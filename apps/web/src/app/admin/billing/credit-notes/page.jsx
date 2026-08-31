@@ -1,10 +1,30 @@
 /* src/app/admin/billing/credit-notes/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  FileText, Plus, Search, Filter, X, Check, ChevronDown, ChevronUp,
-  ArrowDownLeft, ArrowUpRight, Calendar, DollarSign, Building2,
-  Clock, AlertTriangle, Download, MoreHorizontal, Eye, Edit3,
-  Trash2, RotateCcw, Send, Printer, Copy
+  FileText,
+  Plus,
+  Search,
+  Filter,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Calendar,
+  DollarSign,
+  Building2,
+  Clock,
+  AlertTriangle,
+  Download,
+  MoreHorizontal,
+  Eye,
+  Edit3,
+  Trash2,
+  RotateCcw,
+  Send,
+  Printer,
+  Copy,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -16,7 +36,7 @@ const initialCreditNotes = [
     tenantId: 'TNT-001',
     tenantName: 'Grand Hotel Boston',
     invoiceId: 'INV-2026-0812',
-    amount: 499.00,
+    amount: 499.0,
     currency: 'USD',
     reason: 'service_outage',
     reasonDetail: 'Platform downtime on Aug 10 — 45 min outage affected check-in flow',
@@ -26,7 +46,7 @@ const initialCreditNotes = [
     appliedAt: null,
     refundedAt: null,
     expiresAt: '2027-08-14',
-    remaining: 499.00,
+    remaining: 499.0,
     appliedTo: [],
     createdBy: 'Robert Chen',
     notes: 'Approved by ops team. Customer retention priority.',
@@ -36,7 +56,7 @@ const initialCreditNotes = [
     tenantId: 'TNT-002',
     tenantName: 'Seaside Resort Miami',
     invoiceId: 'INV-2026-0720',
-    amount: 249.50,
+    amount: 249.5,
     currency: 'USD',
     reason: 'billing_error',
     reasonDetail: 'Double-charged for channel manager integration in July invoice',
@@ -47,9 +67,7 @@ const initialCreditNotes = [
     refundedAt: null,
     expiresAt: '2027-08-01',
     remaining: 0,
-    appliedTo: [
-      { invoiceId: 'INV-2026-0820', amount: 249.50, date: '2026-08-05' },
-    ],
+    appliedTo: [{ invoiceId: 'INV-2026-0820', amount: 249.5, date: '2026-08-05' }],
     createdBy: 'Sarah J.',
     notes: 'Auto-detected by billing reconciliation.',
   },
@@ -58,7 +76,7 @@ const initialCreditNotes = [
     tenantId: 'TNT-004',
     tenantName: 'Downtown Suites Chicago',
     invoiceId: 'INV-2026-0712',
-    amount: 199.00,
+    amount: 199.0,
     currency: 'USD',
     reason: 'goodwill',
     reasonDetail: 'Goodwill credit for delayed onboarding — 2 week delay beyond SLA',
@@ -78,7 +96,7 @@ const initialCreditNotes = [
     tenantId: 'TNT-007',
     tenantName: 'Urban Hotel NYC',
     invoiceId: 'INV-2026-0722',
-    amount: 750.00,
+    amount: 750.0,
     currency: 'USD',
     reason: 'feature_delay',
     reasonDetail: 'AI Revenue Manager feature delayed by 3 weeks past committed date',
@@ -88,7 +106,7 @@ const initialCreditNotes = [
     appliedAt: null,
     refundedAt: null,
     expiresAt: '2027-08-10',
-    remaining: 750.00,
+    remaining: 750.0,
     appliedTo: [],
     createdBy: 'Maria Garcia',
     notes: 'Enterprise account — escalation handled by CSM.',
@@ -98,7 +116,7 @@ const initialCreditNotes = [
     tenantId: 'TNT-005',
     tenantName: 'Coastal Inn San Diego',
     invoiceId: 'INV-2026-0905',
-    amount: 99.50,
+    amount: 99.5,
     currency: 'USD',
     reason: 'service_outage',
     reasonDetail: 'Minor API latency spike on Aug 8 — p95 exceeded 500ms for 10 min',
@@ -108,10 +126,8 @@ const initialCreditNotes = [
     appliedAt: '2026-08-12',
     refundedAt: null,
     expiresAt: '2027-08-09',
-    remaining: 49.50,
-    appliedTo: [
-      { invoiceId: 'INV-2026-0905', amount: 50.00, date: '2026-08-12' },
-    ],
+    remaining: 49.5,
+    appliedTo: [{ invoiceId: 'INV-2026-0905', amount: 50.0, date: '2026-08-12' }],
     createdBy: 'System',
     notes: 'Auto-generated from SLA breach detection.',
   },
@@ -120,7 +136,7 @@ const initialCreditNotes = [
     tenantId: 'TNT-003',
     tenantName: 'Mountain Lodge Aspen',
     invoiceId: null,
-    amount: 299.00,
+    amount: 299.0,
     currency: 'USD',
     reason: 'promotional',
     reasonDetail: 'Trial extension credit — converted from 14-day to 30-day trial',
@@ -130,7 +146,7 @@ const initialCreditNotes = [
     appliedAt: null,
     refundedAt: null,
     expiresAt: '2026-09-15',
-    remaining: 299.00,
+    remaining: 299.0,
     appliedTo: [],
     createdBy: 'James Miller',
     notes: 'Sales-approved promotional credit.',
@@ -139,19 +155,60 @@ const initialCreditNotes = [
 
 /* ─── Metadata ─── */
 const reasonMeta = {
-  service_outage: { label: 'Service Outage', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
-  billing_error: { label: 'Billing Error', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
-  goodwill: { label: 'Goodwill', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
-  feature_delay: { label: 'Feature Delay', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  promotional: { label: 'Promotional', color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20' },
+  service_outage: {
+    label: 'Service Outage',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+  },
+  billing_error: {
+    label: 'Billing Error',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+  },
+  goodwill: {
+    label: 'Goodwill',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+  },
+  feature_delay: {
+    label: 'Feature Delay',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+  },
+  promotional: {
+    label: 'Promotional',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    border: 'border-secondary/20',
+  },
 };
 
 const statusMeta = {
   issued: { label: 'Issued', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20' },
-  applied: { label: 'Applied', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-  partially_applied: { label: 'Partially Applied', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
-  refunded: { label: 'Refunded', dot: 'bg-secondary', class: 'bg-secondary/10 text-secondary border-secondary/20' },
-  expired: { label: 'Expired', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border' },
+  applied: {
+    label: 'Applied',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  partially_applied: {
+    label: 'Partially Applied',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
+  refunded: {
+    label: 'Refunded',
+    dot: 'bg-secondary',
+    class: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
+  expired: {
+    label: 'Expired',
+    dot: 'bg-text-muted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+  },
   voided: { label: 'Voided', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
 };
 
@@ -174,7 +231,12 @@ function daysUntil(dateStr) {
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.issued;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -184,7 +246,14 @@ function StatusBadge({ status }) {
 function ReasonBadge({ reason }) {
   const meta = reasonMeta[reason] || reasonMeta.goodwill;
   return (
-    <span className={cn('inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', meta.bg, meta.color, meta.border)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -199,7 +268,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -219,11 +299,11 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
     notes: '',
   });
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const tenant = tenants.find(t => t.id === form.tenantId);
+    const tenant = tenants.find((t) => t.id === form.tenantId);
     onCreate({
       ...form,
       id: `CN-${Date.now().toString(36).toUpperCase()}`,
@@ -240,7 +320,15 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
       amount: parseFloat(form.amount) || 0,
     });
     onClose();
-    setForm({ tenantId: '', invoiceId: '', amount: '', reason: 'service_outage', reasonDetail: '', type: 'full', notes: '' });
+    setForm({
+      tenantId: '',
+      invoiceId: '',
+      amount: '',
+      reason: 'service_outage',
+      reasonDetail: '',
+      type: 'full',
+      notes: '',
+    });
   };
 
   if (!isOpen) return null;
@@ -259,14 +347,19 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
               <p className="text-xs text-text-muted">Issue a new credit to a tenant</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tenant</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Tenant
+            </label>
             <select
               value={form.tenantId}
               onChange={(e) => update('tenantId', e.target.value)}
@@ -274,12 +367,18 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">Select tenant...</option>
-              {tenants.map(t => <option key={t.id} value={t.id}>{t.name} ({t.id})</option>)}
+              {tenants.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.id})
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Reference Invoice (optional)</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Reference Invoice (optional)
+            </label>
             <input
               type="text"
               value={form.invoiceId}
@@ -291,7 +390,9 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Amount ($)</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Amount ($)
+              </label>
               <input
                 type="number"
                 min="0.01"
@@ -303,7 +404,9 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Type</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Type
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {['full', 'partial'].map((type) => (
                   <button
@@ -325,20 +428,26 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Reason</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Reason
+            </label>
             <select
               value={form.reason}
               onChange={(e) => update('reason', e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {Object.entries(reasonMeta).map(([key, meta]) => (
-                <option key={key} value={key}>{meta.label}</option>
+                <option key={key} value={key}>
+                  {meta.label}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Detail</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Detail
+            </label>
             <textarea
               value={form.reasonDetail}
               onChange={(e) => update('reasonDetail', e.target.value)}
@@ -350,7 +459,9 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Internal Notes</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Internal Notes
+            </label>
             <textarea
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
@@ -361,7 +472,9 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Plus className="mr-1.5 h-4 w-4" /> Create Credit Note
             </Button>
@@ -412,7 +525,10 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status={note.status} />
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -429,7 +545,9 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -446,24 +564,39 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
               <div className="rounded-xl border border-border bg-surface p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-xs text-text-muted uppercase tracking-wider">Credit Amount</p>
-                    <p className="mt-1 text-3xl font-bold font-mono text-text-primary">{formatCurrency(note.amount)}</p>
+                    <p className="text-xs text-text-muted uppercase tracking-wider">
+                      Credit Amount
+                    </p>
+                    <p className="mt-1 text-3xl font-bold font-mono text-text-primary">
+                      {formatCurrency(note.amount)}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-text-muted uppercase tracking-wider">Remaining</p>
-                    <p className={cn('mt-1 text-2xl font-bold font-mono', note.remaining > 0 ? 'text-secondary' : 'text-accent')}>
+                    <p
+                      className={cn(
+                        'mt-1 text-2xl font-bold font-mono',
+                        note.remaining > 0 ? 'text-secondary' : 'text-accent'
+                      )}
+                    >
                       {formatCurrency(note.remaining)}
                     </p>
                   </div>
                 </div>
                 <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                   <div
-                    className={cn('h-full rounded-full transition-all', note.remaining === 0 ? 'bg-accent' : 'bg-secondary')}
-                    style={{ width: `${note.amount > 0 ? ((note.amount - note.remaining) / note.amount) * 100 : 0}%` }}
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      note.remaining === 0 ? 'bg-accent' : 'bg-secondary'
+                    )}
+                    style={{
+                      width: `${note.amount > 0 ? ((note.amount - note.remaining) / note.amount) * 100 : 0}%`,
+                    }}
                   />
                 </div>
                 <p className="mt-2 text-xs text-text-muted text-right">
-                  {formatCurrency(note.amount - note.remaining)} used · {formatCurrency(note.remaining)} remaining
+                  {formatCurrency(note.amount - note.remaining)} used ·{' '}
+                  {formatCurrency(note.remaining)} remaining
                 </p>
               </div>
 
@@ -475,8 +608,12 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
                   <p className="text-xs text-text-muted font-mono">{note.tenantId}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-4">
-                  <p className="text-xs text-text-muted uppercase tracking-wider">Reference Invoice</p>
-                  <p className="mt-1 text-sm font-medium text-text-primary">{note.invoiceId || '—'}</p>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">
+                    Reference Invoice
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-text-primary">
+                    {note.invoiceId || '—'}
+                  </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Issued</p>
@@ -486,8 +623,15 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
                 <div className="rounded-lg border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Expires</p>
                   <p className="mt-1 text-sm text-text-primary">{note.expiresAt}</p>
-                  <p className={cn('text-xs', daysUntil(note.expiresAt) < 30 ? 'text-warning' : 'text-text-muted')}>
-                    {daysUntil(note.expiresAt) > 0 ? `${daysUntil(note.expiresAt)} days remaining` : 'Expired'}
+                  <p
+                    className={cn(
+                      'text-xs',
+                      daysUntil(note.expiresAt) < 30 ? 'text-warning' : 'text-text-muted'
+                    )}
+                  >
+                    {daysUntil(note.expiresAt) > 0
+                      ? `${daysUntil(note.expiresAt)} days remaining`
+                      : 'Expired'}
                   </p>
                 </div>
               </div>
@@ -496,7 +640,9 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
               <div className="rounded-xl border border-border bg-surface p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <ReasonBadge reason={note.reason} />
-                  <span className="text-xs text-text-muted">{typeMeta[note.type]?.label || note.type}</span>
+                  <span className="text-xs text-text-muted">
+                    {typeMeta[note.type]?.label || note.type}
+                  </span>
                 </div>
                 <p className="text-sm text-text-secondary">{note.reasonDetail}</p>
               </div>
@@ -504,7 +650,9 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
               {/* Notes */}
               {note.notes && (
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">Internal Notes</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+                    Internal Notes
+                  </p>
                   <p className="text-sm text-text-secondary">{note.notes}</p>
                 </div>
               )}
@@ -517,7 +665,12 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
                   </Button>
                 )}
                 {(note.status === 'issued' || note.status === 'partially_applied') && (
-                  <Button variant="outline" size="sm" className="text-danger border-danger/30 hover:bg-danger/10" onClick={handleVoid}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-danger border-danger/30 hover:bg-danger/10"
+                    onClick={handleVoid}
+                  >
                     <X className="mr-1.5 h-3.5 w-3.5" /> Void
                   </Button>
                 )}
@@ -541,13 +694,20 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
               ) : (
                 <div className="space-y-3">
                   {note.appliedTo.map((entry, i) => (
-                    <div key={i} className="flex items-start gap-3 rounded-lg border border-border bg-surface p-4">
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-lg border border-border bg-surface p-4"
+                    >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10">
                         <Check className="h-4 w-4 text-accent" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-text-primary">Applied to {entry.invoiceId}</p>
-                        <p className="text-xs text-text-muted">{entry.date} · {formatCurrency(entry.amount)}</p>
+                        <p className="text-sm font-medium text-text-primary">
+                          Applied to {entry.invoiceId}
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          {entry.date} · {formatCurrency(entry.amount)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -585,7 +745,8 @@ export default function CreditNotesPage() {
 
   const filteredNotes = useMemo(() => {
     let result = notes.filter((n) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         n.id.toLowerCase().includes(query.toLowerCase()) ||
         n.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         n.reasonDetail.toLowerCase().includes(query.toLowerCase());
@@ -612,27 +773,43 @@ export default function CreditNotesPage() {
     return result;
   }, [notes, query, statusFilter, reasonFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: notes.length,
-    issued: notes.filter(n => n.status === 'issued').length,
-    totalOutstanding: notes.filter(n => n.remaining > 0).reduce((s, n) => s + n.remaining, 0),
-    refunded: notes.filter(n => n.status === 'refunded').length,
-  }), [notes]);
+  const stats = useMemo(
+    () => ({
+      total: notes.length,
+      issued: notes.filter((n) => n.status === 'issued').length,
+      totalOutstanding: notes.filter((n) => n.remaining > 0).reduce((s, n) => s + n.remaining, 0),
+      refunded: notes.filter((n) => n.status === 'refunded').length,
+    }),
+    [notes]
+  );
 
   const handleCreate = (newNote) => {
-    setNotes(prev => [newNote, ...prev]);
+    setNotes((prev) => [newNote, ...prev]);
   };
 
   const handleVoid = (id) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, status: 'voided', remaining: 0 } : n));
+    setNotes((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, status: 'voided', remaining: 0 } : n))
+    );
   };
 
   const handleRefund = (id) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, status: 'refunded', remaining: 0, refundedAt: new Date().toISOString().split('T')[0] } : n));
+    setNotes((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? {
+              ...n,
+              status: 'refunded',
+              remaining: 0,
+              refundedAt: new Date().toISOString().split('T')[0],
+            }
+          : n
+      )
+    );
   };
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
@@ -644,7 +821,9 @@ export default function CreditNotesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Credit Notes</h1>
-          <p className="text-sm text-text-secondary">Manage credits, refunds, and tenant adjustments</p>
+          <p className="text-sm text-text-secondary">
+            Manage credits, refunds, and tenant adjustments
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -658,10 +837,34 @@ export default function CreditNotesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Total Notes" value={stats.total} icon={FileText} color="text-text-primary" subtext="All time" />
-        <StatCard label="Issued" value={stats.issued} icon={Clock} color="text-info" subtext="Awaiting use" />
-        <StatCard label="Outstanding" value={formatCurrency(stats.totalOutstanding)} icon={DollarSign} color="text-secondary" subtext="Unapplied balance" />
-        <StatCard label="Refunded" value={stats.refunded} icon={RotateCcw} color="text-accent" subtext="Cash back issued" />
+        <StatCard
+          label="Total Notes"
+          value={stats.total}
+          icon={FileText}
+          color="text-text-primary"
+          subtext="All time"
+        />
+        <StatCard
+          label="Issued"
+          value={stats.issued}
+          icon={Clock}
+          color="text-info"
+          subtext="Awaiting use"
+        />
+        <StatCard
+          label="Outstanding"
+          value={formatCurrency(stats.totalOutstanding)}
+          icon={DollarSign}
+          color="text-secondary"
+          subtext="Unapplied balance"
+        />
+        <StatCard
+          label="Refunded"
+          value={stats.refunded}
+          icon={RotateCcw}
+          color="text-accent"
+          subtext="Cash back issued"
+        />
       </div>
 
       {/* Filters */}
@@ -684,7 +887,9 @@ export default function CreditNotesPage() {
           >
             <option value="all">All Statuses</option>
             {Object.entries(statusMeta).map(([key, meta]) => (
-              <option key={key} value={key}>{meta.label}</option>
+              <option key={key} value={key}>
+                {meta.label}
+              </option>
             ))}
           </select>
           <select
@@ -694,7 +899,9 @@ export default function CreditNotesPage() {
           >
             <option value="all">All Reasons</option>
             {Object.entries(reasonMeta).map(([key, meta]) => (
-              <option key={key} value={key}>{meta.label}</option>
+              <option key={key} value={key}>
+                {meta.label}
+              </option>
             ))}
           </select>
         </div>
@@ -702,7 +909,8 @@ export default function CreditNotesPage() {
 
       {/* Results */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredNotes.length}</span> of {notes.length} credit notes
+        Showing <span className="font-medium text-text-primary">{filteredNotes.length}</span> of{' '}
+        {notes.length} credit notes
       </p>
 
       {/* Table */}
@@ -730,9 +938,12 @@ export default function CreditNotesPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -756,7 +967,9 @@ export default function CreditNotesPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-text-primary font-mono">{note.id}</p>
-                        <p className="text-[10px] text-text-muted">{note.invoiceId || 'No invoice'}</p>
+                        <p className="text-[10px] text-text-muted">
+                          {note.invoiceId || 'No invoice'}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -771,20 +984,28 @@ export default function CreditNotesPage() {
                     <StatusBadge status={note.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(note.amount)}</p>
+                    <p className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(note.amount)}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className={cn('text-sm font-mono font-medium', note.remaining > 0 ? 'text-secondary' : 'text-accent')}>
+                    <p
+                      className={cn(
+                        'text-sm font-mono font-medium',
+                        note.remaining > 0 ? 'text-secondary' : 'text-accent'
+                      )}
+                    >
                       {formatCurrency(note.remaining)}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">
-                    {note.issuedAt}
-                  </td>
+                  <td className="px-4 py-3 text-text-secondary text-xs">{note.issuedAt}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedNote(note); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedNote(note);
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title="View Details"
                       >

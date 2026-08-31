@@ -2,21 +2,49 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Plug, Webhook, Code, Terminal, Search, Filter, Plus,
-  RefreshCw, Download, Shield, Activity, Globe, Zap,
-  CheckCircle2, AlertTriangle, XCircle, Clock, TrendingUp,
-  ChevronDown, ChevronUp, LayoutGrid, List
+  Plug,
+  Webhook,
+  Code,
+  Terminal,
+  Search,
+  Filter,
+  Plus,
+  RefreshCw,
+  Download,
+  Shield,
+  Activity,
+  Globe,
+  Zap,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  integrations, webhooks, apiEndpoints, eventTypes,
-  categoryMeta, statusMeta, formatNumber
+  integrations,
+  webhooks,
+  apiEndpoints,
+  eventTypes,
+  categoryMeta,
+  statusMeta,
+  formatNumber,
 } from './data';
 import {
-  StatCard, IntegrationCard, WebhookRow, EndpointCard,
-  ApiPlayground, NewWebhookModal, IntegrationStatusBadge,
-  CategoryBadge
+  StatCard,
+  IntegrationCard,
+  WebhookRow,
+  EndpointCard,
+  ApiPlayground,
+  NewWebhookModal,
+  IntegrationStatusBadge,
+  CategoryBadge,
 } from './components';
 
 /* ─── Main Page ─── */
@@ -42,7 +70,15 @@ export default function IntegrationsPage() {
     const totalWebhooks = webhookList.length;
     const activeWebhooks = webhookList.filter((w) => w.status === 'active').length;
     const totalDeliveries = webhookList.reduce((s, w) => s + w.totalDeliveries, 0);
-    return { connected, disconnected, error, pending, totalWebhooks, activeWebhooks, totalDeliveries };
+    return {
+      connected,
+      disconnected,
+      error,
+      pending,
+      totalWebhooks,
+      activeWebhooks,
+      totalDeliveries,
+    };
   }, [integrationList, webhookList]);
 
   /* ─── Filtered Integrations ─── */
@@ -97,7 +133,11 @@ export default function IntegrationsPage() {
     setIntegrationList((prev) =>
       prev.map((i) =>
         i.id === id
-          ? { ...i, status: i.status === 'connected' ? 'disconnected' : 'connected', lastSync: i.status === 'connected' ? null : new Date().toISOString() }
+          ? {
+              ...i,
+              status: i.status === 'connected' ? 'disconnected' : 'connected',
+              lastSync: i.status === 'connected' ? null : new Date().toISOString(),
+            }
           : i
       )
     );
@@ -105,7 +145,9 @@ export default function IntegrationsPage() {
 
   const handleDisconnect = (id) => {
     setIntegrationList((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, status: 'disconnected', health: 'unknown', lastSync: null } : i))
+      prev.map((i) =>
+        i.id === id ? { ...i, status: 'disconnected', health: 'unknown', lastSync: null } : i
+      )
     );
   };
 
@@ -117,7 +159,11 @@ export default function IntegrationsPage() {
     setWebhookList((prev) =>
       prev.map((w) =>
         w.id === id
-          ? { ...w, lastTriggered: new Date().toISOString().replace('T', ' ').slice(0, 19), totalDeliveries: w.totalDeliveries + 1 }
+          ? {
+              ...w,
+              lastTriggered: new Date().toISOString().replace('T', ' ').slice(0, 19),
+              totalDeliveries: w.totalDeliveries + 1,
+            }
           : w
       )
     );
@@ -204,10 +250,15 @@ export default function IntegrationsPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id); setQuery(''); }}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setQuery('');
+                }}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -240,13 +291,22 @@ export default function IntegrationsPage() {
                 .sort((a, b) => new Date(b.lastSync) - new Date(a.lastSync))
                 .slice(0, 5)
                 .map((integration) => (
-                  <div key={integration.id} className="flex items-center gap-4 px-6 py-3 hover:bg-background/50 transition-colors">
-                    <div className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded-lg',
-                      integration.health === 'healthy' ? 'bg-accent/10' :
-                      integration.health === 'degraded' ? 'bg-warning/10' :
-                      integration.health === 'critical' ? 'bg-danger/10' : 'bg-neutral/10'
-                    )}>
+                  <div
+                    key={integration.id}
+                    className="flex items-center gap-4 px-6 py-3 hover:bg-background/50 transition-colors"
+                  >
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 items-center justify-center rounded-lg',
+                        integration.health === 'healthy'
+                          ? 'bg-accent/10'
+                          : integration.health === 'degraded'
+                            ? 'bg-warning/10'
+                            : integration.health === 'critical'
+                              ? 'bg-danger/10'
+                              : 'bg-neutral/10'
+                      )}
+                    >
                       {integration.health === 'healthy' ? (
                         <CheckCircle2 className="h-4 w-4 text-accent" />
                       ) : integration.health === 'degraded' ? (
@@ -285,22 +345,41 @@ export default function IntegrationsPage() {
                     className="rounded-xl border border-border bg-surface p-4 text-left hover:border-secondary/30 transition-all"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', meta.bg)}>
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-lg',
+                          meta.bg
+                        )}
+                      >
                         <span className={cn('text-sm font-bold', meta.color)}>
                           {integration.name.charAt(0)}
                         </span>
                       </div>
-                      <span className={cn(
-                        'h-2 w-2 rounded-full',
-                        integration.status === 'connected' && integration.health === 'healthy' ? 'bg-accent' :
-                        integration.status === 'connected' && integration.health === 'degraded' ? 'bg-warning' :
-                        integration.status === 'error' ? 'bg-danger' :
-                        integration.status === 'pending' ? 'bg-warning' : 'bg-text-muted'
-                      )} />
+                      <span
+                        className={cn(
+                          'h-2 w-2 rounded-full',
+                          integration.status === 'connected' && integration.health === 'healthy'
+                            ? 'bg-accent'
+                            : integration.status === 'connected' &&
+                                integration.health === 'degraded'
+                              ? 'bg-warning'
+                              : integration.status === 'error'
+                                ? 'bg-danger'
+                                : integration.status === 'pending'
+                                  ? 'bg-warning'
+                                  : 'bg-text-muted'
+                        )}
+                      />
                     </div>
-                    <p className="text-sm font-medium text-text-primary truncate">{integration.name}</p>
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {integration.name}
+                    </p>
                     <p className="text-[10px] text-text-muted mt-0.5">
-                      {integration.status === 'connected' ? 'Connected' : integration.status === 'error' ? 'Error' : 'Not connected'}
+                      {integration.status === 'connected'
+                        ? 'Connected'
+                        : integration.status === 'error'
+                          ? 'Error'
+                          : 'Not connected'}
                     </p>
                   </button>
                 );
@@ -318,7 +397,9 @@ export default function IntegrationsPage() {
                 <Plug className="h-5 w-5 text-secondary" />
               </div>
               <h4 className="text-sm font-semibold text-text-primary">Browse Connectors</h4>
-              <p className="text-xs text-text-secondary mt-1">Connect Stripe, Twilio, SendGrid, and more</p>
+              <p className="text-xs text-text-secondary mt-1">
+                Connect Stripe, Twilio, SendGrid, and more
+              </p>
               <ArrowRight className="h-4 w-4 text-secondary mt-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
             <button
@@ -329,7 +410,9 @@ export default function IntegrationsPage() {
                 <Webhook className="h-5 w-5 text-secondary" />
               </div>
               <h4 className="text-sm font-semibold text-text-primary">Manage Webhooks</h4>
-              <p className="text-xs text-text-secondary mt-1">Configure endpoints and event subscriptions</p>
+              <p className="text-xs text-text-secondary mt-1">
+                Configure endpoints and event subscriptions
+              </p>
               <ArrowRight className="h-4 w-4 text-secondary mt-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
             <button
@@ -370,7 +453,9 @@ export default function IntegrationsPage() {
               >
                 <option value="all">All Categories</option>
                 {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
               <select
@@ -389,7 +474,9 @@ export default function IntegrationsPage() {
                   onClick={() => setViewMode('grid')}
                   className={cn(
                     'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                    viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary'
+                    viewMode === 'grid'
+                      ? 'bg-secondary text-white'
+                      : 'text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -398,7 +485,9 @@ export default function IntegrationsPage() {
                   onClick={() => setViewMode('list')}
                   className={cn(
                     'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                    viewMode === 'list' ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary'
+                    viewMode === 'list'
+                      ? 'bg-secondary text-white'
+                      : 'text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <List className="h-4 w-4" />
@@ -409,7 +498,9 @@ export default function IntegrationsPage() {
 
           {/* Results */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredIntegrations.length}</span> of {integrationList.length} integrations
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredIntegrations.length}</span> of{' '}
+            {integrationList.length} integrations
           </p>
 
           {viewMode === 'grid' ? (
@@ -423,7 +514,17 @@ export default function IntegrationsPage() {
                     const int = integrationList.find((i) => i.id === id);
                     if (int?.status === 'disconnected' || int?.status === 'pending') {
                       setIntegrationList((prev) =>
-                        prev.map((i) => (i.id === id ? { ...i, status: 'connected', health: 'healthy', connectedAt: new Date().toISOString().split('T')[0], lastSync: new Date().toISOString().replace('T', ' ').slice(0, 19) } : i))
+                        prev.map((i) =>
+                          i.id === id
+                            ? {
+                                ...i,
+                                status: 'connected',
+                                health: 'healthy',
+                                connectedAt: new Date().toISOString().split('T')[0],
+                                lastSync: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                              }
+                            : i
+                        )
                       );
                     }
                   }}
@@ -437,11 +538,21 @@ export default function IntegrationsPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-background border-b border-border">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Integration</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Category</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Health</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Last Sync</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Integration
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Category
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Health
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Last Sync
+                      </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
                     </tr>
                   </thead>
@@ -449,29 +560,52 @@ export default function IntegrationsPage() {
                     {filteredIntegrations.map((integration) => {
                       const meta = categoryMeta[integration.category] || categoryMeta.payments;
                       return (
-                        <tr key={integration.id} className="hover:bg-background/50 transition-colors">
+                        <tr
+                          key={integration.id}
+                          className="hover:bg-background/50 transition-colors"
+                        >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', meta.bg)}>
-                                <span className={cn('text-xs font-bold', meta.color)}>{integration.name.charAt(0)}</span>
+                              <div
+                                className={cn(
+                                  'flex h-8 w-8 items-center justify-center rounded-lg',
+                                  meta.bg
+                                )}
+                              >
+                                <span className={cn('text-xs font-bold', meta.color)}>
+                                  {integration.name.charAt(0)}
+                                </span>
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-text-primary">{integration.name}</p>
+                                <p className="text-sm font-medium text-text-primary">
+                                  {integration.name}
+                                </p>
                                 <p className="text-[10px] text-text-muted">{integration.version}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3"><CategoryBadge category={integration.category} /></td>
-                          <td className="px-4 py-3"><IntegrationStatusBadge status={integration.status} /></td>
+                          <td className="px-4 py-3">
+                            <CategoryBadge category={integration.category} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <IntegrationStatusBadge status={integration.status} />
+                          </td>
                           <td className="px-4 py-3">
                             {integration.health ? (
-                              <span className={cn(
-                                'text-xs font-medium',
-                                integration.health === 'healthy' ? 'text-accent' :
-                                integration.health === 'degraded' ? 'text-warning' :
-                                integration.health === 'critical' ? 'text-danger' : 'text-text-muted'
-                              )}>
-                                {integration.health.charAt(0).toUpperCase() + integration.health.slice(1)}
+                              <span
+                                className={cn(
+                                  'text-xs font-medium',
+                                  integration.health === 'healthy'
+                                    ? 'text-accent'
+                                    : integration.health === 'degraded'
+                                      ? 'text-warning'
+                                      : integration.health === 'critical'
+                                        ? 'text-danger'
+                                        : 'text-text-muted'
+                                )}
+                              >
+                                {integration.health.charAt(0).toUpperCase() +
+                                  integration.health.slice(1)}
                               </span>
                             ) : (
                               <span className="text-xs text-text-muted">—</span>
@@ -483,15 +617,37 @@ export default function IntegrationsPage() {
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-end gap-1">
                               {integration.status === 'connected' ? (
-                                <Button size="sm" variant="ghost" className="text-danger hover:bg-danger/10" onClick={() => handleDisconnect(integration.id)}>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-danger hover:bg-danger/10"
+                                  onClick={() => handleDisconnect(integration.id)}
+                                >
                                   <XCircle className="h-3.5 w-3.5" />
                                 </Button>
                               ) : (
-                                <Button size="sm" variant="outline" onClick={() => {
-                                  setIntegrationList((prev) =>
-                                    prev.map((i) => (i.id === integration.id ? { ...i, status: 'connected', health: 'healthy', connectedAt: new Date().toISOString().split('T')[0], lastSync: new Date().toISOString().replace('T', ' ').slice(0, 19) } : i))
-                                  );
-                                }}>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setIntegrationList((prev) =>
+                                      prev.map((i) =>
+                                        i.id === integration.id
+                                          ? {
+                                              ...i,
+                                              status: 'connected',
+                                              health: 'healthy',
+                                              connectedAt: new Date().toISOString().split('T')[0],
+                                              lastSync: new Date()
+                                                .toISOString()
+                                                .replace('T', ' ')
+                                                .slice(0, 19),
+                                            }
+                                          : i
+                                      )
+                                    );
+                                  }}
+                                >
                                   <Plug className="h-3.5 w-3.5" />
                                 </Button>
                               )}
@@ -530,7 +686,8 @@ export default function IntegrationsPage() {
 
           {/* Results */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredWebhooks.length}</span> of {webhookList.length} webhooks
+            Showing <span className="font-medium text-text-primary">{filteredWebhooks.length}</span>{' '}
+            of {webhookList.length} webhooks
           </p>
 
           {/* Webhooks Table */}
@@ -540,11 +697,21 @@ export default function IntegrationsPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Events</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Endpoint</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Last Triggered</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Events
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Endpoint
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Last Triggered
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
                   </tr>
                 </thead>
@@ -610,7 +777,9 @@ export default function IntegrationsPage() {
 
           {/* Results */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredEndpoints.length}</span> of {apiEndpoints.length} endpoints
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredEndpoints.length}</span> of{' '}
+            {apiEndpoints.length} endpoints
           </p>
 
           {/* Endpoints */}

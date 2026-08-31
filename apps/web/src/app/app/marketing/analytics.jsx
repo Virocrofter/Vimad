@@ -2,14 +2,45 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  TrendingUp, TrendingDown, BarChart3, PieChart, Activity,
-  Calendar, ChevronDown, Download, Filter, ArrowRight,
-  Users, Mail, MousePointer, ShoppingBag, DollarSign,
-  Eye, Clock, Target, Percent, Zap, RefreshCw,
-  ChevronLeft, ChevronRight, MoreHorizontal, Share2,
-  Printer, FileText, Layers, Globe, Smartphone,
-  Monitor, Tablet, CheckCircle2, XCircle, AlertCircle,
-  Star, ArrowUpRight, ArrowDownRight, Minus
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  Activity,
+  Calendar,
+  ChevronDown,
+  Download,
+  Filter,
+  ArrowRight,
+  Users,
+  Mail,
+  MousePointer,
+  ShoppingBag,
+  DollarSign,
+  Eye,
+  Clock,
+  Target,
+  Percent,
+  Zap,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Share2,
+  Printer,
+  FileText,
+  Layers,
+  Globe,
+  Smartphone,
+  Monitor,
+  Tablet,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Star,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -54,17 +85,78 @@ const analyticsData = {
     clicked: generateTrend(630, 150, 12),
     converted: generateTrend(135, 45, 12),
     revenue: generateTrend(36000, 6000, 12),
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Week 9', 'Week 10', 'Week 11', 'Week 12'],
+    labels: [
+      'Week 1',
+      'Week 2',
+      'Week 3',
+      'Week 4',
+      'Week 5',
+      'Week 6',
+      'Week 7',
+      'Week 8',
+      'Week 9',
+      'Week 10',
+      'Week 11',
+      'Week 12',
+    ],
   },
 };
 
 const campaignPerformance = [
-  { name: 'Welcome Series', sent: 12450, opened: 62, clicked: 18, converted: 4.2, revenue: 45200, trend: 12 },
-  { name: 'Cart Recovery', sent: 3420, opened: 52, clicked: 26, converted: 7.8, revenue: 38900, trend: 8 },
-  { name: 'Birthday Rewards', sent: 560, opened: 75, clicked: 32, converted: 8.0, revenue: 8200, trend: 3 },
-  { name: 'Flash Sale', sent: 8900, opened: 45, clicked: 12, converted: 2.1, revenue: 15600, trend: -5 },
-  { name: 'VIP Upgrade', sent: 850, opened: 58, clicked: 22, converted: 4.9, revenue: 22100, trend: 15 },
-  { name: 'Post-Stay Review', sent: 8920, opened: 70, clicked: 20, converted: 5.0, revenue: 0, trend: 2 },
+  {
+    name: 'Welcome Series',
+    sent: 12450,
+    opened: 62,
+    clicked: 18,
+    converted: 4.2,
+    revenue: 45200,
+    trend: 12,
+  },
+  {
+    name: 'Cart Recovery',
+    sent: 3420,
+    opened: 52,
+    clicked: 26,
+    converted: 7.8,
+    revenue: 38900,
+    trend: 8,
+  },
+  {
+    name: 'Birthday Rewards',
+    sent: 560,
+    opened: 75,
+    clicked: 32,
+    converted: 8.0,
+    revenue: 8200,
+    trend: 3,
+  },
+  {
+    name: 'Flash Sale',
+    sent: 8900,
+    opened: 45,
+    clicked: 12,
+    converted: 2.1,
+    revenue: 15600,
+    trend: -5,
+  },
+  {
+    name: 'VIP Upgrade',
+    sent: 850,
+    opened: 58,
+    clicked: 22,
+    converted: 4.9,
+    revenue: 22100,
+    trend: 15,
+  },
+  {
+    name: 'Post-Stay Review',
+    sent: 8920,
+    opened: 70,
+    clicked: 20,
+    converted: 5.0,
+    revenue: 0,
+    trend: 2,
+  },
 ];
 
 const funnelData = {
@@ -112,7 +204,11 @@ function formatNumber(num) {
 }
 
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 /* ─── SVG Chart Components ─── */
@@ -124,8 +220,10 @@ function LineChart({ data, labels, colors, height = 200 }) {
   const width = labels.length * 40;
   const padding = { top: 10, right: 10, bottom: 30, left: 10 };
 
-  const getX = (i) => padding.left + (i / (labels.length - 1)) * (width - padding.left - padding.right);
-  const getY = (v) => padding.top + (1 - (v - min) / range) * (height - padding.top - padding.bottom);
+  const getX = (i) =>
+    padding.left + (i / (labels.length - 1)) * (width - padding.left - padding.right);
+  const getY = (v) =>
+    padding.top + (1 - (v - min) / range) * (height - padding.top - padding.bottom);
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="none">
@@ -154,11 +252,19 @@ function LineChart({ data, labels, colors, height = 200 }) {
             </linearGradient>
           </defs>
           <path
-            d={`M ${getX(0)} ${getY(series[0])} ${series.slice(1).map((v, i) => `L ${getX(i + 1)} ${getY(v)}`).join(' ')} L ${getX(series.length - 1)} ${height - padding.bottom} L ${getX(0)} ${height - padding.bottom} Z`}
+            d={`M ${getX(0)} ${getY(series[0])} ${series
+              .slice(1)
+              .map((v, i) => `L ${getX(i + 1)} ${getY(v)}`)
+              .join(
+                ' '
+              )} L ${getX(series.length - 1)} ${height - padding.bottom} L ${getX(0)} ${height - padding.bottom} Z`}
             fill={`url(#grad-${si})`}
           />
           <path
-            d={`M ${getX(0)} ${getY(series[0])} ${series.slice(1).map((v, i) => `L ${getX(i + 1)} ${getY(v)}`).join(' ')}`}
+            d={`M ${getX(0)} ${getY(series[0])} ${series
+              .slice(1)
+              .map((v, i) => `L ${getX(i + 1)} ${getY(v)}`)
+              .join(' ')}`}
             fill="none"
             stroke={colors[si]}
             strokeWidth="2"
@@ -236,8 +342,8 @@ function DonutChart({ data, size = 120 }) {
     currentAngle += angle;
     const endAngle = currentAngle;
 
-    const startRad = (startAngle - 90) * Math.PI / 180;
-    const endRad = (endAngle - 90) * Math.PI / 180;
+    const startRad = ((startAngle - 90) * Math.PI) / 180;
+    const endRad = ((endAngle - 90) * Math.PI) / 180;
 
     const x1 = center + radius * Math.cos(startRad);
     const y1 = center + radius * Math.sin(startRad);
@@ -254,18 +360,28 @@ function DonutChart({ data, size = 120 }) {
       {data.map((d, i) => (
         <path key={i} d={getArc(d.value)} fill={d.color} stroke="white" strokeWidth="2" />
       ))}
-      <circle cx={center} cy={center} r={radius * 0.55} fill="white" className="dark:fill-surface" />
+      <circle
+        cx={center}
+        cy={center}
+        r={radius * 0.55}
+        fill="white"
+        className="dark:fill-surface"
+      />
     </svg>
   );
 }
 
 function FunnelChart({ stages, height = 280 }) {
-  const max = Math.max(...stages.map(s => s.count));
+  const max = Math.max(...stages.map((s) => s.count));
   const width = 400;
   const stageHeight = height / stages.length;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="w-full h-full"
+      preserveAspectRatio="xMidYMid meet"
+    >
       {stages.map((stage, i) => {
         const w = (stage.count / max) * width * 0.8;
         const x = (width - w) / 2;
@@ -273,23 +389,39 @@ function FunnelChart({ stages, height = 280 }) {
         const prevW = i > 0 ? (stages[i - 1].count / max) * width * 0.8 : w;
         const prevX = (width - prevW) / 2;
 
-        const path = i === 0
-          ? `M ${x} ${y} L ${x + w} ${y} L ${x + w} ${y + stageHeight - 4} L ${x} ${y + stageHeight - 4} Z`
-          : `M ${prevX} ${y} L ${prevX + prevW} ${y} L ${x + w} ${y + stageHeight - 4} L ${x} ${y + stageHeight - 4} Z`;
+        const path =
+          i === 0
+            ? `M ${x} ${y} L ${x + w} ${y} L ${x + w} ${y + stageHeight - 4} L ${x} ${y + stageHeight - 4} Z`
+            : `M ${prevX} ${y} L ${prevX + prevW} ${y} L ${x + w} ${y + stageHeight - 4} L ${x} ${y + stageHeight - 4} Z`;
 
         const conversionRate = i > 0 ? Math.round((stage.count / stages[i - 1].count) * 100) : 100;
 
         return (
           <g key={i}>
             <path d={path} fill={stage.color} opacity="0.9" rx="4" />
-            <text x={width / 2} y={y + stageHeight / 2 - 4} textAnchor="middle" className="fill-white text-xs font-semibold">
+            <text
+              x={width / 2}
+              y={y + stageHeight / 2 - 4}
+              textAnchor="middle"
+              className="fill-white text-xs font-semibold"
+            >
               {stage.name}
             </text>
-            <text x={width / 2} y={y + stageHeight / 2 + 10} textAnchor="middle" className="fill-white/80 text-[10px]">
+            <text
+              x={width / 2}
+              y={y + stageHeight / 2 + 10}
+              textAnchor="middle"
+              className="fill-white/80 text-[10px]"
+            >
               {formatNumber(stage.count)}
             </text>
             {i > 0 && (
-              <text x={width / 2} y={y + 2} textAnchor="middle" className="fill-text-muted text-[9px]">
+              <text
+                x={width / 2}
+                y={y + 2}
+                textAnchor="middle"
+                className="fill-text-muted text-[9px]"
+              >
                 {conversionRate}% conversion
               </text>
             )}
@@ -317,8 +449,12 @@ function HeatmapChart({ data, xLabels, yLabels, height = 200 }) {
   };
 
   return (
-    <svg viewBox={`0 0 ${width} ${fullHeight}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
-      {data.map((row, yi) => (
+    <svg
+      viewBox={`0 0 ${width} ${fullHeight}`}
+      className="w-full h-full"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      {data.map((row, yi) =>
         row.map((v, xi) => (
           <g key={`${yi}-${xi}`}>
             <rect
@@ -339,9 +475,15 @@ function HeatmapChart({ data, xLabels, yLabels, height = 200 }) {
             </text>
           </g>
         ))
-      ))}
+      )}
       {xLabels.map((label, i) => (
-        <text key={`x-${i}`} x={i * cellWidth + cellWidth / 2} y={fullHeight - 2} textAnchor="middle" className="fill-text-muted text-[9px]">
+        <text
+          key={`x-${i}`}
+          x={i * cellWidth + cellWidth / 2}
+          y={fullHeight - 2}
+          textAnchor="middle"
+          className="fill-text-muted text-[9px]"
+        >
           {label}
         </text>
       ))}
@@ -365,13 +507,33 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend, onClick }) 
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <div className={cn('mt-1 flex items-center gap-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            <div
+              className={cn(
+                'mt-1 flex items-center gap-1 text-xs font-medium',
+                trend >= 0 ? 'text-accent' : 'text-danger'
+              )}
+            >
+              {trend >= 0 ? (
+                <ArrowUpRight className="h-3 w-3" />
+              ) : (
+                <ArrowDownRight className="h-3 w-3" />
+              )}
               {Math.abs(trend)}%
             </div>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('secondary', 'secondary/10').replace('info', 'info/10').replace('warning', 'warning/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('secondary', 'secondary/10')
+              .replace('info', 'info/10')
+              .replace('warning', 'warning/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -385,7 +547,9 @@ function TabButton({ active, onClick, children }) {
       onClick={onClick}
       className={cn(
         'px-4 py-2 text-xs font-medium rounded-lg transition-colors',
-        active ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-secondary hover:bg-surface-elevated'
+        active
+          ? 'bg-secondary text-white'
+          : 'text-text-muted hover:text-text-secondary hover:bg-surface-elevated'
       )}
     >
       {children}
@@ -401,13 +565,16 @@ export function MarketingAnalyticsPage() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const data = analyticsData[dateRange];
-  const totals = useMemo(() => ({
-    sent: data.sent.reduce((a, b) => a + b, 0),
-    opened: data.opened.reduce((a, b) => a + b, 0),
-    clicked: data.clicked.reduce((a, b) => a + b, 0),
-    converted: data.converted.reduce((a, b) => a + b, 0),
-    revenue: data.revenue.reduce((a, b) => a + b, 0),
-  }), [data]);
+  const totals = useMemo(
+    () => ({
+      sent: data.sent.reduce((a, b) => a + b, 0),
+      opened: data.opened.reduce((a, b) => a + b, 0),
+      clicked: data.clicked.reduce((a, b) => a + b, 0),
+      converted: data.converted.reduce((a, b) => a + b, 0),
+      revenue: data.revenue.reduce((a, b) => a + b, 0),
+    }),
+    [data]
+  );
 
   const openRate = totals.sent > 0 ? Math.round((totals.opened / totals.sent) * 100) : 0;
   const clickRate = totals.opened > 0 ? Math.round((totals.clicked / totals.opened) * 100) : 0;
@@ -419,7 +586,9 @@ export function MarketingAnalyticsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Marketing Analytics</h1>
-          <p className="text-sm text-text-secondary">Performance insights and campaign attribution</p>
+          <p className="text-sm text-text-secondary">
+            Performance insights and campaign attribution
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -428,7 +597,7 @@ export function MarketingAnalyticsPage() {
               className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-surface px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated"
             >
               <Calendar className="h-4 w-4" />
-              {dateRanges.find(d => d.value === dateRange)?.label}
+              {dateRanges.find((d) => d.value === dateRange)?.label}
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
             {showDatePicker && (
@@ -436,10 +605,15 @@ export function MarketingAnalyticsPage() {
                 {dateRanges.map((range) => (
                   <button
                     key={range.value}
-                    onClick={() => { setDateRange(range.value); setShowDatePicker(false); }}
+                    onClick={() => {
+                      setDateRange(range.value);
+                      setShowDatePicker(false);
+                    }}
                     className={cn(
                       'w-full px-4 py-2 text-left text-sm transition-colors',
-                      dateRange === range.value ? 'bg-secondary/10 text-secondary' : 'text-text-secondary hover:bg-surface-elevated'
+                      dateRange === range.value
+                        ? 'bg-secondary/10 text-secondary'
+                        : 'text-text-secondary hover:bg-surface-elevated'
                     )}
                   >
                     {range.label}
@@ -459,10 +633,21 @@ export function MarketingAnalyticsPage() {
 
       {/* Metric Tabs */}
       <div className="flex gap-1 rounded-lg border border-border bg-surface p-1 w-fit">
-        <TabButton active={activeMetric === 'overview'} onClick={() => setActiveMetric('overview')}>Overview</TabButton>
-        <TabButton active={activeMetric === 'campaigns'} onClick={() => setActiveMetric('campaigns')}>Campaigns</TabButton>
-        <TabButton active={activeMetric === 'funnel'} onClick={() => setActiveMetric('funnel')}>Funnel</TabButton>
-        <TabButton active={activeMetric === 'segments'} onClick={() => setActiveMetric('segments')}>Segments</TabButton>
+        <TabButton active={activeMetric === 'overview'} onClick={() => setActiveMetric('overview')}>
+          Overview
+        </TabButton>
+        <TabButton
+          active={activeMetric === 'campaigns'}
+          onClick={() => setActiveMetric('campaigns')}
+        >
+          Campaigns
+        </TabButton>
+        <TabButton active={activeMetric === 'funnel'} onClick={() => setActiveMetric('funnel')}>
+          Funnel
+        </TabButton>
+        <TabButton active={activeMetric === 'segments'} onClick={() => setActiveMetric('segments')}>
+          Segments
+        </TabButton>
       </div>
 
       {/* Overview Tab */}
@@ -516,7 +701,9 @@ export function MarketingAnalyticsPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-semibold text-text-primary">Performance Trend</h3>
-                <p className="text-xs text-text-muted">Sent, opened, clicked, and converted over time</p>
+                <p className="text-xs text-text-muted">
+                  Sent, opened, clicked, and converted over time
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 {[
@@ -524,7 +711,7 @@ export function MarketingAnalyticsPage() {
                   { label: 'Opened', color: '#10B981' },
                   { label: 'Clicked', color: '#F59E0B' },
                   { label: 'Converted', color: '#EF4444' },
-                ].map(item => (
+                ].map((item) => (
                   <div key={item.label} className="flex items-center gap-1.5">
                     <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
                     <span className="text-[10px] text-text-muted">{item.label}</span>
@@ -553,10 +740,15 @@ export function MarketingAnalyticsPage() {
                   {deviceBreakdown.map((d) => (
                     <div key={d.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+                        <div
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: d.color }}
+                        />
                         <span className="text-xs text-text-secondary">{d.name}</span>
                       </div>
-                      <span className="text-xs font-mono font-medium text-text-primary">{d.value}%</span>
+                      <span className="text-xs font-mono font-medium text-text-primary">
+                        {d.value}%
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -568,11 +760,7 @@ export function MarketingAnalyticsPage() {
               <h3 className="text-sm font-semibold text-text-primary mb-1">Engagement Heatmap</h3>
               <p className="text-xs text-text-muted mb-4">Opens by day and hour (local time)</p>
               <div className="h-56">
-                <HeatmapChart
-                  data={heatmapData}
-                  xLabels={hourlyLabels}
-                  yLabels={dailyLabels}
-                />
+                <HeatmapChart data={heatmapData} xLabels={hourlyLabels} yLabels={dailyLabels} />
               </div>
             </div>
           </div>
@@ -585,15 +773,16 @@ export function MarketingAnalyticsPage() {
                 <p className="text-xs text-text-muted">Revenue driven by marketing campaigns</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-text-muted">Total: <span className="font-mono font-semibold text-text-primary">{formatCurrency(totals.revenue)}</span></span>
+                <span className="text-xs text-text-muted">
+                  Total:{' '}
+                  <span className="font-mono font-semibold text-text-primary">
+                    {formatCurrency(totals.revenue)}
+                  </span>
+                </span>
               </div>
             </div>
             <div className="h-48">
-              <BarChart
-                data={data.revenue}
-                labels={data.labels}
-                color="#10B981"
-              />
+              <BarChart data={data.revenue} labels={data.labels} color="#10B981" />
             </div>
           </div>
         </>
@@ -610,13 +799,27 @@ export function MarketingAnalyticsPage() {
             <table className="w-full text-sm">
               <thead className="bg-background border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Campaign</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Sent</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Open Rate</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Click Rate</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Conv. Rate</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Revenue</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Trend</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Campaign
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Sent
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Open Rate
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Click Rate
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Conv. Rate
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Revenue
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Trend
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -625,11 +828,16 @@ export function MarketingAnalyticsPage() {
                     <td className="px-4 py-3">
                       <p className="text-sm font-medium text-text-primary">{camp.name}</p>
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-text-primary">{formatNumber(camp.sent)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-text-primary">
+                      {formatNumber(camp.sent)}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-12 h-1.5 rounded-full bg-border overflow-hidden">
-                          <div className="h-full rounded-full bg-accent" style={{ width: `${camp.opened}%` }} />
+                          <div
+                            className="h-full rounded-full bg-accent"
+                            style={{ width: `${camp.opened}%` }}
+                          />
                         </div>
                         <span className="font-mono text-text-primary">{camp.opened}%</span>
                       </div>
@@ -637,13 +845,21 @@ export function MarketingAnalyticsPage() {
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-12 h-1.5 rounded-full bg-border overflow-hidden">
-                          <div className="h-full rounded-full bg-secondary" style={{ width: `${camp.clicked * 2}%` }} />
+                          <div
+                            className="h-full rounded-full bg-secondary"
+                            style={{ width: `${camp.clicked * 2}%` }}
+                          />
                         </div>
                         <span className="font-mono text-text-primary">{camp.clicked}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className={cn('font-mono', camp.converted > 5 ? 'text-accent' : 'text-text-primary')}>
+                      <span
+                        className={cn(
+                          'font-mono',
+                          camp.converted > 5 ? 'text-accent' : 'text-text-primary'
+                        )}
+                      >
                         {camp.converted}%
                       </span>
                     </td>
@@ -651,8 +867,17 @@ export function MarketingAnalyticsPage() {
                       {camp.revenue > 0 ? formatCurrency(camp.revenue) : '—'}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className={cn('inline-flex items-center gap-1 text-xs font-medium', camp.trend >= 0 ? 'text-accent' : 'text-danger')}>
-                        {camp.trend >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 text-xs font-medium',
+                          camp.trend >= 0 ? 'text-accent' : 'text-danger'
+                        )}
+                      >
+                        {camp.trend >= 0 ? (
+                          <ArrowUpRight className="h-3 w-3" />
+                        ) : (
+                          <ArrowDownRight className="h-3 w-3" />
+                        )}
                         {Math.abs(camp.trend)}%
                       </span>
                     </td>
@@ -690,25 +915,54 @@ export function MarketingAnalyticsPage() {
 
           <div className="space-y-4">
             <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold text-text-primary mb-4">Funnel Drop-off Analysis</h3>
+              <h3 className="text-sm font-semibold text-text-primary mb-4">
+                Funnel Drop-off Analysis
+              </h3>
               <div className="space-y-3">
                 {[
-                  { stage: 'Sent → Delivered', rate: 97.8, drop: 2.2, reason: 'Bounces & invalid addresses' },
-                  { stage: 'Delivered → Opened', rate: 61.3, drop: 38.7, reason: 'Subject line fatigue, timing' },
-                  { stage: 'Opened → Clicked', rate: 30.0, drop: 70.0, reason: 'Weak CTAs, content relevance' },
-                  { stage: 'Clicked → Converted', rate: 24.3, drop: 75.7, reason: 'Landing page friction, price' },
+                  {
+                    stage: 'Sent → Delivered',
+                    rate: 97.8,
+                    drop: 2.2,
+                    reason: 'Bounces & invalid addresses',
+                  },
+                  {
+                    stage: 'Delivered → Opened',
+                    rate: 61.3,
+                    drop: 38.7,
+                    reason: 'Subject line fatigue, timing',
+                  },
+                  {
+                    stage: 'Opened → Clicked',
+                    rate: 30.0,
+                    drop: 70.0,
+                    reason: 'Weak CTAs, content relevance',
+                  },
+                  {
+                    stage: 'Clicked → Converted',
+                    rate: 24.3,
+                    drop: 75.7,
+                    reason: 'Landing page friction, price',
+                  },
                 ].map((item, i) => (
                   <div key={i} className="rounded-lg border border-border bg-background p-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-medium text-text-secondary">{item.stage}</span>
-                      <span className="text-xs font-mono font-semibold text-accent">{item.rate}%</span>
+                      <span className="text-xs font-mono font-semibold text-accent">
+                        {item.rate}%
+                      </span>
                     </div>
                     <div className="w-full h-1.5 rounded-full bg-border overflow-hidden mb-2">
-                      <div className="h-full rounded-full bg-accent" style={{ width: `${item.rate}%` }} />
+                      <div
+                        className="h-full rounded-full bg-accent"
+                        style={{ width: `${item.rate}%` }}
+                      />
                     </div>
                     <div className="flex items-center gap-1.5">
                       <ArrowDownRight className="h-3 w-3 text-danger" />
-                      <span className="text-[10px] text-text-muted">{item.drop}% drop — {item.reason}</span>
+                      <span className="text-[10px] text-text-muted">
+                        {item.drop}% drop — {item.reason}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -719,10 +973,26 @@ export function MarketingAnalyticsPage() {
               <h3 className="text-sm font-semibold text-text-primary mb-3">Optimization Tips</h3>
               <div className="space-y-2">
                 {[
-                  { icon: Mail, text: 'A/B test subject lines to improve open rates by ~15%', color: 'text-blue-500' },
-                  { icon: MousePointer, text: 'Add urgency CTAs to increase click-through by 22%', color: 'text-amber-500' },
-                  { icon: Target, text: 'Simplify checkout to reduce click-to-conversion drop', color: 'text-green-500' },
-                  { icon: Clock, text: 'Send at 9am local time for 12% higher engagement', color: 'text-purple-500' },
+                  {
+                    icon: Mail,
+                    text: 'A/B test subject lines to improve open rates by ~15%',
+                    color: 'text-blue-500',
+                  },
+                  {
+                    icon: MousePointer,
+                    text: 'Add urgency CTAs to increase click-through by 22%',
+                    color: 'text-amber-500',
+                  },
+                  {
+                    icon: Target,
+                    text: 'Simplify checkout to reduce click-to-conversion drop',
+                    color: 'text-green-500',
+                  },
+                  {
+                    icon: Clock,
+                    text: 'Send at 9am local time for 12% higher engagement',
+                    color: 'text-purple-500',
+                  },
                 ].map((tip, i) => (
                   <div key={i} className="flex items-start gap-2.5 rounded-lg bg-background p-2.5">
                     <tip.icon className={cn('h-4 w-4 mt-0.5 shrink-0', tip.color)} />
@@ -746,7 +1016,9 @@ export function MarketingAnalyticsPage() {
                   <p className="text-xs text-text-muted">{formatNumber(segment.size)} contacts</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold font-mono text-text-primary">{formatCurrency(segment.revenue)}</p>
+                  <p className="text-lg font-bold font-mono text-text-primary">
+                    {formatCurrency(segment.revenue)}
+                  </p>
                   <p className="text-[10px] text-text-muted">Attributed revenue</p>
                 </div>
               </div>
@@ -754,13 +1026,19 @@ export function MarketingAnalyticsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-text-muted">Engagement Score</span>
-                    <span className="text-xs font-mono font-medium text-text-primary">{segment.engagement}/100</span>
+                    <span className="text-xs font-mono font-medium text-text-primary">
+                      {segment.engagement}/100
+                    </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-border overflow-hidden">
                     <div
                       className={cn(
                         'h-full rounded-full transition-all',
-                        segment.engagement > 80 ? 'bg-accent' : segment.engagement > 60 ? 'bg-secondary' : 'bg-warning'
+                        segment.engagement > 80
+                          ? 'bg-accent'
+                          : segment.engagement > 60
+                            ? 'bg-secondary'
+                            : 'bg-warning'
                       )}
                       style={{ width: `${segment.engagement}%` }}
                     />

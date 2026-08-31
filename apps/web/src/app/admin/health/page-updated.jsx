@@ -2,18 +2,60 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Activity, AlertTriangle, BarChart3, CheckCircle2, ChevronDown, ChevronUp,
-  Clock, Cpu, Database, Download, Filter, HardDrive, History,
-  Layers, LayoutGrid, List, MemoryStick, RefreshCw, Search,
-  Server, Shield, TrendingUp, X, XCircle, Zap, Globe,
-  ArrowUpRight, ArrowDownRight, Minus, Wifi, Bell, BellRing,
-  Settings, Plus, SlidersHorizontal
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Cpu,
+  Database,
+  Download,
+  Filter,
+  HardDrive,
+  History,
+  Layers,
+  LayoutGrid,
+  List,
+  MemoryStick,
+  RefreshCw,
+  Search,
+  Server,
+  Shield,
+  TrendingUp,
+  X,
+  XCircle,
+  Zap,
+  Globe,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Wifi,
+  Bell,
+  BellRing,
+  Settings,
+  Plus,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 import {
@@ -93,7 +135,7 @@ export default function SystemHealthPage() {
   useEffect(() => {
     if (!autoRefresh) return;
     const timer = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           handleRefresh();
           return refreshInterval;
@@ -107,7 +149,8 @@ export default function SystemHealthPage() {
   /* ─── Computed Data ─── */
   const filteredErrors = useMemo(() => {
     return errorLogs.filter((e) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         e.message.toLowerCase().includes(query.toLowerCase()) ||
         e.id.toLowerCase().includes(query.toLowerCase()) ||
         e.service.toLowerCase().includes(query.toLowerCase());
@@ -118,18 +161,21 @@ export default function SystemHealthPage() {
     });
   }, [query, severityFilter, serviceFilter, statusFilter]);
 
-  const errorStats = useMemo(() => ({
-    total: errorLogs.length,
-    critical: errorLogs.filter(e => e.severity === 'critical').length,
-    error: errorLogs.filter(e => e.severity === 'error').length,
-    warning: errorLogs.filter(e => e.severity === 'warning').length,
-    open: errorLogs.filter(e => e.status === 'open').length,
-  }), []);
+  const errorStats = useMemo(
+    () => ({
+      total: errorLogs.length,
+      critical: errorLogs.filter((e) => e.severity === 'critical').length,
+      error: errorLogs.filter((e) => e.severity === 'error').length,
+      warning: errorLogs.filter((e) => e.severity === 'warning').length,
+      open: errorLogs.filter((e) => e.status === 'open').length,
+    }),
+    []
+  );
 
   const serviceStats = useMemo(() => {
-    const operational = serviceStatus.filter(s => s.status === 'operational').length;
-    const degraded = serviceStatus.filter(s => s.status === 'degraded').length;
-    const critical = serviceStatus.filter(s => s.status === 'critical').length;
+    const operational = serviceStatus.filter((s) => s.status === 'operational').length;
+    const degraded = serviceStatus.filter((s) => s.status === 'degraded').length;
+    const critical = serviceStatus.filter((s) => s.status === 'critical').length;
     return { operational, degraded, critical, total: serviceStatus.length };
   }, []);
 
@@ -153,7 +199,8 @@ export default function SystemHealthPage() {
   /* ─── Alert Computed Data ─── */
   const filteredRules = useMemo(() => {
     return rules.filter((r) => {
-      const matchesQuery = !alertQuery ||
+      const matchesQuery =
+        !alertQuery ||
         r.name.toLowerCase().includes(alertQuery.toLowerCase()) ||
         r.id.toLowerCase().includes(alertQuery.toLowerCase()) ||
         r.description.toLowerCase().includes(alertQuery.toLowerCase());
@@ -165,7 +212,8 @@ export default function SystemHealthPage() {
 
   const filteredHistory = useMemo(() => {
     return history.filter((h) => {
-      const matchesQuery = !alertQuery ||
+      const matchesQuery =
+        !alertQuery ||
         h.ruleName.toLowerCase().includes(alertQuery.toLowerCase()) ||
         h.message.toLowerCase().includes(alertQuery.toLowerCase());
       const matchesSeverity = alertSeverityFilter === 'all' || h.severity === alertSeverityFilter;
@@ -173,18 +221,21 @@ export default function SystemHealthPage() {
     });
   }, [history, alertQuery, alertSeverityFilter]);
 
-  const alertStats = useMemo(() => ({
-    total: rules.length,
-    enabled: rules.filter(r => r.enabled).length,
-    firing: rules.filter(r => getAlertStatus(r) === 'firing').length,
-    disabled: rules.filter(r => !r.enabled).length,
-    historyTotal: history.length,
-    openAlerts: history.filter(h => !h.resolvedAt).length,
-  }), [rules, history]);
+  const alertStats = useMemo(
+    () => ({
+      total: rules.length,
+      enabled: rules.filter((r) => r.enabled).length,
+      firing: rules.filter((r) => getAlertStatus(r) === 'firing').length,
+      disabled: rules.filter((r) => !r.enabled).length,
+      historyTotal: history.length,
+      openAlerts: history.filter((h) => !h.resolvedAt).length,
+    }),
+    [rules, history]
+  );
 
   /* ─── Handlers ─── */
   const toggleError = (id) => {
-    setExpandedErrors(prev => {
+    setExpandedErrors((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -197,31 +248,31 @@ export default function SystemHealthPage() {
     setCountdown(refreshInterval);
   };
 
-  const uniqueServices = useMemo(() => [...new Set(errorLogs.map(e => e.service))], []);
+  const uniqueServices = useMemo(() => [...new Set(errorLogs.map((e) => e.service))], []);
 
   /* ─── Alert Handlers ─── */
   const handleToggleRule = (id) => {
-    setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
+    setRules((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
   };
 
   const handleDeleteRule = (id) => {
     if (confirm('Delete this alert rule? This action cannot be undone.')) {
-      setRules(prev => prev.filter(r => r.id !== id));
+      setRules((prev) => prev.filter((r) => r.id !== id));
     }
   };
 
   const handleSaveRule = (rule) => {
-    setRules(prev => {
-      const exists = prev.find(r => r.id === rule.id);
+    setRules((prev) => {
+      const exists = prev.find((r) => r.id === rule.id);
       if (exists) {
-        return prev.map(r => r.id === rule.id ? rule : r);
+        return prev.map((r) => (r.id === rule.id ? rule : r));
       }
       return [rule, ...prev];
     });
   };
 
   const handleTestRule = (id) => {
-    const rule = rules.find(r => r.id === id);
+    const rule = rules.find((r) => r.id === id);
     if (!rule) return;
     const newEntry = {
       id: `AH-${Date.now().toString(36).toUpperCase()}`,
@@ -236,20 +287,26 @@ export default function SystemHealthPage() {
       acknowledgedBy: null,
       acknowledgedAt: null,
     };
-    setHistory(prev => [newEntry, ...prev]);
+    setHistory((prev) => [newEntry, ...prev]);
     alert(`Test alert fired for "${rule.name}". Check the Alert History tab.`);
   };
 
   const handleAcknowledge = (id) => {
-    setHistory(prev => prev.map(h => h.id === id ? {
-      ...h,
-      acknowledgedBy: 'You',
-      acknowledgedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-    } : h));
+    setHistory((prev) =>
+      prev.map((h) =>
+        h.id === id
+          ? {
+              ...h,
+              acknowledgedBy: 'You',
+              acknowledgedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
+            }
+          : h
+      )
+    );
   };
 
   const toggleAlert = (id) => {
-    setExpandedAlerts(prev => {
+    setExpandedAlerts((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -305,10 +362,15 @@ export default function SystemHealthPage() {
         <div className="flex items-center gap-2">
           {/* Auto-refresh toggle */}
           <button
-            onClick={() => { setAutoRefresh(!autoRefresh); if (!autoRefresh) setCountdown(refreshInterval); }}
+            onClick={() => {
+              setAutoRefresh(!autoRefresh);
+              if (!autoRefresh) setCountdown(refreshInterval);
+            }}
             className={cn(
               'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
-              autoRefresh ? 'border-accent bg-accent/10 text-accent' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              autoRefresh
+                ? 'border-accent bg-accent/10 text-accent'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <RefreshCw className={cn('h-3.5 w-3.5', autoRefresh && 'animate-spin')} />
@@ -375,7 +437,9 @@ export default function SystemHealthPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -417,11 +481,7 @@ export default function SystemHealthPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {serviceStatus.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  onClick={() => {}}
-                />
+                <ServiceCard key={service.id} service={service} onClick={() => {}} />
               ))}
             </div>
           </div>
@@ -443,23 +503,43 @@ export default function SystemHealthPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Severity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Service</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Message</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Severity
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Service
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Message
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Time
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {errorLogs.slice(0, 5).map((error) => (
                     <tr key={error.id} className="hover:bg-background/50 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-text-muted">{error.id}</td>
-                      <td className="px-4 py-3"><SeverityBadge severity={error.severity} /></td>
+                      <td className="px-4 py-3">
+                        <SeverityBadge severity={error.severity} />
+                      </td>
                       <td className="px-4 py-3 text-text-secondary text-xs">{error.service}</td>
-                      <td className="px-4 py-3 text-sm text-text-primary truncate max-w-[250px]">{error.message}</td>
-                      <td className="px-4 py-3 text-text-secondary text-xs">{timeAgo(error.timestamp)}</td>
-                      <td className="px-4 py-3"><ErrorStatusBadge status={error.status} /></td>
+                      <td className="px-4 py-3 text-sm text-text-primary truncate max-w-[250px]">
+                        {error.message}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary text-xs">
+                        {timeAgo(error.timestamp)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <ErrorStatusBadge status={error.status} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -487,10 +567,20 @@ export default function SystemHealthPage() {
                     <XAxis dataKey="hour" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                     <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
                       labelStyle={{ color: 'var(--text-primary)' }}
                     />
-                    <Area type="monotone" dataKey="requests" stroke="#863bff" fill="url(#reqGradient)" strokeWidth={2} />
+                    <Area
+                      type="monotone"
+                      dataKey="requests"
+                      stroke="#863bff"
+                      fill="url(#reqGradient)"
+                      strokeWidth={2}
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -508,12 +598,30 @@ export default function SystemHealthPage() {
                     <XAxis dataKey="hour" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" unit="%" />
                     <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
                       labelStyle={{ color: 'var(--text-primary)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: '11px' }} />
-                    <Line type="monotone" dataKey="cpu" stroke="#863bff" strokeWidth={2} dot={false} name="CPU" />
-                    <Line type="monotone" dataKey="memory" stroke="#22c55e" strokeWidth={2} dot={false} name="Memory" />
+                    <Line
+                      type="monotone"
+                      dataKey="cpu"
+                      stroke="#863bff"
+                      strokeWidth={2}
+                      dot={false}
+                      name="CPU"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="memory"
+                      stroke="#22c55e"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Memory"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -535,7 +643,9 @@ export default function SystemHealthPage() {
                 onClick={() => setTimeRange(range)}
                 className={cn(
                   'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                  timeRange === range ? 'bg-secondary text-white' : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  timeRange === range
+                    ? 'bg-secondary text-white'
+                    : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 Last {range}
@@ -571,14 +681,46 @@ export default function SystemHealthPage() {
                   <XAxis dataKey="hour" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                   <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" unit="ms" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                    contentStyle={{
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                    }}
                     labelStyle={{ color: 'var(--text-primary)' }}
                   />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Line type="monotone" dataKey="api" stroke="#863bff" strokeWidth={2} dot={false} name="API Gateway" />
-                  <Line type="monotone" dataKey="auth" stroke="#22c55e" strokeWidth={2} dot={false} name="Auth Service" />
-                  <Line type="monotone" dataKey="db" stroke="#3b82f6" strokeWidth={2} dot={false} name="Database" />
-                  <Line type="monotone" dataKey="cache" stroke="#f59e0b" strokeWidth={2} dot={false} name="Redis Cache" />
+                  <Line
+                    type="monotone"
+                    dataKey="api"
+                    stroke="#863bff"
+                    strokeWidth={2}
+                    dot={false}
+                    name="API Gateway"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="auth"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Auth Service"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="db"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Database"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="cache"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Redis Cache"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -593,10 +735,19 @@ export default function SystemHealthPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={requestVolume}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="hour" tick={{ fontSize: 9 }} stroke="var(--text-muted)" interval={2} />
+                    <XAxis
+                      dataKey="hour"
+                      tick={{ fontSize: 9 }}
+                      stroke="var(--text-muted)"
+                      interval={2}
+                    />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                     <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
                     />
                     <Bar dataKey="requests" fill="#863bff" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -621,10 +772,15 @@ export default function SystemHealthPage() {
                     <div key={item.service}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-text-secondary">{item.service}</span>
-                        <span className="text-xs font-mono font-medium text-text-primary">{item.count}</span>
+                        <span className="text-xs font-mono font-medium text-text-primary">
+                          {item.count}
+                        </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                        <div className={cn('h-full rounded-full transition-all', item.color)} style={{ width: `${pct}%` }} />
+                        <div
+                          className={cn('h-full rounded-full transition-all', item.color)}
+                          style={{ width: `${pct}%` }}
+                        />
                       </div>
                     </div>
                   );
@@ -636,34 +792,68 @@ export default function SystemHealthPage() {
             <div className="rounded-xl border border-border bg-surface p-5">
               <h3 className="text-sm font-semibold text-text-primary mb-4">Current Resources</h3>
               <div className="space-y-4">
-                {serviceStatus.filter(s => s.connections || s.memoryUsage || s.diskUsage || s.indexSize).map((svc) => {
-                  const metric = svc.connections
-                    ? { label: 'Connections', used: svc.connections.active, total: svc.connections.max, unit: '' }
-                    : svc.memoryUsage
-                    ? { label: 'Memory', used: svc.memoryUsage.used, total: svc.memoryUsage.total, unit: svc.memoryUsage.unit }
-                    : svc.diskUsage
-                    ? { label: 'Disk', used: svc.diskUsage.used, total: svc.diskUsage.total, unit: svc.diskUsage.unit }
-                    : { label: 'Index', used: svc.indexSize.used, total: svc.indexSize.total, unit: svc.indexSize.unit };
+                {serviceStatus
+                  .filter((s) => s.connections || s.memoryUsage || s.diskUsage || s.indexSize)
+                  .map((svc) => {
+                    const metric = svc.connections
+                      ? {
+                          label: 'Connections',
+                          used: svc.connections.active,
+                          total: svc.connections.max,
+                          unit: '',
+                        }
+                      : svc.memoryUsage
+                        ? {
+                            label: 'Memory',
+                            used: svc.memoryUsage.used,
+                            total: svc.memoryUsage.total,
+                            unit: svc.memoryUsage.unit,
+                          }
+                        : svc.diskUsage
+                          ? {
+                              label: 'Disk',
+                              used: svc.diskUsage.used,
+                              total: svc.diskUsage.total,
+                              unit: svc.diskUsage.unit,
+                            }
+                          : {
+                              label: 'Index',
+                              used: svc.indexSize.used,
+                              total: svc.indexSize.total,
+                              unit: svc.indexSize.unit,
+                            };
 
-                  const pct = Math.round((metric.used / metric.total) * 100);
+                    const pct = Math.round((metric.used / metric.total) * 100);
 
-                  return (
-                    <div key={svc.id}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-text-secondary">{svc.name} — {metric.label}</span>
-                        <span className={cn('text-xs font-mono font-medium', pct > 80 ? 'text-danger' : pct > 60 ? 'text-warning' : 'text-accent')}>
-                          {metric.used}{metric.unit} / {metric.total}{metric.unit}
-                        </span>
+                    return (
+                      <div key={svc.id}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-text-secondary">
+                            {svc.name} — {metric.label}
+                          </span>
+                          <span
+                            className={cn(
+                              'text-xs font-mono font-medium',
+                              pct > 80 ? 'text-danger' : pct > 60 ? 'text-warning' : 'text-accent'
+                            )}
+                          >
+                            {metric.used}
+                            {metric.unit} / {metric.total}
+                            {metric.unit}
+                          </span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-border overflow-hidden">
+                          <div
+                            className={cn(
+                              'h-full rounded-full transition-all',
+                              pct > 80 ? 'bg-danger' : pct > 60 ? 'bg-warning' : 'bg-accent'
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                        <div
-                          className={cn('h-full rounded-full transition-all', pct > 80 ? 'bg-danger' : pct > 60 ? 'bg-warning' : 'bg-accent')}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -722,7 +912,9 @@ export default function SystemHealthPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -756,7 +948,11 @@ export default function SystemHealthPage() {
                     className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="all">All Services</option>
-                    {uniqueServices.map(s => <option key={s} value={s}>{s}</option>)}
+                    {uniqueServices.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-1.5">
@@ -776,7 +972,12 @@ export default function SystemHealthPage() {
               </div>
               <div className="mt-3 flex justify-end">
                 <button
-                  onClick={() => { setSeverityFilter('all'); setServiceFilter('all'); setStatusFilter('all'); setQuery(''); }}
+                  onClick={() => {
+                    setSeverityFilter('all');
+                    setServiceFilter('all');
+                    setStatusFilter('all');
+                    setQuery('');
+                  }}
                   className="h-9 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
                 >
                   Reset Filters
@@ -787,7 +988,8 @@ export default function SystemHealthPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredErrors.length}</span> of {errorLogs.length} errors
+            Showing <span className="font-medium text-text-primary">{filteredErrors.length}</span>{' '}
+            of {errorLogs.length} errors
           </p>
 
           {/* Error Table */}
@@ -797,12 +999,24 @@ export default function SystemHealthPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Severity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Service</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Message</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Count</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Severity
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Service
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Message
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Time
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Count
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -843,7 +1057,7 @@ export default function SystemHealthPage() {
             />
             <HealthStatCard
               label="Critical"
-              value={incidentHistory.filter(i => i.severity === 'critical').length}
+              value={incidentHistory.filter((i) => i.severity === 'critical').length}
               icon={XCircle}
               color="text-danger"
               subtext="Highest severity"
@@ -879,15 +1093,23 @@ export default function SystemHealthPage() {
                   )}
 
                   {/* Dot */}
-                  <div className={cn(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2',
-                    incident.severity === 'critical' ? 'border-danger bg-danger/10' :
-                    incident.severity === 'warning' ? 'border-warning bg-warning/10' :
-                    'border-info bg-info/10'
-                  )}>
-                    {incident.severity === 'critical' ? <XCircle className="h-4 w-4 text-danger" /> :
-                     incident.severity === 'warning' ? <AlertTriangle className="h-4 w-4 text-warning" /> :
-                     <Activity className="h-4 w-4 text-info" />}
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2',
+                      incident.severity === 'critical'
+                        ? 'border-danger bg-danger/10'
+                        : incident.severity === 'warning'
+                          ? 'border-warning bg-warning/10'
+                          : 'border-info bg-info/10'
+                    )}
+                  >
+                    {incident.severity === 'critical' ? (
+                      <XCircle className="h-4 w-4 text-danger" />
+                    ) : incident.severity === 'warning' ? (
+                      <AlertTriangle className="h-4 w-4 text-warning" />
+                    ) : (
+                      <Activity className="h-4 w-4 text-info" />
+                    )}
                   </div>
 
                   {/* Content */}
@@ -909,7 +1131,10 @@ export default function SystemHealthPage() {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {incident.affectedServices.map((svc) => (
-                        <span key={svc} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary">
+                        <span
+                          key={svc}
+                          className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary"
+                        >
                           {svc}
                         </span>
                       ))}
@@ -990,7 +1215,13 @@ export default function SystemHealthPage() {
                 <option value="ok">OK</option>
                 <option value="disabled">Disabled</option>
               </select>
-              <Button size="sm" onClick={() => { setEditingRule(null); setShowAlertModal(true); }}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingRule(null);
+                  setShowAlertModal(true);
+                }}
+              >
                 <Plus className="mr-1.5 h-4 w-4" /> New Rule
               </Button>
             </div>
@@ -1002,7 +1233,9 @@ export default function SystemHealthPage() {
               onClick={() => setShowChannels(!showChannels)}
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
-                showChannels ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                showChannels
+                  ? 'border-secondary bg-secondary/10 text-secondary'
+                  : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
               )}
             >
               <Settings className="h-3.5 w-3.5" /> Channels
@@ -1012,13 +1245,17 @@ export default function SystemHealthPage() {
           {/* Channel Configuration */}
           {showChannels && (
             <div className="rounded-xl border border-border bg-surface p-4">
-              <h3 className="text-sm font-semibold text-text-primary mb-3">Notification Channels</h3>
+              <h3 className="text-sm font-semibold text-text-primary mb-3">
+                Notification Channels
+              </h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                {channels.map(ch => (
+                {channels.map((ch) => (
                   <ChannelConfigCard
                     key={ch.id}
                     channel={ch}
-                    onConfigure={(c) => alert(`Configure ${c.label} — UI would open settings modal`)}
+                    onConfigure={(c) =>
+                      alert(`Configure ${c.label} — UI would open settings modal`)
+                    }
                   />
                 ))}
               </div>
@@ -1039,7 +1276,10 @@ export default function SystemHealthPage() {
                   key={rule.id}
                   rule={rule}
                   onToggle={handleToggleRule}
-                  onEdit={(r) => { setEditingRule(r); setShowAlertModal(true); }}
+                  onEdit={(r) => {
+                    setEditingRule(r);
+                    setShowAlertModal(true);
+                  }}
                   onDelete={handleDeleteRule}
                   onTest={handleTestRule}
                 />
@@ -1066,12 +1306,24 @@ export default function SystemHealthPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Severity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Rule</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Message</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Triggered</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Ack</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Severity
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Rule
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Message
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Triggered
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Ack
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -1103,7 +1355,10 @@ export default function SystemHealthPage() {
       {showAlertModal && (
         <AlertRuleModal
           rule={editingRule}
-          onClose={() => { setShowAlertModal(false); setEditingRule(null); }}
+          onClose={() => {
+            setShowAlertModal(false);
+            setEditingRule(null);
+          }}
           onSave={handleSaveRule}
         />
       )}

@@ -1,23 +1,56 @@
 /* src/app/admin/demo-access/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Search, Filter, Plus, Zap, Users, TrendingUp, Clock,
-  AlertTriangle, CheckCircle2, XCircle, Lock, BarChart3,
-  ChevronDown, ChevronUp, Download, RefreshCw, Calendar,
-  Globe, Mail, ArrowUpRight, ArrowDownRight, Percent,
-  MousePointerClick, Timer, Star, Building2
+  Search,
+  Filter,
+  Plus,
+  Zap,
+  Users,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Lock,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  RefreshCw,
+  Calendar,
+  Globe,
+  Mail,
+  ArrowUpRight,
+  ArrowDownRight,
+  Percent,
+  MousePointerClick,
+  Timer,
+  Star,
+  Building2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { useDemoStore } from './store';
 import {
-  tierConfig, demoStatusMeta, funnelStages, formatCurrency,
-  formatDate, getDaysUntil
+  tierConfig,
+  demoStatusMeta,
+  funnelStages,
+  formatCurrency,
+  formatDate,
+  getDaysUntil,
 } from './data';
 import {
-  StatCard, DemoStatusBadge, TierBadge, DaysRemainingBadge,
-  MiniUsageBar, FeatureTag, ConversionFunnel, SourceBreakdown,
-  FeaturePopularityChart, DemoDetailDrawer, NewDemoModal
+  StatCard,
+  DemoStatusBadge,
+  TierBadge,
+  DaysRemainingBadge,
+  MiniUsageBar,
+  FeatureTag,
+  ConversionFunnel,
+  SourceBreakdown,
+  FeaturePopularityChart,
+  DemoDetailDrawer,
+  NewDemoModal,
 } from './components';
 
 /* ─── Simple Sparkline (SVG) ─── */
@@ -27,15 +60,29 @@ function Sparkline({ data, color = '#3b82f6', width = 120, height = 32 }) {
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  const points = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * width;
-    const y = height - ((v - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
+  const points = values
+    .map((v, i) => {
+      const x = (i / (values.length - 1)) * width;
+      const y = height - ((v - min) / range) * height;
+      return `${x},${y}`;
+    })
+    .join(' ');
   return (
     <svg width={width} height={height} className="overflow-visible">
-      <polyline fill="none" stroke={color} strokeWidth="2" points={points} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={width} cy={height - ((values[values.length - 1] - min) / range) * height} r="2.5" fill={color} />
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        points={points}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx={width}
+        cy={height - ((values[values.length - 1] - min) / range) * height}
+        r="2.5"
+        fill={color}
+      />
     </svg>
   );
 }
@@ -117,7 +164,10 @@ export default function DemoAccessPage() {
   const funnelData = useMemo(() => {
     return funnelStages.map((stage) => ({
       ...stage,
-      count: demos.filter((d) => d.onboardingStep === stage.key || (stage.key === 'converted' && d.status === 'converted')).length,
+      count: demos.filter(
+        (d) =>
+          d.onboardingStep === stage.key || (stage.key === 'converted' && d.status === 'converted')
+      ).length,
     }));
   }, [demos]);
 
@@ -128,7 +178,8 @@ export default function DemoAccessPage() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Demo Access</h1>
           <p className="text-sm text-text-secondary">
-            Grant trials, track engagement, convert prospects — {stats.active + stats.expiringSoon} active demos
+            Grant trials, track engagement, convert prospects — {stats.active + stats.expiringSoon}{' '}
+            active demos
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -138,9 +189,13 @@ export default function DemoAccessPage() {
             onClick={() => setActiveView(activeView === 'list' ? 'analytics' : 'list')}
           >
             {activeView === 'list' ? (
-              <><BarChart3 className="mr-1.5 h-4 w-4" /> Analytics</>
+              <>
+                <BarChart3 className="mr-1.5 h-4 w-4" /> Analytics
+              </>
             ) : (
-              <><Building2 className="mr-1.5 h-4 w-4" /> Demo List</>
+              <>
+                <Building2 className="mr-1.5 h-4 w-4" /> Demo List
+              </>
             )}
           </Button>
           <Button variant="outline" size="sm">
@@ -206,7 +261,9 @@ export default function DemoAccessPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -290,7 +347,8 @@ export default function DemoAccessPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredDemos.length}</span> of {demos.length} demos
+            Showing <span className="font-medium text-text-primary">{filteredDemos.length}</span> of{' '}
+            {demos.length} demos
           </p>
 
           {/* Demo Table */}
@@ -320,9 +378,12 @@ export default function DemoAccessPage() {
                       >
                         <div className="flex items-center gap-1">
                           {col.label}
-                          {sortConfig.key === col.key && (
-                            sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                          )}
+                          {sortConfig.key === col.key &&
+                            (sortConfig.dir === 'asc' ? (
+                              <ChevronUp className="h-3 w-3" />
+                            ) : (
+                              <ChevronDown className="h-3 w-3" />
+                            ))}
                         </div>
                       </th>
                     ))}
@@ -343,12 +404,21 @@ export default function DemoAccessPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', tier.bg)}>
+                            <div
+                              className={cn(
+                                'flex h-9 w-9 items-center justify-center rounded-lg',
+                                tier.bg
+                              )}
+                            >
                               <Building2 className={cn('h-4 w-4', tier.color)} />
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-text-primary">{demo.tenantName}</p>
-                              <p className="text-[10px] text-text-muted font-mono">{demo.subdomain}.unifiedpms.com</p>
+                              <p className="text-sm font-medium text-text-primary">
+                                {demo.tenantName}
+                              </p>
+                              <p className="text-[10px] text-text-muted font-mono">
+                                {demo.subdomain}.unifiedpms.com
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -373,13 +443,14 @@ export default function DemoAccessPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-text-secondary text-xs">
-                          {demo.createdAt}
-                        </td>
+                        <td className="px-4 py-3 text-text-secondary text-xs">{demo.createdAt}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
-                              onClick={(e) => { e.stopPropagation(); setSelectedDemo(demo); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDemo(demo);
+                              }}
                               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                               title="View Details"
                             >
@@ -387,7 +458,10 @@ export default function DemoAccessPage() {
                             </button>
                             {demo.status === 'active' || demo.status === 'expiring_soon' ? (
                               <button
-                                onClick={(e) => { e.stopPropagation(); convertDemo(demo.id, demo.tier); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  convertDemo(demo.id, demo.tier);
+                                }}
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-md text-accent hover:bg-accent/10"
                                 title="Convert to Paid"
                               >
@@ -470,13 +544,20 @@ export default function DemoAccessPage() {
                       <span className={cn('w-20 text-xs font-medium', meta.color)}>{t.tier}</span>
                       <div className="flex-1 h-6 rounded-md bg-border overflow-hidden relative">
                         <div
-                          className={cn('h-full rounded-md flex items-center px-2', meta.bg.replace('/10', '/70'))}
+                          className={cn(
+                            'h-full rounded-md flex items-center px-2',
+                            meta.bg.replace('/10', '/70')
+                          )}
                           style={{ width: `${t.rate}%` }}
                         >
-                          <span className="text-xs font-medium text-white">{t.converted}/{t.started}</span>
+                          <span className="text-xs font-medium text-white">
+                            {t.converted}/{t.started}
+                          </span>
                         </div>
                       </div>
-                      <span className="text-xs font-mono font-medium text-text-primary w-12 text-right">{t.rate}%</span>
+                      <span className="text-xs font-mono font-medium text-text-primary w-12 text-right">
+                        {t.rate}%
+                      </span>
                     </div>
                   );
                 })}
@@ -484,7 +565,9 @@ export default function DemoAccessPage() {
               <div className="mt-4 rounded-lg border border-border bg-background p-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-text-secondary">Avg. Time to Convert</span>
-                  <span className="font-mono font-medium text-text-primary">{analytics.avgTimeToConvert} days</span>
+                  <span className="font-mono font-medium text-text-primary">
+                    {analytics.avgTimeToConvert} days
+                  </span>
                 </div>
               </div>
             </div>
@@ -509,12 +592,7 @@ export default function DemoAccessPage() {
       )}
 
       {/* ─── Modals ─── */}
-      {showNewDemo && (
-        <NewDemoModal
-          onClose={() => setShowNewDemo(false)}
-          onCreate={addDemo}
-        />
-      )}
+      {showNewDemo && <NewDemoModal onClose={() => setShowNewDemo(false)} onCreate={addDemo} />}
 
       {selectedDemo && (
         <DemoDetailDrawer

@@ -24,9 +24,7 @@ export default function GuestAuthLayout() {
 
       {/* Footer */}
       <footer className="border-t border-border py-4 text-center">
-        <p className="text-xs text-text-muted">
-          © 2026 Vimad. Secure, encrypted connection.
-        </p>
+        <p className="text-xs text-text-muted">© 2026 Vimad. Secure, encrypted connection.</p>
       </footer>
     </div>
   );

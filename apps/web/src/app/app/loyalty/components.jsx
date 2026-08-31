@@ -13,11 +13,15 @@ export function TierBadge({ tier, size = 'md' }) {
     lg: 'text-sm px-3 py-1.5 gap-2',
   };
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full border font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, meta.border,
-      sizeClasses[size]
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border,
+        sizeClasses[size]
+      )}
+    >
       <Icon className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3')} />
       {meta.label}
     </span>
@@ -33,7 +37,18 @@ export function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -48,7 +63,9 @@ export function TierProgressBar({ current, nextTierReq, tier }) {
     <div className="w-full">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs text-text-muted">{current.toLocaleString()} pts</span>
-        <span className="text-xs font-medium text-text-secondary">{nextTierReq.toLocaleString()} pts</span>
+        <span className="text-xs font-medium text-text-secondary">
+          {nextTierReq.toLocaleString()} pts
+        </span>
       </div>
       <div className="h-2 w-full rounded-full bg-border overflow-hidden">
         <div

@@ -1,6 +1,17 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Key, Eye, Server, Zap, Globe, Clock, FileCheck, AlertTriangle } from 'lucide-react';
+import {
+  Shield,
+  Lock,
+  Key,
+  Eye,
+  Server,
+  Zap,
+  Globe,
+  Clock,
+  FileCheck,
+  AlertTriangle,
+} from 'lucide-react';
 
 export default function SecurityOverviewPage() {
   // Security pages feel better in dark mode — respect user choice but default dark on mount
@@ -55,10 +66,13 @@ export default function SecurityOverviewPage() {
     <div className="bg-background">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-surface py-20">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '24px 24px'
-        }} />
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+        />
         <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/10">
             <Shield className="h-8 w-8 text-secondary" />
@@ -67,7 +81,8 @@ export default function SecurityOverviewPage() {
             Security at Unified PMS
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Trust is the foundation of hospitality technology. We protect your property and guest data with enterprise-grade security at every layer.
+            Trust is the foundation of hospitality technology. We protect your property and guest
+            data with enterprise-grade security at every layer.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-text-secondary">
@@ -91,7 +106,10 @@ export default function SecurityOverviewPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {pillars.map((p) => (
-              <div key={p.title} className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-secondary/30">
+              <div
+                key={p.title}
+                className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-secondary/30"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
                   <p.icon className="h-5 w-5 text-secondary" />
                 </div>
@@ -128,7 +146,13 @@ export default function SecurityOverviewPage() {
           <AlertTriangle className="mx-auto h-8 w-8 text-warning" />
           <h2 className="mt-4 text-2xl font-bold text-text-primary">Report a Security Issue</h2>
           <p className="mt-2 text-text-secondary">
-            We operate a responsible disclosure program. If you discover a vulnerability, please report it to <a href="mailto:security@unifiedpms.com" className="text-secondary hover:underline">security@unifiedpms.com</a>. We commit to acknowledging reports within 24 hours and resolving critical issues within 72 hours.
+            We operate a responsible disclosure program. If you discover a vulnerability, please
+            report it to{' '}
+            <a href="mailto:security@unifiedpms.com" className="text-secondary hover:underline">
+              security@unifiedpms.com
+            </a>
+            . We commit to acknowledging reports within 24 hours and resolving critical issues
+            within 72 hours.
           </p>
         </div>
       </section>

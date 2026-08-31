@@ -158,7 +158,12 @@ export const shadowableUsers = [
 export const mockShadowHistory = [
   {
     id: 'SHD-8XJ2KP',
-    shadowUser: { id: 'USR-002', name: 'Sarah Johnson', role: 'front_desk', email: 'sarah@frontdesk.com' },
+    shadowUser: {
+      id: 'USR-002',
+      name: 'Sarah Johnson',
+      role: 'front_desk',
+      email: 'sarah@frontdesk.com',
+    },
     originalUser: { id: 'ADM-001', name: 'Super Admin', role: 'super_admin' },
     startTime: '2026-08-16 14:30:00',
     endTime: '2026-08-16 14:45:00',
@@ -167,15 +172,28 @@ export const mockShadowHistory = [
     stealth: false,
     actionsTaken: [
       { action: 'SESSION_STARTED', timestamp: '2026-08-16 14:30:00' },
-      { action: 'VIEWED_RESERVATION', details: { reservationId: 'R-4023' }, timestamp: '2026-08-16 14:32:00' },
-      { action: 'MODIFIED_GUEST_PROFILE', details: { guestId: 'G-8891' }, timestamp: '2026-08-16 14:35:00' },
+      {
+        action: 'VIEWED_RESERVATION',
+        details: { reservationId: 'R-4023' },
+        timestamp: '2026-08-16 14:32:00',
+      },
+      {
+        action: 'MODIFIED_GUEST_PROFILE',
+        details: { guestId: 'G-8891' },
+        timestamp: '2026-08-16 14:35:00',
+      },
       { action: 'CONTEXT_SWITCHED', details: { to: 'admin' }, timestamp: '2026-08-16 14:38:00' },
       { action: 'SESSION_ENDED', timestamp: '2026-08-16 14:45:00' },
     ],
   },
   {
     id: 'SHD-9YKLQM',
-    shadowUser: { id: 'USR-004', name: 'Maria Garcia', role: 'housekeeping', email: 'maria@housekeeping.com' },
+    shadowUser: {
+      id: 'USR-004',
+      name: 'Maria Garcia',
+      role: 'housekeeping',
+      email: 'maria@housekeeping.com',
+    },
     originalUser: { id: 'ADM-001', name: 'Super Admin', role: 'super_admin' },
     startTime: '2026-08-16 10:00:00',
     endTime: '2026-08-16 10:20:00',
@@ -185,7 +203,11 @@ export const mockShadowHistory = [
     actionsTaken: [
       { action: 'SESSION_STARTED', timestamp: '2026-08-16 10:00:00' },
       { action: 'STEALTH_ENABLED', timestamp: '2026-08-16 10:01:00' },
-      { action: 'UPDATED_ROOM_STATUS', details: { roomId: '205', status: 'clean' }, timestamp: '2026-08-16 10:05:00' },
+      {
+        action: 'UPDATED_ROOM_STATUS',
+        details: { roomId: '205', status: 'clean' },
+        timestamp: '2026-08-16 10:05:00',
+      },
       { action: 'VIEWED_HOUSEKEEPING_REPORT', timestamp: '2026-08-16 10:12:00' },
       { action: 'STEALTH_DISABLED', timestamp: '2026-08-16 10:18:00' },
       { action: 'SESSION_ENDED', timestamp: '2026-08-16 10:20:00' },
@@ -193,7 +215,13 @@ export const mockShadowHistory = [
   },
   {
     id: 'SHD-TAKEOVER-ABC123',
-    shadowUser: { id: 'USR-006', name: 'Lisa Wong', role: 'admin', email: 'lisa@sales.com', takenOverSession: 'SESS-jkl012' },
+    shadowUser: {
+      id: 'USR-006',
+      name: 'Lisa Wong',
+      role: 'admin',
+      email: 'lisa@sales.com',
+      takenOverSession: 'SESS-jkl012',
+    },
     originalUser: { id: 'ADM-001', name: 'Super Admin', role: 'super_admin' },
     startTime: '2026-08-15 16:00:00',
     endTime: '2026-08-15 16:30:00',
@@ -202,7 +230,11 @@ export const mockShadowHistory = [
     stealth: false,
     actionsTaken: [
       { action: 'SESSION_TAKEOVER', timestamp: '2026-08-15 16:00:00' },
-      { action: 'VIEWED_EVENT', details: { eventId: 'EVT-2024' }, timestamp: '2026-08-15 16:05:00' },
+      {
+        action: 'VIEWED_EVENT',
+        details: { eventId: 'EVT-2024' },
+        timestamp: '2026-08-15 16:05:00',
+      },
       { action: 'MODIFIED_BEO', details: { beoId: 'BEO-112' }, timestamp: '2026-08-15 16:15:00' },
       { action: 'SESSION_ENDED', timestamp: '2026-08-15 16:30:00' },
     ],
@@ -248,19 +280,53 @@ export const shadowActionLabels = {
 
 /* ─── Role Config for UI ─── */
 export const roleConfig = {
-  super_admin: { label: 'Super Admin', color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  admin: { label: 'Admin', color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20' },
-  manager: { label: 'Manager', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
-  front_desk: { label: 'Front Desk', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  housekeeping: { label: 'Housekeeping', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
-  readonly: { label: 'Read-only', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border' },
+  super_admin: {
+    label: 'Super Admin',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+  },
+  admin: {
+    label: 'Admin',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    border: 'border-secondary/20',
+  },
+  manager: {
+    label: 'Manager',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+  },
+  front_desk: {
+    label: 'Front Desk',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+  },
+  housekeeping: {
+    label: 'Housekeeping',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+  },
+  readonly: {
+    label: 'Read-only',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+  },
 };
 
 /* ─── Status Config ─── */
 export const userStatusConfig = {
   online: { label: 'Online', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
   away: { label: 'Away', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
-  offline: { label: 'Offline', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border' },
+  offline: {
+    label: 'Offline',
+    dot: 'bg-text-muted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+  },
 };
 
 /* ─── Module Icons/Labels Map ─── */

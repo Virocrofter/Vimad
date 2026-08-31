@@ -23,7 +23,10 @@ export default function ContactPage() {
           </div>
           <h2 className="mt-4 text-2xl font-bold text-text-primary">Message sent!</h2>
           <p className="mt-2 text-text-secondary">We will get back to you within 24 hours.</p>
-          <Link to="/" className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-secondary px-6 text-sm font-medium text-white hover:bg-secondary/90">
+          <Link
+            to="/"
+            className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-secondary px-6 text-sm font-medium text-white hover:bg-secondary/90"
+          >
             Back to Home
           </Link>
         </div>
@@ -39,7 +42,8 @@ export default function ContactPage() {
             <div>
               <h1 className="text-4xl font-bold text-text-primary sm:text-5xl">Get in touch</h1>
               <p className="mt-4 text-lg text-text-secondary">
-                Have a question about pricing, migration, or enterprise features? We are here to help.
+                Have a question about pricing, migration, or enterprise features? We are here to
+                help.
               </p>
 
               <div className="mt-8 space-y-4">
@@ -73,13 +77,16 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-surface p-6 sm:p-8 space-y-4">
+            <form
+              onSubmit={handleSubmit}
+              className="rounded-xl border border-border bg-surface p-6 sm:p-8 space-y-4"
+            >
               <Input
                 label="Name"
                 placeholder="John Doe"
                 required
                 value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
                 label="Email"
@@ -87,13 +94,13 @@ export default function ContactPage() {
                 placeholder="you@property.com"
                 required
                 value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
                 label="Property Name"
                 placeholder="Grand Plaza Hotel"
                 value={form.hotel}
-                onChange={e => setForm({ ...form, hotel: e.target.value })}
+                onChange={(e) => setForm({ ...form, hotel: e.target.value })}
               />
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-text-primary">Message</label>
@@ -102,7 +109,7 @@ export default function ContactPage() {
                   required
                   placeholder="How can we help?"
                   value={form.message}
-                  onChange={e => setForm({ ...form, message: e.target.value })}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
                   className="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </div>

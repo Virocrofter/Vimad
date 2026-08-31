@@ -2,31 +2,84 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Funnel, Users, TrendingUp, TrendingDown, DollarSign, Clock,
-  Filter, Search, ChevronDown, ChevronUp, BarChart3, Activity,
-  Zap, Target, Flag, Calendar, ArrowUpRight, ArrowDownRight,
-  Minus, Download, Plus, RefreshCw, AlertTriangle, CheckCircle2,
-  XCircle, Mail, Phone, Monitor, Video, Tag, Clock3, Sparkles,
-  PieChart, LineChart
+  Funnel,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Clock,
+  Filter,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  Activity,
+  Zap,
+  Target,
+  Flag,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Download,
+  Plus,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Mail,
+  Phone,
+  Monitor,
+  Video,
+  Tag,
+  Clock3,
+  Sparkles,
+  PieChart,
+  LineChart,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  LineChart as ReLineChart, Line, AreaChart, Area, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart as RePieChart, Pie, Cell
+  LineChart as ReLineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 import {
-  funnelStages, onboardingTenants, funnelMetrics, stageDropOffs,
-  dailyConversions, csmTeam, dropOffReasons, interventionTypes,
-  getOverallProgress, getHealthScoreColor, getStatusMeta
+  funnelStages,
+  onboardingTenants,
+  funnelMetrics,
+  stageDropOffs,
+  dailyConversions,
+  csmTeam,
+  dropOffReasons,
+  interventionTypes,
+  getOverallProgress,
+  getHealthScoreColor,
+  getStatusMeta,
 } from './data';
 
 import {
-  OnboardingStatCard, OnboardingStatusBadge, HealthScoreBadge,
-  FunnelVisualization, TenantProgressRow, InterventionCard,
-  CsmPerformanceCard, MiniSparkline
+  OnboardingStatCard,
+  OnboardingStatusBadge,
+  HealthScoreBadge,
+  FunnelVisualization,
+  TenantProgressRow,
+  InterventionCard,
+  CsmPerformanceCard,
+  MiniSparkline,
 } from './components';
 
 import InterventionModal from './InterventionModal';
@@ -59,30 +112,42 @@ export default function OnboardingFunnelPage() {
   /* ─── Computed Data ─── */
   const filteredTenants = useMemo(() => {
     return tenants.filter((t) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         t.name.toLowerCase().includes(query.toLowerCase()) ||
         t.id.toLowerCase().includes(query.toLowerCase()) ||
         t.subdomain.toLowerCase().includes(query.toLowerCase()) ||
         t.assignedCSM.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
-      const matchesStage = stageFilter === 'all' || t.dropOffStage === stageFilter || (stageFilter === 'no_dropoff' && !t.dropOffStage);
+      const matchesStage =
+        stageFilter === 'all' ||
+        t.dropOffStage === stageFilter ||
+        (stageFilter === 'no_dropoff' && !t.dropOffStage);
       const matchesCSM = csmFilter === 'all' || t.assignedCSM === csmFilter;
       return matchesQuery && matchesStatus && matchesStage && matchesCSM;
     });
   }, [tenants, query, statusFilter, stageFilter, csmFilter]);
 
   const stats = useMemo(() => {
-    const activeTrials = tenants.filter(t => t.status === 'active_trial').length;
-    const atRisk = tenants.filter(t => t.status === 'at_risk').length;
-    const expired = tenants.filter(t => t.status === 'trial_expired').length;
-    const converted = tenants.filter(t => t.status === 'converted').length;
+    const activeTrials = tenants.filter((t) => t.status === 'active_trial').length;
+    const atRisk = tenants.filter((t) => t.status === 'at_risk').length;
+    const expired = tenants.filter((t) => t.status === 'trial_expired').length;
+    const converted = tenants.filter((t) => t.status === 'converted').length;
     const totalRevenueAtRisk = tenants.reduce((s, t) => s + t.revenueAtRisk, 0);
-    const avgHealth = tenants.length > 0 ? Math.round(tenants.reduce((s, t) => s + t.healthScore, 0) / tenants.length) : 0;
+    const avgHealth =
+      tenants.length > 0
+        ? Math.round(tenants.reduce((s, t) => s + t.healthScore, 0) / tenants.length)
+        : 0;
     const interventionSuccess = 68.4;
 
     return {
-      activeTrials, atRisk, expired, converted,
-      totalRevenueAtRisk, avgHealth, interventionSuccess,
+      activeTrials,
+      atRisk,
+      expired,
+      converted,
+      totalRevenueAtRisk,
+      avgHealth,
+      interventionSuccess,
       total: tenants.length,
     };
   }, [tenants]);
@@ -96,7 +161,7 @@ export default function OnboardingFunnelPage() {
 
   const dropOffPieData = useMemo(() => {
     const reasons = {};
-    tenants.forEach(t => {
+    tenants.forEach((t) => {
       if (t.dropOffReason) {
         reasons[t.dropOffReason] = (reasons[t.dropOffReason] || 0) + 1;
       }
@@ -110,9 +175,9 @@ export default function OnboardingFunnelPage() {
 
   const conversionByPlan = useMemo(() => {
     const plans = ['Starter', 'Professional', 'Enterprise'];
-    return plans.map(plan => {
-      const planTenants = tenants.filter(t => t.plan === plan);
-      const converted = planTenants.filter(t => t.status === 'converted').length;
+    return plans.map((plan) => {
+      const planTenants = tenants.filter((t) => t.plan === plan);
+      const converted = planTenants.filter((t) => t.status === 'converted').length;
       const rate = planTenants.length > 0 ? (converted / planTenants.length) * 100 : 0;
       return { plan, converted, total: planTenants.length, rate: rate.toFixed(1) };
     });
@@ -120,7 +185,7 @@ export default function OnboardingFunnelPage() {
 
   /* ─── Handlers ─── */
   const toggleTenant = (id) => {
-    setExpandedTenants(prev => {
+    setExpandedTenants((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -134,12 +199,14 @@ export default function OnboardingFunnelPage() {
   };
 
   const handleSaveIntervention = (intervention) => {
-    setTenants(prev => prev.map(t => {
-      if (t.id === selectedTenant.id) {
-        return { ...t, interventions: [...t.interventions, intervention] };
-      }
-      return t;
-    }));
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === selectedTenant.id) {
+          return { ...t, interventions: [...t.interventions, intervention] };
+        }
+        return t;
+      })
+    );
   };
 
   const handleExport = () => {
@@ -158,7 +225,7 @@ export default function OnboardingFunnelPage() {
     URL.revokeObjectURL(url);
   };
 
-  const uniqueCSMs = useMemo(() => [...new Set(tenants.map(t => t.assignedCSM))], [tenants]);
+  const uniqueCSMs = useMemo(() => [...new Set(tenants.map((t) => t.assignedCSM))], [tenants]);
 
   /* ─── Tabs ─── */
   const tabs = [
@@ -182,7 +249,13 @@ export default function OnboardingFunnelPage() {
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
-          <Button size="sm" onClick={() => { setSelectedTenant(null); setShowInterventionModal(true); }}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setSelectedTenant(null);
+              setShowInterventionModal(true);
+            }}
+          >
             <Flag className="mr-1.5 h-4 w-4" /> Bulk Intervention
           </Button>
         </div>
@@ -226,12 +299,18 @@ export default function OnboardingFunnelPage() {
       {/* Secondary Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg. Time to Convert</p>
-          <p className="mt-1 text-lg font-bold font-mono text-text-primary">{funnelMetrics.avgTimeToConvert}</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-wider">
+            Avg. Time to Convert
+          </p>
+          <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+            {funnelMetrics.avgTimeToConvert}
+          </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-3">
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg. Health Score</p>
-          <p className={cn('mt-1 text-lg font-bold font-mono', getHealthScoreColor(stats.avgHealth))}>
+          <p
+            className={cn('mt-1 text-lg font-bold font-mono', getHealthScoreColor(stats.avgHealth))}
+          >
             {stats.avgHealth}
           </p>
         </div>
@@ -242,7 +321,9 @@ export default function OnboardingFunnelPage() {
           </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">Intervention Success</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-wider">
+            Intervention Success
+          </p>
           <p className="mt-1 text-lg font-bold font-mono text-secondary">
             {funnelMetrics.interventionSuccessRate}%
           </p>
@@ -261,7 +342,9 @@ export default function OnboardingFunnelPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -315,14 +398,26 @@ export default function OnboardingFunnelPage() {
                       <div key={item.key}>
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className={cn('h-2 w-2 rounded-full', reasonMeta?.color.replace('text-', 'bg-') || 'bg-text-muted')} />
-                            <span className="text-xs font-medium text-text-secondary">{item.name}</span>
+                            <span
+                              className={cn(
+                                'h-2 w-2 rounded-full',
+                                reasonMeta?.color.replace('text-', 'bg-') || 'bg-text-muted'
+                              )}
+                            />
+                            <span className="text-xs font-medium text-text-secondary">
+                              {item.name}
+                            </span>
                           </div>
-                          <span className="text-xs font-mono text-text-primary">{item.value} ({pct.toFixed(1)}%)</span>
+                          <span className="text-xs font-mono text-text-primary">
+                            {item.value} ({pct.toFixed(1)}%)
+                          </span>
                         </div>
                         <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                           <div
-                            className={cn('h-full rounded-full', reasonMeta?.color.replace('text-', 'bg-') || 'bg-text-muted')}
+                            className={cn(
+                              'h-full rounded-full',
+                              reasonMeta?.color.replace('text-', 'bg-') || 'bg-text-muted'
+                            )}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -331,7 +426,9 @@ export default function OnboardingFunnelPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-text-muted text-center py-8">No drop-off data available</p>
+                <p className="text-sm text-text-muted text-center py-8">
+                  No drop-off data available
+                </p>
               )}
             </div>
 
@@ -370,7 +467,9 @@ export default function OnboardingFunnelPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -405,9 +504,13 @@ export default function OnboardingFunnelPage() {
                   >
                     <option value="all">All Stages</option>
                     <option value="no_dropoff">No Drop-off</option>
-                    {funnelStages.filter(s => !s.isStart && !s.isEnd).map(s => (
-                      <option key={s.id} value={s.id}>{s.label}</option>
-                    ))}
+                    {funnelStages
+                      .filter((s) => !s.isStart && !s.isEnd)
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className="space-y-1.5">
@@ -418,13 +521,22 @@ export default function OnboardingFunnelPage() {
                     className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="all">All CSMs</option>
-                    {uniqueCSMs.map(csm => <option key={csm} value={csm}>{csm}</option>)}
+                    {uniqueCSMs.map((csm) => (
+                      <option key={csm} value={csm}>
+                        {csm}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
               <div className="mt-3 flex justify-end">
                 <button
-                  onClick={() => { setStatusFilter('all'); setStageFilter('all'); setCsmFilter('all'); setQuery(''); }}
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setStageFilter('all');
+                    setCsmFilter('all');
+                    setQuery('');
+                  }}
                   className="h-9 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
                 >
                   Reset Filters
@@ -435,7 +547,8 @@ export default function OnboardingFunnelPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredTenants.length}</span> of {tenants.length} tenants
+            Showing <span className="font-medium text-text-primary">{filteredTenants.length}</span>{' '}
+            of {tenants.length} tenants
           </p>
 
           {/* Tenant Table */}
@@ -445,12 +558,24 @@ export default function OnboardingFunnelPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Tenant</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Health</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Progress</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">CSM</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Revenue at Risk</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Tenant
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Health
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Progress
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      CSM
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Revenue at Risk
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-16"></th>
                   </tr>
                 </thead>
@@ -493,14 +618,25 @@ export default function OnboardingFunnelPage() {
             />
             <OnboardingStatCard
               label="Opened / Clicked"
-              value={tenants.reduce((s, t) => s + t.interventions.filter(i => ['opened', 'clicked'].includes(i.status)).length, 0)}
+              value={tenants.reduce(
+                (s, t) =>
+                  s +
+                  t.interventions.filter((i) => ['opened', 'clicked'].includes(i.status)).length,
+                0
+              )}
               icon={CheckCircle2}
               color="text-accent"
               subtext="Engaged recipients"
             />
             <OnboardingStatCard
               label="No Response"
-              value={tenants.reduce((s, t) => s + t.interventions.filter(i => ['unopened', 'no_answer'].includes(i.status)).length, 0)}
+              value={tenants.reduce(
+                (s, t) =>
+                  s +
+                  t.interventions.filter((i) => ['unopened', 'no_answer'].includes(i.status))
+                    .length,
+                0
+              )}
               icon={XCircle}
               color="text-warning"
               subtext="Follow-up needed"
@@ -521,8 +657,13 @@ export default function OnboardingFunnelPage() {
             </h3>
             <div className="space-y-3">
               {tenants
-                .flatMap(t => t.interventions.map(i => ({ ...i, tenantName: t.name, tenantId: t.id })))
-                .sort((a, b) => new Date(b.sentAt || b.scheduledAt) - new Date(a.sentAt || a.scheduledAt))
+                .flatMap((t) =>
+                  t.interventions.map((i) => ({ ...i, tenantName: t.name, tenantId: t.id }))
+                )
+                .sort(
+                  (a, b) =>
+                    new Date(b.sentAt || b.scheduledAt) - new Date(a.sentAt || a.scheduledAt)
+                )
                 .slice(0, 10)
                 .map((intervention) => (
                   <InterventionCard
@@ -531,8 +672,10 @@ export default function OnboardingFunnelPage() {
                     tenantName={intervention.tenantName}
                   />
                 ))}
-              {tenants.every(t => t.interventions.length === 0) && (
-                <p className="text-sm text-text-muted text-center py-8">No interventions recorded yet</p>
+              {tenants.every((t) => t.interventions.length === 0) && (
+                <p className="text-sm text-text-muted text-center py-8">
+                  No interventions recorded yet
+                </p>
               )}
             </div>
           </div>
@@ -552,7 +695,9 @@ export default function OnboardingFunnelPage() {
                 onClick={() => setTimeRange(range)}
                 className={cn(
                   'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                  timeRange === range ? 'bg-secondary text-white' : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  timeRange === range
+                    ? 'bg-secondary text-white'
+                    : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 Last {range}
@@ -579,15 +724,38 @@ export default function OnboardingFunnelPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="var(--text-muted)" interval={Math.floor(chartData.length / 6)} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10 }}
+                    stroke="var(--text-muted)"
+                    interval={Math.floor(chartData.length / 6)}
+                  />
                   <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                    contentStyle={{
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                    }}
                     labelStyle={{ color: 'var(--text-primary)' }}
                   />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Area type="monotone" dataKey="trials" stroke={CHART_COLORS.primary} fill="url(#trialGradient)" strokeWidth={2} name="New Trials" />
-                  <Area type="monotone" dataKey="conversions" stroke={CHART_COLORS.accent} fill="url(#convGradient)" strokeWidth={2} name="Conversions" />
+                  <Area
+                    type="monotone"
+                    dataKey="trials"
+                    stroke={CHART_COLORS.primary}
+                    fill="url(#trialGradient)"
+                    strokeWidth={2}
+                    name="New Trials"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="conversions"
+                    stroke={CHART_COLORS.accent}
+                    fill="url(#convGradient)"
+                    strokeWidth={2}
+                    name="Conversions"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -605,13 +773,19 @@ export default function OnboardingFunnelPage() {
                   <div key={item.plan}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-text-secondary">{item.plan}</span>
-                      <span className="text-xs font-mono text-text-primary">{item.converted}/{item.total} ({item.rate}%)</span>
+                      <span className="text-xs font-mono text-text-primary">
+                        {item.converted}/{item.total} ({item.rate}%)
+                      </span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                       <div
                         className={cn(
                           'h-full rounded-full transition-all',
-                          item.plan === 'Enterprise' ? 'bg-purple-500' : item.plan === 'Professional' ? 'bg-secondary' : 'bg-info'
+                          item.plan === 'Enterprise'
+                            ? 'bg-purple-500'
+                            : item.plan === 'Professional'
+                              ? 'bg-secondary'
+                              : 'bg-info'
                         )}
                         style={{ width: `${item.rate}%` }}
                       />
@@ -627,15 +801,21 @@ export default function OnboardingFunnelPage() {
                 <Clock3 className="h-4 w-4 text-secondary" /> Avg. Time per Stage
               </h3>
               <div className="space-y-3">
-                {funnelStages.filter(s => s.avgDuration).map((stage) => (
-                  <div key={stage.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-text-secondary">{stage.label}</span>
-                      {stage.optional && <span className="text-[10px] text-text-muted">(optional)</span>}
+                {funnelStages
+                  .filter((s) => s.avgDuration)
+                  .map((stage) => (
+                    <div key={stage.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-text-secondary">{stage.label}</span>
+                        {stage.optional && (
+                          <span className="text-[10px] text-text-muted">(optional)</span>
+                        )}
+                      </div>
+                      <span className="text-xs font-mono font-medium text-text-primary">
+                        {stage.avgDuration}
+                      </span>
                     </div>
-                    <span className="text-xs font-mono font-medium text-text-primary">{stage.avgDuration}</span>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </div>
@@ -646,7 +826,10 @@ export default function OnboardingFunnelPage() {
       {showInterventionModal && (
         <InterventionModal
           tenant={selectedTenant || filteredTenants[0]}
-          onClose={() => { setShowInterventionModal(false); setSelectedTenant(null); }}
+          onClose={() => {
+            setShowInterventionModal(false);
+            setSelectedTenant(null);
+          }}
           onSave={handleSaveIntervention}
         />
       )}

@@ -3,25 +3,47 @@ import { useTheme } from '../../../hooks/useTheme';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  BarChart as ReBarChart, Bar, LineChart, Line, PieChart as RePieChart,
-  Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, AreaChart, Area
+  BarChart as ReBarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
 } from 'recharts';
-import {
-  Download, FileText, Printer
-} from 'lucide-react';
+import { Download, FileText, Printer } from 'lucide-react';
 /* ─── Chart Theme Tokens ─── */
 const CHART_TOKENS = {
   light: {
-    primary: '#0F172A', secondary: '#3B82F6', accent: '#10B981',
-    warning: '#F59E0B', danger: '#EF4444', info: '#6366F1',
-    neutral: '#64748B', grid: '#E2E8F0', text: '#475569',
+    primary: '#0F172A',
+    secondary: '#3B82F6',
+    accent: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#6366F1',
+    neutral: '#64748B',
+    grid: '#E2E8F0',
+    text: '#475569',
     surface: '#FFFFFF',
   },
   dark: {
-    primary: '#F8FAFC', secondary: '#60A5FA', accent: '#34D399',
-    warning: '#FBBF24', danger: '#F87171', info: '#818CF8',
-    neutral: '#94A3B8', grid: '#334155', text: '#CBD5E1',
+    primary: '#F8FAFC',
+    secondary: '#60A5FA',
+    accent: '#34D399',
+    warning: '#FBBF24',
+    danger: '#F87171',
+    info: '#818CF8',
+    neutral: '#94A3B8',
+    grid: '#334155',
+    text: '#CBD5E1',
     surface: '#1E293B',
   },
 };
@@ -39,11 +61,28 @@ export function ThemeTooltip({ active, payload, label, isDark }) {
   const border = isDark ? '#475569' : '#E2E8F0';
   const text = isDark ? '#F1F5F9' : '#0F172A';
   return (
-    <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: '8px', padding: '8px 12px', fontSize: '12px' }}>
+    <div
+      style={{
+        background: bg,
+        border: `1px solid ${border}`,
+        borderRadius: '8px',
+        padding: '8px 12px',
+        fontSize: '12px',
+      }}
+    >
       <p style={{ color: text, fontWeight: 600, marginBottom: '4px' }}>{label}</p>
       {payload.map((p, i) => (
         <p key={i} style={{ color: p.color || text }}>
-          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: p.color, marginRight: '6px' }} />
+          <span
+            style={{
+              display: 'inline-block',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: p.color,
+              marginRight: '6px',
+            }}
+          />
           {p.name}: {typeof p.value === 'number' ? p.value.toLocaleString() : p.value}
         </p>
       ))}
@@ -78,7 +117,10 @@ export function ReportDataTable({ columns, data, reportId }) {
           <thead className="bg-background border-b border-border">
             <tr>
               {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                <th
+                  key={col.key}
+                  className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider"
+                >
                   {col.label}
                 </th>
               ))}
@@ -107,7 +149,13 @@ export function ReportChartRenderer({ report, data, colors }) {
   const tooltip = <ThemeTooltip isDark={isDark} />;
 
   if (report.type === 'pie') {
-    const pieColors = [colors.accent, colors.warning, colors.secondary, colors.info, colors.neutral];
+    const pieColors = [
+      colors.accent,
+      colors.warning,
+      colors.secondary,
+      colors.info,
+      colors.neutral,
+    ];
     return (
       <ResponsiveContainer width="100%" height={320}>
         <RePieChart>
@@ -134,7 +182,14 @@ export function ReportChartRenderer({ report, data, colors }) {
           <Tooltip content={tooltip} />
           <Legend />
           {keys.map((key, i) => (
-            <Line key={key} type="monotone" dataKey={key} stroke={[colors.secondary, colors.accent, colors.warning, colors.info][i % 4]} strokeWidth={2} dot={false} />
+            <Line
+              key={key}
+              type="monotone"
+              dataKey={key}
+              stroke={[colors.secondary, colors.accent, colors.warning, colors.info][i % 4]}
+              strokeWidth={2}
+              dot={false}
+            />
           ))}
         </LineChart>
       </ResponsiveContainer>
@@ -150,8 +205,20 @@ export function ReportChartRenderer({ report, data, colors }) {
           <YAxis stroke={colors.text} fontSize={12} />
           <Tooltip content={tooltip} />
           <Legend />
-          <Area type="monotone" dataKey="charges" stroke={colors.secondary} fill={colors.secondary} fillOpacity={0.15} />
-          <Area type="monotone" dataKey="payments" stroke={colors.accent} fill={colors.accent} fillOpacity={0.15} />
+          <Area
+            type="monotone"
+            dataKey="charges"
+            stroke={colors.secondary}
+            fill={colors.secondary}
+            fillOpacity={0.15}
+          />
+          <Area
+            type="monotone"
+            dataKey="payments"
+            stroke={colors.accent}
+            fill={colors.accent}
+            fillOpacity={0.15}
+          />
         </AreaChart>
       </ResponsiveContainer>
     );
@@ -168,7 +235,14 @@ export function ReportChartRenderer({ report, data, colors }) {
         <Tooltip content={tooltip} />
         <Legend />
         {keys.map((key, i) => (
-          <Bar key={key} dataKey={key} fill={[colors.secondary, colors.accent, colors.warning, colors.info, colors.danger][i % 5]} radius={[4, 4, 0, 0]} />
+          <Bar
+            key={key}
+            dataKey={key}
+            fill={
+              [colors.secondary, colors.accent, colors.warning, colors.info, colors.danger][i % 5]
+            }
+            radius={[4, 4, 0, 0]}
+          />
         ))}
       </ReBarChart>
     </ResponsiveContainer>

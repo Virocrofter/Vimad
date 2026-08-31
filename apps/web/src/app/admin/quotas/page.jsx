@@ -2,23 +2,62 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, Search, Filter, Plus, X, Check, ChevronDown, ChevronUp,
-  Zap, HardDrive, BedDouble, Users, TrendingUp, TrendingDown,
-  AlertTriangle, CheckCircle2, Clock, DollarSign, Gauge,
-  Ban, Activity, BarChart3, Download, RefreshCw, Settings,
-  FileText, Bell, BellRing, Eye, EyeOff
+  Shield,
+  Search,
+  Filter,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  HardDrive,
+  BedDouble,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Gauge,
+  Ban,
+  Activity,
+  BarChart3,
+  Download,
+  RefreshCw,
+  Settings,
+  FileText,
+  Bell,
+  BellRing,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  quotaRules, tenantUsage, overageHistory, throttleEvents,
-  resourceMeta, actionMeta, getUsagePercent, getUsageColor,
-  getUsageBarColor, formatNumber, formatCurrency
+  quotaRules,
+  tenantUsage,
+  overageHistory,
+  throttleEvents,
+  resourceMeta,
+  actionMeta,
+  getUsagePercent,
+  getUsageColor,
+  getUsageBarColor,
+  formatNumber,
+  formatCurrency,
 } from './data';
 import {
-  QuotaStatCard, QuotaRuleCard, TenantUsageRow,
-  OverageHistoryRow, ThrottleEventRow, ResourceBadge,
-  ActionBadge, ScopeBadge, MiniProgressRing
+  QuotaStatCard,
+  QuotaRuleCard,
+  TenantUsageRow,
+  OverageHistoryRow,
+  ThrottleEventRow,
+  ResourceBadge,
+  ActionBadge,
+  ScopeBadge,
+  MiniProgressRing,
 } from './components';
 import QuotaModal from './QuotaModal';
 import OverageModal from './OverageModal';
@@ -59,21 +98,23 @@ export default function QuotasPage() {
   /* ─── Computed Data ─── */
   const filteredRules = useMemo(() => {
     return rules.filter((r) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         r.name.toLowerCase().includes(query.toLowerCase()) ||
         r.id.toLowerCase().includes(query.toLowerCase()) ||
         r.description.toLowerCase().includes(query.toLowerCase());
       const matchesResource = resourceFilter === 'all' || r.resource === resourceFilter;
       const matchesScope = scopeFilter === 'all' || r.scope === scopeFilter;
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'enabled' ? r.enabled : !r.enabled);
+      const matchesStatus =
+        statusFilter === 'all' || (statusFilter === 'enabled' ? r.enabled : !r.enabled);
       return matchesQuery && matchesResource && matchesScope && matchesStatus;
     });
   }, [rules, query, resourceFilter, scopeFilter, statusFilter]);
 
   const filteredUsage = useMemo(() => {
     return usage.filter((u) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         u.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         u.tenantId.toLowerCase().includes(query.toLowerCase());
       const matchesResource = resourceFilter === 'all' || u.resource === resourceFilter;
@@ -83,7 +124,8 @@ export default function QuotasPage() {
 
   const filteredOverages = useMemo(() => {
     return overages.filter((o) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         o.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         o.tenantId.toLowerCase().includes(query.toLowerCase());
       const matchesResource = resourceFilter === 'all' || o.resource === resourceFilter;
@@ -93,7 +135,8 @@ export default function QuotasPage() {
 
   const filteredThrottles = useMemo(() => {
     return throttles.filter((t) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         t.tenantId.toLowerCase().includes(query.toLowerCase()) ||
         t.reason.toLowerCase().includes(query.toLowerCase());
       const matchesResource = resourceFilter === 'all' || t.resource === resourceFilter;
@@ -103,45 +146,56 @@ export default function QuotasPage() {
 
   /* ─── Stats ─── */
   const stats = useMemo(() => {
-    const enabled = rules.filter(r => r.enabled).length;
-    const throttling = rules.filter(r => r.enabled && r.action === 'throttle').length;
-    const blocking = rules.filter(r => r.enabled && r.action === 'block').length;
+    const enabled = rules.filter((r) => r.enabled).length;
+    const throttling = rules.filter((r) => r.enabled && r.action === 'throttle').length;
+    const blocking = rules.filter((r) => r.enabled && r.action === 'block').length;
     const totalOverages = overages.reduce((s, o) => s + o.charge, 0);
-    const projectedOverages = overages.filter(o => o.status === 'projected').reduce((s, o) => s + o.charge, 0);
-    const activeThrottles = throttles.filter(t => !t.resolved).length;
-    const criticalUsage = usage.filter(u => getUsagePercent(u.used, u.limit) >= 90).length;
-    return { enabled, throttling, blocking, totalOverages, projectedOverages, activeThrottles, criticalUsage, total: rules.length };
+    const projectedOverages = overages
+      .filter((o) => o.status === 'projected')
+      .reduce((s, o) => s + o.charge, 0);
+    const activeThrottles = throttles.filter((t) => !t.resolved).length;
+    const criticalUsage = usage.filter((u) => getUsagePercent(u.used, u.limit) >= 90).length;
+    return {
+      enabled,
+      throttling,
+      blocking,
+      totalOverages,
+      projectedOverages,
+      activeThrottles,
+      criticalUsage,
+      total: rules.length,
+    };
   }, [rules, overages, throttles, usage]);
 
   /* ─── Handlers ─── */
   const handleToggleRule = (id) => {
-    setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
+    setRules((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
   };
 
   const handleDeleteRule = (id) => {
     if (confirm('Delete this quota rule? This cannot be undone.')) {
-      setRules(prev => prev.filter(r => r.id !== id));
+      setRules((prev) => prev.filter((r) => r.id !== id));
     }
   };
 
   const handleSaveRule = (rule) => {
-    setRules(prev => {
-      const exists = prev.find(r => r.id === rule.id);
-      if (exists) return prev.map(r => r.id === rule.id ? rule : r);
+    setRules((prev) => {
+      const exists = prev.find((r) => r.id === rule.id);
+      if (exists) return prev.map((r) => (r.id === rule.id ? rule : r));
       return [rule, ...prev];
     });
   };
 
   const handleSaveOverage = (entry) => {
-    setOverages(prev => {
-      const exists = prev.find(o => o.id === entry.id);
-      if (exists) return prev.map(o => o.id === entry.id ? entry : o);
+    setOverages((prev) => {
+      const exists = prev.find((o) => o.id === entry.id);
+      if (exists) return prev.map((o) => (o.id === entry.id ? entry : o));
       return [entry, ...prev];
     });
   };
 
   const toggleUsage = (key) => {
-    setExpandedUsage(prev => {
+    setExpandedUsage((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
@@ -163,19 +217,33 @@ export default function QuotasPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Rate Limiting & Quotas</h1>
-          <p className="text-sm text-text-secondary">Per-tenant API limits, storage caps, room ceilings, and overage controls</p>
+          <p className="text-sm text-text-secondary">
+            Per-tenant API limits, storage caps, room ceilings, and overage controls
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
           {activeTab === 'rules' && (
-            <Button size="sm" onClick={() => { setEditingRule(null); setShowQuotaModal(true); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditingRule(null);
+                setShowQuotaModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> New Rule
             </Button>
           )}
           {activeTab === 'overages' && (
-            <Button size="sm" onClick={() => { setEditingOverage(null); setShowOverageModal(true); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditingOverage(null);
+                setShowOverageModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> Record Overage
             </Button>
           )}
@@ -226,7 +294,9 @@ export default function QuotasPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -259,7 +329,9 @@ export default function QuotasPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -280,7 +352,9 @@ export default function QuotasPage() {
               >
                 <option value="all">All Resources</option>
                 {Object.entries(resourceMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -316,7 +390,12 @@ export default function QuotasPage() {
           </div>
           <div className="mt-3 flex justify-end">
             <button
-              onClick={() => { setResourceFilter('all'); setScopeFilter('all'); setStatusFilter('all'); setQuery(''); }}
+              onClick={() => {
+                setResourceFilter('all');
+                setScopeFilter('all');
+                setStatusFilter('all');
+                setQuery('');
+              }}
               className="h-9 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
             >
               Reset Filters
@@ -329,14 +408,18 @@ export default function QuotasPage() {
       {activeTab === 'rules' && (
         <div className="space-y-6">
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredRules.length}</span> of {rules.length} rules
+            Showing <span className="font-medium text-text-primary">{filteredRules.length}</span> of{' '}
+            {rules.length} rules
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredRules.map((rule) => (
               <QuotaRuleCard
                 key={rule.id}
                 rule={rule}
-                onEdit={(r) => { setEditingRule(r); setShowQuotaModal(true); }}
+                onEdit={(r) => {
+                  setEditingRule(r);
+                  setShowQuotaModal(true);
+                }}
                 onToggle={handleToggleRule}
                 onDelete={handleDeleteRule}
               />
@@ -357,17 +440,25 @@ export default function QuotasPage() {
           {/* Usage Summary Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {Object.entries(resourceMeta).map(([key, meta]) => {
-              const resourceUsage = usage.filter(u => u.resource === key);
-              const avgPct = resourceUsage.length > 0
-                ? Math.round(resourceUsage.reduce((s, u) => s + getUsagePercent(u.used, u.limit), 0) / resourceUsage.length)
-                : 0;
+              const resourceUsage = usage.filter((u) => u.resource === key);
+              const avgPct =
+                resourceUsage.length > 0
+                  ? Math.round(
+                      resourceUsage.reduce((s, u) => s + getUsagePercent(u.used, u.limit), 0) /
+                        resourceUsage.length
+                    )
+                  : 0;
               return (
                 <div key={key} className="rounded-xl border border-border bg-surface p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-text-muted uppercase tracking-wider">{meta.label}</span>
+                    <span className="text-xs text-text-muted uppercase tracking-wider">
+                      {meta.label}
+                    </span>
                     <MiniProgressRing percent={avgPct} size={36} strokeWidth={3} />
                   </div>
-                  <p className={cn('text-lg font-bold font-mono', getUsageColor(avgPct))}>{avgPct}% avg</p>
+                  <p className={cn('text-lg font-bold font-mono', getUsageColor(avgPct))}>
+                    {avgPct}% avg
+                  </p>
                   <p className="text-xs text-text-muted">{resourceUsage.length} tenants tracked</p>
                 </div>
               );
@@ -376,19 +467,32 @@ export default function QuotasPage() {
 
           {/* Usage Table */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredUsage.length}</span> of {usage.length} usage records
+            Showing <span className="font-medium text-text-primary">{filteredUsage.length}</span> of{' '}
+            {usage.length} usage records
           </p>
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Resource</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Tenant</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Plan</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Usage</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Resource
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Tenant
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Plan
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Usage
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -422,28 +526,36 @@ export default function QuotasPage() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <QuotaStatCard
               label="Total Billed"
-              value={formatCurrency(overages.filter(o => o.status === 'billed').reduce((s, o) => s + o.charge, 0))}
+              value={formatCurrency(
+                overages.filter((o) => o.status === 'billed').reduce((s, o) => s + o.charge, 0)
+              )}
               icon={DollarSign}
               color="text-accent"
               subtext="Collected revenue"
             />
             <QuotaStatCard
               label="Projected"
-              value={formatCurrency(overages.filter(o => o.status === 'projected').reduce((s, o) => s + o.charge, 0))}
+              value={formatCurrency(
+                overages.filter((o) => o.status === 'projected').reduce((s, o) => s + o.charge, 0)
+              )}
               icon={TrendingUp}
               color="text-info"
               subtext="Current cycle estimate"
             />
             <QuotaStatCard
               label="Waived"
-              value={formatCurrency(overages.filter(o => o.status === 'waived').reduce((s, o) => s + o.charge, 0))}
+              value={formatCurrency(
+                overages.filter((o) => o.status === 'waived').reduce((s, o) => s + o.charge, 0)
+              )}
               icon={Ban}
               color="text-text-muted"
               subtext="Forgiven charges"
             />
             <QuotaStatCard
               label="Disputed"
-              value={formatCurrency(overages.filter(o => o.status === 'disputed').reduce((s, o) => s + o.charge, 0))}
+              value={formatCurrency(
+                overages.filter((o) => o.status === 'disputed').reduce((s, o) => s + o.charge, 0)
+              )}
               icon={AlertTriangle}
               color="text-warning"
               subtext="Under review"
@@ -452,21 +564,38 @@ export default function QuotasPage() {
 
           {/* Overage Table */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredOverages.length}</span> of {overages.length} entries
+            Showing <span className="font-medium text-text-primary">{filteredOverages.length}</span>{' '}
+            of {overages.length} entries
           </p>
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Tenant</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Resource</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Period</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Excess</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Rate</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Charge</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Invoice</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Tenant
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Resource
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Period
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Excess
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Rate
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Charge
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Invoice
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -525,19 +654,33 @@ export default function QuotasPage() {
 
           {/* Throttle Table */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredThrottles.length}</span> of {throttles.length} events
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredThrottles.length}</span> of{' '}
+            {throttles.length} events
           </p>
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Resource</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Tenant</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Timestamp</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Reason</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Duration</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Resource
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Tenant
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Timestamp
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Reason
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Duration
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -563,7 +706,10 @@ export default function QuotasPage() {
       {showQuotaModal && (
         <QuotaModal
           rule={editingRule}
-          onClose={() => { setShowQuotaModal(false); setEditingRule(null); }}
+          onClose={() => {
+            setShowQuotaModal(false);
+            setEditingRule(null);
+          }}
           onSave={handleSaveRule}
           tenants={mockTenants}
         />
@@ -572,7 +718,10 @@ export default function QuotasPage() {
       {showOverageModal && (
         <OverageModal
           entry={editingOverage}
-          onClose={() => { setShowOverageModal(false); setEditingOverage(null); }}
+          onClose={() => {
+            setShowOverageModal(false);
+            setEditingOverage(null);
+          }}
           onSave={handleSaveOverage}
         />
       )}

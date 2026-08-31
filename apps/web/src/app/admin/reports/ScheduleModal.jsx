@@ -1,8 +1,18 @@
 /* src/app/admin/reports/ScheduleModal.jsx */
 import { useState } from 'react';
 import {
-  X, Clock, Mail, Check, Calendar, Bell, BellOff,
-  FileSpreadsheet, FileText, FileJson, Image, Trash2
+  X,
+  Clock,
+  Mail,
+  Check,
+  Calendar,
+  Bell,
+  BellOff,
+  FileSpreadsheet,
+  FileText,
+  FileJson,
+  Image,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -18,21 +28,21 @@ export default function ScheduleModal({ report, onClose, onSave }) {
     paused: existing?.paused || false,
   });
 
-  const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const updateForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const addRecipient = () => {
-    setForm(prev => ({ ...prev, recipients: [...prev.recipients, ''] }));
+    setForm((prev) => ({ ...prev, recipients: [...prev.recipients, ''] }));
   };
 
   const updateRecipient = (index, value) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      recipients: prev.recipients.map((r, i) => i === index ? value : r),
+      recipients: prev.recipients.map((r, i) => (i === index ? value : r)),
     }));
   };
 
   const removeRecipient = (index) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       recipients: prev.recipients.filter((_, i) => i !== index),
     }));
@@ -41,7 +51,7 @@ export default function ScheduleModal({ report, onClose, onSave }) {
   const handleSave = () => {
     const cleaned = {
       ...form,
-      recipients: form.recipients.filter(r => r.trim() !== ''),
+      recipients: form.recipients.filter((r) => r.trim() !== ''),
     };
     if (cleaned.recipients.length === 0) {
       onSave(null); // Remove schedule if no recipients
@@ -57,8 +67,11 @@ export default function ScheduleModal({ report, onClose, onSave }) {
   };
 
   const formatIcons = {
-    csv: FileSpreadsheet, xlsx: FileSpreadsheet, pdf: FileText,
-    json: FileJson, png: Image,
+    csv: FileSpreadsheet,
+    xlsx: FileSpreadsheet,
+    pdf: FileText,
+    json: FileJson,
+    png: Image,
   };
 
   return (
@@ -76,7 +89,10 @@ export default function ScheduleModal({ report, onClose, onSave }) {
               <p className="text-xs text-text-muted">{report?.name}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -84,9 +100,11 @@ export default function ScheduleModal({ report, onClose, onSave }) {
         <div className="p-6 space-y-5">
           {/* Frequency */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Frequency</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Frequency
+            </label>
             <div className="grid grid-cols-3 gap-2">
-              {scheduleFrequencies.map(freq => (
+              {scheduleFrequencies.map((freq) => (
                 <button
                   key={freq.key}
                   onClick={() => updateForm('frequency', freq.key)}
@@ -106,7 +124,9 @@ export default function ScheduleModal({ report, onClose, onSave }) {
           {/* Time (not for hourly) */}
           {form.frequency !== 'hourly' && (
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Run Time</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Run Time
+              </label>
               <input
                 type="time"
                 value={form.time}
@@ -119,9 +139,11 @@ export default function ScheduleModal({ report, onClose, onSave }) {
 
           {/* Export Format */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Export Format</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Export Format
+            </label>
             <div className="grid grid-cols-5 gap-2">
-              {exportFormats.map(fmt => {
+              {exportFormats.map((fmt) => {
                 const Icon = formatIcons[fmt.key] || FileText;
                 return (
                   <button
@@ -134,7 +156,12 @@ export default function ScheduleModal({ report, onClose, onSave }) {
                         : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                     )}
                   >
-                    <Icon className={cn('h-4 w-4', form.format === fmt.key ? 'text-secondary' : 'text-text-muted')} />
+                    <Icon
+                      className={cn(
+                        'h-4 w-4',
+                        form.format === fmt.key ? 'text-secondary' : 'text-text-muted'
+                      )}
+                    />
                     <span className="text-[10px] font-medium">{fmt.label}</span>
                   </button>
                 );
@@ -144,7 +171,9 @@ export default function ScheduleModal({ report, onClose, onSave }) {
 
           {/* Recipients */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Email Recipients</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Email Recipients
+            </label>
             <div className="space-y-2">
               {form.recipients.map((recipient, i) => (
                 <div key={i} className="flex gap-2">
@@ -169,7 +198,13 @@ export default function ScheduleModal({ report, onClose, onSave }) {
                 </div>
               ))}
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={addRecipient} className="w-full">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addRecipient}
+              className="w-full"
+            >
               <Mail className="mr-1.5 h-3.5 w-3.5" /> Add Recipient
             </Button>
           </div>
@@ -177,11 +212,19 @@ export default function ScheduleModal({ report, onClose, onSave }) {
           {/* Pause Toggle */}
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center gap-3">
-              {form.paused ? <BellOff className="h-5 w-5 text-text-muted" /> : <Bell className="h-5 w-5 text-accent" />}
+              {form.paused ? (
+                <BellOff className="h-5 w-5 text-text-muted" />
+              ) : (
+                <Bell className="h-5 w-5 text-accent" />
+              )}
               <div>
-                <p className="text-sm font-medium text-text-primary">{form.paused ? 'Schedule Paused' : 'Schedule Active'}</p>
+                <p className="text-sm font-medium text-text-primary">
+                  {form.paused ? 'Schedule Paused' : 'Schedule Active'}
+                </p>
                 <p className="text-xs text-text-muted">
-                  {form.paused ? 'Exports will not run until resumed' : 'Exports will run automatically'}
+                  {form.paused
+                    ? 'Exports will not run until resumed'
+                    : 'Exports will run automatically'}
                 </p>
               </div>
             </div>
@@ -192,21 +235,27 @@ export default function ScheduleModal({ report, onClose, onSave }) {
                 !form.paused ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                !form.paused ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  !form.paused ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Summary */}
           <div className="rounded-lg border border-border bg-background p-3">
             <p className="text-xs text-text-muted">
-              <span className="font-medium text-text-secondary">Summary:</span>{' '}
-              This report will be exported as{' '}
-              <span className="font-medium text-text-primary">{exportFormats.find(f => f.key === form.format)?.label}</span>{' '}
-              {form.frequency === 'hourly' ? 'every hour' : `${scheduleFrequencies.find(f => f.key === form.frequency)?.label.toLowerCase()} at ${form.time} UTC`}{' '}
-              and sent to {form.recipients.filter(r => r.trim()).length} recipient(s).
+              <span className="font-medium text-text-secondary">Summary:</span> This report will be
+              exported as{' '}
+              <span className="font-medium text-text-primary">
+                {exportFormats.find((f) => f.key === form.format)?.label}
+              </span>{' '}
+              {form.frequency === 'hourly'
+                ? 'every hour'
+                : `${scheduleFrequencies.find((f) => f.key === form.frequency)?.label.toLowerCase()} at ${form.time} UTC`}{' '}
+              and sent to {form.recipients.filter((r) => r.trim()).length} recipient(s).
             </p>
           </div>
         </div>
@@ -214,12 +263,19 @@ export default function ScheduleModal({ report, onClose, onSave }) {
         {/* Actions */}
         <div className="border-t border-border p-4 flex items-center justify-between">
           {existing && (
-            <Button type="button" variant="ghost" className="text-danger hover:bg-danger/5" onClick={handleRemove}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-danger hover:bg-danger/5"
+              onClick={handleRemove}
+            >
               <Trash2 className="mr-1.5 h-4 w-4" /> Remove Schedule
             </Button>
           )}
           <div className="ml-auto flex items-center gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="button" onClick={handleSave}>
               <Check className="mr-1.5 h-4 w-4" /> Save Schedule
             </Button>

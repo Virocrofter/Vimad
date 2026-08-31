@@ -1,31 +1,77 @@
 /* src/app/admin/audit/components.jsx */
 import { useState } from 'react';
 import {
-  ChevronDown, ChevronUp, Shield, ShieldCheck, ShieldAlert,
-  Hash, Link2, Clock, MapPin, Globe, User, AlertTriangle,
-  CheckCircle2, XCircle, Info, FileText, Download, Filter,
-  Search, Eye, EyeOff, Fingerprint, Lock, Unlock, Copy,
-  Check, X, FileDown, Calendar, Tag, Activity, Zap,
-  TrendingUp, TrendingDown, Minus, Server, HardDrive,
-  Database, KeyRound, Users, CreditCard, Settings,
-  Building2, Flag, Ban, RotateCcw, ArrowRight
+  ChevronDown,
+  ChevronUp,
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
+  Hash,
+  Link2,
+  Clock,
+  MapPin,
+  Globe,
+  User,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Info,
+  FileText,
+  Download,
+  Filter,
+  Search,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  Lock,
+  Unlock,
+  Copy,
+  Check,
+  X,
+  FileDown,
+  Calendar,
+  Tag,
+  Activity,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Server,
+  HardDrive,
+  Database,
+  KeyRound,
+  Users,
+  CreditCard,
+  Settings,
+  Building2,
+  Flag,
+  Ban,
+  RotateCcw,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  severityMeta, statusMeta, actionCategories, timeAgo,
-  formatDateTime, verifyLogIntegrity, complianceFrameworks,
-  exportFormats
+  severityMeta,
+  statusMeta,
+  actionCategories,
+  timeAgo,
+  formatDateTime,
+  verifyLogIntegrity,
+  complianceFrameworks,
+  exportFormats,
 } from './data';
 
 /* ─── Severity Badge ─── */
 export function SeverityBadge({ severity }) {
   const meta = severityMeta[severity] || severityMeta.info;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -36,10 +82,12 @@ export function SeverityBadge({ severity }) {
 export function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.verified;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -50,10 +98,14 @@ export function StatusBadge({ status }) {
 export function CategoryBadge({ category }) {
   const meta = actionCategories[category] || actionCategories.config;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
-      meta.bg, meta.color, 'border-current/20'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -62,14 +114,21 @@ export function CategoryBadge({ category }) {
 /* ─── Tamper-Proof Indicator ─── */
 export function TamperProofBadge({ log, compact = false }) {
   const integrity = verifyLogIntegrity(log);
-  const allValid = integrity.hashValid && integrity.signatureValid && integrity.chainLinked && integrity.shadowExcluded;
+  const allValid =
+    integrity.hashValid &&
+    integrity.signatureValid &&
+    integrity.chainLinked &&
+    integrity.shadowExcluded;
 
   if (compact) {
     return (
-      <span className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
-        allValid ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
-      )} title={allValid ? 'Tamper-proof verified' : 'Integrity check failed'}>
+      <span
+        className={cn(
+          'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+          allValid ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+        )}
+        title={allValid ? 'Tamper-proof verified' : 'Integrity check failed'}
+      >
         {allValid ? <ShieldCheck className="h-3 w-3" /> : <ShieldAlert className="h-3 w-3" />}
         {allValid ? 'Verified' : 'Compromised'}
       </span>
@@ -79,26 +138,48 @@ export function TamperProofBadge({ log, compact = false }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-3 space-y-2">
       <div className="flex items-center gap-2">
-        {allValid ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <ShieldAlert className="h-4 w-4 text-rose-500" />}
-        <span className={cn('text-xs font-semibold', allValid ? 'text-emerald-500' : 'text-rose-500')}>
+        {allValid ? (
+          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+        ) : (
+          <ShieldAlert className="h-4 w-4 text-rose-500" />
+        )}
+        <span
+          className={cn('text-xs font-semibold', allValid ? 'text-emerald-500' : 'text-rose-500')}
+        >
           {allValid ? 'Tamper-Proof Verified' : 'Integrity Alert'}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2 text-[10px]">
         <div className="flex items-center gap-1.5">
-          {integrity.hashValid ? <Check className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-rose-500" />}
+          {integrity.hashValid ? (
+            <Check className="h-3 w-3 text-emerald-500" />
+          ) : (
+            <X className="h-3 w-3 text-rose-500" />
+          )}
           <span className="text-text-secondary">Hash Valid</span>
         </div>
         <div className="flex items-center gap-1.5">
-          {integrity.signatureValid ? <Check className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-rose-500" />}
+          {integrity.signatureValid ? (
+            <Check className="h-3 w-3 text-emerald-500" />
+          ) : (
+            <X className="h-3 w-3 text-rose-500" />
+          )}
           <span className="text-text-secondary">Signature Valid</span>
         </div>
         <div className="flex items-center gap-1.5">
-          {integrity.chainLinked ? <Check className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-rose-500" />}
+          {integrity.chainLinked ? (
+            <Check className="h-3 w-3 text-emerald-500" />
+          ) : (
+            <X className="h-3 w-3 text-rose-500" />
+          )}
           <span className="text-text-secondary">Chain Linked</span>
         </div>
         <div className="flex items-center gap-1.5">
-          {integrity.shadowExcluded ? <Check className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-rose-500" />}
+          {integrity.shadowExcluded ? (
+            <Check className="h-3 w-3 text-emerald-500" />
+          ) : (
+            <X className="h-3 w-3 text-rose-500" />
+          )}
           <span className="text-text-secondary">No Shadow</span>
         </div>
       </div>
@@ -156,7 +237,12 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary">
-              {log.actor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+              {log.actor.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase()}
             </div>
             <div>
               <p className="text-sm text-text-primary">{log.actor.name}</p>
@@ -177,14 +263,24 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
         <td className="px-4 py-3">
           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={(e) => { e.stopPropagation(); copyHash(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                copyHash();
+              }}
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated"
               title="Copy hash"
             >
-              {copiedHash ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copiedHash ? (
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); onFlag?.(log); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFlag?.(log);
+              }}
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-secondary hover:bg-rose-500/10 hover:text-rose-500"
               title="Flag for review"
             >
@@ -200,10 +296,17 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
               {/* Actor Details */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="rounded-lg border border-border bg-background p-3 space-y-2">
-                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Actor</h4>
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                    Actor
+                  </h4>
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                      {log.actor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                      {log.actor.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase()}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">{log.actor.name}</p>
@@ -218,23 +321,30 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
                       <MapPin className="h-3 w-3 text-text-muted" /> {log.actor.ip}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Globe className="h-3 w-3 text-text-muted" /> {log.actor.userAgent.slice(0, 40)}...
+                      <Globe className="h-3 w-3 text-text-muted" />{' '}
+                      {log.actor.userAgent.slice(0, 40)}...
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-lg border border-border bg-background p-3 space-y-2">
-                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Target</h4>
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                    Target
+                  </h4>
                   <p className="text-sm font-medium text-text-primary">{log.target.name}</p>
                   <p className="text-xs text-text-muted font-mono">{log.target.id}</p>
-                  <p className="text-xs text-text-secondary capitalize">Type: {log.target.type.replace('_', ' ')}</p>
+                  <p className="text-xs text-text-secondary capitalize">
+                    Type: {log.target.type.replace('_', ' ')}
+                  </p>
                   {log.target.tenantId && (
                     <p className="text-xs text-text-secondary">Tenant: {log.target.tenantId}</p>
                   )}
                 </div>
 
                 <div className="rounded-lg border border-border bg-background p-3 space-y-2">
-                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Session</h4>
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                    Session
+                  </h4>
                   <p className="text-xs text-text-secondary font-mono">{log.sessionId}</p>
                   <div className="flex items-center gap-1.5">
                     {log.shadowSession ? (
@@ -256,11 +366,15 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
               {/* Metadata */}
               {log.metadata && Object.keys(log.metadata).length > 0 && (
                 <div className="rounded-lg border border-border bg-background p-3">
-                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">Metadata</h4>
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+                    Metadata
+                  </h4>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {Object.entries(log.metadata).map(([key, value]) => (
                       <div key={key} className="text-xs">
-                        <span className="text-text-muted capitalize">{key.replace(/_/g, ' ')}:</span>{' '}
+                        <span className="text-text-muted capitalize">
+                          {key.replace(/_/g, ' ')}:
+                        </span>{' '}
                         <span className="text-text-primary font-medium">
                           {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
                         </span>
@@ -279,12 +393,21 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
                   <FileDown className="mr-1.5 h-3.5 w-3.5" /> Export Entry
                 </Button>
                 {log.status !== 'flagged' && (
-                  <Button variant="outline" size="sm" className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10" onClick={() => onFlag?.(log)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10"
+                    onClick={() => onFlag?.(log)}
+                  >
                     <Flag className="mr-1.5 h-3.5 w-3.5" /> Flag for Review
                   </Button>
                 )}
                 {log.status === 'flagged' && (
-                  <Button variant="outline" size="sm" className="text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10"
+                  >
                     <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Mark Resolved
                   </Button>
                 )}
@@ -300,9 +423,24 @@ export function AuditLogRow({ log, expanded, onToggle, onFlag, onExport }) {
 /* ─── Anomaly Card ─── */
 export function AnomalyCard({ anomaly, onInvestigate, onDismiss }) {
   const severityMeta = {
-    critical: { icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-    high: { icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
-    medium: { icon: Info, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+    critical: {
+      icon: AlertTriangle,
+      color: 'text-rose-500',
+      bg: 'bg-rose-500/10',
+      border: 'border-rose-500/20',
+    },
+    high: {
+      icon: AlertTriangle,
+      color: 'text-orange-500',
+      bg: 'bg-orange-500/10',
+      border: 'border-orange-500/20',
+    },
+    medium: {
+      icon: Info,
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/20',
+    },
     low: { icon: Info, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
   };
 
@@ -310,32 +448,52 @@ export function AnomalyCard({ anomaly, onInvestigate, onDismiss }) {
   const Icon = meta.icon;
 
   return (
-    <div className={cn(
-      'rounded-xl border p-4 transition-all hover:shadow-md',
-      meta.border, meta.bg
-    )}>
+    <div
+      className={cn('rounded-xl border p-4 transition-all hover:shadow-md', meta.border, meta.bg)}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg bg-background', meta.color)}>
+          <div
+            className={cn(
+              'flex h-10 w-10 items-center justify-center rounded-lg bg-background',
+              meta.color
+            )}
+          >
             <Icon className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-semibold text-text-primary">{anomaly.title}</h4>
-              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', meta.bg, meta.color)}>
+              <span
+                className={cn(
+                  'rounded-full px-2 py-0.5 text-[10px] font-medium',
+                  meta.bg,
+                  meta.color
+                )}
+              >
                 {anomaly.confidence * 100}% confidence
               </span>
             </div>
-            <p className="text-xs text-text-muted mt-0.5">{anomaly.id} · Detected {timeAgo(anomaly.detectedAt)}</p>
+            <p className="text-xs text-text-muted mt-0.5">
+              {anomaly.id} · Detected {timeAgo(anomaly.detectedAt)}
+            </p>
           </div>
         </div>
-        <span className={cn(
-          'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-          anomaly.status === 'active' ? 'bg-rose-500/10 text-rose-500' :
-          anomaly.status === 'investigating' ? 'bg-amber-500/10 text-amber-500' :
-          'bg-emerald-500/10 text-emerald-500'
-        )}>
-          {anomaly.status === 'active' ? 'Active' : anomaly.status === 'investigating' ? 'Investigating' : 'Resolved'}
+        <span
+          className={cn(
+            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+            anomaly.status === 'active'
+              ? 'bg-rose-500/10 text-rose-500'
+              : anomaly.status === 'investigating'
+                ? 'bg-amber-500/10 text-amber-500'
+                : 'bg-emerald-500/10 text-emerald-500'
+          )}
+        >
+          {anomaly.status === 'active'
+            ? 'Active'
+            : anomaly.status === 'investigating'
+              ? 'Investigating'
+              : 'Resolved'}
         </span>
       </div>
 
@@ -343,14 +501,19 @@ export function AnomalyCard({ anomaly, onInvestigate, onDismiss }) {
 
       <div className="mt-3 flex flex-wrap gap-1">
         {anomaly.affectedTargets.map((target) => (
-          <span key={target} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary">
+          <span
+            key={target}
+            className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary"
+          >
             {target}
           </span>
         ))}
       </div>
 
       <div className="mt-3 rounded-lg border border-border bg-background p-2.5">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">Recommended Action</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
+          Recommended Action
+        </p>
         <p className="text-xs text-text-secondary">{anomaly.recommendedAction}</p>
       </div>
 
@@ -361,12 +524,21 @@ export function AnomalyCard({ anomaly, onInvestigate, onDismiss }) {
           </Button>
         )}
         {anomaly.status === 'active' && (
-          <Button size="sm" variant="outline" className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10" onClick={() => onDismiss?.(anomaly)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10"
+            onClick={() => onDismiss?.(anomaly)}
+          >
             <Ban className="mr-1.5 h-3.5 w-3.5" /> Dismiss
           </Button>
         )}
         {anomaly.status === 'resolved' && (
-          <Button size="sm" variant="outline" className="text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10"
+          >
             <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reopen
           </Button>
         )}
@@ -388,7 +560,7 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
 
   const handleExport = async () => {
     setIsExporting(true);
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
     onExport?.({
       framework: selectedFramework,
       format: selectedFormat,
@@ -400,8 +572,8 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
     onClose();
   };
 
-  const framework = complianceFrameworks.find(f => f.id === selectedFramework);
-  const format = exportFormats.find(f => f.id === selectedFormat);
+  const framework = complianceFrameworks.find((f) => f.id === selectedFramework);
+  const format = exportFormats.find((f) => f.id === selectedFormat);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -417,7 +589,10 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
               <p className="text-xs text-text-muted">Generate tamper-proof audit report</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -425,7 +600,9 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
         <div className="p-6 space-y-5">
           {/* Framework */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Compliance Framework</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Compliance Framework
+            </label>
             <div className="grid grid-cols-2 gap-2">
               {complianceFrameworks.map((fw) => (
                 <button
@@ -438,7 +615,12 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
                       : 'border-border bg-surface hover:border-secondary/30'
                   )}
                 >
-                  <p className={cn('text-sm font-medium', selectedFramework === fw.id ? 'text-secondary' : 'text-text-primary')}>
+                  <p
+                    className={cn(
+                      'text-sm font-medium',
+                      selectedFramework === fw.id ? 'text-secondary' : 'text-text-primary'
+                    )}
+                  >
                     {fw.label}
                   </p>
                   <p className="text-[10px] text-text-muted mt-0.5">{fw.description}</p>
@@ -449,7 +631,9 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
 
           {/* Format */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Export Format</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Export Format
+            </label>
             <div className="flex gap-2">
               {exportFormats.map((fmt) => (
                 <button
@@ -470,14 +654,16 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
 
           {/* Date Range */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Date Range</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Date Range
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-text-muted mb-1 block">From</label>
                 <input
                   type="date"
                   value={dateRange.from}
-                  onChange={(e) => setDateRange(p => ({ ...p, from: e.target.value }))}
+                  onChange={(e) => setDateRange((p) => ({ ...p, from: e.target.value }))}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
                 />
               </div>
@@ -486,7 +672,7 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
                 <input
                   type="date"
                   value={dateRange.to}
-                  onChange={(e) => setDateRange(p => ({ ...p, to: e.target.value }))}
+                  onChange={(e) => setDateRange((p) => ({ ...p, to: e.target.value }))}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
                 />
               </div>
@@ -495,7 +681,9 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
 
           {/* Options */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Options</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Options
+            </label>
             <label className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -505,7 +693,9 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
               />
               <div>
                 <p className="text-sm font-medium text-text-primary">Include Metadata</p>
-                <p className="text-xs text-text-muted">Actor details, session info, and target context</p>
+                <p className="text-xs text-text-muted">
+                  Actor details, session info, and target context
+                </p>
               </div>
             </label>
             <label className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 cursor-pointer">
@@ -517,7 +707,9 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
               />
               <div>
                 <p className="text-sm font-medium text-text-primary">Include Tamper-Proof Chain</p>
-                <p className="text-xs text-text-muted">Cryptographic hashes and signatures for verification</p>
+                <p className="text-xs text-text-muted">
+                  Cryptographic hashes and signatures for verification
+                </p>
               </div>
             </label>
           </div>
@@ -534,13 +726,17 @@ export function ComplianceExportModal({ isOpen, onClose, onExport }) {
             </div>
             <div className="flex items-center justify-between text-xs mt-1">
               <span className="text-text-muted">Period:</span>
-              <span className="font-medium text-text-primary">{dateRange.from} → {dateRange.to}</span>
+              <span className="font-medium text-text-primary">
+                {dateRange.from} → {dateRange.to}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="border-t border-border p-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
           <Button onClick={handleExport} isLoading={isExporting}>
             <FileDown className="mr-1.5 h-4 w-4" /> Generate Export
           </Button>
@@ -560,15 +756,29 @@ export function AuditStatCard({ label, value, subtext, icon: Icon, color, trend 
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-emerald-500' : 'text-rose-500')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last period
+            <p
+              className={cn(
+                'mt-1 text-xs font-medium',
+                trend >= 0 ? 'text-emerald-500' : 'text-rose-500'
+              )}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last period
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('rose-500', 'rose-500/10').replace('emerald-500', 'emerald-500/10').replace('amber-500', 'amber-500/10').replace('blue-500', 'blue-500/10').replace('purple-500', 'purple-500/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('rose-500', 'rose-500/10')
+              .replace('emerald-500', 'emerald-500/10')
+              .replace('amber-500', 'amber-500/10')
+              .replace('blue-500', 'blue-500/10')
+              .replace('purple-500', 'purple-500/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -596,16 +806,23 @@ export function ChainVerificationVisual({ logs }) {
 
           return (
             <div key={log.id} className="flex items-center gap-3 text-xs">
-              <div className={cn(
-                'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
-                linked ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
-              )}>
+              <div
+                className={cn(
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
+                  linked ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+                )}
+              >
                 {linked ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-text-muted">{log.id}</span>
-                  <span className={cn('rounded px-1.5 py-0.5 text-[10px]', severityMeta[log.severity]?.class)}>
+                  <span
+                    className={cn(
+                      'rounded px-1.5 py-0.5 text-[10px]',
+                      severityMeta[log.severity]?.class
+                    )}
+                  >
                     {log.severity}
                   </span>
                 </div>
@@ -622,7 +839,9 @@ export function ChainVerificationVisual({ logs }) {
         })}
       </div>
       {logs.length > 20 && (
-        <p className="text-xs text-text-muted text-center mt-2">+{logs.length - 20} more entries in chain</p>
+        <p className="text-xs text-text-muted text-center mt-2">
+          +{logs.length - 20} more entries in chain
+        </p>
       )}
     </div>
   );

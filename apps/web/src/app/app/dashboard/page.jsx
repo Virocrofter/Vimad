@@ -1,5 +1,17 @@
 import { useState } from 'react';
-import { TrendingUp, Users, BedDouble, DollarSign, Bell, X, Plus, CheckCircle2, AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import {
+  TrendingUp,
+  Users,
+  BedDouble,
+  DollarSign,
+  Bell,
+  X,
+  Plus,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  Info,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
 const kpis = [
@@ -17,18 +29,72 @@ const activities = [
 ];
 
 const initialAlerts = [
-  { id: 1, severity: 'danger', title: 'Room 103 — Dirty', message: 'Housekeeping flagged as dirty, guest arriving at 2 PM', time: '5 min ago' },
-  { id: 2, severity: 'warning', title: '3 Arrivals Pending', message: 'Rooms 105, 204, 310 not yet assigned', time: '12 min ago' },
-  { id: 3, severity: 'info', title: 'Night Audit Ready', message: 'All charges posted. Ready to roll date.', time: '1 hr ago' },
-  { id: 4, severity: 'success', title: 'Backup Complete', message: 'Incremental backup finished successfully', time: '2 hrs ago' },
-  { id: 5, severity: 'warning', title: 'Low Inventory — Suites', message: 'Only 2 suites available for Aug 14-16', time: '3 hrs ago' },
+  {
+    id: 1,
+    severity: 'danger',
+    title: 'Room 103 — Dirty',
+    message: 'Housekeeping flagged as dirty, guest arriving at 2 PM',
+    time: '5 min ago',
+  },
+  {
+    id: 2,
+    severity: 'warning',
+    title: '3 Arrivals Pending',
+    message: 'Rooms 105, 204, 310 not yet assigned',
+    time: '12 min ago',
+  },
+  {
+    id: 3,
+    severity: 'info',
+    title: 'Night Audit Ready',
+    message: 'All charges posted. Ready to roll date.',
+    time: '1 hr ago',
+  },
+  {
+    id: 4,
+    severity: 'success',
+    title: 'Backup Complete',
+    message: 'Incremental backup finished successfully',
+    time: '2 hrs ago',
+  },
+  {
+    id: 5,
+    severity: 'warning',
+    title: 'Low Inventory — Suites',
+    message: 'Only 2 suites available for Aug 14-16',
+    time: '3 hrs ago',
+  },
 ];
 
 const severityMeta = {
-  danger: { icon: AlertTriangle, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
-  warning: { icon: AlertCircle, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
-  info: { icon: Info, color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  success: { icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
+  danger: {
+    icon: AlertTriangle,
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
+  warning: {
+    icon: AlertCircle,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
+  info: {
+    icon: Info,
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  success: {
+    icon: CheckCircle2,
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
 };
 
 const quickActions = [
@@ -68,7 +134,7 @@ export default function AppDashboard() {
                     <p className="mt-1 text-sm text-accent">{kpi.change}</p>
                   </div>
                   <div className="rounded-lg bg-surface-elevated p-3">
-                    <kpi.icon className={cn("h-6 w-6", kpi.color)} />
+                    <kpi.icon className={cn('h-6 w-6', kpi.color)} />
                   </div>
                 </div>
               </div>
@@ -80,10 +146,15 @@ export default function AppDashboard() {
             <h3 className="text-lg font-semibold text-text-primary">Recent Activity</h3>
             <div className="mt-4 space-y-3">
               {activities.map((item, i) => (
-                <div key={i} className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3"
+                >
                   <div>
                     <p className="text-sm font-medium text-text-primary">{item.action}</p>
-                    <p className="text-xs text-text-secondary">{item.guest} • Room {item.room}</p>
+                    <p className="text-xs text-text-secondary">
+                      {item.guest} • Room {item.room}
+                    </p>
                   </div>
                   <span className="text-xs text-text-muted">{item.time}</span>
                 </div>
@@ -93,10 +164,12 @@ export default function AppDashboard() {
         </div>
 
         {/* Alert Panel */}
-        <div className={cn(
-          'rounded-xl border border-border bg-surface overflow-hidden transition-all duration-300',
-          alertsOpen ? 'opacity-100' : 'opacity-90'
-        )}>
+        <div
+          className={cn(
+            'rounded-xl border border-border bg-surface overflow-hidden transition-all duration-300',
+            alertsOpen ? 'opacity-100' : 'opacity-90'
+          )}
+        >
           <div className="flex items-center justify-between border-b border-border bg-background px-4 py-3">
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-secondary" />
@@ -136,7 +209,9 @@ export default function AppDashboard() {
                               <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
                               <p className="text-sm font-medium text-text-primary">{alert.title}</p>
                             </div>
-                            <p className="mt-0.5 text-xs text-text-secondary leading-relaxed">{alert.message}</p>
+                            <p className="mt-0.5 text-xs text-text-secondary leading-relaxed">
+                              {alert.message}
+                            </p>
                             <p className="mt-1 text-[10px] text-text-muted">{alert.time}</p>
                           </div>
                           <button

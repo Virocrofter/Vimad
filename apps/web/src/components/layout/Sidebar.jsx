@@ -2,13 +2,45 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import {
-  ChevronLeft, ChevronRight, ChevronDown, LayoutDashboard,
-  CalendarDays, BedDouble, CreditCard, Settings, BarChart3,
-  Users, Shield, LogOut, Moon, Sun, LayoutGrid, Tag, Package,
-  Sparkles, Clock, Rocket, Headphones, Briefcase, Wallet,
-  Megaphone, Heart, Globe, Radio, TrendingUp, Zap, Star, Utensils,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  LayoutDashboard,
+  CalendarDays,
+  BedDouble,
+  CreditCard,
+  Settings,
+  BarChart3,
+  Users,
+  Shield,
+  LogOut,
+  Moon,
+  Sun,
+  LayoutGrid,
+  Tag,
+  Package,
+  Sparkles,
+  Clock,
+  Rocket,
+  Headphones,
+  Briefcase,
+  Wallet,
+  Megaphone,
+  Heart,
+  Globe,
+  Radio,
+  TrendingUp,
+  Zap,
+  Star,
+  Utensils,
   // New icons for missing routes
-  UsersRound, KeyRound, Car, Receipt, ClipboardList, Building2, CalendarCheck
+  UsersRound,
+  KeyRound,
+  Car,
+  Receipt,
+  ClipboardList,
+  Building2,
+  CalendarCheck,
 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuthStore } from '../../stores/authStores';
@@ -47,8 +79,8 @@ const defaultNavGroups = [
       { icon: Utensils, label: 'Meal Plans', path: '/app/meal-plans' },
       { icon: KeyRound, label: 'Keys', path: '/app/keys' },
       { icon: Car, label: 'Parking', path: '/app/parking' },
-        { icon: ClipboardList, label: 'Audit Trail', path: '/app/audit-trail' },
-        { icon: UsersRound, label: 'Users & Roles', path: '/app/users' },
+      { icon: ClipboardList, label: 'Audit Trail', path: '/app/audit-trail' },
+      { icon: UsersRound, label: 'Users & Roles', path: '/app/users' },
     ],
   },
   {
@@ -108,7 +140,11 @@ export function Sidebar({ navGroups = defaultNavGroups, collapsed, onCollapseCha
             collapsed && 'mx-auto ml-0'
           )}
         >
-          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+          {collapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronLeft className="h-3.5 w-3.5" />
+          )}
         </button>
       </div>
 
@@ -123,12 +159,17 @@ export function Sidebar({ navGroups = defaultNavGroups, collapsed, onCollapseCha
               >
                 <span className="flex-1 text-left">{group.label}</span>
                 <ChevronDown
-                  className={cn('h-3.5 w-3.5 transition-transform', !expandedGroups[gIdx] && '-rotate-90')}
+                  className={cn(
+                    'h-3.5 w-3.5 transition-transform',
+                    !expandedGroups[gIdx] && '-rotate-90'
+                  )}
                 />
               </button>
             )}
             {(!collapsed ? expandedGroups[gIdx] : true) && (
-              <div className={cn('space-y-0.5', collapsed ? 'px-2' : 'px-2')}>                {group.items.map((item) => {
+              <div className={cn('space-y-0.5', collapsed ? 'px-2' : 'px-2')}>
+                {' '}
+                {group.items.map((item) => {
                   const active = isActive(item.path);
                   return (
                     <Link
@@ -181,7 +222,12 @@ export function Sidebar({ navGroups = defaultNavGroups, collapsed, onCollapseCha
         {!collapsed && user && (
           <div className="mt-3 flex items-center gap-3 border-t border-border pt-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-medium text-secondary">
-              {user.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+              {user.name
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase()}
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-text-primary">{user.name}</p>

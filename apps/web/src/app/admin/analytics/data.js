@@ -9,7 +9,9 @@ export const featureUsageHeatmap = [
     totalEvents: 284500,
     uniqueUsers: 420,
     avgSessionMin: 12.4,
-    hourly: [12, 8, 5, 3, 2, 4, 18, 45, 78, 92, 85, 88, 95, 90, 82, 75, 68, 55, 42, 35, 28, 22, 18, 15],
+    hourly: [
+      12, 8, 5, 3, 2, 4, 18, 45, 78, 92, 85, 88, 95, 90, 82, 75, 68, 55, 42, 35, 28, 22, 18, 15,
+    ],
   },
   {
     feature: 'Front Desk',
@@ -17,7 +19,9 @@ export const featureUsageHeatmap = [
     totalEvents: 198200,
     uniqueUsers: 380,
     avgSessionMin: 8.2,
-    hourly: [8, 5, 3, 2, 1, 3, 12, 38, 65, 72, 68, 70, 75, 72, 65, 58, 48, 38, 28, 22, 18, 15, 12, 10],
+    hourly: [
+      8, 5, 3, 2, 1, 3, 12, 38, 65, 72, 68, 70, 75, 72, 65, 58, 48, 38, 28, 22, 18, 15, 12, 10,
+    ],
   },
   {
     feature: 'Room Plan',
@@ -73,7 +77,9 @@ export const featureUsageHeatmap = [
     totalEvents: 342000,
     uniqueUsers: 1850,
     avgSessionMin: 4.2,
-    hourly: [8, 5, 3, 2, 2, 3, 8, 18, 35, 42, 45, 48, 52, 50, 48, 45, 42, 38, 32, 28, 22, 18, 14, 10],
+    hourly: [
+      8, 5, 3, 2, 2, 3, 8, 18, 35, 42, 45, 48, 52, 50, 48, 45, 42, 38, 32, 28, 22, 18, 14, 10,
+    ],
   },
   {
     feature: 'Analytics',
@@ -415,25 +421,91 @@ export const dauTrend = [
 
 /* ─── Power Users (top 10%) ─── */
 export const powerUsers = [
-  { tenantId: 'TNT-001', name: 'Grand Hotel Boston', score: 94, streakDays: 45, commandsUsed: 2840 },
-  { tenantId: 'TNT-002', name: 'Seaside Resort Miami', score: 87, streakDays: 38, commandsUsed: 2150 },
+  {
+    tenantId: 'TNT-001',
+    name: 'Grand Hotel Boston',
+    score: 94,
+    streakDays: 45,
+    commandsUsed: 2840,
+  },
+  {
+    tenantId: 'TNT-002',
+    name: 'Seaside Resort Miami',
+    score: 87,
+    streakDays: 38,
+    commandsUsed: 2150,
+  },
   { tenantId: 'TNT-007', name: 'Urban Hotel NYC', score: 82, streakDays: 32, commandsUsed: 1890 },
-  { tenantId: 'TNT-005', name: 'Coastal Inn San Diego', score: 68, streakDays: 22, commandsUsed: 1240 },
+  {
+    tenantId: 'TNT-005',
+    name: 'Coastal Inn San Diego',
+    score: 68,
+    streakDays: 22,
+    commandsUsed: 1240,
+  },
 ];
 
 /* ─── Metadata ─── */
 export const classificationMeta = {
-  power: { label: 'Power User', color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', dot: 'bg-purple-500' },
-  engaged: { label: 'Engaged', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
-  'at-risk': { label: 'At Risk', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
-  dormant: { label: 'Dormant', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
+  power: {
+    label: 'Power User',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+    dot: 'bg-purple-500',
+  },
+  engaged: {
+    label: 'Engaged',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
+  'at-risk': {
+    label: 'At Risk',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
+  dormant: {
+    label: 'Dormant',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 export const severityMeta = {
-  critical: { label: 'Critical', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
-  high: { label: 'High', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
-  medium: { label: 'Medium', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  low: { label: 'Low', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
+  critical: {
+    label: 'Critical',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
+  high: {
+    label: 'High',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
+  medium: {
+    label: 'Medium',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  low: {
+    label: 'Low',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const categoryMeta = {
@@ -477,4 +549,3 @@ export function formatNumber(num) {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
   return num.toString();
 }
-

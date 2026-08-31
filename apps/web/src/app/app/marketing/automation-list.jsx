@@ -2,12 +2,41 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Zap, Play, Pause, Clock, CheckCircle2, XCircle, AlertCircle,
-  Plus, Search, Filter, MoreHorizontal, Edit3, Copy, Trash2,
-  BarChart3, Users, Mail, Bell, Workflow, ChevronRight,
-  TrendingUp, Activity, Calendar, ArrowRight, Sparkles,
-  PauseCircle, PlayCircle, Timer, RefreshCw, GripVertical,
-  LayoutTemplate, Settings, Eye, Download, X
+  Zap,
+  Play,
+  Pause,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Edit3,
+  Copy,
+  Trash2,
+  BarChart3,
+  Users,
+  Mail,
+  Bell,
+  Workflow,
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  Calendar,
+  ArrowRight,
+  Sparkles,
+  PauseCircle,
+  PlayCircle,
+  Timer,
+  RefreshCw,
+  GripVertical,
+  LayoutTemplate,
+  Settings,
+  Eye,
+  Download,
+  X,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -122,7 +151,7 @@ const mockWorkflows = [
   {
     id: 'WF-1008',
     name: 'Win-Back Campaign',
-    description: 'Re-engage guests who haven\'t booked in 12 months',
+    description: "Re-engage guests who haven't booked in 12 months",
     status: 'draft',
     trigger: 'Inactive 12 Months',
     nodes: 9,
@@ -205,12 +234,26 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('secondary', 'secondary/10').replace('info', 'info/10').replace('warning', 'warning/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('secondary', 'secondary/10')
+              .replace('info', 'info/10')
+              .replace('warning', 'warning/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -222,11 +265,13 @@ function MiniSparkline({ data, color = '#3B82F6' }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * 60;
-    const y = 20 - ((v - min) / range) * 20;
-    return `${x},${y}`;
-  }).join(' ');
+  const points = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * 60;
+      const y = 20 - ((v - min) / range) * 20;
+      return `${x},${y}`;
+    })
+    .join(' ');
 
   return (
     <svg width="64" height="24" className="overflow-visible">
@@ -264,11 +309,18 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
     >
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-            workflow.status === 'active' ? 'bg-accent/10' : 'bg-surface-elevated'
-          )}>
-            <Icon className={cn('h-4 w-4', workflow.status === 'active' ? 'text-accent' : 'text-text-muted')} />
+          <div
+            className={cn(
+              'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+              workflow.status === 'active' ? 'bg-accent/10' : 'bg-surface-elevated'
+            )}
+          >
+            <Icon
+              className={cn(
+                'h-4 w-4',
+                workflow.status === 'active' ? 'text-accent' : 'text-text-muted'
+              )}
+            />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -282,13 +334,23 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
         </div>
       </td>
       <td className="px-4 py-4">
-        <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', status.class)}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+            status.class
+          )}
+        >
           <StatusIcon className="h-3 w-3" />
           {status.label}
         </span>
       </td>
       <td className="px-4 py-4">
-        <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', category.color)}>
+        <span
+          className={cn(
+            'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+            category.color
+          )}
+        >
           {category.label}
         </span>
       </td>
@@ -301,23 +363,40 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm font-mono font-medium text-text-primary">{formatNumber(workflow.executions)}</p>
+            <p className="text-sm font-mono font-medium text-text-primary">
+              {formatNumber(workflow.executions)}
+            </p>
             <p className="text-[10px] text-text-muted">executions</p>
           </div>
-          <MiniSparkline data={sparkData} color={workflow.status === 'active' ? '#10B981' : '#94A3B8'} />
+          <MiniSparkline
+            data={sparkData}
+            color={workflow.status === 'active' ? '#10B981' : '#94A3B8'}
+          />
         </div>
       </td>
       <td className="px-4 py-4">
         <div className="space-y-0.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-text-muted">Success</span>
-            <span className={cn('font-mono font-medium', workflow.successRate > 50 ? 'text-accent' : 'text-text-primary')}>
+            <span
+              className={cn(
+                'font-mono font-medium',
+                workflow.successRate > 50 ? 'text-accent' : 'text-text-primary'
+              )}
+            >
               {workflow.successRate}%
             </span>
           </div>
           <div className="w-16 h-1 rounded-full bg-border overflow-hidden">
             <div
-              className={cn('h-full rounded-full transition-all', workflow.successRate > 80 ? 'bg-accent' : workflow.successRate > 40 ? 'bg-warning' : 'bg-danger')}
+              className={cn(
+                'h-full rounded-full transition-all',
+                workflow.successRate > 80
+                  ? 'bg-accent'
+                  : workflow.successRate > 40
+                    ? 'bg-warning'
+                    : 'bg-danger'
+              )}
               style={{ width: `${workflow.successRate}%` }}
             />
           </div>
@@ -332,7 +411,10 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
       <td className="px-4 py-4">
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={(e) => { e.stopPropagation(); onEdit(workflow.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(workflow.id);
+            }}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
             title="Edit"
           >
@@ -340,7 +422,10 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
           </button>
           {workflow.status === 'active' ? (
             <button
-              onClick={(e) => { e.stopPropagation(); onToggle(workflow.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle(workflow.id);
+              }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-warning/10 hover:text-warning"
               title="Pause"
             >
@@ -348,7 +433,10 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
             </button>
           ) : workflow.status === 'paused' ? (
             <button
-              onClick={(e) => { e.stopPropagation(); onToggle(workflow.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle(workflow.id);
+              }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-accent/10 hover:text-accent"
               title="Resume"
             >
@@ -356,7 +444,10 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
             </button>
           ) : workflow.status === 'draft' ? (
             <button
-              onClick={(e) => { e.stopPropagation(); onToggle(workflow.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle(workflow.id);
+              }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-accent/10 hover:text-accent"
               title="Activate"
             >
@@ -364,14 +455,20 @@ function WorkflowRow({ workflow, onToggle, onDuplicate, onDelete, onEdit, isSele
             </button>
           ) : null}
           <button
-            onClick={(e) => { e.stopPropagation(); onDuplicate(workflow.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate(workflow.id);
+            }}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
             title="Duplicate"
           >
             <Copy className="h-4 w-4" />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onDelete(workflow.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(workflow.id);
+            }}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
             title="Delete"
           >
@@ -419,13 +516,24 @@ function ExecutionLogPanel({ workflow, onClose }) {
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {logs.map((log) => (
-            <div key={log.id} className="rounded-lg border border-border bg-background p-3 space-y-2">
+            <div
+              key={log.id}
+              className="rounded-lg border border-border bg-background p-3 space-y-2"
+            >
               <div className="flex items-center justify-between">
-                <span className={cn(
-                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
-                  log.status === 'success' ? 'bg-accent/10 text-accent' : 'bg-danger/10 text-danger'
-                )}>
-                  {log.status === 'success' ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    log.status === 'success'
+                      ? 'bg-accent/10 text-accent'
+                      : 'bg-danger/10 text-danger'
+                  )}
+                >
+                  {log.status === 'success' ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <XCircle className="h-3 w-3" />
+                  )}
                   {log.status}
                 </span>
                 <span className="text-[10px] text-text-muted font-mono">
@@ -454,12 +562,14 @@ export function AutomationListPage() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
 
-  const selectedWorkflow = workflows.find(w => w.id === selectedWorkflowId);
+  const selectedWorkflow = workflows.find((w) => w.id === selectedWorkflowId);
 
   const stats = useMemo(() => {
-    const active = workflows.filter(w => w.status === 'active');
+    const active = workflows.filter((w) => w.status === 'active');
     const totalExecs = workflows.reduce((s, w) => s + w.executions, 0);
-    const avgSuccess = workflows.filter(w => w.executions > 0).reduce((s, w) => s + w.successRate, 0) / workflows.filter(w => w.executions > 0).length || 0;
+    const avgSuccess =
+      workflows.filter((w) => w.executions > 0).reduce((s, w) => s + w.successRate, 0) /
+        workflows.filter((w) => w.executions > 0).length || 0;
     return {
       activeCount: active.length,
       totalExecs,
@@ -470,7 +580,9 @@ export function AutomationListPage() {
 
   const filtered = useMemo(() => {
     return workflows.filter((w) => {
-      const matchesQuery = w.name.toLowerCase().includes(query.toLowerCase()) || w.description.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery =
+        w.name.toLowerCase().includes(query.toLowerCase()) ||
+        w.description.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || w.status === statusFilter;
       const matchesCategory = categoryFilter === 'all' || w.category === categoryFilter;
       return matchesQuery && matchesStatus && matchesCategory;
@@ -478,17 +590,19 @@ export function AutomationListPage() {
   }, [workflows, query, statusFilter, categoryFilter]);
 
   const handleToggle = (id) => {
-    setWorkflows(prev => prev.map(w => {
-      if (w.id !== id) return w;
-      if (w.status === 'active') return { ...w, status: 'paused' };
-      if (w.status === 'paused') return { ...w, status: 'active' };
-      if (w.status === 'draft') return { ...w, status: 'active' };
-      return w;
-    }));
+    setWorkflows((prev) =>
+      prev.map((w) => {
+        if (w.id !== id) return w;
+        if (w.status === 'active') return { ...w, status: 'paused' };
+        if (w.status === 'paused') return { ...w, status: 'active' };
+        if (w.status === 'draft') return { ...w, status: 'active' };
+        return w;
+      })
+    );
   };
 
   const handleDuplicate = (id) => {
-    const original = workflows.find(w => w.id === id);
+    const original = workflows.find((w) => w.id === id);
     if (!original) return;
     const newWorkflow = {
       ...original,
@@ -500,11 +614,11 @@ export function AutomationListPage() {
       lastRun: null,
       createdAt: new Date().toISOString().split('T')[0],
     };
-    setWorkflows(prev => [newWorkflow, ...prev]);
+    setWorkflows((prev) => [newWorkflow, ...prev]);
   };
 
   const handleDelete = (id) => {
-    setWorkflows(prev => prev.filter(w => w.id !== id));
+    setWorkflows((prev) => prev.filter((w) => w.id !== id));
     if (selectedWorkflowId === id) setSelectedWorkflowId(null);
   };
 
@@ -514,7 +628,9 @@ export function AutomationListPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Automation Workflows</h1>
-          <p className="text-sm text-text-secondary">Visual workflow builder for guest engagement automations</p>
+          <p className="text-sm text-text-secondary">
+            Visual workflow builder for guest engagement automations
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate('/app/marketing')}>
@@ -574,31 +690,96 @@ export function AutomationListPage() {
             {showTemplates ? 'Hide' : 'Show All'}
           </Button>
         </div>
-        <div className={cn(
-          'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 transition-all',
-          showTemplates ? '' : 'max-h-24 overflow-hidden'
-        )}>
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 transition-all',
+            showTemplates ? '' : 'max-h-24 overflow-hidden'
+          )}
+        >
           {[
-            { name: 'Welcome Series', icon: Mail, desc: 'Onboard new guests', color: 'text-blue-500', bg: 'bg-blue-500/10', nodes: 8 },
-            { name: 'Cart Recovery', icon: Zap, desc: 'Recover abandoned bookings', color: 'text-purple-500', bg: 'bg-purple-500/10', nodes: 7 },
-            { name: 'Birthday Rewards', icon: Sparkles, desc: 'Automatic birthday perks', color: 'text-pink-500', bg: 'bg-pink-500/10', nodes: 4 },
-            { name: 'Review Request', icon: CheckCircle2, desc: 'Post-stay feedback', color: 'text-green-500', bg: 'bg-green-500/10', nodes: 5 },
-            { name: 'Flash Sale', icon: Timer, desc: 'Urgent promotional blast', color: 'text-orange-500', bg: 'bg-orange-500/10', nodes: 3 },
-            { name: 'VIP Upgrade', icon: Users, desc: 'Targeted upsell flow', color: 'text-amber-500', bg: 'bg-amber-500/10', nodes: 6 },
-            { name: 'Win-Back', icon: RefreshCw, desc: 'Re-engage inactive guests', color: 'text-cyan-500', bg: 'bg-cyan-500/10', nodes: 9 },
-            { name: 'Loyalty Points', icon: TrendingUp, desc: 'Points balance reminder', color: 'text-indigo-500', bg: 'bg-indigo-500/10', nodes: 5 },
+            {
+              name: 'Welcome Series',
+              icon: Mail,
+              desc: 'Onboard new guests',
+              color: 'text-blue-500',
+              bg: 'bg-blue-500/10',
+              nodes: 8,
+            },
+            {
+              name: 'Cart Recovery',
+              icon: Zap,
+              desc: 'Recover abandoned bookings',
+              color: 'text-purple-500',
+              bg: 'bg-purple-500/10',
+              nodes: 7,
+            },
+            {
+              name: 'Birthday Rewards',
+              icon: Sparkles,
+              desc: 'Automatic birthday perks',
+              color: 'text-pink-500',
+              bg: 'bg-pink-500/10',
+              nodes: 4,
+            },
+            {
+              name: 'Review Request',
+              icon: CheckCircle2,
+              desc: 'Post-stay feedback',
+              color: 'text-green-500',
+              bg: 'bg-green-500/10',
+              nodes: 5,
+            },
+            {
+              name: 'Flash Sale',
+              icon: Timer,
+              desc: 'Urgent promotional blast',
+              color: 'text-orange-500',
+              bg: 'bg-orange-500/10',
+              nodes: 3,
+            },
+            {
+              name: 'VIP Upgrade',
+              icon: Users,
+              desc: 'Targeted upsell flow',
+              color: 'text-amber-500',
+              bg: 'bg-amber-500/10',
+              nodes: 6,
+            },
+            {
+              name: 'Win-Back',
+              icon: RefreshCw,
+              desc: 'Re-engage inactive guests',
+              color: 'text-cyan-500',
+              bg: 'bg-cyan-500/10',
+              nodes: 9,
+            },
+            {
+              name: 'Loyalty Points',
+              icon: TrendingUp,
+              desc: 'Points balance reminder',
+              color: 'text-indigo-500',
+              bg: 'bg-indigo-500/10',
+              nodes: 5,
+            },
           ].map((template) => (
             <button
               key={template.name}
               onClick={() => navigate('/app/marketing/automation/builder')}
               className="flex items-center gap-3 rounded-lg border border-border bg-background p-3 text-left transition-all hover:border-secondary/50 hover:shadow-sm"
             >
-              <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', template.bg)}>
+              <div
+                className={cn(
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                  template.bg
+                )}
+              >
                 <template.icon className={cn('h-4 w-4', template.color)} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-text-primary">{template.name}</p>
-                <p className="text-[10px] text-text-muted truncate">{template.desc} · {template.nodes} nodes</p>
+                <p className="text-[10px] text-text-muted truncate">
+                  {template.desc} · {template.nodes} nodes
+                </p>
               </div>
               <ArrowRight className="ml-auto h-3.5 w-3.5 text-text-muted shrink-0" />
             </button>
@@ -637,7 +818,9 @@ export function AutomationListPage() {
           >
             <option value="all">All Categories</option>
             {Object.entries(categoryMeta).map(([key, cat]) => (
-              <option key={key} value={key}>{cat.label}</option>
+              <option key={key} value={key}>
+                {cat.label}
+              </option>
             ))}
           </select>
           <div className="flex items-center rounded-md border border-border bg-background p-0.5">
@@ -645,7 +828,9 @@ export function AutomationListPage() {
               onClick={() => setViewMode('list')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'list' ? 'bg-secondary text-white' : 'text-text-secondary hover:bg-surface-elevated'
+                viewMode === 'list'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-secondary hover:bg-surface-elevated'
               )}
             >
               <BarChart3 className="h-3.5 w-3.5" />
@@ -654,7 +839,9 @@ export function AutomationListPage() {
               onClick={() => setViewMode('grid')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-secondary hover:bg-surface-elevated'
+                viewMode === 'grid'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-secondary hover:bg-surface-elevated'
               )}
             >
               <LayoutTemplate className="h-3.5 w-3.5" />
@@ -670,14 +857,30 @@ export function AutomationListPage() {
             <table className="w-full text-sm">
               <thead className="bg-background border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Workflow</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Category</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Trigger</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Executions</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Success</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Duration</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Last Run</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Workflow
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Trigger
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Executions
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Success
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Last Run
+                  </th>
                   <th className="px-4 py-3 w-40"></th>
                 </tr>
               </thead>
@@ -723,14 +926,31 @@ export function AutomationListPage() {
                 onClick={() => setSelectedWorkflowId(workflow.id)}
                 className={cn(
                   'rounded-xl border bg-surface p-5 cursor-pointer transition-all hover:shadow-md',
-                  selectedWorkflowId === workflow.id ? 'border-secondary ring-1 ring-secondary/30' : 'border-border'
+                  selectedWorkflowId === workflow.id
+                    ? 'border-secondary ring-1 ring-secondary/30'
+                    : 'border-border'
                 )}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', workflow.status === 'active' ? 'bg-accent/10' : 'bg-surface-elevated')}>
-                    <Icon className={cn('h-5 w-5', workflow.status === 'active' ? 'text-accent' : 'text-text-muted')} />
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-lg',
+                      workflow.status === 'active' ? 'bg-accent/10' : 'bg-surface-elevated'
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        'h-5 w-5',
+                        workflow.status === 'active' ? 'text-accent' : 'text-text-muted'
+                      )}
+                    />
                   </div>
-                  <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', status.class)}>
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                      status.class
+                    )}
+                  >
                     <StatusIcon className="h-3 w-3" />
                     {status.label}
                   </span>
@@ -738,18 +958,30 @@ export function AutomationListPage() {
                 <h3 className="text-sm font-semibold text-text-primary mb-1">{workflow.name}</h3>
                 <p className="text-xs text-text-muted mb-4 line-clamp-2">{workflow.description}</p>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', category.color)}>
+                  <span
+                    className={cn(
+                      'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                      category.color
+                    )}
+                  >
                     {category.label}
                   </span>
                   <span className="text-[10px] text-text-muted">{workflow.nodes} nodes</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
                   <div>
-                    <p className="text-lg font-bold font-mono text-text-primary">{formatNumber(workflow.executions)}</p>
+                    <p className="text-lg font-bold font-mono text-text-primary">
+                      {formatNumber(workflow.executions)}
+                    </p>
                     <p className="text-[10px] text-text-muted">Executions</p>
                   </div>
                   <div>
-                    <p className={cn('text-lg font-bold font-mono', workflow.successRate > 50 ? 'text-accent' : 'text-text-primary')}>
+                    <p
+                      className={cn(
+                        'text-lg font-bold font-mono',
+                        workflow.successRate > 50 ? 'text-accent' : 'text-text-primary'
+                      )}
+                    >
                       {workflow.successRate}%
                     </p>
                     <p className="text-[10px] text-text-muted">Success Rate</p>
@@ -757,24 +989,34 @@ export function AutomationListPage() {
                 </div>
                 <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
                   <button
-                    onClick={(e) => { e.stopPropagation(); navigate(`/app/marketing/automation/builder?id=${workflow.id}`); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/app/marketing/automation/builder?id=${workflow.id}`);
+                    }}
                     className="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-secondary/5 px-3 py-1.5 text-xs font-medium text-secondary hover:bg-secondary/10 transition-colors"
                   >
                     <Edit3 className="h-3 w-3" /> Edit
                   </button>
                   {workflow.status === 'active' ? (
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleToggle(workflow.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggle(workflow.id);
+                      }}
                       className="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-warning/5 px-3 py-1.5 text-xs font-medium text-warning hover:bg-warning/10 transition-colors"
                     >
                       <Pause className="h-3 w-3" /> Pause
                     </button>
                   ) : (
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleToggle(workflow.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggle(workflow.id);
+                      }}
                       className="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/10 transition-colors"
                     >
-                      <Play className="h-3 w-3" /> {workflow.status === 'draft' ? 'Activate' : 'Resume'}
+                      <Play className="h-3 w-3" />{' '}
+                      {workflow.status === 'draft' ? 'Activate' : 'Resume'}
                     </button>
                   )}
                 </div>
@@ -793,7 +1035,10 @@ export function AutomationListPage() {
       {/* Execution Log Slide-over */}
       {selectedWorkflowId && (
         <>
-          <div className="fixed inset-0 z-30 bg-black/20" onClick={() => setSelectedWorkflowId(null)} />
+          <div
+            className="fixed inset-0 z-30 bg-black/20"
+            onClick={() => setSelectedWorkflowId(null)}
+          />
           <ExecutionLogPanel
             workflow={selectedWorkflow}
             onClose={() => setSelectedWorkflowId(null)}

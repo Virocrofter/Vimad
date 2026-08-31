@@ -1,15 +1,44 @@
 /* src/app/admin/finances/components.jsx */
 import { useState } from 'react';
 import {
-  TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2,
-  Clock, Zap, Shield, CreditCard, Globe, DollarSign, Users,
-  ArrowUpRight, ArrowDownRight, Activity, Server, Wifi, WifiOff
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Zap,
+  Shield,
+  CreditCard,
+  Globe,
+  DollarSign,
+  Users,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity,
+  Server,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  ComposedChart, ReferenceLine
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  ComposedChart,
+  ReferenceLine,
 } from 'recharts';
 import { gatewayStatusMeta, formatCurrency, formatCompactCurrency, formatPercent } from './data';
 
@@ -24,17 +53,32 @@ export function FinanceStatCard({ label, value, subtext, icon: Icon, color, tren
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <div className={cn('mt-1 flex items-center gap-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
+            <div
+              className={cn(
+                'mt-1 flex items-center gap-1 text-xs font-medium',
+                trend >= 0 ? 'text-accent' : 'text-danger'
+              )}
+            >
               <TrendIcon className="h-3 w-3" />
-              {trend >= 0 ? '+' : ''}{trend}%
+              {trend >= 0 ? '+' : ''}
+              {trend}%
               {trendLabel && <span className="text-text-muted font-normal">{trendLabel}</span>}
             </div>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10').replace('purple-500', 'purple-500/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+              .replace('purple-500', 'purple-500/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -54,7 +98,13 @@ export function MiniSparkline({ data, dataKey, color = '#3b82f6', width = 120, h
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#spark-${dataKey})`} strokeWidth={1.5} />
+        <Area
+          type="monotone"
+          dataKey={dataKey}
+          stroke={color}
+          fill={`url(#spark-${dataKey})`}
+          strokeWidth={1.5}
+        />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -68,16 +118,36 @@ export function MrrBreakdownChart({ data }) {
         <BarChart data={data} barGap={2}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+          <YAxis
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
             labelStyle={{ color: 'var(--text-primary)' }}
             formatter={(value) => [formatCurrency(value), '']}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
           <Bar dataKey="newMrr" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} name="New" />
-          <Bar dataKey="expansionMrr" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} name="Expansion" />
-          <Bar dataKey="contractionMrr" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} name="Contraction" />
+          <Bar
+            dataKey="expansionMrr"
+            stackId="a"
+            fill="#3b82f6"
+            radius={[0, 0, 0, 0]}
+            name="Expansion"
+          />
+          <Bar
+            dataKey="contractionMrr"
+            stackId="a"
+            fill="#f59e0b"
+            radius={[0, 0, 0, 0]}
+            name="Contraction"
+          />
           <Bar dataKey="churnedMrr" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} name="Churn" />
         </BarChart>
       </ResponsiveContainer>
@@ -99,13 +169,27 @@ export function MrrTrendChart({ data }) {
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+          <YAxis
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
             labelStyle={{ color: 'var(--text-primary)' }}
             formatter={(value) => [formatCurrency(value), 'MRR']}
           />
-          <Area type="monotone" dataKey="mrr" stroke="#3b82f6" fill="url(#mrrGradient)" strokeWidth={2} />
+          <Area
+            type="monotone"
+            dataKey="mrr"
+            stroke="#3b82f6"
+            fill="url(#mrrGradient)"
+            strokeWidth={2}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -120,16 +204,53 @@ export function ChurnTrendChart({ data }) {
         <ComposedChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-          <YAxis yAxisId="left" tick={{ fontSize: 10 }} stroke="var(--text-muted)" unit="%" domain={[0, 6]} />
-          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} stroke="var(--text-muted)" domain={[100, 115]} unit="%" />
+          <YAxis
+            yAxisId="left"
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            unit="%"
+            domain={[0, 6]}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            domain={[100, 115]}
+            unit="%"
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
             labelStyle={{ color: 'var(--text-primary)' }}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Bar yAxisId="left" dataKey="logoChurn" fill="#ef4444" radius={[4, 4, 0, 0]} name="Logo Churn %" />
-          <Bar yAxisId="left" dataKey="revenueChurn" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Revenue Churn %" />
-          <Line yAxisId="right" type="monotone" dataKey="nrr" stroke="#10b981" strokeWidth={2} dot={false} name="NRR %" />
+          <Bar
+            yAxisId="left"
+            dataKey="logoChurn"
+            fill="#ef4444"
+            radius={[4, 4, 0, 0]}
+            name="Logo Churn %"
+          />
+          <Bar
+            yAxisId="left"
+            dataKey="revenueChurn"
+            fill="#f59e0b"
+            radius={[4, 4, 0, 0]}
+            name="Revenue Churn %"
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="nrr"
+            stroke="#10b981"
+            strokeWidth={2}
+            dot={false}
+            name="NRR %"
+          />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -165,18 +286,28 @@ export function CohortHeatmap({ data }) {
             <th className="px-2 py-1.5 text-left text-text-muted font-medium">Cohort</th>
             <th className="px-2 py-1.5 text-center text-text-muted font-medium">Size</th>
             {monthLabels.map((m) => (
-              <th key={m} className="px-2 py-1.5 text-center text-text-muted font-medium w-12">{m}</th>
+              <th key={m} className="px-2 py-1.5 text-center text-text-muted font-medium w-12">
+                {m}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {data.map((cohort) => (
             <tr key={cohort.cohort} className="border-t border-border">
-              <td className="px-2 py-1.5 font-medium text-text-primary whitespace-nowrap">{cohort.cohort}</td>
+              <td className="px-2 py-1.5 font-medium text-text-primary whitespace-nowrap">
+                {cohort.cohort}
+              </td>
               <td className="px-2 py-1.5 text-center text-text-secondary">{cohort.size}</td>
               {cohort.months.map((val, i) => (
                 <td key={i} className="px-1 py-1">
-                  <div className={cn('h-7 w-full rounded flex items-center justify-center text-[10px] font-medium', getColor(val), getTextColor(val))}>
+                  <div
+                    className={cn(
+                      'h-7 w-full rounded flex items-center justify-center text-[10px] font-medium',
+                      getColor(val),
+                      getTextColor(val)
+                    )}
+                  >
                     {val !== null ? `${val.toFixed(1)}` : '—'}
                   </div>
                 </td>
@@ -196,10 +327,25 @@ export function LtvComparisonChart({ data }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" barGap={4}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 10 }} stroke="var(--text-muted)" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
-          <YAxis type="category" dataKey="segment" tick={{ fontSize: 11 }} stroke="var(--text-muted)" width={90} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+          />
+          <YAxis
+            type="category"
+            dataKey="segment"
+            tick={{ fontSize: 11 }}
+            stroke="var(--text-muted)"
+            width={90}
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
             formatter={(value) => [formatCurrency(value), '']}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
@@ -219,15 +365,44 @@ export function LtvTrendChart({ data }) {
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+          <YAxis
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
             formatter={(value) => [formatCurrency(value), '']}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Line type="monotone" dataKey="enterprise" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Enterprise" />
-          <Line type="monotone" dataKey="professional" stroke="#3b82f6" strokeWidth={2} dot={false} name="Professional" />
-          <Line type="monotone" dataKey="starter" stroke="#10b981" strokeWidth={2} dot={false} name="Starter" />
+          <Line
+            type="monotone"
+            dataKey="enterprise"
+            stroke="#8b5cf6"
+            strokeWidth={2}
+            dot={false}
+            name="Enterprise"
+          />
+          <Line
+            type="monotone"
+            dataKey="professional"
+            stroke="#3b82f6"
+            strokeWidth={2}
+            dot={false}
+            name="Professional"
+          />
+          <Line
+            type="monotone"
+            dataKey="starter"
+            stroke="#10b981"
+            strokeWidth={2}
+            dot={false}
+            name="Starter"
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -237,26 +412,51 @@ export function LtvTrendChart({ data }) {
 /* ─── Payment Gateway Card ─── */
 export function GatewayCard({ gateway }) {
   const meta = gatewayStatusMeta[gateway.status] || gatewayStatusMeta.healthy;
-  const StatusIcon = gateway.status === 'healthy' ? CheckCircle2 : gateway.status === 'degraded' ? AlertTriangle : WifiOff;
+  const StatusIcon =
+    gateway.status === 'healthy'
+      ? CheckCircle2
+      : gateway.status === 'degraded'
+        ? AlertTriangle
+        : WifiOff;
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all',
-      gateway.status === 'critical' ? 'border-danger/30' :
-      gateway.status === 'degraded' ? 'border-warning/30' :
-      'border-border'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all',
+        gateway.status === 'critical'
+          ? 'border-danger/30'
+          : gateway.status === 'degraded'
+            ? 'border-warning/30'
+            : 'border-border'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', meta.class)}>
-            <CreditCard className={cn('h-4 w-4', gateway.status === 'healthy' ? 'text-accent' : gateway.status === 'degraded' ? 'text-warning' : 'text-danger')} />
+            <CreditCard
+              className={cn(
+                'h-4 w-4',
+                gateway.status === 'healthy'
+                  ? 'text-accent'
+                  : gateway.status === 'degraded'
+                    ? 'text-warning'
+                    : 'text-danger'
+              )}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{gateway.name}</h3>
-            <p className="text-[10px] text-text-muted">{gateway.methods.map(m => m.replace('_', ' ')).join(', ')}</p>
+            <p className="text-[10px] text-text-muted">
+              {gateway.methods.map((m) => m.replace('_', ' ')).join(', ')}
+            </p>
           </div>
         </div>
-        <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+            meta.class
+          )}
+        >
           <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
           {meta.label}
         </span>
@@ -265,21 +465,39 @@ export function GatewayCard({ gateway }) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Success Rate</p>
-          <p className={cn('text-sm font-mono font-medium', gateway.successRate >= 98 ? 'text-accent' : gateway.successRate >= 95 ? 'text-warning' : 'text-danger')}>
+          <p
+            className={cn(
+              'text-sm font-mono font-medium',
+              gateway.successRate >= 98
+                ? 'text-accent'
+                : gateway.successRate >= 95
+                  ? 'text-warning'
+                  : 'text-danger'
+            )}
+          >
             {gateway.successRate}%
           </p>
         </div>
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg Latency</p>
-          <p className="text-sm font-mono font-medium text-text-primary">{gateway.avgProcessingTime}ms</p>
+          <p className="text-sm font-mono font-medium text-text-primary">
+            {gateway.avgProcessingTime}ms
+          </p>
         </div>
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Today</p>
-          <p className="text-sm font-mono font-medium text-text-primary">{gateway.volumeToday.toLocaleString()}</p>
+          <p className="text-sm font-mono font-medium text-text-primary">
+            {gateway.volumeToday.toLocaleString()}
+          </p>
         </div>
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Failures</p>
-          <p className={cn('text-sm font-mono font-medium', gateway.failuresToday > 100 ? 'text-warning' : 'text-text-primary')}>
+          <p
+            className={cn(
+              'text-sm font-mono font-medium',
+              gateway.failuresToday > 100 ? 'text-warning' : 'text-text-primary'
+            )}
+          >
             {gateway.failuresToday}
           </p>
         </div>
@@ -322,8 +540,15 @@ export function PaymentMethodChart({ data }) {
             ))}
           </Pie>
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
-            formatter={(value, name, props) => [`${value}% — ${formatCurrency(props.payload.volume)}`, props.payload.method]}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
+            formatter={(value, name, props) => [
+              `${value}% — ${formatCurrency(props.payload.volume)}`,
+              props.payload.method,
+            ]}
           />
           <Legend wrapperStyle={{ fontSize: '10px' }} />
         </PieChart>
@@ -350,16 +575,58 @@ export function ForecastChart({ data, currentMrr }) {
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+          <YAxis
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
             formatter={(value) => [formatCurrency(value), '']}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Area type="monotone" dataKey="optimistic" stroke="#10b981" fill="url(#optimisticGrad)" strokeWidth={1.5} strokeDasharray="4 4" name="Optimistic" />
-          <Area type="monotone" dataKey="realistic" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.1} strokeWidth={2} name="Realistic" />
-          <Area type="monotone" dataKey="conservative" stroke="#ef4444" fill="url(#conservativeGrad)" strokeWidth={1.5} strokeDasharray="4 4" name="Conservative" />
-          <ReferenceLine y={currentMrr} stroke="#64748b" strokeDasharray="3 3" label={{ value: 'Current MRR', position: 'insideBottomRight', fontSize: 10, fill: 'var(--text-muted)' }} />
+          <Area
+            type="monotone"
+            dataKey="optimistic"
+            stroke="#10b981"
+            fill="url(#optimisticGrad)"
+            strokeWidth={1.5}
+            strokeDasharray="4 4"
+            name="Optimistic"
+          />
+          <Area
+            type="monotone"
+            dataKey="realistic"
+            stroke="#3b82f6"
+            fill="#3b82f6"
+            fillOpacity={0.1}
+            strokeWidth={2}
+            name="Realistic"
+          />
+          <Area
+            type="monotone"
+            dataKey="conservative"
+            stroke="#ef4444"
+            fill="url(#conservativeGrad)"
+            strokeWidth={1.5}
+            strokeDasharray="4 4"
+            name="Conservative"
+          />
+          <ReferenceLine
+            y={currentMrr}
+            stroke="#64748b"
+            strokeDasharray="3 3"
+            label={{
+              value: 'Current MRR',
+              position: 'insideBottomRight',
+              fontSize: 10,
+              fill: 'var(--text-muted)',
+            }}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -388,8 +655,15 @@ export function PlanDistributionChart({ data }) {
             ))}
           </Pie>
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
-            formatter={(value, name, props) => [formatCurrency(value), `${props.payload.plan} (${props.payload.customers} customers)`]}
+            contentStyle={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+            }}
+            formatter={(value, name, props) => [
+              formatCurrency(value),
+              `${props.payload.plan} (${props.payload.customers} customers)`,
+            ]}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -404,35 +678,65 @@ export function TaxJurisdictionTable({ jurisdictions }) {
       <table className="w-full text-sm">
         <thead className="bg-background border-b border-border">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Jurisdiction</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Rate</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Collected</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Remitted</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Pending</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Jurisdiction
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Rate
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Collected
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Remitted
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Pending
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Status
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
           {jurisdictions.map((j) => (
-            <tr key={`${j.country}-${j.state || 'all'}`} className="hover:bg-background/50 transition-colors">
+            <tr
+              key={`${j.country}-${j.state || 'all'}`}
+              className="hover:bg-background/50 transition-colors"
+            >
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Globe className="h-3.5 w-3.5 text-text-muted" />
                   <span className="text-text-primary font-medium">
-                    {j.country}{j.state ? ` — ${j.state}` : ''}
+                    {j.country}
+                    {j.state ? ` — ${j.state}` : ''}
                   </span>
                 </div>
               </td>
               <td className="px-4 py-3 text-right font-mono text-text-primary">{j.rate}%</td>
-              <td className="px-4 py-3 text-right font-mono text-text-primary">{formatCurrency(j.collected)}</td>
-              <td className="px-4 py-3 text-right font-mono text-text-secondary">{formatCurrency(j.remitted)}</td>
-              <td className="px-4 py-3 text-right font-mono text-warning">{formatCurrency(j.pending)}</td>
+              <td className="px-4 py-3 text-right font-mono text-text-primary">
+                {formatCurrency(j.collected)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-text-secondary">
+                {formatCurrency(j.remitted)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-warning">
+                {formatCurrency(j.pending)}
+              </td>
               <td className="px-4 py-3 text-right">
-                <span className={cn(
-                  'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-                  j.pending < 5000 ? 'bg-accent/10 text-accent border-accent/20' : 'bg-warning/10 text-warning border-warning/20'
-                )}>
-                  {j.pending < 5000 ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                    j.pending < 5000
+                      ? 'bg-accent/10 text-accent border-accent/20'
+                      : 'bg-warning/10 text-warning border-warning/20'
+                  )}
+                >
+                  {j.pending < 5000 ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <Clock className="h-3 w-3" />
+                  )}
                   {j.pending < 5000 ? 'Current' : 'Pending'}
                 </span>
               </td>
@@ -451,12 +755,24 @@ export function RevenueRecognitionTable({ obligations }) {
       <table className="w-full text-sm">
         <thead className="bg-background border-b border-border">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Contract</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Period</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Total</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Recognized</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Remaining</th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Progress</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Contract
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Period
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Total
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Recognized
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Remaining
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Progress
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -471,15 +787,29 @@ export function RevenueRecognitionTable({ obligations }) {
                   </div>
                 </td>
                 <td className="px-4 py-3 text-text-secondary text-xs">{po.period}</td>
-                <td className="px-4 py-3 text-right font-mono text-text-primary">{formatCurrency(po.amount)}</td>
-                <td className="px-4 py-3 text-right font-mono text-accent">{formatCurrency(po.recognized)}</td>
-                <td className="px-4 py-3 text-right font-mono text-text-secondary">{formatCurrency(po.remaining)}</td>
+                <td className="px-4 py-3 text-right font-mono text-text-primary">
+                  {formatCurrency(po.amount)}
+                </td>
+                <td className="px-4 py-3 text-right font-mono text-accent">
+                  {formatCurrency(po.recognized)}
+                </td>
+                <td className="px-4 py-3 text-right font-mono text-text-secondary">
+                  {formatCurrency(po.remaining)}
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 flex-1 rounded-full bg-border overflow-hidden">
-                      <div className={cn('h-full rounded-full transition-all', pct >= 100 ? 'bg-accent' : 'bg-secondary')} style={{ width: `${Math.min(100, pct)}%` }} />
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all',
+                          pct >= 100 ? 'bg-accent' : 'bg-secondary'
+                        )}
+                        style={{ width: `${Math.min(100, pct)}%` }}
+                      />
                     </div>
-                    <span className="text-[10px] font-mono text-text-muted w-8 text-right">{pct.toFixed(0)}%</span>
+                    <span className="text-[10px] font-mono text-text-muted w-8 text-right">
+                      {pct.toFixed(0)}%
+                    </span>
                   </div>
                 </td>
               </tr>
@@ -493,17 +823,22 @@ export function RevenueRecognitionTable({ obligations }) {
 
 /* ─── Churn Reason Bar Chart ─── */
 export function ChurnReasonChart({ data }) {
-  const max = Math.max(...data.map(d => d.pct));
+  const max = Math.max(...data.map((d) => d.pct));
   return (
     <div className="space-y-3">
       {data.map((item) => (
         <div key={item.reason}>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-text-secondary">{item.reason}</span>
-            <span className="text-xs font-mono font-medium text-text-primary">{item.count} ({item.pct}%)</span>
+            <span className="text-xs font-mono font-medium text-text-primary">
+              {item.count} ({item.pct}%)
+            </span>
           </div>
           <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-            <div className="h-full rounded-full bg-danger/70 transition-all" style={{ width: `${(item.pct / max) * 100}%` }} />
+            <div
+              className="h-full rounded-full bg-danger/70 transition-all"
+              style={{ width: `${(item.pct / max) * 100}%` }}
+            />
           </div>
         </div>
       ))}

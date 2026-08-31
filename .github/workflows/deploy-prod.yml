@@ -26,4 +26,5 @@ jobs:
           NODE_ENV: production
 
       - name: Deploy to production
-        run: echo "TODO: add production deploy command (e.g. Railway, Render, Fly.io)"
+        run: |
+          echo "TODO: add production deploy command - Railway, Render, or Fly.io"

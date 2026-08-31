@@ -1,12 +1,43 @@
 /* src/app/admin/billing/dunning/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  AlertTriangle, RefreshCw, Play, Pause, SkipForward, X, Check,
-  Search, Filter, ChevronDown, ChevronUp, Clock, Mail, Phone,
-  Send, Ban, DollarSign, CreditCard, Building2, Calendar,
-  ArrowRight, Eye, Edit3, Trash2, Download, Plus, Bell,
-  Zap, Shield, TrendingUp, TrendingDown, Minus, History,
-  RotateCcw, Settings, UserX, FileWarning
+  AlertTriangle,
+  RefreshCw,
+  Play,
+  Pause,
+  SkipForward,
+  X,
+  Check,
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Mail,
+  Phone,
+  Send,
+  Ban,
+  DollarSign,
+  CreditCard,
+  Building2,
+  Calendar,
+  ArrowRight,
+  Eye,
+  Edit3,
+  Trash2,
+  Download,
+  Plus,
+  Bell,
+  Zap,
+  Shield,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  History,
+  RotateCcw,
+  Settings,
+  UserX,
+  FileWarning,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -18,8 +49,8 @@ const initialDunningRecords = [
     tenantId: 'TNT-004',
     tenantName: 'Downtown Suites Chicago',
     invoiceId: 'INV-2026-0812',
-    invoiceAmount: 199.00,
-    amountDue: 199.00,
+    invoiceAmount: 199.0,
+    amountDue: 199.0,
     currency: 'USD',
     status: 'active',
     stage: 2,
@@ -36,16 +67,62 @@ const initialDunningRecords = [
     suspendedAt: null,
     history: [
       { date: '2026-08-12', action: 'Invoice created', type: 'info', actor: 'System' },
-      { date: '2026-08-12 02:15:00', action: 'Payment failed', type: 'danger', actor: 'Stripe', detail: 'Insufficient funds' },
-      { date: '2026-08-13 09:00:00', action: 'Retry #1 failed', type: 'danger', actor: 'System', detail: 'Insufficient funds' },
-      { date: '2026-08-13 14:30:00', action: 'Reminder email sent', type: 'warning', actor: 'System' },
-      { date: '2026-08-14 09:00:00', action: 'Retry #2 failed', type: 'danger', actor: 'System', detail: 'Insufficient funds' },
-      { date: '2026-08-14 16:00:00', action: 'Escalated to Stage 2', type: 'warning', actor: 'System' },
-      { date: '2026-08-15 09:00:00', action: 'Retry #3 failed', type: 'danger', actor: 'System', detail: 'Insufficient funds' },
+      {
+        date: '2026-08-12 02:15:00',
+        action: 'Payment failed',
+        type: 'danger',
+        actor: 'Stripe',
+        detail: 'Insufficient funds',
+      },
+      {
+        date: '2026-08-13 09:00:00',
+        action: 'Retry #1 failed',
+        type: 'danger',
+        actor: 'System',
+        detail: 'Insufficient funds',
+      },
+      {
+        date: '2026-08-13 14:30:00',
+        action: 'Reminder email sent',
+        type: 'warning',
+        actor: 'System',
+      },
+      {
+        date: '2026-08-14 09:00:00',
+        action: 'Retry #2 failed',
+        type: 'danger',
+        actor: 'System',
+        detail: 'Insufficient funds',
+      },
+      {
+        date: '2026-08-14 16:00:00',
+        action: 'Escalated to Stage 2',
+        type: 'warning',
+        actor: 'System',
+      },
+      {
+        date: '2026-08-15 09:00:00',
+        action: 'Retry #3 failed',
+        type: 'danger',
+        actor: 'System',
+        detail: 'Insufficient funds',
+      },
     ],
     communications: [
-      { type: 'email', sentAt: '2026-08-13 14:30:00', status: 'delivered', subject: 'Payment Failed — Please Update Your Card', opened: true },
-      { type: 'email', sentAt: '2026-08-14 10:00:00', status: 'delivered', subject: 'Urgent: Payment Required to Avoid Service Interruption', opened: false },
+      {
+        type: 'email',
+        sentAt: '2026-08-13 14:30:00',
+        status: 'delivered',
+        subject: 'Payment Failed — Please Update Your Card',
+        opened: true,
+      },
+      {
+        type: 'email',
+        sentAt: '2026-08-14 10:00:00',
+        status: 'delivered',
+        subject: 'Urgent: Payment Required to Avoid Service Interruption',
+        opened: false,
+      },
     ],
     autoRetry: true,
     manualHold: false,
@@ -55,8 +132,8 @@ const initialDunningRecords = [
     tenantId: 'TNT-008',
     tenantName: 'Desert Oasis Phoenix',
     invoiceId: 'INV-2026-0515',
-    invoiceAmount: 199.00,
-    amountDue: 199.00,
+    invoiceAmount: 199.0,
+    amountDue: 199.0,
     currency: 'USD',
     status: 'resolved',
     stage: 0,
@@ -73,14 +150,43 @@ const initialDunningRecords = [
     suspendedAt: null,
     history: [
       { date: '2026-05-15', action: 'Invoice created', type: 'info', actor: 'System' },
-      { date: '2026-05-15 02:15:00', action: 'Payment failed', type: 'danger', actor: 'Stripe', detail: 'Expired card' },
-      { date: '2026-05-16 09:00:00', action: 'Retry #1 failed', type: 'danger', actor: 'System', detail: 'Expired card' },
-      { date: '2026-05-16 14:00:00', action: 'Customer updated payment method', type: 'accent', actor: 'Customer' },
-      { date: '2026-05-17 09:00:00', action: 'Retry #2 succeeded', type: 'accent', actor: 'System', detail: 'Payment captured: $199.00' },
+      {
+        date: '2026-05-15 02:15:00',
+        action: 'Payment failed',
+        type: 'danger',
+        actor: 'Stripe',
+        detail: 'Expired card',
+      },
+      {
+        date: '2026-05-16 09:00:00',
+        action: 'Retry #1 failed',
+        type: 'danger',
+        actor: 'System',
+        detail: 'Expired card',
+      },
+      {
+        date: '2026-05-16 14:00:00',
+        action: 'Customer updated payment method',
+        type: 'accent',
+        actor: 'Customer',
+      },
+      {
+        date: '2026-05-17 09:00:00',
+        action: 'Retry #2 succeeded',
+        type: 'accent',
+        actor: 'System',
+        detail: 'Payment captured: $199.00',
+      },
       { date: '2026-05-17 09:05:00', action: 'Dunning resolved', type: 'accent', actor: 'System' },
     ],
     communications: [
-      { type: 'email', sentAt: '2026-05-16 10:00:00', status: 'delivered', subject: 'Payment Failed — Update Expired Card', opened: true },
+      {
+        type: 'email',
+        sentAt: '2026-05-16 10:00:00',
+        status: 'delivered',
+        subject: 'Payment Failed — Update Expired Card',
+        opened: true,
+      },
     ],
     autoRetry: true,
     manualHold: false,
@@ -90,8 +196,8 @@ const initialDunningRecords = [
     tenantId: 'TNT-006',
     tenantName: 'Lakeside Resort Tahoe',
     invoiceId: 'INV-2026-0814',
-    invoiceAmount: 4990.00,
-    amountDue: 4990.00,
+    invoiceAmount: 4990.0,
+    amountDue: 4990.0,
     currency: 'USD',
     status: 'active',
     stage: 1,
@@ -108,12 +214,35 @@ const initialDunningRecords = [
     suspendedAt: null,
     history: [
       { date: '2026-08-14', action: 'Invoice created', type: 'info', actor: 'System' },
-      { date: '2026-08-14 06:00:00', action: 'ACH debit failed', type: 'danger', actor: 'Stripe', detail: 'Bank account closed' },
-      { date: '2026-08-15 09:00:00', action: 'Retry #1 failed', type: 'danger', actor: 'System', detail: 'Bank account closed' },
-      { date: '2026-08-15 10:00:00', action: 'Reminder email sent', type: 'warning', actor: 'System' },
+      {
+        date: '2026-08-14 06:00:00',
+        action: 'ACH debit failed',
+        type: 'danger',
+        actor: 'Stripe',
+        detail: 'Bank account closed',
+      },
+      {
+        date: '2026-08-15 09:00:00',
+        action: 'Retry #1 failed',
+        type: 'danger',
+        actor: 'System',
+        detail: 'Bank account closed',
+      },
+      {
+        date: '2026-08-15 10:00:00',
+        action: 'Reminder email sent',
+        type: 'warning',
+        actor: 'System',
+      },
     ],
     communications: [
-      { type: 'email', sentAt: '2026-08-15 10:00:00', status: 'delivered', subject: 'ACH Payment Failed — Please Update Bank Account', opened: false },
+      {
+        type: 'email',
+        sentAt: '2026-08-15 10:00:00',
+        status: 'delivered',
+        subject: 'ACH Payment Failed — Please Update Bank Account',
+        opened: false,
+      },
     ],
     autoRetry: true,
     manualHold: false,
@@ -123,8 +252,8 @@ const initialDunningRecords = [
     tenantId: 'TNT-005',
     tenantName: 'Coastal Inn San Diego',
     invoiceId: 'INV-2026-0905',
-    invoiceAmount: 199.00,
-    amountDue: 199.00,
+    invoiceAmount: 199.0,
+    amountDue: 199.0,
     currency: 'USD',
     status: 'suspended',
     stage: 4,
@@ -141,22 +270,66 @@ const initialDunningRecords = [
     suspendedAt: '2026-08-10',
     history: [
       { date: '2026-08-05', action: 'Invoice created', type: 'info', actor: 'System' },
-      { date: '2026-08-05 02:15:00', action: 'Payment failed', type: 'danger', actor: 'Stripe', detail: 'Do not honor' },
+      {
+        date: '2026-08-05 02:15:00',
+        action: 'Payment failed',
+        type: 'danger',
+        actor: 'Stripe',
+        detail: 'Do not honor',
+      },
       { date: '2026-08-06 09:00:00', action: 'Retry #1 failed', type: 'danger', actor: 'System' },
-      { date: '2026-08-06 14:00:00', action: 'Reminder email sent', type: 'warning', actor: 'System' },
+      {
+        date: '2026-08-06 14:00:00',
+        action: 'Reminder email sent',
+        type: 'warning',
+        actor: 'System',
+      },
       { date: '2026-08-07 09:00:00', action: 'Retry #2 failed', type: 'danger', actor: 'System' },
-      { date: '2026-08-07 16:00:00', action: 'Escalated to Stage 2', type: 'warning', actor: 'System' },
+      {
+        date: '2026-08-07 16:00:00',
+        action: 'Escalated to Stage 2',
+        type: 'warning',
+        actor: 'System',
+      },
       { date: '2026-08-08 09:00:00', action: 'Retry #3 failed', type: 'danger', actor: 'System' },
-      { date: '2026-08-08 12:00:00', action: 'Escalated to Stage 3 — phone outreach', type: 'warning', actor: 'System' },
+      {
+        date: '2026-08-08 12:00:00',
+        action: 'Escalated to Stage 3 — phone outreach',
+        type: 'warning',
+        actor: 'System',
+      },
       { date: '2026-08-09 09:00:00', action: 'Retry #4 failed', type: 'danger', actor: 'System' },
-      { date: '2026-08-09 14:00:00', action: 'Escalated to Stage 4 — final notice', type: 'danger', actor: 'System' },
+      {
+        date: '2026-08-09 14:00:00',
+        action: 'Escalated to Stage 4 — final notice',
+        type: 'danger',
+        actor: 'System',
+      },
       { date: '2026-08-10 09:00:00', action: 'Retry #5 failed', type: 'danger', actor: 'System' },
       { date: '2026-08-10 10:00:00', action: 'Account suspended', type: 'danger', actor: 'System' },
     ],
     communications: [
-      { type: 'email', sentAt: '2026-08-06 14:00:00', status: 'delivered', subject: 'Payment Failed — Please Update Your Method', opened: true },
-      { type: 'email', sentAt: '2026-08-08 12:30:00', status: 'delivered', subject: 'Urgent: Service At Risk — Payment Required', opened: false },
-      { type: 'email', sentAt: '2026-08-09 14:30:00', status: 'bounced', subject: 'FINAL NOTICE: Account Will Be Suspended', opened: false },
+      {
+        type: 'email',
+        sentAt: '2026-08-06 14:00:00',
+        status: 'delivered',
+        subject: 'Payment Failed — Please Update Your Method',
+        opened: true,
+      },
+      {
+        type: 'email',
+        sentAt: '2026-08-08 12:30:00',
+        status: 'delivered',
+        subject: 'Urgent: Service At Risk — Payment Required',
+        opened: false,
+      },
+      {
+        type: 'email',
+        sentAt: '2026-08-09 14:30:00',
+        status: 'bounced',
+        subject: 'FINAL NOTICE: Account Will Be Suspended',
+        opened: false,
+      },
     ],
     autoRetry: false,
     manualHold: false,
@@ -166,8 +339,8 @@ const initialDunningRecords = [
     tenantId: 'TNT-002',
     tenantName: 'Seaside Resort Miami',
     invoiceId: 'INV-2026-0820',
-    invoiceAmount: 499.00,
-    amountDue: 499.00,
+    invoiceAmount: 499.0,
+    amountDue: 499.0,
     currency: 'USD',
     status: 'on_hold',
     stage: 1,
@@ -184,9 +357,26 @@ const initialDunningRecords = [
     suspendedAt: null,
     history: [
       { date: '2026-08-20', action: 'Invoice created', type: 'info', actor: 'System' },
-      { date: '2026-08-20 02:15:00', action: 'Payment failed', type: 'danger', actor: 'Stripe', detail: 'Processing error (Stripe incident)' },
-      { date: '2026-08-20 03:00:00', action: 'Auto-retry paused — Stripe incident detected', type: 'warning', actor: 'System' },
-      { date: '2026-08-20 09:00:00', action: 'Placed on manual hold', type: 'info', actor: 'David Park', detail: 'Waiting for Stripe incident resolution' },
+      {
+        date: '2026-08-20 02:15:00',
+        action: 'Payment failed',
+        type: 'danger',
+        actor: 'Stripe',
+        detail: 'Processing error (Stripe incident)',
+      },
+      {
+        date: '2026-08-20 03:00:00',
+        action: 'Auto-retry paused — Stripe incident detected',
+        type: 'warning',
+        actor: 'System',
+      },
+      {
+        date: '2026-08-20 09:00:00',
+        action: 'Placed on manual hold',
+        type: 'info',
+        actor: 'David Park',
+        detail: 'Waiting for Stripe incident resolution',
+      },
     ],
     communications: [],
     autoRetry: false,
@@ -197,10 +387,38 @@ const initialDunningRecords = [
 /* ─── Dunning Config ─── */
 const dunningConfig = {
   stages: [
-    { id: 1, name: 'Friendly Reminder', delay: 0, action: 'email', template: 'payment_failed_friendly', retryInterval: 24 },
-    { id: 2, name: 'Urgent Notice', delay: 3, action: 'email', template: 'payment_failed_urgent', retryInterval: 24 },
-    { id: 3, name: 'Phone Outreach', delay: 5, action: 'phone', template: 'payment_failed_phone', retryInterval: 48 },
-    { id: 4, name: 'Final Notice / Suspend', delay: 7, action: 'suspend', template: 'payment_failed_final', retryInterval: 0 },
+    {
+      id: 1,
+      name: 'Friendly Reminder',
+      delay: 0,
+      action: 'email',
+      template: 'payment_failed_friendly',
+      retryInterval: 24,
+    },
+    {
+      id: 2,
+      name: 'Urgent Notice',
+      delay: 3,
+      action: 'email',
+      template: 'payment_failed_urgent',
+      retryInterval: 24,
+    },
+    {
+      id: 3,
+      name: 'Phone Outreach',
+      delay: 5,
+      action: 'phone',
+      template: 'payment_failed_phone',
+      retryInterval: 48,
+    },
+    {
+      id: 4,
+      name: 'Final Notice / Suspend',
+      delay: 7,
+      action: 'suspend',
+      template: 'payment_failed_final',
+      retryInterval: 0,
+    },
   ],
   retrySchedule: [24, 24, 48, 48, 72], // hours between retries
   autoSuspendAfterStage: 4,
@@ -210,11 +428,27 @@ const dunningConfig = {
 
 /* ─── Metadata ─── */
 const statusMeta = {
-  active: { label: 'Active', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
+  active: {
+    label: 'Active',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
   on_hold: { label: 'On Hold', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20' },
-  resolved: { label: 'Resolved', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-  suspended: { label: 'Suspended', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
-  cancelled: { label: 'Cancelled', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border' },
+  resolved: {
+    label: 'Resolved',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  suspended: {
+    label: 'Suspended',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    dot: 'bg-text-muted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+  },
 };
 
 const failureReasonMeta = {
@@ -242,7 +476,12 @@ function timeUntil(dateStr) {
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.active;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -261,7 +500,9 @@ function StageIndicator({ stage, maxStages }) {
           )}
         />
       ))}
-      <span className="ml-1 text-xs text-text-muted">{stage}/{maxStages}</span>
+      <span className="ml-1 text-xs text-text-muted">
+        {stage}/{maxStages}
+      </span>
     </div>
   );
 }
@@ -275,7 +516,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -309,12 +561,26 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg',
-                record.status === 'suspended' ? 'bg-danger/10' : record.status === 'resolved' ? 'bg-accent/10' : 'bg-warning/10'
-              )}>
-                <AlertTriangle className={cn('h-5 w-5',
-                  record.status === 'suspended' ? 'text-danger' : record.status === 'resolved' ? 'text-accent' : 'text-warning'
-                )} />
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg',
+                  record.status === 'suspended'
+                    ? 'bg-danger/10'
+                    : record.status === 'resolved'
+                      ? 'bg-accent/10'
+                      : 'bg-warning/10'
+                )}
+              >
+                <AlertTriangle
+                  className={cn(
+                    'h-5 w-5',
+                    record.status === 'suspended'
+                      ? 'text-danger'
+                      : record.status === 'resolved'
+                        ? 'text-accent'
+                        : 'text-warning'
+                  )}
+                />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{record.id}</h2>
@@ -323,7 +589,10 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status={record.status} />
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -340,7 +609,9 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -356,7 +627,9 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-xs text-text-muted uppercase tracking-wider">Amount Due</p>
-                <p className="mt-1 text-3xl font-bold font-mono text-text-primary">{formatCurrency(record.amountDue)}</p>
+                <p className="mt-1 text-3xl font-bold font-mono text-text-primary">
+                  {formatCurrency(record.amountDue)}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-text-muted uppercase tracking-wider">Invoice</p>
@@ -369,7 +642,12 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
                 <CreditCard className="h-4 w-4 text-text-muted" />
                 <span className="text-sm text-text-secondary">{record.paymentMethod}</span>
               </div>
-              <span className={cn('text-xs font-medium', (failureReasonMeta[record.failureReason]?.color || 'text-text-muted'))}>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  failureReasonMeta[record.failureReason]?.color || 'text-text-muted'
+                )}
+              >
                 {failureReasonMeta[record.failureReason]?.label || record.failureReason}
               </span>
             </div>
@@ -378,13 +656,20 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
           {/* Progress */}
           <div className="rounded-xl border border-border bg-surface p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">Dunning Progress</p>
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Dunning Progress
+              </p>
               <StageIndicator stage={record.stage} maxStages={record.maxStages} />
             </div>
             <div className="h-2 w-full rounded-full bg-border overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all',
-                  record.status === 'resolved' ? 'bg-accent' : record.status === 'suspended' ? 'bg-danger' : 'bg-warning'
+                className={cn(
+                  'h-full rounded-full transition-all',
+                  record.status === 'resolved'
+                    ? 'bg-accent'
+                    : record.status === 'suspended'
+                      ? 'bg-danger'
+                      : 'bg-warning'
                 )}
                 style={{ width: `${(record.stage / record.maxStages) * 100}%` }}
               />
@@ -392,7 +677,9 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
             <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-xs text-text-muted">Retry Count</p>
-                <p className="font-mono font-medium text-text-primary">{record.retryCount} / {record.maxRetries}</p>
+                <p className="font-mono font-medium text-text-primary">
+                  {record.retryCount} / {record.maxRetries}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-text-muted">Next Retry</p>
@@ -412,21 +699,33 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
                     {index < record.history.length - 1 && (
                       <div className="absolute left-[15px] top-8 bottom-0 w-px bg-border" />
                     )}
-                    <div className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2',
-                      entry.type === 'danger' ? 'border-danger bg-danger/10' :
-                      entry.type === 'warning' ? 'border-warning bg-warning/10' :
-                      entry.type === 'accent' ? 'border-accent bg-accent/10' :
-                      'border-info bg-info/10'
-                    )}>
-                      {entry.type === 'danger' ? <AlertTriangle className="h-3.5 w-3.5 text-danger" /> :
-                       entry.type === 'warning' ? <Clock className="h-3.5 w-3.5 text-warning" /> :
-                       entry.type === 'accent' ? <Check className="h-3.5 w-3.5 text-accent" /> :
-                       <History className="h-3.5 w-3.5 text-info" />}
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2',
+                        entry.type === 'danger'
+                          ? 'border-danger bg-danger/10'
+                          : entry.type === 'warning'
+                            ? 'border-warning bg-warning/10'
+                            : entry.type === 'accent'
+                              ? 'border-accent bg-accent/10'
+                              : 'border-info bg-info/10'
+                      )}
+                    >
+                      {entry.type === 'danger' ? (
+                        <AlertTriangle className="h-3.5 w-3.5 text-danger" />
+                      ) : entry.type === 'warning' ? (
+                        <Clock className="h-3.5 w-3.5 text-warning" />
+                      ) : entry.type === 'accent' ? (
+                        <Check className="h-3.5 w-3.5 text-accent" />
+                      ) : (
+                        <History className="h-3.5 w-3.5 text-info" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-text-primary">{entry.action}</p>
-                      {entry.detail && <p className="text-xs text-text-secondary mt-0.5">{entry.detail}</p>}
+                      {entry.detail && (
+                        <p className="text-xs text-text-secondary mt-0.5">{entry.detail}</p>
+                      )}
                       <div className="mt-1 flex items-center gap-2 text-xs text-text-muted">
                         <span>{entry.actor}</span>
                         <span>·</span>
@@ -454,13 +753,20 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Mail className="h-4 w-4 text-text-muted" />
-                          <span className="text-sm font-medium text-text-primary">{comm.subject}</span>
+                          <span className="text-sm font-medium text-text-primary">
+                            {comm.subject}
+                          </span>
                         </div>
-                        <span className={cn('text-[10px] font-medium uppercase px-2 py-0.5 rounded-full',
-                          comm.status === 'delivered' ? 'bg-accent/10 text-accent' :
-                          comm.status === 'bounced' ? 'bg-danger/10 text-danger' :
-                          'bg-warning/10 text-warning'
-                        )}>
+                        <span
+                          className={cn(
+                            'text-[10px] font-medium uppercase px-2 py-0.5 rounded-full',
+                            comm.status === 'delivered'
+                              ? 'bg-accent/10 text-accent'
+                              : comm.status === 'bounced'
+                                ? 'bg-danger/10 text-danger'
+                                : 'bg-warning/10 text-warning'
+                          )}
+                        >
                           {comm.status}
                         </span>
                       </div>
@@ -489,14 +795,23 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
               <h3 className="text-sm font-semibold text-text-primary">Dunning Configuration</h3>
               <div className="rounded-xl border border-border bg-surface p-5 space-y-4">
                 {dunningConfig.stages.map((stage) => (
-                  <div key={stage.id} className={cn(
-                    'flex items-start gap-3 rounded-lg border p-3',
-                    stage.id <= record.stage ? 'border-warning/30 bg-warning/5' : 'border-border bg-background'
-                  )}>
-                    <div className={cn(
-                      'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
-                      stage.id <= record.stage ? 'bg-warning text-white' : 'bg-border text-text-muted'
-                    )}>
+                  <div
+                    key={stage.id}
+                    className={cn(
+                      'flex items-start gap-3 rounded-lg border p-3',
+                      stage.id <= record.stage
+                        ? 'border-warning/30 bg-warning/5'
+                        : 'border-border bg-background'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                        stage.id <= record.stage
+                          ? 'bg-warning text-white'
+                          : 'bg-border text-text-muted'
+                      )}
+                    >
                       {stage.id}
                     </div>
                     <div className="flex-1">
@@ -511,15 +826,21 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
               <div className="rounded-xl border border-border bg-surface p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Grace Period</span>
-                  <span className="font-mono text-text-primary">{dunningConfig.gracePeriodDays} days</span>
+                  <span className="font-mono text-text-primary">
+                    {dunningConfig.gracePeriodDays} days
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Max Retries</span>
-                  <span className="font-mono text-text-primary">{dunningConfig.maxRetriesPerInvoice}</span>
+                  <span className="font-mono text-text-primary">
+                    {dunningConfig.maxRetriesPerInvoice}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Auto-Suspend After</span>
-                  <span className="font-mono text-text-primary">Stage {dunningConfig.autoSuspendAfterStage}</span>
+                  <span className="font-mono text-text-primary">
+                    Stage {dunningConfig.autoSuspendAfterStage}
+                  </span>
                 </div>
               </div>
             </div>
@@ -538,7 +859,12 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
                 <Button size="sm" variant="outline" onClick={handleSkip}>
                   <SkipForward className="mr-1.5 h-3.5 w-3.5" /> Skip Stage
                 </Button>
-                <Button size="sm" variant="outline" className="text-accent border-accent/30 hover:bg-accent/10" onClick={handleResolve}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-accent border-accent/30 hover:bg-accent/10"
+                  onClick={handleResolve}
+                >
                   <Check className="mr-1.5 h-3.5 w-3.5" /> Mark Resolved
                 </Button>
               </>
@@ -548,13 +874,23 @@ function DunningDetailDrawer({ record, onClose, onAction }) {
                 <Button size="sm" onClick={handleResume}>
                   <Play className="mr-1.5 h-3.5 w-3.5" /> Resume
                 </Button>
-                <Button size="sm" variant="outline" className="text-accent border-accent/30 hover:bg-accent/10" onClick={handleResolve}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-accent border-accent/30 hover:bg-accent/10"
+                  onClick={handleResolve}
+                >
                   <Check className="mr-1.5 h-3.5 w-3.5" /> Mark Resolved
                 </Button>
               </>
             )}
             {record.status === 'active' && record.stage >= 3 && (
-              <Button size="sm" variant="outline" className="text-danger border-danger/30 hover:bg-danger/10 ml-auto" onClick={handleSuspend}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-danger border-danger/30 hover:bg-danger/10 ml-auto"
+                onClick={handleSuspend}
+              >
                 <Ban className="mr-1.5 h-3.5 w-3.5" /> Suspend Account
               </Button>
             )}
@@ -575,7 +911,8 @@ export default function DunningPage() {
 
   const filteredRecords = useMemo(() => {
     let result = records.filter((r) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         r.id.toLowerCase().includes(query.toLowerCase()) ||
         r.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         r.invoiceId.toLowerCase().includes(query.toLowerCase()) ||
@@ -602,100 +939,126 @@ export default function DunningPage() {
     return result;
   }, [records, query, statusFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: records.length,
-    active: records.filter(r => r.status === 'active').length,
-    onHold: records.filter(r => r.status === 'on_hold').length,
-    totalAtRisk: records.filter(r => r.status === 'active').reduce((s, r) => s + r.amountDue, 0),
-    suspended: records.filter(r => r.status === 'suspended').length,
-    resolved: records.filter(r => r.status === 'resolved').length,
-  }), [records]);
+  const stats = useMemo(
+    () => ({
+      total: records.length,
+      active: records.filter((r) => r.status === 'active').length,
+      onHold: records.filter((r) => r.status === 'on_hold').length,
+      totalAtRisk: records
+        .filter((r) => r.status === 'active')
+        .reduce((s, r) => s + r.amountDue, 0),
+      suspended: records.filter((r) => r.status === 'suspended').length,
+      resolved: records.filter((r) => r.status === 'resolved').length,
+    }),
+    [records]
+  );
 
   const handleAction = (id, action) => {
-    setRecords(prev => prev.map(r => {
-      if (r.id !== id) return r;
-      switch (action) {
-        case 'retry':
-          return {
-            ...r,
-            retryCount: r.retryCount + 1,
-            lastRetryAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-            history: [...r.history, {
-              date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              action: `Manual retry #${r.retryCount + 1}`,
-              type: 'info',
-              actor: 'You',
-            }],
-          };
-        case 'hold':
-          return {
-            ...r,
-            status: 'on_hold',
-            manualHold: true,
-            autoRetry: false,
-            history: [...r.history, {
-              date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              action: 'Placed on manual hold',
-              type: 'info',
-              actor: 'You',
-            }],
-          };
-        case 'resume':
-          return {
-            ...r,
-            status: 'active',
-            manualHold: false,
-            autoRetry: true,
-            history: [...r.history, {
-              date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              action: 'Resumed from hold',
-              type: 'info',
-              actor: 'You',
-            }],
-          };
-        case 'skip':
-          return {
-            ...r,
-            stage: Math.min(r.stage + 1, r.maxStages),
-            history: [...r.history, {
-              date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              action: `Skipped to Stage ${Math.min(r.stage + 1, r.maxStages)}`,
-              type: 'warning',
-              actor: 'You',
-            }],
-          };
-        case 'resolve':
-          return {
-            ...r,
-            status: 'resolved',
-            nextRetryAt: null,
-            history: [...r.history, {
-              date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              action: 'Marked as resolved',
-              type: 'accent',
-              actor: 'You',
-            }],
-          };
-        case 'suspend':
-          return {
-            ...r,
-            status: 'suspended',
-            suspendedAt: new Date().toISOString().split('T')[0],
-            nextRetryAt: null,
-            history: [...r.history, {
-              date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              action: 'Account suspended',
-              type: 'danger',
-              actor: 'You',
-            }],
-          };
-        default: return r;
-      }
-    }));
+    setRecords((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r;
+        switch (action) {
+          case 'retry':
+            return {
+              ...r,
+              retryCount: r.retryCount + 1,
+              lastRetryAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
+              history: [
+                ...r.history,
+                {
+                  date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                  action: `Manual retry #${r.retryCount + 1}`,
+                  type: 'info',
+                  actor: 'You',
+                },
+              ],
+            };
+          case 'hold':
+            return {
+              ...r,
+              status: 'on_hold',
+              manualHold: true,
+              autoRetry: false,
+              history: [
+                ...r.history,
+                {
+                  date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                  action: 'Placed on manual hold',
+                  type: 'info',
+                  actor: 'You',
+                },
+              ],
+            };
+          case 'resume':
+            return {
+              ...r,
+              status: 'active',
+              manualHold: false,
+              autoRetry: true,
+              history: [
+                ...r.history,
+                {
+                  date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                  action: 'Resumed from hold',
+                  type: 'info',
+                  actor: 'You',
+                },
+              ],
+            };
+          case 'skip':
+            return {
+              ...r,
+              stage: Math.min(r.stage + 1, r.maxStages),
+              history: [
+                ...r.history,
+                {
+                  date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                  action: `Skipped to Stage ${Math.min(r.stage + 1, r.maxStages)}`,
+                  type: 'warning',
+                  actor: 'You',
+                },
+              ],
+            };
+          case 'resolve':
+            return {
+              ...r,
+              status: 'resolved',
+              nextRetryAt: null,
+              history: [
+                ...r.history,
+                {
+                  date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                  action: 'Marked as resolved',
+                  type: 'accent',
+                  actor: 'You',
+                },
+              ],
+            };
+          case 'suspend':
+            return {
+              ...r,
+              status: 'suspended',
+              suspendedAt: new Date().toISOString().split('T')[0],
+              nextRetryAt: null,
+              history: [
+                ...r.history,
+                {
+                  date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                  action: 'Account suspended',
+                  type: 'danger',
+                  actor: 'You',
+                },
+              ],
+            };
+          default:
+            return r;
+        }
+      })
+    );
   };
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
@@ -707,7 +1070,9 @@ export default function DunningPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Dunning Control</h1>
-          <p className="text-sm text-text-secondary">Manage failed payments, retry logic, and collection workflows</p>
+          <p className="text-sm text-text-secondary">
+            Manage failed payments, retry logic, and collection workflows
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -721,10 +1086,34 @@ export default function DunningPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Active" value={stats.active} icon={AlertTriangle} color="text-warning" subtext="In collection" />
-        <StatCard label="On Hold" value={stats.onHold} icon={Pause} color="text-info" subtext="Manual pause" />
-        <StatCard label="At Risk" value={formatCurrency(stats.totalAtRisk)} icon={DollarSign} color="text-danger" subtext="Outstanding" />
-        <StatCard label="Resolved" value={stats.resolved} icon={Check} color="text-accent" subtext="This month" />
+        <StatCard
+          label="Active"
+          value={stats.active}
+          icon={AlertTriangle}
+          color="text-warning"
+          subtext="In collection"
+        />
+        <StatCard
+          label="On Hold"
+          value={stats.onHold}
+          icon={Pause}
+          color="text-info"
+          subtext="Manual pause"
+        />
+        <StatCard
+          label="At Risk"
+          value={formatCurrency(stats.totalAtRisk)}
+          icon={DollarSign}
+          color="text-danger"
+          subtext="Outstanding"
+        />
+        <StatCard
+          label="Resolved"
+          value={stats.resolved}
+          icon={Check}
+          color="text-accent"
+          subtext="This month"
+        />
       </div>
 
       {/* Filters */}
@@ -747,7 +1136,9 @@ export default function DunningPage() {
           >
             <option value="all">All Statuses</option>
             {Object.entries(statusMeta).map(([key, meta]) => (
-              <option key={key} value={key}>{meta.label}</option>
+              <option key={key} value={key}>
+                {meta.label}
+              </option>
             ))}
           </select>
         </div>
@@ -755,7 +1146,8 @@ export default function DunningPage() {
 
       {/* Results */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredRecords.length}</span> of {records.length} dunning records
+        Showing <span className="font-medium text-text-primary">{filteredRecords.length}</span> of{' '}
+        {records.length} dunning records
       </p>
 
       {/* Table */}
@@ -783,9 +1175,12 @@ export default function DunningPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -804,15 +1199,31 @@ export default function DunningPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg',
-                        record.status === 'suspended' ? 'bg-danger/10' : record.status === 'resolved' ? 'bg-accent/10' : 'bg-warning/10'
-                      )}>
-                        <AlertTriangle className={cn('h-4 w-4',
-                          record.status === 'suspended' ? 'text-danger' : record.status === 'resolved' ? 'text-accent' : 'text-warning'
-                        )} />
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-lg',
+                          record.status === 'suspended'
+                            ? 'bg-danger/10'
+                            : record.status === 'resolved'
+                              ? 'bg-accent/10'
+                              : 'bg-warning/10'
+                        )}
+                      >
+                        <AlertTriangle
+                          className={cn(
+                            'h-4 w-4',
+                            record.status === 'suspended'
+                              ? 'text-danger'
+                              : record.status === 'resolved'
+                                ? 'text-accent'
+                                : 'text-warning'
+                          )}
+                        />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-text-primary font-mono">{record.id}</p>
+                        <p className="text-sm font-medium text-text-primary font-mono">
+                          {record.id}
+                        </p>
                         <p className="text-[10px] text-text-muted">{record.invoiceId}</p>
                       </div>
                     </div>
@@ -822,7 +1233,9 @@ export default function DunningPage() {
                     <p className="text-[10px] text-text-muted font-mono">{record.tenantId}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(record.amountDue)}</p>
+                    <p className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(record.amountDue)}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
                     <StageIndicator stage={record.stage} maxStages={record.maxStages} />
@@ -831,7 +1244,12 @@ export default function DunningPage() {
                     <StatusBadge status={record.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn('text-xs font-medium', failureReasonMeta[record.failureReason]?.color || 'text-text-muted')}>
+                    <span
+                      className={cn(
+                        'text-xs font-medium',
+                        failureReasonMeta[record.failureReason]?.color || 'text-text-muted'
+                      )}
+                    >
                       {failureReasonMeta[record.failureReason]?.label || record.failureReason}
                     </span>
                   </td>
@@ -839,7 +1257,9 @@ export default function DunningPage() {
                     {record.nextRetryAt ? (
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-text-muted" />
-                        <span className="text-xs text-text-secondary">{timeUntil(record.nextRetryAt)}</span>
+                        <span className="text-xs text-text-secondary">
+                          {timeUntil(record.nextRetryAt)}
+                        </span>
                       </div>
                     ) : (
                       <span className="text-xs text-text-muted">—</span>
@@ -848,7 +1268,10 @@ export default function DunningPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedRecord(record); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRecord(record);
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title="View Details"
                       >
@@ -856,7 +1279,10 @@ export default function DunningPage() {
                       </button>
                       {record.status === 'active' && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleAction(record.id, 'retry'); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAction(record.id, 'retry');
+                          }}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                           title="Retry Now"
                         >

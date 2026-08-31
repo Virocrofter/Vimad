@@ -1,7 +1,16 @@
 /* src/app/guest-portal/auth/verify/page.jsx */
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ShieldCheck, Smartphone, Mail, ArrowRight, Loader2, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react';
+import {
+  ShieldCheck,
+  Smartphone,
+  Mail,
+  ArrowRight,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  RotateCcw,
+} from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 
@@ -9,7 +18,7 @@ export default function GuestVerifyPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const method = searchParams.get('method') || 'email'; // 'email' | 'sms'
-  
+
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -35,7 +44,7 @@ export default function GuestVerifyPage() {
   const handleChange = (index, value) => {
     if (value.length > 1) return;
     if (!/^\\d*$/.test(value)) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -64,10 +73,10 @@ export default function GuestVerifyPage() {
 
     setIsVerifying(true);
     setError('');
-    
+
     // Simulate API verification
     await new Promise((r) => setTimeout(r, 1500));
-    
+
     if (code === '000000') {
       setError('Invalid verification code. Please try again.');
       setIsVerifying(false);
@@ -76,7 +85,7 @@ export default function GuestVerifyPage() {
 
     setIsVerified(true);
     setIsVerifying(false);
-    
+
     // Redirect after success
     setTimeout(() => {
       navigate('/guest-portal');
@@ -215,7 +224,8 @@ export default function GuestVerifyPage() {
       <div className="rounded-lg border border-border bg-surface p-3 flex items-start gap-2">
         <ShieldCheck className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
         <p className="text-xs text-text-muted">
-          For your security, this verification link expires in 10 minutes. Never share your code with anyone.
+          For your security, this verification link expires in 10 minutes. Never share your code
+          with anyone.
         </p>
       </div>
     </div>

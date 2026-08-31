@@ -1,33 +1,121 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Moon, Sun, CheckCircle2, AlertCircle, Loader2, Database,
-  BedDouble, DollarSign, Receipt, ArrowRight, RotateCcw,
-  Download, Printer, ChevronRight, Shield, Clock, FileText,
-  XCircle, AlertTriangle, TrendingUp, CreditCard, UserCheck
+  Moon,
+  Sun,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Database,
+  BedDouble,
+  DollarSign,
+  Receipt,
+  ArrowRight,
+  RotateCcw,
+  Download,
+  Printer,
+  ChevronRight,
+  Shield,
+  Clock,
+  FileText,
+  XCircle,
+  AlertTriangle,
+  TrendingUp,
+  CreditCard,
+  UserCheck,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 
 /* ─── Mock Data ─── */
 const initialChecklist = [
-  { id: 'arrivals', label: 'Verify all arrivals have been checked in', detail: '3 arrivals pending for Room 105, 204, 310', severity: 'warning' },
-  { id: 'departures', label: 'Verify all departures have been checked out', detail: '2 departures pending for Room 312, 118', severity: 'warning' },
-  { id: 'no-shows', label: 'Review no-show reservations', detail: '1 no-show flagged for Robert Chen (Res #4025)', severity: 'info' },
-  { id: 'charges', label: 'Confirm all charges have been posted', detail: '5 unposted room charges detected', severity: 'danger' },
-  { id: 'payments', label: 'Verify payment batches are balanced', detail: 'Cash: $178.50 · Card: $25.00 · Balanced', severity: 'success' },
-  { id: 'backup', label: 'Database backup completed', detail: 'Last backup: 2026-08-12 02:00 AM', severity: 'success' },
-  { id: 'rooms', label: 'Confirm room status updates', detail: '8 rooms marked dirty, 5 due for inspection', severity: 'info' },
-  { id: 'rates', label: 'Verify rate and availability for new business date', detail: 'Rates loaded for Aug 13 — Aug 19', severity: 'success' },
+  {
+    id: 'arrivals',
+    label: 'Verify all arrivals have been checked in',
+    detail: '3 arrivals pending for Room 105, 204, 310',
+    severity: 'warning',
+  },
+  {
+    id: 'departures',
+    label: 'Verify all departures have been checked out',
+    detail: '2 departures pending for Room 312, 118',
+    severity: 'warning',
+  },
+  {
+    id: 'no-shows',
+    label: 'Review no-show reservations',
+    detail: '1 no-show flagged for Robert Chen (Res #4025)',
+    severity: 'info',
+  },
+  {
+    id: 'charges',
+    label: 'Confirm all charges have been posted',
+    detail: '5 unposted room charges detected',
+    severity: 'danger',
+  },
+  {
+    id: 'payments',
+    label: 'Verify payment batches are balanced',
+    detail: 'Cash: $178.50 · Card: $25.00 · Balanced',
+    severity: 'success',
+  },
+  {
+    id: 'backup',
+    label: 'Database backup completed',
+    detail: 'Last backup: 2026-08-12 02:00 AM',
+    severity: 'success',
+  },
+  {
+    id: 'rooms',
+    label: 'Confirm room status updates',
+    detail: '8 rooms marked dirty, 5 due for inspection',
+    severity: 'info',
+  },
+  {
+    id: 'rates',
+    label: 'Verify rate and availability for new business date',
+    detail: 'Rates loaded for Aug 13 — Aug 19',
+    severity: 'success',
+  },
 ];
 
 const eodSteps = [
-  { id: 'backup', label: 'Database Backup', description: 'Creating incremental backup...', duration: 1200 },
-  { id: 'post_charges', label: 'Post Room Charges', description: 'Posting recurring room charges and taxes...', duration: 2500 },
-  { id: 'update_status', label: 'Update Room Statuses', description: 'Marking departure rooms as dirty...', duration: 1500 },
-  { id: 'no_show', label: 'Process No-Shows', description: 'Applying no-show policies and charges...', duration: 1000 },
-  { id: 'reports', label: 'Generate Audit Reports', description: 'Building reconciliation and management reports...', duration: 2000 },
-  { id: 'roll_date', label: 'Roll Business Date', description: 'Advancing system date to 2026-08-13...', duration: 800 },
+  {
+    id: 'backup',
+    label: 'Database Backup',
+    description: 'Creating incremental backup...',
+    duration: 1200,
+  },
+  {
+    id: 'post_charges',
+    label: 'Post Room Charges',
+    description: 'Posting recurring room charges and taxes...',
+    duration: 2500,
+  },
+  {
+    id: 'update_status',
+    label: 'Update Room Statuses',
+    description: 'Marking departure rooms as dirty...',
+    duration: 1500,
+  },
+  {
+    id: 'no_show',
+    label: 'Process No-Shows',
+    description: 'Applying no-show policies and charges...',
+    duration: 1000,
+  },
+  {
+    id: 'reports',
+    label: 'Generate Audit Reports',
+    description: 'Building reconciliation and management reports...',
+    duration: 2000,
+  },
+  {
+    id: 'roll_date',
+    label: 'Roll Business Date',
+    description: 'Advancing system date to 2026-08-13...',
+    duration: 800,
+  },
 ];
 
 const reportData = {
@@ -44,26 +132,26 @@ const reportData = {
     walkIns: 1,
   },
   revenue: {
-    roomRevenue: 5283.00,
+    roomRevenue: 5283.0,
     taxRevenue: 792.45,
-    otherRevenue: 1247.00,
+    otherRevenue: 1247.0,
     totalRevenue: 7322.45,
   },
   payments: {
-    cash: 178.50,
-    creditCard: 4125.00,
-    directBill: 1850.00,
-    other: 450.00,
-    totalPayments: 6603.50,
+    cash: 178.5,
+    creditCard: 4125.0,
+    directBill: 1850.0,
+    other: 450.0,
+    totalPayments: 6603.5,
   },
   adjustments: {
-    discounts: -320.00,
-    writeOffs: 0.00,
-    corrections: 45.00,
-    totalAdjustments: -275.00,
+    discounts: -320.0,
+    writeOffs: 0.0,
+    corrections: 45.0,
+    totalAdjustments: -275.0,
   },
   balance: {
-    opening: 12450.00,
+    opening: 12450.0,
     closing: 19497.45,
     netChange: 7047.45,
   },
@@ -76,10 +164,14 @@ function formatCurrency(amount) {
 
 function SeverityIcon({ severity }) {
   switch (severity) {
-    case 'danger': return <XCircle className="h-5 w-5 text-danger" />;
-    case 'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
-    case 'success': return <CheckCircle2 className="h-5 w-5 text-accent" />;
-    default: return <AlertCircle className="h-5 w-5 text-info" />;
+    case 'danger':
+      return <XCircle className="h-5 w-5 text-danger" />;
+    case 'warning':
+      return <AlertTriangle className="h-5 w-5 text-warning" />;
+    case 'success':
+      return <CheckCircle2 className="h-5 w-5 text-accent" />;
+    default:
+      return <AlertCircle className="h-5 w-5 text-info" />;
   }
 }
 
@@ -163,7 +255,13 @@ export default function NightAuditPage() {
     setPhase('processing');
     setCurrentStep(0);
     setProgress(0);
-    setLogs([{ time: new Date().toLocaleTimeString(), message: 'Night audit initiated by Night Manager', type: 'info' }]);
+    setLogs([
+      {
+        time: new Date().toLocaleTimeString(),
+        message: 'Night audit initiated by Night Manager',
+        type: 'info',
+      },
+    ]);
   };
 
   /* EOD Processing Simulation */
@@ -176,7 +274,11 @@ export default function NightAuditPage() {
         if (!cancelled) {
           setLogs((prev) => [
             ...prev,
-            { time: new Date().toLocaleTimeString(), message: 'Night audit completed successfully', type: 'success' },
+            {
+              time: new Date().toLocaleTimeString(),
+              message: 'Night audit completed successfully',
+              type: 'success',
+            },
           ]);
           setTimeout(() => setPhase('report'), 600);
         }
@@ -205,14 +307,20 @@ export default function NightAuditPage() {
       setProgress(((stepIndex + 1) / eodSteps.length) * 100);
       setLogs((prev) => [
         ...prev,
-        { time: new Date().toLocaleTimeString(), message: `Completed: ${step.label}`, type: 'success' },
+        {
+          time: new Date().toLocaleTimeString(),
+          message: `Completed: ${step.label}`,
+          type: 'success',
+        },
       ]);
 
       runStep(stepIndex + 1);
     };
 
     runStep(0);
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [phase]);
 
   const resetAudit = () => {
@@ -241,9 +349,15 @@ export default function NightAuditPage() {
             </button>
           </div>
           <p className="text-sm text-text-secondary">
-            Business Date: <span className="font-mono font-medium text-text-primary">{reportData.businessDate}</span>
+            Business Date:{' '}
+            <span className="font-mono font-medium text-text-primary">
+              {reportData.businessDate}
+            </span>
             {' · '}
-            Next Date: <span className="font-mono font-medium text-text-primary">{reportData.nextBusinessDate}</span>
+            Next Date:{' '}
+            <span className="font-mono font-medium text-text-primary">
+              {reportData.nextBusinessDate}
+            </span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -264,8 +378,16 @@ export default function NightAuditPage() {
               onClick={phase === 'report' ? resetAudit : startAudit}
               disabled={phase === 'checklist' && !allChecked}
             >
-              {phase === 'checklist' && <><ArrowRight className="mr-1.5 h-4 w-4" /> Run Night Audit</>}
-              {phase === 'report' && <><RotateCcw className="mr-1.5 h-4 w-4" /> Run Again</>}
+              {phase === 'checklist' && (
+                <>
+                  <ArrowRight className="mr-1.5 h-4 w-4" /> Run Night Audit
+                </>
+              )}
+              {phase === 'report' && (
+                <>
+                  <RotateCcw className="mr-1.5 h-4 w-4" /> Run Again
+                </>
+              )}
             </Button>
           )}
         </div>
@@ -278,19 +400,31 @@ export default function NightAuditPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Pending Items</p>
-              <p className={cn('mt-1 text-2xl font-bold', pendingCount > 0 ? 'text-warning' : 'text-accent')}>
+              <p
+                className={cn(
+                  'mt-1 text-2xl font-bold',
+                  pendingCount > 0 ? 'text-warning' : 'text-accent'
+                )}
+              >
                 {pendingCount}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Critical</p>
-              <p className={cn('mt-1 text-2xl font-bold', dangerCount > 0 ? 'text-danger' : 'text-accent')}>
+              <p
+                className={cn(
+                  'mt-1 text-2xl font-bold',
+                  dangerCount > 0 ? 'text-danger' : 'text-accent'
+                )}
+              >
                 {dangerCount}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Occupied Tonight</p>
-              <p className="mt-1 text-2xl font-bold text-text-primary">{reportData.summary.occupied}</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">
+                {reportData.summary.occupied}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Total Revenue</p>
@@ -341,10 +475,14 @@ export default function NightAuditPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <SeverityIcon severity={item.severity} />
-                      <span className={cn(
-                        'text-sm font-medium',
-                        item.checked ? 'text-text-primary line-through opacity-60' : 'text-text-primary'
-                      )}>
+                      <span
+                        className={cn(
+                          'text-sm font-medium',
+                          item.checked
+                            ? 'text-text-primary line-through opacity-60'
+                            : 'text-text-primary'
+                        )}
+                      >
                         {item.label}
                       </span>
                       {item.severity === 'success' && (
@@ -362,7 +500,11 @@ export default function NightAuditPage() {
 
           {/* Quick Actions */}
           <div className="flex flex-wrap items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => navigate('/app/reservations/front-desk')}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/app/reservations/front-desk')}
+            >
               Front Desk
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/app/billing')}>
@@ -409,17 +551,25 @@ export default function NightAuditPage() {
                   idx < currentStep
                     ? 'border-accent/20 bg-accent/5'
                     : idx === currentStep
-                    ? 'border-secondary/20 bg-secondary/5'
-                    : 'border-border bg-surface opacity-50'
+                      ? 'border-secondary/20 bg-secondary/5'
+                      : 'border-border bg-surface opacity-50'
                 )}
               >
-                <p className={cn(
-                  'text-[10px] font-medium uppercase tracking-wider',
-                  idx < currentStep ? 'text-accent' : idx === currentStep ? 'text-secondary' : 'text-text-muted'
-                )}>
+                <p
+                  className={cn(
+                    'text-[10px] font-medium uppercase tracking-wider',
+                    idx < currentStep
+                      ? 'text-accent'
+                      : idx === currentStep
+                        ? 'text-secondary'
+                        : 'text-text-muted'
+                  )}
+                >
                   {idx < currentStep ? 'Done' : idx === currentStep ? 'Running' : 'Pending'}
                 </p>
-                <p className="mt-0.5 text-xs font-medium text-text-primary truncate">{step.label}</p>
+                <p className="mt-0.5 text-xs font-medium text-text-primary truncate">
+                  {step.label}
+                </p>
               </div>
             ))}
           </div>
@@ -466,8 +616,11 @@ export default function NightAuditPage() {
             <div>
               <h2 className="text-lg font-semibold text-text-primary">Night Audit Complete</h2>
               <p className="text-sm text-text-secondary">
-                Business date successfully rolled to <span className="font-mono font-medium text-text-primary">{reportData.nextBusinessDate}</span>.
-                All reports have been generated and archived.
+                Business date successfully rolled to{' '}
+                <span className="font-mono font-medium text-text-primary">
+                  {reportData.nextBusinessDate}
+                </span>
+                . All reports have been generated and archived.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-background px-3 py-1 text-xs font-medium text-text-secondary border border-border">
@@ -522,7 +675,9 @@ export default function NightAuditPage() {
               <p className="text-2xl font-bold font-mono text-text-primary">
                 {formatCurrency(reportData.payments.totalPayments)}
               </p>
-              <p className="text-xs text-text-secondary mt-1">{reportData.summary.noShows} no-show</p>
+              <p className="text-xs text-text-secondary mt-1">
+                {reportData.summary.noShows} no-show
+              </p>
             </div>
           </div>
 
@@ -538,19 +693,27 @@ export default function NightAuditPage() {
               <div className="divide-y divide-border">
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Room Revenue</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.revenue.roomRevenue)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.revenue.roomRevenue)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Tax Revenue</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.revenue.taxRevenue)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.revenue.taxRevenue)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Other Revenue</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.revenue.otherRevenue)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.revenue.otherRevenue)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3 bg-secondary/5">
                   <span className="text-sm font-semibold text-text-primary">Total Revenue</span>
-                  <span className="text-sm font-mono font-bold text-secondary">{formatCurrency(reportData.revenue.totalRevenue)}</span>
+                  <span className="text-sm font-mono font-bold text-secondary">
+                    {formatCurrency(reportData.revenue.totalRevenue)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -565,23 +728,33 @@ export default function NightAuditPage() {
               <div className="divide-y divide-border">
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Cash</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.payments.cash)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.payments.cash)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Credit Card</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.payments.creditCard)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.payments.creditCard)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Direct Bill</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.payments.directBill)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.payments.directBill)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Other</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.payments.other)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.payments.other)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3 bg-accent/5">
                   <span className="text-sm font-semibold text-text-primary">Total Payments</span>
-                  <span className="text-sm font-mono font-bold text-accent">{formatCurrency(reportData.payments.totalPayments)}</span>
+                  <span className="text-sm font-mono font-bold text-accent">
+                    {formatCurrency(reportData.payments.totalPayments)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -596,19 +769,27 @@ export default function NightAuditPage() {
               <div className="divide-y divide-border">
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Discounts</span>
-                  <span className="text-sm font-mono font-medium text-danger">{formatCurrency(reportData.adjustments.discounts)}</span>
+                  <span className="text-sm font-mono font-medium text-danger">
+                    {formatCurrency(reportData.adjustments.discounts)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Write-offs</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.adjustments.writeOffs)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.adjustments.writeOffs)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Corrections</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.adjustments.corrections)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.adjustments.corrections)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3 bg-warning/5">
                   <span className="text-sm font-semibold text-text-primary">Net Adjustments</span>
-                  <span className="text-sm font-mono font-bold text-warning">{formatCurrency(reportData.adjustments.totalAdjustments)}</span>
+                  <span className="text-sm font-mono font-bold text-warning">
+                    {formatCurrency(reportData.adjustments.totalAdjustments)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -623,15 +804,21 @@ export default function NightAuditPage() {
               <div className="divide-y divide-border">
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Opening Balance</span>
-                  <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(reportData.balance.opening)}</span>
+                  <span className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(reportData.balance.opening)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3">
                   <span className="text-sm text-text-secondary">Net Change</span>
-                  <span className="text-sm font-mono font-medium text-accent">+{formatCurrency(reportData.balance.netChange)}</span>
+                  <span className="text-sm font-mono font-medium text-accent">
+                    +{formatCurrency(reportData.balance.netChange)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-6 py-3 bg-secondary/5">
                   <span className="text-sm font-semibold text-text-primary">Closing Balance</span>
-                  <span className="text-sm font-mono font-bold text-secondary">{formatCurrency(reportData.balance.closing)}</span>
+                  <span className="text-sm font-mono font-bold text-secondary">
+                    {formatCurrency(reportData.balance.closing)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -645,13 +832,24 @@ export default function NightAuditPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {[
                 { label: 'Arrivals', value: reportData.summary.arrivals, color: 'text-accent' },
-                { label: 'Departures', value: reportData.summary.departures, color: 'text-warning' },
+                {
+                  label: 'Departures',
+                  value: reportData.summary.departures,
+                  color: 'text-warning',
+                },
                 { label: 'No-Shows', value: reportData.summary.noShows, color: 'text-danger' },
                 { label: 'Walk-Ins', value: reportData.summary.walkIns, color: 'text-info' },
                 { label: 'OOO Rooms', value: reportData.summary.ooo, color: 'text-text-muted' },
-                { label: 'Available', value: reportData.summary.available, color: 'text-text-secondary' },
+                {
+                  label: 'Available',
+                  value: reportData.summary.available,
+                  color: 'text-text-secondary',
+                },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-lg border border-border bg-background p-3 text-center">
+                <div
+                  key={stat.label}
+                  className="rounded-lg border border-border bg-background p-3 text-center"
+                >
                   <p className={cn('text-xl font-bold', stat.color)}>{stat.value}</p>
                   <p className="text-xs text-text-muted mt-0.5">{stat.label}</p>
                 </div>

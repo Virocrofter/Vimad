@@ -1,12 +1,32 @@
 /* src/app/admin/health/components.jsx */
 import { useState } from 'react';
 import {
-  Activity, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp,
-  Clock, Copy, ExternalLink, Server, X, XCircle, Zap, Shield,
-  TrendingUp, TrendingDown, Minus, Info
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  ExternalLink,
+  Server,
+  X,
+  XCircle,
+  Zap,
+  Shield,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Info,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { severityMeta, serviceStatusMeta, errorStatusMeta, incidentSeverityMeta, timeAgo } from './data';
+import {
+  severityMeta,
+  serviceStatusMeta,
+  errorStatusMeta,
+  incidentSeverityMeta,
+  timeAgo,
+} from './data';
 
 /* ─── Stat Card ─── */
 export function HealthStatCard({ label, value, subtext, icon: Icon, color, trend }) {
@@ -18,12 +38,26 @@ export function HealthStatCard({ label, value, subtext, icon: Icon, color, trend
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last period
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last period
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -35,7 +69,12 @@ export function HealthStatCard({ label, value, subtext, icon: Icon, color, trend
 export function ServiceStatusBadge({ status }) {
   const meta = serviceStatusMeta[status] || serviceStatusMeta.operational;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -46,7 +85,12 @@ export function ServiceStatusBadge({ status }) {
 export function SeverityBadge({ severity }) {
   const meta = severityMeta[severity] || severityMeta.info;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -57,7 +101,12 @@ export function SeverityBadge({ severity }) {
 export function ErrorStatusBadge({ status }) {
   const meta = errorStatusMeta[status] || errorStatusMeta.open;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -67,7 +116,12 @@ export function ErrorStatusBadge({ status }) {
 export function IncidentSeverityBadge({ severity }) {
   const meta = incidentSeverityMeta[severity] || incidentSeverityMeta.info;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -78,24 +132,26 @@ export function IncidentSeverityBadge({ severity }) {
 export function MiniSparkline({ data, color = 'text-accent', width = 80, height = 24 }) {
   if (!data || data.length < 2) return <div className="h-6 w-20 bg-border rounded" />;
 
-  const values = data.map(d => typeof d === 'number' ? d : d.value || 0);
+  const values = data.map((d) => (typeof d === 'number' ? d : d.value || 0));
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
 
-  const points = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * width;
-    const y = height - ((v - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
+  const points = values
+    .map((v, i) => {
+      const x = (i / (values.length - 1)) * width;
+      const y = height - ((v - min) / range) * height;
+      return `${x},${y}`;
+    })
+    .join(' ');
 
   const colorClass = color.replace('text-', '');
   const strokeColors = {
-    'accent': '#22c55e',
-    'danger': '#ef4444',
-    'warning': '#f59e0b',
-    'info': '#3b82f6',
-    'secondary': '#863bff',
+    accent: '#22c55e',
+    danger: '#ef4444',
+    warning: '#f59e0b',
+    info: '#3b82f6',
+    secondary: '#863bff',
   };
 
   return (
@@ -108,7 +164,12 @@ export function MiniSparkline({ data, color = 'text-accent', width = 80, height 
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx={width} cy={height - ((values[values.length - 1] - min) / range) * height} r="2" fill={strokeColors[colorClass] || strokeColors.accent} />
+      <circle
+        cx={width}
+        cy={height - ((values[values.length - 1] - min) / range) * height}
+        r="2"
+        fill={strokeColors[colorClass] || strokeColors.accent}
+      />
     </svg>
   );
 }
@@ -116,16 +177,23 @@ export function MiniSparkline({ data, color = 'text-accent', width = 80, height 
 /* ─── Service Card ─── */
 export function ServiceCard({ service, onClick }) {
   const meta = serviceStatusMeta[service.status] || serviceStatusMeta.operational;
-  const StatusIcon = service.status === 'operational' ? CheckCircle2 : service.status === 'degraded' ? AlertTriangle : XCircle;
+  const StatusIcon =
+    service.status === 'operational'
+      ? CheckCircle2
+      : service.status === 'degraded'
+        ? AlertTriangle
+        : XCircle;
 
   return (
     <div
       onClick={onClick}
       className={cn(
         'group rounded-xl border bg-surface p-4 cursor-pointer transition-all hover:shadow-md',
-        service.status === 'critical' ? 'border-danger/30 hover:border-danger/50' :
-        service.status === 'degraded' ? 'border-warning/30 hover:border-warning/50' :
-        'border-border hover:border-secondary/50'
+        service.status === 'critical'
+          ? 'border-danger/30 hover:border-danger/50'
+          : service.status === 'degraded'
+            ? 'border-warning/30 hover:border-warning/50'
+            : 'border-border hover:border-secondary/50'
       )}
     >
       <div className="flex items-start justify-between">
@@ -135,7 +203,9 @@ export function ServiceCard({ service, onClick }) {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{service.name}</h3>
-            <p className="text-[10px] text-text-muted">{service.version} · {service.region}</p>
+            <p className="text-[10px] text-text-muted">
+              {service.version} · {service.region}
+            </p>
           </div>
         </div>
         <ServiceStatusBadge status={service.status} />
@@ -162,8 +232,18 @@ export function ServiceCard({ service, onClick }) {
 
       {/* Footer */}
       <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[10px] text-text-muted">
-        <span>{service.requestsPerMin ? `${service.requestsPerMin.toLocaleString()} req/min` : service.connections ? `${service.connections.active} conns` : service.queueDepth ? `${service.queueDepth.toLocaleString()} queued` : `${service.sentPerMin?.toLocaleString() || service.storageUsed?.used || service.memoryUsage?.used} ${service.storageUsed?.unit || service.memoryUsage?.unit || 'sent/min'}`}</span>
-        <span>{service.lastRestart ? `Restarted ${timeAgo(service.lastRestart)}` : 'Always on'}</span>
+        <span>
+          {service.requestsPerMin
+            ? `${service.requestsPerMin.toLocaleString()} req/min`
+            : service.connections
+              ? `${service.connections.active} conns`
+              : service.queueDepth
+                ? `${service.queueDepth.toLocaleString()} queued`
+                : `${service.sentPerMin?.toLocaleString() || service.storageUsed?.used || service.memoryUsage?.used} ${service.storageUsed?.unit || service.memoryUsage?.unit || 'sent/min'}`}
+        </span>
+        <span>
+          {service.lastRestart ? `Restarted ${timeAgo(service.lastRestart)}` : 'Always on'}
+        </span>
       </div>
     </div>
   );
@@ -175,10 +255,7 @@ export function ErrorLogRow({ error, expanded, onToggle }) {
 
   return (
     <>
-      <tr
-        className="hover:bg-background/50 transition-colors cursor-pointer"
-        onClick={onToggle}
-      >
+      <tr className="hover:bg-background/50 transition-colors cursor-pointer" onClick={onToggle}>
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <button className="text-text-muted hover:text-text-primary">
@@ -210,7 +287,9 @@ export function ErrorLogRow({ error, expanded, onToggle }) {
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-text-muted">First seen: {error.firstSeen}</span>
                   {error.assignedTo && (
-                    <span className="text-xs text-text-secondary">Assigned: {error.assignedTo}</span>
+                    <span className="text-xs text-text-secondary">
+                      Assigned: {error.assignedTo}
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -224,8 +303,12 @@ export function ErrorLogRow({ error, expanded, onToggle }) {
               </div>
               {error.stack && (
                 <div className="rounded-md bg-background border border-border p-3">
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Stack Trace</p>
-                  <pre className="text-xs font-mono text-text-secondary whitespace-pre-wrap">{error.stack}</pre>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+                    Stack Trace
+                  </p>
+                  <pre className="text-xs font-mono text-text-secondary whitespace-pre-wrap">
+                    {error.stack}
+                  </pre>
                 </div>
               )}
               <div className="flex items-center gap-2 pt-2">
@@ -273,7 +356,10 @@ export function IncidentCard({ incident }) {
 
       <div className="mt-3 flex flex-wrap gap-1">
         {incident.affectedServices.map((svc) => (
-          <span key={svc} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary">
+          <span
+            key={svc}
+            className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary"
+          >
             {svc}
           </span>
         ))}
@@ -283,8 +369,14 @@ export function IncidentCard({ incident }) {
 }
 
 /* ─── Simple Bar Chart (no recharts dependency for simple cases) ─── */
-export function SimpleBarChart({ data, dataKey, labelKey, color = 'bg-secondary', maxHeight = 120 }) {
-  const max = Math.max(...data.map(d => d[dataKey]));
+export function SimpleBarChart({
+  data,
+  dataKey,
+  labelKey,
+  color = 'bg-secondary',
+  maxHeight = 120,
+}) {
+  const max = Math.max(...data.map((d) => d[dataKey]));
 
   return (
     <div className="flex items-end gap-1 h-32">
@@ -308,9 +400,27 @@ export function SimpleBarChart({ data, dataKey, labelKey, color = 'bg-secondary'
 /* ─── System Health Indicator ─── */
 export function SystemHealthIndicator({ status }) {
   const configs = {
-    healthy: { icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', label: 'All Systems Operational' },
-    degraded: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', label: 'Degraded Performance' },
-    critical: { icon: XCircle, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', label: 'Critical Issues Detected' },
+    healthy: {
+      icon: CheckCircle2,
+      color: 'text-accent',
+      bg: 'bg-accent/10',
+      border: 'border-accent/20',
+      label: 'All Systems Operational',
+    },
+    degraded: {
+      icon: AlertTriangle,
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+      border: 'border-warning/20',
+      label: 'Degraded Performance',
+    },
+    critical: {
+      icon: XCircle,
+      color: 'text-danger',
+      bg: 'bg-danger/10',
+      border: 'border-danger/20',
+      label: 'Critical Issues Detected',
+    },
   };
 
   const config = configs[status] || configs.healthy;
@@ -318,12 +428,19 @@ export function SystemHealthIndicator({ status }) {
 
   return (
     <div className={cn('rounded-xl border p-4 flex items-center gap-4', config.bg, config.border)}>
-      <div className={cn('flex h-12 w-12 items-center justify-center rounded-full bg-background', config.color)}>
+      <div
+        className={cn(
+          'flex h-12 w-12 items-center justify-center rounded-full bg-background',
+          config.color
+        )}
+      >
         <Icon className="h-6 w-6" />
       </div>
       <div>
         <p className={cn('text-lg font-bold', config.color)}>{config.label}</p>
-        <p className="text-xs text-text-secondary">Last checked: {new Date().toLocaleTimeString()}</p>
+        <p className="text-xs text-text-secondary">
+          Last checked: {new Date().toLocaleTimeString()}
+        </p>
       </div>
     </div>
   );

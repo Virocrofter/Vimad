@@ -1,9 +1,23 @@
 /* src/app/admin/shadow/components/ShadowAuditLog.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Search, Filter, Eye, Zap, LogOut, LogIn, ArrowLeftRight,
-  Ghost, Clock, ChevronDown, ChevronUp, X, Shield,
-  AlertTriangle, CheckCircle2, Info, Monitor
+  Search,
+  Filter,
+  Eye,
+  Zap,
+  LogOut,
+  LogIn,
+  ArrowLeftRight,
+  Ghost,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Shield,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  Monitor,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useShadowStore } from '../store';
@@ -19,7 +33,7 @@ export function ShadowAuditLog() {
   const [actionFilter, setActionFilter] = useState('all');
   const [expandedSessions, setExpandedSessions] = useState(new Set());
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const sessionHistory = useShadowStore((s) => s.sessionHistory);
   const isShadowActive = useShadowStore((s) => s.isShadowActive);
   const shadowSessionId = useShadowStore((s) => s.shadowSessionId);
@@ -28,14 +42,15 @@ export function ShadowAuditLog() {
   // Combine archived + current session actions
   const allActions = useMemo(() => {
     const current = isShadowActive ? getCurrentSessionActions() : [];
-    return [...sessionHistory, ...current].sort((a, b) => 
-      new Date(b.timestamp) - new Date(a.timestamp)
+    return [...sessionHistory, ...current].sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
     );
   }, [sessionHistory, isShadowActive, getCurrentSessionActions]);
 
   const filteredActions = useMemo(() => {
     return allActions.filter((a) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         (a.targetUserName && a.targetUserName.toLowerCase().includes(query.toLowerCase())) ||
         (a.adminUserName && a.adminUserName.toLowerCase().includes(query.toLowerCase())) ||
         (a.action && a.action.toLowerCase().includes(query.toLowerCase())) ||
@@ -88,7 +103,9 @@ export function ShadowAuditLog() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors',
-              showFilters ? 'border-purple-500 bg-purple-500/10 text-purple-500' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-purple-500 bg-purple-500/10 text-purple-500'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-3.5 w-3.5" /> Filter
@@ -132,7 +149,7 @@ export function ShadowAuditLog() {
           const isExpanded = expandedSessions.has(sid);
           const firstAction = actions[0];
           const isCurrent = isShadowActive && sid === shadowSessionId;
-          
+
           return (
             <div
               key={sid}
@@ -146,7 +163,11 @@ export function ShadowAuditLog() {
                 onClick={() => toggleSession(sid)}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-background/50 transition-colors"
               >
-                {isExpanded ? <ChevronUp className="h-4 w-4 text-text-muted shrink-0" /> : <ChevronDown className="h-4 w-4 text-text-muted shrink-0" />}
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-text-muted shrink-0" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-text-muted shrink-0" />
+                )}
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500/10 shrink-0">
                   <Eye className="h-4 w-4 text-purple-500" />
                 </div>
@@ -166,7 +187,12 @@ export function ShadowAuditLog() {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-text-muted mt-0.5">
                     {firstAction?.targetUserName && (
-                      <span>Target: <strong className="text-text-secondary">{firstAction.targetUserName}</strong></span>
+                      <span>
+                        Target:{' '}
+                        <strong className="text-text-secondary">
+                          {firstAction.targetUserName}
+                        </strong>
+                      </span>
                     )}
                     {firstAction?.adminUserName && (
                       <>
@@ -215,7 +241,12 @@ function AuditActionRow({ action }) {
 
   return (
     <div className="flex items-start gap-3 px-4 py-3 hover:bg-background/30 transition-colors">
-      <div className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full mt-0.5', config.bg)}>
+      <div
+        className={cn(
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full mt-0.5',
+          config.bg
+        )}
+      >
         <Icon className={cn('h-3.5 w-3.5', config.color)} />
       </div>
       <div className="min-w-0 flex-1">
@@ -223,9 +254,7 @@ function AuditActionRow({ action }) {
           <span className="text-sm font-medium text-text-primary">
             {shadowActionLabels[action.action] || action.action}
           </span>
-          {action.stealth && (
-            <Ghost className="h-3 w-3 text-text-muted" />
-          )}
+          {action.stealth && <Ghost className="h-3 w-3 text-text-muted" />}
         </div>
         {action.details && Object.keys(action.details).length > 0 && (
           <p className="mt-0.5 text-xs text-text-muted font-mono">

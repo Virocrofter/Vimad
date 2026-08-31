@@ -2,13 +2,53 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, Search, Filter, Download, Calendar, Clock, User, Eye,
-  FileText, Lock, Unlock, Edit3, Trash2, Plus, CheckCircle2,
-  XCircle, AlertTriangle, Info, ChevronDown, ChevronUp, X,
-  Database, Server, CreditCard, Key, Settings, Users, BedDouble,
-  DollarSign, RefreshCw, Printer, ArrowUpDown, MoreHorizontal,
-  ClipboardList, Activity, Globe, Mail, Phone, MapPin, Ban,
-  ExternalLink, History, FileSpreadsheet, Sparkles, TrendingUp, Moon, Wrench
+  Shield,
+  Search,
+  Filter,
+  Download,
+  Calendar,
+  Clock,
+  User,
+  Eye,
+  FileText,
+  Lock,
+  Unlock,
+  Edit3,
+  Trash2,
+  Plus,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Database,
+  Server,
+  CreditCard,
+  Key,
+  Settings,
+  Users,
+  BedDouble,
+  DollarSign,
+  RefreshCw,
+  Printer,
+  ArrowUpDown,
+  MoreHorizontal,
+  ClipboardList,
+  Activity,
+  Globe,
+  Mail,
+  Phone,
+  MapPin,
+  Ban,
+  ExternalLink,
+  History,
+  FileSpreadsheet,
+  Sparkles,
+  TrendingUp,
+  Moon,
+  Wrench,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -56,9 +96,7 @@ const auditEntries = [
     category: 'housekeeping',
     severity: 'info',
     resource: { type: 'Room', id: '103', name: 'Room 103 — Deluxe Queen' },
-    changes: [
-      { field: 'status', old: 'dirty', new: 'clean' },
-    ],
+    changes: [{ field: 'status', old: 'dirty', new: 'clean' }],
     description: 'Auto-updated room status after housekeeping completion',
     sessionId: 'system_auto',
     userAgent: 'UnifiedPMS-Worker/1.0',
@@ -115,7 +153,12 @@ const auditEntries = [
   {
     id: 'AUD-2026-0812-007',
     timestamp: '2026-08-12 09:45:12',
-    user: { id: 'U-108', name: 'Maria Garcia', role: 'Housekeeping Supervisor', ip: '192.168.1.89' },
+    user: {
+      id: 'U-108',
+      name: 'Maria Garcia',
+      role: 'Housekeeping Supervisor',
+      ip: '192.168.1.89',
+    },
     action: 'room.ooo.set',
     category: 'housekeeping',
     severity: 'warning',
@@ -235,7 +278,11 @@ const auditEntries = [
     action: 'inventory.adjust',
     category: 'inventory',
     severity: 'warning',
-    resource: { type: 'Stock Item', id: 'INV-WINE-001', name: 'Cabernet Sauvignon 2019 — 24 bottles' },
+    resource: {
+      type: 'Stock Item',
+      id: 'INV-WINE-001',
+      name: 'Cabernet Sauvignon 2019 — 24 bottles',
+    },
     changes: [
       { field: 'quantity', old: '24', new: '18' },
       { field: 'reason', old: '—', new: 'Smith Wedding — Grand Ballroom event' },
@@ -264,7 +311,12 @@ const auditEntries = [
 
 /* ─── Metadata ─── */
 const categoryMeta = {
-  reservations: { label: 'Reservations', icon: BedDouble, color: 'text-secondary', bg: 'bg-secondary/10' },
+  reservations: {
+    label: 'Reservations',
+    icon: BedDouble,
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+  },
   billing: { label: 'Billing', icon: DollarSign, color: 'text-accent', bg: 'bg-accent/10' },
   housekeeping: { label: 'Housekeeping', icon: Sparkles, color: 'text-info', bg: 'bg-info/10' },
   rates: { label: 'Rates', icon: TrendingUp, color: 'text-warning', bg: 'bg-warning/10' },
@@ -273,14 +325,34 @@ const categoryMeta = {
   system: { label: 'System', icon: Server, color: 'text-text-muted', bg: 'bg-surface-elevated' },
   reports: { label: 'Reports', icon: FileText, color: 'text-teal-500', bg: 'bg-teal-500/10' },
   groups: { label: 'Groups', icon: Users, color: 'text-pink-500', bg: 'bg-pink-500/10' },
-  inventory: { label: 'Inventory', icon: Database, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  inventory: {
+    label: 'Inventory',
+    icon: Database,
+    color: 'text-orange-500',
+    bg: 'bg-orange-500/10',
+  },
   security: { label: 'Security', icon: Lock, color: 'text-danger', bg: 'bg-danger/10' },
 };
 
 const severityMeta = {
-  info: { label: 'Info', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', icon: Info },
-  warning: { label: 'Warning', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', icon: AlertTriangle },
-  danger: { label: 'Critical', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', icon: XCircle },
+  info: {
+    label: 'Info',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    icon: Info,
+  },
+  warning: {
+    label: 'Warning',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    icon: AlertTriangle,
+  },
+  danger: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    icon: XCircle,
+  },
 };
 
 const actionTypeMeta = {
@@ -309,7 +381,12 @@ function formatTimestamp(ts) {
   if (diff < 1) return 'Just now';
   if (diff < 60) return `${diff} min ago`;
   if (diff < 1440) return `${Math.floor(diff / 60)} hr ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 /* ─── Components ─── */
@@ -322,7 +399,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -334,7 +422,12 @@ function SeverityBadge({ severity }) {
   const meta = severityMeta[severity] || severityMeta.info;
   const Icon = meta.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -345,7 +438,14 @@ function CategoryBadge({ category }) {
   const meta = categoryMeta[category] || categoryMeta.system;
   const Icon = meta.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium', meta.bg, meta.color, 'border-current/20')}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       <Icon className="h-3 w-3" />
       {meta.label}
     </span>
@@ -367,7 +467,9 @@ function AuditDetailDrawer({ entry, onClose }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', sevMeta.bg)}>
+              <div
+                className={cn('flex h-10 w-10 items-center justify-center rounded-lg', sevMeta.bg)}
+              >
                 <ActionIcon className={cn('h-5 w-5', sevMeta.class.split(' ')[1])} />
               </div>
               <div>
@@ -375,7 +477,10 @@ function AuditDetailDrawer({ entry, onClose }) {
                 <p className="text-xs text-text-muted">{entry.id}</p>
               </div>
             </div>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -390,7 +495,9 @@ function AuditDetailDrawer({ entry, onClose }) {
 
           {/* Timestamp */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Event Details</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Event Details
+            </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2 text-text-secondary">
                 <Clock className="h-4 w-4 text-text-muted" />
@@ -413,45 +520,62 @@ function AuditDetailDrawer({ entry, onClose }) {
 
           {/* User */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Actor</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Actor
+            </h4>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 text-sm font-bold text-secondary">
-                {entry.user.name.split(' ').map(n => n[0]).join('')}
+                {entry.user.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">{entry.user.name}</p>
-                <p className="text-xs text-text-muted">{entry.user.role} · ID: {entry.user.id}</p>
+                <p className="text-xs text-text-muted">
+                  {entry.user.role} · ID: {entry.user.id}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Resource */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Target Resource</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Target Resource
+            </h4>
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-info/10">
                 <Database className="h-4 w-4 text-info" />
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">{entry.resource.name}</p>
-                <p className="text-xs text-text-muted">{entry.resource.type} · {entry.resource.id}</p>
+                <p className="text-xs text-text-muted">
+                  {entry.resource.type} · {entry.resource.id}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Description */}
           <div className="rounded-xl border border-border bg-surface p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">Description</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+              Description
+            </h4>
             <p className="text-sm text-text-secondary">{entry.description}</p>
           </div>
 
           {/* Changes */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Field Changes</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Field Changes
+            </h4>
             <div className="space-y-2">
               {entry.changes.map((change, i) => (
                 <div key={i} className="rounded-lg border border-border bg-background p-3">
-                  <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">{change.field}</p>
+                  <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+                    {change.field}
+                  </p>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 rounded-md bg-danger/5 border border-danger/20 px-3 py-2">
                       <p className="text-[10px] text-danger uppercase tracking-wider">Before</p>
@@ -499,7 +623,8 @@ export default function AuditTrailPage() {
   /* ─── Computed Data ─── */
   const filteredEntries = useMemo(() => {
     let result = entries.filter((e) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         e.id.toLowerCase().includes(query.toLowerCase()) ||
         e.user.name.toLowerCase().includes(query.toLowerCase()) ||
         e.resource.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -522,16 +647,19 @@ export default function AuditTrailPage() {
     return result;
   }, [entries, query, categoryFilter, severityFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: entries.length,
-    info: entries.filter(e => e.severity === 'info').length,
-    warning: entries.filter(e => e.severity === 'warning').length,
-    danger: entries.filter(e => e.severity === 'danger').length,
-    uniqueUsers: new Set(entries.map(e => e.user.id)).size,
-  }), [entries]);
+  const stats = useMemo(
+    () => ({
+      total: entries.length,
+      info: entries.filter((e) => e.severity === 'info').length,
+      warning: entries.filter((e) => e.severity === 'warning').length,
+      danger: entries.filter((e) => e.severity === 'danger').length,
+      uniqueUsers: new Set(entries.map((e) => e.user.id)).size,
+    }),
+    [entries]
+  );
 
   const toggleRow = (id) => {
-    setExpandedRows(prev => {
+    setExpandedRows((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -545,7 +673,9 @@ export default function AuditTrailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Audit Trail</h1>
-          <p className="text-sm text-text-secondary">Immutable activity log, compliance tracking, and change history</p>
+          <p className="text-sm text-text-secondary">
+            Immutable activity log, compliance tracking, and change history
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -606,7 +736,9 @@ export default function AuditTrailPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -638,7 +770,9 @@ export default function AuditTrailPage() {
               >
                 <option value="all">All Categories</option>
                 {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -657,7 +791,11 @@ export default function AuditTrailPage() {
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => { setCategoryFilter('all'); setSeverityFilter('all'); setQuery(''); }}
+                onClick={() => {
+                  setCategoryFilter('all');
+                  setSeverityFilter('all');
+                  setQuery('');
+                }}
                 className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
               >
                 Reset Filters
@@ -669,7 +807,8 @@ export default function AuditTrailPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredEntries.length}</span> of {entries.length} audit entries
+        Showing <span className="font-medium text-text-primary">{filteredEntries.length}</span> of{' '}
+        {entries.length} audit entries
       </p>
 
       {/* Audit Table */}
@@ -679,18 +818,33 @@ export default function AuditTrailPage() {
             <thead className="bg-background border-b border-border">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-10"></th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Time</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Severity</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">User</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Action</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Resource</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Time
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Severity
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Action
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Resource
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Category
+                </th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {filteredEntries.map((entry) => {
-                const meta = actionTypeMeta[entry.action] || { label: entry.action, icon: Activity };
+                const meta = actionTypeMeta[entry.action] || {
+                  label: entry.action,
+                  icon: Activity,
+                };
                 const ActionIcon = meta.icon;
                 const isExpanded = expandedRows.has(entry.id);
 
@@ -703,12 +857,20 @@ export default function AuditTrailPage() {
                     >
                       <td className="px-4 py-3">
                         <button className="text-text-muted hover:text-text-primary">
-                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
                         </button>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-text-secondary text-xs">{formatTimestamp(entry.timestamp)}</div>
-                        <div className="text-[10px] text-text-muted font-mono">{entry.timestamp.split(' ')[1]}</div>
+                        <div className="text-text-secondary text-xs">
+                          {formatTimestamp(entry.timestamp)}
+                        </div>
+                        <div className="text-[10px] text-text-muted font-mono">
+                          {entry.timestamp.split(' ')[1]}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <SeverityBadge severity={entry.severity} />
@@ -716,10 +878,15 @@ export default function AuditTrailPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary">
-                            {entry.user.name.split(' ').map(n => n[0]).join('')}
+                            {entry.user.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-text-primary">{entry.user.name}</p>
+                            <p className="text-sm font-medium text-text-primary">
+                              {entry.user.name}
+                            </p>
                             <p className="text-[10px] text-text-muted">{entry.user.role}</p>
                           </div>
                         </div>
@@ -740,7 +907,10 @@ export default function AuditTrailPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={(e) => { e.stopPropagation(); setSelectedEntry(entry); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEntry(entry);
+                            }}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                             title="View Details"
                           >
@@ -759,10 +929,16 @@ export default function AuditTrailPage() {
                             <div className="space-y-2">
                               {entry.changes.map((change, i) => (
                                 <div key={i} className="flex items-center gap-3 text-xs">
-                                  <span className="font-medium text-text-muted w-24">{change.field}</span>
-                                  <span className="rounded bg-danger/5 border border-danger/20 px-2 py-0.5 font-mono text-danger">{change.old}</span>
+                                  <span className="font-medium text-text-muted w-24">
+                                    {change.field}
+                                  </span>
+                                  <span className="rounded bg-danger/5 border border-danger/20 px-2 py-0.5 font-mono text-danger">
+                                    {change.old}
+                                  </span>
                                   <ArrowUpDown className="h-3 w-3 text-text-muted" />
-                                  <span className="rounded bg-accent/5 border border-accent/20 px-2 py-0.5 font-mono text-accent">{change.new}</span>
+                                  <span className="rounded bg-accent/5 border border-accent/20 px-2 py-0.5 font-mono text-accent">
+                                    {change.new}
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -796,7 +972,7 @@ export default function AuditTrailPage() {
         <div>
           <p className="text-sm font-medium text-text-primary">Compliance & Data Retention</p>
           <p className="text-xs text-text-secondary mt-0.5">
-            Audit logs are immutable and retained for 7 years per PCI DSS and GDPR requirements. 
+            Audit logs are immutable and retained for 7 years per PCI DSS and GDPR requirements.
             Export functionality is available for compliance officers and authorized administrators.
             All access to this page is logged and monitored.
           </p>
@@ -805,10 +981,7 @@ export default function AuditTrailPage() {
 
       {/* Detail Drawer */}
       {selectedEntry && (
-        <AuditDetailDrawer
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
-        />
+        <AuditDetailDrawer entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
       )}
     </div>
   );

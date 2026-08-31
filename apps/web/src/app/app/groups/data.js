@@ -125,33 +125,69 @@ export const initialGroups = [
 ];
 
 export const roomingListTemplate = [
-  ['Last Name', 'First Name', 'Email', 'Phone', 'Room Type', 'Arrival', 'Departure', 'Special Requests'],
-  ['Smith', 'John', 'john@email.com', '+15550101', 'Deluxe King', '2026-08-20', '2026-08-22', 'High floor'],
-  ['Smith', 'Jane', 'jane@email.com', '+15550102', 'Deluxe King', '2026-08-20', '2026-08-22', 'Adjoining to John'],
+  [
+    'Last Name',
+    'First Name',
+    'Email',
+    'Phone',
+    'Room Type',
+    'Arrival',
+    'Departure',
+    'Special Requests',
+  ],
+  [
+    'Smith',
+    'John',
+    'john@email.com',
+    '+15550101',
+    'Deluxe King',
+    '2026-08-20',
+    '2026-08-22',
+    'High floor',
+  ],
+  [
+    'Smith',
+    'Jane',
+    'jane@email.com',
+    '+15550102',
+    'Deluxe King',
+    '2026-08-20',
+    '2026-08-22',
+    'Adjoining to John',
+  ],
 ];
 
 export const floorPlan = [
-  { floor: 1, rooms: [
-    { id: '101', type: 'Standard Twin', status: 'available' },
-    { id: '102', type: 'Standard Twin', status: 'occupied' },
-    { id: '103', type: 'Standard Queen', status: 'available' },
-    { id: '104', type: 'Deluxe King', status: 'available' },
-    { id: '105', type: 'Suite', status: 'available' },
-  ]},
-  { floor: 2, rooms: [
-    { id: '201', type: 'Deluxe King', status: 'available' },
-    { id: '202', type: 'Deluxe King', status: 'available' },
-    { id: '203', type: 'Suite', status: 'available' },
-    { id: '204', type: 'Deluxe King', status: 'occupied' },
-    { id: '205', type: 'Standard Queen', status: 'available' },
-  ]},
-  { floor: 3, rooms: [
-    { id: '301', type: 'Suite', status: 'available' },
-    { id: '302', type: 'Deluxe King', status: 'occupied' },
-    { id: '303', type: 'Standard Twin', status: 'available' },
-    { id: '304', type: 'Deluxe Queen', status: 'available' },
-    { id: '305', type: 'Suite', status: 'available' },
-  ]},
+  {
+    floor: 1,
+    rooms: [
+      { id: '101', type: 'Standard Twin', status: 'available' },
+      { id: '102', type: 'Standard Twin', status: 'occupied' },
+      { id: '103', type: 'Standard Queen', status: 'available' },
+      { id: '104', type: 'Deluxe King', status: 'available' },
+      { id: '105', type: 'Suite', status: 'available' },
+    ],
+  },
+  {
+    floor: 2,
+    rooms: [
+      { id: '201', type: 'Deluxe King', status: 'available' },
+      { id: '202', type: 'Deluxe King', status: 'available' },
+      { id: '203', type: 'Suite', status: 'available' },
+      { id: '204', type: 'Deluxe King', status: 'occupied' },
+      { id: '205', type: 'Standard Queen', status: 'available' },
+    ],
+  },
+  {
+    floor: 3,
+    rooms: [
+      { id: '301', type: 'Suite', status: 'available' },
+      { id: '302', type: 'Deluxe King', status: 'occupied' },
+      { id: '303', type: 'Standard Twin', status: 'available' },
+      { id: '304', type: 'Deluxe Queen', status: 'available' },
+      { id: '305', type: 'Suite', status: 'available' },
+    ],
+  },
 ];
 
 /* ─── Metadata ─── */
@@ -175,7 +211,7 @@ export function formatCurrency(amount) {
 }
 
 export function downloadTemplate() {
-  const csv = roomingListTemplate.map(row => row.join(',')).join('\n');
+  const csv = roomingListTemplate.map((row) => row.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

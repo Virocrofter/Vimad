@@ -2,9 +2,26 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Wrench, Sparkles, Wifi, Volume2, Shield, HelpCircle,
-  CheckCircle2, AlertTriangle, X, Send, Loader2, Camera, Upload,
-  ChevronRight, Clock, MessageSquare, FileText, Image, Plus
+  ArrowLeft,
+  Wrench,
+  Sparkles,
+  Wifi,
+  Volume2,
+  Shield,
+  HelpCircle,
+  CheckCircle2,
+  AlertTriangle,
+  X,
+  Send,
+  Loader2,
+  Camera,
+  Upload,
+  ChevronRight,
+  Clock,
+  MessageSquare,
+  FileText,
+  Image,
+  Plus,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { issueCategories } from '../../data';
@@ -42,7 +59,7 @@ export default function IssuesPage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      setTickets(prev => [newTicket, ...prev]);
+      setTickets((prev) => [newTicket, ...prev]);
       setLoading(false);
       setSubmitted(true);
       setSelectedCategory(null);
@@ -56,7 +73,12 @@ export default function IssuesPage() {
     { id: 'low', label: 'Low', description: 'Not urgent, can wait', color: 'text-accent' },
     { id: 'normal', label: 'Normal', description: 'Standard priority', color: 'text-info' },
     { id: 'high', label: 'High', description: 'Needs attention soon', color: 'text-warning' },
-    { id: 'urgent', label: 'Urgent', description: 'Immediate attention needed', color: 'text-danger' },
+    {
+      id: 'urgent',
+      label: 'Urgent',
+      description: 'Immediate attention needed',
+      color: 'text-danger',
+    },
   ];
 
   const statusColors = {
@@ -88,7 +110,9 @@ export default function IssuesPage() {
           <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
           <div>
             <p className="text-sm font-medium text-text-primary">Issue Reported!</p>
-            <p className="text-xs text-text-secondary">Our team will address it as soon as possible.</p>
+            <p className="text-xs text-text-secondary">
+              Our team will address it as soon as possible.
+            </p>
           </div>
         </div>
       )}
@@ -99,7 +123,9 @@ export default function IssuesPage() {
 
         {/* Category Selection */}
         <div>
-          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">Category</label>
+          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">
+            Category
+          </label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {issueCategories.map((category) => {
               const icons = {
@@ -124,13 +150,22 @@ export default function IssuesPage() {
                       : 'border-border bg-background hover:bg-surface-elevated'
                   )}
                 >
-                  <div className={cn(
-                    'flex h-10 w-10 items-center justify-center rounded-full',
-                    isSelected ? 'bg-secondary/10' : 'bg-border'
-                  )}>
-                    <Icon className={cn('h-5 w-5', isSelected ? 'text-secondary' : 'text-text-muted')} />
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-full',
+                      isSelected ? 'bg-secondary/10' : 'bg-border'
+                    )}
+                  >
+                    <Icon
+                      className={cn('h-5 w-5', isSelected ? 'text-secondary' : 'text-text-muted')}
+                    />
                   </div>
-                  <span className={cn('text-xs font-medium', isSelected ? 'text-secondary' : 'text-text-primary')}>
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      isSelected ? 'text-secondary' : 'text-text-primary'
+                    )}
+                  >
                     {category.label}
                   </span>
                 </button>
@@ -141,7 +176,9 @@ export default function IssuesPage() {
 
         {/* Description */}
         <div>
-          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">Description</label>
+          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">
+            Description
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -153,7 +190,9 @@ export default function IssuesPage() {
 
         {/* Urgency */}
         <div>
-          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">Urgency</label>
+          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">
+            Urgency
+          </label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {urgencyOptions.map((opt) => (
               <button
@@ -166,7 +205,12 @@ export default function IssuesPage() {
                     : 'border-border bg-background hover:bg-surface-elevated'
                 )}
               >
-                <p className={cn('text-sm font-medium', urgency === opt.id ? 'text-secondary' : opt.color)}>
+                <p
+                  className={cn(
+                    'text-sm font-medium',
+                    urgency === opt.id ? 'text-secondary' : opt.color
+                  )}
+                >
                   {opt.label}
                 </p>
                 <p className="text-[10px] text-text-muted mt-0.5">{opt.description}</p>
@@ -206,18 +250,32 @@ export default function IssuesPage() {
         ) : (
           <div className="space-y-2">
             {tickets.map((ticket) => (
-              <div key={ticket.id} className="rounded-xl border border-border bg-surface p-4 space-y-3">
+              <div
+                key={ticket.id}
+                className="rounded-xl border border-border bg-surface p-4 space-y-3"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className={cn('rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize', statusColors[ticket.status])}>
+                    <span
+                      className={cn(
+                        'rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize',
+                        statusColors[ticket.status]
+                      )}
+                    >
                       {ticket.status.replace('_', ' ')}
                     </span>
-                    <span className={cn(
-                      'text-[10px] font-medium',
-                      ticket.urgency === 'urgent' ? 'text-danger' :
-                      ticket.urgency === 'high' ? 'text-warning' :
-                      ticket.urgency === 'normal' ? 'text-info' : 'text-accent'
-                    )}>
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium',
+                        ticket.urgency === 'urgent'
+                          ? 'text-danger'
+                          : ticket.urgency === 'high'
+                            ? 'text-warning'
+                            : ticket.urgency === 'normal'
+                              ? 'text-info'
+                              : 'text-accent'
+                      )}
+                    >
                       {ticket.urgency}
                     </span>
                   </div>
@@ -235,7 +293,11 @@ export default function IssuesPage() {
                 )}
                 <div className="flex items-center gap-2 text-xs text-text-muted">
                   <Clock className="h-3 w-3" />
-                  {new Date(ticket.createdAt).toLocaleDateString()} at {new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(ticket.createdAt).toLocaleDateString()} at{' '}
+                  {new Date(ticket.createdAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </div>
               </div>
             ))}
@@ -245,4 +307,3 @@ export default function IssuesPage() {
     </div>
   );
 }
-

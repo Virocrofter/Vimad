@@ -1,33 +1,30 @@
-import { Outlet, Link } from "react-router-dom";
-import { useTheme } from "../../hooks/useTheme";
-import { Moon, Sun, Menu } from "lucide-react";
-import { useState } from "react";
-import { cn } from "../../lib/utils";
-import { Footer } from "../../components/layout/Footer";
+import { Outlet, Link } from 'react-router-dom';
+import { useTheme } from '../../hooks/useTheme';
+import { Moon, Sun, Menu } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '../../lib/utils';
+import { Footer } from '../../components/layout/Footer';
 
 export default function MarketingLayout() {
   const { resolvedTheme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/features", label: "Features" },
-    { to: "/pricing", label: "Pricing" },
-    { to: "/integrations", label: "Integrations" },
-    { to: "/case-studies", label: "Case Studies" },
-    { to: "/blog", label: "Blog" },
-    { to: "/about", label: "About" },
-    { to: "/contact", label: "Contact" },
+    { to: '/', label: 'Home' },
+    { to: '/features', label: 'Features' },
+    { to: '/pricing', label: 'Pricing' },
+    { to: '/integrations', label: 'Integrations' },
+    { to: '/case-studies', label: 'Case Studies' },
+    { to: '/blog', label: 'Blog' },
+    { to: '/about', label: 'About' },
+    { to: '/contact', label: 'Contact' },
   ];
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-text-primary">
       <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 text-xl font-semibold text-primary"
-          >
+          <Link to="/" className="flex items-center gap-2.5 text-xl font-semibold text-primary">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-lg font-bold text-white">
               U
             </div>
@@ -50,7 +47,7 @@ export default function MarketingLayout() {
               className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-text-secondary hover:bg-surface-elevated"
               aria-label="Toggle theme"
             >
-              {resolvedTheme === "dark" ? (
+              {resolvedTheme === 'dark' ? (
                 <Sun className="h-4 w-4" />
               ) : (
                 <Moon className="h-4 w-4" />

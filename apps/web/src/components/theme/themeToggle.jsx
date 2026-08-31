@@ -61,7 +61,9 @@ export function ThemeToggle({ className, showLabel = false }) {
                 }}
                 className={cn(
                   'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
-                  isActive ? 'bg-secondary/10 text-secondary' : 'text-text-secondary hover:bg-surface'
+                  isActive
+                    ? 'bg-secondary/10 text-secondary'
+                    : 'text-text-secondary hover:bg-surface'
                 )}
               >
                 <OptIcon className="h-4 w-4" />

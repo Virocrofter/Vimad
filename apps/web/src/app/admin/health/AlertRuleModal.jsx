@@ -43,10 +43,10 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
     }
   }, [rule]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const toggleChannel = (ch) => {
     const current = form.channels;
-    update('channels', current.includes(ch) ? current.filter(c => c !== ch) : [...current, ch]);
+    update('channels', current.includes(ch) ? current.filter((c) => c !== ch) : [...current, ch]);
   };
 
   const handleSubmit = (e) => {
@@ -72,11 +72,18 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
               <Bell className="h-5 w-5 text-danger" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-text-primary">{isEditing ? 'Edit Alert Rule' : 'New Alert Rule'}</h3>
-              <p className="text-xs text-text-muted">{isEditing ? rule.id : 'Configure monitoring and notification'}</p>
+              <h3 className="text-lg font-bold text-text-primary">
+                {isEditing ? 'Edit Alert Rule' : 'New Alert Rule'}
+              </h3>
+              <p className="text-xs text-text-muted">
+                {isEditing ? rule.id : 'Configure monitoring and notification'}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -85,7 +92,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
           {/* Basic Info */}
           <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Rule Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Rule Name
+              </label>
               <input
                 type="text"
                 required
@@ -96,7 +105,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Description
+              </label>
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
@@ -109,7 +120,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
 
           {/* Metric & Condition */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Condition</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Condition
+            </h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-text-secondary">Metric</label>
@@ -119,26 +132,34 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {Object.entries(alertMetricMeta).map(([key, meta]) => (
-                    <option key={key} value={key}>{meta.label}</option>
+                    <option key={key} value={key}>
+                      {meta.label}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Operator</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Operator
+                </label>
                 <select
                   value={form.condition}
                   onChange={(e) => update('condition', e.target.value)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {alertConditions.map(c => (
-                    <option key={c.key} value={c.key}>{c.label} ({c.symbol})</option>
+                  {alertConditions.map((c) => (
+                    <option key={c.key} value={c.key}>
+                      {c.label} ({c.symbol})
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Threshold</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Threshold
+                </label>
                 <div className="relative">
                   <input
                     type="number"
@@ -153,7 +174,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Duration (seconds)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Duration (seconds)
+                </label>
                 <input
                   type="number"
                   min="10"
@@ -167,7 +190,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
 
           {/* Severity */}
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Severity</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Severity
+            </label>
             <div className="grid grid-cols-3 gap-2">
               {Object.entries(alertSeverityMeta).map(([key, meta]) => (
                 <button
@@ -189,7 +214,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
 
           {/* Channels */}
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Notification Channels</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Notification Channels
+            </label>
             <div className="flex flex-wrap gap-2">
               {availableChannels.map((ch) => (
                 <button
@@ -214,7 +241,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
             <div>
               <p className="text-sm font-medium text-text-primary">Enable Rule</p>
-              <p className="text-xs text-text-muted">{form.enabled ? 'Rule is active and monitoring' : 'Rule is disabled'}</p>
+              <p className="text-xs text-text-muted">
+                {form.enabled ? 'Rule is active and monitoring' : 'Rule is disabled'}
+              </p>
             </div>
             <button
               type="button"
@@ -224,16 +253,20 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
                 form.enabled ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.enabled ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.enabled ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Rule'}
             </Button>

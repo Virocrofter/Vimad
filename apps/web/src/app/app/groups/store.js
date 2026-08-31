@@ -5,8 +5,7 @@ import { initialGroups } from './data';
 export const useGroupStore = create((set, get) => ({
   groups: initialGroups,
 
-  addGroup: (newGroup) =>
-    set((state) => ({ groups: [newGroup, ...state.groups] })),
+  addGroup: (newGroup) => set((state) => ({ groups: [newGroup, ...state.groups] })),
 
   updateGroup: (id, updater) =>
     set((state) => ({

@@ -16,12 +16,19 @@ export const initialTenants = [
     nextRenewal: '2026-09-12',
     region: 'us-east',
     owner: { name: 'Robert Chen', email: 'robert@grandhotel.com', phone: '+1 617-555-0101' },
-    features: ['channel-manager', 'booking-engine', 'guest-portal', 'crm-loyalty', 'marketing-automation', 'ai-revenue'],
-    rooms:    { used: 142,   total: 200 },
-    users:    { used: 18,    total: 30 },
-    storage:  { used: 45.2,  total: 100, unit: 'GB' },
+    features: [
+      'channel-manager',
+      'booking-engine',
+      'guest-portal',
+      'crm-loyalty',
+      'marketing-automation',
+      'ai-revenue',
+    ],
+    rooms: { used: 142, total: 200 },
+    users: { used: 18, total: 30 },
+    storage: { used: 45.2, total: 100, unit: 'GB' },
     apiCalls: { used: 28400, total: 100000 },
-    revenue:  { mrr: 4990,   totalPaid: 59880 },
+    revenue: { mrr: 4990, totalPaid: 59880 },
     billing: { nextInvoice: '2026-09-12', paymentMethod: 'Visa •••• 4242', overdue: false },
     notes: 'Flagship enterprise customer. Dedicated account manager assigned.',
   },
@@ -40,11 +47,11 @@ export const initialTenants = [
     region: 'us-east',
     owner: { name: 'Maria Garcia', email: 'maria@seasideresort.com', phone: '+1 305-555-0202' },
     features: ['channel-manager', 'booking-engine', 'guest-portal', 'crm-loyalty'],
-    rooms:    { used: 85,    total: 200 },
-    users:    { used: 12,    total: 20 },
-    storage:  { used: 28.5,  total: 100, unit: 'GB' },
+    rooms: { used: 85, total: 200 },
+    users: { used: 12, total: 20 },
+    storage: { used: 28.5, total: 100, unit: 'GB' },
     apiCalls: { used: 15600, total: 100000 },
-    revenue:  { mrr: 499,    totalPaid: 5988 },
+    revenue: { mrr: 499, totalPaid: 5988 },
     billing: { nextInvoice: '2026-08-20', paymentMethod: 'Mastercard •••• 8891', overdue: false },
     notes: 'Seasonal property. High volume in winter months.',
   },
@@ -63,11 +70,11 @@ export const initialTenants = [
     region: 'us-west',
     owner: { name: 'James Miller', email: 'james@mountainlodge.com', phone: '+1 970-555-0303' },
     features: ['channel-manager', 'booking-engine'],
-    rooms:    { used: 45,   total: 200 },
-    users:    { used: 6,    total: 20 },
-    storage:  { used: 8.2,  total: 100, unit: 'GB' },
+    rooms: { used: 45, total: 200 },
+    users: { used: 6, total: 20 },
+    storage: { used: 8.2, total: 100, unit: 'GB' },
     apiCalls: { used: 4200, total: 100000 },
-    revenue:  { mrr: 0,     totalPaid: 0 },
+    revenue: { mrr: 0, totalPaid: 0 },
     billing: { nextInvoice: null, paymentMethod: null, overdue: false },
     notes: '14-day trial. Onboarding call scheduled for Aug 18.',
   },
@@ -86,12 +93,17 @@ export const initialTenants = [
     region: 'us-central',
     owner: { name: 'Lisa Wong', email: 'lisa@downtownsuites.com', phone: '+1 312-555-0404' },
     features: ['booking-engine'],
-    rooms:    { used: 32,   total: 75 },
-    users:    { used: 4,    total: 10 },
-    storage:  { used: 12.1, total: 50, unit: 'GB' },
+    rooms: { used: 32, total: 75 },
+    users: { used: 4, total: 10 },
+    storage: { used: 12.1, total: 50, unit: 'GB' },
     apiCalls: { used: 8900, total: 50000 },
-    revenue:  { mrr: 199,   totalPaid: 2388 },
-    billing: { nextInvoice: '2026-08-12', paymentMethod: 'Visa •••• 4242', overdue: true, overdueAmount: 199 },
+    revenue: { mrr: 199, totalPaid: 2388 },
+    billing: {
+      nextInvoice: '2026-08-12',
+      paymentMethod: 'Visa •••• 4242',
+      overdue: true,
+      overdueAmount: 199,
+    },
     notes: 'Payment failed 3x. Account suspended pending payment resolution.',
   },
   {
@@ -109,11 +121,11 @@ export const initialTenants = [
     region: 'us-west',
     owner: { name: 'David Park', email: 'david@coastalinn.com', phone: '+1 619-555-0505' },
     features: ['booking-engine', 'guest-portal'],
-    rooms:    { used: 28,   total: 75 },
-    users:    { used: 3,    total: 10 },
-    storage:  { used: 9.8,  total: 50, unit: 'GB' },
+    rooms: { used: 28, total: 75 },
+    users: { used: 3, total: 10 },
+    storage: { used: 9.8, total: 50, unit: 'GB' },
     apiCalls: { used: 6700, total: 50000 },
-    revenue:  { mrr: 199,   totalPaid: 2388 },
+    revenue: { mrr: 199, totalPaid: 2388 },
     billing: { nextInvoice: '2026-09-05', paymentMethod: 'ACH', overdue: false },
     notes: 'Small boutique property. Considering upgrade to Professional.',
   },
@@ -132,11 +144,11 @@ export const initialTenants = [
     region: 'us-west',
     owner: { name: 'Amanda Wilson', email: 'amanda@lakesideresort.com', phone: '+1 530-555-0606' },
     features: [],
-    rooms:    { used: 0, total: 500 },
-    users:    { used: 0, total: 50 },
-    storage:  { used: 0, total: 500, unit: 'GB' },
+    rooms: { used: 0, total: 500 },
+    users: { used: 0, total: 50 },
+    storage: { used: 0, total: 500, unit: 'GB' },
     apiCalls: { used: 0, total: 500000 },
-    revenue:  { mrr: 0,  totalPaid: 0 },
+    revenue: { mrr: 0, totalPaid: 0 },
     billing: { nextInvoice: null, paymentMethod: null, overdue: false },
     notes: 'Contract signed. Awaiting Stripe Connect onboarding completion.',
   },
@@ -154,12 +166,18 @@ export const initialTenants = [
     nextRenewal: '2026-08-22',
     region: 'us-east',
     owner: { name: 'Kevin Lee', email: 'kevin@urbanhotel.com', phone: '+1 212-555-0707' },
-    features: ['channel-manager', 'booking-engine', 'guest-portal', 'crm-loyalty', 'marketing-automation'],
-    rooms:    { used: 120,   total: 200 },
-    users:    { used: 15,    total: 20 },
-    storage:  { used: 38.7,  total: 100, unit: 'GB' },
+    features: [
+      'channel-manager',
+      'booking-engine',
+      'guest-portal',
+      'crm-loyalty',
+      'marketing-automation',
+    ],
+    rooms: { used: 120, total: 200 },
+    users: { used: 15, total: 20 },
+    storage: { used: 38.7, total: 100, unit: 'GB' },
     apiCalls: { used: 42100, total: 100000 },
-    revenue:  { mrr: 499,    totalPaid: 5988 },
+    revenue: { mrr: 499, totalPaid: 5988 },
     billing: { nextInvoice: '2026-08-22', paymentMethod: 'Amex •••• 1001', overdue: false },
     notes: 'High API usage. Monitoring for potential upgrade to Enterprise.',
   },
@@ -178,11 +196,11 @@ export const initialTenants = [
     region: 'us-west',
     owner: { name: 'Priya Kumar', email: 'priya@desertoasis.com', phone: '+1 602-555-0808' },
     features: [],
-    rooms:    { used: 0, total: 75 },
-    users:    { used: 0, total: 10 },
-    storage:  { used: 0, total: 50, unit: 'GB' },
+    rooms: { used: 0, total: 75 },
+    users: { used: 0, total: 10 },
+    storage: { used: 0, total: 50, unit: 'GB' },
     apiCalls: { used: 0, total: 50000 },
-    revenue:  { mrr: 0,  totalPaid: 1194 },
+    revenue: { mrr: 0, totalPaid: 1194 },
     billing: { nextInvoice: null, paymentMethod: null, overdue: false },
     notes: 'Churned May 2026. Reason: switched to competitor. Exit interview completed.',
   },
@@ -259,9 +277,7 @@ export const initialFeatureFlags = [
     createdBy: 'Admin',
     impact: 'high',
     category: 'guest-experience',
-    history: [
-      { date: '2026-04-05', action: 'Flag created', user: 'Admin' },
-    ],
+    history: [{ date: '2026-04-05', action: 'Flag created', user: 'Admin' }],
   },
   {
     id: 'FF-005',
@@ -312,9 +328,7 @@ export const initialFeatureFlags = [
     createdBy: 'Admin',
     impact: 'low',
     category: 'billing',
-    history: [
-      { date: '2026-07-20', action: 'Flag created', user: 'Admin' },
-    ],
+    history: [{ date: '2026-07-20', action: 'Flag created', user: 'Admin' }],
   },
   {
     id: 'FF-008',
@@ -338,48 +352,113 @@ export const initialFeatureFlags = [
 
 /* ─── Metadata ─── */
 export const tenantStatusMeta = {
-  active:    { label: 'Active',    class: 'bg-accent/10 text-accent border-accent/20',     dot: 'bg-accent',      icon: 'CheckCircle2' },
-  trial:     { label: 'Trial',     class: 'bg-info/10 text-info border-info/20',           dot: 'bg-info',        icon: 'Clock' },
-  suspended: { label: 'Suspended', class: 'bg-danger/10 text-danger border-danger/20',     dot: 'bg-danger',      icon: 'AlertTriangle' },
-  pending:   { label: 'Pending',   class: 'bg-warning/10 text-warning border-warning/20',  dot: 'bg-warning',     icon: 'Clock' },
-  cancelled: { label: 'Cancelled', class: 'bg-neutral/10 text-text-muted border-border',   dot: 'bg-text-muted',  icon: 'XCircle' },
+  active: {
+    label: 'Active',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: 'CheckCircle2',
+  },
+  trial: {
+    label: 'Trial',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: 'Clock',
+  },
+  suspended: {
+    label: 'Suspended',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: 'AlertTriangle',
+  },
+  pending: {
+    label: 'Pending',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: 'Clock',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+    icon: 'XCircle',
+  },
 };
 
 // Alias for components that expect statusMeta
 export const statusMeta = tenantStatusMeta;
 
 export const planMeta = {
-  Starter:      { label: 'Starter',      color: 'text-info',        bg: 'bg-info/10' },
-  Professional: { label: 'Professional', color: 'text-secondary',   bg: 'bg-secondary/10' },
-  Enterprise:   { label: 'Enterprise',   color: 'text-purple-500',  bg: 'bg-purple-500/10' },
+  Starter: { label: 'Starter', color: 'text-info', bg: 'bg-info/10' },
+  Professional: { label: 'Professional', color: 'text-secondary', bg: 'bg-secondary/10' },
+  Enterprise: { label: 'Enterprise', color: 'text-purple-500', bg: 'bg-purple-500/10' },
 };
 
 export const flagStatusMeta = {
-  active:     { label: 'Active',     class: 'bg-accent/10 text-accent border-accent/20',    dot: 'bg-accent' },
-  inactive:   { label: 'Inactive',   class: 'bg-neutral/10 text-text-muted border-border',  dot: 'bg-text-muted' },
-  deprecated: { label: 'Deprecated', class: 'bg-danger/10 text-danger border-danger/20',    dot: 'bg-danger' },
+  active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
+  inactive: {
+    label: 'Inactive',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
+  deprecated: {
+    label: 'Deprecated',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 export const flagCategoryMeta = {
-  revenue:           { label: 'Revenue',           color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: 'TrendingUp' },
-  'guest-experience':{ label: 'Guest Experience',  color: 'text-pink-500',    bg: 'bg-pink-500/10',    icon: 'Heart' },
-  analytics:         { label: 'Analytics',         color: 'text-blue-500',    bg: 'bg-blue-500/10',    icon: 'BarChart3' },
-  operations:        { label: 'Operations',        color: 'text-orange-500',  bg: 'bg-orange-500/10',  icon: 'Settings' },
-  billing:           { label: 'Billing',           color: 'text-amber-500',   bg: 'bg-amber-500/10',   icon: 'CreditCard' },
+  revenue: {
+    label: 'Revenue',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    icon: 'TrendingUp',
+  },
+  'guest-experience': {
+    label: 'Guest Experience',
+    color: 'text-pink-500',
+    bg: 'bg-pink-500/10',
+    icon: 'Heart',
+  },
+  analytics: {
+    label: 'Analytics',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    icon: 'BarChart3',
+  },
+  operations: {
+    label: 'Operations',
+    color: 'text-orange-500',
+    bg: 'bg-orange-500/10',
+    icon: 'Settings',
+  },
+  billing: { label: 'Billing', color: 'text-amber-500', bg: 'bg-amber-500/10', icon: 'CreditCard' },
 };
 
 export const impactMeta = {
-  high:   { label: 'High',   class: 'bg-danger/10 text-danger border-danger/20' },
+  high: { label: 'High', class: 'bg-danger/10 text-danger border-danger/20' },
   medium: { label: 'Medium', class: 'bg-warning/10 text-warning border-warning/20' },
-  low:    { label: 'Low',    class: 'bg-accent/10 text-accent border-accent/20' },
+  low: { label: 'Low', class: 'bg-accent/10 text-accent border-accent/20' },
 };
 
 export const billingStatusMeta = {
-  active:    { label: 'Active',    class: 'bg-accent/10 text-accent border-accent/20',    dot: 'bg-accent' },
-  overdue:   { label: 'Overdue',   class: 'bg-danger/10 text-danger border-danger/20',    dot: 'bg-danger' },
-  pending:   { label: 'Pending',   class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  cancelled: { label: 'Cancelled', class: 'bg-neutral/10 text-text-muted border-border',  dot: 'bg-text-muted' },
-  trial:     { label: 'Trial',     class: 'bg-info/10 text-info border-info/20',          dot: 'bg-info' },
+  active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
+  overdue: {
+    label: 'Overdue',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
+  pending: {
+    label: 'Pending',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
+  trial: { label: 'Trial', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
 };
 
 export const regions = ['us-east', 'us-west', 'us-central', 'eu-west', 'ap-southeast'];
@@ -391,7 +470,11 @@ export function formatCurrency(amount) {
 
 export function formatDate(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 /* ─── Usage Helpers (used by components.jsx and page.jsx) ─── */
@@ -403,15 +486,15 @@ export function getUsagePercent(used, total) {
 export function getUsageColor(pct) {
   if (pct === null) return 'text-text-muted';
   if (pct >= 100) return 'text-danger';
-  if (pct >= 90)  return 'text-warning';
-  if (pct >= 75)  return 'text-info';
+  if (pct >= 90) return 'text-warning';
+  if (pct >= 75) return 'text-info';
   return 'text-accent';
 }
 
 export function getUsageBarColor(pct) {
   if (pct === null) return 'bg-text-muted';
   if (pct >= 100) return 'bg-danger';
-  if (pct >= 90)  return 'bg-warning';
-  if (pct >= 75)  return 'bg-info';
+  if (pct >= 90) return 'bg-warning';
+  if (pct >= 75) return 'bg-info';
   return 'bg-accent';
 }

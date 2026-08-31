@@ -1,12 +1,37 @@
 /* src/app/guest-portal/status/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Activity, CheckCircle2, AlertTriangle, Wrench, XCircle,
-  Clock, RefreshCw, Wifi, WifiOff, Server, Shield, Globe,
-  ChevronDown, ChevronUp, ExternalLink, Bell, BellOff,
-  TrendingUp, TrendingDown, Minus, Info, ArrowRight,
-  Coffee, Dumbbell, Waves, Car, Briefcase, ConciergeBell,
-  UtensilsCrossed, Sparkles, BedDouble,
+  Activity,
+  CheckCircle2,
+  AlertTriangle,
+  Wrench,
+  XCircle,
+  Clock,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  Server,
+  Shield,
+  Globe,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Bell,
+  BellOff,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Info,
+  ArrowRight,
+  Coffee,
+  Dumbbell,
+  Waves,
+  Car,
+  Briefcase,
+  ConciergeBell,
+  UtensilsCrossed,
+  Sparkles,
+  BedDouble,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -21,7 +46,7 @@ const serviceIcons = {
   'Rooftop Pool': Waves,
   'Business Center': Briefcase,
   'Valet Parking': Car,
-  'Concierge': ConciergeBell,
+  Concierge: ConciergeBell,
 };
 
 export default function StatusPage() {
@@ -34,21 +59,21 @@ export default function StatusPage() {
 
   const stats = useMemo(() => {
     const total = serviceStatuses.length;
-    const operational = serviceStatuses.filter(s => s.status === 'operational').length;
-    const degraded = serviceStatuses.filter(s => s.status === 'degraded').length;
-    const maintenance = serviceStatuses.filter(s => s.status === 'maintenance').length;
-    const unavailable = serviceStatuses.filter(s => s.status === 'unavailable').length;
+    const operational = serviceStatuses.filter((s) => s.status === 'operational').length;
+    const degraded = serviceStatuses.filter((s) => s.status === 'degraded').length;
+    const maintenance = serviceStatuses.filter((s) => s.status === 'maintenance').length;
+    const unavailable = serviceStatuses.filter((s) => s.status === 'unavailable').length;
     const healthScore = Math.round((operational / total) * 100);
     return { total, operational, degraded, maintenance, unavailable, healthScore };
   }, []);
 
   const filteredServices = useMemo(() => {
     if (filter === 'all') return serviceStatuses;
-    return serviceStatuses.filter(s => s.status === filter);
+    return serviceStatuses.filter((s) => s.status === filter);
   }, [filter]);
 
-  const activeAnnouncements = guestAnnouncements.filter(a =>
-    a.status === 'published' && new Date(a.expiresAt) > new Date()
+  const activeAnnouncements = guestAnnouncements.filter(
+    (a) => a.status === 'published' && new Date(a.expiresAt) > new Date()
   );
 
   return (
@@ -74,25 +99,37 @@ export default function StatusPage() {
             onClick={() => setSubscribed(!subscribed)}
             className={subscribed ? 'border-accent text-accent' : ''}
           >
-            {subscribed ? <BellOff className="mr-1.5 h-4 w-4" /> : <Bell className="mr-1.5 h-4 w-4" />}
+            {subscribed ? (
+              <BellOff className="mr-1.5 h-4 w-4" />
+            ) : (
+              <Bell className="mr-1.5 h-4 w-4" />
+            )}
             {subscribed ? 'Subscribed' : 'Subscribe'}
           </Button>
         </div>
       </div>
 
       {/* Overall Health */}
-      <div className={cn(
-        'rounded-xl border p-5 flex items-center gap-4',
-        stats.healthScore >= 90 ? 'border-accent/20 bg-accent/5' :
-        stats.healthScore >= 70 ? 'border-warning/20 bg-warning/5' :
-        'border-danger/20 bg-danger/5'
-      )}>
-        <div className={cn(
-          'flex h-14 w-14 shrink-0 items-center justify-center rounded-full',
-          stats.healthScore >= 90 ? 'bg-accent/10' :
-          stats.healthScore >= 70 ? 'bg-warning/10' :
-          'bg-danger/10'
-        )}>
+      <div
+        className={cn(
+          'rounded-xl border p-5 flex items-center gap-4',
+          stats.healthScore >= 90
+            ? 'border-accent/20 bg-accent/5'
+            : stats.healthScore >= 70
+              ? 'border-warning/20 bg-warning/5'
+              : 'border-danger/20 bg-danger/5'
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-14 w-14 shrink-0 items-center justify-center rounded-full',
+            stats.healthScore >= 90
+              ? 'bg-accent/10'
+              : stats.healthScore >= 70
+                ? 'bg-warning/10'
+                : 'bg-danger/10'
+          )}
+        >
           {stats.healthScore >= 90 ? (
             <CheckCircle2 className="h-7 w-7 text-accent" />
           ) : stats.healthScore >= 70 ? (
@@ -102,14 +139,21 @@ export default function StatusPage() {
           )}
         </div>
         <div className="flex-1">
-          <p className={cn('text-lg font-bold',
-            stats.healthScore >= 90 ? 'text-accent' :
-            stats.healthScore >= 70 ? 'text-warning' :
-            'text-danger'
-          )}>
-            {stats.healthScore >= 90 ? 'All Systems Operational' :
-             stats.healthScore >= 70 ? 'Some Services Affected' :
-             'Service Disruptions Detected'}
+          <p
+            className={cn(
+              'text-lg font-bold',
+              stats.healthScore >= 90
+                ? 'text-accent'
+                : stats.healthScore >= 70
+                  ? 'text-warning'
+                  : 'text-danger'
+            )}
+          >
+            {stats.healthScore >= 90
+              ? 'All Systems Operational'
+              : stats.healthScore >= 70
+                ? 'Some Services Affected'
+                : 'Service Disruptions Detected'}
           </p>
           <p className="text-xs text-text-secondary">
             {stats.operational} of {stats.total} services operational
@@ -118,11 +162,16 @@ export default function StatusPage() {
           </p>
         </div>
         <div className="hidden sm:block text-right">
-          <p className={cn('text-3xl font-bold font-mono',
-            stats.healthScore >= 90 ? 'text-accent' :
-            stats.healthScore >= 70 ? 'text-warning' :
-            'text-danger'
-          )}>
+          <p
+            className={cn(
+              'text-3xl font-bold font-mono',
+              stats.healthScore >= 90
+                ? 'text-accent'
+                : stats.healthScore >= 70
+                  ? 'text-warning'
+                  : 'text-danger'
+            )}
+          >
             {stats.healthScore}%
           </p>
           <p className="text-[10px] text-text-muted">Health Score</p>
@@ -197,7 +246,9 @@ export default function StatusPage() {
             )}
           >
             {tab.label}
-            <span className="rounded-full bg-background px-1.5 py-0.5 text-[10px] text-text-muted">{tab.count}</span>
+            <span className="rounded-full bg-background px-1.5 py-0.5 text-[10px] text-text-muted">
+              {tab.count}
+            </span>
           </button>
         ))}
       </div>
@@ -214,37 +265,64 @@ export default function StatusPage() {
               key={service.id}
               className={cn(
                 'rounded-xl border bg-surface p-4 transition-all cursor-pointer',
-                service.status === 'operational' ? 'border-border' :
-                service.status === 'degraded' ? 'border-warning/30' :
-                service.status === 'maintenance' ? 'border-info/30' :
-                'border-danger/30',
+                service.status === 'operational'
+                  ? 'border-border'
+                  : service.status === 'degraded'
+                    ? 'border-warning/30'
+                    : service.status === 'maintenance'
+                      ? 'border-info/30'
+                      : 'border-danger/30',
                 isExpanded && 'shadow-md'
               )}
               onClick={() => setExpandedService(isExpanded ? null : service.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={cn(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                    meta.color.replace('text-', 'bg-').replace('danger', 'bg-danger/10').replace('accent', 'bg-accent/10').replace('warning', 'bg-warning/10').replace('info', 'bg-info/10')
-                  )}>
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                      meta.color
+                        .replace('text-', 'bg-')
+                        .replace('danger', 'bg-danger/10')
+                        .replace('accent', 'bg-accent/10')
+                        .replace('warning', 'bg-warning/10')
+                        .replace('info', 'bg-info/10')
+                    )}
+                  >
                     <Icon className={cn('h-5 w-5', meta.color)} />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-text-primary">{service.name}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-                        meta.color.replace('text-', 'bg-').replace('danger', 'bg-danger/10').replace('accent', 'bg-accent/10').replace('warning', 'bg-warning/10').replace('info', 'bg-info/10'),
-                        meta.color,
-                        meta.color.replace('text-', 'border-').replace('danger', 'border-danger/20').replace('accent', 'border-accent/20').replace('warning', 'border-warning/20').replace('info', 'border-info/20')
-                      )}>
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                          meta.color
+                            .replace('text-', 'bg-')
+                            .replace('danger', 'bg-danger/10')
+                            .replace('accent', 'bg-accent/10')
+                            .replace('warning', 'bg-warning/10')
+                            .replace('info', 'bg-info/10'),
+                          meta.color,
+                          meta.color
+                            .replace('text-', 'border-')
+                            .replace('danger', 'border-danger/20')
+                            .replace('accent', 'border-accent/20')
+                            .replace('warning', 'border-warning/20')
+                            .replace('info', 'border-info/20')
+                        )}
+                      >
                         <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
                         {meta.label}
                       </span>
                     </div>
                   </div>
                 </div>
-                {isExpanded ? <ChevronUp className="h-4 w-4 text-text-muted" /> : <ChevronDown className="h-4 w-4 text-text-muted" />}
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-text-muted" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-text-muted" />
+                )}
               </div>
 
               {isExpanded && (

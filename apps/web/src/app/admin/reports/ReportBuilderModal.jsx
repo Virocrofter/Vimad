@@ -1,17 +1,40 @@
 /* src/app/admin/reports/ReportBuilderModal.jsx */
 import { useState, useMemo } from 'react';
 import {
-  X, Plus, Save, Eye, GripVertical, ChevronRight, ChevronDown,
-  BarChart3, TrendingUp, Activity, PieChart, Table, Hash,
-  ScatterChart, Grid3x3, Filter, Layers, FilePlus, ArrowLeft,
-  Check, AlertTriangle
+  X,
+  Plus,
+  Save,
+  Eye,
+  GripVertical,
+  ChevronRight,
+  ChevronDown,
+  BarChart3,
+  TrendingUp,
+  Activity,
+  PieChart,
+  Table,
+  Hash,
+  ScatterChart,
+  Grid3x3,
+  Filter,
+  Layers,
+  FilePlus,
+  ArrowLeft,
+  Check,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
-  chartTypes, dataSources, aggregations, timeGranularities,
-  reportTemplates, mockChartData, getDataSourceFields, getApplicableAggregations
+  chartTypes,
+  dataSources,
+  aggregations,
+  timeGranularities,
+  reportTemplates,
+  mockChartData,
+  getDataSourceFields,
+  getApplicableAggregations,
 } from './data';
 import { ChartTypeIcon, TemplateIcon, ChartRenderer, FieldChip } from './components';
 
@@ -29,25 +52,25 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
   });
 
   const fields = useMemo(() => getDataSourceFields(dataSource), [dataSource]);
-  const numericFields = fields.filter(f => ['number', 'currency', 'percent'].includes(f.type));
+  const numericFields = fields.filter((f) => ['number', 'currency', 'percent'].includes(f.type));
   const allFields = fields;
 
-  const updateConfig = (key, value) => setConfig(prev => ({ ...prev, [key]: value }));
+  const updateConfig = (key, value) => setConfig((prev) => ({ ...prev, [key]: value }));
 
   const toggleYAxis = (fieldKey) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       yAxis: prev.yAxis.includes(fieldKey)
-        ? prev.yAxis.filter(k => k !== fieldKey)
+        ? prev.yAxis.filter((k) => k !== fieldKey)
         : [...prev.yAxis, fieldKey],
     }));
   };
 
   const toggleColumn = (fieldKey) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       columns: prev.columns.includes(fieldKey)
-        ? prev.columns.filter(k => k !== fieldKey)
+        ? prev.columns.filter((k) => k !== fieldKey)
         : [...prev.columns, fieldKey],
     }));
   };
@@ -84,10 +107,15 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
             </div>
             <div>
               <h3 className="text-lg font-bold text-text-primary">Configure Widget</h3>
-              <p className="text-xs text-text-muted">{dataSources.find(s => s.key === dataSource)?.label}</p>
+              <p className="text-xs text-text-muted">
+                {dataSources.find((s) => s.key === dataSource)?.label}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -96,7 +124,9 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
           {/* Step 1: Chart Type */}
           {step === 1 && (
             <div className="space-y-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Select Chart Type</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Select Chart Type
+              </h4>
               <div className="grid grid-cols-3 gap-3">
                 {chartTypes.map((ct) => (
                   <button
@@ -109,7 +139,13 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
                         : 'border-border bg-surface text-text-secondary hover:border-secondary/30'
                     )}
                   >
-                    <ChartTypeIcon type={ct.key} className={cn('h-6 w-6', chartType === ct.key ? 'text-secondary' : 'text-text-muted')} />
+                    <ChartTypeIcon
+                      type={ct.key}
+                      className={cn(
+                        'h-6 w-6',
+                        chartType === ct.key ? 'text-secondary' : 'text-text-muted'
+                      )}
+                    />
                     <span className="text-sm font-medium">{ct.label}</span>
                     <span className="text-[10px] text-text-muted capitalize">{ct.category}</span>
                   </button>
@@ -129,9 +165,11 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
               {/* X-Axis */}
               {needsXAxis && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">X-Axis / Category</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    X-Axis / Category
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {allFields.map(field => (
+                    {allFields.map((field) => (
                       <FieldChip
                         key={field.key}
                         field={field}
@@ -146,9 +184,11 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
               {/* Y-Axis */}
               {needsYAxis && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Y-Axis / Values</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    Y-Axis / Values
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {numericFields.map(field => (
+                    {numericFields.map((field) => (
                       <FieldChip
                         key={field.key}
                         field={field}
@@ -163,9 +203,11 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
               {/* Columns (for table) */}
               {needsColumns && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Table Columns</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    Table Columns
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {allFields.map(field => (
+                    {allFields.map((field) => (
                       <FieldChip
                         key={field.key}
                         field={field}
@@ -180,9 +222,13 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
               {/* Aggregation */}
               {needsAggregation && config.yAxis.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Aggregation</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    Aggregation
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {getApplicableAggregations(numericFields.find(f => f.key === config.yAxis[0])?.type || 'number').map(agg => (
+                    {getApplicableAggregations(
+                      numericFields.find((f) => f.key === config.yAxis[0])?.type || 'number'
+                    ).map((agg) => (
                       <button
                         key={agg.key}
                         onClick={() => updateConfig('aggregation', agg.key)}
@@ -203,9 +249,11 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
               {/* Granularity */}
               {needsGranularity && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Time Granularity</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    Time Granularity
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {timeGranularities.map(g => (
+                    {timeGranularities.map((g) => (
                       <button
                         key={g.key}
                         onClick={() => updateConfig('granularity', g.key)}
@@ -225,7 +273,9 @@ function WidgetBuilder({ isOpen, onClose, onSave, dataSource, existingWidget }) 
 
               {/* Preview */}
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Preview</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Preview
+                </h4>
                 <div className="rounded-xl border border-border bg-surface p-4">
                   <ChartRenderer
                     type={chartType}
@@ -277,7 +327,7 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
   const [editingWidgetIndex, setEditingWidgetIndex] = useState(null);
   const [tagInput, setTagInput] = useState('');
 
-  const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const updateForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
@@ -293,7 +343,7 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
         'support-metrics': { dataSource: 'support', chartType: 'bar', tags: ['support'] },
       };
       const preset = presets[template.key] || {};
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         name: template.label,
         description: template.description,
@@ -305,29 +355,29 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
 
   const addWidget = (widget) => {
     if (editingWidgetIndex !== null) {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
-        widgets: prev.widgets.map((w, i) => i === editingWidgetIndex ? widget : w),
+        widgets: prev.widgets.map((w, i) => (i === editingWidgetIndex ? widget : w)),
       }));
       setEditingWidgetIndex(null);
     } else {
-      setForm(prev => ({ ...prev, widgets: [...prev.widgets, widget] }));
+      setForm((prev) => ({ ...prev, widgets: [...prev.widgets, widget] }));
     }
   };
 
   const removeWidget = (index) => {
-    setForm(prev => ({ ...prev, widgets: prev.widgets.filter((_, i) => i !== index) }));
+    setForm((prev) => ({ ...prev, widgets: prev.widgets.filter((_, i) => i !== index) }));
   };
 
   const addTag = () => {
     if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
-      setForm(prev => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
+      setForm((prev) => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
       setTagInput('');
     }
   };
 
   const removeTag = (tag) => {
-    setForm(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
+    setForm((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }));
   };
 
   const handleSave = () => {
@@ -366,11 +416,21 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                 {isEditing ? 'Edit Report' : 'Create Custom Report'}
               </h3>
               <p className="text-xs text-text-muted">
-                Step {step} of 4 · {step === 1 ? 'Choose Template' : step === 2 ? 'Basic Info' : step === 3 ? 'Build Report' : 'Review & Save'}
+                Step {step} of 4 ·{' '}
+                {step === 1
+                  ? 'Choose Template'
+                  : step === 2
+                    ? 'Basic Info'
+                    : step === 3
+                      ? 'Build Report'
+                      : 'Review & Save'}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -379,7 +439,9 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
           {/* ─── STEP 1: Template Selection ─── */}
           {step === 1 && (
             <div className="space-y-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Start from a Template</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Start from a Template
+              </h4>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {reportTemplates.map((template) => (
                   <button
@@ -392,14 +454,31 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                         : 'border-border bg-surface hover:border-secondary/30'
                     )}
                   >
-                    <div className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-lg',
-                      selectedTemplate?.key === template.key ? 'bg-secondary/10' : 'bg-neutral/10'
-                    )}>
-                      <TemplateIcon template={template.key} className={cn('h-5 w-5', selectedTemplate?.key === template.key ? 'text-secondary' : 'text-text-muted')} />
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-lg',
+                        selectedTemplate?.key === template.key ? 'bg-secondary/10' : 'bg-neutral/10'
+                      )}
+                    >
+                      <TemplateIcon
+                        template={template.key}
+                        className={cn(
+                          'h-5 w-5',
+                          selectedTemplate?.key === template.key
+                            ? 'text-secondary'
+                            : 'text-text-muted'
+                        )}
+                      />
                     </div>
                     <div>
-                      <p className={cn('text-sm font-semibold', selectedTemplate?.key === template.key ? 'text-secondary' : 'text-text-primary')}>
+                      <p
+                        className={cn(
+                          'text-sm font-semibold',
+                          selectedTemplate?.key === template.key
+                            ? 'text-secondary'
+                            : 'text-text-primary'
+                        )}
+                      >
                         {template.label}
                       </p>
                       <p className="mt-0.5 text-xs text-text-muted">{template.description}</p>
@@ -420,7 +499,9 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
             <div className="space-y-5">
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Report Name</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Report Name
+                  </label>
                   <input
                     type="text"
                     value={form.name}
@@ -430,7 +511,9 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Description
+                  </label>
                   <textarea
                     value={form.description}
                     onChange={(e) => updateForm('description', e.target.value)}
@@ -443,17 +526,25 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Data Source</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Data Source
+                  </label>
                   <select
                     value={form.dataSource}
                     onChange={(e) => updateForm('dataSource', e.target.value)}
                     className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {dataSources.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                    {dataSources.map((s) => (
+                      <option key={s.key} value={s.key}>
+                        {s.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tenant Scope</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Tenant Scope
+                  </label>
                   <select
                     value={form.tenantScope}
                     onChange={(e) => updateForm('tenantScope', e.target.value)}
@@ -469,12 +560,19 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
 
               {/* Tags */}
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tags</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Tags
+                </label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {form.tags.map(tag => (
-                    <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-secondary/10 border border-secondary/20 px-2.5 py-0.5 text-xs font-medium text-secondary">
+                  {form.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full bg-secondary/10 border border-secondary/20 px-2.5 py-0.5 text-xs font-medium text-secondary"
+                    >
                       {tag}
-                      <button onClick={() => removeTag(tag)} className="hover:text-danger"><X className="h-3 w-3" /></button>
+                      <button onClick={() => removeTag(tag)} className="hover:text-danger">
+                        <X className="h-3 w-3" />
+                      </button>
                     </span>
                   ))}
                 </div>
@@ -487,7 +585,9 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                     placeholder="Add tag..."
                     className="h-9 flex-1 rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
-                  <Button type="button" variant="outline" size="sm" onClick={addTag}>Add</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={addTag}>
+                    Add
+                  </Button>
                 </div>
               </div>
 
@@ -495,7 +595,9 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
               <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
                 <div>
                   <p className="text-sm font-medium text-text-primary">Share with Team</p>
-                  <p className="text-xs text-text-muted">Make this report visible to other admins</p>
+                  <p className="text-xs text-text-muted">
+                    Make this report visible to other admins
+                  </p>
                 </div>
                 <button
                   onClick={() => updateForm('isShared', !form.isShared)}
@@ -504,10 +606,12 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                     form.isShared ? 'bg-accent' : 'bg-border'
                   )}
                 >
-                  <span className={cn(
-                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                    form.isShared ? 'translate-x-6' : 'translate-x-1'
-                  )} />
+                  <span
+                    className={cn(
+                      'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                      form.isShared ? 'translate-x-6' : 'translate-x-1'
+                    )}
+                  />
                 </button>
               </div>
 
@@ -526,8 +630,16 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
           {step === 3 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Report Widgets</h4>
-                <Button size="sm" onClick={() => { setEditingWidgetIndex(null); setShowWidgetBuilder(true); }}>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Report Widgets
+                </h4>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setEditingWidgetIndex(null);
+                    setShowWidgetBuilder(true);
+                  }}
+                >
                   <Plus className="mr-1.5 h-4 w-4" /> Add Widget
                 </Button>
               </div>
@@ -535,8 +647,17 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
               {form.widgets.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border bg-surface p-12 text-center">
                   <BarChart3 className="mx-auto h-10 w-10 text-text-muted mb-3" />
-                  <p className="text-sm text-text-muted">No widgets yet. Add your first widget to get started.</p>
-                  <Button size="sm" className="mt-3" onClick={() => { setEditingWidgetIndex(null); setShowWidgetBuilder(true); }}>
+                  <p className="text-sm text-text-muted">
+                    No widgets yet. Add your first widget to get started.
+                  </p>
+                  <Button
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      setEditingWidgetIndex(null);
+                      setShowWidgetBuilder(true);
+                    }}
+                  >
                     <Plus className="mr-1.5 h-4 w-4" /> Add Widget
                   </Button>
                 </div>
@@ -547,11 +668,16 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <ChartTypeIcon type={widget.type} className="h-4 w-4 text-secondary" />
-                          <span className="text-sm font-medium text-text-primary capitalize">{widget.type}</span>
+                          <span className="text-sm font-medium text-text-primary capitalize">
+                            {widget.type}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => { setEditingWidgetIndex(i); setShowWidgetBuilder(true); }}
+                            onClick={() => {
+                              setEditingWidgetIndex(i);
+                              setShowWidgetBuilder(true);
+                            }}
                             className="p-1 text-text-muted hover:text-text-primary"
                           >
                             <Edit3 className="h-3.5 w-3.5" />
@@ -565,11 +691,7 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                         </div>
                       </div>
                       <div className="rounded-lg border border-border bg-background p-3">
-                        <ChartRenderer
-                          type={widget.type}
-                          data={previewData}
-                          config={widget}
-                        />
+                        <ChartRenderer type={widget.type} data={previewData} config={widget} />
                       </div>
                     </div>
                   ))}
@@ -597,16 +719,22 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                 </div>
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Description</p>
-                  <p className="text-sm text-text-secondary">{form.description || 'No description'}</p>
+                  <p className="text-sm text-text-secondary">
+                    {form.description || 'No description'}
+                  </p>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-xs text-text-muted uppercase tracking-wider">Data Source</p>
-                    <p className="text-text-primary">{dataSources.find(s => s.key === form.dataSource)?.label}</p>
+                    <p className="text-text-primary">
+                      {dataSources.find((s) => s.key === form.dataSource)?.label}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-text-muted uppercase tracking-wider">Tenant Scope</p>
-                    <p className="text-text-primary">{form.tenantScope === 'all' ? 'All Tenants' : form.tenantScope}</p>
+                    <p className="text-text-primary">
+                      {form.tenantScope === 'all' ? 'All Tenants' : form.tenantScope}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-text-muted uppercase tracking-wider">Widgets</p>
@@ -616,30 +744,35 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Tags</p>
                   <div className="flex flex-wrap gap-1">
-                    {form.tags.map(tag => (
-                      <span key={tag} className="rounded-full bg-secondary/10 border border-secondary/20 px-2 py-0.5 text-xs font-medium text-secondary">
+                    {form.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-secondary/10 border border-secondary/20 px-2 py-0.5 text-xs font-medium text-secondary"
+                      >
                         {tag}
                       </span>
                     ))}
-                    {form.tags.length === 0 && <span className="text-xs text-text-muted">No tags</span>}
+                    {form.tags.length === 0 && (
+                      <span className="text-xs text-text-muted">No tags</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Widget Previews */}
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Widget Previews</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Widget Previews
+                </h4>
                 {form.widgets.map((widget, i) => (
                   <div key={i} className="rounded-xl border border-border bg-surface p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <ChartTypeIcon type={widget.type} className="h-4 w-4 text-secondary" />
-                      <span className="text-sm font-medium text-text-primary capitalize">Widget {i + 1}: {widget.type}</span>
+                      <span className="text-sm font-medium text-text-primary capitalize">
+                        Widget {i + 1}: {widget.type}
+                      </span>
                     </div>
-                    <ChartRenderer
-                      type={widget.type}
-                      data={previewData}
-                      config={widget}
-                    />
+                    <ChartRenderer type={widget.type} data={previewData} config={widget} />
                   </div>
                 ))}
               </div>
@@ -661,7 +794,10 @@ export default function ReportBuilderModal({ report, onClose, onSave }) {
       {showWidgetBuilder && (
         <WidgetBuilder
           isOpen={showWidgetBuilder}
-          onClose={() => { setShowWidgetBuilder(false); setEditingWidgetIndex(null); }}
+          onClose={() => {
+            setShowWidgetBuilder(false);
+            setEditingWidgetIndex(null);
+          }}
           onSave={addWidget}
           dataSource={form.dataSource}
           existingWidget={editingWidgetIndex !== null ? form.widgets[editingWidgetIndex] : null}

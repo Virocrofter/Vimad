@@ -1,12 +1,48 @@
 /* src/app/admin/health/alert-components.jsx */
 import { useState } from 'react';
 import {
-  Bell, BellRing, BellOff, Plus, X, Check, ChevronDown, ChevronUp,
-  Trash2, Edit3, Copy, ToggleLeft, ToggleRight, Mail, MessageSquare,
-  Radio, Globe, Phone, AlertTriangle, Clock, CheckCircle2, XCircle,
-  Activity, Cpu, MemoryStick, HardDrive, Database, Zap, Layers,
-  TrendingUp, TrendingDown, Minus, Eye, EyeOff, Filter, Search,
-  MoreHorizontal, Pause, Play, RefreshCw, Settings, History
+  Bell,
+  BellRing,
+  BellOff,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  Edit3,
+  Copy,
+  ToggleLeft,
+  ToggleRight,
+  Mail,
+  MessageSquare,
+  Radio,
+  Globe,
+  Phone,
+  AlertTriangle,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Activity,
+  Cpu,
+  MemoryStick,
+  HardDrive,
+  Database,
+  Zap,
+  Layers,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Eye,
+  EyeOff,
+  Filter,
+  Search,
+  MoreHorizontal,
+  Pause,
+  Play,
+  RefreshCw,
+  Settings,
+  History,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -15,14 +51,34 @@ import { alertSeverityMeta, getAlertStatus, formatDuration } from './alert-data'
 /* ─── Alert Status Badge ─── */
 export function AlertStatusBadge({ status }) {
   const configs = {
-    firing: { label: 'Firing', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', icon: BellRing },
-    ok: { label: 'OK', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', icon: CheckCircle2 },
-    disabled: { label: 'Disabled', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border', icon: BellOff },
+    firing: {
+      label: 'Firing',
+      dot: 'bg-danger',
+      class: 'bg-danger/10 text-danger border-danger/20',
+      icon: BellRing,
+    },
+    ok: {
+      label: 'OK',
+      dot: 'bg-accent',
+      class: 'bg-accent/10 text-accent border-accent/20',
+      icon: CheckCircle2,
+    },
+    disabled: {
+      label: 'Disabled',
+      dot: 'bg-text-muted',
+      class: 'bg-neutral/10 text-text-muted border-border',
+      icon: BellOff,
+    },
   };
   const config = configs[status] || configs.ok;
   const Icon = config.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', config.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        config.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', config.dot)} />
       <Icon className="h-3 w-3" />
       {config.label}
@@ -34,7 +90,12 @@ export function AlertStatusBadge({ status }) {
 export function AlertSeverityBadge({ severity }) {
   const meta = alertSeverityMeta[severity] || alertSeverityMeta.info;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -59,21 +120,34 @@ export function AlertRuleCard({ rule, onToggle, onEdit, onDelete, onTest }) {
   const isFiring = status === 'firing';
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      isFiring ? 'border-danger/30 hover:border-danger/50' : 'border-border hover:border-secondary/30'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        isFiring
+          ? 'border-danger/30 hover:border-danger/50'
+          : 'border-border hover:border-secondary/30'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg',
-            isFiring ? 'bg-danger/10' : rule.enabled ? 'bg-accent/10' : 'bg-neutral/10'
-          )}>
-            <Bell className={cn('h-4 w-4', isFiring ? 'text-danger' : rule.enabled ? 'text-accent' : 'text-text-muted')} />
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              isFiring ? 'bg-danger/10' : rule.enabled ? 'bg-accent/10' : 'bg-neutral/10'
+            )}
+          >
+            <Bell
+              className={cn(
+                'h-4 w-4',
+                isFiring ? 'text-danger' : rule.enabled ? 'text-accent' : 'text-text-muted'
+              )}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{rule.name}</h3>
-            <p className="text-[10px] text-text-muted">{rule.id} · {rule.metric}</p>
+            <p className="text-[10px] text-text-muted">
+              {rule.id} · {rule.metric}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -93,14 +167,18 @@ export function AlertRuleCard({ rule, onToggle, onEdit, onDelete, onTest }) {
         </div>
         <div className="mt-1 flex items-center justify-between">
           <span className="text-xs text-text-muted">Duration</span>
-          <span className="text-xs font-mono text-text-secondary">{formatDuration(rule.duration)}</span>
+          <span className="text-xs font-mono text-text-secondary">
+            {formatDuration(rule.duration)}
+          </span>
         </div>
       </div>
 
       {/* Channels & Meta */}
       <div className="mt-3 flex items-center justify-between">
         <div className="flex flex-wrap gap-1">
-          {rule.channels.map(ch => <ChannelBadge key={ch} channel={ch} />)}
+          {rule.channels.map((ch) => (
+            <ChannelBadge key={ch} channel={ch} />
+          ))}
         </div>
         <div className="flex items-center gap-2 text-[10px] text-text-muted">
           <span>{rule.triggerCount} triggers</span>
@@ -119,16 +197,29 @@ export function AlertRuleCard({ rule, onToggle, onEdit, onDelete, onTest }) {
               : 'text-text-muted hover:bg-surface-elevated'
           )}
         >
-          {rule.enabled ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
+          {rule.enabled ? (
+            <ToggleRight className="h-3.5 w-3.5" />
+          ) : (
+            <ToggleLeft className="h-3.5 w-3.5" />
+          )}
           {rule.enabled ? 'Enabled' : 'Disabled'}
         </button>
-        <button onClick={() => onTest(rule.id)} className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-secondary hover:bg-secondary/10 transition-colors">
+        <button
+          onClick={() => onTest(rule.id)}
+          className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-secondary hover:bg-secondary/10 transition-colors"
+        >
           <RefreshCw className="h-3.5 w-3.5" /> Test
         </button>
-        <button onClick={() => onEdit(rule)} className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-elevated transition-colors">
+        <button
+          onClick={() => onEdit(rule)}
+          className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
+        >
           <Edit3 className="h-3.5 w-3.5" /> Edit
         </button>
-        <button onClick={() => onDelete(rule.id)} className="ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 transition-colors">
+        <button
+          onClick={() => onDelete(rule.id)}
+          className="ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 transition-colors"
+        >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -144,7 +235,10 @@ export function AlertHistoryRow({ entry, expanded, onToggle, onAcknowledge }) {
   return (
     <>
       <tr
-        className={cn('hover:bg-background/50 transition-colors cursor-pointer', isOpen && 'bg-danger/5')}
+        className={cn(
+          'hover:bg-background/50 transition-colors cursor-pointer',
+          isOpen && 'bg-danger/5'
+        )}
         onClick={onToggle}
       >
         <td className="px-4 py-3">
@@ -179,7 +273,10 @@ export function AlertHistoryRow({ entry, expanded, onToggle, onAcknowledge }) {
             <span className="text-xs text-text-secondary">{entry.acknowledgedBy}</span>
           ) : isOpen ? (
             <button
-              onClick={(e) => { e.stopPropagation(); onAcknowledge(entry.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAcknowledge(entry.id);
+              }}
               className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-white hover:bg-secondary/90"
             >
               Ack
@@ -212,7 +309,8 @@ export function AlertHistoryRow({ entry, expanded, onToggle, onAcknowledge }) {
               {entry.acknowledgedBy && (
                 <div className="rounded-md bg-secondary/5 border border-secondary/20 p-2">
                   <p className="text-xs text-secondary">
-                    Acknowledged by <strong>{entry.acknowledgedBy}</strong> at {entry.acknowledgedAt}
+                    Acknowledged by <strong>{entry.acknowledgedBy}</strong> at{' '}
+                    {entry.acknowledgedAt}
                   </p>
                 </div>
               )}
@@ -230,17 +328,25 @@ export function ChannelConfigCard({ channel, onConfigure }) {
   const Icon = icons[channel.id] || Globe;
 
   return (
-    <div className={cn(
-      'rounded-xl border p-4 transition-all',
-      channel.configured ? 'border-border bg-surface' : 'border-dashed border-border bg-background/50'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border p-4 transition-all',
+        channel.configured
+          ? 'border-border bg-surface'
+          : 'border-dashed border-border bg-background/50'
+      )}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg',
-            channel.configured ? 'bg-secondary/10' : 'bg-neutral/10'
-          )}>
-            <Icon className={cn('h-4 w-4', channel.configured ? 'text-secondary' : 'text-text-muted')} />
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              channel.configured ? 'bg-secondary/10' : 'bg-neutral/10'
+            )}
+          >
+            <Icon
+              className={cn('h-4 w-4', channel.configured ? 'text-secondary' : 'text-text-muted')}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{channel.label}</h3>
@@ -275,15 +381,26 @@ export function AlertStatCard({ label, value, subtext, icon: Icon, color, trend 
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last week
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last week
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>

@@ -2,9 +2,21 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, TrendingUp, TrendingDown, Calendar, Filter,
-  Hotel, Gift, Star, ArrowUpRight, ArrowDownRight, Minus,
-  Search, Download, CheckCircle2, XCircle
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Filter,
+  Hotel,
+  Gift,
+  Star,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Search,
+  Download,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -18,37 +30,45 @@ export default function LoyaltyHistoryPage() {
   const [timeFilter, setTimeFilter] = useState('all');
 
   const filteredHistory = useMemo(() => {
-    return pointsHistory.filter(t => {
-      const matchesQuery = !query ||
+    return pointsHistory.filter((t) => {
+      const matchesQuery =
+        !query ||
         t.description.toLowerCase().includes(query.toLowerCase()) ||
         t.id.toLowerCase().includes(query.toLowerCase());
       const matchesType = typeFilter === 'all' || t.type === typeFilter;
-      
+
       let matchesTime = true;
       const txnDate = new Date(t.date);
       const now = new Date('2026-08-17');
-      if (timeFilter === '7d') matchesTime = (now - txnDate) <= 7 * 24 * 60 * 60 * 1000;
-      if (timeFilter === '30d') matchesTime = (now - txnDate) <= 30 * 24 * 60 * 60 * 1000;
-      if (timeFilter === '90d') matchesTime = (now - txnDate) <= 90 * 24 * 60 * 60 * 1000;
+      if (timeFilter === '7d') matchesTime = now - txnDate <= 7 * 24 * 60 * 60 * 1000;
+      if (timeFilter === '30d') matchesTime = now - txnDate <= 30 * 24 * 60 * 60 * 1000;
+      if (timeFilter === '90d') matchesTime = now - txnDate <= 90 * 24 * 60 * 60 * 1000;
       if (timeFilter === '2026') matchesTime = txnDate.getFullYear() === 2026;
       if (timeFilter === '2025') matchesTime = txnDate.getFullYear() === 2025;
-      
+
       return matchesQuery && matchesType && matchesTime;
     });
   }, [query, typeFilter, timeFilter]);
 
   // Stats
-  const earnedTotal = useMemo(() =>
-    filteredHistory.filter(t => t.type === 'earned').reduce((s, t) => s + t.points, 0),
-  [filteredHistory]);
-  const redeemedTotal = useMemo(() =>
-    Math.abs(filteredHistory.filter(t => t.type === 'redeemed').reduce((s, t) => s + t.points, 0)),
-  [filteredHistory]);
+  const earnedTotal = useMemo(
+    () => filteredHistory.filter((t) => t.type === 'earned').reduce((s, t) => s + t.points, 0),
+    [filteredHistory]
+  );
+  const redeemedTotal = useMemo(
+    () =>
+      Math.abs(
+        filteredHistory.filter((t) => t.type === 'redeemed').reduce((s, t) => s + t.points, 0)
+      ),
+    [filteredHistory]
+  );
 
   const handleExport = () => {
     const csv = [
       'Date,Type,Description,Points,Balance',
-      ...filteredHistory.map(t => `${t.date},${t.type},"${t.description}",${t.points},${t.balance}`)
+      ...filteredHistory.map(
+        (t) => `${t.date},${t.type},"${t.description}",${t.points},${t.balance}`
+      ),
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -72,7 +92,9 @@ export default function LoyaltyHistoryPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Points History</h1>
-            <p className="text-sm text-text-secondary">Track your earning and redemption activity</p>
+            <p className="text-sm text-text-secondary">
+              Track your earning and redemption activity
+            </p>
           </div>
         </div>
         <div className="text-right">
@@ -90,7 +112,9 @@ export default function LoyaltyHistoryPage() {
             </div>
             <div>
               <p className="text-xs text-text-muted">Earned</p>
-              <p className="text-lg font-bold font-mono text-accent">+{formatPoints(earnedTotal)}</p>
+              <p className="text-lg font-bold font-mono text-accent">
+                +{formatPoints(earnedTotal)}
+              </p>
             </div>
           </div>
         </div>
@@ -101,7 +125,9 @@ export default function LoyaltyHistoryPage() {
             </div>
             <div>
               <p className="text-xs text-text-muted">Redeemed</p>
-              <p className="text-lg font-bold font-mono text-danger">-{formatPoints(redeemedTotal)}</p>
+              <p className="text-lg font-bold font-mono text-danger">
+                -{formatPoints(redeemedTotal)}
+              </p>
             </div>
           </div>
         </div>
@@ -112,7 +138,9 @@ export default function LoyaltyHistoryPage() {
             </div>
             <div>
               <p className="text-xs text-text-muted">Net</p>
-              <p className="text-lg font-bold font-mono text-text-primary">+{formatPoints(earnedTotal - redeemedTotal)}</p>
+              <p className="text-lg font-bold font-mono text-text-primary">
+                +{formatPoints(earnedTotal - redeemedTotal)}
+              </p>
             </div>
           </div>
         </div>
@@ -123,7 +151,9 @@ export default function LoyaltyHistoryPage() {
             </div>
             <div>
               <p className="text-xs text-text-muted">Transactions</p>
-              <p className="text-lg font-bold font-mono text-text-primary">{filteredHistory.length}</p>
+              <p className="text-lg font-bold font-mono text-text-primary">
+                {filteredHistory.length}
+              </p>
             </div>
           </div>
         </div>
@@ -171,7 +201,8 @@ export default function LoyaltyHistoryPage() {
 
       {/* Results count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredHistory.length}</span> of {pointsHistory.length} transactions
+        Showing <span className="font-medium text-text-primary">{filteredHistory.length}</span> of{' '}
+        {pointsHistory.length} transactions
       </p>
 
       {/* History Table */}
@@ -180,10 +211,18 @@ export default function LoyaltyHistoryPage() {
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Description</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Points</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Balance</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Points
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Balance
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -195,10 +234,12 @@ export default function LoyaltyHistoryPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className={cn(
-                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-full',
-                        txn.type === 'earned' ? 'bg-accent/10' : 'bg-danger/10'
-                      )}>
+                      <div
+                        className={cn(
+                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full',
+                          txn.type === 'earned' ? 'bg-accent/10' : 'bg-danger/10'
+                        )}
+                      >
                         {txn.type === 'earned' ? (
                           <TrendingUp className="h-3 w-3 text-accent" />
                         ) : (
@@ -212,11 +253,14 @@ export default function LoyaltyHistoryPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className={cn(
-                      'font-mono font-medium',
-                      txn.type === 'earned' ? 'text-accent' : 'text-danger'
-                    )}>
-                      {txn.type === 'earned' ? '+' : ''}{formatPoints(txn.points)}
+                    <span
+                      className={cn(
+                        'font-mono font-medium',
+                        txn.type === 'earned' ? 'text-accent' : 'text-danger'
+                      )}
+                    >
+                      {txn.type === 'earned' ? '+' : ''}
+                      {formatPoints(txn.points)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -248,20 +292,24 @@ export default function LoyaltyHistoryPage() {
             { month: 'March 2026', earned: 0, redeemed: 0 },
             { month: 'February 2026', earned: 612, redeemed: 0 },
             { month: 'January 2026', earned: 1000, redeemed: 3500 },
-          ].map(m => (
+          ].map((m) => (
             <div key={m.month} className="flex items-center gap-4">
               <span className="w-28 text-xs text-text-secondary shrink-0">{m.month}</span>
               <div className="flex-1 flex items-center gap-2">
                 {m.earned > 0 && (
                   <div className="flex items-center gap-1 rounded-md bg-accent/10 px-2 py-0.5">
                     <TrendingUp className="h-3 w-3 text-accent" />
-                    <span className="text-[10px] font-mono text-accent">+{formatPoints(m.earned)}</span>
+                    <span className="text-[10px] font-mono text-accent">
+                      +{formatPoints(m.earned)}
+                    </span>
                   </div>
                 )}
                 {m.redeemed > 0 && (
                   <div className="flex items-center gap-1 rounded-md bg-danger/10 px-2 py-0.5">
                     <TrendingDown className="h-3 w-3 text-danger" />
-                    <span className="text-[10px] font-mono text-danger">-{formatPoints(m.redeemed)}</span>
+                    <span className="text-[10px] font-mono text-danger">
+                      -{formatPoints(m.redeemed)}
+                    </span>
                   </div>
                 )}
                 {m.earned === 0 && m.redeemed === 0 && (

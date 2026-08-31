@@ -44,10 +44,7 @@ export default function GuestRegisterPage() {
         {[1, 2, 3].map((s) => (
           <div
             key={s}
-            className={cn(
-              'h-1.5 flex-1 rounded-full',
-              s <= step ? 'bg-secondary' : 'bg-border'
-            )}
+            className={cn('h-1.5 flex-1 rounded-full', s <= step ? 'bg-secondary' : 'bg-border')}
           />
         ))}
       </div>
@@ -56,11 +53,15 @@ export default function GuestRegisterPage() {
         <>
           <div className="text-center">
             <h1 className="text-xl font-bold text-text-primary">Find Your Reservation</h1>
-            <p className="mt-1 text-sm text-text-secondary">We'll verify your booking before creating your account</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              We'll verify your booking before creating your account
+            </p>
           </div>
           <form onSubmit={handleVerifyBooking} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Booking Reference</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">
+                Booking Reference
+              </label>
               <input
                 type="text"
                 value={form.bookingRef}
@@ -70,7 +71,9 @@ export default function GuestRegisterPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Last Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">
+                Last Name
+              </label>
               <input
                 type="text"
                 value={form.lastName}
@@ -124,7 +127,9 @@ export default function GuestRegisterPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Confirm Password</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">
+                Confirm Password
+              </label>
               <input
                 type="password"
                 value={form.confirmPassword}

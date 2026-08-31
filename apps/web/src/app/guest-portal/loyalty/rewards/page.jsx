@@ -2,9 +2,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Gift, Search, Filter, CheckCircle2, AlertCircle,
-  Star, Crown, Sparkles, Hotel, UtensilsCrossed, Heart,
-  Car, Clock, Wine, Coffee, Dumbbell, ArrowRight, Minus
+  ArrowLeft,
+  Gift,
+  Search,
+  Filter,
+  CheckCircle2,
+  AlertCircle,
+  Star,
+  Crown,
+  Sparkles,
+  Hotel,
+  UtensilsCrossed,
+  Heart,
+  Car,
+  Clock,
+  Wine,
+  Coffee,
+  Dumbbell,
+  ArrowRight,
+  Minus,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -33,8 +49,9 @@ export default function RewardsPage() {
   const [redeemed, setRedeemed] = useState([]);
   const [showConfirm, setShowConfirm] = useState(null);
 
-  const filteredRewards = rewardsCatalog.filter(r => {
-    const matchesQuery = !query ||
+  const filteredRewards = rewardsCatalog.filter((r) => {
+    const matchesQuery =
+      !query ||
       r.name.toLowerCase().includes(query.toLowerCase()) ||
       r.description.toLowerCase().includes(query.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || r.category === categoryFilter;
@@ -46,9 +63,9 @@ export default function RewardsPage() {
   const handleRedeem = async (reward) => {
     setShowConfirm(null);
     setRedeeming(reward.id);
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
     setRedeeming(null);
-    setRedeemed(prev => [...prev, reward.id]);
+    setRedeemed((prev) => [...prev, reward.id]);
   };
 
   return (
@@ -84,7 +101,7 @@ export default function RewardsPage() {
           />
         </div>
         <div className="flex items-center gap-1.5">
-          {['all', 'stay', 'dining', 'wellness', 'services'].map(cat => (
+          {['all', 'stay', 'dining', 'wellness', 'services'].map((cat) => (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
@@ -113,9 +130,11 @@ export default function RewardsPage() {
               key={reward.id}
               className={cn(
                 'rounded-xl border bg-surface p-5 transition-all',
-                isRedeemed ? 'border-accent/30 bg-accent/5' :
-                affordable ? 'border-border hover:shadow-md hover:border-secondary/30' :
-                'border-border opacity-60'
+                isRedeemed
+                  ? 'border-accent/30 bg-accent/5'
+                  : affordable
+                    ? 'border-border hover:shadow-md hover:border-secondary/30'
+                    : 'border-border opacity-60'
               )}
             >
               {/* Image / Icon */}
@@ -124,10 +143,12 @@ export default function RewardsPage() {
                   {reward.image}
                 </div>
                 <div className="text-right">
-                  <p className={cn(
-                    'text-lg font-bold font-mono',
-                    affordable ? 'text-secondary' : 'text-text-muted'
-                  )}>
+                  <p
+                    className={cn(
+                      'text-lg font-bold font-mono',
+                      affordable ? 'text-secondary' : 'text-text-muted'
+                    )}
+                  >
                     {formatPoints(reward.pointsCost)}
                   </p>
                   <p className="text-[10px] text-text-muted">points</p>
@@ -136,7 +157,9 @@ export default function RewardsPage() {
 
               {/* Content */}
               <h3 className="text-sm font-semibold text-text-primary">{reward.name}</h3>
-              <p className="mt-1 text-xs text-text-secondary leading-relaxed">{reward.description}</p>
+              <p className="mt-1 text-xs text-text-secondary leading-relaxed">
+                {reward.description}
+              </p>
 
               {/* Category */}
               <div className="mt-3 flex items-center gap-2">
@@ -166,9 +189,14 @@ export default function RewardsPage() {
                     disabled={redeeming === reward.id}
                   >
                     {redeeming === reward.id ? (
-                      <><Sparkles className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Processing...</>
+                      <>
+                        <Sparkles className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Processing...
+                      </>
                     ) : (
-                      <><Gift className="mr-1.5 h-3.5 w-3.5" /> Redeem {formatPoints(reward.pointsCost)} pts</>
+                      <>
+                        <Gift className="mr-1.5 h-3.5 w-3.5" /> Redeem{' '}
+                        {formatPoints(reward.pointsCost)} pts
+                      </>
                     )}
                   </Button>
                 ) : (
@@ -195,24 +223,29 @@ export default function RewardsPage() {
       {/* Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowConfirm(null)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowConfirm(null)}
+          />
           <div className="relative w-full max-w-sm rounded-xl border border-border bg-background shadow-2xl p-6">
             <div className="text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary/10 mx-auto">
                 <Gift className="h-8 w-8 text-secondary" />
               </div>
               <h3 className="mt-4 text-lg font-bold text-text-primary">Redeem Reward?</h3>
-              <p className="mt-1 text-sm text-text-secondary">
-                {showConfirm.name}
-              </p>
+              <p className="mt-1 text-sm text-text-secondary">{showConfirm.name}</p>
               <div className="mt-4 rounded-lg border border-border bg-surface p-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-text-muted">Cost</span>
-                  <span className="font-bold font-mono text-secondary">{formatPoints(showConfirm.pointsCost)} pts</span>
+                  <span className="font-bold font-mono text-secondary">
+                    {formatPoints(showConfirm.pointsCost)} pts
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm mt-1">
                   <span className="text-text-muted">Balance after</span>
-                  <span className="font-mono text-text-primary">{formatPoints(points - showConfirm.pointsCost)} pts</span>
+                  <span className="font-mono text-text-primary">
+                    {formatPoints(points - showConfirm.pointsCost)} pts
+                  </span>
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2">

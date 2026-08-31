@@ -2,9 +2,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Eye, Shield, Zap, Ghost, Users, Clock, Activity,
-  AlertTriangle, CheckCircle2, TrendingUp, History,
-  BarChart3, Lock, Unlock, Terminal, Radio
+  Eye,
+  Shield,
+  Zap,
+  Ghost,
+  Users,
+  Clock,
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  TrendingUp,
+  History,
+  BarChart3,
+  Lock,
+  Unlock,
+  Terminal,
+  Radio,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -24,7 +37,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('purple-500', 'purple-500/10').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('purple-500', 'purple-500/10')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -34,8 +58,13 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
 
 /* ─── User Mini Card ─── */
 function UserMiniCard({ user, onSelect }) {
-  const statusColor = user.status === 'online' ? 'bg-accent' : user.status === 'away' ? 'bg-warning' : 'bg-text-muted';
-  
+  const statusColor =
+    user.status === 'online'
+      ? 'bg-accent'
+      : user.status === 'away'
+        ? 'bg-warning'
+        : 'bg-text-muted';
+
   return (
     <button
       onClick={() => onSelect(user)}
@@ -45,11 +74,18 @@ function UserMiniCard({ user, onSelect }) {
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
           {user.avatar}
         </div>
-        <span className={cn('absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface', statusColor)} />
+        <span
+          className={cn(
+            'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface',
+            statusColor
+          )}
+        />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-text-primary truncate">{user.name}</p>
-        <p className="text-[10px] text-text-muted">{user.role} · {user.property}</p>
+        <p className="text-[10px] text-text-muted">
+          {user.role} · {user.property}
+        </p>
       </div>
       <Eye className="h-4 w-4 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
     </button>
@@ -62,7 +98,7 @@ export default function ShadowModePage() {
   const [showSelector, setShowSelector] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'audit' | 'history'
   const [selectedQuickUser, setSelectedQuickUser] = useState(null);
-  
+
   const isShadowActive = useShadowStore((s) => s.isShadowActive);
   const shadowUser = useShadowStore((s) => s.shadowUser);
   const stealthMode = useShadowStore((s) => s.stealthMode);
@@ -106,7 +142,9 @@ export default function ShadowModePage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-text-primary">Shadow Mode</h1>
-              <p className="text-sm text-text-secondary">Impersonate users undetected by standard audit</p>
+              <p className="text-sm text-text-secondary">
+                Impersonate users undetected by standard audit
+              </p>
             </div>
           </div>
         </div>
@@ -122,7 +160,11 @@ export default function ShadowModePage() {
                 )}
                 onClick={toggleStealth}
               >
-                {stealthMode ? <Unlock className="mr-1.5 h-4 w-4" /> : <Lock className="mr-1.5 h-4 w-4" />}
+                {stealthMode ? (
+                  <Unlock className="mr-1.5 h-4 w-4" />
+                ) : (
+                  <Lock className="mr-1.5 h-4 w-4" />
+                )}
                 {stealthMode ? 'Disable Stealth' : 'Enable Stealth'}
               </Button>
               <Button variant="danger" size="sm" onClick={() => endShadow('manual')}>
@@ -158,8 +200,9 @@ export default function ShadowModePage() {
                   )}
                 </div>
                 <p className="text-sm text-text-secondary mt-0.5">
-                  Viewing as <strong className="text-text-primary">{shadowUser.name}</strong> ({shadowUser.role}) 
-                  at <strong className="text-text-primary">{shadowUser.property}</strong>
+                  Viewing as <strong className="text-text-primary">{shadowUser.name}</strong> (
+                  {shadowUser.role}) at{' '}
+                  <strong className="text-text-primary">{shadowUser.property}</strong>
                 </p>
               </div>
             </div>
@@ -184,7 +227,9 @@ export default function ShadowModePage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-purple-500 text-purple-500' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-purple-500 text-purple-500'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -242,7 +287,7 @@ export default function ShadowModePage() {
                   <Eye className="mr-1.5 h-3.5 w-3.5" /> Browse All
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {shadowableUsers.slice(0, 6).map((user) => (
                   <UserMiniCard key={user.id} user={user} onSelect={handleQuickShadow} />
@@ -256,7 +301,7 @@ export default function ShadowModePage() {
                 <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                   <Shield className="h-4 w-4 text-purple-500" /> Shadow Protocol
                 </h3>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10">
@@ -264,37 +309,45 @@ export default function ShadowModePage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">Invisible to Audit</p>
-                      <p className="text-xs text-text-muted">Actions appear as the target user in standard logs</p>
+                      <p className="text-xs text-text-muted">
+                        Actions appear as the target user in standard logs
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
                       <Ghost className="h-3.5 w-3.5 text-purple-500" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">Stealth Mode</p>
-                      <p className="text-xs text-text-muted">Hide all UI indicators while shadowing</p>
+                      <p className="text-xs text-text-muted">
+                        Hide all UI indicators while shadowing
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-warning/10">
                       <Zap className="h-3.5 w-3.5 text-warning" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">Session Takeover</p>
-                      <p className="text-xs text-text-muted">Hijack live user sessions in real-time</p>
+                      <p className="text-xs text-text-muted">
+                        Hijack live user sessions in real-time
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-danger/10">
                       <AlertTriangle className="h-3.5 w-3.5 text-danger" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">Isolated Logging</p>
-                      <p className="text-xs text-text-muted">Shadow actions logged separately — super admin only</p>
+                      <p className="text-xs text-text-muted">
+                        Shadow actions logged separately — super admin only
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -306,15 +359,21 @@ export default function ShadowModePage() {
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-text-secondary">Toggle Stealth</span>
-                    <kbd className="rounded bg-background border border-border px-2 py-0.5 font-mono text-text-muted">Ctrl + Shift + S</kbd>
+                    <kbd className="rounded bg-background border border-border px-2 py-0.5 font-mono text-text-muted">
+                      Ctrl + Shift + S
+                    </kbd>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-text-secondary">End Shadow</span>
-                    <kbd className="rounded bg-background border border-border px-2 py-0.5 font-mono text-text-muted">Ctrl + Shift + X</kbd>
+                    <kbd className="rounded bg-background border border-border px-2 py-0.5 font-mono text-text-muted">
+                      Ctrl + Shift + X
+                    </kbd>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-text-secondary">Switch Context</span>
-                    <kbd className="rounded bg-background border border-border px-2 py-0.5 font-mono text-text-muted">Ctrl + Shift + C</kbd>
+                    <kbd className="rounded bg-background border border-border px-2 py-0.5 font-mono text-text-muted">
+                      Ctrl + Shift + C
+                    </kbd>
                   </div>
                 </div>
               </div>
@@ -330,7 +389,13 @@ export default function ShadowModePage() {
       {activeTab === 'history' && <ShadowSessionHistory />}
 
       {/* User Selector Modal */}
-      <ShadowUserSelector isOpen={showSelector} onClose={() => { setShowSelector(false); setSelectedQuickUser(null); }} />
+      <ShadowUserSelector
+        isOpen={showSelector}
+        onClose={() => {
+          setShowSelector(false);
+          setSelectedQuickUser(null);
+        }}
+      />
     </div>
   );
 }

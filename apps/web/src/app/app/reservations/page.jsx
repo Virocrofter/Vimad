@@ -1,9 +1,27 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Search, Filter, X, Check, ChevronDown, MoreHorizontal, Eye, Edit3,
-  LogIn, XCircle, Calendar, User, BedDouble, Phone, Mail,
-  CheckSquare, Square, Trash2, Download, Printer, Plus
+  Search,
+  Filter,
+  X,
+  Check,
+  ChevronDown,
+  MoreHorizontal,
+  Eye,
+  Edit3,
+  LogIn,
+  XCircle,
+  Calendar,
+  User,
+  BedDouble,
+  Phone,
+  Mail,
+  CheckSquare,
+  Square,
+  Trash2,
+  Download,
+  Printer,
+  Plus,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -11,14 +29,126 @@ import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
 const mockReservations = [
-  { id: '4021', guest: 'John Smith', email: 'john@email.com', phone: '+1 555-0101', room: '204', roomType: 'Deluxe King', arrival: '2026-08-12', departure: '2026-08-15', nights: 3, status: 'checked_in', rate: 189, balance: 0, source: 'Direct' },
-  { id: '4022', guest: 'Sarah Johnson', email: 'sarah@email.com', phone: '+1 555-0102', room: '312', roomType: 'Standard Twin', arrival: '2026-08-11', departure: '2026-08-14', nights: 3, status: 'checked_out', rate: 145, balance: 0, source: 'Booking.com' },
-  { id: '4023', guest: 'Michael Brown', email: 'mbrown@email.com', phone: '+1 555-0103', room: '105', roomType: 'Suite', arrival: '2026-08-15', departure: '2026-08-20', nights: 5, status: 'confirmed', rate: 320, balance: 320, source: 'Expedia' },
-  { id: '4024', guest: 'Emily Davis', email: 'emily@email.com', phone: '+1 555-0104', room: '401', roomType: 'Deluxe King', arrival: '2026-08-12', departure: '2026-08-13', nights: 1, status: 'confirmed', rate: 189, balance: 189, source: 'Direct' },
-  { id: '4025', guest: 'Robert Chen', email: 'robert@email.com', phone: '+1 555-0105', room: '118', roomType: 'Standard Queen', arrival: '2026-08-10', departure: '2026-08-12', nights: 2, status: 'no_show', rate: 135, balance: 135, source: 'Walk-in' },
-  { id: '4026', guest: 'Lisa Wong', email: 'lisa@email.com', phone: '+1 555-0106', room: '310', roomType: 'Deluxe King', arrival: '2026-08-12', departure: '2026-08-16', nights: 4, status: 'cancelled', rate: 189, balance: 0, source: 'Booking.com' },
-  { id: '4027', guest: 'David Miller', email: 'david@email.com', phone: '+1 555-0107', room: null, roomType: 'Standard Twin', arrival: '2026-08-18', departure: '2026-08-22', nights: 4, status: 'waitlist', rate: 145, balance: 0, source: 'Direct' },
-  { id: '4028', guest: 'Amanda Wilson', email: 'amanda@email.com', phone: '+1 555-0108', room: '205', roomType: 'Suite', arrival: '2026-08-13', departure: '2026-08-15', nights: 2, status: 'checked_in', rate: 320, balance: 120, source: 'Direct' },
+  {
+    id: '4021',
+    guest: 'John Smith',
+    email: 'john@email.com',
+    phone: '+1 555-0101',
+    room: '204',
+    roomType: 'Deluxe King',
+    arrival: '2026-08-12',
+    departure: '2026-08-15',
+    nights: 3,
+    status: 'checked_in',
+    rate: 189,
+    balance: 0,
+    source: 'Direct',
+  },
+  {
+    id: '4022',
+    guest: 'Sarah Johnson',
+    email: 'sarah@email.com',
+    phone: '+1 555-0102',
+    room: '312',
+    roomType: 'Standard Twin',
+    arrival: '2026-08-11',
+    departure: '2026-08-14',
+    nights: 3,
+    status: 'checked_out',
+    rate: 145,
+    balance: 0,
+    source: 'Booking.com',
+  },
+  {
+    id: '4023',
+    guest: 'Michael Brown',
+    email: 'mbrown@email.com',
+    phone: '+1 555-0103',
+    room: '105',
+    roomType: 'Suite',
+    arrival: '2026-08-15',
+    departure: '2026-08-20',
+    nights: 5,
+    status: 'confirmed',
+    rate: 320,
+    balance: 320,
+    source: 'Expedia',
+  },
+  {
+    id: '4024',
+    guest: 'Emily Davis',
+    email: 'emily@email.com',
+    phone: '+1 555-0104',
+    room: '401',
+    roomType: 'Deluxe King',
+    arrival: '2026-08-12',
+    departure: '2026-08-13',
+    nights: 1,
+    status: 'confirmed',
+    rate: 189,
+    balance: 189,
+    source: 'Direct',
+  },
+  {
+    id: '4025',
+    guest: 'Robert Chen',
+    email: 'robert@email.com',
+    phone: '+1 555-0105',
+    room: '118',
+    roomType: 'Standard Queen',
+    arrival: '2026-08-10',
+    departure: '2026-08-12',
+    nights: 2,
+    status: 'no_show',
+    rate: 135,
+    balance: 135,
+    source: 'Walk-in',
+  },
+  {
+    id: '4026',
+    guest: 'Lisa Wong',
+    email: 'lisa@email.com',
+    phone: '+1 555-0106',
+    room: '310',
+    roomType: 'Deluxe King',
+    arrival: '2026-08-12',
+    departure: '2026-08-16',
+    nights: 4,
+    status: 'cancelled',
+    rate: 189,
+    balance: 0,
+    source: 'Booking.com',
+  },
+  {
+    id: '4027',
+    guest: 'David Miller',
+    email: 'david@email.com',
+    phone: '+1 555-0107',
+    room: null,
+    roomType: 'Standard Twin',
+    arrival: '2026-08-18',
+    departure: '2026-08-22',
+    nights: 4,
+    status: 'waitlist',
+    rate: 145,
+    balance: 0,
+    source: 'Direct',
+  },
+  {
+    id: '4028',
+    guest: 'Amanda Wilson',
+    email: 'amanda@email.com',
+    phone: '+1 555-0108',
+    room: '205',
+    roomType: 'Suite',
+    arrival: '2026-08-13',
+    departure: '2026-08-15',
+    nights: 2,
+    status: 'checked_in',
+    rate: 320,
+    balance: 120,
+    source: 'Direct',
+  },
 ];
 
 const statusMeta = {
@@ -34,7 +164,12 @@ const statusMeta = {
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.confirmed;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -44,19 +179,35 @@ function StatusBadge({ status }) {
 function InlineActions({ status, onView, onCheckIn, onCancel }) {
   return (
     <div className="flex items-center gap-1">
-      <button onClick={onView} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary" title="View">
+      <button
+        onClick={onView}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+        title="View"
+      >
         <Eye className="h-4 w-4" />
       </button>
-      <button onClick={onCheckIn} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary" title="Edit">
+      <button
+        onClick={onCheckIn}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+        title="Edit"
+      >
         <Edit3 className="h-4 w-4" />
       </button>
       {status === 'confirmed' && (
-        <button onClick={onCheckIn} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-secondary/10 hover:text-secondary" title="Check In">
+        <button
+          onClick={onCheckIn}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-secondary/10 hover:text-secondary"
+          title="Check In"
+        >
           <LogIn className="h-4 w-4" />
         </button>
       )}
       {(status === 'confirmed' || status === 'waitlist') && (
-        <button onClick={onCancel} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger" title="Cancel">
+        <button
+          onClick={onCancel}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
+          title="Cancel"
+        >
           <XCircle className="h-4 w-4" />
         </button>
       )}
@@ -140,10 +291,17 @@ export default function ReservationsPage() {
           onClick={() => setFiltersOpen(!filtersOpen)}
           className={cn(
             'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-            filtersOpen ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+            filtersOpen
+              ? 'border-secondary bg-secondary/10 text-secondary'
+              : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
           )}
         >
-          <Filter className="h-4 w-4" /> Filters {filtersOpen ? <ChevronDown className="h-3.5 w-3.5 rotate-180" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          <Filter className="h-4 w-4" /> Filters{' '}
+          {filtersOpen ? (
+            <ChevronDown className="h-3.5 w-3.5 rotate-180" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )}
         </button>
       </div>
 
@@ -202,7 +360,12 @@ export default function ReservationsPage() {
           </div>
           <div className="mt-3 flex items-center gap-2">
             <button
-              onClick={() => { setStatusFilter('all'); setSourceFilter('all'); setDateFrom(''); setDateTo(''); }}
+              onClick={() => {
+                setStatusFilter('all');
+                setSourceFilter('all');
+                setDateFrom('');
+                setDateTo('');
+              }}
               className="text-xs text-text-muted hover:text-text-primary"
             >
               Reset all filters
@@ -216,7 +379,10 @@ export default function ReservationsPage() {
         <div className="flex items-center justify-between rounded-lg border border-secondary/20 bg-secondary/5 px-4 py-2.5">
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-secondary">{selected.size} selected</span>
-            <button onClick={clearSelection} className="text-xs text-text-muted hover:text-text-primary">
+            <button
+              onClick={clearSelection}
+              className="text-xs text-text-muted hover:text-text-primary"
+            >
               Clear
             </button>
           </div>
@@ -244,8 +410,15 @@ export default function ReservationsPage() {
             <thead className="bg-background border-b border-border">
               <tr>
                 <th className="px-4 py-3 w-10">
-                  <button onClick={toggleSelectAll} className="text-text-muted hover:text-text-primary">
-                    {selected.size === filtered.length && filtered.length > 0 ? <CheckSquare className="h-4 w-4 text-secondary" /> : <Square className="h-4 w-4" />}
+                  <button
+                    onClick={toggleSelectAll}
+                    className="text-text-muted hover:text-text-primary"
+                  >
+                    {selected.size === filtered.length && filtered.length > 0 ? (
+                      <CheckSquare className="h-4 w-4 text-secondary" />
+                    ) : (
+                      <Square className="h-4 w-4" />
+                    )}
                   </button>
                 </th>
                 <th className="px-4 py-3 font-medium text-text-secondary">Conf #</th>
@@ -269,15 +442,27 @@ export default function ReservationsPage() {
                   )}
                 >
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleSelect(r.id)} className="text-text-muted hover:text-text-primary">
-                      {selected.has(r.id) ? <CheckSquare className="h-4 w-4 text-secondary" /> : <Square className="h-4 w-4" />}
+                    <button
+                      onClick={() => toggleSelect(r.id)}
+                      className="text-text-muted hover:text-text-primary"
+                    >
+                      {selected.has(r.id) ? (
+                        <CheckSquare className="h-4 w-4 text-secondary" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
                     </button>
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-text-secondary">#{r.id}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                        {r.guest.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        {r.guest
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()}
                       </div>
                       <div>
                         <p className="font-medium text-text-primary">{r.guest}</p>
@@ -294,13 +479,20 @@ export default function ReservationsPage() {
                       <Calendar className="h-3.5 w-3.5 text-text-muted" />
                       {r.arrival}
                     </div>
-                    <div className="text-xs text-text-muted mt-0.5">{r.nights} nights → {r.departure}</div>
+                    <div className="text-xs text-text-muted mt-0.5">
+                      {r.nights} nights → {r.departure}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>
                   <td className="px-4 py-3 text-right font-medium text-text-primary">${r.rate}</td>
-                  <td className={cn('px-4 py-3 text-right font-medium', r.balance > 0 ? 'text-danger' : 'text-accent')}>
+                  <td
+                    className={cn(
+                      'px-4 py-3 text-right font-medium',
+                      r.balance > 0 ? 'text-danger' : 'text-accent'
+                    )}
+                  >
                     ${r.balance}
                   </td>
                   <td className="px-4 py-3 text-text-secondary">{r.source}</td>

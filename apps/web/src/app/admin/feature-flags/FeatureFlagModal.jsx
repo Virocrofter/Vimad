@@ -2,11 +2,37 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ToggleLeft, ToggleRight, Search, Filter, Plus, X, Check,
-  ChevronDown, ChevronUp, Save, Trash2, Edit3, Copy, Globe,
-  Users, Building2, Clock, AlertTriangle, Info, Shield,
-  Percent, Target, Zap, ArrowUpDown, MoreHorizontal,
-  Eye, EyeOff, RefreshCw, Download, Upload, Tag
+  ToggleLeft,
+  ToggleRight,
+  Search,
+  Filter,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  Trash2,
+  Edit3,
+  Copy,
+  Globe,
+  Users,
+  Building2,
+  Clock,
+  AlertTriangle,
+  Info,
+  Shield,
+  Percent,
+  Target,
+  Zap,
+  ArrowUpDown,
+  MoreHorizontal,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Download,
+  Upload,
+  Tag,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -18,7 +44,8 @@ const initialFlags = [
     id: 'ff-001',
     key: 'new-booking-engine',
     name: 'New Booking Engine',
-    description: 'Redesigned guest-facing booking engine with AI recommendations and dynamic pricing display.',
+    description:
+      'Redesigned guest-facing booking engine with AI recommendations and dynamic pricing display.',
     category: 'guest-experience',
     status: 'active',
     rollout: { type: 'percentage', value: 100 },
@@ -62,13 +89,12 @@ const initialFlags = [
     id: 'ff-003',
     key: 'contactless-checkin',
     name: 'Contactless Check-in',
-    description: 'Mobile key issuance, digital registration card, and self-service kiosk check-in flow.',
+    description:
+      'Mobile key issuance, digital registration card, and self-service kiosk check-in flow.',
     category: 'operations',
     status: 'active',
     rollout: { type: 'percentage', value: 60 },
-    targeting: [
-      { type: 'plan', operator: 'in', value: ['Professional', 'Enterprise'] },
-    ],
+    targeting: [{ type: 'plan', operator: 'in', value: ['Professional', 'Enterprise'] }],
     createdAt: '2026-04-20',
     updatedAt: '2026-08-12',
     createdBy: 'Lisa Wong',
@@ -93,28 +119,29 @@ const initialFlags = [
     createdBy: 'James Miller',
     environments: ['staging'],
     requiresRestart: false,
-    auditLog: [
-      { date: '2026-07-01', user: 'James Miller', action: 'Created flag in staging' },
-    ],
+    auditLog: [{ date: '2026-07-01', user: 'James Miller', action: 'Created flag in staging' }],
   },
   {
     id: 'ff-005',
     key: 'advanced-analytics',
     name: 'Advanced Analytics Dashboard',
-    description: 'Predictive analytics, cohort analysis, and custom report builder with data export.',
+    description:
+      'Predictive analytics, cohort analysis, and custom report builder with data export.',
     category: 'reporting',
     status: 'active',
     rollout: { type: 'percentage', value: 100 },
-    targeting: [
-      { type: 'plan', operator: 'eq', value: 'Enterprise' },
-    ],
+    targeting: [{ type: 'plan', operator: 'eq', value: 'Enterprise' }],
     createdAt: '2026-03-10',
     updatedAt: '2026-08-01',
     createdBy: 'Maria Garcia',
     environments: ['production'],
     requiresRestart: false,
     auditLog: [
-      { date: '2026-08-01', user: 'Maria Garcia', action: 'Full rollout to all Enterprise tenants' },
+      {
+        date: '2026-08-01',
+        user: 'Maria Garcia',
+        action: 'Full rollout to all Enterprise tenants',
+      },
       { date: '2026-04-01', user: 'Maria Garcia', action: 'Beta launch for 5 pilot tenants' },
     ],
   },
@@ -122,33 +149,29 @@ const initialFlags = [
     id: 'ff-006',
     key: 'multi-property-dashboard',
     name: 'Multi-Property Dashboard',
-    description: 'Unified dashboard for managing multiple properties with cross-property reporting and user management.',
+    description:
+      'Unified dashboard for managing multiple properties with cross-property reporting and user management.',
     category: 'operations',
     status: 'active',
     rollout: { type: 'percentage', value: 100 },
-    targeting: [
-      { type: 'plan', operator: 'eq', value: 'Enterprise' },
-    ],
+    targeting: [{ type: 'plan', operator: 'eq', value: 'Enterprise' }],
     createdAt: '2026-02-15',
     updatedAt: '2026-06-01',
     createdBy: 'Robert Chen',
     environments: ['production'],
     requiresRestart: false,
-    auditLog: [
-      { date: '2026-06-01', user: 'Robert Chen', action: 'Full GA release' },
-    ],
+    auditLog: [{ date: '2026-06-01', user: 'Robert Chen', action: 'Full GA release' }],
   },
   {
     id: 'ff-007',
     key: 'channel-manager-v2',
     name: 'Channel Manager v2 API',
-    description: 'Next-generation channel manager with real-time sync, conflict resolution, and rate parity monitoring.',
+    description:
+      'Next-generation channel manager with real-time sync, conflict resolution, and rate parity monitoring.',
     category: 'integrations',
     status: 'active',
     rollout: { type: 'percentage', value: 15 },
-    targeting: [
-      { type: 'tenant', operator: 'in', value: ['grandhotel'] },
-    ],
+    targeting: [{ type: 'tenant', operator: 'in', value: ['grandhotel'] }],
     createdAt: '2026-08-01',
     updatedAt: '2026-08-14',
     createdBy: 'Mike Chen',
@@ -163,7 +186,8 @@ const initialFlags = [
     id: 'ff-008',
     key: 'sms-notifications',
     name: 'SMS Guest Notifications',
-    description: 'Automated SMS alerts for check-in reminders, room ready, and checkout confirmations.',
+    description:
+      'Automated SMS alerts for check-in reminders, room ready, and checkout confirmations.',
     category: 'guest-experience',
     status: 'inactive',
     rollout: { type: 'percentage', value: 0 },
@@ -173,14 +197,17 @@ const initialFlags = [
     createdBy: 'Sarah J.',
     environments: ['staging'],
     requiresRestart: false,
-    auditLog: [
-      { date: '2026-07-20', user: 'Sarah J.', action: 'Created in staging environment' },
-    ],
+    auditLog: [{ date: '2026-07-20', user: 'Sarah J.', action: 'Created in staging environment' }],
   },
 ];
 
 const categories = [
-  { key: 'guest-experience', label: 'Guest Experience', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  {
+    key: 'guest-experience',
+    label: 'Guest Experience',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+  },
   { key: 'revenue', label: 'Revenue', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   { key: 'operations', label: 'Operations', color: 'text-blue-500', bg: 'bg-blue-500/10' },
   { key: 'reporting', label: 'Reporting', color: 'text-amber-500', bg: 'bg-amber-500/10' },
@@ -196,14 +223,15 @@ const rolloutTypes = [
 
 /* ─── Helpers ─── */
 function getCategoryMeta(key) {
-  return categories.find(c => c.key === key) || categories[0];
+  return categories.find((c) => c.key === key) || categories[0];
 }
 
 function getRolloutLabel(flag) {
   if (flag.status === 'inactive') return 'Disabled';
   if (flag.rollout.type === 'percentage') return `${flag.rollout.value}%`;
   if (flag.rollout.type === 'all') return 'All Users';
-  if (flag.targeting.length > 0) return `${flag.targeting.length} rule${flag.targeting.length > 1 ? 's' : ''}`;
+  if (flag.targeting.length > 0)
+    return `${flag.targeting.length} rule${flag.targeting.length > 1 ? 's' : ''}`;
   return '0%';
 }
 
@@ -217,7 +245,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -228,7 +267,14 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
 function CategoryBadge({ category }) {
   const meta = getCategoryMeta(category);
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.bg, meta.color, 'border-current/20')}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       <Tag className="h-3 w-3" />
       {meta.label}
     </span>
@@ -258,7 +304,10 @@ function RolloutBar({ value, max = 100 }) {
     <div className="flex items-center gap-2">
       <div className="h-2 w-24 rounded-full bg-border overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all', pct >= 80 ? 'bg-accent' : pct >= 40 ? 'bg-secondary' : 'bg-warning')}
+          className={cn(
+            'h-full rounded-full transition-all',
+            pct >= 80 ? 'bg-accent' : pct >= 40 ? 'bg-secondary' : 'bg-warning'
+          )}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -302,8 +351,18 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', flag.status === 'active' ? 'bg-accent/10' : 'bg-neutral/10')}>
-                <Zap className={cn('h-5 w-5', flag.status === 'active' ? 'text-accent' : 'text-text-muted')} />
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg',
+                  flag.status === 'active' ? 'bg-accent/10' : 'bg-neutral/10'
+                )}
+              >
+                <Zap
+                  className={cn(
+                    'h-5 w-5',
+                    flag.status === 'active' ? 'text-accent' : 'text-text-muted'
+                  )}
+                />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{flag.name}</h2>
@@ -318,12 +377,17 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                   flag.status === 'active' ? 'bg-accent' : 'bg-border'
                 )}
               >
-                <span className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  flag.status === 'active' ? 'translate-x-6' : 'translate-x-1'
-                )} />
+                <span
+                  className={cn(
+                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                    flag.status === 'active' ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
               </button>
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -340,7 +404,9 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -358,7 +424,9 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
               <div className="rounded-xl border border-border bg-surface p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-xs text-text-muted uppercase tracking-wider">Current Status</p>
+                    <p className="text-xs text-text-muted uppercase tracking-wider">
+                      Current Status
+                    </p>
                     <div className="mt-1 flex items-center gap-2">
                       <StatusBadge status={flag.status} />
                       <CategoryBadge category={flag.category} />
@@ -383,10 +451,19 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                       </button>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <button onClick={handleSave} className="text-xs text-accent hover:underline flex items-center gap-1">
+                        <button
+                          onClick={handleSave}
+                          className="text-xs text-accent hover:underline flex items-center gap-1"
+                        >
                           <Check className="h-3 w-3" /> Save
                         </button>
-                        <button onClick={() => { setIsEditing(false); setEditRollout(flag.rollout.value); }} className="text-xs text-text-muted hover:underline">
+                        <button
+                          onClick={() => {
+                            setIsEditing(false);
+                            setEditRollout(flag.rollout.value);
+                          }}
+                          className="text-xs text-text-muted hover:underline"
+                        >
                           Cancel
                         </button>
                       </div>
@@ -405,7 +482,9 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                       />
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-text-muted">0%</span>
-                        <span className="text-lg font-bold font-mono text-secondary">{editRollout}%</span>
+                        <span className="text-lg font-bold font-mono text-secondary">
+                          {editRollout}%
+                        </span>
                         <span className="text-xs text-text-muted">100%</span>
                       </div>
                     </div>
@@ -417,7 +496,9 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
 
               {/* Description */}
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">Description</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+                  Description
+                </h3>
                 <p className="text-sm text-text-secondary">{flag.description}</p>
               </div>
 
@@ -431,17 +512,29 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                 <div className="rounded-lg border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Environments</p>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {flag.environments.map(env => (
-                      <span key={env} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary capitalize">
+                    {flag.environments.map((env) => (
+                      <span
+                        key={env}
+                        className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary capitalize"
+                      >
                         {env}
                       </span>
                     ))}
                   </div>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-4">
-                  <p className="text-xs text-text-muted uppercase tracking-wider">Requires Restart</p>
-                  <p className={cn('mt-1 text-sm font-medium', flag.requiresRestart ? 'text-warning' : 'text-accent')}>
-                    {flag.requiresRestart ? 'Yes — Service restart required' : 'No — Instant toggle'}
+                  <p className="text-xs text-text-muted uppercase tracking-wider">
+                    Requires Restart
+                  </p>
+                  <p
+                    className={cn(
+                      'mt-1 text-sm font-medium',
+                      flag.requiresRestart ? 'text-warning' : 'text-accent'
+                    )}
+                  >
+                    {flag.requiresRestart
+                      ? 'Yes — Service restart required'
+                      : 'No — Instant toggle'}
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-4">
@@ -458,7 +551,11 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                 <Button variant="outline" size="sm" className="flex-1">
                   <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Refresh Cache
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 text-danger border-danger/30 hover:bg-danger/10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-danger border-danger/30 hover:bg-danger/10"
+                >
                   <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Archive
                 </Button>
               </div>
@@ -479,7 +576,9 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                 <div className="rounded-xl border border-border bg-surface p-8 text-center">
                   <Target className="mx-auto h-10 w-10 text-text-muted mb-3" />
                   <p className="text-sm text-text-muted">No targeting rules configured.</p>
-                  <p className="text-xs text-text-muted mt-1">This flag applies to all users based on rollout percentage only.</p>
+                  <p className="text-xs text-text-muted mt-1">
+                    This flag applies to all users based on rollout percentage only.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -497,11 +596,16 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
                         </button>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {Array.isArray(rule.value) ? rule.value.map(v => (
-                          <span key={v} className="rounded-full bg-background border border-border px-2.5 py-0.5 text-xs text-text-secondary">
-                            {v}
-                          </span>
-                        )) : (
+                        {Array.isArray(rule.value) ? (
+                          rule.value.map((v) => (
+                            <span
+                              key={v}
+                              className="rounded-full bg-background border border-border px-2.5 py-0.5 text-xs text-text-secondary"
+                            >
+                              {v}
+                            </span>
+                          ))
+                        ) : (
                           <span className="rounded-full bg-background border border-border px-2.5 py-0.5 text-xs text-text-secondary">
                             {rule.value}
                           </span>
@@ -514,7 +618,9 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
 
               {/* Rule Builder Preview */}
               <div className="rounded-xl border border-border bg-surface p-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Add New Rule</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Add New Rule
+                </h4>
                 <div className="grid grid-cols-3 gap-3">
                   <select className="h-10 rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     <option value="">Select type...</option>
@@ -549,7 +655,10 @@ function FlagDetailDrawer({ flag, onClose, onUpdate }) {
               <h3 className="text-sm font-semibold text-text-primary">Change History</h3>
               <div className="space-y-3">
                 {flag.auditLog.map((entry, i) => (
-                  <div key={i} className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3">
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3"
+                  >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10">
                       <Clock className="h-4 w-4 text-secondary" />
                     </div>
@@ -582,7 +691,7 @@ function NewFlagModal({ onClose, onCreate }) {
     rollout: 0,
   });
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -597,7 +706,9 @@ function NewFlagModal({ onClose, onCreate }) {
       createdBy: 'You',
       environments: ['staging'],
       requiresRestart: false,
-      auditLog: [{ date: new Date().toISOString().split('T')[0], user: 'You', action: 'Created flag' }],
+      auditLog: [
+        { date: new Date().toISOString().split('T')[0], user: 'You', action: 'Created flag' },
+      ],
     });
     onClose();
   };
@@ -615,7 +726,9 @@ function NewFlagModal({ onClose, onCreate }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Flag Name</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Flag Name
+            </label>
             <input
               type="text"
               required
@@ -627,7 +740,9 @@ function NewFlagModal({ onClose, onCreate }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Key</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Key
+            </label>
             <input
               type="text"
               required
@@ -636,11 +751,15 @@ function NewFlagModal({ onClose, onCreate }) {
               placeholder="e.g. new-booking-engine"
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm font-mono text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
-            <p className="mt-1 text-[10px] text-text-muted">Used in code: useFlag(&quot;{form.key || 'your-flag-key'}&quot;)</p>
+            <p className="mt-1 text-[10px] text-text-muted">
+              Used in code: useFlag(&quot;{form.key || 'your-flag-key'}&quot;)
+            </p>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Description
+            </label>
             <textarea
               value={form.description}
               onChange={(e) => update('description', e.target.value)}
@@ -652,17 +771,25 @@ function NewFlagModal({ onClose, onCreate }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Category</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Category
+              </label>
               <select
                 value={form.category}
                 onChange={(e) => update('category', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {categories.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+                {categories.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Initial Rollout</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Initial Rollout
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -672,13 +799,17 @@ function NewFlagModal({ onClose, onCreate }) {
                   onChange={(e) => update('rollout', parseInt(e.target.value) || 0)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 pr-8 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted">%</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted">
+                  %
+                </span>
               </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Plus className="mr-1.5 h-4 w-4" /> Create Flag
             </Button>
@@ -702,7 +833,8 @@ export default function FeatureFlagsPage() {
 
   const filteredFlags = useMemo(() => {
     let result = flags.filter((f) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         f.name.toLowerCase().includes(query.toLowerCase()) ||
         f.key.toLowerCase().includes(query.toLowerCase()) ||
         f.description.toLowerCase().includes(query.toLowerCase());
@@ -733,25 +865,32 @@ export default function FeatureFlagsPage() {
     return result;
   }, [flags, query, categoryFilter, statusFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: flags.length,
-    active: flags.filter(f => f.status === 'active').length,
-    inactive: flags.filter(f => f.status === 'inactive').length,
-    avgRollout: flags.filter(f => f.status === 'active').length > 0
-      ? Math.round(flags.filter(f => f.status === 'active').reduce((s, f) => s + f.rollout.value, 0) / flags.filter(f => f.status === 'active').length)
-      : 0,
-  }), [flags]);
+  const stats = useMemo(
+    () => ({
+      total: flags.length,
+      active: flags.filter((f) => f.status === 'active').length,
+      inactive: flags.filter((f) => f.status === 'inactive').length,
+      avgRollout:
+        flags.filter((f) => f.status === 'active').length > 0
+          ? Math.round(
+              flags.filter((f) => f.status === 'active').reduce((s, f) => s + f.rollout.value, 0) /
+                flags.filter((f) => f.status === 'active').length
+            )
+          : 0,
+    }),
+    [flags]
+  );
 
   const handleUpdate = (id, updates) => {
-    setFlags(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
+    setFlags((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
   };
 
   const handleCreate = (newFlag) => {
-    setFlags(prev => [newFlag, ...prev]);
+    setFlags((prev) => [newFlag, ...prev]);
   };
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
@@ -763,7 +902,9 @@ export default function FeatureFlagsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Feature Flags</h1>
-          <p className="text-sm text-text-secondary">Rollout management, targeting rules, and feature toggles</p>
+          <p className="text-sm text-text-secondary">
+            Rollout management, targeting rules, and feature toggles
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -777,10 +918,34 @@ export default function FeatureFlagsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Total Flags" value={stats.total} icon={ToggleRight} color="text-text-primary" subtext="Across all environments" />
-        <StatCard label="Active" value={stats.active} icon={Zap} color="text-accent" subtext="Currently enabled" />
-        <StatCard label="Inactive" value={stats.inactive} icon={EyeOff} color="text-text-muted" subtext="Disabled or staging" />
-        <StatCard label="Avg. Rollout" value={`${stats.avgRollout}%`} icon={Percent} color="text-secondary" subtext="Of active flags" />
+        <StatCard
+          label="Total Flags"
+          value={stats.total}
+          icon={ToggleRight}
+          color="text-text-primary"
+          subtext="Across all environments"
+        />
+        <StatCard
+          label="Active"
+          value={stats.active}
+          icon={Zap}
+          color="text-accent"
+          subtext="Currently enabled"
+        />
+        <StatCard
+          label="Inactive"
+          value={stats.inactive}
+          icon={EyeOff}
+          color="text-text-muted"
+          subtext="Disabled or staging"
+        />
+        <StatCard
+          label="Avg. Rollout"
+          value={`${stats.avgRollout}%`}
+          icon={Percent}
+          color="text-secondary"
+          subtext="Of active flags"
+        />
       </div>
 
       {/* Filters */}
@@ -802,7 +967,11 @@ export default function FeatureFlagsPage() {
             className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="all">All Categories</option>
-            {categories.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+            {categories.map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.label}
+              </option>
+            ))}
           </select>
           <select
             value={statusFilter}
@@ -818,7 +987,8 @@ export default function FeatureFlagsPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredFlags.length}</span> of {flags.length} feature flags
+        Showing <span className="font-medium text-text-primary">{filteredFlags.length}</span> of{' '}
+        {flags.length} feature flags
       </p>
 
       {/* Flags Table */}
@@ -844,9 +1014,12 @@ export default function FeatureFlagsPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -865,8 +1038,18 @@ export default function FeatureFlagsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', flag.status === 'active' ? 'bg-accent/10' : 'bg-neutral/10')}>
-                        <Zap className={cn('h-4 w-4', flag.status === 'active' ? 'text-accent' : 'text-text-muted')} />
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-lg',
+                          flag.status === 'active' ? 'bg-accent/10' : 'bg-neutral/10'
+                        )}
+                      >
+                        <Zap
+                          className={cn(
+                            'h-4 w-4',
+                            flag.status === 'active' ? 'text-accent' : 'text-text-muted'
+                          )}
+                        />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-text-primary">{flag.name}</p>
@@ -883,24 +1066,34 @@ export default function FeatureFlagsPage() {
                   <td className="px-4 py-3">
                     <RolloutBar value={flag.rollout.value} />
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">
-                    {flag.updatedAt}
-                  </td>
+                  <td className="px-4 py-3 text-text-secondary text-xs">{flag.updatedAt}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedFlag(flag); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFlag(flag);
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleUpdate(flag.id, { status: flag.status === 'active' ? 'inactive' : 'active' }); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdate(flag.id, {
+                            status: flag.status === 'active' ? 'inactive' : 'active',
+                          });
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title={flag.status === 'active' ? 'Disable' : 'Enable'}
                       >
-                        {flag.status === 'active' ? <ToggleRight className="h-4 w-4 text-accent" /> : <ToggleLeft className="h-4 w-4 text-text-muted" />}
+                        {flag.status === 'active' ? (
+                          <ToggleRight className="h-4 w-4 text-accent" />
+                        ) : (
+                          <ToggleLeft className="h-4 w-4 text-text-muted" />
+                        )}
                       </button>
                     </div>
                   </td>

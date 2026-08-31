@@ -1,18 +1,37 @@
 /* src/app/guest-portal/page.jsx */
 import { useMemo } from 'react';
 import {
-  Home, Calendar, KeyRound, UtensilsCrossed, CreditCard,
-  Crown, MessageSquare, Star, ChevronRight, Bell, ArrowRight,
-  Clock, MapPin, Phone, Wifi, Coffee, Car, Dumbbell, Waves,
+  Home,
+  Calendar,
+  KeyRound,
+  UtensilsCrossed,
+  CreditCard,
+  Crown,
+  MessageSquare,
+  Star,
+  ChevronRight,
+  Bell,
+  ArrowRight,
+  Clock,
+  MapPin,
+  Phone,
+  Wifi,
+  Coffee,
+  Car,
+  Dumbbell,
+  Waves,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 import { guestProfile, guestStays, guestAnnouncements, getStayPhase } from './data';
 import {
-  GuestBookingCard, DigitalKeyWidget, PointsDisplay,
-  GuestAnnouncementCard, QuickAction, SectionHeader,
+  GuestBookingCard,
+  DigitalKeyWidget,
+  PointsDisplay,
+  GuestAnnouncementCard,
+  QuickAction,
+  SectionHeader,
 } from './components';
-
 
 export default function GuestDashboard() {
   const currentStay = guestStays[0];
@@ -24,8 +43,18 @@ export default function GuestDashboard() {
       subtitle: `${currentStay.dates.nights} nights at ${currentStay.property.name}`,
       actions: [
         { icon: Calendar, label: 'Check In', href: '/guest-portal/check-in', color: 'accent' },
-        { icon: CreditCard, label: 'View Booking', href: '/guest-portal/booking', color: 'secondary' },
-        { icon: Star, label: 'Add Requests', href: '/guest-portal/profile/preferences', color: 'info' },
+        {
+          icon: CreditCard,
+          label: 'View Booking',
+          href: '/guest-portal/booking',
+          color: 'secondary',
+        },
+        {
+          icon: Star,
+          label: 'Add Requests',
+          href: '/guest-portal/profile/preferences',
+          color: 'info',
+        },
       ],
     },
     'in-stay': {
@@ -33,9 +62,24 @@ export default function GuestDashboard() {
       subtitle: `Room ${currentStay.room.number} · ${currentStay.property.name}`,
       actions: [
         { icon: KeyRound, label: 'Digital Key', href: '/guest-portal/keys', color: 'secondary' },
-        { icon: UtensilsCrossed, label: 'Room Service', href: '/guest-portal/stay/room-service', color: 'accent' },
-        { icon: CreditCard, label: 'View Folio', href: '/guest-portal/billing', color: 'text-primary' },
-        { icon: MessageSquare, label: 'Message Staff', href: '/guest-portal/messages', color: 'info' },
+        {
+          icon: UtensilsCrossed,
+          label: 'Room Service',
+          href: '/guest-portal/stay/room-service',
+          color: 'accent',
+        },
+        {
+          icon: CreditCard,
+          label: 'View Folio',
+          href: '/guest-portal/billing',
+          color: 'text-primary',
+        },
+        {
+          icon: MessageSquare,
+          label: 'Message Staff',
+          href: '/guest-portal/messages',
+          color: 'info',
+        },
       ],
     },
     'post-stay': {
@@ -44,16 +88,25 @@ export default function GuestDashboard() {
       actions: [
         { icon: Star, label: 'Leave Review', href: '/guest-portal/reviews', color: 'warning' },
         { icon: Crown, label: 'Loyalty', href: '/guest-portal/loyalty', color: 'secondary' },
-        { icon: CreditCard, label: 'View Receipt', href: '/guest-portal/billing/invoice', color: 'text-primary' },
+        {
+          icon: CreditCard,
+          label: 'View Receipt',
+          href: '/guest-portal/billing/invoice',
+          color: 'text-primary',
+        },
         { icon: Calendar, label: 'Book Again', href: '/guest-portal/booking', color: 'accent' },
       ],
     },
   };
   const cfg = phaseConfig[phase];
 
-  const activeAnnouncements = useMemo(() =>
-    guestAnnouncements.filter(a => a.status === 'published' && new Date(a.expiresAt) > new Date()),
-  []);
+  const activeAnnouncements = useMemo(
+    () =>
+      guestAnnouncements.filter(
+        (a) => a.status === 'published' && new Date(a.expiresAt) > new Date()
+      ),
+    []
+  );
 
   return (
     <div className="space-y-6">
@@ -118,7 +171,10 @@ export default function GuestDashboard() {
                 { icon: Phone, label: '24/7 Concierge' },
                 { icon: Star, label: 'Spa' },
               ].map((amenity) => (
-                <div key={amenity.label} className="flex items-center gap-2 rounded-lg border border-border bg-background p-2.5">
+                <div
+                  key={amenity.label}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-background p-2.5"
+                >
                   <amenity.icon className="h-4 w-4 text-text-muted" />
                   <span className="text-xs text-text-secondary">{amenity.label}</span>
                 </div>
@@ -133,7 +189,10 @@ export default function GuestDashboard() {
                 <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                   <Bell className="h-4 w-4 text-secondary" /> Announcements
                 </h3>
-                <a href="/guest-portal/status/announcements" className="text-xs text-secondary hover:underline">
+                <a
+                  href="/guest-portal/status/announcements"
+                  className="text-xs text-secondary hover:underline"
+                >
                   View all <ChevronRight className="h-3 w-3 inline" />
                 </a>
               </div>
@@ -161,7 +220,11 @@ export default function GuestDashboard() {
             <div className="space-y-1">
               {[
                 { label: 'Modify Booking', href: '/guest-portal/booking/modify', icon: Calendar },
-                { label: 'Room Service', href: '/guest-portal/stay/room-service', icon: UtensilsCrossed },
+                {
+                  label: 'Room Service',
+                  href: '/guest-portal/stay/room-service',
+                  icon: UtensilsCrossed,
+                },
                 { label: 'Housekeeping', href: '/guest-portal/stay/housekeeping', icon: Home },
                 { label: 'Concierge', href: '/guest-portal/stay/concierge', icon: MessageSquare },
                 { label: 'Support', href: '/guest-portal/support', icon: MessageSquare },

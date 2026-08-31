@@ -2,10 +2,26 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Target, Eye, Heart, Users, Globe, Award } from 'lucide-react';
 
 const values = [
-  { icon: Target, title: 'Mission-Driven', desc: 'We build technology that lets hoteliers focus on guests, not software.' },
-  { icon: Eye, title: 'Transparent', desc: 'No hidden fees, no lock-in contracts, no surprise price hikes.' },
-  { icon: Heart, title: 'Hospitality-First', desc: 'Designed by hoteliers, for hoteliers. Every feature starts with operational reality.' },
-  { icon: Users, title: 'Customer-Obsessed', desc: 'White-glove onboarding and 24/7 support because your property never sleeps.' },
+  {
+    icon: Target,
+    title: 'Mission-Driven',
+    desc: 'We build technology that lets hoteliers focus on guests, not software.',
+  },
+  {
+    icon: Eye,
+    title: 'Transparent',
+    desc: 'No hidden fees, no lock-in contracts, no surprise price hikes.',
+  },
+  {
+    icon: Heart,
+    title: 'Hospitality-First',
+    desc: 'Designed by hoteliers, for hoteliers. Every feature starts with operational reality.',
+  },
+  {
+    icon: Users,
+    title: 'Customer-Obsessed',
+    desc: 'White-glove onboarding and 24/7 support because your property never sleeps.',
+  },
 ];
 
 const stats = [
@@ -31,7 +47,8 @@ export default function AboutPage() {
             Building the future of <span className="text-secondary">hospitality</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Unified PMS was founded by hoteliers who were tired of legacy software. Today we power properties across 30 countries.
+            Unified PMS was founded by hoteliers who were tired of legacy software. Today we power
+            properties across 30 countries.
           </p>
         </div>
       </section>
@@ -56,7 +73,10 @@ export default function AboutPage() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v) => (
-              <div key={v.title} className="rounded-xl border border-border bg-surface p-6 text-center">
+              <div
+                key={v.title}
+                className="rounded-xl border border-border bg-surface p-6 text-center"
+              >
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10">
                   <v.icon className="h-6 w-6 text-secondary" />
                 </div>
@@ -75,7 +95,10 @@ export default function AboutPage() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {team.map((t) => (
-              <div key={t.name} className="rounded-xl border border-border bg-background p-6 text-center">
+              <div
+                key={t.name}
+                className="rounded-xl border border-border bg-background p-6 text-center"
+              >
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-secondary/10 text-lg font-bold text-secondary">
                   {t.initials}
                 </div>
@@ -90,8 +113,13 @@ export default function AboutPage() {
       <section className="py-20 text-center">
         <div className="mx-auto max-w-xl px-4">
           <h2 className="text-2xl font-bold text-text-primary">Want to join the team?</h2>
-          <p className="mt-2 text-text-secondary">We are always looking for hospitality-minded engineers and designers.</p>
-          <Link to="/contact" className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+          <p className="mt-2 text-text-secondary">
+            We are always looking for hospitality-minded engineers and designers.
+          </p>
+          <Link
+            to="/contact"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+          >
             Get in Touch <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </div>

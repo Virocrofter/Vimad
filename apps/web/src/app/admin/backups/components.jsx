@@ -1,27 +1,67 @@
 /* src/app/admin/backups/components.jsx */
 import { useState } from 'react';
 import {
-  CheckCircle2, XCircle, AlertTriangle, Clock, Shield, Database,
-  HardDrive, Cloud, Server, Zap, Activity, TrendingUp, TrendingDown,
-  Minus, ChevronDown, ChevronUp, Copy, Check, Globe, Wifi, WifiOff,
-  RefreshCw, Play, Pause, RotateCcw, FileCheck, Layers, ArrowUpRight,
-  ArrowDownRight, Timer, Gauge, Target, Crosshair, AlertOctagon,
-  Info, FileText, Terminal, Bug
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Clock,
+  Shield,
+  Database,
+  HardDrive,
+  Cloud,
+  Server,
+  Zap,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Check,
+  Globe,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Play,
+  Pause,
+  RotateCcw,
+  FileCheck,
+  Layers,
+  ArrowUpRight,
+  ArrowDownRight,
+  Timer,
+  Gauge,
+  Target,
+  Crosshair,
+  AlertOctagon,
+  Info,
+  FileText,
+  Terminal,
+  Bug,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
-  backupTypeMeta, scheduleStatusMeta, restorePointStatusMeta,
-  replicationStatusMeta, testStatusMeta, timeAgo
+  backupTypeMeta,
+  scheduleStatusMeta,
+  restorePointStatusMeta,
+  replicationStatusMeta,
+  testStatusMeta,
+  timeAgo,
 } from './data';
 
 /* ─── Type Badge ─── */
 export function BackupTypeBadge({ type }) {
   const meta = backupTypeMeta[type] || backupTypeMeta.full;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -32,10 +72,12 @@ export function BackupTypeBadge({ type }) {
 export function ScheduleStatusBadge({ status }) {
   const meta = scheduleStatusMeta[status] || scheduleStatusMeta.success;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -46,10 +88,12 @@ export function ScheduleStatusBadge({ status }) {
 export function RestorePointStatusBadge({ status }) {
   const meta = restorePointStatusMeta[status] || restorePointStatusMeta.available;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -60,10 +104,12 @@ export function RestorePointStatusBadge({ status }) {
 export function ReplicationStatusBadge({ status }) {
   const meta = replicationStatusMeta[status] || replicationStatusMeta.active;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -74,10 +120,12 @@ export function ReplicationStatusBadge({ status }) {
 export function TestStatusBadge({ status }) {
   const meta = testStatusMeta[status] || testStatusMeta.success;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -94,15 +142,26 @@ export function BackupStatCard({ label, value, subtext, icon: Icon, color, trend
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -117,13 +176,23 @@ export function BackupProgressBar({ used, total, label, unit = '', color = 'bg-a
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px]">
         <span className="text-text-muted">{label}</span>
-        <span className={cn('font-mono font-medium', pct > 80 ? 'text-danger' : pct > 60 ? 'text-warning' : 'text-accent')}>
-          {used}{unit} / {total}{unit}
+        <span
+          className={cn(
+            'font-mono font-medium',
+            pct > 80 ? 'text-danger' : pct > 60 ? 'text-warning' : 'text-accent'
+          )}
+        >
+          {used}
+          {unit} / {total}
+          {unit}
         </span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all', pct > 80 ? 'bg-danger' : pct > 60 ? 'bg-warning' : color)}
+          className={cn(
+            'h-full rounded-full transition-all',
+            pct > 80 ? 'bg-danger' : pct > 60 ? 'bg-warning' : color
+          )}
           style={{ width: `${Math.min(100, pct)}%` }}
         />
       </div>
@@ -146,11 +215,19 @@ export function ReplicationLagIndicator({ lagSeconds, targetSeconds }) {
     <div className="flex items-center gap-2">
       <div className="h-2 w-16 rounded-full bg-border overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all', isHealthy ? 'bg-accent' : isWarning ? 'bg-warning' : 'bg-danger')}
+          className={cn(
+            'h-full rounded-full transition-all',
+            isHealthy ? 'bg-accent' : isWarning ? 'bg-warning' : 'bg-danger'
+          )}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className={cn('text-xs font-mono font-medium', isHealthy ? 'text-accent' : isWarning ? 'text-warning' : 'text-danger')}>
+      <span
+        className={cn(
+          'text-xs font-mono font-medium',
+          isHealthy ? 'text-accent' : isWarning ? 'text-warning' : 'text-danger'
+        )}
+      >
         {display}
       </span>
     </div>
@@ -166,19 +243,33 @@ export function RtoRpoGauge({ actual, target, label, unit = 'min' }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">{label}</span>
-        <span className={cn('text-xs font-mono font-bold', isHealthy ? 'text-accent' : isWarning ? 'text-warning' : 'text-danger')}>
-          {actual}{unit}
+        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+          {label}
+        </span>
+        <span
+          className={cn(
+            'text-xs font-mono font-bold',
+            isHealthy ? 'text-accent' : isWarning ? 'text-warning' : 'text-danger'
+          )}
+        >
+          {actual}
+          {unit}
         </span>
       </div>
       <div className="h-2.5 w-full rounded-full bg-border overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all', isHealthy ? 'bg-accent' : isWarning ? 'bg-warning' : 'bg-danger')}
+          className={cn(
+            'h-full rounded-full transition-all',
+            isHealthy ? 'bg-accent' : isWarning ? 'bg-warning' : 'bg-danger'
+          )}
           style={{ width: `${Math.min(100, pct)}%` }}
         />
       </div>
       <div className="mt-1.5 flex items-center justify-between text-[10px] text-text-muted">
-        <span>Target: {target}{unit}</span>
+        <span>
+          Target: {target}
+          {unit}
+        </span>
         <span>{Math.round(pct)}% of target</span>
       </div>
     </div>
@@ -188,13 +279,15 @@ export function RtoRpoGauge({ actual, target, label, unit = 'min' }) {
 /* ─── Health Check Dot ─── */
 export function HealthCheckDot({ status }) {
   return (
-    <span className={cn(
-      'inline-flex h-2 w-2 rounded-full',
-      status === 'healthy' && 'bg-accent',
-      status === 'warning' && 'bg-warning',
-      status === 'failed' && 'bg-danger',
-      status === 'unknown' && 'bg-text-muted'
-    )} />
+    <span
+      className={cn(
+        'inline-flex h-2 w-2 rounded-full',
+        status === 'healthy' && 'bg-accent',
+        status === 'warning' && 'bg-warning',
+        status === 'failed' && 'bg-danger',
+        status === 'unknown' && 'bg-text-muted'
+      )}
+    />
   );
 }
 
@@ -219,7 +312,13 @@ export function TestResultRow({ label, status, detail }) {
       </div>
       <div className="text-right">
         <span className={cn('text-xs font-medium', config.color)}>
-          {status === 'passed' ? 'Passed' : status === 'failed' ? 'Failed' : status === 'warning' ? 'Warning' : 'Not started'}
+          {status === 'passed'
+            ? 'Passed'
+            : status === 'failed'
+              ? 'Failed'
+              : status === 'warning'
+                ? 'Warning'
+                : 'Not started'}
         </span>
         {detail && <p className="text-[10px] text-text-muted">{detail}</p>}
       </div>
@@ -239,7 +338,12 @@ export function LogEntry({ time, level, message }) {
   return (
     <div className="flex items-start gap-3 py-1.5 font-mono text-xs">
       <span className="shrink-0 text-text-muted w-20">{time}</span>
-      <span className={cn('shrink-0 w-14 font-semibold uppercase', levelColors[level] || 'text-text-muted')}>
+      <span
+        className={cn(
+          'shrink-0 w-14 font-semibold uppercase',
+          levelColors[level] || 'text-text-muted'
+        )}
+      >
         {level}
       </span>
       <span className="text-text-secondary">{message}</span>
@@ -250,13 +354,24 @@ export function LogEntry({ time, level, message }) {
 /* ─── Storage Tier Badge ─── */
 export function StorageTierBadge({ tier }) {
   const tiers = {
-    'Standard': { color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
+    Standard: { color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
     'Standard-IA': { color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-    'Glacier Deep Archive': { color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20' },
+    'Glacier Deep Archive': {
+      color: 'text-secondary',
+      bg: 'bg-secondary/10',
+      border: 'border-secondary/20',
+    },
   };
   const meta = tiers[tier] || tiers.Standard;
   return (
-    <span className={cn('inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium', meta.bg, meta.color, meta.border)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <Cloud className="mr-1 h-3 w-3" />
       {tier}
     </span>
@@ -296,11 +411,26 @@ export function CopyableId({ id }) {
 }
 
 /* ─── Timeline Item ─── */
-export function TimelineItem({ icon: Icon, iconColor, iconBg, title, subtitle, time, status, children }) {
+export function TimelineItem({
+  icon: Icon,
+  iconColor,
+  iconBg,
+  title,
+  subtitle,
+  time,
+  status,
+  children,
+}) {
   return (
     <div className="relative flex gap-4 pb-6 last:pb-0">
       <div className="flex flex-col items-center">
-        <div className={cn('flex h-9 w-9 items-center justify-center rounded-full border-2', iconBg, iconColor.replace('text-', 'border-'))}>
+        <div
+          className={cn(
+            'flex h-9 w-9 items-center justify-center rounded-full border-2',
+            iconBg,
+            iconColor.replace('text-', 'border-')
+          )}
+        >
           <Icon className={cn('h-4 w-4', iconColor)} />
         </div>
         <div className="mt-1 h-full w-px bg-border" />
@@ -321,8 +451,18 @@ export function TimelineItem({ icon: Icon, iconColor, iconBg, title, subtitle, t
 /* ─── Issue Alert ─── */
 export function IssueAlert({ severity, message, component }) {
   const configs = {
-    critical: { icon: AlertOctagon, color: 'text-danger', bg: 'bg-danger/5', border: 'border-danger/20' },
-    warning: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/5', border: 'border-warning/20' },
+    critical: {
+      icon: AlertOctagon,
+      color: 'text-danger',
+      bg: 'bg-danger/5',
+      border: 'border-danger/20',
+    },
+    warning: {
+      icon: AlertTriangle,
+      color: 'text-warning',
+      bg: 'bg-warning/5',
+      border: 'border-warning/20',
+    },
     info: { icon: Info, color: 'text-info', bg: 'bg-info/5', border: 'border-info/20' },
   };
   const config = configs[severity] || configs.info;

@@ -80,9 +80,7 @@ export const guestStays = [
       bedType: 'king',
       view: 'city',
       sqft: 420,
-      images: [
-        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
-      ],
+      images: ['https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800'],
       features: ['balcony', 'mini-bar', 'smart-tv', 'workspace'],
     },
     dates: {
@@ -97,7 +95,7 @@ export const guestStays = [
     rate: {
       nightly: 189,
       total: 567,
-      taxes: 56.70,
+      taxes: 56.7,
       fees: 25,
       currency: 'USD',
       breakdown: [
@@ -108,19 +106,37 @@ export const guestStays = [
     },
     folio: {
       charges: [
-        { id: 'CHG-001', date: '2026-08-12', description: 'Room Rate', amount: 189, category: 'room' },
-        { id: 'CHG-002', date: '2026-08-12', description: 'Room Service - Breakfast', amount: 32, category: 'dining' },
-        { id: 'CHG-003', date: '2026-08-13', description: 'Spa Treatment', amount: 120, category: 'spa' },
+        {
+          id: 'CHG-001',
+          date: '2026-08-12',
+          description: 'Room Rate',
+          amount: 189,
+          category: 'room',
+        },
+        {
+          id: 'CHG-002',
+          date: '2026-08-12',
+          description: 'Room Service - Breakfast',
+          amount: 32,
+          category: 'dining',
+        },
+        {
+          id: 'CHG-003',
+          date: '2026-08-13',
+          description: 'Spa Treatment',
+          amount: 120,
+          category: 'spa',
+        },
       ],
-      total: 648.70,
-      paid: 648.70,
+      total: 648.7,
+      paid: 648.7,
       balance: 0,
       payments: [
-        { id: 'PAY-001', date: '2026-08-12', method: 'Credit Card ending 4242', amount: 648.70 },
+        { id: 'PAY-001', date: '2026-08-12', method: 'Credit Card ending 4242', amount: 648.7 },
       ],
       invoices: [
         { id: 'INV-001', date: '2026-08-12', type: 'deposit', amount: 200 },
-        { id: 'INV-002', date: '2026-08-15', type: 'final', amount: 648.70 },
+        { id: 'INV-002', date: '2026-08-15', type: 'final', amount: 648.7 },
       ],
     },
     digitalKey: {
@@ -200,9 +216,7 @@ export const guestStays = [
       phone: '+1305-555-0200',
       email: 'miami@seasideresort.com',
       coordinates: { lat: 25.7617, lng: -80.1918 },
-      images: [
-        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
-      ],
+      images: ['https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800'],
       amenities: ['beach', 'pool', 'spa', 'restaurant', 'gym'],
     },
     room: {
@@ -213,9 +227,7 @@ export const guestStays = [
       bedType: 'king',
       view: 'ocean',
       sqft: 650,
-      images: [
-        'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
-      ],
+      images: ['https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800'],
       features: ['balcony', 'jacuzzi', 'mini-bar', 'smart-tv', 'workspace'],
     },
     dates: {
@@ -230,7 +242,7 @@ export const guestStays = [
     rate: {
       nightly: 289,
       total: 1445,
-      taxes: 144.50,
+      taxes: 144.5,
       fees: 50,
       currency: 'USD',
       breakdown: [
@@ -243,15 +255,19 @@ export const guestStays = [
     },
     folio: {
       charges: [
-        { id: 'CHG-101', date: '2026-09-20', description: 'Room Rate', amount: 289, category: 'room' },
+        {
+          id: 'CHG-101',
+          date: '2026-09-20',
+          description: 'Room Rate',
+          amount: 289,
+          category: 'room',
+        },
       ],
       total: 289,
       paid: 0,
       balance: 289,
       payments: [],
-      invoices: [
-        { id: 'INV-101', date: '2026-09-20', type: 'interim', amount: 289 },
-      ],
+      invoices: [{ id: 'INV-101', date: '2026-09-20', type: 'interim', amount: 289 }],
     },
     digitalKey: null,
     services: [],
@@ -273,7 +289,7 @@ export const pastStays = [
     property: { name: 'Grand Hotel Boston', brand: 'Vimad Collection' },
     dates: { arrival: '2026-06-10', departure: '2026-06-14', nights: 4 },
     rate: { total: 756, currency: 'USD' },
-    folio: { total: 892.40, paid: 892.40, balance: 0 },
+    folio: { total: 892.4, paid: 892.4, balance: 0 },
     pointsEarned: 892,
   },
   {
@@ -283,7 +299,7 @@ export const pastStays = [
     property: { name: 'Seaside Resort Miami', brand: 'Vimad Collection' },
     dates: { arrival: '2026-04-20', departure: '2026-04-25', nights: 5 },
     rate: { total: 1245, currency: 'USD' },
-    folio: { total: 1450.80, paid: 1450.80, balance: 0 },
+    folio: { total: 1450.8, paid: 1450.8, balance: 0 },
     pointsEarned: 1451,
   },
   {
@@ -293,7 +309,7 @@ export const pastStays = [
     property: { name: 'Urban Hotel NYC', brand: 'Vimad Collection' },
     dates: { arrival: '2026-02-14', departure: '2026-02-16', nights: 2 },
     rate: { total: 520, currency: 'USD' },
-    folio: { total: 612.30, paid: 612.30, balance: 0 },
+    folio: { total: 612.3, paid: 612.3, balance: 0 },
     pointsEarned: 612,
   },
 ];
@@ -326,7 +342,12 @@ export const tierBenefits = {
     bg: 'bg-yellow-500/10',
     border: 'border-yellow-500/20',
     dot: 'bg-yellow-500',
-    benefits: ['All Silver benefits', 'Guaranteed room upgrade', 'Free breakfast', 'Early check-in'],
+    benefits: [
+      'All Silver benefits',
+      'Guaranteed room upgrade',
+      'Free breakfast',
+      'Early check-in',
+    ],
     pointsMultiplier: 1.5,
     pointsRequired: 10000,
   },
@@ -336,7 +357,13 @@ export const tierBenefits = {
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/20',
     dot: 'bg-purple-500',
-    benefits: ['All Gold benefits', 'Suite upgrade', 'Executive lounge access', 'Free parking', 'Spa credit'],
+    benefits: [
+      'All Gold benefits',
+      'Suite upgrade',
+      'Executive lounge access',
+      'Free parking',
+      'Spa credit',
+    ],
     pointsMultiplier: 2.0,
     pointsRequired: 25000,
   },
@@ -344,34 +371,192 @@ export const tierBenefits = {
 
 /* ─── Rewards Catalog ─── */
 export const rewardsCatalog = [
-  { id: 'RWD-001', name: 'Free Night Stay', description: 'One complimentary night at any Vimad Collection property', pointsCost: 15000, category: 'stay', image: '🏨', available: true },
-  { id: 'RWD-002', name: 'Room Upgrade', description: 'Upgrade to next room category on your next stay', pointsCost: 5000, category: 'stay', image: '⬆️', available: true },
-  { id: 'RWD-003', name: 'Spa Treatment', description: '60-minute massage or facial at property spa', pointsCost: 8000, category: 'wellness', image: '💆', available: true },
-  { id: 'RWD-004', name: '$50 Dining Credit', description: 'Credit valid at any hotel restaurant or room service', pointsCost: 3500, category: 'dining', image: '🍽️', available: true },
-  { id: 'RWD-005', name: 'Late Checkout', description: 'Extend checkout until 4:00 PM', pointsCost: 2000, category: 'stay', image: '🕐', available: true },
-  { id: 'RWD-006', name: 'Airport Transfer', description: 'Complimentary airport pickup or drop-off', pointsCost: 6000, category: 'services', image: '🚗', available: true },
-  { id: 'RWD-007', name: 'Bottle of Champagne', description: 'Premium champagne delivered to your room', pointsCost: 4500, category: 'dining', image: '🍾', available: true },
-  { id: 'RWD-008', name: 'Executive Lounge Access', description: 'One-day access to executive lounge', pointsCost: 3000, category: 'stay', image: '🏢', available: true },
+  {
+    id: 'RWD-001',
+    name: 'Free Night Stay',
+    description: 'One complimentary night at any Vimad Collection property',
+    pointsCost: 15000,
+    category: 'stay',
+    image: '🏨',
+    available: true,
+  },
+  {
+    id: 'RWD-002',
+    name: 'Room Upgrade',
+    description: 'Upgrade to next room category on your next stay',
+    pointsCost: 5000,
+    category: 'stay',
+    image: '⬆️',
+    available: true,
+  },
+  {
+    id: 'RWD-003',
+    name: 'Spa Treatment',
+    description: '60-minute massage or facial at property spa',
+    pointsCost: 8000,
+    category: 'wellness',
+    image: '💆',
+    available: true,
+  },
+  {
+    id: 'RWD-004',
+    name: '$50 Dining Credit',
+    description: 'Credit valid at any hotel restaurant or room service',
+    pointsCost: 3500,
+    category: 'dining',
+    image: '🍽️',
+    available: true,
+  },
+  {
+    id: 'RWD-005',
+    name: 'Late Checkout',
+    description: 'Extend checkout until 4:00 PM',
+    pointsCost: 2000,
+    category: 'stay',
+    image: '🕐',
+    available: true,
+  },
+  {
+    id: 'RWD-006',
+    name: 'Airport Transfer',
+    description: 'Complimentary airport pickup or drop-off',
+    pointsCost: 6000,
+    category: 'services',
+    image: '🚗',
+    available: true,
+  },
+  {
+    id: 'RWD-007',
+    name: 'Bottle of Champagne',
+    description: 'Premium champagne delivered to your room',
+    pointsCost: 4500,
+    category: 'dining',
+    image: '🍾',
+    available: true,
+  },
+  {
+    id: 'RWD-008',
+    name: 'Executive Lounge Access',
+    description: 'One-day access to executive lounge',
+    pointsCost: 3000,
+    category: 'stay',
+    image: '🏢',
+    available: true,
+  },
 ];
 
 /* ─── Points History ─── */
 export const pointsHistory = [
-  { id: 'TXN-001', date: '2026-08-14', type: 'earned', description: 'Stay at Grand Hotel Boston', points: 253, stayId: 'RES-4021', balance: 12500 },
-  { id: 'TXN-002', date: '2026-08-13', type: 'earned', description: 'Stay at Grand Hotel Boston', points: 189, stayId: 'RES-4021', balance: 12247 },
-  { id: 'TXN-003', date: '2026-08-12', type: 'earned', description: 'Stay at Grand Hotel Boston', points: 189, stayId: 'RES-4021', balance: 12058 },
-  { id: 'TXN-004', date: '2026-08-12', type: 'earned', description: 'Welcome bonus — Gold tier', points: 500, stayId: null, balance: 11869 },
-  { id: 'TXN-005', date: '2026-06-14', type: 'earned', description: 'Stay at Grand Hotel Boston', points: 892, stayId: 'RES-3892', balance: 11369 },
-  { id: 'TXN-006', date: '2026-04-25', type: 'earned', description: 'Stay at Seaside Resort Miami', points: 1451, stayId: 'RES-3541', balance: 10477 },
-  { id: 'TXN-007', date: '2026-04-25', type: 'redeemed', description: 'Room Upgrade — Seaside Resort', points: -5000, stayId: 'RES-3541', balance: 9026 },
-  { id: 'TXN-008', date: '2026-02-16', type: 'earned', description: 'Stay at Urban Hotel NYC', points: 612, stayId: 'RES-3102', balance: 14026 },
-  { id: 'TXN-009', date: '2026-01-15', type: 'earned', description: 'Anniversary bonus points', points: 1000, stayId: null, balance: 13414 },
-  { id: 'TXN-010', date: '2025-12-20', type: 'redeemed', description: '$50 Dining Credit', points: -3500, stayId: null, balance: 12414 },
+  {
+    id: 'TXN-001',
+    date: '2026-08-14',
+    type: 'earned',
+    description: 'Stay at Grand Hotel Boston',
+    points: 253,
+    stayId: 'RES-4021',
+    balance: 12500,
+  },
+  {
+    id: 'TXN-002',
+    date: '2026-08-13',
+    type: 'earned',
+    description: 'Stay at Grand Hotel Boston',
+    points: 189,
+    stayId: 'RES-4021',
+    balance: 12247,
+  },
+  {
+    id: 'TXN-003',
+    date: '2026-08-12',
+    type: 'earned',
+    description: 'Stay at Grand Hotel Boston',
+    points: 189,
+    stayId: 'RES-4021',
+    balance: 12058,
+  },
+  {
+    id: 'TXN-004',
+    date: '2026-08-12',
+    type: 'earned',
+    description: 'Welcome bonus — Gold tier',
+    points: 500,
+    stayId: null,
+    balance: 11869,
+  },
+  {
+    id: 'TXN-005',
+    date: '2026-06-14',
+    type: 'earned',
+    description: 'Stay at Grand Hotel Boston',
+    points: 892,
+    stayId: 'RES-3892',
+    balance: 11369,
+  },
+  {
+    id: 'TXN-006',
+    date: '2026-04-25',
+    type: 'earned',
+    description: 'Stay at Seaside Resort Miami',
+    points: 1451,
+    stayId: 'RES-3541',
+    balance: 10477,
+  },
+  {
+    id: 'TXN-007',
+    date: '2026-04-25',
+    type: 'redeemed',
+    description: 'Room Upgrade — Seaside Resort',
+    points: -5000,
+    stayId: 'RES-3541',
+    balance: 9026,
+  },
+  {
+    id: 'TXN-008',
+    date: '2026-02-16',
+    type: 'earned',
+    description: 'Stay at Urban Hotel NYC',
+    points: 612,
+    stayId: 'RES-3102',
+    balance: 14026,
+  },
+  {
+    id: 'TXN-009',
+    date: '2026-01-15',
+    type: 'earned',
+    description: 'Anniversary bonus points',
+    points: 1000,
+    stayId: null,
+    balance: 13414,
+  },
+  {
+    id: 'TXN-010',
+    date: '2025-12-20',
+    type: 'redeemed',
+    description: '$50 Dining Credit',
+    points: -3500,
+    stayId: null,
+    balance: 12414,
+  },
 ];
 
 /* ─── Split Bill Participants ─── */
 export const splitParticipants = [
-  { id: 'P-001', name: 'John Smith', email: 'john.smith@email.com', avatar: 'JS', isPrimary: true, share: 50 },
-  { id: 'P-002', name: 'Sarah Smith', email: 'sarah.smith@email.com', avatar: 'SS', isPrimary: false, share: 50 },
+  {
+    id: 'P-001',
+    name: 'John Smith',
+    email: 'john.smith@email.com',
+    avatar: 'JS',
+    isPrimary: true,
+    share: 50,
+  },
+  {
+    id: 'P-002',
+    name: 'Sarah Smith',
+    email: 'sarah.smith@email.com',
+    avatar: 'SS',
+    isPrimary: false,
+    share: 50,
+  },
 ];
 
 /* ─── Category Meta for Folio ─── */
@@ -391,8 +576,26 @@ export const roomServiceMenu = {
       icon: 'Coffee',
       available: '06:00-11:00',
       items: [
-        { id: 'B-001', name: 'Continental Breakfast', description: 'Fresh pastries, seasonal fruit, yogurt, granola', price: 24, image: 'https://images.unsplash.com/photo-1533089862017-5614ec95e22e?w=400', dietary: ['vegetarian'], allergens: ['gluten', 'dairy'], prepTime: 20 },
-        { id: 'B-002', name: 'Eggs Benedict', description: 'Poached eggs, Canadian bacon, hollandaise on English muffin', price: 28, image: 'https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=400', dietary: [], allergens: ['gluten', 'dairy', 'egg'], prepTime: 25 },
+        {
+          id: 'B-001',
+          name: 'Continental Breakfast',
+          description: 'Fresh pastries, seasonal fruit, yogurt, granola',
+          price: 24,
+          image: 'https://images.unsplash.com/photo-1533089862017-5614ec95e22e?w=400',
+          dietary: ['vegetarian'],
+          allergens: ['gluten', 'dairy'],
+          prepTime: 20,
+        },
+        {
+          id: 'B-002',
+          name: 'Eggs Benedict',
+          description: 'Poached eggs, Canadian bacon, hollandaise on English muffin',
+          price: 28,
+          image: 'https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=400',
+          dietary: [],
+          allergens: ['gluten', 'dairy', 'egg'],
+          prepTime: 25,
+        },
       ],
     },
     {
@@ -401,8 +604,26 @@ export const roomServiceMenu = {
       icon: 'UtensilsCrossed',
       available: '11:00-23:00',
       items: [
-        { id: 'L-001', name: 'Caesar Salad', description: 'Romaine lettuce, parmesan, croutons, Caesar dressing', price: 18, image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400', dietary: ['vegetarian'], allergens: ['dairy', 'gluten', 'egg'], prepTime: 15 },
-        { id: 'L-002', name: 'Grilled Salmon', description: 'Atlantic salmon, seasonal vegetables, lemon butter', price: 34, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400', dietary: ['gluten-free'], allergens: ['fish', 'dairy'], prepTime: 30 },
+        {
+          id: 'L-001',
+          name: 'Caesar Salad',
+          description: 'Romaine lettuce, parmesan, croutons, Caesar dressing',
+          price: 18,
+          image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400',
+          dietary: ['vegetarian'],
+          allergens: ['dairy', 'gluten', 'egg'],
+          prepTime: 15,
+        },
+        {
+          id: 'L-002',
+          name: 'Grilled Salmon',
+          description: 'Atlantic salmon, seasonal vegetables, lemon butter',
+          price: 34,
+          image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400',
+          dietary: ['gluten-free'],
+          allergens: ['fish', 'dairy'],
+          prepTime: 30,
+        },
       ],
     },
     {
@@ -411,8 +632,26 @@ export const roomServiceMenu = {
       icon: 'Wine',
       available: '24h',
       items: [
-        { id: 'BV-001', name: 'Fresh Orange Juice', description: 'Squeezed daily', price: 8, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400', dietary: ['vegan', 'gluten-free'], allergens: [], prepTime: 5 },
-        { id: 'BV-002', name: 'House Red Wine', description: 'Cabernet Sauvignon, California', price: 14, image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400', dietary: ['vegan', 'gluten-free'], allergens: [], prepTime: 5 },
+        {
+          id: 'BV-001',
+          name: 'Fresh Orange Juice',
+          description: 'Squeezed daily',
+          price: 8,
+          image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400',
+          dietary: ['vegan', 'gluten-free'],
+          allergens: [],
+          prepTime: 5,
+        },
+        {
+          id: 'BV-002',
+          name: 'House Red Wine',
+          description: 'Cabernet Sauvignon, California',
+          price: 14,
+          image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400',
+          dietary: ['vegan', 'gluten-free'],
+          allergens: [],
+          prepTime: 5,
+        },
       ],
     },
     {
@@ -421,9 +660,36 @@ export const roomServiceMenu = {
       icon: 'Sparkles',
       available: '24h',
       items: [
-        { id: 'A-001', name: 'Extra Pillows', description: 'Feather or foam', price: 0, image: '', dietary: [], allergens: [], prepTime: 10 },
-        { id: 'A-002', name: 'Toiletries Kit', description: 'Premium bath amenities', price: 0, image: '', dietary: [], allergens: [], prepTime: 10 },
-        { id: 'A-003', name: 'Iron & Board', description: 'Delivered to room', price: 0, image: '', dietary: [], allergens: [], prepTime: 15 },
+        {
+          id: 'A-001',
+          name: 'Extra Pillows',
+          description: 'Feather or foam',
+          price: 0,
+          image: '',
+          dietary: [],
+          allergens: [],
+          prepTime: 10,
+        },
+        {
+          id: 'A-002',
+          name: 'Toiletries Kit',
+          description: 'Premium bath amenities',
+          price: 0,
+          image: '',
+          dietary: [],
+          allergens: [],
+          prepTime: 10,
+        },
+        {
+          id: 'A-003',
+          name: 'Iron & Board',
+          description: 'Delivered to room',
+          price: 0,
+          image: '',
+          dietary: [],
+          allergens: [],
+          prepTime: 15,
+        },
       ],
     },
   ],
@@ -437,7 +703,8 @@ export const guestAnnouncements = [
     priority: 'high',
     status: 'published',
     title: 'New Rooftop Spa Now Open',
-    content: 'Experience our newly renovated rooftop spa with panoramic city views. Book your treatment through the Concierge section.',
+    content:
+      'Experience our newly renovated rooftop spa with panoramic city views. Book your treatment through the Concierge section.',
     image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
     cta: { label: 'Book Spa Treatment', url: '/guest-portal/stay/concierge' },
     publishedAt: '2026-08-10T09:00:00Z',
@@ -449,7 +716,8 @@ export const guestAnnouncements = [
     priority: 'medium',
     status: 'published',
     title: 'Pool Maintenance Scheduled',
-    content: 'The rooftop pool will be closed for maintenance on August 20, 2026 from 6:00 AM to 12:00 PM.',
+    content:
+      'The rooftop pool will be closed for maintenance on August 20, 2026 from 6:00 AM to 12:00 PM.',
     cta: null,
     publishedAt: '2026-08-15T14:00:00Z',
     expiresAt: '2026-08-21T00:00:00Z',
@@ -458,7 +726,12 @@ export const guestAnnouncements = [
 
 /* ─── Service Status Meta ─── */
 export const serviceStatusMeta = {
-  operational: { label: 'Operational', color: 'text-accent', dot: 'bg-accent', icon: 'CheckCircle2' },
+  operational: {
+    label: 'Operational',
+    color: 'text-accent',
+    dot: 'bg-accent',
+    icon: 'CheckCircle2',
+  },
   degraded: { label: 'Degraded', color: 'text-warning', dot: 'bg-warning', icon: 'AlertTriangle' },
   maintenance: { label: 'Maintenance', color: 'text-info', dot: 'bg-info', icon: 'Wrench' },
   unavailable: { label: 'Unavailable', color: 'text-danger', dot: 'bg-danger', icon: 'XCircle' },
@@ -468,12 +741,32 @@ export const serviceStatusMeta = {
 export const serviceStatuses = [
   { id: 'svc-001', name: 'Front Desk', status: 'operational', description: '24/7 reception' },
   { id: 'svc-002', name: 'Room Service', status: 'operational', description: 'Available 6AM–11PM' },
-  { id: 'svc-003', name: 'Spa & Wellness', status: 'maintenance', description: 'Closed until 2PM for maintenance' },
+  {
+    id: 'svc-003',
+    name: 'Spa & Wellness',
+    status: 'maintenance',
+    description: 'Closed until 2PM for maintenance',
+  },
   { id: 'svc-004', name: 'Fitness Center', status: 'operational', description: 'Open 5AM–11PM' },
-  { id: 'svc-005', name: 'Rooftop Pool', status: 'degraded', description: 'Heating system under repair' },
+  {
+    id: 'svc-005',
+    name: 'Rooftop Pool',
+    status: 'degraded',
+    description: 'Heating system under repair',
+  },
   { id: 'svc-006', name: 'Business Center', status: 'operational', description: 'Open 7AM–10PM' },
-  { id: 'svc-007', name: 'Valet Parking', status: 'operational', description: 'Available upon request' },
-  { id: 'svc-008', name: 'Concierge', status: 'operational', description: 'Tour bookings & transport' },
+  {
+    id: 'svc-007',
+    name: 'Valet Parking',
+    status: 'operational',
+    description: 'Available upon request',
+  },
+  {
+    id: 'svc-008',
+    name: 'Concierge',
+    status: 'operational',
+    description: 'Tour bookings & transport',
+  },
 ];
 
 /* ─── Document Types ─── */
@@ -508,8 +801,16 @@ export const pillowTypeOptions = [
 ];
 
 export const dietaryOptions = [
-  'vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'kosher', 'halal',
-  'nut-free', 'shellfish-free', 'low-sodium', 'diabetic-friendly',
+  'vegetarian',
+  'vegan',
+  'gluten-free',
+  'dairy-free',
+  'kosher',
+  'halal',
+  'nut-free',
+  'shellfish-free',
+  'low-sodium',
+  'diabetic-friendly',
 ];
 
 export const accessibilityOptions = [
@@ -575,8 +876,11 @@ export function formatDateTime(isoString) {
   if (!isoString) return '—';
   const d = new Date(isoString);
   return d.toLocaleString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -617,13 +921,30 @@ export function getCancellationPolicy(stay) {
   const now = new Date();
   const arrival = new Date(stay.dates.arrival);
   const hoursBefore = (arrival - now) / (1000 * 60 * 60);
-  if (hoursBefore >= 72) return { type: 'free', fee: 0, label: 'Free Cancellation', description: 'Cancel at least 72 hours before arrival for a full refund.' };
-  if (hoursBefore >= 24) return { type: 'partial', fee: stay.rate.total * 0.5, label: 'Partial Refund', description: 'Cancel at least 24 hours before arrival for a 50% refund.' };
-  return { type: 'non-refundable', fee: stay.rate.total, label: 'Non-Refundable', description: 'Cancellations within 24 hours of arrival are non-refundable.' };
+  if (hoursBefore >= 72)
+    return {
+      type: 'free',
+      fee: 0,
+      label: 'Free Cancellation',
+      description: 'Cancel at least 72 hours before arrival for a full refund.',
+    };
+  if (hoursBefore >= 24)
+    return {
+      type: 'partial',
+      fee: stay.rate.total * 0.5,
+      label: 'Partial Refund',
+      description: 'Cancel at least 24 hours before arrival for a 50% refund.',
+    };
+  return {
+    type: 'non-refundable',
+    fee: stay.rate.total,
+    label: 'Non-Refundable',
+    description: 'Cancellations within 24 hours of arrival are non-refundable.',
+  };
 }
 
 export function getCategoryTotal(charges, category) {
-  return charges.filter(c => c.category === category).reduce((s, c) => s + c.amount, 0);
+  return charges.filter((c) => c.category === category).reduce((s, c) => s + c.amount, 0);
 }
 
 export function getTierProgress(tier, points) {
@@ -644,46 +965,99 @@ export function getTierProgress(tier, points) {
 
 export function getPhaseColor(phase) {
   switch (phase) {
-    case 'pre-arrival': return 'text-info';
-    case 'in-stay': return 'text-accent';
-    case 'post-stay': return 'text-text-muted';
-    default: return 'text-text-muted';
+    case 'pre-arrival':
+      return 'text-info';
+    case 'in-stay':
+      return 'text-accent';
+    case 'post-stay':
+      return 'text-text-muted';
+    default:
+      return 'text-text-muted';
   }
 }
 
 export function getPhaseBadge(phase) {
   switch (phase) {
-    case 'pre-arrival': return { label: 'Upcoming', bg: 'bg-info/10', color: 'text-info', border: 'border-info/20' };
-    case 'in-stay': return { label: 'Checked In', bg: 'bg-accent/10', color: 'text-accent', border: 'border-accent/20' };
-    case 'post-stay': return { label: 'Completed', bg: 'bg-neutral/10', color: 'text-text-muted', border: 'border-border' };
-    default: return { label: 'Unknown', bg: 'bg-neutral/10', color: 'text-text-muted', border: 'border-border' };
+    case 'pre-arrival':
+      return { label: 'Upcoming', bg: 'bg-info/10', color: 'text-info', border: 'border-info/20' };
+    case 'in-stay':
+      return {
+        label: 'Checked In',
+        bg: 'bg-accent/10',
+        color: 'text-accent',
+        border: 'border-accent/20',
+      };
+    case 'post-stay':
+      return {
+        label: 'Completed',
+        bg: 'bg-neutral/10',
+        color: 'text-text-muted',
+        border: 'border-border',
+      };
+    default:
+      return {
+        label: 'Unknown',
+        bg: 'bg-neutral/10',
+        color: 'text-text-muted',
+        border: 'border-border',
+      };
   }
 }
 
 /* ─── Status Meta ─── */
 export const stayStatusMeta = {
-  confirmed: { label: 'Confirmed', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  checked_in: { label: 'Checked In', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
-  checked_out: { label: 'Checked Out', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
-  cancelled: { label: 'Cancelled', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
-  no_show: { label: 'No Show', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
+  confirmed: {
+    label: 'Confirmed',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  checked_in: {
+    label: 'Checked In',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
+  checked_out: {
+    label: 'Checked Out',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
+  no_show: {
+    label: 'No Show',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 /* ─── Menu Availability Helper ─── */
 export function isMenuAvailable(category) {
   if (!category?.available) return true; // Default to available if no time restriction
-  
+
   const now = new Date();
   const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight
-  
+
   // Parse time range like "06:00-11:00" or "24h"
   if (category.available === '24h') return true;
-  
-  const [start, end] = category.available.split('-').map(t => {
+
+  const [start, end] = category.available.split('-').map((t) => {
     const [hours, minutes] = t.split(':').map(Number);
     return hours * 60 + minutes;
   });
-  
+
   if (start <= end) {
     return currentTime >= start && currentTime <= end;
   } else {
@@ -705,7 +1079,8 @@ export const housekeepingServices = [
   {
     id: 'hk-002',
     name: 'Deep Cleaning',
-    description: 'Thorough cleaning including carpet shampoo, window cleaning, and full sanitization',
+    description:
+      'Thorough cleaning including carpet shampoo, window cleaning, and full sanitization',
     estimatedDuration: '90 min',
     icon: 'Sparkles',
     category: 'cleaning',

@@ -1,9 +1,22 @@
 /* src/app/admin/health/page-simulation.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Activity, BarChart3, Zap, Server, Shield, TrendingUp,
-  ChevronDown, ChevronUp, RefreshCw, Download, Radio,
-  Gauge, Flame, Siren, ArrowUpRight, ArrowDownRight
+  Activity,
+  BarChart3,
+  Zap,
+  Server,
+  Shield,
+  TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Download,
+  Radio,
+  Gauge,
+  Flame,
+  Siren,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -28,11 +41,7 @@ import {
 } from './simulation-components';
 
 // Original health components
-import {
-  HealthStatCard,
-  ServiceStatusBadge,
-  SystemHealthIndicator,
-} from './components';
+import { HealthStatCard, ServiceStatusBadge, SystemHealthIndicator } from './components';
 
 /* ─── Main Page: System Health with Live Simulation ─── */
 export default function SystemHealthSimulationPage() {
@@ -51,22 +60,31 @@ export default function SystemHealthSimulationPage() {
     if (!liveData?.snapshots) return null;
 
     const snapshots = Object.values(liveData.snapshots);
-    const operational = snapshots.filter(s => s.status === 'operational').length;
-    const degraded = snapshots.filter(s => s.status === 'degraded').length;
-    const critical = snapshots.filter(s => s.status === 'critical').length;
+    const operational = snapshots.filter((s) => s.status === 'operational').length;
+    const degraded = snapshots.filter((s) => s.status === 'degraded').length;
+    const critical = snapshots.filter((s) => s.status === 'critical').length;
 
-    const avgLatency = snapshots.reduce((s, svc) => s + (svc.metrics?.latency?.value || 0), 0) / snapshots.length;
-    const totalThroughput = snapshots.reduce((s, svc) => s + (svc.metrics?.throughput?.value || 0), 0);
-    const avgErrorRate = snapshots.reduce((s, svc) => s + (svc.metrics?.errorRate?.value || 0), 0) / snapshots.length;
-    const avgCpu = snapshots.reduce((s, svc) => s + (svc.metrics?.cpu?.value || 0), 0) / snapshots.length;
-    const avgMemory = snapshots.reduce((s, svc) => s + (svc.metrics?.memory?.value || 0), 0) / snapshots.length;
+    const avgLatency =
+      snapshots.reduce((s, svc) => s + (svc.metrics?.latency?.value || 0), 0) / snapshots.length;
+    const totalThroughput = snapshots.reduce(
+      (s, svc) => s + (svc.metrics?.throughput?.value || 0),
+      0
+    );
+    const avgErrorRate =
+      snapshots.reduce((s, svc) => s + (svc.metrics?.errorRate?.value || 0), 0) / snapshots.length;
+    const avgCpu =
+      snapshots.reduce((s, svc) => s + (svc.metrics?.cpu?.value || 0), 0) / snapshots.length;
+    const avgMemory =
+      snapshots.reduce((s, svc) => s + (svc.metrics?.memory?.value || 0), 0) / snapshots.length;
 
     // Generate sparkline data from history
     const sparkline = (metric) => {
-      return snapshots[0]?.history?.[metric]?.slice(-20).map((p, i) => ({
-        index: i,
-        value: p.value,
-      })) || [];
+      return (
+        snapshots[0]?.history?.[metric]?.slice(-20).map((p, i) => ({
+          index: i,
+          value: p.value,
+        })) || []
+      );
     };
 
     return {
@@ -138,7 +156,9 @@ export default function SystemHealthSimulationPage() {
             onClick={() => setShowSimStats(!showSimStats)}
             className={cn(
               'inline-flex h-9 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors',
-              showSimStats ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showSimStats
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Gauge className="h-3.5 w-3.5" />
@@ -158,17 +178,16 @@ export default function SystemHealthSimulationPage() {
       )}
 
       {/* Live Status Indicator */}
-      <LiveStatusIndicator
-        status={health.status}
-        isConnected={isConnected}
-      />
+      <LiveStatusIndicator status={health.status} isConnected={isConnected} />
 
       {/* Traffic Wave Visualization */}
       <div className="rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Flame className="h-4 w-4 text-secondary" />
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Live Traffic Intensity</p>
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Live Traffic Intensity
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <TrafficWaveViz bars={40} />
@@ -186,7 +205,13 @@ export default function SystemHealthSimulationPage() {
           value={liveMetrics?.avgLatency || 0}
           unit="ms"
           icon={Zap}
-          color={liveMetrics?.avgLatency > 500 ? 'text-danger' : liveMetrics?.avgLatency > 200 ? 'text-warning' : 'text-accent'}
+          color={
+            liveMetrics?.avgLatency > 500
+              ? 'text-danger'
+              : liveMetrics?.avgLatency > 200
+                ? 'text-warning'
+                : 'text-accent'
+          }
           trend={health.trend}
           sparklineData={liveMetrics?.sparklines?.latency || []}
         />
@@ -210,7 +235,13 @@ export default function SystemHealthSimulationPage() {
           value={`${liveMetrics?.operational || 0}/${liveMetrics?.total || 0}`}
           unit=""
           icon={Server}
-          color={liveMetrics?.critical > 0 ? 'text-danger' : liveMetrics?.degraded > 0 ? 'text-warning' : 'text-accent'}
+          color={
+            liveMetrics?.critical > 0
+              ? 'text-danger'
+              : liveMetrics?.degraded > 0
+                ? 'text-warning'
+                : 'text-accent'
+          }
         />
       </div>
 
@@ -222,7 +253,13 @@ export default function SystemHealthSimulationPage() {
           value={liveMetrics?.avgCpu || 0}
           unit="%"
           icon={Cpu}
-          color={liveMetrics?.avgCpu > 80 ? 'text-danger' : liveMetrics?.avgCpu > 60 ? 'text-warning' : 'text-accent'}
+          color={
+            liveMetrics?.avgCpu > 80
+              ? 'text-danger'
+              : liveMetrics?.avgCpu > 60
+                ? 'text-warning'
+                : 'text-accent'
+          }
           sparklineData={liveMetrics?.sparklines?.cpu || []}
         />
         <LiveMetricCard
@@ -230,7 +267,13 @@ export default function SystemHealthSimulationPage() {
           value={liveMetrics?.avgMemory || 0}
           unit="%"
           icon={Activity}
-          color={liveMetrics?.avgMemory > 85 ? 'text-danger' : liveMetrics?.avgMemory > 70 ? 'text-warning' : 'text-accent'}
+          color={
+            liveMetrics?.avgMemory > 85
+              ? 'text-danger'
+              : liveMetrics?.avgMemory > 70
+                ? 'text-warning'
+                : 'text-accent'
+          }
         />
       </div>
 
@@ -246,7 +289,9 @@ export default function SystemHealthSimulationPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -287,9 +332,9 @@ export default function SystemHealthSimulationPage() {
                   key={service.id}
                   service={service}
                   expanded={expandedService === service.id}
-                  onClick={() => setExpandedService(
-                    expandedService === service.id ? null : service.id
-                  )}
+                  onClick={() =>
+                    setExpandedService(expandedService === service.id ? null : service.id)
+                  }
                 />
               ))}
             </div>
@@ -327,28 +372,44 @@ export default function SystemHealthSimulationPage() {
                 <div className="grid grid-cols-4 gap-3 mb-4">
                   <div className="text-center">
                     <p className="text-[10px] text-text-muted uppercase">Latency</p>
-                    <p className="text-lg font-mono font-bold text-text-primary">{service.latency?.current}ms</p>
+                    <p className="text-lg font-mono font-bold text-text-primary">
+                      {service.latency?.current}ms
+                    </p>
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-text-muted uppercase">p95</p>
-                    <p className="text-lg font-mono font-bold text-text-primary">{service.latency?.p95}ms</p>
+                    <p className="text-lg font-mono font-bold text-text-primary">
+                      {service.latency?.p95}ms
+                    </p>
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-text-muted uppercase">Errors</p>
-                    <p className={cn('text-lg font-mono font-bold', service.errorRate > 1 ? 'text-danger' : 'text-accent')}>
+                    <p
+                      className={cn(
+                        'text-lg font-mono font-bold',
+                        service.errorRate > 1 ? 'text-danger' : 'text-accent'
+                      )}
+                    >
                       {service.errorRate}%
                     </p>
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-text-muted uppercase">Throughput</p>
-                    <p className="text-lg font-mono font-bold text-text-primary">{service.throughput}</p>
+                    <p className="text-lg font-mono font-bold text-text-primary">
+                      {service.throughput}
+                    </p>
                   </div>
                 </div>
                 {service.history?.latency && (
                   <div className="h-32">
                     <LiveLatencyChart
                       data={service.history.latency.slice(-30).map((p, i) => ({
-                        time: new Date(p.timestamp).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                        time: new Date(p.timestamp).toLocaleTimeString('en-US', {
+                          hour12: false,
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }),
                         value: p.value,
                       }))}
                       height={128}

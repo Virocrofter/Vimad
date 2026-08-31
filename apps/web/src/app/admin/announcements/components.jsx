@@ -1,16 +1,47 @@
 /* src/app/admin/announcements/components.jsx */
 import { useState } from 'react';
 import {
-  Sparkles, Wrench, AlertTriangle, Info, Globe, Tag, Building2,
-  Clock, Eye, Pin, ChevronDown, ChevronUp, CheckCircle2, XCircle,
-  Calendar, Server, Zap, ArrowUpRight, Users, BarChart3, Trash2,
-  Edit3, Copy, MoreHorizontal, Check, X, ExternalLink
+  Sparkles,
+  Wrench,
+  AlertTriangle,
+  Info,
+  Globe,
+  Tag,
+  Building2,
+  Clock,
+  Eye,
+  Pin,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  XCircle,
+  Calendar,
+  Server,
+  Zap,
+  ArrowUpRight,
+  Users,
+  BarChart3,
+  Trash2,
+  Edit3,
+  Copy,
+  MoreHorizontal,
+  Check,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
-  announcementTypeMeta, priorityMeta, announcementStatusMeta,
-  maintenanceStatusMeta, impactMeta, changelogTypeMeta,
-  formatDateTime, formatDate, formatRelativeTime, isUpcoming, isOngoing
+  announcementTypeMeta,
+  priorityMeta,
+  announcementStatusMeta,
+  maintenanceStatusMeta,
+  impactMeta,
+  changelogTypeMeta,
+  formatDateTime,
+  formatDate,
+  formatRelativeTime,
+  isUpcoming,
+  isOngoing,
 } from './data';
 
 /* ─── Type Icon Helper ─── */
@@ -29,10 +60,14 @@ function TypeIcon({ type, className }) {
 export function TypeBadge({ type }) {
   const meta = announcementTypeMeta[type] || announcementTypeMeta.update;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <TypeIcon type={type} className="h-3 w-3" />
       {meta.label}
     </span>
@@ -43,10 +78,14 @@ export function TypeBadge({ type }) {
 export function PriorityBadge({ priority }) {
   const meta = priorityMeta[priority] || priorityMeta.low;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -55,14 +94,19 @@ export function PriorityBadge({ priority }) {
 
 /* ─── Status Badge ─── */
 export function StatusBadge({ status, kind = 'announcement' }) {
-  const meta = kind === 'maintenance'
-    ? maintenanceStatusMeta[status] || maintenanceStatusMeta.scheduled
-    : announcementStatusMeta[status] || announcementStatusMeta.draft;
+  const meta =
+    kind === 'maintenance'
+      ? maintenanceStatusMeta[status] || maintenanceStatusMeta.scheduled
+      : announcementStatusMeta[status] || announcementStatusMeta.draft;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -73,10 +117,14 @@ export function StatusBadge({ status, kind = 'announcement' }) {
 export function ImpactBadge({ impact }) {
   const meta = impactMeta[impact] || impactMeta.none;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -86,10 +134,14 @@ export function ImpactBadge({ impact }) {
 export function ChangeTypeBadge({ type }) {
   const meta = changelogTypeMeta[type] || changelogTypeMeta.fix;
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -102,17 +154,27 @@ export function ReadRateBar({ read, total }) {
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px]">
         <span className="text-text-muted">Read rate</span>
-        <span className={cn('font-mono font-medium', pct >= 80 ? 'text-accent' : pct >= 50 ? 'text-warning' : 'text-danger')}>
+        <span
+          className={cn(
+            'font-mono font-medium',
+            pct >= 80 ? 'text-accent' : pct >= 50 ? 'text-warning' : 'text-danger'
+          )}
+        >
           {pct}%
         </span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all', pct >= 80 ? 'bg-accent' : pct >= 50 ? 'bg-warning' : 'bg-danger')}
+          className={cn(
+            'h-full rounded-full transition-all',
+            pct >= 80 ? 'bg-accent' : pct >= 50 ? 'bg-warning' : 'bg-danger'
+          )}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-[10px] text-text-muted">{read} of {total} tenants</p>
+      <p className="text-[10px] text-text-muted">
+        {read} of {total} tenants
+      </p>
     </div>
   );
 }
@@ -123,28 +185,35 @@ export function AnnouncementCard({ announcement, onEdit, onDelete, onTogglePin, 
   const [showActions, setShowActions] = useState(false);
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      announcement.pinned ? 'border-secondary/30 ring-1 ring-secondary/10' : 'border-border'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        announcement.pinned ? 'border-secondary/30 ring-1 ring-secondary/10' : 'border-border'
+      )}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className={cn(
-            'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-            announcementTypeMeta[announcement.type]?.bg || 'bg-info/10'
-          )}>
+          <div
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+              announcementTypeMeta[announcement.type]?.bg || 'bg-info/10'
+            )}
+          >
             <TypeIcon
               type={announcement.type}
-              className={cn('h-5 w-5', announcementTypeMeta[announcement.type]?.color || 'text-info')}
+              className={cn(
+                'h-5 w-5',
+                announcementTypeMeta[announcement.type]?.color || 'text-info'
+              )}
             />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-semibold text-text-primary truncate">{announcement.title}</h3>
-              {announcement.pinned && (
-                <Pin className="h-3.5 w-3.5 text-secondary shrink-0" />
-              )}
+              <h3 className="text-sm font-semibold text-text-primary truncate">
+                {announcement.title}
+              </h3>
+              {announcement.pinned && <Pin className="h-3.5 w-3.5 text-secondary shrink-0" />}
             </div>
             <div className="mt-1 flex items-center gap-2 flex-wrap">
               <TypeBadge type={announcement.type} />
@@ -174,33 +243,48 @@ export function AnnouncementCard({ announcement, onEdit, onDelete, onTogglePin, 
               <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-surface-elevated shadow-xl py-1">
                 {announcement.status === 'draft' && (
                   <button
-                    onClick={() => { onPublish?.(announcement.id); setShowActions(false); }}
+                    onClick={() => {
+                      onPublish?.(announcement.id);
+                      setShowActions(false);
+                    }}
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-accent hover:bg-surface"
                   >
                     <CheckCircle2 className="h-4 w-4" /> Publish Now
                   </button>
                 )}
                 <button
-                  onClick={() => { onTogglePin?.(announcement.id); setShowActions(false); }}
+                  onClick={() => {
+                    onTogglePin?.(announcement.id);
+                    setShowActions(false);
+                  }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-surface"
                 >
                   <Pin className="h-4 w-4" /> {announcement.pinned ? 'Unpin' : 'Pin'}
                 </button>
                 <button
-                  onClick={() => { onEdit?.(announcement); setShowActions(false); }}
+                  onClick={() => {
+                    onEdit?.(announcement);
+                    setShowActions(false);
+                  }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-surface"
                 >
                   <Edit3 className="h-4 w-4" /> Edit
                 </button>
                 <button
-                  onClick={() => { navigator.clipboard.writeText(announcement.id); setShowActions(false); }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(announcement.id);
+                    setShowActions(false);
+                  }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-surface"
                 >
                   <Copy className="h-4 w-4" /> Copy ID
                 </button>
                 <div className="my-1 border-t border-border" />
                 <button
-                  onClick={() => { onDelete?.(announcement.id); setShowActions(false); }}
+                  onClick={() => {
+                    onDelete?.(announcement.id);
+                    setShowActions(false);
+                  }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger/5"
                 >
                   <Trash2 className="h-4 w-4" /> Delete
@@ -213,10 +297,9 @@ export function AnnouncementCard({ announcement, onEdit, onDelete, onTogglePin, 
 
       {/* Content */}
       <div className="mt-3">
-        <p className={cn(
-          'text-sm text-text-secondary leading-relaxed',
-          !expanded && 'line-clamp-2'
-        )}>
+        <p
+          className={cn('text-sm text-text-secondary leading-relaxed', !expanded && 'line-clamp-2')}
+        >
           {announcement.content}
         </p>
         {announcement.content.length > 120 && (
@@ -225,9 +308,13 @@ export function AnnouncementCard({ announcement, onEdit, onDelete, onTogglePin, 
             className="mt-1 text-xs text-secondary hover:underline inline-flex items-center gap-1"
           >
             {expanded ? (
-              <>Less <ChevronUp className="h-3 w-3" /></>
+              <>
+                Less <ChevronUp className="h-3 w-3" />
+              </>
             ) : (
-              <>More <ChevronDown className="h-3 w-3" /></>
+              <>
+                More <ChevronDown className="h-3 w-3" />
+              </>
             )}
           </button>
         )}
@@ -251,9 +338,11 @@ export function AnnouncementCard({ announcement, onEdit, onDelete, onTogglePin, 
         <div className="flex items-center gap-3 text-[10px] text-text-muted">
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
-            {announcement.audience === 'all' ? 'All tenants' :
-             announcement.audience === 'plan' ? `Plans: ${announcement.targetPlans.join(', ')}` :
-             `${announcement.targetTenants.length} tenant(s)`}
+            {announcement.audience === 'all'
+              ? 'All tenants'
+              : announcement.audience === 'plan'
+                ? `Plans: ${announcement.targetPlans.join(', ')}`
+                : `${announcement.targetTenants.length} tenant(s)`}
           </span>
           <span>·</span>
           <span>By {announcement.createdBy}</span>
@@ -319,7 +408,9 @@ export function ChangelogEntry({ entry, onEdit, onDelete }) {
         <p className="mt-3 text-sm text-text-secondary">{entry.summary}</p>
 
         {/* Changes List */}
-        <div className={cn('mt-3 space-y-2', !expanded && 'max-h-32 overflow-hidden relative')}>          {entry.changes.map((change, i) => (
+        <div className={cn('mt-3 space-y-2', !expanded && 'max-h-32 overflow-hidden relative')}>
+          {' '}
+          {entry.changes.map((change, i) => (
             <div key={i} className="flex items-start gap-2">
               <ChangeTypeBadge type={change.type} />
               <span className="text-sm text-text-secondary">{change.text}</span>
@@ -336,9 +427,13 @@ export function ChangelogEntry({ entry, onEdit, onDelete }) {
             className="mt-2 text-xs text-secondary hover:underline inline-flex items-center gap-1"
           >
             {expanded ? (
-              <>Show less <ChevronUp className="h-3 w-3" /></>
+              <>
+                Show less <ChevronUp className="h-3 w-3" />
+              </>
             ) : (
-              <>Show all {entry.changes.length} changes <ChevronDown className="h-3 w-3" /></>
+              <>
+                Show all {entry.changes.length} changes <ChevronDown className="h-3 w-3" />
+              </>
             )}
           </button>
         )}
@@ -353,22 +448,31 @@ export function MaintenanceWindowCard({ window, onEdit, onDelete, onCancel }) {
   const ongoing = isOngoing(window.startTime, window.endTime);
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      ongoing ? 'border-warning/30 ring-1 ring-warning/10' :
-      upcoming ? 'border-info/30' : 'border-border'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        ongoing
+          ? 'border-warning/30 ring-1 ring-warning/10'
+          : upcoming
+            ? 'border-info/30'
+            : 'border-border'
+      )}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className={cn(
-            'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-            ongoing ? 'bg-warning/10' : upcoming ? 'bg-info/10' : 'bg-accent/10'
-          )}>
-            <Server className={cn(
-              'h-5 w-5',
-              ongoing ? 'text-warning' : upcoming ? 'text-info' : 'text-accent'
-            )} />
+          <div
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+              ongoing ? 'bg-warning/10' : upcoming ? 'bg-info/10' : 'bg-accent/10'
+            )}
+          >
+            <Server
+              className={cn(
+                'h-5 w-5',
+                ongoing ? 'text-warning' : upcoming ? 'text-info' : 'text-accent'
+              )}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -444,7 +548,9 @@ export function MaintenanceWindowCard({ window, onEdit, onDelete, onCancel }) {
 
       {/* Affected Services */}
       <div className="mt-3">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted mb-1.5">Affected Services</p>
+        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted mb-1.5">
+          Affected Services
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {window.affectedServices.map((svc) => (
             <span
@@ -463,9 +569,13 @@ export function MaintenanceWindowCard({ window, onEdit, onDelete, onCancel }) {
         <span>By {window.createdBy}</span>
         <span className="flex items-center gap-1">
           {window.tenantNotification ? (
-            <><Check className="h-3 w-3 text-accent" /> Tenants notified</>
+            <>
+              <Check className="h-3 w-3 text-accent" /> Tenants notified
+            </>
           ) : (
-            <><X className="h-3 w-3 text-text-muted" /> Silent</>
+            <>
+              <X className="h-3 w-3 text-text-muted" /> Silent
+            </>
           )}
         </span>
       </div>
@@ -483,10 +593,18 @@ export function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>

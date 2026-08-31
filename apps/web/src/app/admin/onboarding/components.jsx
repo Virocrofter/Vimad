@@ -1,19 +1,60 @@
 /* src/app/admin/onboarding/components.jsx */
 import { useState } from 'react';
 import {
-  ChevronDown, ChevronUp, ChevronRight, Mail, Phone, Monitor,
-  Video, Tag, Clock, CheckCircle2, AlertTriangle, XCircle,
-  TrendingUp, TrendingDown, Minus, User, Calendar, Activity,
-  Zap, Filter, ArrowRight, BarChart3, Funnel, Users, DollarSign,
-  Clock3, Target, Sparkles, Ban, Play, Pause, Eye, Edit3, Plus,
-  Trash2, Check, X, MessageSquare, Headphones, Star, Flag
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+  Mail,
+  Phone,
+  Monitor,
+  Video,
+  Tag,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  User,
+  Calendar,
+  Activity,
+  Zap,
+  Filter,
+  ArrowRight,
+  BarChart3,
+  Funnel,
+  Users,
+  DollarSign,
+  Clock3,
+  Target,
+  Sparkles,
+  Ban,
+  Play,
+  Pause,
+  Eye,
+  Edit3,
+  Plus,
+  Trash2,
+  Check,
+  X,
+  MessageSquare,
+  Headphones,
+  Star,
+  Flag,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
-  getStageProgress, getOverallProgress, formatDuration,
-  getHealthScoreColor, getHealthScoreBg, getStatusMeta,
-  getInterventionStatusMeta, funnelStages, dropOffReasons,
-  interventionTypes
+  getStageProgress,
+  getOverallProgress,
+  formatDuration,
+  getHealthScoreColor,
+  getHealthScoreBg,
+  getStatusMeta,
+  getInterventionStatusMeta,
+  funnelStages,
+  dropOffReasons,
+  interventionTypes,
 } from './data';
 
 /* ─── Stat Card ─── */
@@ -26,15 +67,26 @@ export function OnboardingStatCard({ label, value, subtext, icon: Icon, color, t
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -46,7 +98,12 @@ export function OnboardingStatCard({ label, value, subtext, icon: Icon, color, t
 export function OnboardingStatusBadge({ status }) {
   const meta = getStatusMeta(status);
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -56,7 +113,14 @@ export function OnboardingStatusBadge({ status }) {
 /* ─── Health Score Badge ─── */
 export function HealthScoreBadge({ score }) {
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', getHealthScoreBg(score), getHealthScoreColor(score), 'border-current/20')}>
+    <div
+      className={cn(
+        'flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        getHealthScoreBg(score),
+        getHealthScoreColor(score),
+        'border-current/20'
+      )}
+    >
       <Activity className="h-3 w-3" />
       {score}
     </div>
@@ -65,7 +129,7 @@ export function HealthScoreBadge({ score }) {
 
 /* ─── Funnel Visualization ─── */
 export function FunnelVisualization({ stageData }) {
-  const maxEntered = Math.max(...stageData.map(s => s.entered));
+  const maxEntered = Math.max(...stageData.map((s) => s.entered));
 
   return (
     <div className="space-y-3">
@@ -81,7 +145,7 @@ export function FunnelVisualization({ stageData }) {
             <div className="flex items-center gap-3">
               <div className="w-32 text-right">
                 <span className="text-xs font-medium text-text-secondary">
-                  {funnelStages.find(s => s.id === stage.stage)?.label || stage.stage}
+                  {funnelStages.find((s) => s.id === stage.stage)?.label || stage.stage}
                 </span>
               </div>
               <div className="flex-1 space-y-1">
@@ -124,7 +188,12 @@ export function FunnelVisualization({ stageData }) {
             {stage.dropOff > 0 && stage.topReason && (
               <div className="flex items-center gap-2 ml-32">
                 <ArrowRight className="h-3 w-3 text-danger" />
-                <span className={cn('text-[10px] font-medium', dropOffReasons[stage.topReason]?.color || 'text-text-muted')}>
+                <span
+                  className={cn(
+                    'text-[10px] font-medium',
+                    dropOffReasons[stage.topReason]?.color || 'text-text-muted'
+                  )}
+                >
                   {dropOffReasons[stage.topReason]?.label || stage.topReason}
                 </span>
                 <span className="text-[10px] text-text-muted">
@@ -157,7 +226,10 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
   return (
     <>
       <tr
-        className={cn('hover:bg-background/50 transition-colors cursor-pointer', tenant.status === 'at_risk' && 'bg-danger/5')}
+        className={cn(
+          'hover:bg-background/50 transition-colors cursor-pointer',
+          tenant.status === 'at_risk' && 'bg-danger/5'
+        )}
         onClick={onToggle}
       >
         <td className="px-4 py-3">
@@ -184,11 +256,16 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
           <div className="w-full max-w-[120px]">
             <div className="flex items-center justify-between text-[10px] mb-0.5">
               <span className="text-text-muted">{overall}%</span>
-              <span className="text-text-muted">{tenant.daysRemaining > 0 ? `${tenant.daysRemaining}d left` : 'Expired'}</span>
+              <span className="text-text-muted">
+                {tenant.daysRemaining > 0 ? `${tenant.daysRemaining}d left` : 'Expired'}
+              </span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all', overall >= 80 ? 'bg-accent' : overall >= 50 ? 'bg-warning' : 'bg-danger')}
+                className={cn(
+                  'h-full rounded-full transition-all',
+                  overall >= 80 ? 'bg-accent' : overall >= 50 ? 'bg-warning' : 'bg-danger'
+                )}
                 style={{ width: `${overall}%` }}
               />
             </div>
@@ -204,7 +281,10 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
         </td>
         <td className="px-4 py-3 text-right">
           <button
-            onClick={(e) => { e.stopPropagation(); onIntervene(tenant); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onIntervene(tenant);
+            }}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-secondary/10 hover:text-secondary transition-colors"
             title="Add Intervention"
           >
@@ -218,18 +298,31 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
             <div className="rounded-lg border border-border bg-surface p-4 space-y-4">
               {/* Stage Breakdown */}
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Onboarding Progress</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Onboarding Progress
+                </h4>
                 <div className="grid grid-cols-4 gap-2">
                   {funnelStages.map((stage) => {
                     const progress = getStageProgress(tenant, stage.id);
-                    const stageMeta = funnelStages.find(s => s.id === stage.id);
+                    const stageMeta = funnelStages.find((s) => s.id === stage.id);
                     return (
-                      <div key={stage.id} className="rounded-lg border border-border bg-background p-2.5">
+                      <div
+                        key={stage.id}
+                        className="rounded-lg border border-border bg-background p-2.5"
+                      >
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[10px] font-medium text-text-secondary">{stageMeta?.label}</span>
-                          {progress.status === 'completed' && <CheckCircle2 className="h-3 w-3 text-accent" />}
-                          {progress.status === 'in_progress' && <Clock3 className="h-3 w-3 text-warning" />}
-                          {progress.status === 'not_started' && <Minus className="h-3 w-3 text-text-muted" />}
+                          <span className="text-[10px] font-medium text-text-secondary">
+                            {stageMeta?.label}
+                          </span>
+                          {progress.status === 'completed' && (
+                            <CheckCircle2 className="h-3 w-3 text-accent" />
+                          )}
+                          {progress.status === 'in_progress' && (
+                            <Clock3 className="h-3 w-3 text-warning" />
+                          )}
+                          {progress.status === 'not_started' && (
+                            <Minus className="h-3 w-3 text-text-muted" />
+                          )}
                         </div>
                         {progress.status === 'completed' && (
                           <p className="text-[10px] text-text-muted">
@@ -239,7 +332,10 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
                         {progress.status === 'in_progress' && (
                           <div className="space-y-1">
                             <div className="h-1 w-full rounded-full bg-border overflow-hidden">
-                              <div className="h-full rounded-full bg-warning" style={{ width: `${progress.pct}%` }} />
+                              <div
+                                className="h-full rounded-full bg-warning"
+                                style={{ width: `${progress.pct}%` }}
+                              />
                             </div>
                             <p className="text-[10px] text-text-muted">{progress.pct}% done</p>
                           </div>
@@ -259,10 +355,16 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-danger" />
                     <span className="text-sm font-medium text-danger">
-                      Dropped off at: {funnelStages.find(s => s.id === tenant.dropOffStage)?.label}
+                      Dropped off at:{' '}
+                      {funnelStages.find((s) => s.id === tenant.dropOffStage)?.label}
                     </span>
                     {tenant.dropOffReason && (
-                      <span className={cn('text-xs', dropOffReasons[tenant.dropOffReason]?.color || 'text-text-muted')}>
+                      <span
+                        className={cn(
+                          'text-xs',
+                          dropOffReasons[tenant.dropOffReason]?.color || 'text-text-muted'
+                        )}
+                      >
                         ({dropOffReasons[tenant.dropOffReason]?.label})
                       </span>
                     )}
@@ -273,26 +375,57 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
               {/* Interventions */}
               {tenant.interventions.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">Interventions</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+                    Interventions
+                  </h4>
                   <div className="space-y-2">
                     {tenant.interventions.map((int) => {
-                      const intMeta = interventionTypes.find(t => t.id === int.type);
+                      const intMeta = interventionTypes.find((t) => t.id === int.type);
                       const statusMeta = getInterventionStatusMeta(int.status);
                       return (
-                        <div key={int.id} className="flex items-center gap-3 rounded-md border border-border bg-background p-2.5">
-                          <div className={cn('flex h-7 w-7 items-center justify-center rounded-md', intMeta?.bg || 'bg-neutral/10')}>
-                            {int.type === 'email' && <Mail className={cn('h-3.5 w-3.5', intMeta?.color)} />}
-                            {int.type === 'call' && <Phone className={cn('h-3.5 w-3.5', intMeta?.color)} />}
-                            {int.type === 'in_app' && <Monitor className={cn('h-3.5 w-3.5', intMeta?.color)} />}
-                            {int.type === 'demo' && <Video className={cn('h-3.5 w-3.5', intMeta?.color)} />}
-                            {int.type === 'discount' && <Tag className={cn('h-3.5 w-3.5', intMeta?.color)} />}
-                            {int.type === 'extend_trial' && <Clock className={cn('h-3.5 w-3.5', intMeta?.color)} />}
+                        <div
+                          key={int.id}
+                          className="flex items-center gap-3 rounded-md border border-border bg-background p-2.5"
+                        >
+                          <div
+                            className={cn(
+                              'flex h-7 w-7 items-center justify-center rounded-md',
+                              intMeta?.bg || 'bg-neutral/10'
+                            )}
+                          >
+                            {int.type === 'email' && (
+                              <Mail className={cn('h-3.5 w-3.5', intMeta?.color)} />
+                            )}
+                            {int.type === 'call' && (
+                              <Phone className={cn('h-3.5 w-3.5', intMeta?.color)} />
+                            )}
+                            {int.type === 'in_app' && (
+                              <Monitor className={cn('h-3.5 w-3.5', intMeta?.color)} />
+                            )}
+                            {int.type === 'demo' && (
+                              <Video className={cn('h-3.5 w-3.5', intMeta?.color)} />
+                            )}
+                            {int.type === 'discount' && (
+                              <Tag className={cn('h-3.5 w-3.5', intMeta?.color)} />
+                            )}
+                            {int.type === 'extend_trial' && (
+                              <Clock className={cn('h-3.5 w-3.5', intMeta?.color)} />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-text-primary truncate">{int.subject}</p>
-                            <p className="text-[10px] text-text-muted">{int.notes || int.sentAt || int.scheduledAt}</p>
+                            <p className="text-xs font-medium text-text-primary truncate">
+                              {int.subject}
+                            </p>
+                            <p className="text-[10px] text-text-muted">
+                              {int.notes || int.sentAt || int.scheduledAt}
+                            </p>
                           </div>
-                          <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', statusMeta.class)}>
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                              statusMeta.class
+                            )}
+                          >
                             <span className={cn('h-1 w-1 rounded-full', statusMeta.dot)} />
                             {statusMeta.label}
                           </span>
@@ -330,27 +463,43 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
 
 /* ─── Intervention Card ─── */
 export function InterventionCard({ intervention, tenantName }) {
-  const intMeta = interventionTypes.find(t => t.id === intervention.type);
+  const intMeta = interventionTypes.find((t) => t.id === intervention.type);
   const statusMeta = getInterventionStatusMeta(intervention.status);
 
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', intMeta?.bg || 'bg-neutral/10')}>
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              intMeta?.bg || 'bg-neutral/10'
+            )}
+          >
             {intervention.type === 'email' && <Mail className={cn('h-4 w-4', intMeta?.color)} />}
             {intervention.type === 'call' && <Phone className={cn('h-4 w-4', intMeta?.color)} />}
-            {intervention.type === 'in_app' && <Monitor className={cn('h-4 w-4', intMeta?.color)} />}
+            {intervention.type === 'in_app' && (
+              <Monitor className={cn('h-4 w-4', intMeta?.color)} />
+            )}
             {intervention.type === 'demo' && <Video className={cn('h-4 w-4', intMeta?.color)} />}
             {intervention.type === 'discount' && <Tag className={cn('h-4 w-4', intMeta?.color)} />}
-            {intervention.type === 'extend_trial' && <Clock className={cn('h-4 w-4', intMeta?.color)} />}
+            {intervention.type === 'extend_trial' && (
+              <Clock className={cn('h-4 w-4', intMeta?.color)} />
+            )}
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{intervention.subject}</h3>
-            <p className="text-[10px] text-text-muted">{tenantName} · {intervention.sentAt || intervention.scheduledAt}</p>
+            <p className="text-[10px] text-text-muted">
+              {tenantName} · {intervention.sentAt || intervention.scheduledAt}
+            </p>
           </div>
         </div>
-        <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', statusMeta.class)}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+            statusMeta.class
+          )}
+        >
           <span className={cn('h-1.5 w-1.5 rounded-full', statusMeta.dot)} />
           {statusMeta.label}
         </span>
@@ -368,7 +517,12 @@ export function CsmPerformanceCard({ csm }) {
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-3 mb-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 text-sm font-bold text-secondary">
-          {csm.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+          {csm.name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase()}
         </div>
         <div>
           <h3 className="text-sm font-semibold text-text-primary">{csm.name}</h3>
@@ -393,16 +547,18 @@ export function CsmPerformanceCard({ csm }) {
 export function MiniSparkline({ data, color = '#863bff', width = 100, height = 30 }) {
   if (!data || data.length < 2) return <div className="h-8 w-24 bg-border rounded" />;
 
-  const values = data.map(d => d.value || d);
+  const values = data.map((d) => d.value || d);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
 
-  const points = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * width;
-    const y = height - ((v - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
+  const points = values
+    .map((v, i) => {
+      const x = (i / (values.length - 1)) * width;
+      const y = height - ((v - min) / range) * height;
+      return `${x},${y}`;
+    })
+    .join(' ');
 
   return (
     <svg width={width} height={height} className="overflow-visible">
@@ -414,7 +570,12 @@ export function MiniSparkline({ data, color = '#863bff', width = 100, height = 3
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx={width} cy={height - ((values[values.length - 1] - min) / range) * height} r="2" fill={color} />
+      <circle
+        cx={width}
+        cy={height - ((values[values.length - 1] - min) / range) * height}
+        r="2"
+        fill={color}
+      />
     </svg>
   );
 }

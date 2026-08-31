@@ -26,18 +26,18 @@ export class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className={cn(
-          'flex min-h-[50vh] flex-col items-center justify-center p-6',
-          this.props.className
-        )}>
+        <div
+          className={cn(
+            'flex min-h-[50vh] flex-col items-center justify-center p-6',
+            this.props.className
+          )}
+        >
           <div className="w-full max-w-lg rounded-xl border border-danger/20 bg-surface p-8 text-center shadow-lg">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-danger/10">
               <AlertTriangle className="h-8 w-8 text-danger" />
             </div>
 
-            <h2 className="mt-4 text-xl font-bold text-text-primary">
-              Something went wrong
-            </h2>
+            <h2 className="mt-4 text-xl font-bold text-text-primary">Something went wrong</h2>
             <p className="mt-2 text-sm text-text-secondary">
               {this.state.error?.message || 'An unexpected error occurred while loading this page.'}
             </p>

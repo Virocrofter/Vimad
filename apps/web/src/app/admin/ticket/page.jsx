@@ -2,25 +2,73 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Ticket, Search, Filter, Plus, X, Check, ChevronDown, ChevronUp,
-  MessageSquare, Clock, AlertTriangle, CheckCircle2, Eye, Edit3,
-  Trash2, Send, UserPlus, Building2, Tag, ArrowUpDown, MoreHorizontal,
-  Star, StarOff, RefreshCw, Download, Mail, Phone, Link2, Shield,
-  Zap, TrendingUp, TrendingDown, Minus, Calendar, Hash, Timer,
-  Reply, Lock, Unlock, Archive
+  Ticket,
+  Search,
+  Filter,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  Eye,
+  Edit3,
+  Trash2,
+  Send,
+  UserPlus,
+  Building2,
+  Tag,
+  ArrowUpDown,
+  MoreHorizontal,
+  Star,
+  StarOff,
+  RefreshCw,
+  Download,
+  Mail,
+  Phone,
+  Link2,
+  Shield,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Calendar,
+  Hash,
+  Timer,
+  Reply,
+  Lock,
+  Unlock,
+  Archive,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
-  initialTickets, priorityMeta, statusMeta, categoryMeta,
-  formatDateTime, timeAgo, getSlaStatus, getResponseTime,
-  teamMembers
+  initialTickets,
+  priorityMeta,
+  statusMeta,
+  categoryMeta,
+  formatDateTime,
+  timeAgo,
+  getSlaStatus,
+  getResponseTime,
+  teamMembers,
 } from './data';
 import {
-  PriorityBadge, StatusBadge, CategoryBadge, SlaBadge,
-  TicketStatCard, PriorityBar, SatisfactionStars,
-  MessageBubble, TeamMemberCard, TimelineItem, TicketVolumeChart
+  PriorityBadge,
+  StatusBadge,
+  CategoryBadge,
+  SlaBadge,
+  TicketStatCard,
+  PriorityBar,
+  SatisfactionStars,
+  MessageBubble,
+  TeamMemberCard,
+  TimelineItem,
+  TicketVolumeChart,
 } from './components';
 
 /* ─── Ticket Detail Drawer ─── */
@@ -83,17 +131,30 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-lg',
-                ticket.priority === 'critical' ? 'bg-danger/10' :
-                ticket.priority === 'high' ? 'bg-warning/10' :
-                ticket.priority === 'medium' ? 'bg-info/10' : 'bg-neutral/10'
-              )}>
-                <Ticket className={cn('h-5 w-5',
-                  ticket.priority === 'critical' ? 'text-danger' :
-                  ticket.priority === 'high' ? 'text-warning' :
-                  ticket.priority === 'medium' ? 'text-info' : 'text-text-muted'
-                )} />
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg',
+                  ticket.priority === 'critical'
+                    ? 'bg-danger/10'
+                    : ticket.priority === 'high'
+                      ? 'bg-warning/10'
+                      : ticket.priority === 'medium'
+                        ? 'bg-info/10'
+                        : 'bg-neutral/10'
+                )}
+              >
+                <Ticket
+                  className={cn(
+                    'h-5 w-5',
+                    ticket.priority === 'critical'
+                      ? 'text-danger'
+                      : ticket.priority === 'high'
+                        ? 'text-warning'
+                        : ticket.priority === 'medium'
+                          ? 'text-info'
+                          : 'text-text-muted'
+                  )}
+                />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{ticket.subject}</h2>
@@ -113,7 +174,10 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
                   <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
                 </button>
               )}
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -130,7 +194,9 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -217,7 +283,7 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder={isInternal ? "Add an internal note..." : "Type your reply..."}
+                    placeholder={isInternal ? 'Add an internal note...' : 'Type your reply...'}
                     rows={4}
                     className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
                   />
@@ -240,7 +306,9 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-text-primary">Customer Satisfaction</p>
-                      <p className="text-xs text-text-muted">How the tenant rated this resolution</p>
+                      <p className="text-xs text-text-muted">
+                        How the tenant rated this resolution
+                      </p>
                     </div>
                     <SatisfactionStars rating={ticket.satisfaction} />
                   </div>
@@ -253,13 +321,17 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
           {activeTab === 'details' && (
             <div className="space-y-6">
               <div className="rounded-xl border border-border bg-surface p-5 space-y-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Description</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Description
+                </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">{ticket.description}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Requester</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    Requester
+                  </h3>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <User className="h-4 w-4 text-text-muted" />
@@ -271,13 +343,17 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Shield className="h-4 w-4 text-text-muted" />
-                      <span className="text-text-secondary capitalize">{ticket.requester.role}</span>
+                      <span className="text-text-secondary capitalize">
+                        {ticket.requester.role}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Tenant</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                    Tenant
+                  </h3>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <Building2 className="h-4 w-4 text-text-muted" />
@@ -292,7 +368,9 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Metadata</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Metadata
+                </h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Created</span>
@@ -320,10 +398,15 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Tags</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Tags
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {ticket.tags.map((tag) => (
-                    <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2.5 py-1 text-xs text-text-secondary">
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2.5 py-1 text-xs text-text-secondary"
+                    >
                       <Tag className="h-3 w-3" />
                       {tag}
                     </span>
@@ -386,7 +469,10 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
         {/* Assign Modal */}
         {showAssignModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAssignModal(false)} />
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowAssignModal(false)}
+            />
             <div className="relative w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl">
               <h3 className="text-lg font-bold text-text-primary mb-4">Assign Ticket</h3>
               <div className="space-y-1">
@@ -419,11 +505,11 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
     requesterEmail: '',
   });
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const tenant = tenants.find(t => t.id === form.tenantId);
+    const tenant = tenants.find((t) => t.id === form.tenantId);
     onCreate({
       id: `TKT-${Date.now().toString(36).toUpperCase()}`,
       subject: form.subject,
@@ -442,14 +528,16 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
       slaDeadline: '2026-08-17 14:35:00',
       tags: [],
       satisfaction: null,
-      messages: [{
-        id: 1,
-        from: 'system',
-        author: form.requesterName,
-        timestamp: '2026-08-16 14:35:00',
-        body: form.description,
-        internal: false,
-      }],
+      messages: [
+        {
+          id: 1,
+          from: 'system',
+          author: form.requesterName,
+          timestamp: '2026-08-16 14:35:00',
+          body: form.description,
+          internal: false,
+        },
+      ],
     });
     onClose();
   };
@@ -467,7 +555,9 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Subject</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Subject
+            </label>
             <input
               type="text"
               required
@@ -479,7 +569,9 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Description
+            </label>
             <textarea
               required
               value={form.description}
@@ -492,47 +584,61 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Priority</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Priority
+              </label>
               <select
                 value={form.priority}
                 onChange={(e) => update('priority', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {Object.entries(priorityMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Category</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Category
+              </label>
               <select
                 value={form.category}
                 onChange={(e) => update('category', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tenant</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Tenant
+            </label>
             <select
               value={form.tenantId}
               onChange={(e) => update('tenantId', e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {tenants.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
+              {tenants.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
               ))}
             </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Requester Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Requester Name
+              </label>
               <input
                 type="text"
                 value={form.requesterName}
@@ -542,7 +648,9 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Requester Email</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Requester Email
+              </label>
               <input
                 type="email"
                 value={form.requesterEmail}
@@ -554,7 +662,9 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit">
               <Plus className="mr-1.5 h-4 w-4" /> Create Ticket
             </Button>
@@ -582,24 +692,26 @@ export default function TicketsPage() {
   /* ─── Tenant list for filters/modals ─── */
   const tenants = useMemo(() => {
     const map = new Map();
-    tickets.forEach(t => map.set(t.tenant.id, t.tenant));
+    tickets.forEach((t) => map.set(t.tenant.id, t.tenant));
     return Array.from(map.values());
   }, [tickets]);
 
   /* ─── Filtered & Sorted Tickets ─── */
   const filteredTickets = useMemo(() => {
     let result = tickets.filter((t) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         t.subject.toLowerCase().includes(query.toLowerCase()) ||
         t.id.toLowerCase().includes(query.toLowerCase()) ||
         t.description.toLowerCase().includes(query.toLowerCase()) ||
         t.tenant.name.toLowerCase().includes(query.toLowerCase()) ||
         t.requester.name.toLowerCase().includes(query.toLowerCase()) ||
-        t.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+        t.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
       const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || t.priority === priorityFilter;
       const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
-      const matchesAssignee = assigneeFilter === 'all' ||
+      const matchesAssignee =
+        assigneeFilter === 'all' ||
         (assigneeFilter === 'unassigned' ? !t.assignee : t.assignee?.name === assigneeFilter);
       return matchesQuery && matchesStatus && matchesPriority && matchesCategory && matchesAssignee;
     });
@@ -634,27 +746,43 @@ export default function TicketsPage() {
 
   /* ─── Stats ─── */
   const stats = useMemo(() => {
-    const open = tickets.filter(t => t.status === 'open').length;
-    const inProgress = tickets.filter(t => t.status === 'in_progress').length;
-    const pending = tickets.filter(t => t.status === 'pending').length;
-    const resolved = tickets.filter(t => t.status === 'resolved').length;
-    const unassigned = tickets.filter(t => !t.assignee && t.status !== 'resolved' && t.status !== 'closed').length;
-    const breached = tickets.filter(t => getSlaStatus(t) === 'breached' && t.status !== 'resolved').length;
-    const avgResponse = tickets.filter(t => t.firstResponseAt).reduce((sum, t) => {
-      const created = new Date(t.createdAt.replace(' ', 'T'));
-      const responded = new Date(t.firstResponseAt.replace(' ', 'T'));
-      return sum + (responded - created);
-    }, 0) / (tickets.filter(t => t.firstResponseAt).length || 1);
+    const open = tickets.filter((t) => t.status === 'open').length;
+    const inProgress = tickets.filter((t) => t.status === 'in_progress').length;
+    const pending = tickets.filter((t) => t.status === 'pending').length;
+    const resolved = tickets.filter((t) => t.status === 'resolved').length;
+    const unassigned = tickets.filter(
+      (t) => !t.assignee && t.status !== 'resolved' && t.status !== 'closed'
+    ).length;
+    const breached = tickets.filter(
+      (t) => getSlaStatus(t) === 'breached' && t.status !== 'resolved'
+    ).length;
+    const avgResponse =
+      tickets
+        .filter((t) => t.firstResponseAt)
+        .reduce((sum, t) => {
+          const created = new Date(t.createdAt.replace(' ', 'T'));
+          const responded = new Date(t.firstResponseAt.replace(' ', 'T'));
+          return sum + (responded - created);
+        }, 0) / (tickets.filter((t) => t.firstResponseAt).length || 1);
     const avgResponseMin = Math.round(avgResponse / (1000 * 60));
 
     const priorityCounts = {
-      critical: tickets.filter(t => t.priority === 'critical' && t.status !== 'resolved').length,
-      high: tickets.filter(t => t.priority === 'high' && t.status !== 'resolved').length,
-      medium: tickets.filter(t => t.priority === 'medium' && t.status !== 'resolved').length,
-      low: tickets.filter(t => t.priority === 'low' && t.status !== 'resolved').length,
+      critical: tickets.filter((t) => t.priority === 'critical' && t.status !== 'resolved').length,
+      high: tickets.filter((t) => t.priority === 'high' && t.status !== 'resolved').length,
+      medium: tickets.filter((t) => t.priority === 'medium' && t.status !== 'resolved').length,
+      low: tickets.filter((t) => t.priority === 'low' && t.status !== 'resolved').length,
     };
 
-    return { open, inProgress, pending, resolved, unassigned, breached, avgResponseMin, priorityCounts };
+    return {
+      open,
+      inProgress,
+      pending,
+      resolved,
+      unassigned,
+      breached,
+      avgResponseMin,
+      priorityCounts,
+    };
   }, [tickets]);
 
   /* ─── Volume data for chart ─── */
@@ -662,7 +790,7 @@ export default function TicketsPage() {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days.map((label, i) => ({
       label,
-      count: tickets.filter(t => {
+      count: tickets.filter((t) => {
         const d = new Date(t.createdAt.replace(' ', 'T'));
         return d.getDay() === (i + 1) % 7;
       }).length,
@@ -671,18 +799,18 @@ export default function TicketsPage() {
 
   /* ─── Handlers ─── */
   const handleUpdate = (id, updates) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
     if (selectedTicket?.id === id) {
-      setSelectedTicket(prev => ({ ...prev, ...updates }));
+      setSelectedTicket((prev) => ({ ...prev, ...updates }));
     }
   };
 
   const handleCreate = (newTicket) => {
-    setTickets(prev => [newTicket, ...prev]);
+    setTickets((prev) => [newTicket, ...prev]);
   };
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
@@ -698,7 +826,9 @@ export default function TicketsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Support Tickets</h1>
-          <p className="text-sm text-text-secondary">Manage customer issues, track SLAs, and coordinate resolutions</p>
+          <p className="text-sm text-text-secondary">
+            Manage customer issues, track SLAs, and coordinate resolutions
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -746,7 +876,9 @@ export default function TicketsPage() {
       {/* Priority Distribution & Volume */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-surface p-4 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-text-primary mb-3">Ticket Volume (This Week)</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">
+            Ticket Volume (This Week)
+          </h3>
           <TicketVolumeChart data={volumeData} />
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
@@ -786,7 +918,9 @@ export default function TicketsPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -817,7 +951,9 @@ export default function TicketsPage() {
               >
                 <option value="all">All Statuses</option>
                 {Object.entries(statusMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -830,7 +966,9 @@ export default function TicketsPage() {
               >
                 <option value="all">All Priorities</option>
                 {Object.entries(priorityMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -843,7 +981,9 @@ export default function TicketsPage() {
               >
                 <option value="all">All Categories</option>
                 {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -856,8 +996,10 @@ export default function TicketsPage() {
               >
                 <option value="all">All Agents</option>
                 <option value="unassigned">Unassigned</option>
-                {teamMembers.map(m => (
-                  <option key={m.id} value={m.name}>{m.name}</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.name}>
+                    {m.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -881,7 +1023,8 @@ export default function TicketsPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredTickets.length}</span> of {tickets.length} tickets
+        Showing <span className="font-medium text-text-primary">{filteredTickets.length}</span> of{' '}
+        {tickets.length} tickets
       </p>
 
       {/* Tickets Table */}
@@ -908,9 +1051,12 @@ export default function TicketsPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -929,24 +1075,41 @@ export default function TicketsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-lg',
-                        ticket.priority === 'critical' ? 'bg-danger/10' :
-                        ticket.priority === 'high' ? 'bg-warning/10' :
-                        ticket.priority === 'medium' ? 'bg-info/10' : 'bg-neutral/10'
-                      )}>
-                        <Ticket className={cn('h-4 w-4',
-                          ticket.priority === 'critical' ? 'text-danger' :
-                          ticket.priority === 'high' ? 'text-warning' :
-                          ticket.priority === 'medium' ? 'text-info' : 'text-text-muted'
-                        )} />
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-lg',
+                          ticket.priority === 'critical'
+                            ? 'bg-danger/10'
+                            : ticket.priority === 'high'
+                              ? 'bg-warning/10'
+                              : ticket.priority === 'medium'
+                                ? 'bg-info/10'
+                                : 'bg-neutral/10'
+                        )}
+                      >
+                        <Ticket
+                          className={cn(
+                            'h-4 w-4',
+                            ticket.priority === 'critical'
+                              ? 'text-danger'
+                              : ticket.priority === 'high'
+                                ? 'text-warning'
+                                : ticket.priority === 'medium'
+                                  ? 'text-info'
+                                  : 'text-text-muted'
+                          )}
+                        />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">{ticket.subject}</p>
+                        <p className="text-sm font-medium text-text-primary truncate">
+                          {ticket.subject}
+                        </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-text-muted font-mono">{ticket.id}</span>
                           <span className="text-[10px] text-text-muted">·</span>
-                          <span className="text-[10px] text-text-muted truncate">{ticket.tenant.name}</span>
+                          <span className="text-[10px] text-text-muted truncate">
+                            {ticket.tenant.name}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -975,15 +1138,16 @@ export default function TicketsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-text-secondary text-xs">
-                      {timeAgo(ticket.updatedAt)}
-                    </div>
+                    <div className="text-text-secondary text-xs">{timeAgo(ticket.updatedAt)}</div>
                     <SlaBadge ticket={ticket} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedTicket(ticket); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTicket(ticket);
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title="View Details"
                       >
@@ -993,7 +1157,10 @@ export default function TicketsPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleUpdate(ticket.id, { status: 'resolved', resolvedAt: '2026-08-16 14:35:00' });
+                            handleUpdate(ticket.id, {
+                              status: 'resolved',
+                              resolvedAt: '2026-08-16 14:35:00',
+                            });
                           }}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-accent/10 hover:text-accent"
                           title="Resolve"

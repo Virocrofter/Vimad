@@ -2,12 +2,42 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Play, Pause, Plus, Trash2, Copy, Settings, Zap, Mail,
-  Clock, Users, Filter, CheckCircle2, XCircle, AlertCircle,
-  ChevronRight, ChevronDown, GripVertical, Save, Download,
-  Undo, Redo, Eye, MousePointer, ArrowRight, Workflow,
-  Timer, Bell, Send, Target, BarChart3, RefreshCw, X,
-  Search, LayoutTemplate, Sparkles, MoreHorizontal
+  Play,
+  Pause,
+  Plus,
+  Trash2,
+  Copy,
+  Settings,
+  Zap,
+  Mail,
+  Clock,
+  Users,
+  Filter,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  ChevronRight,
+  ChevronDown,
+  GripVertical,
+  Save,
+  Download,
+  Undo,
+  Redo,
+  Eye,
+  MousePointer,
+  ArrowRight,
+  Workflow,
+  Timer,
+  Bell,
+  Send,
+  Target,
+  BarChart3,
+  RefreshCw,
+  X,
+  Search,
+  LayoutTemplate,
+  Sparkles,
+  MoreHorizontal,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -23,18 +53,34 @@ const NODE_TYPES = {
     inputs: 0,
     outputs: 1,
     configFields: [
-      { key: 'triggerType', label: 'Trigger Type', type: 'select', options: [
-        { value: 'guest_checkin', label: 'Guest Check-in' },
-        { value: 'booking_confirmed', label: 'Booking Confirmed' },
-        { value: 'booking_cancelled', label: 'Booking Cancelled' },
-        { value: 'abandoned_cart', label: 'Abandoned Cart' },
-        { value: 'birthday', label: 'Guest Birthday' },
-        { value: 'loyalty_upgrade', label: 'Loyalty Tier Upgrade' },
-        { value: 'manual', label: 'Manual Start' },
-        { value: 'schedule', label: 'Scheduled' },
-      ]},
-      { key: 'schedule', label: 'Schedule (Cron)', type: 'text', placeholder: '0 9 * * *', showIf: (c) => c.triggerType === 'schedule' },
-      { key: 'delayMinutes', label: 'Delay (minutes)', type: 'number', showIf: (c) => c.triggerType !== 'manual' },
+      {
+        key: 'triggerType',
+        label: 'Trigger Type',
+        type: 'select',
+        options: [
+          { value: 'guest_checkin', label: 'Guest Check-in' },
+          { value: 'booking_confirmed', label: 'Booking Confirmed' },
+          { value: 'booking_cancelled', label: 'Booking Cancelled' },
+          { value: 'abandoned_cart', label: 'Abandoned Cart' },
+          { value: 'birthday', label: 'Guest Birthday' },
+          { value: 'loyalty_upgrade', label: 'Loyalty Tier Upgrade' },
+          { value: 'manual', label: 'Manual Start' },
+          { value: 'schedule', label: 'Scheduled' },
+        ],
+      },
+      {
+        key: 'schedule',
+        label: 'Schedule (Cron)',
+        type: 'text',
+        placeholder: '0 9 * * *',
+        showIf: (c) => c.triggerType === 'schedule',
+      },
+      {
+        key: 'delayMinutes',
+        label: 'Delay (minutes)',
+        type: 'number',
+        showIf: (c) => c.triggerType !== 'manual',
+      },
     ],
   },
   delay: {
@@ -46,21 +92,37 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 1,
     configFields: [
-      { key: 'waitType', label: 'Wait Type', type: 'select', options: [
-        { value: 'fixed', label: 'Fixed Duration' },
-        { value: 'until_time', label: 'Until Specific Time' },
-        { value: 'until_date', label: 'Until Specific Date' },
-      ]},
-      { key: 'duration', label: 'Duration', type: 'select', options: [
-        { value: '1h', label: '1 Hour' },
-        { value: '4h', label: '4 Hours' },
-        { value: '12h', label: '12 Hours' },
-        { value: '1d', label: '1 Day' },
-        { value: '2d', label: '2 Days' },
-        { value: '7d', label: '1 Week' },
-        { value: 'custom', label: 'Custom' },
-      ], showIf: (c) => c.waitType === 'fixed' },
-      { key: 'customMinutes', label: 'Custom Minutes', type: 'number', showIf: (c) => c.waitType === 'fixed' && c.duration === 'custom' },
+      {
+        key: 'waitType',
+        label: 'Wait Type',
+        type: 'select',
+        options: [
+          { value: 'fixed', label: 'Fixed Duration' },
+          { value: 'until_time', label: 'Until Specific Time' },
+          { value: 'until_date', label: 'Until Specific Date' },
+        ],
+      },
+      {
+        key: 'duration',
+        label: 'Duration',
+        type: 'select',
+        options: [
+          { value: '1h', label: '1 Hour' },
+          { value: '4h', label: '4 Hours' },
+          { value: '12h', label: '12 Hours' },
+          { value: '1d', label: '1 Day' },
+          { value: '2d', label: '2 Days' },
+          { value: '7d', label: '1 Week' },
+          { value: 'custom', label: 'Custom' },
+        ],
+        showIf: (c) => c.waitType === 'fixed',
+      },
+      {
+        key: 'customMinutes',
+        label: 'Custom Minutes',
+        type: 'number',
+        showIf: (c) => c.waitType === 'fixed' && c.duration === 'custom',
+      },
     ],
   },
   condition: {
@@ -72,24 +134,34 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 2,
     configFields: [
-      { key: 'field', label: 'Field', type: 'select', options: [
-        { value: 'guest_type', label: 'Guest Type' },
-        { value: 'booking_value', label: 'Booking Value' },
-        { value: 'loyalty_tier', label: 'Loyalty Tier' },
-        { value: 'nights_stayed', label: 'Nights Stayed' },
-        { value: 'room_type', label: 'Room Type' },
-        { value: 'checkin_date', label: 'Check-in Date' },
-        { value: 'email_opened', label: 'Email Opened' },
-        { value: 'email_clicked', label: 'Email Clicked' },
-      ]},
-      { key: 'operator', label: 'Operator', type: 'select', options: [
-        { value: 'eq', label: 'Equals' },
-        { value: 'ne', label: 'Not Equals' },
-        { value: 'gt', label: 'Greater Than' },
-        { value: 'lt', label: 'Less Than' },
-        { value: 'contains', label: 'Contains' },
-        { value: 'in', label: 'In List' },
-      ]},
+      {
+        key: 'field',
+        label: 'Field',
+        type: 'select',
+        options: [
+          { value: 'guest_type', label: 'Guest Type' },
+          { value: 'booking_value', label: 'Booking Value' },
+          { value: 'loyalty_tier', label: 'Loyalty Tier' },
+          { value: 'nights_stayed', label: 'Nights Stayed' },
+          { value: 'room_type', label: 'Room Type' },
+          { value: 'checkin_date', label: 'Check-in Date' },
+          { value: 'email_opened', label: 'Email Opened' },
+          { value: 'email_clicked', label: 'Email Clicked' },
+        ],
+      },
+      {
+        key: 'operator',
+        label: 'Operator',
+        type: 'select',
+        options: [
+          { value: 'eq', label: 'Equals' },
+          { value: 'ne', label: 'Not Equals' },
+          { value: 'gt', label: 'Greater Than' },
+          { value: 'lt', label: 'Less Than' },
+          { value: 'contains', label: 'Contains' },
+          { value: 'in', label: 'In List' },
+        ],
+      },
       { key: 'value', label: 'Value', type: 'text' },
       { key: 'trueLabel', label: 'True Branch Label', type: 'text', defaultValue: 'Yes' },
       { key: 'falseLabel', label: 'False Branch Label', type: 'text', defaultValue: 'No' },
@@ -104,18 +176,28 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 1,
     configFields: [
-      { key: 'template', label: 'Email Template', type: 'select', options: [
-        { value: 'welcome', label: 'Welcome Email' },
-        { value: 'promo', label: 'Promotional Offer' },
-        { value: 'newsletter', label: 'Monthly Newsletter' },
-        { value: 'thank_you', label: 'Thank You' },
-        { value: 'review_request', label: 'Review Request' },
-        { value: 'birthday', label: 'Birthday Special' },
-        { value: 'abandoned_cart', label: 'Cart Recovery' },
-      ]},
+      {
+        key: 'template',
+        label: 'Email Template',
+        type: 'select',
+        options: [
+          { value: 'welcome', label: 'Welcome Email' },
+          { value: 'promo', label: 'Promotional Offer' },
+          { value: 'newsletter', label: 'Monthly Newsletter' },
+          { value: 'thank_you', label: 'Thank You' },
+          { value: 'review_request', label: 'Review Request' },
+          { value: 'birthday', label: 'Birthday Special' },
+          { value: 'abandoned_cart', label: 'Cart Recovery' },
+        ],
+      },
       { key: 'subject', label: 'Subject Line', type: 'text' },
       { key: 'fromName', label: 'From Name', type: 'text', defaultValue: 'Grand Hotel' },
-      { key: 'fromEmail', label: 'From Email', type: 'text', defaultValue: 'noreply@grandhotel.com' },
+      {
+        key: 'fromEmail',
+        label: 'From Email',
+        type: 'text',
+        defaultValue: 'noreply@grandhotel.com',
+      },
       { key: 'trackOpens', label: 'Track Opens', type: 'checkbox', defaultValue: true },
       { key: 'trackClicks', label: 'Track Clicks', type: 'checkbox', defaultValue: true },
     ],
@@ -129,11 +211,16 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 1,
     configFields: [
-      { key: 'channel', label: 'Channel', type: 'select', options: [
-        { value: 'push', label: 'Push Notification' },
-        { value: 'sms', label: 'SMS' },
-        { value: 'in_app', label: 'In-App Message' },
-      ]},
+      {
+        key: 'channel',
+        label: 'Channel',
+        type: 'select',
+        options: [
+          { value: 'push', label: 'Push Notification' },
+          { value: 'sms', label: 'SMS' },
+          { value: 'in_app', label: 'In-App Message' },
+        ],
+      },
       { key: 'title', label: 'Title', type: 'text' },
       { key: 'body', label: 'Body', type: 'textarea' },
       { key: 'actionUrl', label: 'Action URL', type: 'text' },
@@ -148,12 +235,17 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 1,
     configFields: [
-      { key: 'action', label: 'Action', type: 'select', options: [
-        { value: 'add_tag', label: 'Add Tag' },
-        { value: 'remove_tag', label: 'Remove Tag' },
-        { value: 'add_segment', label: 'Add to Segment' },
-        { value: 'remove_segment', label: 'Remove from Segment' },
-      ]},
+      {
+        key: 'action',
+        label: 'Action',
+        type: 'select',
+        options: [
+          { value: 'add_tag', label: 'Add Tag' },
+          { value: 'remove_tag', label: 'Remove Tag' },
+          { value: 'add_segment', label: 'Add to Segment' },
+          { value: 'remove_segment', label: 'Remove from Segment' },
+        ],
+      },
       { key: 'tag', label: 'Tag / Segment', type: 'text' },
     ],
   },
@@ -166,12 +258,17 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 1,
     configFields: [
-      { key: 'method', label: 'Method', type: 'select', options: [
-        { value: 'POST', label: 'POST' },
-        { value: 'GET', label: 'GET' },
-        { value: 'PUT', label: 'PUT' },
-        { value: 'PATCH', label: 'PATCH' },
-      ]},
+      {
+        key: 'method',
+        label: 'Method',
+        type: 'select',
+        options: [
+          { value: 'POST', label: 'POST' },
+          { value: 'GET', label: 'GET' },
+          { value: 'PUT', label: 'PUT' },
+          { value: 'PATCH', label: 'PATCH' },
+        ],
+      },
       { key: 'url', label: 'URL', type: 'text' },
       { key: 'headers', label: 'Headers (JSON)', type: 'textarea', defaultValue: '{}' },
     ],
@@ -198,10 +295,15 @@ const NODE_TYPES = {
     inputs: 1,
     outputs: 0,
     configFields: [
-      { key: 'endType', label: 'End Type', type: 'select', options: [
-        { value: 'success', label: 'Success' },
-        { value: 'failure', label: 'Failure' },
-      ]},
+      {
+        key: 'endType',
+        label: 'End Type',
+        type: 'select',
+        options: [
+          { value: 'success', label: 'Success' },
+          { value: 'failure', label: 'Failure' },
+        ],
+      },
     ],
   },
 };
@@ -221,11 +323,41 @@ const SAMPLE_WORKFLOWS = [
     nodes: [
       { id: 't1', type: 'trigger', x: 300, y: 50, config: { triggerType: 'booking_confirmed' } },
       { id: 'd1', type: 'delay', x: 300, y: 180, config: { waitType: 'fixed', duration: '1h' } },
-      { id: 'e1', type: 'email', x: 300, y: 310, config: { template: 'welcome', subject: 'Welcome to Grand Hotel!' } },
+      {
+        id: 'e1',
+        type: 'email',
+        x: 300,
+        y: 310,
+        config: { template: 'welcome', subject: 'Welcome to Grand Hotel!' },
+      },
       { id: 'd2', type: 'delay', x: 300, y: 440, config: { waitType: 'fixed', duration: '1d' } },
-      { id: 'c1', type: 'condition', x: 300, y: 570, config: { field: 'email_opened', operator: 'eq', value: 'true', trueLabel: 'Opened', falseLabel: 'Not Opened' } },
-      { id: 'e2', type: 'email', x: 150, y: 720, config: { template: 'promo', subject: 'Exclusive Offer for You' } },
-      { id: 'e3', type: 'email', x: 450, y: 720, config: { template: 'review_request', subject: 'How Was Your Stay?' } },
+      {
+        id: 'c1',
+        type: 'condition',
+        x: 300,
+        y: 570,
+        config: {
+          field: 'email_opened',
+          operator: 'eq',
+          value: 'true',
+          trueLabel: 'Opened',
+          falseLabel: 'Not Opened',
+        },
+      },
+      {
+        id: 'e2',
+        type: 'email',
+        x: 150,
+        y: 720,
+        config: { template: 'promo', subject: 'Exclusive Offer for You' },
+      },
+      {
+        id: 'e3',
+        type: 'email',
+        x: 450,
+        y: 720,
+        config: { template: 'review_request', subject: 'How Was Your Stay?' },
+      },
       { id: 'end1', type: 'end', x: 300, y: 850, config: { endType: 'success' } },
     ],
     edges: [
@@ -246,11 +378,45 @@ const SAMPLE_WORKFLOWS = [
     nodes: [
       { id: 't1', type: 'trigger', x: 300, y: 50, config: { triggerType: 'abandoned_cart' } },
       { id: 'd1', type: 'delay', x: 300, y: 180, config: { waitType: 'fixed', duration: '1h' } },
-      { id: 'e1', type: 'email', x: 300, y: 310, config: { template: 'abandoned_cart', subject: 'Complete Your Reservation' } },
+      {
+        id: 'e1',
+        type: 'email',
+        x: 300,
+        y: 310,
+        config: { template: 'abandoned_cart', subject: 'Complete Your Reservation' },
+      },
       { id: 'd2', type: 'delay', x: 300, y: 440, config: { waitType: 'fixed', duration: '1d' } },
-      { id: 'c1', type: 'condition', x: 300, y: 570, config: { field: 'booking_value', operator: 'gt', value: '500', trueLabel: 'High Value', falseLabel: 'Standard' } },
-      { id: 'e2', type: 'email', x: 150, y: 720, config: { template: 'promo', subject: 'We Miss You — 15% Off' } },
-      { id: 'n1', type: 'notification', x: 450, y: 720, config: { channel: 'sms', title: 'Booking Reminder', body: 'Complete your booking and save 10%!' } },
+      {
+        id: 'c1',
+        type: 'condition',
+        x: 300,
+        y: 570,
+        config: {
+          field: 'booking_value',
+          operator: 'gt',
+          value: '500',
+          trueLabel: 'High Value',
+          falseLabel: 'Standard',
+        },
+      },
+      {
+        id: 'e2',
+        type: 'email',
+        x: 150,
+        y: 720,
+        config: { template: 'promo', subject: 'We Miss You — 15% Off' },
+      },
+      {
+        id: 'n1',
+        type: 'notification',
+        x: 450,
+        y: 720,
+        config: {
+          channel: 'sms',
+          title: 'Booking Reminder',
+          body: 'Complete your booking and save 10%!',
+        },
+      },
       { id: 'end1', type: 'end', x: 300, y: 850, config: { endType: 'success' } },
     ],
     edges: [
@@ -270,9 +436,27 @@ const SAMPLE_WORKFLOWS = [
     description: 'Automatic birthday perks',
     nodes: [
       { id: 't1', type: 'trigger', x: 300, y: 50, config: { triggerType: 'birthday' } },
-      { id: 'd1', type: 'delay', x: 300, y: 180, config: { waitType: 'fixed', duration: 'custom', customMinutes: 0 } },
-      { id: 'e1', type: 'email', x: 300, y: 310, config: { template: 'birthday', subject: '🎂 Happy Birthday from Grand Hotel!' } },
-      { id: 'tag1', type: 'tag', x: 300, y: 440, config: { action: 'add_tag', tag: 'birthday-reward-sent' } },
+      {
+        id: 'd1',
+        type: 'delay',
+        x: 300,
+        y: 180,
+        config: { waitType: 'fixed', duration: 'custom', customMinutes: 0 },
+      },
+      {
+        id: 'e1',
+        type: 'email',
+        x: 300,
+        y: 310,
+        config: { template: 'birthday', subject: '🎂 Happy Birthday from Grand Hotel!' },
+      },
+      {
+        id: 'tag1',
+        type: 'tag',
+        x: 300,
+        y: 440,
+        config: { action: 'add_tag', tag: 'birthday-reward-sent' },
+      },
       { id: 'end1', type: 'end', x: 300, y: 570, config: { endType: 'success' } },
     ],
     edges: [
@@ -300,7 +484,19 @@ function getConnectionPath(x1, y1, x2, y2) {
 }
 
 /* ─── Mini Node Component ─── */
-function WorkflowNode({ node, isSelected, isExecuting, executionStatus, onSelect, onDragStart, onDrag, onDragEnd, onConnectStart, onConnectEnd, scale }) {
+function WorkflowNode({
+  node,
+  isSelected,
+  isExecuting,
+  executionStatus,
+  onSelect,
+  onDragStart,
+  onDrag,
+  onDragEnd,
+  onConnectStart,
+  onConnectEnd,
+  scale,
+}) {
   const typeDef = NODE_TYPES[node.type];
   const Icon = typeDef.icon;
   const isCondition = node.type === 'condition';
@@ -325,32 +521,34 @@ function WorkflowNode({ node, isSelected, isExecuting, executionStatus, onSelect
 
   return (
     <div
-      className={cn(
-        'absolute select-none',
-        isSelected && 'z-20',
-        !isSelected && 'z-10'
-      )}
+      className={cn('absolute select-none', isSelected && 'z-20', !isSelected && 'z-10')}
       style={{
         left: node.x,
         top: node.y,
         transform: 'translate(-50%, -50%)',
       }}
       onMouseDown={handleMouseDown}
-      onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(node.id);
+      }}
     >
       {/* Node Card */}
-      <div className={cn(
-        'w-52 rounded-xl border bg-surface shadow-sm transition-all',
-        isSelected ? 'border-secondary ring-2 ring-secondary/30' : 'border-border hover:border-secondary/50',
-        isExecuting && executionStatus === 'running' && 'ring-2 ring-accent animate-pulse',
-        isExecuting && executionStatus === 'success' && 'border-accent',
-        isExecuting && executionStatus === 'error' && 'border-danger',
-      )}>
+      <div
+        className={cn(
+          'w-52 rounded-xl border bg-surface shadow-sm transition-all',
+          isSelected
+            ? 'border-secondary ring-2 ring-secondary/30'
+            : 'border-border hover:border-secondary/50',
+          isExecuting && executionStatus === 'running' && 'ring-2 ring-accent animate-pulse',
+          isExecuting && executionStatus === 'success' && 'border-accent',
+          isExecuting && executionStatus === 'error' && 'border-danger'
+        )}
+      >
         {/* Header */}
-        <div className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-t-xl border-b',
-          typeDef.color
-        )}>
+        <div
+          className={cn('flex items-center gap-2 px-3 py-2 rounded-t-xl border-b', typeDef.color)}
+        >
           <Icon className="h-4 w-4" />
           <span className="text-xs font-semibold truncate">{typeDef.label}</span>
           {isExecuting && executionStatus === 'running' && (
@@ -367,7 +565,10 @@ function WorkflowNode({ node, isSelected, isExecuting, executionStatus, onSelect
         {/* Body */}
         <div className="px-3 py-2">
           <p className="text-[10px] text-text-muted truncate">
-            {node.config?.subject || node.config?.triggerType || node.config?.waitType || typeDef.desc}
+            {node.config?.subject ||
+              node.config?.triggerType ||
+              node.config?.waitType ||
+              typeDef.desc}
           </p>
         </div>
 
@@ -387,15 +588,19 @@ function WorkflowNode({ node, isSelected, isExecuting, executionStatus, onSelect
 
         {/* Output Handles */}
         {outputCount > 0 && (
-          <div className={cn(
-            'absolute -right-1.5 flex flex-col gap-2',
-            isCondition ? 'top-1/4' : 'top-1/2 -translate-y-1/2'
-          )}>
+          <div
+            className={cn(
+              'absolute -right-1.5 flex flex-col gap-2',
+              isCondition ? 'top-1/4' : 'top-1/2 -translate-y-1/2'
+            )}
+          >
             {Array.from({ length: outputCount }).map((_, i) => (
               <div
                 key={`out-${i}`}
                 className="w-3 h-3 rounded-full bg-surface border-2 border-accent cursor-crosshair hover:scale-125 transition-transform"
-                title={isCondition && i === 0 ? 'True' : isCondition && i === 1 ? 'False' : 'Output'}
+                title={
+                  isCondition && i === 0 ? 'True' : isCondition && i === 1 ? 'False' : 'Output'
+                }
                 onMouseDown={(e) => handleOutputMouseDown(e, i)}
               />
             ))}
@@ -420,14 +625,16 @@ function WorkflowNode({ node, isSelected, isExecuting, executionStatus, onSelect
 
 /* ─── Edge Component ─── */
 function WorkflowEdge({ edge, nodes, isSelected, onSelect, onDelete, label }) {
-  const fromNode = nodes.find(n => n.id === edge.from);
-  const toNode = nodes.find(n => n.id === edge.to);
+  const fromNode = nodes.find((n) => n.id === edge.from);
+  const toNode = nodes.find((n) => n.id === edge.to);
   if (!fromNode || !toNode) return null;
 
   const typeDef = NODE_TYPES[fromNode.type];
   const isCondition = fromNode.type === 'condition';
   const outputY = isCondition
-    ? edge.fromOutput === 0 ? fromNode.y - 25 : fromNode.y + 25
+    ? edge.fromOutput === 0
+      ? fromNode.y - 25
+      : fromNode.y + 25
     : fromNode.y;
 
   const x1 = fromNode.x + 104;
@@ -438,7 +645,13 @@ function WorkflowEdge({ edge, nodes, isSelected, onSelect, onDelete, label }) {
   const midX = (x1 + x2) / 2;
 
   return (
-    <g className="group cursor-pointer" onClick={(e) => { e.stopPropagation(); onSelect(edge.id); }}>
+    <g
+      className="group cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(edge.id);
+      }}
+    >
       {/* Invisible wider path for easier clicking */}
       <path
         d={getConnectionPath(x1, y1, x2, y2)}
@@ -451,17 +664,17 @@ function WorkflowEdge({ edge, nodes, isSelected, onSelect, onDelete, label }) {
         d={getConnectionPath(x1, y1, x2, y2)}
         className={cn(
           'transition-all',
-          isSelected ? 'stroke-secondary stroke-[3]' : 'stroke-border stroke-2 group-hover:stroke-text-muted'
+          isSelected
+            ? 'stroke-secondary stroke-[3]'
+            : 'stroke-border stroke-2 group-hover:stroke-text-muted'
         )}
         fill="none"
         strokeLinecap="round"
       />
       {/* Arrowhead */}
       <polygon
-        points={`${x2},${y2} ${x2-8},${y2-4} ${x2-8},${y2+4}`}
-        className={cn(
-          isSelected ? 'fill-secondary' : 'fill-border group-hover:fill-text-muted'
-        )}
+        points={`${x2},${y2} ${x2 - 8},${y2 - 4} ${x2 - 8},${y2 + 4}`}
+        className={cn(isSelected ? 'fill-secondary' : 'fill-border group-hover:fill-text-muted')}
       />
       {/* Label */}
       {label && (
@@ -487,9 +700,21 @@ function WorkflowEdge({ edge, nodes, isSelected, onSelect, onDelete, label }) {
       )}
       {/* Delete button on hover */}
       {isSelected && (
-        <g transform={`translate(${midX}, ${(y1 + y2) / 2 - 20})`} onClick={(e) => { e.stopPropagation(); onDelete(edge.id); }}>
+        <g
+          transform={`translate(${midX}, ${(y1 + y2) / 2 - 20})`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(edge.id);
+          }}
+        >
           <circle r="8" className="fill-danger cursor-pointer" />
-          <text y="3" textAnchor="middle" className="fill-white text-[10px] font-bold cursor-pointer">×</text>
+          <text
+            y="3"
+            textAnchor="middle"
+            className="fill-white text-[10px] font-bold cursor-pointer"
+          >
+            ×
+          </text>
         </g>
       )}
     </g>
@@ -559,7 +784,9 @@ function PropertyPanel({ node, onChange, onDelete }) {
                   className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {field.options.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
               )}
@@ -620,14 +847,21 @@ export function AutomationPage() {
   }, []);
 
   // History management
-  const pushHistory = useCallback((newNodes, newEdges) => {
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push({ nodes: deepClone(newNodes), edges: deepClone(newEdges), name: workflowName });
-      return newHistory;
-    });
-    setHistoryIndex(prev => prev + 1);
-  }, [historyIndex, workflowName]);
+  const pushHistory = useCallback(
+    (newNodes, newEdges) => {
+      setHistory((prev) => {
+        const newHistory = prev.slice(0, historyIndex + 1);
+        newHistory.push({
+          nodes: deepClone(newNodes),
+          edges: deepClone(newEdges),
+          name: workflowName,
+        });
+        return newHistory;
+      });
+      setHistoryIndex((prev) => prev + 1);
+    },
+    [historyIndex, workflowName]
+  );
 
   const undo = () => {
     if (historyIndex > 0) {
@@ -651,10 +885,12 @@ export function AutomationPage() {
 
   // Load workflow
   const loadWorkflow = (template) => {
-    const newNodes = deepClone(template.nodes).map(n => ({ ...n, id: generateId() }));
+    const newNodes = deepClone(template.nodes).map((n) => ({ ...n, id: generateId() }));
     const idMap = {};
-    template.nodes.forEach((old, i) => { idMap[old.id] = newNodes[i].id; });
-    const newEdges = deepClone(template.edges).map(e => ({
+    template.nodes.forEach((old, i) => {
+      idMap[old.id] = newNodes[i].id;
+    });
+    const newEdges = deepClone(template.edges).map((e) => ({
       ...e,
       id: `edge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       from: idMap[e.from],
@@ -685,15 +921,15 @@ export function AutomationPage() {
 
   // Update node
   const updateNode = (id, updated) => {
-    const newNodes = nodes.map(n => n.id === id ? updated : n);
+    const newNodes = nodes.map((n) => (n.id === id ? updated : n));
     setNodes(newNodes);
     pushHistory(newNodes, edges);
   };
 
   // Delete node
   const deleteNode = (id) => {
-    const newNodes = nodes.filter(n => n.id !== id);
-    const newEdges = edges.filter(e => e.from !== id && e.to !== id);
+    const newNodes = nodes.filter((n) => n.id !== id);
+    const newEdges = edges.filter((e) => e.from !== id && e.to !== id);
     setNodes(newNodes);
     setEdges(newEdges);
     setSelectedId(null);
@@ -702,7 +938,7 @@ export function AutomationPage() {
 
   // Delete edge
   const deleteEdge = (id) => {
-    const newEdges = edges.filter(e => e.id !== id);
+    const newEdges = edges.filter((e) => e.id !== id);
     setEdges(newEdges);
     setSelectedId(null);
     pushHistory(nodes, newEdges);
@@ -712,7 +948,7 @@ export function AutomationPage() {
   const handleDragStart = (nodeId, clientX, clientY) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const node = nodes.find(n => n.id === nodeId);
+    const node = nodes.find((n) => n.id === nodeId);
     setDragState({
       nodeId,
       startX: clientX,
@@ -722,34 +958,39 @@ export function AutomationPage() {
     });
   };
 
-  const handleMouseMove = useCallback((e) => {
-    if (dragState) {
-      const dx = (e.clientX - dragState.startX) / scale;
-      const dy = (e.clientY - dragState.startY) / scale;
-      setNodes(prev => prev.map(n =>
-        n.id === dragState.nodeId
-          ? { ...n, x: dragState.nodeStartX + dx, y: dragState.nodeStartY + dy }
-          : n
-      ));
-    }
-    if (isPanning) {
-      setPan(prev => ({
-        x: prev.x + e.movementX,
-        y: prev.y + e.movementY,
-      }));
-    }
-    if (connectState) {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (rect) {
-        setTempEdge({
-          x1: connectState.startX,
-          y1: connectState.startY,
-          x2: (e.clientX - rect.left - pan.x) / scale,
-          y2: (e.clientY - rect.top - pan.y) / scale,
-        });
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (dragState) {
+        const dx = (e.clientX - dragState.startX) / scale;
+        const dy = (e.clientY - dragState.startY) / scale;
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === dragState.nodeId
+              ? { ...n, x: dragState.nodeStartX + dx, y: dragState.nodeStartY + dy }
+              : n
+          )
+        );
       }
-    }
-  }, [dragState, isPanning, connectState, scale, pan]);
+      if (isPanning) {
+        setPan((prev) => ({
+          x: prev.x + e.movementX,
+          y: prev.y + e.movementY,
+        }));
+      }
+      if (connectState) {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          setTempEdge({
+            x1: connectState.startX,
+            y1: connectState.startY,
+            x2: (e.clientX - rect.left - pan.x) / scale,
+            y2: (e.clientY - rect.top - pan.y) / scale,
+          });
+        }
+      }
+    },
+    [dragState, isPanning, connectState, scale, pan]
+  );
 
   const handleMouseUp = useCallback(() => {
     if (dragState) {
@@ -763,15 +1004,13 @@ export function AutomationPage() {
 
   // Connection handlers
   const handleConnectStart = (nodeId, outputIndex, e) => {
-    const node = nodes.find(n => n.id === nodeId);
+    const node = nodes.find((n) => n.id === nodeId);
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!node || !rect) return;
 
     const typeDef = NODE_TYPES[node.type];
     const isCondition = node.type === 'condition';
-    const outputY = isCondition
-      ? outputIndex === 0 ? node.y - 25 : node.y + 25
-      : node.y;
+    const outputY = isCondition ? (outputIndex === 0 ? node.y - 25 : node.y + 25) : node.y;
 
     setConnectState({
       fromNode: nodeId,
@@ -786,10 +1025,11 @@ export function AutomationPage() {
     if (connectState.fromNode === nodeId) return;
 
     // Check if connection already exists
-    const exists = edges.some(e =>
-      e.from === connectState.fromNode &&
-      e.to === nodeId &&
-      e.fromOutput === connectState.fromOutput
+    const exists = edges.some(
+      (e) =>
+        e.from === connectState.fromNode &&
+        e.to === nodeId &&
+        e.fromOutput === connectState.fromOutput
     );
     if (exists) return;
 
@@ -818,7 +1058,7 @@ export function AutomationPage() {
   const handleWheel = (e) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setScale(prev => Math.max(0.5, Math.min(2, prev * delta)));
+    setScale((prev) => Math.max(0.5, Math.min(2, prev * delta)));
   };
 
   // Execution simulation
@@ -828,9 +1068,9 @@ export function AutomationPage() {
 
     const sorted = topologicalSort(nodes, edges);
     for (const nodeId of sorted) {
-      setExecutionProgress(prev => ({ ...prev, [nodeId]: 'running' }));
-      await new Promise(r => setTimeout(r, 800 + Math.random() * 600));
-      setExecutionProgress(prev => ({ ...prev, [nodeId]: 'success' }));
+      setExecutionProgress((prev) => ({ ...prev, [nodeId]: 'running' }));
+      await new Promise((r) => setTimeout(r, 800 + Math.random() * 600));
+      setExecutionProgress((prev) => ({ ...prev, [nodeId]: 'success' }));
     }
 
     setTimeout(() => {
@@ -842,17 +1082,20 @@ export function AutomationPage() {
   function topologicalSort(nodes, edges) {
     const adj = {};
     const inDegree = {};
-    nodes.forEach(n => { adj[n.id] = []; inDegree[n.id] = 0; });
-    edges.forEach(e => {
+    nodes.forEach((n) => {
+      adj[n.id] = [];
+      inDegree[n.id] = 0;
+    });
+    edges.forEach((e) => {
       adj[e.from].push(e.to);
       inDegree[e.to]++;
     });
-    const queue = nodes.filter(n => inDegree[n.id] === 0).map(n => n.id);
+    const queue = nodes.filter((n) => inDegree[n.id] === 0).map((n) => n.id);
     const result = [];
     while (queue.length) {
       const curr = queue.shift();
       result.push(curr);
-      adj[curr].forEach(next => {
+      adj[curr].forEach((next) => {
         inDegree[next]--;
         if (inDegree[next] === 0) queue.push(next);
       });
@@ -861,8 +1104,8 @@ export function AutomationPage() {
   }
 
   // Selected item
-  const selectedNode = nodes.find(n => n.id === selectedId);
-  const selectedEdge = edges.find(e => e.id === selectedId);
+  const selectedNode = nodes.find((n) => n.id === selectedId);
+  const selectedEdge = edges.find((e) => e.id === selectedId);
 
   // Export
   const exportWorkflow = () => {
@@ -906,10 +1149,18 @@ export function AutomationPage() {
         <div className="flex items-center gap-2">
           {/* Undo/Redo */}
           <div className="flex items-center rounded-md border border-border bg-background p-0.5">
-            <button onClick={undo} disabled={historyIndex <= 0} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated disabled:opacity-30">
+            <button
+              onClick={undo}
+              disabled={historyIndex <= 0}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated disabled:opacity-30"
+            >
               <Undo className="h-3.5 w-3.5" />
             </button>
-            <button onClick={redo} disabled={historyIndex >= history.length - 1} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated disabled:opacity-30">
+            <button
+              onClick={redo}
+              disabled={historyIndex >= history.length - 1}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated disabled:opacity-30"
+            >
               <Redo className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -927,7 +1178,15 @@ export function AutomationPage() {
             size="sm"
             onClick={isExecuting ? () => setIsExecuting(false) : runSimulation}
           >
-            {isExecuting ? <><Pause className="mr-1.5 h-3.5 w-3.5" /> Stop</> : <><Play className="mr-1.5 h-3.5 w-3.5" /> Test Run</>}
+            {isExecuting ? (
+              <>
+                <Pause className="mr-1.5 h-3.5 w-3.5" /> Stop
+              </>
+            ) : (
+              <>
+                <Play className="mr-1.5 h-3.5 w-3.5" /> Test Run
+              </>
+            )}
           </Button>
 
           <Button size="sm">
@@ -942,7 +1201,7 @@ export function AutomationPage() {
         <div className="w-56 border-r border-border bg-surface flex flex-col">
           <div className="p-3 border-b border-border">
             <div className="flex gap-1">
-              {NODE_CATEGORIES.map(cat => (
+              {NODE_CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
@@ -966,10 +1225,21 @@ export function AutomationPage() {
                 return (
                   <button
                     key={type}
-                    onClick={() => addNode(type, 300 + (Math.random() - 0.5) * 100, 150 + (Math.random() - 0.5) * 50)}
+                    onClick={() =>
+                      addNode(
+                        type,
+                        300 + (Math.random() - 0.5) * 100,
+                        150 + (Math.random() - 0.5) * 50
+                      )
+                    }
                     className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-all hover:bg-surface-elevated group"
                   >
-                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', def.color.split(' ')[0])}>
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                        def.color.split(' ')[0]
+                      )}
+                    >
                       <Icon className={cn('h-4 w-4', def.color.split(' ')[1])} />
                     </div>
                     <div className="min-w-0">
@@ -1006,18 +1276,30 @@ export function AutomationPage() {
             }}
           >
             {/* Grid pattern */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: '2000px', minHeight: '2000px' }}>
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{ minWidth: '2000px', minHeight: '2000px' }}
+            >
               <defs>
                 <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-border/30" />
+                  <path
+                    d="M 20 0 L 0 0 0 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    className="text-border/30"
+                  />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#grid)" />
             </svg>
 
             {/* Edges SVG */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: '2000px', minHeight: '2000px', pointerEvents: 'all' }}>
-              {edges.map(edge => (
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{ minWidth: '2000px', minHeight: '2000px', pointerEvents: 'all' }}
+            >
+              {edges.map((edge) => (
                 <WorkflowEdge
                   key={edge.id}
                   edge={edge}
@@ -1042,7 +1324,7 @@ export function AutomationPage() {
             </svg>
 
             {/* Nodes */}
-            {nodes.map(node => (
+            {nodes.map((node) => (
               <WorkflowNode
                 key={node.id}
                 node={node}
@@ -1062,33 +1344,53 @@ export function AutomationPage() {
 
           {/* Zoom controls */}
           <div className="absolute bottom-4 left-4 flex items-center gap-1 rounded-md border border-border bg-surface p-0.5 shadow-sm">
-            <button onClick={() => setScale(s => Math.max(0.5, s - 0.1))} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated">−</button>
-            <span className="text-xs font-mono w-12 text-center text-text-secondary">{Math.round(scale * 100)}%</span>
-            <button onClick={() => setScale(s => Math.min(2, s + 0.1))} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated">+</button>
-            <button onClick={() => { setScale(1); setPan({ x: 0, y: 0 }); }} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated" title="Reset">
+            <button
+              onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
+            >
+              −
+            </button>
+            <span className="text-xs font-mono w-12 text-center text-text-secondary">
+              {Math.round(scale * 100)}%
+            </span>
+            <button
+              onClick={() => setScale((s) => Math.min(2, s + 0.1))}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
+            >
+              +
+            </button>
+            <button
+              onClick={() => {
+                setScale(1);
+                setPan({ x: 0, y: 0 });
+              }}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
+              title="Reset"
+            >
               <Target className="h-3.5 w-3.5" />
             </button>
           </div>
 
           {/* Stats */}
           <div className="absolute top-4 left-4 rounded-md border border-border bg-surface/90 backdrop-blur px-3 py-1.5 shadow-sm">
-            <p className="text-[10px] text-text-muted">{nodes.length} nodes · {edges.length} connections</p>
+            <p className="text-[10px] text-text-muted">
+              {nodes.length} nodes · {edges.length} connections
+            </p>
           </div>
         </div>
 
         {/* Right sidebar — Properties */}
         <div className="w-72 border-l border-border bg-surface overflow-hidden flex flex-col">
           {selectedNode ? (
-            <PropertyPanel
-              node={selectedNode}
-              onChange={updateNode}
-              onDelete={deleteNode}
-            />
+            <PropertyPanel node={selectedNode} onChange={updateNode} onDelete={deleteNode} />
           ) : selectedEdge ? (
             <div className="h-full flex flex-col">
               <div className="border-b border-border p-4">
                 <h3 className="text-sm font-semibold text-text-primary">Connection</h3>
-                <p className="text-xs text-text-muted mt-1">From {nodes.find(n => n.id === selectedEdge.from)?.type} to {nodes.find(n => n.id === selectedEdge.to)?.type}</p>
+                <p className="text-xs text-text-muted mt-1">
+                  From {nodes.find((n) => n.id === selectedEdge.from)?.type} to{' '}
+                  {nodes.find((n) => n.id === selectedEdge.to)?.type}
+                </p>
               </div>
               <div className="flex-1 p-4">
                 <button
@@ -1103,7 +1405,9 @@ export function AutomationPage() {
             <div className="flex h-full flex-col items-center justify-center p-6 text-center">
               <MousePointer className="h-10 w-10 text-text-muted mb-3" />
               <p className="text-sm text-text-muted">Select a node or connection to edit</p>
-              <p className="text-xs text-text-muted mt-1">Drag from output handles to create connections</p>
+              <p className="text-xs text-text-muted mt-1">
+                Drag from output handles to create connections
+              </p>
             </div>
           )}
         </div>
@@ -1116,7 +1420,10 @@ export function AutomationPage() {
           <div className="relative w-full max-w-2xl rounded-xl border border-border bg-surface p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-text-primary">Workflow Templates</h2>
-              <button onClick={() => setShowTemplates(false)} className="text-text-muted hover:text-text-primary">
+              <button
+                onClick={() => setShowTemplates(false)}
+                className="text-text-muted hover:text-text-primary"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1124,7 +1431,10 @@ export function AutomationPage() {
               {SAMPLE_WORKFLOWS.map((template) => (
                 <button
                   key={template.id}
-                  onClick={() => { loadWorkflow(template); setShowTemplates(false); }}
+                  onClick={() => {
+                    loadWorkflow(template);
+                    setShowTemplates(false);
+                  }}
                   className="rounded-xl border border-border bg-background p-4 text-left transition-all hover:border-secondary/50 hover:shadow-md"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10 mb-3">
@@ -1132,7 +1442,9 @@ export function AutomationPage() {
                   </div>
                   <h3 className="text-sm font-semibold text-text-primary">{template.name}</h3>
                   <p className="text-xs text-text-muted mt-1">{template.description}</p>
-                  <p className="text-[10px] text-text-muted mt-2">{template.nodes.length} nodes · {template.edges.length} connections</p>
+                  <p className="text-[10px] text-text-muted mt-2">
+                    {template.nodes.length} nodes · {template.edges.length} connections
+                  </p>
                 </button>
               ))}
             </div>

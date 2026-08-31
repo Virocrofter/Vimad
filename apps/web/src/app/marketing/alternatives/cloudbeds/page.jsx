@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Check, X, Zap, Puzzle, DollarSign, Layers,
-  TrendingUp, Users, Building2, Shield, Headphones
+  ArrowRight,
+  Check,
+  X,
+  Zap,
+  Puzzle,
+  DollarSign,
+  Layers,
+  TrendingUp,
+  Users,
+  Building2,
+  Shield,
+  Headphones,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -77,13 +87,20 @@ export default function CloudbedsAlternativePage() {
               The Enterprise Alternative to <span className="text-secondary">Cloudbeds</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Stop paying for fragmented tools. Get a unified platform with deeper operations, AI revenue management, and white-glove support.
+              Stop paying for fragmented tools. Get a unified platform with deeper operations, AI
+              revenue management, and white-glove support.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to="/app" className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+              <Link
+                to="/app"
+                className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+              >
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-              <Link to="/demo" className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated">
+              <Link
+                to="/demo"
+                className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
+              >
                 Schedule a Demo
               </Link>
             </div>
@@ -95,7 +112,9 @@ export default function CloudbedsAlternativePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-text-primary">Why hotels outgrow Cloudbeds</h2>
-            <p className="mt-2 text-text-secondary">The pain of pieced-together hospitality software.</p>
+            <p className="mt-2 text-text-secondary">
+              The pain of pieced-together hospitality software.
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {painPoints.map((p) => (
@@ -120,14 +139,25 @@ export default function CloudbedsAlternativePage() {
           <div className="overflow-hidden rounded-xl border border-border">
             <div className="grid grid-cols-3 bg-surface">
               <div className="px-6 py-4 text-sm font-semibold text-text-muted">Feature</div>
-              <div className="px-6 py-4 text-sm font-semibold text-text-primary text-center">Cloudbeds</div>
-              <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">Unified PMS</div>
+              <div className="px-6 py-4 text-sm font-semibold text-text-primary text-center">
+                Cloudbeds
+              </div>
+              <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">
+                Unified PMS
+              </div>
             </div>
             {comparison.map((row, i) => (
-              <div key={row.label} className={cn('grid grid-cols-3', i % 2 === 0 ? 'bg-background' : 'bg-surface')}>
+              <div
+                key={row.label}
+                className={cn('grid grid-cols-3', i % 2 === 0 ? 'bg-background' : 'bg-surface')}
+              >
                 <div className="px-6 py-3.5 text-sm font-medium text-text-primary">{row.label}</div>
-                <div className="px-6 py-3.5 text-center text-sm text-text-secondary">{row.cloudbeds}</div>
-                <div className="px-6 py-3.5 text-center text-sm font-medium text-secondary bg-secondary/5">{row.unified}</div>
+                <div className="px-6 py-3.5 text-center text-sm text-text-secondary">
+                  {row.cloudbeds}
+                </div>
+                <div className="px-6 py-3.5 text-center text-sm font-medium text-secondary bg-secondary/5">
+                  {row.unified}
+                </div>
               </div>
             ))}
           </div>
@@ -161,10 +191,16 @@ export default function CloudbedsAlternativePage() {
             Migrate your data, train your team, and go live in under two weeks.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link to="/app" className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+            <Link
+              to="/app"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+            >
               Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
-            <Link to="/features" className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated">
+            <Link
+              to="/features"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
+            >
               Explore All Features
             </Link>
           </div>

@@ -15,28 +15,28 @@ export const useShadowStore = create(
     (set, get) => ({
       /* ─── Core State ─── */
       isShadowActive: false,
-      shadowUser: null,           // The user being impersonated
-      originalUser: null,         // The admin who initiated shadow
+      shadowUser: null, // The user being impersonated
+      originalUser: null, // The admin who initiated shadow
       shadowStartTime: null,
       shadowSessionId: null,
-      stealthMode: false,         // When true, no banner/toggle visible to admin
-      
+      stealthMode: false, // When true, no banner/toggle visible to admin
+
       /* ─── Session History ─── */
       sessionHistory: [],
-      
+
       /* ─── Current View State ─── */
-      viewContext: 'admin',       // 'admin' | 'user' — which UI to render
-      activeModule: null,         // Which module the shadow user is "in"
-      
+      viewContext: 'admin', // 'admin' | 'user' — which UI to render
+      activeModule: null, // Which module the shadow user is "in"
+
       /* ─── Actions ─── */
-      
+
       /**
        * Start a shadow session — impersonate a target user
        */
       startShadow: (targetUser, adminUser) => {
         const sessionId = `SHD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
         const startTime = new Date().toISOString();
-        
+
         set({
           isShadowActive: true,
           shadowUser: { ...targetUser, sessionId },
@@ -46,7 +46,7 @@ export const useShadowStore = create(
           viewContext: 'user',
           activeModule: targetUser.defaultModule || 'dashboard',
         });
-        
+
         // Log to shadow audit (separate from main audit)
         get().logShadowAction({
           sessionId,
@@ -58,22 +58,22 @@ export const useShadowStore = create(
           timestamp: startTime,
           stealth: get().stealthMode,
         });
-        
+
         return sessionId;
       },
-      
+
       /**
        * End the current shadow session and restore admin context
        */
       endShadow: (reason = 'manual') => {
         const state = get();
         if (!state.isShadowActive) return;
-        
+
         const endTime = new Date().toISOString();
-        const duration = state.shadowStartTime 
+        const duration = state.shadowStartTime
           ? Math.round((new Date(endTime) - new Date(state.shadowStartTime)) / 1000)
           : 0;
-        
+
         // Archive session to history
         const archivedSession = {
           id: state.shadowSessionId,
@@ -84,9 +84,9 @@ export const useShadowStore = create(
           duration,
           reason,
           stealth: state.stealthMode,
-          actionsTaken: state.sessionHistory.filter(h => h.sessionId === state.shadowSessionId),
+          actionsTaken: state.sessionHistory.filter((h) => h.sessionId === state.shadowSessionId),
         };
-        
+
         set((prev) => ({
           isShadowActive: false,
           shadowUser: null,
@@ -97,7 +97,7 @@ export const useShadowStore = create(
           activeModule: null,
           sessionHistory: [...prev.sessionHistory, archivedSession],
         }));
-        
+
         get().logShadowAction({
           sessionId: state.shadowSessionId,
           action: 'SESSION_ENDED',
@@ -111,7 +111,7 @@ export const useShadowStore = create(
           stealth: state.stealthMode,
         });
       },
-      
+
       /**
        * Toggle stealth mode — hides all shadow UI indicators
        */
@@ -127,7 +127,7 @@ export const useShadowStore = create(
           return { stealthMode: next };
         });
       },
-      
+
       /**
        * Switch view context — view as admin or as the shadow user
        */
@@ -140,14 +140,14 @@ export const useShadowStore = create(
           timestamp: new Date().toISOString(),
         });
       },
-      
+
       /**
        * Set active module within shadow session
        */
       setActiveModule: (module) => {
         set({ activeModule: module });
       },
-      
+
       /**
        * Log an action taken during shadow session
        */
@@ -159,7 +159,7 @@ export const useShadowStore = create(
           ],
         }));
       },
-      
+
       /**
        * Record a user action taken while in shadow mode
        * (e.g., "viewed reservation R-1234", "modified guest profile")
@@ -167,7 +167,7 @@ export const useShadowStore = create(
       recordAction: (actionType, details = {}) => {
         const state = get();
         if (!state.isShadowActive) return;
-        
+
         get().logShadowAction({
           sessionId: state.shadowSessionId,
           action: actionType,
@@ -176,14 +176,14 @@ export const useShadowStore = create(
           targetUserId: state.shadowUser?.id,
         });
       },
-      
+
       /**
        * Take over an existing user session (session hijacking simulation)
        */
       takeoverSession: (targetSession, adminUser) => {
         const sessionId = `SHD-TAKEOVER-${Date.now().toString(36).toUpperCase()}`;
         const startTime = new Date().toISOString();
-        
+
         set({
           isShadowActive: true,
           shadowUser: { ...targetSession.user, sessionId, takenOverSession: targetSession.id },
@@ -193,7 +193,7 @@ export const useShadowStore = create(
           viewContext: 'user',
           activeModule: targetSession.currentModule || 'dashboard',
         });
-        
+
         get().logShadowAction({
           sessionId,
           action: 'SESSION_TAKEOVER',
@@ -205,17 +205,17 @@ export const useShadowStore = create(
           timestamp: startTime,
           stealth: get().stealthMode,
         });
-        
+
         return sessionId;
       },
-      
+
       /**
        * Clear all shadow history (irreversible)
        */
       clearHistory: () => {
         set({ sessionHistory: [] });
       },
-      
+
       /**
        * Get active session duration in seconds
        */
@@ -224,20 +224,20 @@ export const useShadowStore = create(
         if (!shadowStartTime) return 0;
         return Math.round((Date.now() - new Date(shadowStartTime).getTime()) / 1000);
       },
-      
+
       /**
        * Get all actions for current session
        */
       getCurrentSessionActions: () => {
         const { shadowSessionId, sessionHistory } = get();
-        return sessionHistory.filter(h => h.sessionId === shadowSessionId);
+        return sessionHistory.filter((h) => h.sessionId === shadowSessionId);
       },
-      
+
       /**
        * Get archived sessions (ended shadow sessions)
        */
       getArchivedSessions: () => {
-        return get().sessionHistory.filter(h => h.endTime && h.id);
+        return get().sessionHistory.filter((h) => h.endTime && h.id);
       },
     }),
     {
@@ -264,7 +264,7 @@ export const useShadowStore = create(
  */
 export const useEffectiveUser = () => {
   const shadowState = useShadowStore();
-  
+
   return {
     user: shadowState.isShadowActive ? shadowState.shadowUser : shadowState.originalUser,
     isShadow: shadowState.isShadowActive,

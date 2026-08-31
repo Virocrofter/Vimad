@@ -1,7 +1,18 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Check, X, Zap, Clock, DollarSign, Monitor, Smartphone,
-  TrendingUp, Users, Building2, Shield, Globe
+  ArrowRight,
+  Check,
+  X,
+  Zap,
+  Clock,
+  DollarSign,
+  Monitor,
+  Smartphone,
+  TrendingUp,
+  Users,
+  Building2,
+  Shield,
+  Globe,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -78,7 +89,8 @@ export default function HiltonOnqAlternativePage() {
               The Modern Alternative to <span className="text-secondary">Hilton OnQ</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Break free from franchise-mandated legacy software. Get deeper operational features, modern UX, and AI-powered revenue management at a fraction of the cost.
+              Break free from franchise-mandated legacy software. Get deeper operational features,
+              modern UX, and AI-powered revenue management at a fraction of the cost.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -103,7 +115,9 @@ export default function HiltonOnqAlternativePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-text-primary">Why hotels are leaving OnQ</h2>
-            <p className="mt-2 text-text-secondary">The hidden costs of franchise-locked PMS software.</p>
+            <p className="mt-2 text-text-secondary">
+              The hidden costs of franchise-locked PMS software.
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {painPoints.map((p) => (
@@ -129,14 +143,23 @@ export default function HiltonOnqAlternativePage() {
           <div className="overflow-hidden rounded-xl border border-border">
             <div className="grid grid-cols-3 bg-surface">
               <div className="px-6 py-4 text-sm font-semibold text-text-muted">Feature</div>
-              <div className="px-6 py-4 text-sm font-semibold text-text-primary text-center">Hilton OnQ</div>
-              <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">Unified PMS</div>
+              <div className="px-6 py-4 text-sm font-semibold text-text-primary text-center">
+                Hilton OnQ
+              </div>
+              <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">
+                Unified PMS
+              </div>
             </div>
             {comparison.map((row, i) => (
-              <div key={row.label} className={cn('grid grid-cols-3', i % 2 === 0 ? 'bg-background' : 'bg-surface')}>
+              <div
+                key={row.label}
+                className={cn('grid grid-cols-3', i % 2 === 0 ? 'bg-background' : 'bg-surface')}
+              >
                 <div className="px-6 py-3.5 text-sm font-medium text-text-primary">{row.label}</div>
                 <div className="px-6 py-3.5 text-center text-sm text-text-secondary">{row.onq}</div>
-                <div className="px-6 py-3.5 text-center text-sm font-medium text-secondary bg-secondary/5">{row.unified}</div>
+                <div className="px-6 py-3.5 text-center text-sm font-medium text-secondary bg-secondary/5">
+                  {row.unified}
+                </div>
               </div>
             ))}
           </div>
@@ -148,7 +171,9 @@ export default function HiltonOnqAlternativePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-text-primary">Built for modern hospitality</h2>
-            <p className="mt-2 text-text-secondary">Everything OnQ does — and everything it doesn't.</p>
+            <p className="mt-2 text-text-secondary">
+              Everything OnQ does — and everything it doesn't.
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {advantages.map((a) => (
@@ -169,7 +194,8 @@ export default function HiltonOnqAlternativePage() {
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="text-3xl font-bold text-text-primary">Ready to move on from OnQ?</h2>
           <p className="mt-4 text-text-secondary">
-            We handle data migration, staff training, and parallel-run support so your transition is seamless.
+            We handle data migration, staff training, and parallel-run support so your transition is
+            seamless.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link

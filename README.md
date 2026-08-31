@@ -53,16 +53,16 @@ npm run dev
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start all dev servers |
-| `npm run build` | Build all apps and packages |
-| `npm run test` | Run all tests |
-| `npm run lint` | Lint all code |
-| `npm run typecheck` | Type-check all code |
-| `npm run format` | Format all code with Prettier |
-| `npm run db:migrate` | Run database migrations |
-| `npm run db:seed` | Seed the database |
+| Command              | Description                   |
+| -------------------- | ----------------------------- |
+| `npm run dev`        | Start all dev servers         |
+| `npm run build`      | Build all apps and packages   |
+| `npm run test`       | Run all tests                 |
+| `npm run lint`       | Lint all code                 |
+| `npm run typecheck`  | Type-check all code           |
+| `npm run format`     | Format all code with Prettier |
+| `npm run db:migrate` | Run database migrations       |
+| `npm run db:seed`    | Seed the database             |
 
 ## Environments
 

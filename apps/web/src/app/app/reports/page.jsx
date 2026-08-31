@@ -1,8 +1,6 @@
 /* src/app/admin/reports/page.jsx */
 import { useState } from 'react';
-import {
-  Plus, LayoutGrid, Settings, Clock
-} from 'lucide-react';
+import { Plus, LayoutGrid, Settings, Clock } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import ReportLibrary from './ReportLibrary';

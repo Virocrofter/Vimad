@@ -1,17 +1,44 @@
 /* src/app/guest-portal/messages/components.jsx */
 import { useState } from 'react';
 import {
-  Bell, Mail, MessageSquare, Smartphone, Clock, CheckCircle2,
-  ChevronRight, ToggleLeft, ToggleRight, Volume2, VolumeX,
-  Moon, Sun, Trash2, Archive, Search, Filter, Star
+  Bell,
+  Mail,
+  MessageSquare,
+  Smartphone,
+  Clock,
+  CheckCircle2,
+  ChevronRight,
+  ToggleLeft,
+  ToggleRight,
+  Volume2,
+  VolumeX,
+  Moon,
+  Sun,
+  Trash2,
+  Archive,
+  Search,
+  Filter,
+  Star,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
 /* ─── Mock Staff ─── */
 export const mockStaff = [
-  { id: 'staff-001', name: 'Sarah Mitchell', role: 'Guest Services', avatar: null, status: 'online' },
+  {
+    id: 'staff-001',
+    name: 'Sarah Mitchell',
+    role: 'Guest Services',
+    avatar: null,
+    status: 'online',
+  },
   { id: 'staff-002', name: 'James Rodriguez', role: 'Concierge', avatar: null, status: 'away' },
-  { id: 'staff-003', name: 'Emily Chen', role: 'Housekeeping Manager', avatar: null, status: 'online' },
+  {
+    id: 'staff-003',
+    name: 'Emily Chen',
+    role: 'Housekeeping Manager',
+    avatar: null,
+    status: 'online',
+  },
 ];
 
 /* ─── Mock Messages ─── */
@@ -80,10 +107,12 @@ export function NotificationPrefCard({ icon: Icon, label, description, enabled, 
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-3">
-        <div className={cn(
-          'flex h-10 w-10 items-center justify-center rounded-lg',
-          enabled ? 'bg-secondary/10' : 'bg-surface-elevated'
-        )}>
+        <div
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-lg',
+            enabled ? 'bg-secondary/10' : 'bg-surface-elevated'
+          )}
+        >
           <Icon className={cn('h-5 w-5', enabled ? 'text-secondary' : 'text-text-muted')} />
         </div>
         <div>
@@ -98,10 +127,12 @@ export function NotificationPrefCard({ icon: Icon, label, description, enabled, 
           enabled ? 'bg-secondary' : 'bg-border'
         )}
       >
-        <span className={cn(
-          'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        )} />
+        <span
+          className={cn(
+            'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+            enabled ? 'translate-x-6' : 'translate-x-1'
+          )}
+        />
       </button>
     </div>
   );
@@ -136,18 +167,22 @@ export function NotificationItem({ notification, onRead, onArchive }) {
       )}
     >
       <div className="flex items-start gap-3">
-        <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', colors[notification.type]?.split(' ')[1] || 'bg-surface-elevated')}>
-          <Icon className={cn('h-5 w-5', colors[notification.type]?.split(' ')[0] || 'text-text-muted')} />
+        <div
+          className={cn(
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+            colors[notification.type]?.split(' ')[1] || 'bg-surface-elevated'
+          )}
+        >
+          <Icon
+            className={cn('h-5 w-5', colors[notification.type]?.split(' ')[0] || 'text-text-muted')}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-sm font-semibold text-text-primary">{notification.title}</h4>
             <span className="text-[10px] text-text-muted shrink-0">{notification.time}</span>
           </div>
-          <p className={cn(
-            'text-sm text-text-secondary mt-0.5',
-            !expanded && 'line-clamp-2'
-          )}>
+          <p className={cn('text-sm text-text-secondary mt-0.5', !expanded && 'line-clamp-2')}>
             {notification.body}
           </p>
           {notification.body.length > 100 && (

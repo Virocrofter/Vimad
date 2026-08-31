@@ -1,9 +1,25 @@
 /* src/app/guest-portal/profile/documents/page.jsx */
 import { useState } from 'react';
 import {
-  ArrowLeft, FileText, Shield, Upload, Camera, Check, X,
-  Loader2, Eye, Trash2, Download, Lock, AlertTriangle,
-  Info, BookOpen, Car, IdCard, Plane, FileCheck,
+  ArrowLeft,
+  FileText,
+  Shield,
+  Upload,
+  Camera,
+  Check,
+  X,
+  Loader2,
+  Eye,
+  Trash2,
+  Download,
+  Lock,
+  AlertTriangle,
+  Info,
+  BookOpen,
+  Car,
+  IdCard,
+  Plane,
+  FileCheck,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -22,7 +38,7 @@ export default function DocumentsPage() {
   const handleUpload = async (files) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
     const newDoc = {
       id: `DOC-${Date.now().toString(36).toUpperCase()}`,
       type: uploadType,
@@ -33,7 +49,7 @@ export default function DocumentsPage() {
       fileName: files[0].name,
       uploadedAt: new Date().toISOString(),
     };
-    setDocuments(prev => [...prev, newDoc]);
+    setDocuments((prev) => [...prev, newDoc]);
     setUploading(false);
     setShowUploadModal(false);
     setUploadCountry('');
@@ -42,7 +58,7 @@ export default function DocumentsPage() {
 
   const handleDelete = (id) => {
     if (confirm('Are you sure you want to delete this document?')) {
-      setDocuments(prev => prev.filter(d => d.id !== id));
+      setDocuments((prev) => prev.filter((d) => d.id !== id));
     }
   };
 
@@ -75,9 +91,9 @@ export default function DocumentsPage() {
         <div>
           <p className="text-sm font-medium text-text-primary">Bank-Level Encryption</p>
           <p className="text-xs text-text-secondary mt-0.5">
-            Your documents are encrypted with AES-256 both at rest and in transit.
-            Only you and authorized hotel staff can access them. Documents are automatically
-            deleted 30 days after checkout.
+            Your documents are encrypted with AES-256 both at rest and in transit. Only you and
+            authorized hotel staff can access them. Documents are automatically deleted 30 days
+            after checkout.
           </p>
         </div>
       </div>
@@ -89,16 +105,20 @@ export default function DocumentsPage() {
           <p className="text-xs text-text-muted">Documents</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4 text-center">
-          <p className="text-2xl font-bold font-mono text-accent">{documents.filter(d => d.verified).length}</p>
+          <p className="text-2xl font-bold font-mono text-accent">
+            {documents.filter((d) => d.verified).length}
+          </p>
           <p className="text-xs text-text-muted">Verified</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4 text-center">
-          <p className="text-2xl font-bold font-mono text-warning">{documents.filter(d => !d.verified).length}</p>
+          <p className="text-2xl font-bold font-mono text-warning">
+            {documents.filter((d) => !d.verified).length}
+          </p>
           <p className="text-xs text-text-muted">Pending</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4 text-center">
           <p className="text-2xl font-bold font-mono text-info">
-            {documents.filter(d => new Date(d.expiryDate) < new Date('2027-01-01')).length}
+            {documents.filter((d) => new Date(d.expiryDate) < new Date('2027-01-01')).length}
           </p>
           <p className="text-xs text-text-muted">Expiring Soon</p>
         </div>
@@ -140,7 +160,10 @@ export default function DocumentsPage() {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowUploadModal(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowUploadModal(false)}
+          />
           <div className="relative w-full max-w-lg max-h-[90vh] overflow-auto rounded-xl border border-border bg-background shadow-2xl">
             <div className="sticky top-0 z-10 border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -152,7 +175,10 @@ export default function DocumentsPage() {
                   <p className="text-xs text-text-muted">Securely upload your travel document</p>
                 </div>
               </div>
-              <button onClick={() => setShowUploadModal(false)} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -214,18 +240,14 @@ export default function DocumentsPage() {
               </div>
 
               {/* Upload Zone */}
-              <FileUploadZone
-                onUpload={handleUpload}
-                accept="image/*,.pdf"
-                maxSize={10}
-              />
+              <FileUploadZone onUpload={handleUpload} accept="image/*,.pdf" maxSize={10} />
 
               {/* Privacy Note */}
               <div className="rounded-lg border border-border bg-surface p-3 flex items-start gap-2">
                 <Lock className="h-4 w-4 text-text-muted shrink-0 mt-0.5" />
                 <p className="text-xs text-text-muted">
-                  Your document will be encrypted and stored securely. Only you and authorized
-                  hotel staff can access it. We never share your documents with third parties.
+                  Your document will be encrypted and stored securely. Only you and authorized hotel
+                  staff can access it. We never share your documents with third parties.
                 </p>
               </div>
             </div>
@@ -236,7 +258,10 @@ export default function DocumentsPage() {
       {/* Preview Modal */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setPreviewDoc(null)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setPreviewDoc(null)}
+          />
           <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl">
             <div className="border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -244,11 +269,18 @@ export default function DocumentsPage() {
                   <Eye className="h-5 w-5 text-secondary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-text-primary capitalize">{previewDoc.type.replace('_', ' ')}</h3>
-                  <p className="text-xs text-text-muted">{previewDoc.country} · Expires {formatDate(previewDoc.expiryDate)}</p>
+                  <h3 className="text-lg font-bold text-text-primary capitalize">
+                    {previewDoc.type.replace('_', ' ')}
+                  </h3>
+                  <p className="text-xs text-text-muted">
+                    {previewDoc.country} · Expires {formatDate(previewDoc.expiryDate)}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setPreviewDoc(null)} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -266,7 +298,9 @@ export default function DocumentsPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-text-secondary">Type</span>
-                  <span className="font-medium text-text-primary capitalize">{previewDoc.type.replace('_', ' ')}</span>
+                  <span className="font-medium text-text-primary capitalize">
+                    {previewDoc.type.replace('_', ' ')}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-text-secondary">Country</span>
@@ -274,15 +308,25 @@ export default function DocumentsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-text-secondary">Uploaded</span>
-                  <span className="font-medium text-text-primary">{formatDate(previewDoc.uploadedAt)}</span>
+                  <span className="font-medium text-text-primary">
+                    {formatDate(previewDoc.uploadedAt)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-text-secondary">Status</span>
-                  <span className={cn(
-                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
-                    previewDoc.verified ? 'bg-accent/10 text-accent' : 'bg-warning/10 text-warning'
-                  )}>
-                    {previewDoc.verified ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                      previewDoc.verified
+                        ? 'bg-accent/10 text-accent'
+                        : 'bg-warning/10 text-warning'
+                    )}
+                  >
+                    {previewDoc.verified ? (
+                      <CheckCircle2 className="h-3 w-3" />
+                    ) : (
+                      <Clock className="h-3 w-3" />
+                    )}
                     {previewDoc.verified ? 'Verified' : 'Pending Verification'}
                   </span>
                 </div>
@@ -291,7 +335,11 @@ export default function DocumentsPage() {
                 <Button variant="outline" className="flex-1" onClick={() => setPreviewDoc(null)}>
                   Close
                 </Button>
-                <Button variant="outline" className="flex-1" onClick={() => handleDelete(previewDoc.id)}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleDelete(previewDoc.id)}
+                >
                   <Trash2 className="mr-1.5 h-4 w-4" /> Delete
                 </Button>
               </div>

@@ -29,9 +29,7 @@ export function FolioLineItem({ charge, onClick, selected }) {
           <p className="text-[10px] text-text-muted">{charge.date}</p>
         </div>
       </div>
-      <p className="text-sm font-mono font-medium text-text-primary">
-        ${charge.amount.toFixed(2)}
-      </p>
+      <p className="text-sm font-mono font-medium text-text-primary">${charge.amount.toFixed(2)}</p>
     </div>
   );
 }
@@ -54,12 +52,16 @@ export function PaymentMethodCard({ method, selected, onSelect }) {
           : 'border-border bg-surface hover:border-secondary/30'
       )}
     >
-      <div className={cn(
-        'flex h-10 w-14 items-center justify-center rounded-md font-bold text-xs',
-        method.brand === 'visa' ? 'bg-blue-600 text-white' :
-        method.brand === 'mastercard' ? 'bg-orange-500 text-white' :
-        'bg-slate-600 text-white'
-      )}>
+      <div
+        className={cn(
+          'flex h-10 w-14 items-center justify-center rounded-md font-bold text-xs',
+          method.brand === 'visa'
+            ? 'bg-blue-600 text-white'
+            : method.brand === 'mastercard'
+              ? 'bg-orange-500 text-white'
+              : 'bg-slate-600 text-white'
+        )}
+      >
         {brandIcons[method.brand] || method.brand.toUpperCase()}
       </div>
       <div className="flex-1">
@@ -73,10 +75,12 @@ export function PaymentMethodCard({ method, selected, onSelect }) {
           Default
         </span>
       )}
-      <div className={cn(
-        'h-4 w-4 rounded-full border-2 flex items-center justify-center',
-        selected ? 'border-secondary bg-secondary' : 'border-border'
-      )}>
+      <div
+        className={cn(
+          'h-4 w-4 rounded-full border-2 flex items-center justify-center',
+          selected ? 'border-secondary bg-secondary' : 'border-border'
+        )}
+      >
         {selected && <div className="h-2 w-2 rounded-full bg-white" />}
       </div>
     </button>
@@ -91,15 +95,21 @@ export function InvoiceRow({ invoice, onDownload, onEmail, downloading, download
     <div className="flex items-center justify-between py-3 px-4 hover:bg-background/50 transition-colors">
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10">
-          <span className="text-xs font-bold text-accent">{typeLabels[invoice.type]?.[0] || 'I'}</span>
+          <span className="text-xs font-bold text-accent">
+            {typeLabels[invoice.type]?.[0] || 'I'}
+          </span>
         </div>
         <div>
-          <p className="text-sm font-medium text-text-primary">{typeLabels[invoice.type] || 'Invoice'} #{invoice.id}</p>
+          <p className="text-sm font-medium text-text-primary">
+            {typeLabels[invoice.type] || 'Invoice'} #{invoice.id}
+          </p>
           <p className="text-[10px] text-text-muted">{invoice.date}</p>
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <span className="text-sm font-mono font-medium text-text-primary">${invoice.amount.toFixed(2)}</span>
+        <span className="text-sm font-mono font-medium text-text-primary">
+          ${invoice.amount.toFixed(2)}
+        </span>
         <button
           onClick={onDownload}
           disabled={downloading}

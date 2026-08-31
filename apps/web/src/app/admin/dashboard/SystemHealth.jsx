@@ -4,9 +4,27 @@ import { cn } from '../../../lib/utils';
 import { Link } from 'react-router-dom';
 
 const statusConfig = {
-  healthy: { icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', label: 'All Systems Operational' },
-  degraded: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', label: 'Degraded Performance' },
-  critical: { icon: XCircle, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', label: 'Critical Issues Detected' },
+  healthy: {
+    icon: CheckCircle2,
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    label: 'All Systems Operational',
+  },
+  degraded: {
+    icon: AlertTriangle,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    label: 'Degraded Performance',
+  },
+  critical: {
+    icon: XCircle,
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    label: 'Critical Issues Detected',
+  },
 };
 
 const serviceStatusConfig = {
@@ -18,7 +36,7 @@ const serviceStatusConfig = {
 export default function SystemHealth({ data }) {
   const config = statusConfig[data.status] || statusConfig.healthy;
   const StatusIcon = config.icon;
-  const degradedCount = data.services.filter(s => s.status !== 'operational').length;
+  const degradedCount = data.services.filter((s) => s.status !== 'operational').length;
 
   return (
     <div className="rounded-xl border border-border bg-surface overflow-hidden">
@@ -37,8 +55,19 @@ export default function SystemHealth({ data }) {
       </div>
 
       {/* Status Banner */}
-      <div className={cn('mx-5 mt-4 rounded-lg border p-3 flex items-center gap-3', config.bg, config.border)}>
-        <div className={cn('flex h-8 w-8 items-center justify-center rounded-full bg-background', config.color)}>
+      <div
+        className={cn(
+          'mx-5 mt-4 rounded-lg border p-3 flex items-center gap-3',
+          config.bg,
+          config.border
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-8 w-8 items-center justify-center rounded-full bg-background',
+            config.color
+          )}
+        >
           <StatusIcon className="h-4 w-4" />
         </div>
         <div className="flex-1">
@@ -58,7 +87,8 @@ export default function SystemHealth({ data }) {
       <div className="p-5">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {data.services.map((service) => {
-            const svcConfig = serviceStatusConfig[service.status] || serviceStatusConfig.operational;
+            const svcConfig =
+              serviceStatusConfig[service.status] || serviceStatusConfig.operational;
             return (
               <div
                 key={service.name}

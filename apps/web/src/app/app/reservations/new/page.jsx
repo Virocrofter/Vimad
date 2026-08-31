@@ -7,8 +7,18 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { cn } from '../../../../lib/utils';
 import {
-  Calendar, BedDouble, DollarSign, User, Check,
-  ChevronRight, ChevronLeft, Rocket, Clock, Star, Wifi, Coffee
+  Calendar,
+  BedDouble,
+  DollarSign,
+  User,
+  Check,
+  ChevronRight,
+  ChevronLeft,
+  Rocket,
+  Clock,
+  Star,
+  Wifi,
+  Coffee,
 } from 'lucide-react';
 
 const steps = [
@@ -20,15 +30,54 @@ const steps = [
 ];
 
 const roomTypes = [
-  { id: 'std-twin', name: 'Standard Twin', baseRate: 145, occupancy: 2, size: '28m²', amenities: ['WiFi', 'TV', 'AC'] },
-  { id: 'del-king', name: 'Deluxe King', baseRate: 189, occupancy: 2, size: '35m²', amenities: ['WiFi', 'TV', 'AC', 'Minibar', 'Balcony'] },
-  { id: 'suite', name: 'Executive Suite', baseRate: 320, occupancy: 4, size: '55m²', amenities: ['WiFi', 'TV', 'AC', 'Minibar', 'Balcony', 'Kitchenette'] },
+  {
+    id: 'std-twin',
+    name: 'Standard Twin',
+    baseRate: 145,
+    occupancy: 2,
+    size: '28m²',
+    amenities: ['WiFi', 'TV', 'AC'],
+  },
+  {
+    id: 'del-king',
+    name: 'Deluxe King',
+    baseRate: 189,
+    occupancy: 2,
+    size: '35m²',
+    amenities: ['WiFi', 'TV', 'AC', 'Minibar', 'Balcony'],
+  },
+  {
+    id: 'suite',
+    name: 'Executive Suite',
+    baseRate: 320,
+    occupancy: 4,
+    size: '55m²',
+    amenities: ['WiFi', 'TV', 'AC', 'Minibar', 'Balcony', 'Kitchenette'],
+  },
 ];
 
 const rateCodes = [
-  { id: 'rack', name: 'Rack Rate', rate: 189, description: 'Best available rate', rules: 'Free cancellation until 24h before arrival' },
-  { id: 'corp', name: 'Corporate', rate: 165, description: 'Corporate negotiated rate', rules: 'Requires valid corporate ID' },
-  { id: 'advance', name: 'Advance Purchase', rate: 149, description: 'Non-refundable, book 14+ days ahead', rules: 'Full prepayment required, non-refundable' },
+  {
+    id: 'rack',
+    name: 'Rack Rate',
+    rate: 189,
+    description: 'Best available rate',
+    rules: 'Free cancellation until 24h before arrival',
+  },
+  {
+    id: 'corp',
+    name: 'Corporate',
+    rate: 165,
+    description: 'Corporate negotiated rate',
+    rules: 'Requires valid corporate ID',
+  },
+  {
+    id: 'advance',
+    name: 'Advance Purchase',
+    rate: 149,
+    description: 'Non-refundable, book 14+ days ahead',
+    rules: 'Full prepayment required, non-refundable',
+  },
 ];
 
 const schema = z.object({
@@ -152,7 +201,12 @@ export default function NewReservationPage() {
                     : 'border-border bg-surface hover:bg-surface-elevated'
                 )}
               >
-                <input type="radio" value={room.id} className="sr-only" {...register('roomTypeId')} />
+                <input
+                  type="radio"
+                  value={room.id}
+                  className="sr-only"
+                  {...register('roomTypeId')}
+                />
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/10">
                   <BedDouble className="h-6 w-6 text-secondary" />
                 </div>
@@ -166,7 +220,10 @@ export default function NewReservationPage() {
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {room.amenities.map((a) => (
-                      <span key={a} className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-text-secondary border border-border">
+                      <span
+                        key={a}
+                        className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-text-secondary border border-border"
+                      >
                         {a === 'WiFi' && <Wifi className="h-3 w-3" />}
                         {a === 'TV' && <Star className="h-3 w-3" />}
                         {a === 'Minibar' && <Coffee className="h-3 w-3" />}
@@ -178,7 +235,9 @@ export default function NewReservationPage() {
                 {values.roomTypeId === room.id && <Check className="h-5 w-5 text-secondary" />}
               </label>
             ))}
-            {errors.roomTypeId && <p className="text-xs text-danger">{errors.roomTypeId.message}</p>}
+            {errors.roomTypeId && (
+              <p className="text-xs text-danger">{errors.roomTypeId.message}</p>
+            )}
           </div>
         );
 
@@ -195,7 +254,12 @@ export default function NewReservationPage() {
                     : 'border-border bg-surface hover:bg-surface-elevated'
                 )}
               >
-                <input type="radio" value={rate.id} className="sr-only" {...register('rateCodeId')} />
+                <input
+                  type="radio"
+                  value={rate.id}
+                  className="sr-only"
+                  {...register('rateCodeId')}
+                />
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/10">
                   <DollarSign className="h-6 w-6 text-secondary" />
                 </div>
@@ -210,7 +274,9 @@ export default function NewReservationPage() {
                 {values.rateCodeId === rate.id && <Check className="h-5 w-5 text-secondary" />}
               </label>
             ))}
-            {errors.rateCodeId && <p className="text-xs text-danger">{errors.rateCodeId.message}</p>}
+            {errors.rateCodeId && (
+              <p className="text-xs text-danger">{errors.rateCodeId.message}</p>
+            )}
           </div>
         );
 
@@ -291,7 +357,9 @@ export default function NewReservationPage() {
 
               {values.specialRequests && (
                 <div className="border-t border-border pt-3">
-                  <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Special Requests</p>
+                  <p className="text-text-muted text-xs uppercase tracking-wider mb-1">
+                    Special Requests
+                  </p>
                   <p className="text-sm text-text-secondary">{values.specialRequests}</p>
                 </div>
               )}
@@ -344,12 +412,22 @@ export default function NewReservationPage() {
                   >
                     {isCompleted ? <Check className="h-4 w-4" /> : <StepIcon className="h-4 w-4" />}
                   </div>
-                  <span className={cn('text-[10px] font-medium', isActive ? 'text-secondary' : 'text-text-muted')}>
+                  <span
+                    className={cn(
+                      'text-[10px] font-medium',
+                      isActive ? 'text-secondary' : 'text-text-muted'
+                    )}
+                  >
                     {step.label}
                   </span>
                 </div>
                 {!isLast && (
-                  <div className={cn('mx-1 h-0.5 flex-1 transition-colors', isCompleted ? 'bg-secondary' : 'bg-border')} />
+                  <div
+                    className={cn(
+                      'mx-1 h-0.5 flex-1 transition-colors',
+                      isCompleted ? 'bg-secondary' : 'bg-border'
+                    )}
+                  />
                 )}
               </div>
             );

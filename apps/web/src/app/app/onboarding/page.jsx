@@ -59,11 +59,10 @@ export default function OnboardingPage() {
                 <Clock className="h-5 w-5 text-secondary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-text-primary">
-                  You have a saved session
-                </p>
+                <p className="text-sm font-medium text-text-primary">You have a saved session</p>
                 <p className="text-xs text-text-muted">
-                  Last worked on {formatTime(savedProgress.savedAt)} · Step {savedProgress.step + 1} of 5
+                  Last worked on {formatTime(savedProgress.savedAt)} · Step {savedProgress.step + 1}{' '}
+                  of 5
                 </p>
               </div>
             </div>

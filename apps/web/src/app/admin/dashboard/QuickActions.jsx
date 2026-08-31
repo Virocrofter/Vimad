@@ -1,21 +1,56 @@
 /* src/app/admin/dashboard/QuickActions.jsx */
 import { useNavigate } from 'react-router-dom';
 import {
-  Building2, ToggleLeft, Megaphone, Wrench, ScrollText, Download,
-  ChevronRight
+  Building2,
+  ToggleLeft,
+  Megaphone,
+  Wrench,
+  ScrollText,
+  Download,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
 const iconMap = {
-  Building2, ToggleLeft, Megaphone, Wrench, ScrollText, Download,
+  Building2,
+  ToggleLeft,
+  Megaphone,
+  Wrench,
+  ScrollText,
+  Download,
 };
 
 const colorMap = {
-  secondary: { bg: 'bg-secondary/10', text: 'text-secondary', hover: 'hover:bg-secondary/20', ring: 'focus-visible:ring-secondary' },
-  accent: { bg: 'bg-accent/10', text: 'text-accent', hover: 'hover:bg-accent/20', ring: 'focus-visible:ring-accent' },
-  info: { bg: 'bg-info/10', text: 'text-info', hover: 'hover:bg-info/20', ring: 'focus-visible:ring-info' },
-  warning: { bg: 'bg-warning/10', text: 'text-warning', hover: 'hover:bg-warning/20', ring: 'focus-visible:ring-warning' },
-  neutral: { bg: 'bg-neutral/10', text: 'text-text-muted', hover: 'hover:bg-neutral/20', ring: 'focus-visible:ring-neutral' },
+  secondary: {
+    bg: 'bg-secondary/10',
+    text: 'text-secondary',
+    hover: 'hover:bg-secondary/20',
+    ring: 'focus-visible:ring-secondary',
+  },
+  accent: {
+    bg: 'bg-accent/10',
+    text: 'text-accent',
+    hover: 'hover:bg-accent/20',
+    ring: 'focus-visible:ring-accent',
+  },
+  info: {
+    bg: 'bg-info/10',
+    text: 'text-info',
+    hover: 'hover:bg-info/20',
+    ring: 'focus-visible:ring-info',
+  },
+  warning: {
+    bg: 'bg-warning/10',
+    text: 'text-warning',
+    hover: 'hover:bg-warning/20',
+    ring: 'focus-visible:ring-warning',
+  },
+  neutral: {
+    bg: 'bg-neutral/10',
+    text: 'text-text-muted',
+    hover: 'hover:bg-neutral/20',
+    ring: 'focus-visible:ring-neutral',
+  },
 };
 
 export default function QuickActions({ actions }) {
@@ -72,7 +107,9 @@ export default function QuickActions({ actions }) {
                   colors.ring
                 )}
               >
-                <div className={cn('flex h-8 w-8 items-center justify-center rounded-md', colors.bg)}>
+                <div
+                  className={cn('flex h-8 w-8 items-center justify-center rounded-md', colors.bg)}
+                >
                   <Icon className={cn('h-4 w-4', colors.text)} />
                 </div>
                 <div className="min-w-0">

@@ -2,10 +2,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  KeyRound, UtensilsCrossed, Sparkles, Wrench, ConciergeBell,
-  ArrowRight, Clock, MapPin, Star, AlertTriangle, CheckCircle2,
-  ChevronRight, Home, Wifi, Dumbbell, Waves, Car, Coffee,
-  MessageSquare, Phone, Bell, Package, Trash2, Bed
+  KeyRound,
+  UtensilsCrossed,
+  Sparkles,
+  Wrench,
+  ConciergeBell,
+  ArrowRight,
+  Clock,
+  MapPin,
+  Star,
+  AlertTriangle,
+  CheckCircle2,
+  ChevronRight,
+  Home,
+  Wifi,
+  Dumbbell,
+  Waves,
+  Car,
+  Coffee,
+  MessageSquare,
+  Phone,
+  Bell,
+  Package,
+  Trash2,
+  Bed,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { guestStay, formatDate, getStayPhase } from '../data';
@@ -75,7 +95,8 @@ export default function StayPage() {
         <div className="flex-1">
           <p className="text-sm font-semibold text-accent">Checked In</p>
           <p className="text-xs text-text-secondary">
-            {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)} · {stay.dates.nights} nights
+            {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)} ·{' '}
+            {stay.dates.nights} nights
           </p>
         </div>
         <button
@@ -100,7 +121,12 @@ export default function StayPage() {
               )}
               disabled={!service.available}
             >
-              <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl', service.color)}>
+              <div
+                className={cn(
+                  'flex h-12 w-12 items-center justify-center rounded-xl',
+                  service.color
+                )}
+              >
                 <service.icon className="h-6 w-6" />
               </div>
               <div className="text-center">
@@ -127,12 +153,19 @@ export default function StayPage() {
               activeServices.map((svc) => (
                 <div key={svc.id} className="px-4 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded-lg',
-                      svc.status === 'delivered' ? 'bg-accent/10' : 'bg-warning/10'
-                    )}>
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 items-center justify-center rounded-lg',
+                        svc.status === 'delivered' ? 'bg-accent/10' : 'bg-warning/10'
+                      )}
+                    >
                       {svc.type === 'room_service' ? (
-                        <UtensilsCrossed className={cn('h-4 w-4', svc.status === 'delivered' ? 'text-accent' : 'text-warning')} />
+                        <UtensilsCrossed
+                          className={cn(
+                            'h-4 w-4',
+                            svc.status === 'delivered' ? 'text-accent' : 'text-warning'
+                          )}
+                        />
                       ) : (
                         <Sparkles className="h-4 w-4 text-secondary" />
                       )}
@@ -146,14 +179,16 @@ export default function StayPage() {
                       </p>
                     </div>
                   </div>
-                  <span className={cn(
-                    'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
-                    svc.status === 'delivered'
-                      ? 'bg-accent/10 text-accent'
-                      : svc.status === 'pending'
-                      ? 'bg-warning/10 text-warning'
-                      : 'bg-secondary/10 text-secondary'
-                  )}>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
+                      svc.status === 'delivered'
+                        ? 'bg-accent/10 text-accent'
+                        : svc.status === 'pending'
+                          ? 'bg-warning/10 text-warning'
+                          : 'bg-secondary/10 text-secondary'
+                    )}
+                  >
                     {svc.status}
                   </span>
                 </div>
@@ -186,12 +221,19 @@ export default function StayPage() {
               activeRequests.map((req) => (
                 <div key={req.id} className="px-4 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded-lg',
-                      req.status === 'completed' ? 'bg-accent/10' : 'bg-info/10'
-                    )}>
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 items-center justify-center rounded-lg',
+                        req.status === 'completed' ? 'bg-accent/10' : 'bg-info/10'
+                      )}
+                    >
                       {req.type === 'housekeeping' ? (
-                        <Sparkles className={cn('h-4 w-4', req.status === 'completed' ? 'text-accent' : 'text-info')} />
+                        <Sparkles
+                          className={cn(
+                            'h-4 w-4',
+                            req.status === 'completed' ? 'text-accent' : 'text-info'
+                          )}
+                        />
                       ) : (
                         <Wrench className="h-4 w-4 text-secondary" />
                       )}
@@ -205,14 +247,16 @@ export default function StayPage() {
                       </p>
                     </div>
                   </div>
-                  <span className={cn(
-                    'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
-                    req.status === 'completed'
-                      ? 'bg-accent/10 text-accent'
-                      : req.status === 'pending'
-                      ? 'bg-warning/10 text-warning'
-                      : 'bg-info/10 text-info'
-                  )}>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
+                      req.status === 'completed'
+                        ? 'bg-accent/10 text-accent'
+                        : req.status === 'pending'
+                          ? 'bg-warning/10 text-warning'
+                          : 'bg-info/10 text-info'
+                    )}
+                  >
                     {req.status}
                   </span>
                 </div>
@@ -240,8 +284,18 @@ export default function StayPage() {
         </h3>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[
-            { icon: Phone, label: 'Front Desk', value: stay.property.phone, href: `tel:${stay.property.phone}` },
-            { icon: MessageSquare, label: 'Chat', value: 'Message Staff', href: '/guest-portal/messages' },
+            {
+              icon: Phone,
+              label: 'Front Desk',
+              value: stay.property.phone,
+              href: `tel:${stay.property.phone}`,
+            },
+            {
+              icon: MessageSquare,
+              label: 'Chat',
+              value: 'Message Staff',
+              href: '/guest-portal/messages',
+            },
             { icon: Clock, label: 'Check-out', value: stay.dates.departureTime, href: null },
             { icon: Wifi, label: 'Wi-Fi', value: 'Vimad-Guest / ••••••••', href: null },
             { icon: Dumbbell, label: 'Gym', value: '5AM – 11PM', href: null },

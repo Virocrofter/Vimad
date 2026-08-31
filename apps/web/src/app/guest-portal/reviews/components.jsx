@@ -1,8 +1,16 @@
 /* src/app/guest-portal/reviews/components.jsx */
 import { useState } from 'react';
 import {
-  Star, ThumbsUp, MessageCircle, Image, ChevronDown, ChevronUp,
-  Flag, CheckCircle2, Hotel, Calendar
+  Star,
+  ThumbsUp,
+  MessageCircle,
+  Image,
+  ChevronDown,
+  ChevronUp,
+  Flag,
+  CheckCircle2,
+  Hotel,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -24,13 +32,16 @@ export function ReviewCard({ review, onHelpful }) {
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 text-sm font-bold text-secondary">
-            {review.author.split(' ').map(n => n[0]).join('')}
+            {review.author
+              .split(' ')
+              .map((n) => n[0])
+              .join('')}
           </div>
           <div>
             <p className="text-sm font-semibold text-text-primary">{review.author}</p>
             <div className="flex items-center gap-2 mt-0.5">
               <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map(star => (
+                {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
                     className={cn(
@@ -61,10 +72,12 @@ export function ReviewCard({ review, onHelpful }) {
       </div>
 
       {/* Comment */}
-      <p className={cn(
-        'mt-3 text-sm text-text-secondary leading-relaxed',
-        !expanded && review.comment.length > 200 && 'line-clamp-3'
-      )}>
+      <p
+        className={cn(
+          'mt-3 text-sm text-text-secondary leading-relaxed',
+          !expanded && review.comment.length > 200 && 'line-clamp-3'
+        )}
+      >
         {review.comment}
       </p>
       {review.comment.length > 200 && (
@@ -72,7 +85,15 @@ export function ReviewCard({ review, onHelpful }) {
           onClick={() => setExpanded(!expanded)}
           className="mt-1 text-xs text-secondary hover:underline inline-flex items-center gap-1"
         >
-          {expanded ? <>Less <ChevronUp className="h-3 w-3" /></> : <>More <ChevronDown className="h-3 w-3" /></>}
+          {expanded ? (
+            <>
+              Less <ChevronUp className="h-3 w-3" />
+            </>
+          ) : (
+            <>
+              More <ChevronDown className="h-3 w-3" />
+            </>
+          )}
         </button>
       )}
 
@@ -111,7 +132,9 @@ export function ReviewCard({ review, onHelpful }) {
           )}
         >
           <ThumbsUp className="h-3.5 w-3.5" />
-          Helpful {review.helpfulCount > 0 && `(${markedHelpful ? review.helpfulCount + 1 : review.helpfulCount})`}
+          Helpful{' '}
+          {review.helpfulCount > 0 &&
+            `(${markedHelpful ? review.helpfulCount + 1 : review.helpfulCount})`}
         </button>
         <button className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary">
           <MessageCircle className="h-3.5 w-3.5" />
@@ -131,7 +154,7 @@ export function RatingBreakdown({ ratings }) {
   const total = Object.values(ratings).reduce((a, b) => a + b, 0);
   return (
     <div className="space-y-2">
-      {[5, 4, 3, 2, 1].map(star => {
+      {[5, 4, 3, 2, 1].map((star) => {
         const count = ratings[star] || 0;
         const pct = total > 0 ? (count / total) * 100 : 0;
         return (

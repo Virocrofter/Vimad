@@ -3,17 +3,59 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../../../lib/utils';
 import {
-  Activity, Zap, TrendingUp, TrendingDown, Minus, Play, Pause,
-  RotateCcw, AlertTriangle, Flame, Shield, Radio, Waves, Gauge,
-  Server, Clock, ChevronRight, ChevronDown, X, Filter, Download,
-  MousePointerClick, ArrowUpRight, ArrowDownRight, BarChart3,
-  Cpu, HardDrive, MemoryStick, Wifi, Eye, EyeOff, Settings2,
-  Siren, Bomb, Rocket, TrafficCone, Timer
+  Activity,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Play,
+  Pause,
+  RotateCcw,
+  AlertTriangle,
+  Flame,
+  Shield,
+  Radio,
+  Waves,
+  Gauge,
+  Server,
+  Clock,
+  ChevronRight,
+  ChevronDown,
+  X,
+  Filter,
+  Download,
+  MousePointerClick,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart3,
+  Cpu,
+  HardDrive,
+  MemoryStick,
+  Wifi,
+  Eye,
+  EyeOff,
+  Settings2,
+  Siren,
+  Bomb,
+  Rocket,
+  TrafficCone,
+  Timer,
 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  ReferenceLine,
 } from 'recharts';
 import {
   useLiveMetrics,
@@ -26,34 +68,72 @@ import {
 /* ─── Live Status Indicator ─── */
 export function LiveStatusIndicator({ status, isConnected, pulse = true }) {
   const configs = {
-    healthy: { icon: Shield, color: 'text-accent', bg: 'bg-accent', border: 'border-accent/30', label: 'All Systems Healthy' },
-    degraded: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning', border: 'border-warning/30', label: 'Degraded Performance' },
-    critical: { icon: Siren, color: 'text-danger', bg: 'bg-danger', border: 'border-danger/30', label: 'Critical Issues Detected' },
-    unknown: { icon: Clock, color: 'text-text-muted', bg: 'bg-text-muted', border: 'border-border', label: 'Connecting...' },
+    healthy: {
+      icon: Shield,
+      color: 'text-accent',
+      bg: 'bg-accent',
+      border: 'border-accent/30',
+      label: 'All Systems Healthy',
+    },
+    degraded: {
+      icon: AlertTriangle,
+      color: 'text-warning',
+      bg: 'bg-warning',
+      border: 'border-warning/30',
+      label: 'Degraded Performance',
+    },
+    critical: {
+      icon: Siren,
+      color: 'text-danger',
+      bg: 'bg-danger',
+      border: 'border-danger/30',
+      label: 'Critical Issues Detected',
+    },
+    unknown: {
+      icon: Clock,
+      color: 'text-text-muted',
+      bg: 'bg-text-muted',
+      border: 'border-border',
+      label: 'Connecting...',
+    },
   };
 
   const config = configs[status] || configs.unknown;
   const Icon = config.icon;
 
   return (
-    <div className={cn(
-      'rounded-xl border p-4 flex items-center gap-4 transition-colors duration-500',
-      config.border,
-      status === 'healthy' ? 'bg-accent/5' : status === 'degraded' ? 'bg-warning/5' : status === 'critical' ? 'bg-danger/5' : 'bg-surface'
-    )}>
-      <div className={cn('relative flex h-12 w-12 items-center justify-center rounded-full bg-background', config.color)}>
+    <div
+      className={cn(
+        'rounded-xl border p-4 flex items-center gap-4 transition-colors duration-500',
+        config.border,
+        status === 'healthy'
+          ? 'bg-accent/5'
+          : status === 'degraded'
+            ? 'bg-warning/5'
+            : status === 'critical'
+              ? 'bg-danger/5'
+              : 'bg-surface'
+      )}
+    >
+      <div
+        className={cn(
+          'relative flex h-12 w-12 items-center justify-center rounded-full bg-background',
+          config.color
+        )}
+      >
         <Icon className="h-6 w-6" />
         {isConnected && pulse && (
-          <span className={cn(
-            'absolute inset-0 rounded-full animate-ping opacity-30',
-            config.bg
-          )} />
+          <span
+            className={cn('absolute inset-0 rounded-full animate-ping opacity-30', config.bg)}
+          />
         )}
         {isConnected && (
-          <span className={cn(
-            'absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background',
-            config.bg
-          )} />
+          <span
+            className={cn(
+              'absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background',
+              config.bg
+            )}
+          />
         )}
       </div>
       <div className="flex-1">
@@ -86,11 +166,11 @@ export function TrafficLoadGauge({ load, maxLoad = 1.0 }) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Waves className="h-4 w-4 text-secondary" />
-          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Traffic Load</p>
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+            Traffic Load
+          </p>
         </div>
-        <span className={cn('text-lg font-bold font-mono', color)}>
-          {Math.round(percentage)}%
-        </span>
+        <span className={cn('text-lg font-bold font-mono', color)}>{Math.round(percentage)}%</span>
       </div>
       <div className="h-3 w-full rounded-full bg-border overflow-hidden">
         <div
@@ -109,7 +189,15 @@ export function TrafficLoadGauge({ load, maxLoad = 1.0 }) {
 }
 
 /* ─── Live Metric Card ─── */
-export function LiveMetricCard({ label, value, unit, trend, icon: Icon, color = 'text-secondary', sparklineData = [] }) {
+export function LiveMetricCard({
+  label,
+  value,
+  unit,
+  trend,
+  icon: Icon,
+  color = 'text-secondary',
+  sparklineData = [],
+}) {
   const trendConfig = {
     up: { icon: TrendingUp, color: 'text-accent', label: 'Improving' },
     down: { icon: TrendingDown, color: 'text-danger', label: 'Degrading' },
@@ -134,15 +222,23 @@ export function LiveMetricCard({ label, value, unit, trend, icon: Icon, color = 
             <div className="flex items-center gap-1 mt-1">
               <TrendIcon className={cn('h-3 w-3', t.color)} />
               <span className={cn('text-xs font-medium', t.color)}>
-                {trend.change > 0 ? '+' : ''}{trend.change}% {t.label}
+                {trend.change > 0 ? '+' : ''}
+                {trend.change}% {t.label}
               </span>
             </div>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -154,14 +250,40 @@ export function LiveMetricCard({ label, value, unit, trend, icon: Icon, color = 
             <AreaChart data={sparklineData}>
               <defs>
                 <linearGradient id={`spark-${label}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={color.includes('accent') ? '#22c55e' : color.includes('danger') ? '#ef4444' : '#863bff'} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={color.includes('accent') ? '#22c55e' : color.includes('danger') ? '#ef4444' : '#863bff'} stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor={
+                      color.includes('accent')
+                        ? '#22c55e'
+                        : color.includes('danger')
+                          ? '#ef4444'
+                          : '#863bff'
+                    }
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor={
+                      color.includes('accent')
+                        ? '#22c55e'
+                        : color.includes('danger')
+                          ? '#ef4444'
+                          : '#863bff'
+                    }
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke={color.includes('accent') ? '#22c55e' : color.includes('danger') ? '#ef4444' : '#863bff'}
+                stroke={
+                  color.includes('accent')
+                    ? '#22c55e'
+                    : color.includes('danger')
+                      ? '#ef4444'
+                      : '#863bff'
+                }
                 fill={`url(#spark-${label})`}
                 strokeWidth={1.5}
               />
@@ -176,9 +298,24 @@ export function LiveMetricCard({ label, value, unit, trend, icon: Icon, color = 
 /* ─── Live Service Card ─── */
 export function LiveServiceCard({ service, onClick, expanded = false }) {
   const statusConfig = {
-    operational: { dot: 'bg-accent', border: 'border-accent/20', bg: 'bg-accent/5', text: 'text-accent' },
-    degraded: { dot: 'bg-warning', border: 'border-warning/20', bg: 'bg-warning/5', text: 'text-warning' },
-    critical: { dot: 'bg-danger', border: 'border-danger/20', bg: 'bg-danger/5', text: 'text-danger' },
+    operational: {
+      dot: 'bg-accent',
+      border: 'border-accent/20',
+      bg: 'bg-accent/5',
+      text: 'text-accent',
+    },
+    degraded: {
+      dot: 'bg-warning',
+      border: 'border-warning/20',
+      bg: 'bg-warning/5',
+      text: 'text-warning',
+    },
+    critical: {
+      dot: 'bg-danger',
+      border: 'border-danger/20',
+      bg: 'bg-danger/5',
+      text: 'text-danger',
+    },
   };
 
   const cfg = statusConfig[service.status] || statusConfig.operational;
@@ -188,9 +325,11 @@ export function LiveServiceCard({ service, onClick, expanded = false }) {
       onClick={onClick}
       className={cn(
         'rounded-xl border bg-surface p-4 cursor-pointer transition-all hover:shadow-md',
-        service.status === 'critical' ? 'border-danger/30 hover:border-danger/50' :
-        service.status === 'degraded' ? 'border-warning/30 hover:border-warning/50' :
-        'border-border hover:border-secondary/50'
+        service.status === 'critical'
+          ? 'border-danger/30 hover:border-danger/50'
+          : service.status === 'degraded'
+            ? 'border-warning/30 hover:border-warning/50'
+            : 'border-border hover:border-secondary/50'
       )}
     >
       <div className="flex items-start justify-between">
@@ -202,7 +341,9 @@ export function LiveServiceCard({ service, onClick, expanded = false }) {
             <h3 className="text-sm font-semibold text-text-primary">{service.name}</h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
-              <span className={cn('text-xs font-medium capitalize', cfg.text)}>{service.status}</span>
+              <span className={cn('text-xs font-medium capitalize', cfg.text)}>
+                {service.status}
+              </span>
             </div>
           </div>
         </div>
@@ -216,15 +357,24 @@ export function LiveServiceCard({ service, onClick, expanded = false }) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Latency</p>
-          <p className="text-sm font-mono font-medium text-text-primary">{service.latency?.current}ms</p>
+          <p className="text-sm font-mono font-medium text-text-primary">
+            {service.latency?.current}ms
+          </p>
         </div>
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Throughput</p>
-          <p className="text-sm font-mono font-medium text-text-primary">{service.throughput?.toLocaleString()}</p>
+          <p className="text-sm font-mono font-medium text-text-primary">
+            {service.throughput?.toLocaleString()}
+          </p>
         </div>
         <div>
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Error Rate</p>
-          <p className={cn('text-sm font-mono font-medium', service.errorRate > 1 ? 'text-danger' : 'text-accent')}>
+          <p
+            className={cn(
+              'text-sm font-mono font-medium',
+              service.errorRate > 1 ? 'text-danger' : 'text-accent'
+            )}
+          >
             {service.errorRate}%
           </p>
         </div>
@@ -242,7 +392,9 @@ export function LiveServiceCard({ service, onClick, expanded = false }) {
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Live Latency (60s)</p>
           <div className="h-16">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={service.history.latency?.slice(-30).map((p, i) => ({ i, v: p.value })) || []}>
+              <LineChart
+                data={service.history.latency?.slice(-30).map((p, i) => ({ i, v: p.value })) || []}
+              >
                 <Line type="monotone" dataKey="v" stroke="#863bff" strokeWidth={1.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -267,22 +419,27 @@ export function LiveLatencyChart({ data, height = 300 }) {
   const colors = {
     'API Gateway': '#863bff',
     'Auth Service': '#22c55e',
-    'Database': '#3b82f6',
+    Database: '#3b82f6',
     'Redis Cache': '#f59e0b',
-    'Worker': '#ef4444',
+    Worker: '#ef4444',
     'File Storage': '#ec4899',
     'Search Index': '#06b6d4',
-    'Notifications': '#8b5cf6',
+    Notifications: '#8b5cf6',
   };
 
-  const services = Object.keys(data[0] || {}).filter(k => k !== 'time');
+  const services = Object.keys(data[0] || {}).filter((k) => k !== 'time');
 
   return (
     <div className="h-full">
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="var(--text-muted)" interval="preserveStartEnd" />
+          <XAxis
+            dataKey="time"
+            tick={{ fontSize: 10 }}
+            stroke="var(--text-muted)"
+            interval="preserveStartEnd"
+          />
           <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" unit="ms" />
           <Tooltip
             contentStyle={{
@@ -294,7 +451,7 @@ export function LiveLatencyChart({ data, height = 300 }) {
             labelStyle={{ color: 'var(--text-primary)' }}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          {services.map(svc => (
+          {services.map((svc) => (
             <Line
               key={svc}
               type="monotone"
@@ -366,7 +523,9 @@ export function SimulationControlPanel() {
             className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm font-medium text-text-secondary hover:bg-surface-elevated"
           >
             <Settings2 className="h-4 w-4" />
-            <ChevronDown className={cn('h-3 w-3 transition-transform', showAdvanced && 'rotate-180')} />
+            <ChevronDown
+              className={cn('h-3 w-3 transition-transform', showAdvanced && 'rotate-180')}
+            />
           </button>
         </div>
       </div>
@@ -419,9 +578,21 @@ export function SimulationControlPanel() {
                         : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
                     )}
                   >
-                    <Icon className={cn('h-4 w-4 shrink-0 mt-0.5', active ? 'text-secondary' : 'text-text-muted')} />
+                    <Icon
+                      className={cn(
+                        'h-4 w-4 shrink-0 mt-0.5',
+                        active ? 'text-secondary' : 'text-text-muted'
+                      )}
+                    />
                     <div>
-                      <p className={cn('text-xs font-medium', active ? 'text-secondary' : 'text-text-primary')}>{p.label}</p>
+                      <p
+                        className={cn(
+                          'text-xs font-medium',
+                          active ? 'text-secondary' : 'text-text-primary'
+                        )}
+                      >
+                        {p.label}
+                      </p>
                       <p className="text-[10px] text-text-muted mt-0.5">{p.desc}</p>
                     </div>
                   </button>
@@ -445,16 +616,28 @@ export function SimulationControlPanel() {
                 onChange={(e) => controls.setStress(parseFloat(e.target.value))}
                 className="flex-1 accent-secondary"
               />
-              <span className={cn(
-                'text-sm font-bold font-mono w-20 text-right',
-                controls.stress > 1 ? 'text-danger' : controls.stress > 0.5 ? 'text-warning' : 'text-accent'
-              )}>
+              <span
+                className={cn(
+                  'text-sm font-bold font-mono w-20 text-right',
+                  controls.stress > 1
+                    ? 'text-danger'
+                    : controls.stress > 0.5
+                      ? 'text-warning'
+                      : 'text-accent'
+                )}
+              >
                 {Math.round(controls.stress * 100)}%
               </span>
             </div>
             <div className="mt-1 flex justify-between text-[10px] text-text-muted">
-              {stressLevels.map(l => (
-                <span key={l.value} className={cn(l.color, controls.stress >= l.value && controls.stress < (l.value + 0.5) ? 'font-bold' : '')}>
+              {stressLevels.map((l) => (
+                <span
+                  key={l.value}
+                  className={cn(
+                    l.color,
+                    controls.stress >= l.value && controls.stress < l.value + 0.5 ? 'font-bold' : ''
+                  )}
+                >
                   {l.label}
                 </span>
               ))}
@@ -480,8 +663,18 @@ export function LiveEventStream({ maxEvents = 20, filter = null }) {
 
   const severityConfig = {
     critical: { icon: Siren, color: 'text-danger', bg: 'bg-danger/5', border: 'border-danger/20' },
-    danger: { icon: AlertTriangle, color: 'text-danger', bg: 'bg-danger/5', border: 'border-danger/20' },
-    warning: { icon: TrafficCone, color: 'text-warning', bg: 'bg-warning/5', border: 'border-warning/20' },
+    danger: {
+      icon: AlertTriangle,
+      color: 'text-danger',
+      bg: 'bg-danger/5',
+      border: 'border-danger/20',
+    },
+    warning: {
+      icon: TrafficCone,
+      color: 'text-warning',
+      bg: 'bg-warning/5',
+      border: 'border-warning/20',
+    },
     error: { icon: X, color: 'text-danger', bg: 'bg-danger/5', border: 'border-danger/20' },
     info: { icon: Activity, color: 'text-info', bg: 'bg-info/5', border: 'border-info/20' },
   };
@@ -492,7 +685,9 @@ export function LiveEventStream({ maxEvents = 20, filter = null }) {
     <div className="rounded-xl border border-border bg-surface overflow-hidden">
       <div className="border-b border-border bg-background px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Radio className={cn('h-4 w-4', paused ? 'text-text-muted' : 'text-accent animate-pulse')} />
+          <Radio
+            className={cn('h-4 w-4', paused ? 'text-text-muted' : 'text-accent animate-pulse')}
+          />
           <h3 className="text-sm font-semibold text-text-primary">Live Events</h3>
           {events.length > 0 && (
             <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-medium text-secondary">
@@ -538,7 +733,12 @@ export function LiveEventStream({ maxEvents = 20, filter = null }) {
                     'hover:bg-surface-elevated'
                   )}
                 >
-                  <div className={cn('mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-background', cfg.border)}>
+                  <div
+                    className={cn(
+                      'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-background',
+                      cfg.border
+                    )}
+                  >
                     <Icon className={cn('h-3 w-3', cfg.color)} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -573,9 +773,9 @@ export function TrafficWaveViz({ bars = 30 }) {
   useEffect(() => {
     if (data?.metrics?.trafficLoad !== undefined) {
       const load = data.metrics.trafficLoad / 100;
-      setHeights(prev => {
+      setHeights((prev) => {
         const next = [...prev.slice(1), load + (Math.random() - 0.5) * 0.1];
-        return next.map(h => Math.max(0.05, Math.min(1, h)));
+        return next.map((h) => Math.max(0.05, Math.min(1, h)));
       });
     }
   }, [data]);
@@ -606,17 +806,21 @@ export function ConnectionStatus({ isConnected, size = 'sm' }) {
 
   return (
     <span className="relative inline-flex">
-      <span className={cn(
-        'inline-flex rounded-full',
-        sizeClasses[size],
-        isConnected ? 'bg-accent' : 'bg-text-muted'
-      )} />
-      {isConnected && (
-        <span className={cn(
-          'absolute inline-flex rounded-full opacity-75 animate-ping',
+      <span
+        className={cn(
+          'inline-flex rounded-full',
           sizeClasses[size],
-          'bg-accent'
-        )} />
+          isConnected ? 'bg-accent' : 'bg-text-muted'
+        )}
+      />
+      {isConnected && (
+        <span
+          className={cn(
+            'absolute inline-flex rounded-full opacity-75 animate-ping',
+            sizeClasses[size],
+            'bg-accent'
+          )}
+        />
       )}
     </span>
   );
@@ -638,9 +842,21 @@ export function SimulationStatsBar() {
       <div className="h-3 w-px bg-border" />
       <span>Elapsed: {controls.formattedElapsed}</span>
       <div className="h-3 w-px bg-border" />
-      <span>Pattern: <span className="font-mono text-text-secondary">{stats.trafficPattern}</span></span>
+      <span>
+        Pattern: <span className="font-mono text-text-secondary">{stats.trafficPattern}</span>
+      </span>
       <div className="h-3 w-px bg-border" />
-      <span>Stress: <span className={cn('font-mono', stats.globalStress > 0.5 ? 'text-danger' : 'text-text-secondary')}>{Math.round(stats.globalStress * 100)}%</span></span>
+      <span>
+        Stress:{' '}
+        <span
+          className={cn(
+            'font-mono',
+            stats.globalStress > 0.5 ? 'text-danger' : 'text-text-secondary'
+          )}
+        >
+          {Math.round(stats.globalStress * 100)}%
+        </span>
+      </span>
       <div className="h-3 w-px bg-border" />
       <span>Listeners: {stats.listenerCount}</span>
       <div className="h-3 w-px bg-border" />

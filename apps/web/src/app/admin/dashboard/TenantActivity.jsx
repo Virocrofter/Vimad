@@ -1,7 +1,13 @@
 /* src/app/admin/dashboard/TenantActivity.jsx */
 import {
-  ArrowUpCircle, CalendarPlus, UserPlus, Shield, Tag, CreditCard,
-  RefreshCw, ArrowRight
+  ArrowUpCircle,
+  CalendarPlus,
+  UserPlus,
+  Shield,
+  Tag,
+  CreditCard,
+  RefreshCw,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Link } from 'react-router-dom';
@@ -44,7 +50,12 @@ export default function TenantActivity({ activities }) {
               key={activity.id}
               className="flex items-start gap-3 border-b border-border px-5 py-3.5 transition-colors hover:bg-background/50"
             >
-              <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-md', config.bg)}>
+              <div
+                className={cn(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-md',
+                  config.bg
+                )}
+              >
                 <ActionIcon className={cn('h-4 w-4', config.color)} />
               </div>
               <div className="flex-1 min-w-0">

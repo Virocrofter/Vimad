@@ -10,7 +10,7 @@ function SimpleAreaChart({ data, color = '#3b82f6', height = 120 }) {
   const chartWidth = 100;
   const chartHeight = height;
 
-  const values = data.map(d => d.value);
+  const values = data.map((d) => d.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
@@ -23,7 +23,7 @@ function SimpleAreaChart({ data, color = '#3b82f6', height = 120 }) {
 
   const areaPath = `
     M ${points[0].x} ${chartHeight}
-    ${points.map(p => `L ${p.x} ${p.y}`).join(' ')}
+    ${points.map((p) => `L ${p.x} ${p.y}`).join(' ')}
     L ${points[points.length - 1].x} ${chartHeight}
     Z
   `;
@@ -39,22 +39,47 @@ function SimpleAreaChart({ data, color = '#3b82f6', height = 120 }) {
         </linearGradient>
       </defs>
       <path d={areaPath} fill="url(#areaGradient)" />
-      <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       {/* Last point dot */}
-      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill={color} />
+      <circle
+        cx={points[points.length - 1].x}
+        cy={points[points.length - 1].y}
+        r="3"
+        fill={color}
+      />
     </svg>
   );
 }
 
 export default function RevenueChart({ mrrData }) {
   const chartData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return mrrData.map((value, i) => ({ label: months[i], value }));
   }, [mrrData]);
 
   const currentMRR = mrrData[mrrData.length - 1];
   const previousMRR = mrrData[mrrData.length - 2];
-  const momChange = ((currentMRR - previousMRR) / previousMRR * 100).toFixed(1);
+  const momChange = (((currentMRR - previousMRR) / previousMRR) * 100).toFixed(1);
 
   return (
     <div className="rounded-xl border border-border bg-surface overflow-hidden">
@@ -75,10 +100,18 @@ export default function RevenueChart({ mrrData }) {
       <div className="p-5">
         {/* Big Number */}
         <div className="mb-4">
-          <p className="text-2xl font-bold font-mono text-text-primary">{formatCurrency(currentMRR)}</p>
+          <p className="text-2xl font-bold font-mono text-text-primary">
+            {formatCurrency(currentMRR)}
+          </p>
           <div className="mt-1 flex items-center gap-1.5">
-            <span className={cn('text-xs font-medium', parseFloat(momChange) >= 0 ? 'text-accent' : 'text-danger')}>
-              {parseFloat(momChange) >= 0 ? '+' : ''}{momChange}%
+            <span
+              className={cn(
+                'text-xs font-medium',
+                parseFloat(momChange) >= 0 ? 'text-accent' : 'text-danger'
+              )}
+            >
+              {parseFloat(momChange) >= 0 ? '+' : ''}
+              {momChange}%
             </span>
             <span className="text-xs text-text-muted">vs last month</span>
           </div>
@@ -91,9 +124,11 @@ export default function RevenueChart({ mrrData }) {
 
         {/* X-axis labels */}
         <div className="mt-2 flex justify-between text-[10px] text-text-muted">
-          {chartData.filter((_, i) => i % 2 === 0).map(d => (
-            <span key={d.label}>{d.label}</span>
-          ))}
+          {chartData
+            .filter((_, i) => i % 2 === 0)
+            .map((d) => (
+              <span key={d.label}>{d.label}</span>
+            ))}
         </div>
       </div>
     </div>

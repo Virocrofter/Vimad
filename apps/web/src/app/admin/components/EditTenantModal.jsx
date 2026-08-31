@@ -1,6 +1,17 @@
 /* src/app/admin/components/EditTenantModal.jsx */
 import { useState, useEffect } from 'react';
-import { X, Check, Building2, Users, Mail, Phone, MapPin, DollarSign, HardDrive, Zap } from 'lucide-react';
+import {
+  X,
+  Check,
+  Building2,
+  Users,
+  Mail,
+  Phone,
+  MapPin,
+  DollarSign,
+  HardDrive,
+  Zap,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { planMeta } from '../data';
@@ -59,7 +70,7 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
     }
   }, [tenant]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const planLimits = {
     Starter: { rooms: 75, storage: 50, apiCalls: 25000 },
@@ -77,7 +88,10 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
 
   const toggleFeature = (feature) => {
     const current = form.features;
-    update('features', current.includes(feature) ? current.filter(f => f !== feature) : [...current, feature]);
+    update(
+      'features',
+      current.includes(feature) ? current.filter((f) => f !== feature) : [...current, feature]
+    );
   };
 
   const availableFeatures = [
@@ -110,8 +124,15 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
       location: form.location,
       rooms: { used: parseInt(form.roomsUsed) || 0, total: parseInt(form.roomsTotal) || 0 },
       users: { used: parseInt(form.usersUsed) || 0, total: parseInt(form.usersTotal) || 0 },
-      storage: { used: parseFloat(form.storageUsed) || 0, total: parseInt(form.storageTotal) || 0, unit: form.storageUnit },
-      apiCalls: { used: parseInt(form.apiCallsUsed) || 0, total: parseInt(form.apiCallsTotal) || 0 },
+      storage: {
+        used: parseFloat(form.storageUsed) || 0,
+        total: parseInt(form.storageTotal) || 0,
+        unit: form.storageUnit,
+      },
+      apiCalls: {
+        used: parseInt(form.apiCallsUsed) || 0,
+        total: parseInt(form.apiCallsTotal) || 0,
+      },
       revenue: { mrr: parseFloat(form.mrr) || 0, totalPaid: parseFloat(form.totalPaid) || 0 },
       notes: form.notes,
       features: form.features,
@@ -136,7 +157,10 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
               <p className="text-xs text-text-muted">{tenant.id}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -144,10 +168,14 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Info */}
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Basic Information</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Basic Information
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Property Name</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Property Name
+                </label>
                 <input
                   type="text"
                   required
@@ -157,13 +185,17 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Subdomain</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Subdomain
+                </label>
                 <div className="flex items-center">
                   <input
                     type="text"
                     required
                     value={form.subdomain}
-                    onChange={(e) => update('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    onChange={(e) =>
+                      update('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                    }
                     className="h-10 flex-1 rounded-l-md border border-border bg-surface px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                   <span className="inline-flex h-10 items-center rounded-r-md border border-l-0 border-border bg-background px-3 text-sm text-text-muted">
@@ -213,7 +245,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
 
           {/* Owner Info */}
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Owner Information</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Owner Information
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-text-secondary">Name</label>
@@ -245,7 +279,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Location</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Location
+                </label>
                 <input
                   type="text"
                   value={form.location}
@@ -258,10 +294,14 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
 
           {/* Usage & Limits */}
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Usage & Limits</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Usage & Limits
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Rooms Used / Total</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Rooms Used / Total
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -281,7 +321,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Users Used / Total</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Users Used / Total
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -303,7 +345,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Storage Used / Total (GB)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Storage Used / Total (GB)
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -324,7 +368,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">API Calls Used / Total</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  API Calls Used / Total
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -348,10 +394,14 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
 
           {/* Revenue */}
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Revenue</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Revenue
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Monthly Recurring Revenue ($)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Monthly Recurring Revenue ($)
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -362,7 +412,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Total Paid ($)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Total Paid ($)
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -377,7 +429,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
 
           {/* Features */}
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Enabled Features</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Enabled Features
+            </h4>
             <div className="flex flex-wrap gap-2">
               {availableFeatures.map((feature) => (
                 <button
@@ -392,7 +446,10 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                   )}
                 >
                   {form.features.includes(feature) && <Check className="h-3 w-3" />}
-                  {feature.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  {feature
+                    .split('-')
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(' ')}
                 </button>
               ))}
             </div>
@@ -411,7 +468,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> Save Changes
             </Button>

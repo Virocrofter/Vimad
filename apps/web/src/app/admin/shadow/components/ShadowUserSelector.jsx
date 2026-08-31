@@ -1,25 +1,31 @@
 /* src/app/admin/shadow/components/ShadowUserSelector.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Search, User, Eye, Zap, Monitor, X, Shield, Clock,
-  MapPin, Mail, ChevronRight, AlertTriangle, CheckCircle2
+  Search,
+  User,
+  Eye,
+  Zap,
+  Monitor,
+  X,
+  Shield,
+  Clock,
+  MapPin,
+  Mail,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 import { useShadowStore } from '../store';
-import {
-  shadowableUsers,
-  roleConfig,
-  userStatusConfig,
-  moduleLabels,
-} from '../data';
+import { shadowableUsers, roleConfig, userStatusConfig, moduleLabels } from '../data';
 
 export function ShadowUserSelector({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [mode, setMode] = useState('impersonate'); // 'impersonate' | 'takeover'
   const [showConfirm, setShowConfirm] = useState(false);
-  
+
   const startShadow = useShadowStore((s) => s.startShadow);
   const takeoverSession = useShadowStore((s) => s.takeoverSession);
   const originalUser = useShadowStore((s) => s.originalUser) || {
@@ -32,12 +38,13 @@ export function ShadowUserSelector({ isOpen, onClose }) {
   const filteredUsers = useMemo(() => {
     if (!query.trim()) return shadowableUsers;
     const q = query.toLowerCase();
-    return shadowableUsers.filter((u) =>
-      u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      u.role.toLowerCase().includes(q) ||
-      u.department.toLowerCase().includes(q) ||
-      u.property.toLowerCase().includes(q)
+    return shadowableUsers.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.role.toLowerCase().includes(q) ||
+        u.department.toLowerCase().includes(q) ||
+        u.property.toLowerCase().includes(q)
     );
   }, [query]);
 
@@ -52,13 +59,13 @@ export function ShadowUserSelector({ isOpen, onClose }) {
 
   const handleConfirm = () => {
     if (!selectedUser) return;
-    
+
     if (mode === 'takeover' && selectedUser.currentSession) {
       takeoverSession(selectedUser.currentSession, originalUser);
     } else {
       startShadow(selectedUser, originalUser);
     }
-    
+
     onClose();
     setSelectedUser(null);
     setShowConfirm(false);
@@ -70,7 +77,7 @@ export function ShadowUserSelector({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      
+
       <div className="relative w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-xl border border-border bg-background shadow-2xl flex flex-col">
         {/* Header */}
         <div className="border-b border-border px-6 py-4 flex items-center justify-between shrink-0">
@@ -83,7 +90,10 @@ export function ShadowUserSelector({ isOpen, onClose }) {
               <p className="text-xs text-text-muted">Impersonate any user undetected</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -105,7 +115,7 @@ export function ShadowUserSelector({ isOpen, onClose }) {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2 text-text-secondary">
                   <MapPin className="h-4 w-4 text-text-muted" />
@@ -144,7 +154,9 @@ export function ShadowUserSelector({ isOpen, onClose }) {
             {/* Mode Selection */}
             {selectedUser.currentSession && (
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">Entry Mode</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Entry Mode
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setMode('impersonate')}
@@ -155,9 +167,21 @@ export function ShadowUserSelector({ isOpen, onClose }) {
                         : 'border-border bg-surface hover:border-secondary/30'
                     )}
                   >
-                    <Eye className={cn('h-5 w-5', mode === 'impersonate' ? 'text-secondary' : 'text-text-muted')} />
+                    <Eye
+                      className={cn(
+                        'h-5 w-5',
+                        mode === 'impersonate' ? 'text-secondary' : 'text-text-muted'
+                      )}
+                    />
                     <div>
-                      <p className={cn('text-sm font-medium', mode === 'impersonate' ? 'text-secondary' : 'text-text-primary')}>Fresh Impersonation</p>
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          mode === 'impersonate' ? 'text-secondary' : 'text-text-primary'
+                        )}
+                      >
+                        Fresh Impersonation
+                      </p>
                       <p className="text-xs text-text-muted">Start new session as this user</p>
                     </div>
                   </button>
@@ -170,9 +194,21 @@ export function ShadowUserSelector({ isOpen, onClose }) {
                         : 'border-border bg-surface hover:border-danger/30'
                     )}
                   >
-                    <Zap className={cn('h-5 w-5', mode === 'takeover' ? 'text-danger' : 'text-text-muted')} />
+                    <Zap
+                      className={cn(
+                        'h-5 w-5',
+                        mode === 'takeover' ? 'text-danger' : 'text-text-muted'
+                      )}
+                    />
                     <div>
-                      <p className={cn('text-sm font-medium', mode === 'takeover' ? 'text-danger' : 'text-text-primary')}>Session Takeover</p>
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          mode === 'takeover' ? 'text-danger' : 'text-text-primary'
+                        )}
+                      >
+                        Session Takeover
+                      </p>
                       <p className="text-xs text-text-muted">Hijack their active session</p>
                     </div>
                   </button>
@@ -184,8 +220,8 @@ export function ShadowUserSelector({ isOpen, onClose }) {
             <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
               <p className="text-xs text-warning">
-                Shadow mode bypasses normal audit trails. All actions will appear as {selectedUser.name}. 
-                Use responsibly.
+                Shadow mode bypasses normal audit trails. All actions will appear as{' '}
+                {selectedUser.name}. Use responsibly.
               </p>
             </div>
 
@@ -307,7 +343,14 @@ function UserRow({ user, onSelect }) {
 function RoleBadge({ role }) {
   const meta = roleConfig[role] || roleConfig.readonly;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.bg, meta.color, meta.border)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -316,7 +359,12 @@ function RoleBadge({ role }) {
 function StatusBadge({ status }) {
   const meta = userStatusConfig[status] || userStatusConfig.offline;
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>

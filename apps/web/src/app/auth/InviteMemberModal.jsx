@@ -63,7 +63,9 @@ export function InviteMemberModal({ isOpen, onClose }) {
               <CheckCircle className="h-6 w-6 text-accent" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-text-primary">Invitation sent!</h3>
-            <p className="mt-1 text-sm text-text-secondary">They'll receive an email to join your team.</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              They'll receive an email to join your team.
+            </p>
           </div>
         ) : (
           <>

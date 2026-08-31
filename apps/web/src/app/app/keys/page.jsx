@@ -2,11 +2,37 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Key, KeyRound, AlertTriangle, CheckCircle2, Clock, Search,
-  Filter, Plus, X, MoreHorizontal, ArrowRightLeft, History,
-  User, DoorOpen, Lock, Unlock, Shield, TrendingUp, AlertCircle,
-  Calendar, MapPin, Tag, ChevronDown, ChevronUp, Download,
-  RefreshCw, Eye, Edit3, Trash2, Copy, Check
+  Key,
+  KeyRound,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Search,
+  Filter,
+  Plus,
+  X,
+  MoreHorizontal,
+  ArrowRightLeft,
+  History,
+  User,
+  DoorOpen,
+  Lock,
+  Unlock,
+  Shield,
+  TrendingUp,
+  AlertCircle,
+  Calendar,
+  MapPin,
+  Tag,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  RefreshCw,
+  Eye,
+  Edit3,
+  Trash2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -28,8 +54,20 @@ const keyRack = [
     lastAudit: '2026-08-14 09:00 AM',
     auditBy: 'Sarah J.',
     history: [
-      { action: 'checked_out', by: 'Sarah J.', to: 'Mike C.', time: '2026-08-14 08:30 AM', note: 'Morning shift handover' },
-      { action: 'checked_in', by: 'Mike C.', to: 'Sarah J.', time: '2026-08-14 09:00 AM', note: 'Returned after shift' },
+      {
+        action: 'checked_out',
+        by: 'Sarah J.',
+        to: 'Mike C.',
+        time: '2026-08-14 08:30 AM',
+        note: 'Morning shift handover',
+      },
+      {
+        action: 'checked_in',
+        by: 'Mike C.',
+        to: 'Sarah J.',
+        time: '2026-08-14 09:00 AM',
+        note: 'Returned after shift',
+      },
     ],
   },
   {
@@ -46,7 +84,13 @@ const keyRack = [
     lastAudit: '2026-08-14 06:00 PM',
     auditBy: 'James L.',
     history: [
-      { action: 'checked_out', by: 'James L.', to: 'Maria G.', time: '2026-08-15 07:00 AM', note: 'Morning cleaning round' },
+      {
+        action: 'checked_out',
+        by: 'James L.',
+        to: 'Maria G.',
+        time: '2026-08-15 07:00 AM',
+        note: 'Morning cleaning round',
+      },
     ],
   },
   {
@@ -63,7 +107,13 @@ const keyRack = [
     lastAudit: '2026-08-12 15:30',
     auditBy: 'Sarah J.',
     history: [
-      { action: 'checked_out', by: 'Sarah J.', to: 'John Smith', time: '2026-08-12 15:30', note: 'Check-in' },
+      {
+        action: 'checked_out',
+        by: 'Sarah J.',
+        to: 'John Smith',
+        time: '2026-08-12 15:30',
+        note: 'Check-in',
+      },
     ],
   },
   {
@@ -95,7 +145,13 @@ const keyRack = [
     lastAudit: '2026-08-14 06:00 PM',
     auditBy: 'James L.',
     history: [
-      { action: 'checked_out', by: 'James L.', to: 'David P.', time: '2026-08-15 08:00', note: 'HVAC repair on Floor 2' },
+      {
+        action: 'checked_out',
+        by: 'James L.',
+        to: 'David P.',
+        time: '2026-08-15 08:00',
+        note: 'HVAC repair on Floor 2',
+      },
     ],
   },
   {
@@ -112,7 +168,13 @@ const keyRack = [
     lastAudit: '2026-08-13 14:00',
     auditBy: 'System',
     history: [
-      { action: 'issued', by: 'System', to: 'Amanda Wilson', time: '2026-08-13 14:00', note: 'Mobile check-in' },
+      {
+        action: 'issued',
+        by: 'System',
+        to: 'Amanda Wilson',
+        time: '2026-08-13 14:00',
+        note: 'Mobile check-in',
+      },
     ],
   },
   {
@@ -129,7 +191,13 @@ const keyRack = [
     lastAudit: '2026-08-12 16:00',
     auditBy: 'System',
     history: [
-      { action: 'issued', by: 'System', to: 'Lisa Wong', time: '2026-08-12 16:00', note: 'Mobile check-in' },
+      {
+        action: 'issued',
+        by: 'System',
+        to: 'Lisa Wong',
+        time: '2026-08-12 16:00',
+        note: 'Mobile check-in',
+      },
     ],
   },
   {
@@ -161,8 +229,20 @@ const keyRack = [
     lastAudit: '2026-08-10 15:00',
     auditBy: 'Sarah J.',
     history: [
-      { action: 'checked_out', by: 'Sarah J.', to: 'Robert Chen', time: '2026-08-10 15:00', note: 'Check-in' },
-      { action: 'reminder_sent', by: 'System', to: 'Robert Chen', time: '2026-08-12 12:00', note: 'Overdue reminder email sent' },
+      {
+        action: 'checked_out',
+        by: 'Sarah J.',
+        to: 'Robert Chen',
+        time: '2026-08-10 15:00',
+        note: 'Check-in',
+      },
+      {
+        action: 'reminder_sent',
+        by: 'System',
+        to: 'Robert Chen',
+        time: '2026-08-12 12:00',
+        note: 'Overdue reminder email sent',
+      },
     ],
   },
   {
@@ -179,33 +259,123 @@ const keyRack = [
     lastAudit: '2026-08-15 09:00',
     auditBy: 'Valet Lead',
     history: [
-      { action: 'checked_out', by: 'Valet Lead', to: 'Valet Team', time: '2026-08-15 09:00', note: 'Guest vehicle parked' },
+      {
+        action: 'checked_out',
+        by: 'Valet Lead',
+        to: 'Valet Team',
+        time: '2026-08-15 09:00',
+        note: 'Guest vehicle parked',
+      },
     ],
   },
 ];
 
 const alerts = [
-  { id: 1, severity: 'danger', title: 'Key Overdue — Room 103', message: 'Robert Chen checked out Aug 12. Key not returned. 3 days overdue.', time: '3 days ago', keyId: 'KEY-009' },
-  { id: 2, severity: 'warning', title: 'Floor 1 Master Due Soon', message: 'Maria G. must return Floor 1 Master by 3:00 PM today.', time: '2 hrs ago', keyId: 'KEY-002' },
-  { id: 3, severity: 'warning', title: 'Maintenance Key Due Soon', message: 'David P. must return Maintenance Master by 5:00 PM today.', time: '30 min ago', keyId: 'KEY-005' },
-  { id: 4, severity: 'info', title: 'Daily Key Audit Pending', message: 'Evening key audit not yet completed. 5 keys need verification.', time: '1 hr ago', keyId: null },
-  { id: 5, severity: 'info', title: 'Digital Pass Expiring', message: 'Amanda Wilson\'s digital pass for Suite 301 expires tomorrow at 11:00 AM.', time: '3 hrs ago', keyId: 'KEY-006' },
+  {
+    id: 1,
+    severity: 'danger',
+    title: 'Key Overdue — Room 103',
+    message: 'Robert Chen checked out Aug 12. Key not returned. 3 days overdue.',
+    time: '3 days ago',
+    keyId: 'KEY-009',
+  },
+  {
+    id: 2,
+    severity: 'warning',
+    title: 'Floor 1 Master Due Soon',
+    message: 'Maria G. must return Floor 1 Master by 3:00 PM today.',
+    time: '2 hrs ago',
+    keyId: 'KEY-002',
+  },
+  {
+    id: 3,
+    severity: 'warning',
+    title: 'Maintenance Key Due Soon',
+    message: 'David P. must return Maintenance Master by 5:00 PM today.',
+    time: '30 min ago',
+    keyId: 'KEY-005',
+  },
+  {
+    id: 4,
+    severity: 'info',
+    title: 'Daily Key Audit Pending',
+    message: 'Evening key audit not yet completed. 5 keys need verification.',
+    time: '1 hr ago',
+    keyId: null,
+  },
+  {
+    id: 5,
+    severity: 'info',
+    title: 'Digital Pass Expiring',
+    message: "Amanda Wilson's digital pass for Suite 301 expires tomorrow at 11:00 AM.",
+    time: '3 hrs ago',
+    keyId: 'KEY-006',
+  },
 ];
 
 /* ─── Status Helpers ─── */
 const statusMeta = {
-  available: { label: 'Available', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', icon: CheckCircle2 },
-  checked_out: { label: 'Checked Out', class: 'bg-secondary/10 text-secondary border-secondary/20', dot: 'bg-secondary', icon: ArrowRightLeft },
-  overdue: { label: 'Overdue', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: AlertTriangle },
-  active: { label: 'Active', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', icon: KeyRound },
-  lost: { label: 'Lost', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted', icon: AlertCircle },
+  available: {
+    label: 'Available',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: CheckCircle2,
+  },
+  checked_out: {
+    label: 'Checked Out',
+    class: 'bg-secondary/10 text-secondary border-secondary/20',
+    dot: 'bg-secondary',
+    icon: ArrowRightLeft,
+  },
+  overdue: {
+    label: 'Overdue',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: AlertTriangle,
+  },
+  active: {
+    label: 'Active',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: KeyRound,
+  },
+  lost: {
+    label: 'Lost',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+    icon: AlertCircle,
+  },
 };
 
 const severityMeta = {
-  danger: { icon: AlertTriangle, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
-  warning: { icon: AlertCircle, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
-  info: { icon: Key, color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  success: { icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
+  danger: {
+    icon: AlertTriangle,
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
+  warning: {
+    icon: AlertCircle,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
+  info: {
+    icon: Key,
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  success: {
+    icon: CheckCircle2,
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
 };
 
 const typeMeta = {
@@ -235,12 +405,26 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last week
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last week
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -252,7 +436,12 @@ function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.available;
   const Icon = meta.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -263,7 +452,12 @@ function TypeBadge({ type }) {
   const meta = typeMeta[type] || typeMeta.physical;
   const Icon = meta.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <Icon className="h-3 w-3" /> {meta.label}
     </span>
   );
@@ -300,18 +494,31 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-lg border',
-                keyItem.type === 'digital' ? 'bg-info/10 border-info/30' : 'bg-secondary/10 border-secondary/30'
-              )}>
-                {keyItem.type === 'digital' ? <KeyRound className="h-5 w-5 text-info" /> : <Key className="h-5 w-5 text-secondary" />}
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg border',
+                  keyItem.type === 'digital'
+                    ? 'bg-info/10 border-info/30'
+                    : 'bg-secondary/10 border-secondary/30'
+                )}
+              >
+                {keyItem.type === 'digital' ? (
+                  <KeyRound className="h-5 w-5 text-info" />
+                ) : (
+                  <Key className="h-5 w-5 text-secondary" />
+                )}
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{keyItem.label}</h2>
-                <p className="text-xs text-text-muted">{keyItem.id} · <TypeBadge type={keyItem.type} /></p>
+                <p className="text-xs text-text-muted">
+                  {keyItem.id} · <TypeBadge type={keyItem.type} />
+                </p>
               </div>
             </div>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -319,10 +526,12 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
           <div className="mt-3 flex items-center gap-2">
             <StatusBadge status={keyItem.status} />
             {timeInfo && (
-              <span className={cn(
-                'text-xs font-medium',
-                timeInfo.urgent ? 'text-danger' : 'text-text-muted'
-              )}>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  timeInfo.urgent ? 'text-danger' : 'text-text-muted'
+                )}
+              >
                 {timeInfo.text}
               </span>
             )}
@@ -339,7 +548,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -368,7 +579,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider">Assigned To</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                    Assigned To
+                  </p>
                   <p className="mt-1 text-sm font-medium text-text-primary flex items-center gap-1.5">
                     <User className="h-3.5 w-3.5 text-text-muted" /> {keyItem.assignedTo || '—'}
                   </p>
@@ -397,12 +610,26 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                 {!showCheckInOut ? (
                   <div className="flex gap-2">
                     {keyItem.status === 'available' && (
-                      <Button variant="secondary" className="flex-1" onClick={() => { setCioForm({ ...cioForm, action: 'check_out' }); setShowCheckInOut(true); }}>
+                      <Button
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={() => {
+                          setCioForm({ ...cioForm, action: 'check_out' });
+                          setShowCheckInOut(true);
+                        }}
+                      >
                         <ArrowRightLeft className="mr-1.5 h-4 w-4" /> Check Out
                       </Button>
                     )}
                     {(keyItem.status === 'checked_out' || keyItem.status === 'overdue') && (
-                      <Button variant="accent" className="flex-1" onClick={() => { setCioForm({ ...cioForm, action: 'check_in' }); setShowCheckInOut(true); }}>
+                      <Button
+                        variant="accent"
+                        className="flex-1"
+                        onClick={() => {
+                          setCioForm({ ...cioForm, action: 'check_in' });
+                          setShowCheckInOut(true);
+                        }}
+                      >
                         <CheckCircle2 className="mr-1.5 h-4 w-4" /> Check In
                       </Button>
                     )}
@@ -411,12 +638,17 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                     </Button>
                   </div>
                 ) : (
-                  <form onSubmit={handleCioSubmit} className="rounded-xl border border-border bg-surface p-4 space-y-3">
+                  <form
+                    onSubmit={handleCioSubmit}
+                    className="rounded-xl border border-border bg-surface p-4 space-y-3"
+                  >
                     <h4 className="text-sm font-semibold text-text-primary">
                       {cioForm.action === 'check_out' ? 'Check Out Key' : 'Check In Key'}
                     </h4>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Person</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Person
+                      </label>
                       <input
                         type="text"
                         value={cioForm.person}
@@ -426,7 +658,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Note</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Note
+                      </label>
                       <input
                         type="text"
                         value={cioForm.note}
@@ -436,7 +670,14 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button type="button" variant="outline" className="flex-1" onClick={() => setShowCheckInOut(false)}>Cancel</Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setShowCheckInOut(false)}
+                      >
+                        Cancel
+                      </Button>
                       <Button type="submit" variant="secondary" className="flex-1">
                         <Check className="mr-1.5 h-4 w-4" /> Confirm
                       </Button>
@@ -451,7 +692,10 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                   <Button variant="outline" className="w-full">
                     <RefreshCw className="mr-1.5 h-4 w-4" /> Regenerate Pass
                   </Button>
-                  <Button variant="outline" className="w-full text-danger border-danger/30 hover:bg-danger/10">
+                  <Button
+                    variant="outline"
+                    className="w-full text-danger border-danger/30 hover:bg-danger/10"
+                  >
                     <Lock className="mr-1.5 h-4 w-4" /> Revoke Access
                   </Button>
                 </div>
@@ -468,18 +712,25 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                 keyItem.history.map((entry, i) => (
                   <div key={i} className="rounded-lg border border-border bg-surface p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className={cn(
-                        'text-xs font-semibold uppercase tracking-wider',
-                        entry.action === 'checked_out' ? 'text-secondary' :
-                        entry.action === 'checked_in' ? 'text-accent' :
-                        entry.action === 'issued' ? 'text-info' : 'text-text-muted'
-                      )}>
+                      <span
+                        className={cn(
+                          'text-xs font-semibold uppercase tracking-wider',
+                          entry.action === 'checked_out'
+                            ? 'text-secondary'
+                            : entry.action === 'checked_in'
+                              ? 'text-accent'
+                              : entry.action === 'issued'
+                                ? 'text-info'
+                                : 'text-text-muted'
+                        )}
+                      >
                         {entry.action.replace(/_/g, ' ')}
                       </span>
                       <span className="text-[10px] text-text-muted">{entry.time}</span>
                     </div>
                     <p className="text-sm text-text-secondary">
-                      <span className="font-medium text-text-primary">{entry.by}</span> → <span className="font-medium text-text-primary">{entry.to}</span>
+                      <span className="font-medium text-text-primary">{entry.by}</span> →{' '}
+                      <span className="font-medium text-text-primary">{entry.to}</span>
                     </p>
                     {entry.note && <p className="mt-1 text-xs text-text-muted">{entry.note}</p>}
                   </div>
@@ -509,7 +760,9 @@ export default function KeysPage() {
   const stats = useMemo(() => {
     const total = keys.length;
     const available = keys.filter((k) => k.status === 'available').length;
-    const checkedOut = keys.filter((k) => k.status === 'checked_out' || k.status === 'active').length;
+    const checkedOut = keys.filter(
+      (k) => k.status === 'checked_out' || k.status === 'active'
+    ).length;
     const overdue = keys.filter((k) => k.status === 'overdue').length;
     const digital = keys.filter((k) => k.type === 'digital').length;
     return { total, available, checkedOut, overdue, digital };
@@ -521,7 +774,8 @@ export default function KeysPage() {
 
   const filteredKeys = useMemo(() => {
     return keys.filter((k) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         k.label.toLowerCase().includes(query.toLowerCase()) ||
         k.id.toLowerCase().includes(query.toLowerCase()) ||
         (k.assignedTo && k.assignedTo.toLowerCase().includes(query.toLowerCase())) ||
@@ -538,28 +792,30 @@ export default function KeysPage() {
   };
 
   const handleUpdateStatus = (keyId, action, person, note) => {
-    setKeys((prev) => prev.map((k) => {
-      if (k.id !== keyId) return k;
-      const newStatus = action === 'check_out' ? 'checked_out' : 'available';
-      const newAssignedTo = action === 'check_out' ? person : null;
-      const newAssignedAt = action === 'check_out' ? new Date().toISOString() : null;
-      const newDueBack = action === 'check_out' ? '2026-08-15 23:59' : null;
-      const historyEntry = {
-        action,
-        by: 'You',
-        to: person,
-        time: new Date().toISOString(),
-        note: note || '',
-      };
-      return {
-        ...k,
-        status: newStatus,
-        assignedTo: newAssignedTo,
-        assignedAt: newAssignedAt,
-        dueBack: newDueBack,
-        history: [historyEntry, ...k.history],
-      };
-    }));
+    setKeys((prev) =>
+      prev.map((k) => {
+        if (k.id !== keyId) return k;
+        const newStatus = action === 'check_out' ? 'checked_out' : 'available';
+        const newAssignedTo = action === 'check_out' ? person : null;
+        const newAssignedAt = action === 'check_out' ? new Date().toISOString() : null;
+        const newDueBack = action === 'check_out' ? '2026-08-15 23:59' : null;
+        const historyEntry = {
+          action,
+          by: 'You',
+          to: person,
+          time: new Date().toISOString(),
+          note: note || '',
+        };
+        return {
+          ...k,
+          status: newStatus,
+          assignedTo: newAssignedTo,
+          assignedAt: newAssignedAt,
+          dueBack: newDueBack,
+          history: [historyEntry, ...k.history],
+        };
+      })
+    );
     setSelectedKey(null);
   };
 
@@ -570,7 +826,9 @@ export default function KeysPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Key Management</h1>
-          <p className="text-sm text-text-secondary">Physical keys, digital passes, and access control</p>
+          <p className="text-sm text-text-secondary">
+            Physical keys, digital passes, and access control
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -584,19 +842,51 @@ export default function KeysPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard label="Total Keys" value={stats.total} icon={Key} color="text-text-primary" subtext="Physical + Digital" />
-        <StatCard label="Available" value={stats.available} icon={Unlock} color="text-accent" subtext="Ready for use" />
-        <StatCard label="Checked Out" value={stats.checkedOut} icon={Lock} color="text-secondary" subtext="Active assignments" />
-        <StatCard label="Overdue" value={stats.overdue} icon={AlertTriangle} color="text-danger" subtext="Require attention" />
-        <StatCard label="Digital Passes" value={stats.digital} icon={KeyRound} color="text-info" subtext="Mobile keys active" />
+        <StatCard
+          label="Total Keys"
+          value={stats.total}
+          icon={Key}
+          color="text-text-primary"
+          subtext="Physical + Digital"
+        />
+        <StatCard
+          label="Available"
+          value={stats.available}
+          icon={Unlock}
+          color="text-accent"
+          subtext="Ready for use"
+        />
+        <StatCard
+          label="Checked Out"
+          value={stats.checkedOut}
+          icon={Lock}
+          color="text-secondary"
+          subtext="Active assignments"
+        />
+        <StatCard
+          label="Overdue"
+          value={stats.overdue}
+          icon={AlertTriangle}
+          color="text-danger"
+          subtext="Require attention"
+        />
+        <StatCard
+          label="Digital Passes"
+          value={stats.digital}
+          icon={KeyRound}
+          color="text-info"
+          subtext="Mobile keys active"
+        />
       </div>
 
       {/* Alerts Banner */}
       {activeAlerts.length > 0 && (
-        <div className={cn(
-          'rounded-xl border border-border bg-surface overflow-hidden transition-all',
-          showAlerts ? '' : 'opacity-90'
-        )}>
+        <div
+          className={cn(
+            'rounded-xl border border-border bg-surface overflow-hidden transition-all',
+            showAlerts ? '' : 'opacity-90'
+          )}
+        >
           <div className="flex items-center justify-between border-b border-border bg-background px-4 py-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-danger" />
@@ -627,7 +917,9 @@ export default function KeysPage() {
                           <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
                           <p className="text-sm font-medium text-text-primary">{alert.title}</p>
                         </div>
-                        <p className="mt-0.5 text-xs text-text-secondary leading-relaxed">{alert.message}</p>
+                        <p className="mt-0.5 text-xs text-text-secondary leading-relaxed">
+                          {alert.message}
+                        </p>
                         <p className="mt-1 text-[10px] text-text-muted">{alert.time}</p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
@@ -694,7 +986,9 @@ export default function KeysPage() {
               onClick={() => setViewMode('grid')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'grid'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <Key className="h-4 w-4" />
@@ -703,7 +997,9 @@ export default function KeysPage() {
               onClick={() => setViewMode('list')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'list' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'list'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <Lock className="h-4 w-4" />
@@ -727,11 +1023,19 @@ export default function KeysPage() {
                 )}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className={cn(
-                    'flex h-10 w-10 items-center justify-center rounded-lg border',
-                    keyItem.type === 'digital' ? 'bg-info/10 border-info/30' : 'bg-secondary/10 border-secondary/30'
-                  )}>
-                    {keyItem.type === 'digital' ? <KeyRound className="h-5 w-5 text-info" /> : <Key className="h-5 w-5 text-secondary" />}
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-lg border',
+                      keyItem.type === 'digital'
+                        ? 'bg-info/10 border-info/30'
+                        : 'bg-secondary/10 border-secondary/30'
+                    )}
+                  >
+                    {keyItem.type === 'digital' ? (
+                      <KeyRound className="h-5 w-5 text-info" />
+                    ) : (
+                      <Key className="h-5 w-5 text-secondary" />
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <StatusBadge status={keyItem.status} />
@@ -764,10 +1068,12 @@ export default function KeysPage() {
                 </div>
 
                 {timeInfo && (
-                  <div className={cn(
-                    'mt-3 flex items-center gap-1.5 text-xs font-medium',
-                    timeInfo.urgent ? 'text-danger' : 'text-text-muted'
-                  )}>
+                  <div
+                    className={cn(
+                      'mt-3 flex items-center gap-1.5 text-xs font-medium',
+                      timeInfo.urgent ? 'text-danger' : 'text-text-muted'
+                    )}
+                  >
                     <Clock className="h-3.5 w-3.5" />
                     {timeInfo.text}
                   </div>
@@ -796,12 +1102,24 @@ export default function KeysPage() {
             <table className="w-full text-sm">
               <thead className="bg-background border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Key</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Assigned To</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Due Back</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Location</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Key
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Assigned To
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Due Back
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Location
+                  </th>
                   <th className="px-4 py-3 w-16"></th>
                 </tr>
               </thead>
@@ -816,24 +1134,45 @@ export default function KeysPage() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={cn(
-                            'flex h-8 w-8 items-center justify-center rounded-lg border',
-                            keyItem.type === 'digital' ? 'bg-info/10 border-info/30' : 'bg-secondary/10 border-secondary/30'
-                          )}>
-                            {keyItem.type === 'digital' ? <KeyRound className="h-4 w-4 text-info" /> : <Key className="h-4 w-4 text-secondary" />}
+                          <div
+                            className={cn(
+                              'flex h-8 w-8 items-center justify-center rounded-lg border',
+                              keyItem.type === 'digital'
+                                ? 'bg-info/10 border-info/30'
+                                : 'bg-secondary/10 border-secondary/30'
+                            )}
+                          >
+                            {keyItem.type === 'digital' ? (
+                              <KeyRound className="h-4 w-4 text-info" />
+                            ) : (
+                              <Key className="h-4 w-4 text-secondary" />
+                            )}
                           </div>
                           <div>
-                            <p className="font-medium text-text-primary group-hover:text-secondary transition-colors">{keyItem.label}</p>
+                            <p className="font-medium text-text-primary group-hover:text-secondary transition-colors">
+                              {keyItem.label}
+                            </p>
                             <p className="text-xs text-text-muted">{keyItem.id}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3"><TypeBadge type={keyItem.type} /></td>
-                      <td className="px-4 py-3"><StatusBadge status={keyItem.status} /></td>
-                      <td className="px-4 py-3 text-text-secondary text-xs">{keyItem.assignedTo || '—'}</td>
+                      <td className="px-4 py-3">
+                        <TypeBadge type={keyItem.type} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={keyItem.status} />
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary text-xs">
+                        {keyItem.assignedTo || '—'}
+                      </td>
                       <td className="px-4 py-3">
                         {timeInfo ? (
-                          <span className={cn('text-xs font-medium', timeInfo.urgent ? 'text-danger' : 'text-text-muted')}>
+                          <span
+                            className={cn(
+                              'text-xs font-medium',
+                              timeInfo.urgent ? 'text-danger' : 'text-text-muted'
+                            )}
+                          >
                             {timeInfo.text}
                           </span>
                         ) : (

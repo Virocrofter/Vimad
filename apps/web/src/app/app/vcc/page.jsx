@@ -2,12 +2,45 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  CreditCard, Plus, Search, Filter, Eye, EyeOff, Copy, Check,
-  Clock, AlertTriangle, AlertCircle, CheckCircle2, X, RefreshCw,
-  Download, MoreHorizontal, Trash2, Edit3, Lock, Unlock, Zap,
-  Calendar, DollarSign, TrendingUp, Shield, Ban, ArrowRightLeft,
-  ChevronDown, ChevronUp, LayoutGrid, List, Bell, Settings,
-  History, Wallet, Receipt, Globe, Smartphone, Laptop
+  CreditCard,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle2,
+  X,
+  RefreshCw,
+  Download,
+  MoreHorizontal,
+  Trash2,
+  Edit3,
+  Lock,
+  Unlock,
+  Zap,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Shield,
+  Ban,
+  ArrowRightLeft,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  List,
+  Bell,
+  Settings,
+  History,
+  Wallet,
+  Receipt,
+  Globe,
+  Smartphone,
+  Laptop,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -22,24 +55,43 @@ const initialCards = [
     holderName: 'Grand Hotel Corp',
     type: 'single_use',
     status: 'active',
-    limit: 5000.00,
-    spent: 1890.50,
-    remaining: 3109.50,
+    limit: 5000.0,
+    spent: 1890.5,
+    remaining: 3109.5,
     currency: 'USD',
     issued: '2026-08-01',
     expires: '2026-09-01',
     merchantLock: 'booking.com',
     autoRecharge: true,
-    rechargeThreshold: 500.00,
-    rechargeAmount: 2000.00,
+    rechargeThreshold: 500.0,
+    rechargeAmount: 2000.0,
     transactions: [
-      { id: 'TXN-001', date: '2026-08-12', merchant: 'Booking.com', amount: 450.00, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-002', date: '2026-08-10', merchant: 'Booking.com', amount: 890.50, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-003', date: '2026-08-08', merchant: 'Booking.com', amount: 550.00, status: 'settled', category: 'OTA Commission' },
+      {
+        id: 'TXN-001',
+        date: '2026-08-12',
+        merchant: 'Booking.com',
+        amount: 450.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-002',
+        date: '2026-08-10',
+        merchant: 'Booking.com',
+        amount: 890.5,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-003',
+        date: '2026-08-08',
+        merchant: 'Booking.com',
+        amount: 550.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
     ],
-    alerts: [
-      { id: 1, type: 'warning', message: 'Card expires in 17 days', date: '2026-08-15' },
-    ],
+    alerts: [{ id: 1, type: 'warning', message: 'Card expires in 17 days', date: '2026-08-15' }],
   },
   {
     id: 'VCC-2026-002',
@@ -48,21 +100,49 @@ const initialCards = [
     holderName: 'Grand Hotel Corp',
     type: 'multi_use',
     status: 'active',
-    limit: 10000.00,
-    spent: 3240.00,
-    remaining: 6760.00,
+    limit: 10000.0,
+    spent: 3240.0,
+    remaining: 6760.0,
     currency: 'USD',
     issued: '2026-07-15',
     expires: '2026-10-15',
     merchantLock: null,
     autoRecharge: true,
-    rechargeThreshold: 1000.00,
-    rechargeAmount: 5000.00,
+    rechargeThreshold: 1000.0,
+    rechargeAmount: 5000.0,
     transactions: [
-      { id: 'TXN-004', date: '2026-08-14', merchant: 'Expedia Group', amount: 1200.00, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-005', date: '2026-08-11', merchant: 'Expedia Group', amount: 890.00, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-006', date: '2026-08-09', merchant: 'Hotelbeds', amount: 650.00, status: 'pending', category: 'Wholesaler' },
-      { id: 'TXN-007', date: '2026-08-07', merchant: 'Expedia Group', amount: 500.00, status: 'settled', category: 'OTA Commission' },
+      {
+        id: 'TXN-004',
+        date: '2026-08-14',
+        merchant: 'Expedia Group',
+        amount: 1200.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-005',
+        date: '2026-08-11',
+        merchant: 'Expedia Group',
+        amount: 890.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-006',
+        date: '2026-08-09',
+        merchant: 'Hotelbeds',
+        amount: 650.0,
+        status: 'pending',
+        category: 'Wholesaler',
+      },
+      {
+        id: 'TXN-007',
+        date: '2026-08-07',
+        merchant: 'Expedia Group',
+        amount: 500.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
     ],
     alerts: [],
   },
@@ -73,9 +153,9 @@ const initialCards = [
     holderName: 'Grand Hotel Corp',
     type: 'single_use',
     status: 'active',
-    limit: 2500.00,
-    spent: 2500.00,
-    remaining: 0.00,
+    limit: 2500.0,
+    spent: 2500.0,
+    remaining: 0.0,
     currency: 'USD',
     issued: '2026-08-05',
     expires: '2026-09-05',
@@ -84,12 +164,38 @@ const initialCards = [
     rechargeThreshold: 0,
     rechargeAmount: 0,
     transactions: [
-      { id: 'TXN-008', date: '2026-08-13', merchant: 'Airbnb', amount: 1200.00, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-009', date: '2026-08-12', merchant: 'Airbnb', amount: 800.00, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-010', date: '2026-08-10', merchant: 'Airbnb', amount: 500.00, status: 'settled', category: 'OTA Commission' },
+      {
+        id: 'TXN-008',
+        date: '2026-08-13',
+        merchant: 'Airbnb',
+        amount: 1200.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-009',
+        date: '2026-08-12',
+        merchant: 'Airbnb',
+        amount: 800.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-010',
+        date: '2026-08-10',
+        merchant: 'Airbnb',
+        amount: 500.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
     ],
     alerts: [
-      { id: 2, type: 'danger', message: 'Card limit reached — auto-recharge disabled', date: '2026-08-15' },
+      {
+        id: 2,
+        type: 'danger',
+        message: 'Card limit reached — auto-recharge disabled',
+        date: '2026-08-15',
+      },
       { id: 3, type: 'warning', message: 'Card expires in 21 days', date: '2026-08-15' },
     ],
   },
@@ -100,9 +206,9 @@ const initialCards = [
     holderName: 'Grand Hotel Corp',
     type: 'multi_use',
     status: 'frozen',
-    limit: 7500.00,
-    spent: 1200.00,
-    remaining: 6300.00,
+    limit: 7500.0,
+    spent: 1200.0,
+    remaining: 6300.0,
     currency: 'USD',
     issued: '2026-06-20',
     expires: '2026-09-20',
@@ -111,12 +217,24 @@ const initialCards = [
     rechargeThreshold: 0,
     rechargeAmount: 0,
     transactions: [
-      { id: 'TXN-011', date: '2026-07-28', merchant: 'Hotelbeds', amount: 600.00, status: 'settled', category: 'Wholesaler' },
-      { id: 'TXN-012', date: '2026-07-15', merchant: 'Hotelbeds', amount: 600.00, status: 'settled', category: 'Wholesaler' },
+      {
+        id: 'TXN-011',
+        date: '2026-07-28',
+        merchant: 'Hotelbeds',
+        amount: 600.0,
+        status: 'settled',
+        category: 'Wholesaler',
+      },
+      {
+        id: 'TXN-012',
+        date: '2026-07-15',
+        merchant: 'Hotelbeds',
+        amount: 600.0,
+        status: 'settled',
+        category: 'Wholesaler',
+      },
     ],
-    alerts: [
-      { id: 4, type: 'info', message: 'Card frozen by user', date: '2026-08-10' },
-    ],
+    alerts: [{ id: 4, type: 'info', message: 'Card frozen by user', date: '2026-08-10' }],
   },
   {
     id: 'VCC-2026-005',
@@ -125,9 +243,9 @@ const initialCards = [
     holderName: 'Grand Hotel Corp',
     type: 'single_use',
     status: 'expired',
-    limit: 3000.00,
-    spent: 2100.00,
-    remaining: 0.00,
+    limit: 3000.0,
+    spent: 2100.0,
+    remaining: 0.0,
     currency: 'USD',
     issued: '2026-05-01',
     expires: '2026-07-01',
@@ -136,12 +254,24 @@ const initialCards = [
     rechargeThreshold: 0,
     rechargeAmount: 0,
     transactions: [
-      { id: 'TXN-013', date: '2026-06-15', merchant: 'Booking.com', amount: 900.00, status: 'settled', category: 'OTA Commission' },
-      { id: 'TXN-014', date: '2026-06-01', merchant: 'Booking.com', amount: 1200.00, status: 'settled', category: 'OTA Commission' },
+      {
+        id: 'TXN-013',
+        date: '2026-06-15',
+        merchant: 'Booking.com',
+        amount: 900.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
+      {
+        id: 'TXN-014',
+        date: '2026-06-01',
+        merchant: 'Booking.com',
+        amount: 1200.0,
+        status: 'settled',
+        category: 'OTA Commission',
+      },
     ],
-    alerts: [
-      { id: 5, type: 'danger', message: 'Card expired on 2026-07-01', date: '2026-07-01' },
-    ],
+    alerts: [{ id: 5, type: 'danger', message: 'Card expired on 2026-07-01', date: '2026-07-01' }],
   },
   {
     id: 'VCC-2026-006',
@@ -150,47 +280,137 @@ const initialCards = [
     holderName: 'Grand Hotel Corp',
     type: 'multi_use',
     status: 'active',
-    limit: 15000.00,
-    spent: 8750.00,
-    remaining: 6250.00,
+    limit: 15000.0,
+    spent: 8750.0,
+    remaining: 6250.0,
     currency: 'USD',
     issued: '2026-07-01',
     expires: '2026-12-01',
     merchantLock: null,
     autoRecharge: true,
-    rechargeThreshold: 2000.00,
-    rechargeAmount: 10000.00,
+    rechargeThreshold: 2000.0,
+    rechargeAmount: 10000.0,
     transactions: [
-      { id: 'TXN-015', date: '2026-08-14', merchant: 'Direct Website', amount: 2500.00, status: 'settled', category: 'Direct Booking' },
-      { id: 'TXN-016', date: '2026-08-12', merchant: 'Direct Website', amount: 1800.00, status: 'settled', category: 'Direct Booking' },
-      { id: 'TXN-017', date: '2026-08-10', merchant: 'Direct Website', amount: 2200.00, status: 'settled', category: 'Direct Booking' },
-      { id: 'TXN-018', date: '2026-08-08', merchant: 'Direct Website', amount: 1250.00, status: 'pending', category: 'Direct Booking' },
-      { id: 'TXN-019', date: '2026-08-05', merchant: 'Direct Website', amount: 1000.00, status: 'settled', category: 'Direct Booking' },
+      {
+        id: 'TXN-015',
+        date: '2026-08-14',
+        merchant: 'Direct Website',
+        amount: 2500.0,
+        status: 'settled',
+        category: 'Direct Booking',
+      },
+      {
+        id: 'TXN-016',
+        date: '2026-08-12',
+        merchant: 'Direct Website',
+        amount: 1800.0,
+        status: 'settled',
+        category: 'Direct Booking',
+      },
+      {
+        id: 'TXN-017',
+        date: '2026-08-10',
+        merchant: 'Direct Website',
+        amount: 2200.0,
+        status: 'settled',
+        category: 'Direct Booking',
+      },
+      {
+        id: 'TXN-018',
+        date: '2026-08-08',
+        merchant: 'Direct Website',
+        amount: 1250.0,
+        status: 'pending',
+        category: 'Direct Booking',
+      },
+      {
+        id: 'TXN-019',
+        date: '2026-08-05',
+        merchant: 'Direct Website',
+        amount: 1000.0,
+        status: 'settled',
+        category: 'Direct Booking',
+      },
     ],
     alerts: [
-      { id: 6, type: 'info', message: 'Auto-recharge triggered 3 times this month', date: '2026-08-14' },
+      {
+        id: 6,
+        type: 'info',
+        message: 'Auto-recharge triggered 3 times this month',
+        date: '2026-08-14',
+      },
     ],
   },
 ];
 
 const cardBrandMeta = {
-  visa: { label: 'Visa', color: 'bg-blue-500', textColor: 'text-blue-500', bgLight: 'bg-blue-500/10' },
-  mastercard: { label: 'Mastercard', color: 'bg-orange-500', textColor: 'text-orange-500', bgLight: 'bg-orange-500/10' },
-  amex: { label: 'Amex', color: 'bg-teal-500', textColor: 'text-teal-500', bgLight: 'bg-teal-500/10' },
+  visa: {
+    label: 'Visa',
+    color: 'bg-blue-500',
+    textColor: 'text-blue-500',
+    bgLight: 'bg-blue-500/10',
+  },
+  mastercard: {
+    label: 'Mastercard',
+    color: 'bg-orange-500',
+    textColor: 'text-orange-500',
+    bgLight: 'bg-orange-500/10',
+  },
+  amex: {
+    label: 'Amex',
+    color: 'bg-teal-500',
+    textColor: 'text-teal-500',
+    bgLight: 'bg-teal-500/10',
+  },
 };
 
 const statusMeta = {
-  active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', icon: CheckCircle2 },
-  frozen: { label: 'Frozen', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', icon: Lock },
-  expired: { label: 'Expired', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: AlertCircle },
-  cancelled: { label: 'Cancelled', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted', icon: Ban },
+  active: {
+    label: 'Active',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: CheckCircle2,
+  },
+  frozen: {
+    label: 'Frozen',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: Lock,
+  },
+  expired: {
+    label: 'Expired',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: AlertCircle,
+  },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+    icon: Ban,
+  },
 };
 
 const alertTypeMeta = {
-  danger: { icon: AlertTriangle, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
-  warning: { icon: AlertCircle, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
+  danger: {
+    icon: AlertTriangle,
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+  },
+  warning: {
+    icon: AlertCircle,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+  },
   info: { icon: Bell, color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  success: { icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
+  success: {
+    icon: CheckCircle2,
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+  },
 };
 
 /* ─── Helpers ─── */
@@ -206,11 +426,11 @@ function daysUntil(dateStr) {
 }
 
 function getExpiringCards(cards) {
-  return cards.filter(c => c.status === 'active' && daysUntil(c.expires) <= 30);
+  return cards.filter((c) => c.status === 'active' && daysUntil(c.expires) <= 30);
 }
 
 function getLowBalanceCards(cards) {
-  return cards.filter(c => c.status === 'active' && c.remaining < c.limit * 0.2);
+  return cards.filter((c) => c.status === 'active' && c.remaining < c.limit * 0.2);
 }
 
 /* ─── Components ─── */
@@ -223,7 +443,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -237,29 +468,45 @@ function CardVisual({ card, showNumber = false }) {
   const daysLeft = daysUntil(card.expires);
 
   return (
-    <div className={cn(
-      'relative rounded-xl border p-5 transition-all overflow-hidden',
-      card.status === 'active' ? 'border-border bg-surface hover:shadow-lg hover:border-secondary/30' :
-      card.status === 'frozen' ? 'border-warning/30 bg-warning/5 opacity-80' :
-      'border-danger/30 bg-danger/5 opacity-60'
-    )}>
+    <div
+      className={cn(
+        'relative rounded-xl border p-5 transition-all overflow-hidden',
+        card.status === 'active'
+          ? 'border-border bg-surface hover:shadow-lg hover:border-secondary/30'
+          : card.status === 'frozen'
+            ? 'border-warning/30 bg-warning/5 opacity-80'
+            : 'border-danger/30 bg-danger/5 opacity-60'
+      )}
+    >
       {/* Card Background Pattern */}
       <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
-        <div className={cn('w-full h-full rounded-full -translate-y-1/2 translate-x-1/2', brand.color)} />
+        <div
+          className={cn('w-full h-full rounded-full -translate-y-1/2 translate-x-1/2', brand.color)}
+        />
       </div>
 
       <div className="relative">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className={cn('h-8 w-12 rounded-md flex items-center justify-center text-[10px] font-bold text-white', brand.color)}>
+            <div
+              className={cn(
+                'h-8 w-12 rounded-md flex items-center justify-center text-[10px] font-bold text-white',
+                brand.color
+              )}
+            >
               {brand.label.toUpperCase()}
             </div>
             <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
               {card.type === 'single_use' ? 'Single Use' : 'Multi Use'}
             </span>
           </div>
-          <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', statusMeta[card.status].class)}>
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+              statusMeta[card.status].class
+            )}
+          >
             <div className={cn('h-1.5 w-1.5 rounded-full', statusMeta[card.status].dot)} />
             {statusMeta[card.status].label}
           </span>
@@ -272,7 +519,9 @@ function CardVisual({ card, showNumber = false }) {
               •••• •••• •••• {card.last4}
             </span>
             <button
-              onClick={(e) => { e.stopPropagation(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
               className="rounded-md p-1 hover:bg-surface-elevated text-text-muted transition-colors"
               title="Copy last 4"
             >
@@ -286,13 +535,19 @@ function CardVisual({ card, showNumber = false }) {
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-text-muted">Limit: {formatCurrency(card.limit)}</span>
-            <span className={cn('text-xs font-bold font-mono', card.remaining < card.limit * 0.2 ? 'text-danger' : 'text-accent')}>
+            <span
+              className={cn(
+                'text-xs font-bold font-mono',
+                card.remaining < card.limit * 0.2 ? 'text-danger' : 'text-accent'
+              )}
+            >
               {formatCurrency(card.remaining)} left
             </span>
           </div>
           <div className="h-2 w-full rounded-full bg-border overflow-hidden">
             <div
-              className={cn('h-full rounded-full transition-all',
+              className={cn(
+                'h-full rounded-full transition-all',
                 pctUsed >= 90 ? 'bg-danger' : pctUsed >= 70 ? 'bg-warning' : 'bg-accent'
               )}
               style={{ width: `${Math.min(100, pctUsed)}%` }}
@@ -392,7 +647,9 @@ function NewCardModal({ onClose, onCreate }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Card Type</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Card Type
+            </label>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { key: 'single_use', label: 'Single Use', desc: 'One merchant, auto-expires' },
@@ -418,7 +675,9 @@ function NewCardModal({ onClose, onCreate }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Spending Limit</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Spending Limit
+              </label>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                 <input
@@ -434,7 +693,9 @@ function NewCardModal({ onClose, onCreate }) {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Currency</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Currency
+              </label>
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
@@ -448,7 +709,9 @@ function NewCardModal({ onClose, onCreate }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Merchant Lock (Optional)</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Merchant Lock (Optional)
+            </label>
             <input
               type="text"
               value={form.merchantLock}
@@ -456,11 +719,15 @@ function NewCardModal({ onClose, onCreate }) {
               placeholder="e.g. booking.com"
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
-            <p className="mt-1 text-xs text-text-muted">Restricts card to a single merchant domain</p>
+            <p className="mt-1 text-xs text-text-muted">
+              Restricts card to a single merchant domain
+            </p>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Expires In</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Expires In
+            </label>
             <select
               value={form.expiresInDays}
               onChange={(e) => setForm({ ...form, expiresInDays: e.target.value })}
@@ -486,14 +753,18 @@ function NewCardModal({ onClose, onCreate }) {
               />
               <div>
                 <p className="text-sm font-medium text-text-primary">Enable Auto-Recharge</p>
-                <p className="text-xs text-text-muted">Automatically top up when balance falls below threshold</p>
+                <p className="text-xs text-text-muted">
+                  Automatically top up when balance falls below threshold
+                </p>
               </div>
             </label>
 
             {form.autoRecharge && (
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs text-text-secondary">Recharge Threshold</label>
+                  <label className="mb-1 block text-xs text-text-secondary">
+                    Recharge Threshold
+                  </label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
                     <input
@@ -523,7 +794,9 @@ function NewCardModal({ onClose, onCreate }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Plus className="mr-1.5 h-4 w-4" /> Issue Card
             </Button>
@@ -562,8 +835,8 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
   };
 
   const totalTxns = card.transactions.length;
-  const settledTxns = card.transactions.filter(t => t.status === 'settled');
-  const pendingTxns = card.transactions.filter(t => t.status === 'pending');
+  const settledTxns = card.transactions.filter((t) => t.status === 'settled');
+  const pendingTxns = card.transactions.filter((t) => t.status === 'pending');
   const totalSpent = settledTxns.reduce((s, t) => s + t.amount, 0);
 
   return (
@@ -574,20 +847,35 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn('h-10 w-16 rounded-md flex items-center justify-center text-xs font-bold text-white', cardBrandMeta[card.brand]?.color || 'bg-blue-500')}>
+              <div
+                className={cn(
+                  'h-10 w-16 rounded-md flex items-center justify-center text-xs font-bold text-white',
+                  cardBrandMeta[card.brand]?.color || 'bg-blue-500'
+                )}
+              >
                 {(cardBrandMeta[card.brand]?.label || 'VISA').toUpperCase()}
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">•••• {card.last4}</h2>
-                <p className="text-xs text-text-muted">{card.id} · {card.type === 'single_use' ? 'Single Use' : 'Multi Use'}</p>
+                <p className="text-xs text-text-muted">
+                  {card.id} · {card.type === 'single_use' ? 'Single Use' : 'Multi Use'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold', statusMeta[card.status].class)}>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+                  statusMeta[card.status].class
+                )}
+              >
                 <div className={cn('h-1.5 w-1.5 rounded-full', statusMeta[card.status].dot)} />
                 {statusMeta[card.status].label}
               </span>
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -604,7 +892,9 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -632,16 +922,24 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-text-muted uppercase tracking-wider">Card Number</span>
+                    <span className="text-xs text-text-muted uppercase tracking-wider">
+                      Card Number
+                    </span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm text-text-primary">
-                        {showFullNumber ? '4242 4242 4242 ' + card.last4 : '•••• •••• •••• ' + card.last4}
+                        {showFullNumber
+                          ? '4242 4242 4242 ' + card.last4
+                          : '•••• •••• •••• ' + card.last4}
                       </span>
                       <button
                         onClick={() => copyToClipboard('424242424242' + card.last4)}
                         className="rounded-md p-1 hover:bg-surface-elevated text-text-muted"
                       >
-                        {copied ? <Check className="h-3.5 w-3.5 text-accent" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copied ? (
+                          <Check className="h-3.5 w-3.5 text-accent" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -651,7 +949,9 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-muted uppercase tracking-wider">CVC</span>
-                    <span className="font-mono text-sm text-text-primary">{showFullNumber ? '123' : '•••'}</span>
+                    <span className="font-mono text-sm text-text-primary">
+                      {showFullNumber ? '123' : '•••'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-muted uppercase tracking-wider">Holder</span>
@@ -664,11 +964,18 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Spent</p>
-                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">{formatCurrency(card.spent)}</p>
+                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+                    {formatCurrency(card.spent)}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Remaining</p>
-                  <p className={cn('mt-1 text-2xl font-bold font-mono', card.remaining < card.limit * 0.2 ? 'text-danger' : 'text-accent')}>
+                  <p
+                    className={cn(
+                      'mt-1 text-2xl font-bold font-mono',
+                      card.remaining < card.limit * 0.2 ? 'text-danger' : 'text-accent'
+                    )}
+                  >
                     {formatCurrency(card.remaining)}
                   </p>
                 </div>
@@ -701,7 +1008,14 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                     const meta = alertTypeMeta[alert.type];
                     const Icon = meta.icon;
                     return (
-                      <div key={alert.id} className={cn('rounded-lg border p-3 flex items-start gap-2', meta.bg, meta.border)}>
+                      <div
+                        key={alert.id}
+                        className={cn(
+                          'rounded-lg border p-3 flex items-start gap-2',
+                          meta.bg,
+                          meta.border
+                        )}
+                      >
                         <Icon className={cn('h-4 w-4 shrink-0 mt-0.5', meta.color)} />
                         <div>
                           <p className="text-sm text-text-primary">{alert.message}</p>
@@ -733,25 +1047,42 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
               ) : (
                 <div className="space-y-2">
                   {card.transactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between rounded-lg border border-border bg-surface p-4">
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between rounded-lg border border-border bg-surface p-4"
+                    >
                       <div className="flex items-start gap-3">
-                        <div className={cn(
-                          'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
-                          tx.status === 'settled' ? 'bg-accent/10' : 'bg-warning/10'
-                        )}>
-                          {tx.status === 'settled' ? <CheckCircle2 className="h-4 w-4 text-accent" /> : <Clock className="h-4 w-4 text-warning" />}
+                        <div
+                          className={cn(
+                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+                            tx.status === 'settled' ? 'bg-accent/10' : 'bg-warning/10'
+                          )}
+                        >
+                          {tx.status === 'settled' ? (
+                            <CheckCircle2 className="h-4 w-4 text-accent" />
+                          ) : (
+                            <Clock className="h-4 w-4 text-warning" />
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-text-primary">{tx.merchant}</p>
-                          <p className="text-xs text-text-muted">{tx.date} · {tx.category}</p>
+                          <p className="text-xs text-text-muted">
+                            {tx.date} · {tx.category}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold font-mono text-text-primary">{formatCurrency(tx.amount)}</p>
-                        <span className={cn(
-                          'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-                          tx.status === 'settled' ? 'bg-accent/10 text-accent' : 'bg-warning/10 text-warning'
-                        )}>
+                        <p className="text-sm font-bold font-mono text-text-primary">
+                          {formatCurrency(tx.amount)}
+                        </p>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                            tx.status === 'settled'
+                              ? 'bg-accent/10 text-accent'
+                              : 'bg-warning/10 text-warning'
+                          )}
+                        >
                           {tx.status}
                         </span>
                       </div>
@@ -773,18 +1104,40 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                     disabled={card.status === 'expired' || card.status === 'cancelled'}
                     className={cn(
                       'w-full flex items-center justify-between rounded-lg border p-3 transition-colors',
-                      card.status === 'frozen' ? 'border-accent bg-accent/5' : 'border-border bg-background hover:bg-surface-elevated'
+                      card.status === 'frozen'
+                        ? 'border-accent bg-accent/5'
+                        : 'border-border bg-background hover:bg-surface-elevated'
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      {card.status === 'frozen' ? <Unlock className="h-4 w-4 text-accent" /> : <Lock className="h-4 w-4 text-warning" />}
+                      {card.status === 'frozen' ? (
+                        <Unlock className="h-4 w-4 text-accent" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-warning" />
+                      )}
                       <div className="text-left">
-                        <p className="text-sm font-medium text-text-primary">{card.status === 'frozen' ? 'Unfreeze Card' : 'Freeze Card'}</p>
-                        <p className="text-xs text-text-muted">{card.status === 'frozen' ? 'Resume all transactions' : 'Temporarily block all charges'}</p>
+                        <p className="text-sm font-medium text-text-primary">
+                          {card.status === 'frozen' ? 'Unfreeze Card' : 'Freeze Card'}
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          {card.status === 'frozen'
+                            ? 'Resume all transactions'
+                            : 'Temporarily block all charges'}
+                        </p>
                       </div>
                     </div>
-                    <div className={cn('h-5 w-9 rounded-full transition-colors', card.status === 'frozen' ? 'bg-accent' : 'bg-border')}>
-                      <div className={cn('h-4 w-4 rounded-full bg-white shadow-sm transition-transform mt-0.5', card.status === 'frozen' ? 'translate-x-4' : 'translate-x-0.5')} />
+                    <div
+                      className={cn(
+                        'h-5 w-9 rounded-full transition-colors',
+                        card.status === 'frozen' ? 'bg-accent' : 'bg-border'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'h-4 w-4 rounded-full bg-white shadow-sm transition-transform mt-0.5',
+                          card.status === 'frozen' ? 'translate-x-4' : 'translate-x-0.5'
+                        )}
+                      />
                     </div>
                   </button>
 
@@ -807,7 +1160,12 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-text-secondary">Status</span>
-                    <span className={cn('text-xs font-semibold', card.autoRecharge ? 'text-accent' : 'text-text-muted')}>
+                    <span
+                      className={cn(
+                        'text-xs font-semibold',
+                        card.autoRecharge ? 'text-accent' : 'text-text-muted'
+                      )}
+                    >
                       {card.autoRecharge ? 'Enabled' : 'Disabled'}
                     </span>
                   </div>
@@ -815,11 +1173,15 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
                     <>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-text-secondary">Threshold</span>
-                        <span className="text-sm font-mono text-text-primary">{formatCurrency(card.rechargeThreshold)}</span>
+                        <span className="text-sm font-mono text-text-primary">
+                          {formatCurrency(card.rechargeThreshold)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-text-secondary">Recharge Amount</span>
-                        <span className="text-sm font-mono text-text-primary">{formatCurrency(card.rechargeAmount)}</span>
+                        <span className="text-sm font-mono text-text-primary">
+                          {formatCurrency(card.rechargeAmount)}
+                        </span>
                       </div>
                     </>
                   )}
@@ -849,7 +1211,8 @@ export default function VCCPage() {
 
   const filteredCards = useMemo(() => {
     let result = cards.filter((c) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         c.id.toLowerCase().includes(query.toLowerCase()) ||
         c.last4.includes(query) ||
         (c.merchantLock && c.merchantLock.toLowerCase().includes(query.toLowerCase()));
@@ -859,35 +1222,42 @@ export default function VCCPage() {
     });
 
     if (showExpiringOnly) {
-      result = result.filter(c => c.status === 'active' && daysUntil(c.expires) <= 30);
+      result = result.filter((c) => c.status === 'active' && daysUntil(c.expires) <= 30);
     }
     if (showLowBalanceOnly) {
-      result = result.filter(c => c.status === 'active' && c.remaining < c.limit * 0.2);
+      result = result.filter((c) => c.status === 'active' && c.remaining < c.limit * 0.2);
     }
 
     return result;
   }, [cards, query, statusFilter, typeFilter, showExpiringOnly, showLowBalanceOnly]);
 
   const stats = useMemo(() => {
-    const active = cards.filter(c => c.status === 'active');
+    const active = cards.filter((c) => c.status === 'active');
     const totalLimit = active.reduce((s, c) => s + c.limit, 0);
     const totalSpent = active.reduce((s, c) => s + c.spent, 0);
     const totalRemaining = active.reduce((s, c) => s + c.remaining, 0);
     const expiringSoon = getExpiringCards(active).length;
     const lowBalance = getLowBalanceCards(active).length;
-    return { totalLimit, totalSpent, totalRemaining, expiringSoon, lowBalance, activeCount: active.length };
+    return {
+      totalLimit,
+      totalSpent,
+      totalRemaining,
+      expiringSoon,
+      lowBalance,
+      activeCount: active.length,
+    };
   }, [cards]);
 
   const allAlerts = useMemo(() => {
-    return cards.flatMap(c => c.alerts.map(a => ({ ...a, cardId: c.id, cardLast4: c.last4 })));
+    return cards.flatMap((c) => c.alerts.map((a) => ({ ...a, cardId: c.id, cardLast4: c.last4 })));
   }, [cards]);
 
   const handleCreate = (newCard) => {
-    setCards(prev => [newCard, ...prev]);
+    setCards((prev) => [newCard, ...prev]);
   };
 
   const handleUpdate = (id, updates) => {
-    setCards(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    setCards((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
   return (
@@ -896,7 +1266,9 @@ export default function VCCPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Virtual Credit Cards</h1>
-          <p className="text-sm text-text-secondary">Issue, manage, and monitor VCCs for OTA commissions and vendor payments</p>
+          <p className="text-sm text-text-secondary">
+            Issue, manage, and monitor VCCs for OTA commissions and vendor payments
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -910,10 +1282,32 @@ export default function VCCPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Active Cards" value={stats.activeCount} icon={CreditCard} color="text-secondary" subtext={`of ${cards.length} total`} />
-        <StatCard label="Total Limit" value={formatCurrency(stats.totalLimit)} icon={DollarSign} color="text-accent" />
-        <StatCard label="Remaining" value={formatCurrency(stats.totalRemaining)} icon={Wallet} color="text-info" />
-        <StatCard label="Expiring Soon" value={stats.expiringSoon} icon={AlertTriangle} color={stats.expiringSoon > 0 ? 'text-danger' : 'text-accent'} subtext="Within 30 days" />
+        <StatCard
+          label="Active Cards"
+          value={stats.activeCount}
+          icon={CreditCard}
+          color="text-secondary"
+          subtext={`of ${cards.length} total`}
+        />
+        <StatCard
+          label="Total Limit"
+          value={formatCurrency(stats.totalLimit)}
+          icon={DollarSign}
+          color="text-accent"
+        />
+        <StatCard
+          label="Remaining"
+          value={formatCurrency(stats.totalRemaining)}
+          icon={Wallet}
+          color="text-info"
+        />
+        <StatCard
+          label="Expiring Soon"
+          value={stats.expiringSoon}
+          icon={AlertTriangle}
+          color={stats.expiringSoon > 0 ? 'text-danger' : 'text-accent'}
+          subtext="Within 30 days"
+        />
       </div>
 
       {/* Alerts Banner */}
@@ -923,7 +1317,9 @@ export default function VCCPage() {
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-warning" />
               <h3 className="text-sm font-semibold text-text-primary">Alerts & Notifications</h3>
-              <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">{allAlerts.length}</span>
+              <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {allAlerts.length}
+              </span>
             </div>
           </div>
           <div className="divide-y divide-border">
@@ -931,7 +1327,10 @@ export default function VCCPage() {
               const meta = alertTypeMeta[alert.type];
               const Icon = meta.icon;
               return (
-                <div key={`${alert.cardId}-${alert.id}-${idx}`} className={cn('px-4 py-3 flex items-start gap-3', meta.bg)}>
+                <div
+                  key={`${alert.cardId}-${alert.id}-${idx}`}
+                  className={cn('px-4 py-3 flex items-start gap-3', meta.bg)}
+                >
                   <Icon className={cn('h-4 w-4 shrink-0 mt-0.5', meta.color)} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-text-primary">
@@ -940,7 +1339,7 @@ export default function VCCPage() {
                     <p className="text-xs text-text-muted">{alert.date}</p>
                   </div>
                   <button
-                    onClick={() => setSelectedCard(cards.find(c => c.id === alert.cardId))}
+                    onClick={() => setSelectedCard(cards.find((c) => c.id === alert.cardId))}
                     className="text-xs text-secondary hover:underline shrink-0"
                   >
                     View Card
@@ -969,7 +1368,9 @@ export default function VCCPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -978,7 +1379,9 @@ export default function VCCPage() {
             onClick={() => setShowExpiringOnly(!showExpiringOnly)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showExpiringOnly ? 'border-warning bg-warning/10 text-warning' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showExpiringOnly
+                ? 'border-warning bg-warning/10 text-warning'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Clock className="h-4 w-4" /> Expiring
@@ -987,7 +1390,9 @@ export default function VCCPage() {
             onClick={() => setShowLowBalanceOnly(!showLowBalanceOnly)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showLowBalanceOnly ? 'border-danger bg-danger/10 text-danger' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showLowBalanceOnly
+                ? 'border-danger bg-danger/10 text-danger'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <AlertTriangle className="h-4 w-4" /> Low Balance
@@ -995,13 +1400,23 @@ export default function VCCPage() {
           <div className="flex rounded-md border border-border bg-surface p-0.5">
             <button
               onClick={() => setViewMode('grid')}
-              className={cn('inline-flex h-8 w-8 items-center justify-center rounded transition-colors', viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary')}
+              className={cn(
+                'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
+                viewMode === 'grid'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
+              )}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={cn('inline-flex h-8 w-8 items-center justify-center rounded transition-colors', viewMode === 'list' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary')}
+              className={cn(
+                'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
+                viewMode === 'list'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
+              )}
             >
               <List className="h-4 w-4" />
             </button>
@@ -1041,7 +1456,13 @@ export default function VCCPage() {
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setShowExpiringOnly(false); setShowLowBalanceOnly(false); setQuery(''); }}
+                onClick={() => {
+                  setStatusFilter('all');
+                  setTypeFilter('all');
+                  setShowExpiringOnly(false);
+                  setShowLowBalanceOnly(false);
+                  setQuery('');
+                }}
                 className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
               >
                 Reset All
@@ -1053,18 +1474,15 @@ export default function VCCPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredCards.length}</span> of {cards.length} cards
+        Showing <span className="font-medium text-text-primary">{filteredCards.length}</span> of{' '}
+        {cards.length} cards
       </p>
 
       {/* Grid View */}
       {viewMode === 'grid' && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCards.map((card) => (
-            <button
-              key={card.id}
-              onClick={() => setSelectedCard(card)}
-              className="text-left"
-            >
+            <button key={card.id} onClick={() => setSelectedCard(card)} className="text-left">
               <CardVisual card={card} />
             </button>
           ))}
@@ -1089,7 +1507,9 @@ export default function VCCPage() {
                   <th className="px-4 py-3 text-left font-medium text-text-secondary">Status</th>
                   <th className="px-4 py-3 text-right font-medium text-text-secondary">Limit</th>
                   <th className="px-4 py-3 text-right font-medium text-text-secondary">Spent</th>
-                  <th className="px-4 py-3 text-right font-medium text-text-secondary">Remaining</th>
+                  <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                    Remaining
+                  </th>
                   <th className="px-4 py-3 text-left font-medium text-text-secondary">Expires</th>
                   <th className="px-4 py-3 text-left font-medium text-text-secondary">Merchant</th>
                   <th className="px-4 py-3 w-16"></th>
@@ -1107,7 +1527,12 @@ export default function VCCPage() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={cn('h-6 w-10 rounded flex items-center justify-center text-[9px] font-bold text-white', brand.color)}>
+                          <div
+                            className={cn(
+                              'h-6 w-10 rounded flex items-center justify-center text-[9px] font-bold text-white',
+                              brand.color
+                            )}
+                          >
                             {brand.label.toUpperCase()}
                           </div>
                           <div>
@@ -1117,23 +1542,49 @@ export default function VCCPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs text-text-secondary capitalize">{card.type.replace('_', ' ')}</span>
+                        <span className="text-xs text-text-secondary capitalize">
+                          {card.type.replace('_', ' ')}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium', statusMeta[card.status].class)}>
-                          <div className={cn('h-1.5 w-1.5 rounded-full', statusMeta[card.status].dot)} />
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
+                            statusMeta[card.status].class
+                          )}
+                        >
+                          <div
+                            className={cn('h-1.5 w-1.5 rounded-full', statusMeta[card.status].dot)}
+                          />
                           {statusMeta[card.status].label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-text-primary">{formatCurrency(card.limit)}</td>
-                      <td className="px-4 py-3 text-right font-mono text-text-primary">{formatCurrency(card.spent)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-text-primary">
+                        {formatCurrency(card.limit)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-text-primary">
+                        {formatCurrency(card.spent)}
+                      </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        <span className={card.remaining < card.limit * 0.2 ? 'text-danger' : 'text-accent'}>
+                        <span
+                          className={
+                            card.remaining < card.limit * 0.2 ? 'text-danger' : 'text-accent'
+                          }
+                        >
                           {formatCurrency(card.remaining)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn('text-xs', daysLeft <= 7 ? 'text-danger font-medium' : daysLeft <= 30 ? 'text-warning' : 'text-text-secondary')}>
+                        <span
+                          className={cn(
+                            'text-xs',
+                            daysLeft <= 7
+                              ? 'text-danger font-medium'
+                              : daysLeft <= 30
+                                ? 'text-warning'
+                                : 'text-text-secondary'
+                          )}
+                        >
                           {card.expires}
                           {daysLeft <= 30 && card.status === 'active' && ` (${daysLeft}d)`}
                         </span>

@@ -1,10 +1,36 @@
 /* src/app/app/users/components.jsx */
 import {
-  Shield, ShieldCheck, ShieldAlert, ShieldX, ShieldOff,
-  UserCheck, UserX, UserMinus, Clock, Key, Lock, Unlock,
-  Eye, EyeOff, Check, X, AlertTriangle, AlertOctagon, Info,
-  Crown, Star, Award, Gem, User, Monitor, Wrench, Sparkles,
-  Utensils, TrendingUp, DollarSign, ConciergeBell
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldX,
+  ShieldOff,
+  UserCheck,
+  UserX,
+  UserMinus,
+  Clock,
+  Key,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  Check,
+  X,
+  AlertTriangle,
+  AlertOctagon,
+  Info,
+  Crown,
+  Star,
+  Award,
+  Gem,
+  User,
+  Monitor,
+  Wrench,
+  Sparkles,
+  Utensils,
+  TrendingUp,
+  DollarSign,
+  ConciergeBell,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
@@ -21,10 +47,12 @@ import {
 export function UserStatusBadge({ status }) {
   const meta = userStatusMeta[status] || userStatusMeta.inactive;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -37,10 +65,12 @@ export function RoleBadge({ roleId, showLevel = false }) {
   if (!role) return <span className="text-xs text-text-muted">Unknown Role</span>;
 
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      role.color
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        role.color
+      )}
+    >
       <Shield className="h-3 w-3" />
       {role.name}
       {showLevel && <span className="opacity-60">· L{role.level}</span>}
@@ -54,8 +84,15 @@ export function DepartmentBadge({ departmentId }) {
   if (!dept) return <span className="text-xs text-text-muted">—</span>;
 
   const iconMap = {
-    ConciergeBell, Sparkles, Utensils, TrendingUp, DollarSign,
-    Wrench, Shield, Monitor, Crown,
+    ConciergeBell,
+    Sparkles,
+    Utensils,
+    TrendingUp,
+    DollarSign,
+    Wrench,
+    Shield,
+    Monitor,
+    Crown,
   };
   const Icon = iconMap[dept.icon] || User;
 
@@ -70,18 +107,22 @@ export function DepartmentBadge({ departmentId }) {
 /* ─── Permission Chip ─── */
 export function PermissionChip({ permission, active = false, size = 'sm' }) {
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-colors',
-      active
-        ? getPermissionCategoryColor(permission.category)
-        : 'border-border bg-background text-text-muted opacity-50'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-colors',
+        active
+          ? getPermissionCategoryColor(permission.category)
+          : 'border-border bg-background text-text-muted opacity-50'
+      )}
+    >
       {active && <Check className="h-3 w-3" />}
       {permission.label}
-      <span className={cn(
-        'text-[10px] uppercase tracking-wider ml-0.5',
-        active ? 'opacity-70' : 'opacity-40'
-      )}>
+      <span
+        className={cn(
+          'text-[10px] uppercase tracking-wider ml-0.5',
+          active ? 'opacity-70' : 'opacity-40'
+        )}
+      >
         {getPermissionCategoryLabel(permission.category)}
       </span>
     </span>
@@ -99,10 +140,12 @@ export function PermissionCategoryBadge({ category, count }) {
   const labels = { read: 'Read', write: 'Write', delete: 'Delete', admin: 'Admin' };
 
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      colors[category] || colors.read
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        colors[category] || colors.read
+      )}
+    >
       {labels[category] || category}
       {count !== undefined && <span className="opacity-70">· {count}</span>}
     </span>
@@ -116,10 +159,12 @@ export function AuditSeverityBadge({ severity }) {
   const Icon = iconMap[meta.icon] || Info;
 
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <Icon className="h-3 w-3" />
       {meta.label}
     </span>
@@ -130,10 +175,12 @@ export function AuditSeverityBadge({ severity }) {
 export function ComplianceStatusBadge({ status }) {
   const meta = complianceStatusMeta[status] || complianceStatusMeta.noncompliant;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -192,11 +239,13 @@ export function UserAvatar({ user, size = 'md' }) {
   };
 
   return (
-    <div className={cn(
-      'flex items-center justify-center rounded-full font-bold bg-secondary/10 text-secondary',
-      sizeClasses[size],
-      statusRing[user?.status] || statusRing.inactive
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-center rounded-full font-bold bg-secondary/10 text-secondary',
+        sizeClasses[size],
+        statusRing[user?.status] || statusRing.inactive
+      )}
+    >
       {initials}
     </div>
   );
@@ -212,15 +261,26 @@ export function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -295,7 +355,10 @@ export function ComplianceScoreRing({ passed, total, size = 48 }) {
   const strokeColor = pct >= 95 ? '#22c55e' : pct >= 80 ? '#f59e0b' : '#ef4444';
 
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg className="transform -rotate-90" width={size} height={size}>
         <circle
           cx={size / 2}
@@ -319,9 +382,7 @@ export function ComplianceScoreRing({ passed, total, size = 48 }) {
           className="transition-all duration-500"
         />
       </svg>
-      <span className={cn('absolute text-[10px] font-bold', color)}>
-        {Math.round(pct)}%
-      </span>
+      <span className={cn('absolute text-[10px] font-bold', color)}>{Math.round(pct)}%</span>
     </div>
   );
 }
@@ -350,8 +411,8 @@ export function AuditLogRow({ entry, onClick, compact = false }) {
           <span className="text-xs text-text-muted">{entry.timestamp}</span>
         </div>
         <p className="mt-1 text-sm text-text-primary">
-          <span className="font-medium">{entry.userName}</span>
-          {' '}<span className="text-text-secondary">{entry.action.replace(/\\./g, ' › ')}</span>
+          <span className="font-medium">{entry.userName}</span>{' '}
+          <span className="text-text-secondary">{entry.action.replace(/\\./g, ' › ')}</span>
         </p>
         <p className="text-xs text-text-secondary truncate">{entry.details}</p>
         {!compact && entry.complianceTags?.length > 0 && (
@@ -370,7 +431,11 @@ export function AuditLogRow({ entry, onClick, compact = false }) {
       {!compact && (
         <div className="shrink-0 text-right">
           <p className="text-[10px] text-text-muted font-mono">{entry.ipAddress}</p>
-          <SessionBadge expiry={entry.sessionId !== 'system' ? new Date(Date.now() + 3600000).toISOString() : null} />
+          <SessionBadge
+            expiry={
+              entry.sessionId !== 'system' ? new Date(Date.now() + 3600000).toISOString() : null
+            }
+          />
         </div>
       )}
     </div>

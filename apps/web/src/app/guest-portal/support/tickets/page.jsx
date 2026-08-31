@@ -2,8 +2,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Ticket, Plus, Search, Filter, Clock, CheckCircle2,
-  AlertCircle, MessageSquare, FileText, Send, X
+  ChevronLeft,
+  Ticket,
+  Plus,
+  Search,
+  Filter,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  MessageSquare,
+  FileText,
+  Send,
+  X,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -18,11 +28,24 @@ const initialTickets = [
     priority: 'medium',
     createdAt: 'Aug 14, 2026',
     lastUpdated: '2h ago',
-    lastMessage: 'Hi, I requested a late checkout through the app but I see a charge for an extra night on my folio. Could you please review and remove this charge?',
+    lastMessage:
+      'Hi, I requested a late checkout through the app but I see a charge for an extra night on my folio. Could you please review and remove this charge?',
     messages: [
-      { sender: 'guest', text: 'Hi, I requested a late checkout through the app but I see a charge for an extra night on my folio. Could you please review and remove this charge?', time: 'Aug 14, 10:30 AM' },
-      { sender: 'staff', text: 'Thank you for reaching out. I apologize for the confusion. I am reviewing your request and will get back to you shortly.', time: 'Aug 14, 11:00 AM' },
-      { sender: 'staff', text: 'I have reviewed your account. The charge was applied in error and has been removed. Your late checkout until 2 PM is confirmed at no charge.', time: '2h ago' },
+      {
+        sender: 'guest',
+        text: 'Hi, I requested a late checkout through the app but I see a charge for an extra night on my folio. Could you please review and remove this charge?',
+        time: 'Aug 14, 10:30 AM',
+      },
+      {
+        sender: 'staff',
+        text: 'Thank you for reaching out. I apologize for the confusion. I am reviewing your request and will get back to you shortly.',
+        time: 'Aug 14, 11:00 AM',
+      },
+      {
+        sender: 'staff',
+        text: 'I have reviewed your account. The charge was applied in error and has been removed. Your late checkout until 2 PM is confirmed at no charge.',
+        time: '2h ago',
+      },
     ],
   },
   {
@@ -35,10 +58,26 @@ const initialTickets = [
     lastUpdated: '1d ago',
     lastMessage: 'My breakfast order arrived but was missing the orange juice. Order #SVC-001.',
     messages: [
-      { sender: 'guest', text: 'My breakfast order arrived but was missing the orange juice. Order #SVC-001.', time: 'Aug 13, 9:15 AM' },
-      { sender: 'staff', text: 'We sincerely apologize for the missing item. We are sending the orange juice to your room immediately along with a complimentary pastry for the inconvenience.', time: 'Aug 13, 9:25 AM' },
-      { sender: 'guest', text: 'Received, thank you for the quick response!', time: 'Aug 13, 9:40 AM' },
-      { sender: 'staff', text: 'You are welcome! We hope you enjoy the rest of your stay. This ticket has been resolved.', time: '1d ago' },
+      {
+        sender: 'guest',
+        text: 'My breakfast order arrived but was missing the orange juice. Order #SVC-001.',
+        time: 'Aug 13, 9:15 AM',
+      },
+      {
+        sender: 'staff',
+        text: 'We sincerely apologize for the missing item. We are sending the orange juice to your room immediately along with a complimentary pastry for the inconvenience.',
+        time: 'Aug 13, 9:25 AM',
+      },
+      {
+        sender: 'guest',
+        text: 'Received, thank you for the quick response!',
+        time: 'Aug 13, 9:40 AM',
+      },
+      {
+        sender: 'staff',
+        text: 'You are welcome! We hope you enjoy the rest of your stay. This ticket has been resolved.',
+        time: '1d ago',
+      },
     ],
   },
   {
@@ -49,11 +88,24 @@ const initialTickets = [
     priority: 'high',
     createdAt: 'Aug 12, 2026',
     lastUpdated: '3d ago',
-    lastMessage: 'The WiFi in my room keeps disconnecting every few minutes. I have tried reconnecting multiple times.',
+    lastMessage:
+      'The WiFi in my room keeps disconnecting every few minutes. I have tried reconnecting multiple times.',
     messages: [
-      { sender: 'guest', text: 'The WiFi in my room keeps disconnecting every few minutes. I have tried reconnecting multiple times.', time: 'Aug 12, 8:00 PM' },
-      { sender: 'staff', text: 'I apologize for the inconvenience. Our IT team is investigating the issue with the access point on your floor.', time: 'Aug 12, 8:15 PM' },
-      { sender: 'staff', text: 'The access point has been reset and the connection should be stable now. Please let us know if you experience any further issues.', time: 'Aug 12, 9:00 PM' },
+      {
+        sender: 'guest',
+        text: 'The WiFi in my room keeps disconnecting every few minutes. I have tried reconnecting multiple times.',
+        time: 'Aug 12, 8:00 PM',
+      },
+      {
+        sender: 'staff',
+        text: 'I apologize for the inconvenience. Our IT team is investigating the issue with the access point on your floor.',
+        time: 'Aug 12, 8:15 PM',
+      },
+      {
+        sender: 'staff',
+        text: 'The access point has been reset and the connection should be stable now. Please let us know if you experience any further issues.',
+        time: 'Aug 12, 9:00 PM',
+      },
       { sender: 'guest', text: 'Working perfectly now, thank you!', time: 'Aug 12, 9:10 PM' },
     ],
   },
@@ -66,11 +118,21 @@ export default function TicketsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newTicket, setNewTicket] = useState({ subject: '', category: 'General', priority: 'medium', message: '' });
+  const [newTicket, setNewTicket] = useState({
+    subject: '',
+    category: 'General',
+    priority: 'medium',
+    message: '',
+  });
 
   const filteredTickets = tickets
-    .filter(t => filter === 'all' || t.status === filter)
-    .filter(t => !searchQuery || t.subject.toLowerCase().includes(searchQuery.toLowerCase()) || t.id.toLowerCase().includes(searchQuery.toLowerCase()));
+    .filter((t) => filter === 'all' || t.status === filter)
+    .filter(
+      (t) =>
+        !searchQuery ||
+        t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const handleCreateTicket = () => {
     const ticket = {
@@ -82,25 +144,25 @@ export default function TicketsPage() {
       createdAt: 'Just now',
       lastUpdated: 'Just now',
       lastMessage: newTicket.message,
-      messages: [
-        { sender: 'guest', text: newTicket.message, time: 'Just now' },
-      ],
+      messages: [{ sender: 'guest', text: newTicket.message, time: 'Just now' }],
     };
-    setTickets(prev => [ticket, ...prev]);
+    setTickets((prev) => [ticket, ...prev]);
     setShowCreateModal(false);
     setNewTicket({ subject: '', category: 'General', priority: 'medium', message: '' });
   };
 
   const handleReply = (ticketId, text) => {
-    setTickets(prev => prev.map(t => {
-      if (t.id !== ticketId) return t;
-      return {
-        ...t,
-        lastMessage: text,
-        lastUpdated: 'Just now',
-        messages: [...t.messages, { sender: 'guest', text, time: 'Just now' }],
-      };
-    }));
+    setTickets((prev) =>
+      prev.map((t) => {
+        if (t.id !== ticketId) return t;
+        return {
+          ...t,
+          lastMessage: text,
+          lastUpdated: 'Just now',
+          messages: [...t.messages, { sender: 'guest', text, time: 'Just now' }],
+        };
+      })
+    );
   };
 
   if (selectedTicket) {
@@ -161,9 +223,14 @@ export default function TicketsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">
-        {['all', 'open', 'in_progress', 'resolved'].map(status => {
-          const count = status === 'all' ? tickets.length : tickets.filter(t => t.status === status).length;
-          const meta = ticketStatusMeta[status] || { label: 'All', color: 'text-text-primary', dot: 'bg-text-muted' };
+        {['all', 'open', 'in_progress', 'resolved'].map((status) => {
+          const count =
+            status === 'all' ? tickets.length : tickets.filter((t) => t.status === status).length;
+          const meta = ticketStatusMeta[status] || {
+            label: 'All',
+            color: 'text-text-primary',
+            dot: 'bg-text-muted',
+          };
           return (
             <button
               key={status}
@@ -175,7 +242,12 @@ export default function TicketsPage() {
                   : 'border-border bg-surface hover:bg-surface-elevated'
               )}
             >
-              <p className={cn('text-lg font-bold', filter === status ? 'text-secondary' : 'text-text-primary')}>
+              <p
+                className={cn(
+                  'text-lg font-bold',
+                  filter === status ? 'text-secondary' : 'text-text-primary'
+                )}
+              >
                 {count}
               </p>
               <p className="text-[10px] text-text-muted">{meta.label}</p>
@@ -186,12 +258,8 @@ export default function TicketsPage() {
 
       {/* Tickets */}
       <div className="space-y-3">
-        {filteredTickets.map(ticket => (
-          <TicketCard
-            key={ticket.id}
-            ticket={ticket}
-            onClick={() => setSelectedTicket(ticket)}
-          />
+        {filteredTickets.map((ticket) => (
+          <TicketCard key={ticket.id} ticket={ticket} onClick={() => setSelectedTicket(ticket)} />
         ))}
         {filteredTickets.length === 0 && (
           <div className="text-center py-12">
@@ -204,32 +272,44 @@ export default function TicketsPage() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCreateModal(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowCreateModal(false)}
+          />
           <div className="relative w-full max-w-lg rounded-xl border border-border bg-background shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-text-primary">Create Support Ticket</h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 rounded-lg hover:bg-surface-elevated">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1 rounded-lg hover:bg-surface-elevated"
+              >
                 <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Subject</label>
+                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Subject
+                </label>
                 <input
                   type="text"
                   value={newTicket.subject}
-                  onChange={(e) => setNewTicket(prev => ({ ...prev, subject: e.target.value }))}
+                  onChange={(e) => setNewTicket((prev) => ({ ...prev, subject: e.target.value }))}
                   placeholder="Brief description of your issue"
                   className="mt-1 h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Category</label>
+                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Category
+                  </label>
                   <select
                     value={newTicket.category}
-                    onChange={(e) => setNewTicket(prev => ({ ...prev, category: e.target.value }))}
+                    onChange={(e) =>
+                      setNewTicket((prev) => ({ ...prev, category: e.target.value }))
+                    }
                     className="mt-1 h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none"
                   >
                     <option>General</option>
@@ -241,10 +321,14 @@ export default function TicketsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Priority</label>
+                  <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Priority
+                  </label>
                   <select
                     value={newTicket.priority}
-                    onChange={(e) => setNewTicket(prev => ({ ...prev, priority: e.target.value }))}
+                    onChange={(e) =>
+                      setNewTicket((prev) => ({ ...prev, priority: e.target.value }))
+                    }
                     className="mt-1 h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none"
                   >
                     <option value="low">Low</option>
@@ -255,10 +339,12 @@ export default function TicketsPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Message</label>
+                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Message
+                </label>
                 <textarea
                   value={newTicket.message}
-                  onChange={(e) => setNewTicket(prev => ({ ...prev, message: e.target.value }))}
+                  onChange={(e) => setNewTicket((prev) => ({ ...prev, message: e.target.value }))}
                   placeholder="Describe your issue in detail..."
                   rows={4}
                   className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary resize-none"
@@ -267,7 +353,11 @@ export default function TicketsPage() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowCreateModal(false)}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowCreateModal(false)}
+              >
                 Cancel
               </Button>
               <Button

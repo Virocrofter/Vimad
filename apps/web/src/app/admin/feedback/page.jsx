@@ -1,23 +1,61 @@
 /* src/app/admin/feedback/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  MessageSquare, Star, Lightbulb, TrendingUp, TrendingDown, Search,
-  Filter, Download, Plus, Send, ThumbsUp, ThumbsDown, Meh, ArrowUp,
-  BarChart3, Smile, Frown, Hash, Clock, CheckCircle2, AlertTriangle,
-  ChevronDown, ChevronUp, MoreHorizontal, Link2, ExternalLink
+  MessageSquare,
+  Star,
+  Lightbulb,
+  TrendingUp,
+  TrendingDown,
+  Search,
+  Filter,
+  Download,
+  Plus,
+  Send,
+  ThumbsUp,
+  ThumbsDown,
+  Meh,
+  ArrowUp,
+  BarChart3,
+  Smile,
+  Frown,
+  Hash,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  Link2,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  npsResponses, featureRequests, sentimentTrend, categoryDistribution,
-  npsDistribution, npsCategoryMeta, calculateNPS, getNpsColor,
-  formatNpsScore, getSentimentFromScore
+  npsResponses,
+  featureRequests,
+  sentimentTrend,
+  categoryDistribution,
+  npsDistribution,
+  npsCategoryMeta,
+  calculateNPS,
+  getNpsColor,
+  formatNpsScore,
+  getSentimentFromScore,
 } from './data';
 import {
-  NpsGauge, NpsBreakdownBar, SentimentBadge, NpsScoreBadge,
-  CategoryBadge, FeatureStatusBadge, PriorityBadge, VoteButton,
-  SentimentMiniChart, KeywordTag, ResponseCard, FeedbackStatCard,
-  NpsScoreBar
+  NpsGauge,
+  NpsBreakdownBar,
+  SentimentBadge,
+  NpsScoreBadge,
+  CategoryBadge,
+  FeatureStatusBadge,
+  PriorityBadge,
+  VoteButton,
+  SentimentMiniChart,
+  KeywordTag,
+  ResponseCard,
+  FeedbackStatCard,
+  NpsScoreBar,
 } from './components';
 import NpsDetailDrawer from './NpsDetailDrawer';
 import ResponseModal from './ResponseModal';
@@ -61,13 +99,13 @@ export default function FeedbackPage() {
   /* ─── Computed: NPS Stats ─── */
   const npsStats = useMemo(() => {
     const total = npsData.length;
-    const promoters = npsData.filter(r => r.score >= 9).length;
-    const passives = npsData.filter(r => r.score >= 7 && r.score <= 8).length;
-    const detractors = npsData.filter(r => r.score <= 6).length;
+    const promoters = npsData.filter((r) => r.score >= 9).length;
+    const passives = npsData.filter((r) => r.score >= 7 && r.score <= 8).length;
+    const detractors = npsData.filter((r) => r.score <= 6).length;
     const nps = calculateNPS(promoters, passives, detractors);
     const avgScore = total > 0 ? (npsData.reduce((s, r) => s + r.score, 0) / total).toFixed(1) : 0;
-    const responded = npsData.filter(r => r.responded).length;
-    const followUpNeeded = npsData.filter(r => r.followUp && !r.responded).length;
+    const responded = npsData.filter((r) => r.responded).length;
+    const followUpNeeded = npsData.filter((r) => r.followUp && !r.responded).length;
 
     return { total, promoters, passives, detractors, nps, avgScore, responded, followUpNeeded };
   }, [npsData]);
@@ -75,10 +113,10 @@ export default function FeedbackPage() {
   /* ─── Computed: Feature Stats ─── */
   const featureStats = useMemo(() => {
     const total = features.length;
-    const shipped = features.filter(f => f.status === 'shipped').length;
-    const inProgress = features.filter(f => f.status === 'in-progress').length;
+    const shipped = features.filter((f) => f.status === 'shipped').length;
+    const inProgress = features.filter((f) => f.status === 'in-progress').length;
     const totalVotes = features.reduce((s, f) => s + f.votes, 0);
-    const critical = features.filter(f => f.priority === 'critical').length;
+    const critical = features.filter((f) => f.priority === 'critical').length;
 
     return { total, shipped, inProgress, totalVotes, critical };
   }, [features]);
@@ -86,18 +124,21 @@ export default function FeedbackPage() {
   /* ─── Filtered NPS ─── */
   const filteredNps = useMemo(() => {
     let result = npsData.filter((r) => {
-      const matchesQuery = !npsQuery ||
+      const matchesQuery =
+        !npsQuery ||
         r.comment.toLowerCase().includes(npsQuery.toLowerCase()) ||
         r.user.name.toLowerCase().includes(npsQuery.toLowerCase()) ||
         r.tenantName.toLowerCase().includes(npsQuery.toLowerCase()) ||
         r.id.toLowerCase().includes(npsQuery.toLowerCase());
       const matchesCategory = npsCategoryFilter === 'all' || r.category === npsCategoryFilter;
       const matchesSentiment = npsSentimentFilter === 'all' || r.sentiment === npsSentimentFilter;
-      const matchesScore = npsScoreFilter === 'all' ||
+      const matchesScore =
+        npsScoreFilter === 'all' ||
         (npsScoreFilter === 'promoter' && r.score >= 9) ||
         (npsScoreFilter === 'passive' && r.score >= 7 && r.score <= 8) ||
         (npsScoreFilter === 'detractor' && r.score <= 6);
-      const matchesFollowUp = npsFollowUpFilter === 'all' ||
+      const matchesFollowUp =
+        npsFollowUpFilter === 'all' ||
         (npsFollowUpFilter === 'needs-response' && r.followUp && !r.responded) ||
         (npsFollowUpFilter === 'responded' && r.responded) ||
         (npsFollowUpFilter === 'no-action' && !r.followUp);
@@ -112,12 +153,14 @@ export default function FeedbackPage() {
   /* ─── Filtered Features ─── */
   const filteredFeatures = useMemo(() => {
     let result = features.filter((f) => {
-      const matchesQuery = !featureQuery ||
+      const matchesQuery =
+        !featureQuery ||
         f.title.toLowerCase().includes(featureQuery.toLowerCase()) ||
         f.description.toLowerCase().includes(featureQuery.toLowerCase()) ||
         f.id.toLowerCase().includes(featureQuery.toLowerCase());
       const matchesStatus = featureStatusFilter === 'all' || f.status === featureStatusFilter;
-      const matchesCategory = featureCategoryFilter === 'all' || f.category === featureCategoryFilter;
+      const matchesCategory =
+        featureCategoryFilter === 'all' || f.category === featureCategoryFilter;
 
       return matchesQuery && matchesStatus && matchesCategory;
     });
@@ -128,24 +171,26 @@ export default function FeedbackPage() {
 
   /* ─── Handlers ─── */
   const handleNpsRespond = (id, text) => {
-    setNpsData(prev => prev.map(r =>
-      r.id === id ? {
-        ...r,
-        responded: true,
-        response: { by: 'Admin', text, at: new Date().toISOString() }
-      } : r
-    ));
+    setNpsData((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              responded: true,
+              response: { by: 'Admin', text, at: new Date().toISOString() },
+            }
+          : r
+      )
+    );
   };
 
   const handleFeatureVote = (id) => {
-    setFeatures(prev => prev.map(f =>
-      f.id === id ? { ...f, votes: f.votes + 1 } : f
-    ));
+    setFeatures((prev) => prev.map((f) => (f.id === id ? { ...f, votes: f.votes + 1 } : f)));
   };
 
   const handleSaveFeature = (payload) => {
-    setFeatures(prev => {
-      const idx = prev.findIndex(f => f.id === payload.id);
+    setFeatures((prev) => {
+      const idx = prev.findIndex((f) => f.id === payload.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = payload;
@@ -162,8 +207,18 @@ export default function FeedbackPage() {
 
   /* ─── Tabs ─── */
   const tabs = [
-    { id: 'nps', label: 'NPS & Feedback', icon: MessageSquare, badge: npsStats.followUpNeeded > 0 ? npsStats.followUpNeeded : undefined },
-    { id: 'features', label: 'Feature Requests', icon: Lightbulb, badge: featureStats.critical > 0 ? featureStats.critical : undefined },
+    {
+      id: 'nps',
+      label: 'NPS & Feedback',
+      icon: MessageSquare,
+      badge: npsStats.followUpNeeded > 0 ? npsStats.followUpNeeded : undefined,
+    },
+    {
+      id: 'features',
+      label: 'Feature Requests',
+      icon: Lightbulb,
+      badge: featureStats.critical > 0 ? featureStats.critical : undefined,
+    },
   ];
 
   return (
@@ -181,7 +236,13 @@ export default function FeedbackPage() {
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
           {activeTab === 'features' && (
-            <Button size="sm" onClick={() => { setSelectedFeature(null); setShowFeatureModal(true); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSelectedFeature(null);
+                setShowFeatureModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> New Request
             </Button>
           )}
@@ -200,7 +261,9 @@ export default function FeedbackPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -261,7 +324,13 @@ export default function FeedbackPage() {
               <NpsGauge score={npsStats.nps} size={140} />
               <div className="mt-4 text-center">
                 <p className={cn('text-lg font-bold', getNpsColor(npsStats.nps))}>
-                  {npsStats.nps >= 50 ? 'Excellent' : npsStats.nps >= 30 ? 'Good' : npsStats.nps >= 0 ? 'Average' : 'Poor'}
+                  {npsStats.nps >= 50
+                    ? 'Excellent'
+                    : npsStats.nps >= 30
+                      ? 'Good'
+                      : npsStats.nps >= 0
+                        ? 'Average'
+                        : 'Poor'}
                 </p>
                 <p className="text-xs text-text-muted">Based on {npsStats.total} responses</p>
               </div>
@@ -272,8 +341,12 @@ export default function FeedbackPage() {
               <h3 className="text-sm font-semibold text-text-primary mb-4">Score Distribution</h3>
               <div className="space-y-2">
                 {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((score) => {
-                  const count = npsData.filter(r => r.score === score).length;
-                  const maxCount = Math.max(...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(s => npsData.filter(r => r.score === s).length));
+                  const count = npsData.filter((r) => r.score === score).length;
+                  const maxCount = Math.max(
+                    ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(
+                      (s) => npsData.filter((r) => r.score === s).length
+                    )
+                  );
                   return (
                     <NpsScoreBar key={score} score={score} count={count} maxCount={maxCount} />
                   );
@@ -283,11 +356,23 @@ export default function FeedbackPage() {
 
             {/* Sentiment Trend */}
             <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold text-text-primary mb-4">Sentiment Trend (30d)</h3>
+              <h3 className="text-sm font-semibold text-text-primary mb-4">
+                Sentiment Trend (30d)
+              </h3>
               <SentimentMiniChart data={sentimentTrend} />
               <div className="mt-3 flex items-center justify-between text-xs">
-                <span className="text-text-muted">Latest NPS: <span className="font-mono font-medium text-text-primary">{sentimentTrend[sentimentTrend.length - 1]?.nps || 0}</span></span>
-                <span className="text-text-muted">Responses: <span className="font-mono font-medium text-text-primary">{sentimentTrend.reduce((s, d) => s + d.positive + d.neutral + d.negative, 0)}</span></span>
+                <span className="text-text-muted">
+                  Latest NPS:{' '}
+                  <span className="font-mono font-medium text-text-primary">
+                    {sentimentTrend[sentimentTrend.length - 1]?.nps || 0}
+                  </span>
+                </span>
+                <span className="text-text-muted">
+                  Responses:{' '}
+                  <span className="font-mono font-medium text-text-primary">
+                    {sentimentTrend.reduce((s, d) => s + d.positive + d.neutral + d.negative, 0)}
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -297,14 +382,26 @@ export default function FeedbackPage() {
             <h3 className="text-sm font-semibold text-text-primary mb-4">Feedback by Category</h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {Object.entries(categoryDistribution).map(([cat, data]) => (
-                <div key={cat} className="rounded-lg border border-border bg-background p-3 text-center">
+                <div
+                  key={cat}
+                  className="rounded-lg border border-border bg-background p-3 text-center"
+                >
                   <CategoryBadge category={cat} />
-                  <p className="mt-2 text-2xl font-bold font-mono text-text-primary">{data.count}</p>
+                  <p className="mt-2 text-2xl font-bold font-mono text-text-primary">
+                    {data.count}
+                  </p>
                   <p className="text-[10px] text-text-muted">Avg: {data.avgScore.toFixed(1)}</p>
                   <div className="mt-2 h-1 w-full rounded-full bg-border overflow-hidden">
                     <div
-                      className={cn('h-full rounded-full',
-                        data.avgScore >= 8 ? 'bg-accent' : data.avgScore >= 6 ? 'bg-secondary' : data.avgScore >= 4 ? 'bg-warning' : 'bg-danger'
+                      className={cn(
+                        'h-full rounded-full',
+                        data.avgScore >= 8
+                          ? 'bg-accent'
+                          : data.avgScore >= 6
+                            ? 'bg-secondary'
+                            : data.avgScore >= 4
+                              ? 'bg-warning'
+                              : 'bg-danger'
                       )}
                       style={{ width: `${(data.avgScore / 10) * 100}%` }}
                     />
@@ -375,7 +472,8 @@ export default function FeedbackPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredNps.length}</span> of {npsData.length} responses
+            Showing <span className="font-medium text-text-primary">{filteredNps.length}</span> of{' '}
+            {npsData.length} responses
           </p>
 
           {/* NPS Responses Grid */}
@@ -385,22 +483,38 @@ export default function FeedbackPage() {
                 key={response.id}
                 className={cn(
                   'rounded-xl border bg-surface p-4 transition-all hover:shadow-md cursor-pointer',
-                  response.followUp && !response.responded ? 'border-warning/30 ring-1 ring-warning/10' : 'border-border'
+                  response.followUp && !response.responded
+                    ? 'border-warning/30 ring-1 ring-warning/10'
+                    : 'border-border'
                 )}
-                onClick={() => { setSelectedNps(response); setShowNpsDrawer(true); }}
+                onClick={() => {
+                  setSelectedNps(response);
+                  setShowNpsDrawer(true);
+                }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className={cn(
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                      response.score >= 9 ? 'bg-accent/10' :
-                      response.score >= 7 ? 'bg-secondary/10' :
-                      response.score >= 5 ? 'bg-warning/10' : 'bg-danger/10'
-                    )}>
-                      {response.score >= 9 ? <Smile className="h-5 w-5 text-accent" /> :
-                       response.score >= 7 ? <Smile className="h-5 w-5 text-secondary" /> :
-                       response.score >= 5 ? <Meh className="h-5 w-5 text-warning" /> :
-                       <Frown className="h-5 w-5 text-danger" />}
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                        response.score >= 9
+                          ? 'bg-accent/10'
+                          : response.score >= 7
+                            ? 'bg-secondary/10'
+                            : response.score >= 5
+                              ? 'bg-warning/10'
+                              : 'bg-danger/10'
+                      )}
+                    >
+                      {response.score >= 9 ? (
+                        <Smile className="h-5 w-5 text-accent" />
+                      ) : response.score >= 7 ? (
+                        <Smile className="h-5 w-5 text-secondary" />
+                      ) : response.score >= 5 ? (
+                        <Meh className="h-5 w-5 text-warning" />
+                      ) : (
+                        <Frown className="h-5 w-5 text-danger" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -562,7 +676,8 @@ export default function FeedbackPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredFeatures.length}</span> of {features.length} requests
+            Showing <span className="font-medium text-text-primary">{filteredFeatures.length}</span>{' '}
+            of {features.length} requests
           </p>
 
           {/* Feature Requests Grid */}
@@ -614,12 +729,16 @@ export default function FeedbackPage() {
                     {feature.npsLinked?.length > 0 && (
                       <div className="mt-2 flex items-center gap-1 text-[10px] text-text-muted">
                         <Link2 className="h-3 w-3" />
-                        Linked to {feature.npsLinked.length} NPS response{feature.npsLinked.length > 1 ? 's' : ''}
+                        Linked to {feature.npsLinked.length} NPS response
+                        {feature.npsLinked.length > 1 ? 's' : ''}
                       </div>
                     )}
                   </div>
                   <button
-                    onClick={() => { setSelectedFeature(feature); setShowFeatureModal(true); }}
+                    onClick={() => {
+                      setSelectedFeature(feature);
+                      setShowFeatureModal(true);
+                    }}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-surface-elevated hover:text-text-primary shrink-0"
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -632,7 +751,14 @@ export default function FeedbackPage() {
               <div className="rounded-xl border border-border bg-surface p-12 text-center">
                 <Lightbulb className="mx-auto h-10 w-10 text-text-muted mb-3" />
                 <p className="text-sm text-text-muted">No feature requests match your filters.</p>
-                <Button size="sm" className="mt-4" onClick={() => { setSelectedFeature(null); setShowFeatureModal(true); }}>
+                <Button
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => {
+                    setSelectedFeature(null);
+                    setShowFeatureModal(true);
+                  }}
+                >
                   <Plus className="mr-1.5 h-4 w-4" /> Create Request
                 </Button>
               </div>
@@ -647,8 +773,14 @@ export default function FeedbackPage() {
       {showNpsDrawer && selectedNps && (
         <NpsDetailDrawer
           response={selectedNps}
-          onClose={() => { setShowNpsDrawer(false); setSelectedNps(null); }}
-          onRespond={(r) => { setResponseTarget(r); setShowResponseModal(true); }}
+          onClose={() => {
+            setShowNpsDrawer(false);
+            setSelectedNps(null);
+          }}
+          onRespond={(r) => {
+            setResponseTarget(r);
+            setShowResponseModal(true);
+          }}
           onLinkToFeature={(npsId, featureId) => handleLinkToFeature(npsId, featureId)}
         />
       )}
@@ -656,7 +788,10 @@ export default function FeedbackPage() {
       {showResponseModal && responseTarget && (
         <ResponseModal
           response={responseTarget}
-          onClose={() => { setShowResponseModal(false); setResponseTarget(null); }}
+          onClose={() => {
+            setShowResponseModal(false);
+            setResponseTarget(null);
+          }}
           onSend={handleNpsRespond}
         />
       )}
@@ -664,7 +799,10 @@ export default function FeedbackPage() {
       {showFeatureModal && (
         <FeatureRequestModal
           feature={selectedFeature}
-          onClose={() => { setShowFeatureModal(false); setSelectedFeature(null); }}
+          onClose={() => {
+            setShowFeatureModal(false);
+            setSelectedFeature(null);
+          }}
           onSave={handleSaveFeature}
           tenants={mockTenants}
         />

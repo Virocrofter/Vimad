@@ -15,7 +15,7 @@ export const useGuestStore = create((set, get) => ({
   // Services
   cart: [],
   messages: [],
-  notifications: guestAnnouncements.map(a => ({
+  notifications: guestAnnouncements.map((a) => ({
     id: a.id,
     type: a.type === 'feature' ? 'promo' : a.type === 'maintenance' ? 'alert' : 'system',
     title: a.title,
@@ -35,23 +35,30 @@ export const useGuestStore = create((set, get) => ({
   setCurrentStay: (stay) => set({ currentStay: stay }),
 
   addToCart: (item) => set((state) => ({ cart: [...state.cart, item] })),
-  removeFromCart: (itemId) => set((state) => ({ cart: state.cart.filter(i => i.cartId !== itemId) })),
+  removeFromCart: (itemId) =>
+    set((state) => ({ cart: state.cart.filter((i) => i.cartId !== itemId) })),
   clearCart: () => set({ cart: [] }),
-  updateCartQty: (itemId, qty) => set((state) => ({
-    cart: state.cart.map(i => i.cartId === itemId ? { ...i, qty } : i).filter(i => i.qty > 0)
-  })),
+  updateCartQty: (itemId, qty) =>
+    set((state) => ({
+      cart: state.cart
+        .map((i) => (i.cartId === itemId ? { ...i, qty } : i))
+        .filter((i) => i.qty > 0),
+    })),
 
   addMessage: (msg) => set((state) => ({ messages: [...state.messages, msg] })),
 
-  markNotificationRead: (id) => set((state) => ({
-    notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
-  })),
-  markAllNotificationsRead: () => set((state) => ({
-    notifications: state.notifications.map(n => ({ ...n, read: true }))
-  })),
-  archiveNotification: (id) => set((state) => ({
-    notifications: state.notifications.filter(n => n.id !== id)
-  })),
+  markNotificationRead: (id) =>
+    set((state) => ({
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    })),
+  markAllNotificationsRead: () =>
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true })),
+    })),
+  archiveNotification: (id) =>
+    set((state) => ({
+      notifications: state.notifications.filter((n) => n.id !== id),
+    })),
 
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 }));

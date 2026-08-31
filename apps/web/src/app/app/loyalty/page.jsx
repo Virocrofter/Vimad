@@ -2,9 +2,25 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Filter, Download, Plus, Crown, Star, Gem, Award,
-  Users, TrendingUp, DollarSign, Zap, ArrowUpDown, LayoutGrid,
-  List, ChevronRight, MoreHorizontal, BarChart3, X
+  Search,
+  Filter,
+  Download,
+  Plus,
+  Crown,
+  Star,
+  Gem,
+  Award,
+  Users,
+  TrendingUp,
+  DollarSign,
+  Zap,
+  ArrowUpDown,
+  LayoutGrid,
+  List,
+  ChevronRight,
+  MoreHorizontal,
+  BarChart3,
+  X,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -38,14 +54,16 @@ export default function LoyaltyPage() {
     const totalPoints = mockMembers.reduce((s, m) => s + m.points, 0);
     const totalLTV = mockMembers.reduce((s, m) => s + m.lifetimeValue, 0);
     const avgPoints = Math.round(totalPoints / totalMembers);
-    const redemptions = pointsTransactions.filter(t => t.type === 'redemption').length;
+    const redemptions = pointsTransactions.filter((t) => t.type === 'redemption').length;
     return { totalMembers, totalPoints, totalLTV, avgPoints, redemptions };
   }, []);
 
   /* Tier distribution */
   const tierDistribution = useMemo(() => {
     const dist = { platinum: 0, gold: 0, silver: 0, bronze: 0, none: 0 };
-    mockMembers.forEach(m => { dist[m.tier] = (dist[m.tier] || 0) + 1; });
+    mockMembers.forEach((m) => {
+      dist[m.tier] = (dist[m.tier] || 0) + 1;
+    });
     return dist;
   }, []);
 
@@ -79,7 +97,9 @@ export default function LoyaltyPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Loyalty & Rewards</h1>
-          <p className="text-sm text-text-secondary">Membership tiers, points balance, and guest retention</p>
+          <p className="text-sm text-text-secondary">
+            Membership tiers, points balance, and guest retention
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowPredictive(true)}>
@@ -96,10 +116,31 @@ export default function LoyaltyPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Total Members" value={stats.totalMembers} icon={Users} color="text-secondary" />
-        <StatCard label="Points in Circulation" value={formatNumber(stats.totalPoints)} icon={Zap} color="text-accent" />
-        <StatCard label="Avg. Member LTV" value={`$${formatNumber(stats.totalLTV / stats.totalMembers)}`} icon={DollarSign} color="text-info" />
-        <StatCard label="Redemptions" value={stats.redemptions} icon={TrendingUp} color="text-warning" subtext="This month" />
+        <StatCard
+          label="Total Members"
+          value={stats.totalMembers}
+          icon={Users}
+          color="text-secondary"
+        />
+        <StatCard
+          label="Points in Circulation"
+          value={formatNumber(stats.totalPoints)}
+          icon={Zap}
+          color="text-accent"
+        />
+        <StatCard
+          label="Avg. Member LTV"
+          value={`$${formatNumber(stats.totalLTV / stats.totalMembers)}`}
+          icon={DollarSign}
+          color="text-info"
+        />
+        <StatCard
+          label="Redemptions"
+          value={stats.redemptions}
+          icon={TrendingUp}
+          color="text-warning"
+          subtext="This month"
+        />
       </div>
 
       {/* Tier Distribution Bar */}
@@ -155,7 +196,9 @@ export default function LoyaltyPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -176,7 +219,9 @@ export default function LoyaltyPage() {
               onClick={() => setViewMode('grid')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'grid'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -185,7 +230,9 @@ export default function LoyaltyPage() {
               onClick={() => setViewMode('table')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'table' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'table'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <List className="h-4 w-4" />
@@ -214,7 +261,10 @@ export default function LoyaltyPage() {
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => { setTierFilter('all'); setQuery(''); }}
+                onClick={() => {
+                  setTierFilter('all');
+                  setQuery('');
+                }}
                 className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
               >
                 Reset Filters
@@ -226,7 +276,8 @@ export default function LoyaltyPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredMembers.length}</span> of {mockMembers.length} members
+        Showing <span className="font-medium text-text-primary">{filteredMembers.length}</span> of{' '}
+        {mockMembers.length} members
       </p>
 
       {/* Grid View */}
@@ -256,11 +307,17 @@ export default function LoyaltyPage() {
                 <div className="mt-3 space-y-1.5">
                   <div className="flex items-center gap-2 text-xs text-text-secondary">
                     <Zap className="h-3.5 w-3.5 text-text-muted" />
-                    <span className="font-mono font-medium text-text-primary">{member.points.toLocaleString()}</span> pts
+                    <span className="font-mono font-medium text-text-primary">
+                      {member.points.toLocaleString()}
+                    </span>{' '}
+                    pts
                   </div>
                   <div className="flex items-center gap-2 text-xs text-text-secondary">
                     <DollarSign className="h-3.5 w-3.5 text-text-muted" />
-                    <span className="font-mono font-medium text-text-primary">${member.lifetimeValue.toLocaleString()}</span> LTV
+                    <span className="font-mono font-medium text-text-primary">
+                      ${member.lifetimeValue.toLocaleString()}
+                    </span>{' '}
+                    LTV
                   </div>
                 </div>
 
@@ -272,7 +329,8 @@ export default function LoyaltyPage() {
                       tier={member.tier}
                     />
                     <p className="mt-1 text-[10px] text-text-muted">
-                      {(nextTier[1].req - member.points).toLocaleString()} pts to {nextTier[1].label}
+                      {(nextTier[1].req - member.points).toLocaleString()} pts to{' '}
+                      {nextTier[1].label}
                     </p>
                   </div>
                 )}
@@ -348,9 +406,7 @@ export default function LoyaltyPage() {
                       <td className="px-4 py-3 text-right font-mono text-text-primary">
                         {member.totalStays}
                       </td>
-                      <td className="px-4 py-3 text-text-secondary text-xs">
-                        {member.lastStay}
-                      </td>
+                      <td className="px-4 py-3 text-text-secondary text-xs">{member.lastStay}</td>
                       <td className="px-4 py-3">
                         {nextTier ? (
                           <div className="w-24">
@@ -395,11 +451,21 @@ export default function LoyaltyPage() {
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Member</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Description</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Amount</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Member
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Type
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Description
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                  Amount
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -408,21 +474,30 @@ export default function LoyaltyPage() {
                   <td className="px-4 py-3 text-text-secondary text-xs font-mono">{tx.date}</td>
                   <td className="px-4 py-3 text-text-primary font-medium">{tx.memberName}</td>
                   <td className="px-4 py-3">
-                    <span className={cn(
-                      'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase',
-                      tx.type === 'accrual' ? 'bg-accent/10 text-accent border-accent/20' :
-                      tx.type === 'bonus' ? 'bg-secondary/10 text-secondary border-secondary/20' :
-                      'bg-danger/10 text-danger border-danger/20'
-                    )}>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase',
+                        tx.type === 'accrual'
+                          ? 'bg-accent/10 text-accent border-accent/20'
+                          : tx.type === 'bonus'
+                            ? 'bg-secondary/10 text-secondary border-secondary/20'
+                            : 'bg-danger/10 text-danger border-danger/20'
+                      )}
+                    >
                       {tx.type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs max-w-xs truncate">{tx.description}</td>
-                  <td className={cn(
-                    'px-4 py-3 text-right font-mono font-medium',
-                    tx.type === 'redemption' ? 'text-danger' : 'text-accent'
-                  )}>
-                    {tx.type === 'redemption' ? '' : '+'}{tx.amount.toLocaleString()}
+                  <td className="px-4 py-3 text-text-secondary text-xs max-w-xs truncate">
+                    {tx.description}
+                  </td>
+                  <td
+                    className={cn(
+                      'px-4 py-3 text-right font-mono font-medium',
+                      tx.type === 'redemption' ? 'text-danger' : 'text-accent'
+                    )}
+                  >
+                    {tx.type === 'redemption' ? '' : '+'}
+                    {tx.amount.toLocaleString()}
                   </td>
                 </tr>
               ))}
@@ -442,10 +517,7 @@ export default function LoyaltyPage() {
 
       {/* Predictive LTV Modal */}
       {showPredictive && (
-        <LTVPredictiveModal
-          members={mockMembers}
-          onClose={() => setShowPredictive(false)}
-        />
+        <LTVPredictiveModal members={mockMembers} onClose={() => setShowPredictive(false)} />
       )}
     </div>
   );

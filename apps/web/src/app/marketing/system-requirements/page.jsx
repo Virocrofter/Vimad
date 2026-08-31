@@ -11,7 +11,8 @@ export default function SystemRequirementsPage() {
           </div>
           <h1 className="mt-4 text-3xl font-bold text-text-primary">System Requirements</h1>
           <p className="mt-2 text-text-secondary">
-            Unified PMS is a cloud-native platform. No on-premise servers or complex IT setup required.
+            Unified PMS is a cloud-native platform. No on-premise servers or complex IT setup
+            required.
           </p>
         </div>
 
@@ -26,21 +27,33 @@ export default function SystemRequirementsPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background">
                   <tr>
-                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">Requirement</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">
+                      Requirement
+                    </th>
                     <th className="px-4 py-2.5 text-left font-medium text-text-primary">Minimum</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">Recommended</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">
+                      Recommended
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   <tr>
                     <td className="px-4 py-2.5 text-text-secondary">Operating System</td>
-                    <td className="px-4 py-2.5 text-text-secondary">Windows 10, macOS 11, Ubuntu 20.04</td>
-                    <td className="px-4 py-2.5 text-text-secondary">Windows 11, macOS 14, Ubuntu 22.04</td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      Windows 10, macOS 11, Ubuntu 20.04
+                    </td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      Windows 11, macOS 14, Ubuntu 22.04
+                    </td>
                   </tr>
                   <tr>
                     <td className="px-4 py-2.5 text-text-secondary">Browser</td>
-                    <td className="px-4 py-2.5 text-text-secondary">Chrome 110, Firefox 110, Safari 16, Edge 110</td>
-                    <td className="px-4 py-2.5 text-text-secondary">Latest stable release of any major browser</td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      Chrome 110, Firefox 110, Safari 16, Edge 110
+                    </td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      Latest stable release of any major browser
+                    </td>
                   </tr>
                   <tr>
                     <td className="px-4 py-2.5 text-text-secondary">RAM</td>
@@ -72,8 +85,12 @@ export default function SystemRequirementsPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background">
                   <tr>
-                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">Platform</th>
-                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">Minimum Version</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">
+                      Platform
+                    </th>
+                    <th className="px-4 py-2.5 text-left font-medium text-text-primary">
+                      Minimum Version
+                    </th>
                     <th className="px-4 py-2.5 text-left font-medium text-text-primary">Notes</th>
                   </tr>
                 </thead>
@@ -105,7 +122,12 @@ export default function SystemRequirementsPage() {
               <h2 className="text-lg font-semibold text-text-primary">Network & Firewall</h2>
             </div>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-text-secondary">
-              <li>Outbound HTTPS (port 443) to <code className="rounded bg-background px-1 py-0.5 font-mono text-xs text-secondary">*.unifiedpms.com</code></li>
+              <li>
+                Outbound HTTPS (port 443) to{' '}
+                <code className="rounded bg-background px-1 py-0.5 font-mono text-xs text-secondary">
+                  *.unifiedpms.com
+                </code>
+              </li>
               <li>WebSocket connections for real-time updates (port 443)</li>
               <li>No inbound ports required — fully cloud-hosted</li>
               <li>VPN compatibility: Works through most corporate VPNs</li>

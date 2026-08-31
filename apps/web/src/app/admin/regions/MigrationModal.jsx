@@ -1,8 +1,16 @@
 /* src/app/admin/regions/MigrationModal.jsx */
 import { useState } from 'react';
 import {
-  X, ArrowRight, Server, Globe, Check, AlertTriangle, Clock,
-  Database, Shield, Activity
+  X,
+  ArrowRight,
+  Server,
+  Globe,
+  Check,
+  AlertTriangle,
+  Clock,
+  Database,
+  Shield,
+  Activity,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -26,7 +34,9 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const selectedTenant = tenants.find((t) => t.id === form.tenantId);
-  const sourceRegion = regions.find((r) => r.id === form.sourceRegion || r.code === form.sourceRegion);
+  const sourceRegion = regions.find(
+    (r) => r.id === form.sourceRegion || r.code === form.sourceRegion
+  );
   const targetRegion = regions.find((r) => r.id === form.targetRegion);
 
   const handleSubmit = (e) => {
@@ -48,7 +58,8 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
   };
 
   const canProceed = () => {
-    if (step === 1) return form.tenantId && form.targetRegion && form.sourceRegion !== form.targetRegion;
+    if (step === 1)
+      return form.tenantId && form.targetRegion && form.sourceRegion !== form.targetRegion;
     if (step === 2) return form.reason.length > 5;
     return true;
   };
@@ -72,7 +83,10 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -83,18 +97,31 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
             <div className="flex items-center gap-2">
               {['Select Tenant', 'Configure', 'Review'].map((s, i) => (
                 <div key={s} className="flex items-center gap-2 flex-1">
-                  <div className={cn(
-                    'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold',
-                    step > i + 1 ? 'bg-secondary text-white' :
-                    step === i + 1 ? 'border-2 border-secondary bg-secondary/10 text-secondary' :
-                    'border-2 border-border bg-surface text-text-muted'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold',
+                      step > i + 1
+                        ? 'bg-secondary text-white'
+                        : step === i + 1
+                          ? 'border-2 border-secondary bg-secondary/10 text-secondary'
+                          : 'border-2 border-border bg-surface text-text-muted'
+                    )}
+                  >
                     {step > i + 1 ? <Check className="h-4 w-4" /> : i + 1}
                   </div>
-                  <span className={cn('text-xs font-medium', step >= i + 1 ? 'text-text-primary' : 'text-text-muted')}>
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      step >= i + 1 ? 'text-text-primary' : 'text-text-muted'
+                    )}
+                  >
                     {s}
                   </span>
-                  {i < 2 && <div className={cn('h-0.5 flex-1', step > i + 1 ? 'bg-secondary' : 'bg-border')} />}
+                  {i < 2 && (
+                    <div
+                      className={cn('h-0.5 flex-1', step > i + 1 ? 'bg-secondary' : 'bg-border')}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -106,20 +133,27 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
           {(step === 1 || isEditing) && (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tenant</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Tenant
+                </label>
                 <select
                   value={form.tenantId}
                   onChange={(e) => {
                     const t = tenants.find((x) => x.id === e.target.value);
                     update('tenantId', e.target.value);
                     update('tenantName', t?.name || '');
-                    update('sourceRegion', t ? (regions.find((r) => r.id.includes(t.id))?.id || 'us-east-1') : '');
+                    update(
+                      'sourceRegion',
+                      t ? regions.find((r) => r.id.includes(t.id))?.id || 'us-east-1' : ''
+                    );
                   }}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <option value="">Select a tenant...</option>
                   {tenants.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name} ({t.id}) — {t.plan}</option>
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.id}) — {t.plan}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -127,52 +161,73 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
               {selectedTenant && (
                 <div className="rounded-lg border border-border bg-surface p-3 flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-xs font-bold text-secondary">
-                    {selectedTenant.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    {selectedTenant.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-text-primary">{selectedTenant.name}</p>
-                    <p className="text-[10px] text-text-muted">{selectedTenant.storageGB} GB · ${selectedTenant.mrr}/mo</p>
+                    <p className="text-[10px] text-text-muted">
+                      {selectedTenant.storageGB} GB · ${selectedTenant.mrr}/mo
+                    </p>
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Source Region</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Source Region
+                  </label>
                   <select
                     value={form.sourceRegion}
                     onChange={(e) => update('sourceRegion', e.target.value)}
                     className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="">Select...</option>
-                    {regions.filter((r) => r.status !== 'maintenance').map((r) => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
-                    ))}
+                    {regions
+                      .filter((r) => r.status !== 'maintenance')
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Target Region</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Target Region
+                  </label>
                   <select
                     value={form.targetRegion}
                     onChange={(e) => update('targetRegion', e.target.value)}
                     className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="">Select...</option>
-                    {regions.filter((r) => r.id !== form.sourceRegion && r.status !== 'maintenance').map((r) => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
-                    ))}
+                    {regions
+                      .filter((r) => r.id !== form.sourceRegion && r.status !== 'maintenance')
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
               </div>
 
-              {form.sourceRegion && form.targetRegion && form.sourceRegion === form.targetRegion && (
-                <div className="rounded-lg border border-danger/20 bg-danger/5 p-3">
-                  <p className="text-xs text-danger flex items-center gap-1">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    Source and target regions must be different
-                  </p>
-                </div>
-              )}
+              {form.sourceRegion &&
+                form.targetRegion &&
+                form.sourceRegion === form.targetRegion && (
+                  <div className="rounded-lg border border-danger/20 bg-danger/5 p-3">
+                    <p className="text-xs text-danger flex items-center gap-1">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      Source and target regions must be different
+                    </p>
+                  </div>
+                )}
             </div>
           )}
 
@@ -180,7 +235,9 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
           {(step === 2 || isEditing) && (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Migration Reason</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Migration Reason
+                </label>
                 <textarea
                   value={form.reason}
                   onChange={(e) => update('reason', e.target.value)}
@@ -191,14 +248,18 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Schedule</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Schedule
+                </label>
                 <input
                   type="datetime-local"
                   value={form.scheduledAt}
                   onChange={(e) => update('scheduledAt', e.target.value)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
-                <p className="mt-1 text-[10px] text-text-muted">Leave empty to start immediately upon approval</p>
+                <p className="mt-1 text-[10px] text-text-muted">
+                  Leave empty to start immediately upon approval
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -211,7 +272,9 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
                   />
                   <div>
                     <p className="text-sm font-medium text-text-primary">Verify before cutover</p>
-                    <p className="text-xs text-text-muted">Run data integrity checks before switching traffic</p>
+                    <p className="text-xs text-text-muted">
+                      Run data integrity checks before switching traffic
+                    </p>
                   </div>
                 </label>
 
@@ -224,13 +287,17 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
                   />
                   <div>
                     <p className="text-sm font-medium text-text-primary">Notify tenant</p>
-                    <p className="text-xs text-text-muted">Send email notification to tenant admin before migration</p>
+                    <p className="text-xs text-text-muted">
+                      Send email notification to tenant admin before migration
+                    </p>
                   </div>
                 </label>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Maintenance Window</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Maintenance Window
+                </label>
                 <select
                   value={form.maintenanceWindow}
                   onChange={(e) => update('maintenanceWindow', e.target.value)}
@@ -249,8 +316,10 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
           {step === 3 && !isEditing && (
             <div className="space-y-4">
               <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Migration Summary</h4>
-                
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Migration Summary
+                </h4>
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-xs text-text-muted">Tenant</p>
@@ -258,15 +327,21 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
                   </div>
                   <div>
                     <p className="text-xs text-text-muted">Data Size</p>
-                    <p className="font-medium text-text-primary">{selectedTenant?.storageGB || 0} GB</p>
+                    <p className="font-medium text-text-primary">
+                      {selectedTenant?.storageGB || 0} GB
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-text-muted">From</p>
-                    <p className="font-medium text-text-primary font-mono text-xs">{getRegionName(form.sourceRegion)}</p>
+                    <p className="font-medium text-text-primary font-mono text-xs">
+                      {getRegionName(form.sourceRegion)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-text-muted">To</p>
-                    <p className="font-medium text-text-primary font-mono text-xs">{getRegionName(form.targetRegion)}</p>
+                    <p className="font-medium text-text-primary font-mono text-xs">
+                      {getRegionName(form.targetRegion)}
+                    </p>
                   </div>
                 </div>
 
@@ -278,7 +353,9 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
                 <div className="border-t border-border pt-3">
                   <p className="text-xs text-text-muted">Schedule</p>
                   <p className="text-sm text-text-primary">
-                    {form.scheduledAt ? new Date(form.scheduledAt).toLocaleString() : 'Immediate upon approval'}
+                    {form.scheduledAt
+                      ? new Date(form.scheduledAt).toLocaleString()
+                      : 'Immediate upon approval'}
                   </p>
                 </div>
 
@@ -299,7 +376,8 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
               <div className="rounded-lg border border-warning/20 bg-warning/5 p-3">
                 <p className="text-xs text-warning flex items-start gap-1.5">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                  Cross-region migration will incur brief downtime (typically 30-120 seconds). Ensure the tenant has been notified and the maintenance window is acceptable.
+                  Cross-region migration will incur brief downtime (typically 30-120 seconds).
+                  Ensure the tenant has been notified and the maintenance window is acceptable.
                 </p>
               </div>
             </div>
@@ -312,7 +390,9 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
                 Back
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             {!isEditing && step < 3 ? (
               <Button type="button" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
                 Next

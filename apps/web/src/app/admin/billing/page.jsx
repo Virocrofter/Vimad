@@ -2,19 +2,40 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  DollarSign, TrendingUp, TrendingDown, Users, CreditCard,
-  Receipt, AlertTriangle, RotateCcw, ArrowUpRight, ArrowDownRight,
-  BarChart3, PieChart, Zap, Calendar, ChevronRight
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  CreditCard,
+  Receipt,
+  AlertTriangle,
+  RotateCcw,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart3,
+  PieChart,
+  Zap,
+  Calendar,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  revenueOverview, mrrHistory, revenueByPlan,
-  subscriptions, invoices, creditNotes, dunningCases
+  revenueOverview,
+  mrrHistory,
+  revenueByPlan,
+  subscriptions,
+  invoices,
+  creditNotes,
+  dunningCases,
 } from './data';
 import {
-  BillingStatCard, MrrMovementBar, PlanDistributionChart,
-  InvoiceMiniCard, SubscriptionMiniCard, DunningTimeline
+  BillingStatCard,
+  MrrMovementBar,
+  PlanDistributionChart,
+  InvoiceMiniCard,
+  SubscriptionMiniCard,
+  DunningTimeline,
 } from './components';
 import { formatCurrency } from './data';
 
@@ -22,33 +43,39 @@ export default function BillingDashboard() {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('6m');
 
-  const stats = useMemo(() => ({
-    mrr: revenueOverview.mrr,
-    mrrGrowth: revenueOverview.mrrGrowth,
-    arr: revenueOverview.arr,
-    activeSubs: revenueOverview.activeSubscriptions,
-    trialSubs: revenueOverview.trialSubscriptions,
-    churnRate: revenueOverview.churnRate,
-    nrr: revenueOverview.netRevenueRetention,
-    arpu: revenueOverview.avgRevenuePerUser,
-    ltv: revenueOverview.lifetimeValue,
-    cac: revenueOverview.customerAcquisitionCost,
-    payback: revenueOverview.paybackPeriod,
-  }), []);
+  const stats = useMemo(
+    () => ({
+      mrr: revenueOverview.mrr,
+      mrrGrowth: revenueOverview.mrrGrowth,
+      arr: revenueOverview.arr,
+      activeSubs: revenueOverview.activeSubscriptions,
+      trialSubs: revenueOverview.trialSubscriptions,
+      churnRate: revenueOverview.churnRate,
+      nrr: revenueOverview.netRevenueRetention,
+      arpu: revenueOverview.avgRevenuePerUser,
+      ltv: revenueOverview.lifetimeValue,
+      cac: revenueOverview.customerAcquisitionCost,
+      payback: revenueOverview.paybackPeriod,
+    }),
+    []
+  );
 
   const recentInvoices = useMemo(() => invoices.slice(0, 5), []);
   const recentSubs = useMemo(() => subscriptions.slice(0, 5), []);
-  const activeDunning = useMemo(() => dunningCases.filter(d => d.status === 'in_progress'), []);
+  const activeDunning = useMemo(() => dunningCases.filter((d) => d.status === 'in_progress'), []);
 
-  const pendingAmount = useMemo(() =>
-    invoices.filter(i => i.status === 'pending' || i.status === 'overdue')
-      .reduce((s, i) => s + i.amount, 0),
-  []);
+  const pendingAmount = useMemo(
+    () =>
+      invoices
+        .filter((i) => i.status === 'pending' || i.status === 'overdue')
+        .reduce((s, i) => s + i.amount, 0),
+    []
+  );
 
-  const overdueAmount = useMemo(() =>
-    invoices.filter(i => i.status === 'overdue')
-      .reduce((s, i) => s + i.amount, 0),
-  []);
+  const overdueAmount = useMemo(
+    () => invoices.filter((i) => i.status === 'overdue').reduce((s, i) => s + i.amount, 0),
+    []
+  );
 
   return (
     <div className="space-y-6">
@@ -56,7 +83,9 @@ export default function BillingDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Billing & Revenue</h1>
-          <p className="text-sm text-text-secondary">Subscription management, invoicing, and revenue analytics</p>
+          <p className="text-sm text-text-secondary">
+            Subscription management, invoicing, and revenue analytics
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border border-border bg-background p-1">
@@ -71,7 +100,9 @@ export default function BillingDashboard() {
                 onClick={() => setTimeRange(r.id)}
                 className={cn(
                   'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                  timeRange === r.id ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary'
+                  timeRange === r.id
+                    ? 'bg-secondary text-white'
+                    : 'text-text-secondary hover:text-text-primary'
                 )}
               >
                 {r.label}
@@ -112,7 +143,7 @@ export default function BillingDashboard() {
           icon={TrendingDown}
           color="text-warning"
           subtext="Monthly"
-          trend={-(stats.churnRate)}
+          trend={-stats.churnRate}
         />
       </div>
 
@@ -157,8 +188,8 @@ export default function BillingDashboard() {
           <div className="flex-1">
             <p className="text-sm font-medium text-text-primary">
               {overdueAmount > 0
-                ? `${formatCurrency(overdueAmount)} overdue across ${invoices.filter(i => i.status === 'overdue').length} invoices`
-                : `${formatCurrency(pendingAmount)} pending across ${invoices.filter(i => i.status === 'pending').length} invoices`}
+                ? `${formatCurrency(overdueAmount)} overdue across ${invoices.filter((i) => i.status === 'overdue').length} invoices`
+                : `${formatCurrency(pendingAmount)} pending across ${invoices.filter((i) => i.status === 'pending').length} invoices`}
             </p>
             <p className="text-xs text-text-muted">
               {activeDunning.length > 0
@@ -181,10 +212,22 @@ export default function BillingDashboard() {
               <BarChart3 className="h-4 w-4 text-secondary" /> MRR Movement
             </h3>
             <div className="flex gap-3 text-[10px] text-text-muted">
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-accent" />New</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-secondary" />Expansion</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-warning" />Contraction</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-danger" />Churn</span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                New
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-secondary" />
+                Expansion
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-warning" />
+                Contraction
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-danger" />
+                Churn
+              </span>
             </div>
           </div>
           <MrrMovementBar data={mrrHistory} />
@@ -202,10 +245,38 @@ export default function BillingDashboard() {
       {/* Quick Access Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Subscriptions', count: subscriptions.length, icon: Users, path: '/admin/billing/subscriptions', color: 'text-accent', desc: 'Manage plans & billing cycles' },
-          { label: 'Invoices', count: invoices.length, icon: Receipt, path: '/admin/billing/invoices', color: 'text-secondary', desc: 'Generate & track invoices' },
-          { label: 'Credit Notes', count: creditNotes.length, icon: RotateCcw, path: '/admin/billing/credit-notes', color: 'text-info', desc: 'Refunds & adjustments' },
-          { label: 'Dunning', count: activeDunning.length, icon: AlertTriangle, path: '/admin/billing/dunning', color: 'text-warning', desc: 'Failed payment recovery' },
+          {
+            label: 'Subscriptions',
+            count: subscriptions.length,
+            icon: Users,
+            path: '/admin/billing/subscriptions',
+            color: 'text-accent',
+            desc: 'Manage plans & billing cycles',
+          },
+          {
+            label: 'Invoices',
+            count: invoices.length,
+            icon: Receipt,
+            path: '/admin/billing/invoices',
+            color: 'text-secondary',
+            desc: 'Generate & track invoices',
+          },
+          {
+            label: 'Credit Notes',
+            count: creditNotes.length,
+            icon: RotateCcw,
+            path: '/admin/billing/credit-notes',
+            color: 'text-info',
+            desc: 'Refunds & adjustments',
+          },
+          {
+            label: 'Dunning',
+            count: activeDunning.length,
+            icon: AlertTriangle,
+            path: '/admin/billing/dunning',
+            color: 'text-warning',
+            desc: 'Failed payment recovery',
+          },
         ].map((card) => (
           <button
             key={card.label}
@@ -213,12 +284,24 @@ export default function BillingDashboard() {
             className="rounded-xl border border-border bg-surface p-4 text-left hover:border-secondary/30 hover:shadow-md transition-all group"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className={cn('rounded-lg p-2', card.color.replace('text-', 'bg-').replace('accent', 'accent/10').replace('secondary', 'secondary/10').replace('info', 'info/10').replace('warning', 'warning/10'))}>
+              <div
+                className={cn(
+                  'rounded-lg p-2',
+                  card.color
+                    .replace('text-', 'bg-')
+                    .replace('accent', 'accent/10')
+                    .replace('secondary', 'secondary/10')
+                    .replace('info', 'info/10')
+                    .replace('warning', 'warning/10')
+                )}
+              >
                 <card.icon className={cn('h-5 w-5', card.color)} />
               </div>
               <span className="text-2xl font-bold font-mono text-text-primary">{card.count}</span>
             </div>
-            <p className="text-sm font-medium text-text-primary group-hover:text-secondary transition-colors">{card.label}</p>
+            <p className="text-sm font-medium text-text-primary group-hover:text-secondary transition-colors">
+              {card.label}
+            </p>
             <p className="text-xs text-text-muted">{card.desc}</p>
           </button>
         ))}
@@ -287,11 +370,17 @@ export default function BillingDashboard() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-sm font-medium text-text-primary">{dun.tenantName}</p>
-                    <p className="text-xs text-text-muted">{dun.id} · {dun.invoiceId}</p>
+                    <p className="text-xs text-text-muted">
+                      {dun.id} · {dun.invoiceId}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-mono font-medium text-danger">{formatCurrency(dun.amount)}</p>
-                    <p className="text-[10px] text-text-muted">Attempt {dun.retryCount}/{dun.maxRetries}</p>
+                    <p className="text-sm font-mono font-medium text-danger">
+                      {formatCurrency(dun.amount)}
+                    </p>
+                    <p className="text-[10px] text-text-muted">
+                      Attempt {dun.retryCount}/{dun.maxRetries}
+                    </p>
                   </div>
                 </div>
                 <DunningTimeline actions={dun.actions} />

@@ -1,14 +1,24 @@
 /* src/app/admin/announcements/AnnouncementModal.jsx */
 import { useState, useEffect } from 'react';
 import {
-  X, Check, Sparkles, Globe, Tag, Building2, Calendar, Clock,
-  Pin, Type, AlertTriangle, Info, Wrench, ChevronDown
+  X,
+  Check,
+  Sparkles,
+  Globe,
+  Tag,
+  Building2,
+  Calendar,
+  Clock,
+  Pin,
+  Type,
+  AlertTriangle,
+  Info,
+  Wrench,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
-import {
-  announcementTypeMeta, priorityMeta, audienceMeta, plans, regions
-} from './data';
+import { announcementTypeMeta, priorityMeta, audienceMeta, plans, regions } from './data';
 
 const types = [
   { id: 'feature', label: 'Feature', icon: Sparkles },
@@ -72,16 +82,22 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
     }
   }, [announcement]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const togglePlan = (plan) => {
     const current = form.targetPlans;
-    update('targetPlans', current.includes(plan) ? current.filter(p => p !== plan) : [...current, plan]);
+    update(
+      'targetPlans',
+      current.includes(plan) ? current.filter((p) => p !== plan) : [...current, plan]
+    );
   };
 
   const toggleTenant = (tenantId) => {
     const current = form.targetTenants;
-    update('targetTenants', current.includes(tenantId) ? current.filter(t => t !== tenantId) : [...current, tenantId]);
+    update(
+      'targetTenants',
+      current.includes(tenantId) ? current.filter((t) => t !== tenantId) : [...current, tenantId]
+    );
   };
 
   const handleSubmit = (e) => {
@@ -94,13 +110,17 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
       expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
       createdBy: announcement?.createdBy || 'Admin',
       createdAt: announcement?.createdAt || new Date().toISOString(),
-      publishedAt: form.status === 'published' && !announcement?.publishedAt
-        ? new Date().toISOString()
-        : announcement?.publishedAt || null,
+      publishedAt:
+        form.status === 'published' && !announcement?.publishedAt
+          ? new Date().toISOString()
+          : announcement?.publishedAt || null,
       readCount: announcement?.readCount || 0,
-      totalRecipients: form.audience === 'all' ? tenants.length || 156 :
-        form.audience === 'plan' ? Math.floor((tenants.length || 156) * (form.targetPlans.length / 3)) :
-        form.targetTenants.length,
+      totalRecipients:
+        form.audience === 'all'
+          ? tenants.length || 156
+          : form.audience === 'plan'
+            ? Math.floor((tenants.length || 156) * (form.targetPlans.length / 3))
+            : form.targetTenants.length,
     };
     onSave(payload);
     onClose();
@@ -125,7 +145,10 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -134,7 +157,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
           {/* Title & Content */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Title</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Title
+              </label>
               <input
                 type="text"
                 required
@@ -145,7 +170,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Content</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Content
+              </label>
               <textarea
                 required
                 value={form.content}
@@ -160,7 +187,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
           {/* Type & Priority */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Type</label>
+              <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Type
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {types.map((t) => {
                   const Icon = t.icon;
@@ -185,7 +214,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Priority</label>
+              <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Priority
+              </label>
               <div className="space-y-1.5">
                 {priorities.map((p) => {
                   const meta = priorityMeta[p.id];
@@ -213,7 +244,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
 
           {/* Audience Targeting */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Target Audience</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Target Audience
+            </label>
             <div className="flex gap-2">
               {audiences.map((a) => {
                 const active = form.audience === a.id;
@@ -237,7 +270,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
 
             {form.audience === 'plan' && (
               <div className="rounded-xl border border-border bg-surface p-4">
-                <label className="mb-2 block text-xs font-medium text-text-secondary">Select Plans</label>
+                <label className="mb-2 block text-xs font-medium text-text-secondary">
+                  Select Plans
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {plans.map((plan) => (
                     <button
@@ -261,7 +296,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
 
             {form.audience === 'tenant' && (
               <div className="rounded-xl border border-border bg-surface p-4">
-                <label className="mb-2 block text-xs font-medium text-text-secondary">Select Tenants</label>
+                <label className="mb-2 block text-xs font-medium text-text-secondary">
+                  Select Tenants
+                </label>
                 <div className="max-h-48 overflow-auto space-y-1">
                   {tenants.length === 0 ? (
                     <p className="text-sm text-text-muted py-4 text-center">No tenants available</p>
@@ -278,11 +315,17 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
                             : 'text-text-secondary hover:bg-background'
                         )}
                       >
-                        <div className={cn(
-                          'h-4 w-4 rounded border flex items-center justify-center transition-colors',
-                          form.targetTenants.includes(tenant.id) ? 'bg-secondary border-secondary' : 'border-border'
-                        )}>
-                          {form.targetTenants.includes(tenant.id) && <Check className="h-3 w-3 text-white" />}
+                        <div
+                          className={cn(
+                            'h-4 w-4 rounded border flex items-center justify-center transition-colors',
+                            form.targetTenants.includes(tenant.id)
+                              ? 'bg-secondary border-secondary'
+                              : 'border-border'
+                          )}
+                        >
+                          {form.targetTenants.includes(tenant.id) && (
+                            <Check className="h-3 w-3 text-white" />
+                          )}
                         </div>
                         <span className="font-mono text-xs text-text-muted">{tenant.id}</span>
                         <span className="flex-1 truncate">{tenant.name}</span>
@@ -327,7 +370,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
 
           {/* CTA */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Call to Action (optional)</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Call to Action (optional)
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-[10px] text-text-muted">Button Label</label>
@@ -385,7 +430,9 @@ export default function AnnouncementModal({ announcement, onClose, onSave, tenan
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" />
               {isEditing ? 'Save Changes' : 'Create Announcement'}

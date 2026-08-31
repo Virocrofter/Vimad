@@ -26,4 +26,5 @@ jobs:
           NODE_ENV: staging
 
       - name: Deploy to staging
-        run: echo "TODO: add staging deploy command (e.g. Railway, Render, Fly.io)"
+        run: |
+          echo "TODO: add staging deploy command - Railway, Render, or Fly.io"

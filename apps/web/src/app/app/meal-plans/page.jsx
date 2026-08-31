@@ -2,23 +2,81 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Utensils, Coffee, Sun, Moon, GlassWater, Cherry, Drumstick, Shrimp,
-  Plus, Search, Filter, Edit3, Trash2, Check, X, ChevronDown,
-  Clock, DollarSign, BedDouble, Users, Link2, Settings,
-  AlertCircle, CheckCircle2, Ban, ArrowRightLeft, Copy,
-  LayoutGrid, List, MoreHorizontal, Eye, Save, Calendar
+  Utensils,
+  Coffee,
+  Sun,
+  Moon,
+  GlassWater,
+  Cherry,
+  Drumstick,
+  Shrimp,
+  Plus,
+  Search,
+  Filter,
+  Edit3,
+  Trash2,
+  Check,
+  X,
+  ChevronDown,
+  Clock,
+  DollarSign,
+  BedDouble,
+  Users,
+  Link2,
+  Settings,
+  AlertCircle,
+  CheckCircle2,
+  Ban,
+  ArrowRightLeft,
+  Copy,
+  LayoutGrid,
+  List,
+  MoreHorizontal,
+  Eye,
+  Save,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 
 /* ─── Board Basis Codes ─── */
 const boardBasisCodes = {
-  RO: { label: 'Room Only', description: 'No meals included', icon: BedDouble, color: 'text-text-muted' },
-  BB: { label: 'Bed & Breakfast', description: 'Breakfast only', icon: Coffee, color: 'text-amber-500' },
-  HB: { label: 'Half Board', description: 'Breakfast + Dinner', icon: Sun, color: 'text-orange-500' },
-  FB: { label: 'Full Board', description: 'Breakfast + Lunch + Dinner', icon: Utensils, color: 'text-emerald-500' },
-  AI: { label: 'All Inclusive', description: 'All meals + selected drinks', icon: GlassWater, color: 'text-purple-500' },
-  UAI: { label: 'Ultra All Inclusive', description: 'All meals + premium drinks + snacks', icon: GlassWater, color: 'text-pink-500' },
+  RO: {
+    label: 'Room Only',
+    description: 'No meals included',
+    icon: BedDouble,
+    color: 'text-text-muted',
+  },
+  BB: {
+    label: 'Bed & Breakfast',
+    description: 'Breakfast only',
+    icon: Coffee,
+    color: 'text-amber-500',
+  },
+  HB: {
+    label: 'Half Board',
+    description: 'Breakfast + Dinner',
+    icon: Sun,
+    color: 'text-orange-500',
+  },
+  FB: {
+    label: 'Full Board',
+    description: 'Breakfast + Lunch + Dinner',
+    icon: Utensils,
+    color: 'text-emerald-500',
+  },
+  AI: {
+    label: 'All Inclusive',
+    description: 'All meals + selected drinks',
+    icon: GlassWater,
+    color: 'text-purple-500',
+  },
+  UAI: {
+    label: 'Ultra All Inclusive',
+    description: 'All meals + premium drinks + snacks',
+    icon: GlassWater,
+    color: 'text-pink-500',
+  },
 };
 
 /* ─── Mock Data ─── */
@@ -88,7 +146,13 @@ const initialMealPlans = [
     menu: 'full-menu',
     isActive: true,
     description: 'All meals included — perfect for families',
-    inclusions: ['Breakfast buffet', 'Lunch buffet', 'Dinner buffet', 'Soft drinks with meals', 'Kids menu'],
+    inclusions: [
+      'Breakfast buffet',
+      'Lunch buffet',
+      'Dinner buffet',
+      'Soft drinks with meals',
+      'Kids menu',
+    ],
     exclusions: ['Alcoholic beverages', 'Room service', 'Minibar'],
     childPolicy: { under6: 'free', under12: '50%', under16: '75%' },
     seasonality: 'summer',
@@ -112,7 +176,13 @@ const initialMealPlans = [
     menu: 'all-venues',
     isActive: true,
     description: 'Unlimited dining across all resort restaurants',
-    inclusions: ['All meals', 'Selected alcoholic drinks', 'Pool snacks', 'Minibar restocked daily', 'Room service (limited)'],
+    inclusions: [
+      'All meals',
+      'Selected alcoholic drinks',
+      'Pool snacks',
+      'Minibar restocked daily',
+      'Room service (limited)',
+    ],
     exclusions: ['Premium spirits', 'Bottled wine', 'Special events'],
     childPolicy: { under6: 'free', under12: '50%', under16: '75%' },
     seasonality: 'year-round',
@@ -170,20 +240,119 @@ const initialMealPlans = [
 ];
 
 const linkedRestaurants = [
-  { id: 'REST-001', name: 'The Garden Restaurant', type: 'main', capacity: 120, operatingHours: '06:00 - 22:00', cuisine: 'International' },
-  { id: 'REST-002', name: 'The Pool Bar & Grill', type: 'pool', capacity: 60, operatingHours: '10:00 - 20:00', cuisine: 'Casual / BBQ' },
-  { id: 'REST-003', name: 'Sakura Sushi', type: 'specialty', capacity: 40, operatingHours: '18:00 - 23:00', cuisine: 'Japanese' },
-  { id: 'REST-004', name: 'La Terrazza', type: 'specialty', capacity: 50, operatingHours: '18:00 - 23:00', cuisine: 'Italian' },
+  {
+    id: 'REST-001',
+    name: 'The Garden Restaurant',
+    type: 'main',
+    capacity: 120,
+    operatingHours: '06:00 - 22:00',
+    cuisine: 'International',
+  },
+  {
+    id: 'REST-002',
+    name: 'The Pool Bar & Grill',
+    type: 'pool',
+    capacity: 60,
+    operatingHours: '10:00 - 20:00',
+    cuisine: 'Casual / BBQ',
+  },
+  {
+    id: 'REST-003',
+    name: 'Sakura Sushi',
+    type: 'specialty',
+    capacity: 40,
+    operatingHours: '18:00 - 23:00',
+    cuisine: 'Japanese',
+  },
+  {
+    id: 'REST-004',
+    name: 'La Terrazza',
+    type: 'specialty',
+    capacity: 50,
+    operatingHours: '18:00 - 23:00',
+    cuisine: 'Italian',
+  },
 ];
 
 const postingLog = [
-  { id: 1, date: '2026-08-12', time: '06:15', reservationId: 'R-4021', guest: 'John Smith', plan: 'Standard Breakfast', amount: 25.00, status: 'posted', postedBy: 'System' },
-  { id: 2, date: '2026-08-12', time: '06:15', reservationId: 'R-4022', guest: 'Sarah Johnson', plan: 'Standard Breakfast', amount: 25.00, status: 'posted', postedBy: 'System' },
-  { id: 3, date: '2026-08-12', time: '18:30', reservationId: 'R-4021', guest: 'John Smith', plan: 'Half Board Premium', amount: 65.00, status: 'posted', postedBy: 'System' },
-  { id: 4, date: '2026-08-13', time: '06:15', reservationId: 'R-4021', guest: 'John Smith', plan: 'Standard Breakfast', amount: 25.00, status: 'posted', postedBy: 'System' },
-  { id: 5, date: '2026-08-13', time: '06:15', reservationId: 'R-4023', guest: 'Michael Brown', plan: 'All Inclusive Resort', amount: 129.00, status: 'failed', postedBy: 'System', error: 'Folio balance exceeded credit limit' },
-  { id: 6, date: '2026-08-13', time: '12:00', reservationId: 'R-4024', guest: 'Emily Davis', plan: 'Full Board Family', amount: 89.00, status: 'posted', postedBy: 'System' },
-  { id: 7, date: '2026-08-13', time: '18:30', reservationId: 'R-4024', guest: 'Emily Davis', plan: 'Full Board Family', amount: 89.00, status: 'pending', postedBy: 'System' },
+  {
+    id: 1,
+    date: '2026-08-12',
+    time: '06:15',
+    reservationId: 'R-4021',
+    guest: 'John Smith',
+    plan: 'Standard Breakfast',
+    amount: 25.0,
+    status: 'posted',
+    postedBy: 'System',
+  },
+  {
+    id: 2,
+    date: '2026-08-12',
+    time: '06:15',
+    reservationId: 'R-4022',
+    guest: 'Sarah Johnson',
+    plan: 'Standard Breakfast',
+    amount: 25.0,
+    status: 'posted',
+    postedBy: 'System',
+  },
+  {
+    id: 3,
+    date: '2026-08-12',
+    time: '18:30',
+    reservationId: 'R-4021',
+    guest: 'John Smith',
+    plan: 'Half Board Premium',
+    amount: 65.0,
+    status: 'posted',
+    postedBy: 'System',
+  },
+  {
+    id: 4,
+    date: '2026-08-13',
+    time: '06:15',
+    reservationId: 'R-4021',
+    guest: 'John Smith',
+    plan: 'Standard Breakfast',
+    amount: 25.0,
+    status: 'posted',
+    postedBy: 'System',
+  },
+  {
+    id: 5,
+    date: '2026-08-13',
+    time: '06:15',
+    reservationId: 'R-4023',
+    guest: 'Michael Brown',
+    plan: 'All Inclusive Resort',
+    amount: 129.0,
+    status: 'failed',
+    postedBy: 'System',
+    error: 'Folio balance exceeded credit limit',
+  },
+  {
+    id: 6,
+    date: '2026-08-13',
+    time: '12:00',
+    reservationId: 'R-4024',
+    guest: 'Emily Davis',
+    plan: 'Full Board Family',
+    amount: 89.0,
+    status: 'posted',
+    postedBy: 'System',
+  },
+  {
+    id: 7,
+    date: '2026-08-13',
+    time: '18:30',
+    reservationId: 'R-4024',
+    guest: 'Emily Davis',
+    plan: 'Full Board Family',
+    amount: 89.0,
+    status: 'pending',
+    postedBy: 'System',
+  },
 ];
 
 const roomTypes = [
@@ -200,9 +369,17 @@ function formatCurrency(amount, currency = 'USD') {
 }
 
 const statusMeta = {
-  posted: { label: 'Posted', class: 'bg-accent/10 text-accent border-accent/20', icon: CheckCircle2 },
+  posted: {
+    label: 'Posted',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    icon: CheckCircle2,
+  },
   pending: { label: 'Pending', class: 'bg-warning/10 text-warning border-warning/20', icon: Clock },
-  failed: { label: 'Failed', class: 'bg-danger/10 text-danger border-danger/20', icon: AlertCircle },
+  failed: {
+    label: 'Failed',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    icon: AlertCircle,
+  },
 };
 
 /* ─── Components ─── */
@@ -215,7 +392,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -227,10 +415,12 @@ function BoardBasisBadge({ code }) {
   const meta = boardBasisCodes[code] || boardBasisCodes.RO;
   const Icon = meta.icon;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider',
-      'bg-surface-elevated border-border'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider',
+        'bg-surface-elevated border-border'
+      )}
+    >
       <Icon className={cn('h-3 w-3', meta.color)} />
       <span className="text-text-primary">{code}</span>
       <span className="text-text-muted hidden sm:inline">· {meta.label}</span>
@@ -271,17 +461,17 @@ function MealPlanModal({ plan, onClose, onSave }) {
       price: parseFloat(form.price) || 0,
       inclusions: form.inclusions.split('\\n').filter(Boolean),
       exclusions: form.exclusions.split('\\n').filter(Boolean),
-      restaurant: linkedRestaurants.find(r => r.id === form.restaurantId)?.name || null,
+      restaurant: linkedRestaurants.find((r) => r.id === form.restaurantId)?.name || null,
     });
     onClose();
   };
 
   const toggleRoomType = (rtId) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       applicableRoomTypes: prev.applicableRoomTypes.includes(rtId)
-        ? prev.applicableRoomTypes.filter(id => id !== rtId)
-        : [...prev.applicableRoomTypes, rtId]
+        ? prev.applicableRoomTypes.filter((id) => id !== rtId)
+        : [...prev.applicableRoomTypes, rtId],
     }));
   };
 
@@ -291,7 +481,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Utensils className="h-5 w-5 text-secondary" />
-            <h3 className="text-lg font-bold text-text-primary">{isEdit ? 'Edit' : 'New'} Meal Plan</h3>
+            <h3 className="text-lg font-bold text-text-primary">
+              {isEdit ? 'Edit' : 'New'} Meal Plan
+            </h3>
           </div>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
             <X className="h-5 w-5" />
@@ -302,7 +494,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
           {/* Basic Info */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Plan Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Plan Name
+              </label>
               <input
                 type="text"
                 value={form.name}
@@ -313,7 +507,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Plan Code</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Plan Code
+              </label>
               <input
                 type="text"
                 value={form.code}
@@ -324,19 +520,25 @@ function MealPlanModal({ plan, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Board Basis</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Board Basis
+              </label>
               <select
                 value={form.boardBasis}
                 onChange={(e) => setForm({ ...form, boardBasis: e.target.value })}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {Object.entries(boardBasisCodes).map(([code, meta]) => (
-                  <option key={code} value={code}>{code} — {meta.label}</option>
+                  <option key={code} value={code}>
+                    {code} — {meta.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Price / Night</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Price / Night
+              </label>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                 <input
@@ -366,17 +568,21 @@ function MealPlanModal({ plan, onClose, onSave }) {
                   form.autoPost ? 'bg-secondary' : 'bg-border'
                 )}
               >
-                <span className={cn(
-                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
-                  form.autoPost ? 'translate-x-6' : 'translate-x-1'
-                )} />
+                <span
+                  className={cn(
+                    'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
+                    form.autoPost ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
               </button>
             </div>
 
             {form.autoPost && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Post Frequency</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Post Frequency
+                  </label>
                   <select
                     value={form.postFrequency}
                     onChange={(e) => setForm({ ...form, postFrequency: e.target.value })}
@@ -388,7 +594,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Post Time</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Post Time
+                  </label>
                   <input
                     type="time"
                     value={form.postTime}
@@ -412,8 +620,10 @@ function MealPlanModal({ plan, onClose, onSave }) {
               className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">— No Restaurant —</option>
-              {linkedRestaurants.map(r => (
-                <option key={r.id} value={r.id}>{r.name} ({r.cuisine})</option>
+              {linkedRestaurants.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name} ({r.cuisine})
+                </option>
               ))}
               <option value="MULTI">Multiple Venues</option>
             </select>
@@ -445,7 +655,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
           {/* Inclusions & Exclusions */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Inclusions (one per line)</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Inclusions (one per line)
+              </label>
               <textarea
                 value={form.inclusions}
                 onChange={(e) => setForm({ ...form, inclusions: e.target.value })}
@@ -455,7 +667,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Exclusions (one per line)</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Exclusions (one per line)
+              </label>
               <textarea
                 value={form.exclusions}
                 onChange={(e) => setForm({ ...form, exclusions: e.target.value })}
@@ -476,10 +690,17 @@ function MealPlanModal({ plan, onClose, onSave }) {
                 { key: 'under16', label: 'Under 16' },
               ].map((age) => (
                 <div key={age.key}>
-                  <label className="mb-1 block text-[10px] font-medium text-text-secondary uppercase tracking-wider">{age.label}</label>
+                  <label className="mb-1 block text-[10px] font-medium text-text-secondary uppercase tracking-wider">
+                    {age.label}
+                  </label>
                   <select
                     value={form.childPolicy[age.key]}
-                    onChange={(e) => setForm({ ...form, childPolicy: { ...form.childPolicy, [age.key]: e.target.value } })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        childPolicy: { ...form.childPolicy, [age.key]: e.target.value },
+                      })
+                    }
                     className="h-9 w-full rounded-md border border-border bg-background px-2 text-xs text-text-primary"
                   >
                     <option value="free">Free</option>
@@ -497,7 +718,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
           {/* Seasonality */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Seasonality</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Seasonality
+              </label>
               <select
                 value={form.seasonality}
                 onChange={(e) => setForm({ ...form, seasonality: e.target.value })}
@@ -513,7 +736,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
             {form.seasonality === 'custom' && (
               <>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Start Date</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Start Date
+                  </label>
                   <input
                     type="date"
                     value={form.startDate}
@@ -522,7 +747,9 @@ function MealPlanModal({ plan, onClose, onSave }) {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">End Date</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    End Date
+                  </label>
                   <input
                     type="date"
                     value={form.endDate}
@@ -544,16 +771,20 @@ function MealPlanModal({ plan, onClose, onSave }) {
                 form.isActive ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
-                form.isActive ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.isActive ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
             <span className="text-sm text-text-primary">Plan is active and bookable</span>
           </label>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Save className="mr-1.5 h-4 w-4" /> {isEdit ? 'Save Changes' : 'Create Plan'}
             </Button>
@@ -579,29 +810,37 @@ export default function MealPlansPage() {
 
   const filteredPlans = useMemo(() => {
     return mealPlans.filter((p) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.code.toLowerCase().includes(query.toLowerCase()) ||
         p.description.toLowerCase().includes(query.toLowerCase());
       const matchesBoard = boardFilter === 'all' || p.boardBasis === boardFilter;
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'active' ? p.isActive : !p.isActive);
+      const matchesStatus =
+        statusFilter === 'all' || (statusFilter === 'active' ? p.isActive : !p.isActive);
       return matchesQuery && matchesBoard && matchesStatus;
     });
   }, [mealPlans, query, boardFilter, statusFilter]);
 
-  const stats = useMemo(() => ({
-    total: mealPlans.length,
-    active: mealPlans.filter(p => p.isActive).length,
-    autoPost: mealPlans.filter(p => p.autoPost).length,
-    avgPrice: mealPlans.filter(p => p.price > 0).length > 0
-      ? Math.round(mealPlans.filter(p => p.price > 0).reduce((s, p) => s + p.price, 0) / mealPlans.filter(p => p.price > 0).length)
-      : 0,
-  }), [mealPlans]);
+  const stats = useMemo(
+    () => ({
+      total: mealPlans.length,
+      active: mealPlans.filter((p) => p.isActive).length,
+      autoPost: mealPlans.filter((p) => p.autoPost).length,
+      avgPrice:
+        mealPlans.filter((p) => p.price > 0).length > 0
+          ? Math.round(
+              mealPlans.filter((p) => p.price > 0).reduce((s, p) => s + p.price, 0) /
+                mealPlans.filter((p) => p.price > 0).length
+            )
+          : 0,
+    }),
+    [mealPlans]
+  );
 
   const handleSave = (plan) => {
-    setMealPlans(prev => {
-      const idx = prev.findIndex(p => p.id === plan.id);
+    setMealPlans((prev) => {
+      const idx = prev.findIndex((p) => p.id === plan.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = plan;
@@ -612,7 +851,7 @@ export default function MealPlansPage() {
   };
 
   const handleDelete = (id) => {
-    setMealPlans(prev => prev.filter(p => p.id !== id));
+    setMealPlans((prev) => prev.filter((p) => p.id !== id));
   };
 
   const openEdit = (plan) => {
@@ -631,7 +870,9 @@ export default function MealPlansPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Meal Plans & Board Basis</h1>
-          <p className="text-sm text-text-secondary">Configure dining packages, auto-posting rules, and restaurant links</p>
+          <p className="text-sm text-text-secondary">
+            Configure dining packages, auto-posting rules, and restaurant links
+          </p>
         </div>
         <Button onClick={openNew}>
           <Plus className="mr-1.5 h-4 w-4" /> New Meal Plan
@@ -641,9 +882,19 @@ export default function MealPlansPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Total Plans" value={stats.total} icon={Utensils} color="text-secondary" />
-        <StatCard label="Active Plans" value={stats.active} icon={CheckCircle2} color="text-accent" />
+        <StatCard
+          label="Active Plans"
+          value={stats.active}
+          icon={CheckCircle2}
+          color="text-accent"
+        />
         <StatCard label="Auto-Posting" value={stats.autoPost} icon={Clock} color="text-info" />
-        <StatCard label="Avg. Price" value={formatCurrency(stats.avgPrice)} icon={DollarSign} color="text-warning" />
+        <StatCard
+          label="Avg. Price"
+          value={formatCurrency(stats.avgPrice)}
+          icon={DollarSign}
+          color="text-warning"
+        />
       </div>
 
       {/* Tabs */}
@@ -662,7 +913,9 @@ export default function MealPlansPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" /> {tab.label}
@@ -694,8 +947,10 @@ export default function MealPlansPage() {
                 className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
               >
                 <option value="all">All Board Basis</option>
-                {Object.keys(boardBasisCodes).map(code => (
-                  <option key={code} value={code}>{code} — {boardBasisCodes[code].label}</option>
+                {Object.keys(boardBasisCodes).map((code) => (
+                  <option key={code} value={code}>
+                    {code} — {boardBasisCodes[code].label}
+                  </option>
                 ))}
               </select>
               <select
@@ -710,13 +965,23 @@ export default function MealPlansPage() {
               <div className="flex rounded-md border border-border bg-surface p-0.5">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={cn('inline-flex h-8 w-8 items-center justify-center rounded transition-colors', viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary')}
+                  className={cn(
+                    'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
+                    viewMode === 'grid'
+                      ? 'bg-secondary text-white'
+                      : 'text-text-muted hover:text-text-primary'
+                  )}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={cn('inline-flex h-8 w-8 items-center justify-center rounded transition-colors', viewMode === 'list' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary')}
+                  className={cn(
+                    'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
+                    viewMode === 'list'
+                      ? 'bg-secondary text-white'
+                      : 'text-text-muted hover:text-text-primary'
+                  )}
                 >
                   <List className="h-4 w-4" />
                 </button>
@@ -735,12 +1000,19 @@ export default function MealPlansPage() {
                     key={plan.id}
                     className={cn(
                       'group rounded-xl border bg-surface p-5 transition-all hover:shadow-md',
-                      plan.isActive ? 'border-border hover:border-secondary/50' : 'border-danger/20 opacity-60'
+                      plan.isActive
+                        ? 'border-border hover:border-secondary/50'
+                        : 'border-danger/20 opacity-60'
                     )}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', bbMeta.color.replace('text-', 'bg-').replace('500', '500/10'))}>
+                        <div
+                          className={cn(
+                            'flex h-10 w-10 items-center justify-center rounded-lg',
+                            bbMeta.color.replace('text-', 'bg-').replace('500', '500/10')
+                          )}
+                        >
                           <BbIcon className={cn('h-5 w-5', bbMeta.color)} />
                         </div>
                         <div>
@@ -766,25 +1038,37 @@ export default function MealPlansPage() {
                     <div className="mt-3 space-y-1.5">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-text-secondary">Price / night</span>
-                        <span className="font-mono font-bold text-text-primary">{formatCurrency(plan.price)}</span>
+                        <span className="font-mono font-bold text-text-primary">
+                          {formatCurrency(plan.price)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-text-secondary">Auto-post</span>
-                        <span className={cn('text-xs font-medium', plan.autoPost ? 'text-accent' : 'text-text-muted')}>
+                        <span
+                          className={cn(
+                            'text-xs font-medium',
+                            plan.autoPost ? 'text-accent' : 'text-text-muted'
+                          )}
+                        >
                           {plan.autoPost ? `${plan.postFrequency} @ ${plan.postTime}` : 'Manual'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-text-secondary">Restaurant</span>
-                        <span className="text-xs text-text-secondary truncate max-w-32">{plan.restaurant || '—'}</span>
+                        <span className="text-xs text-text-secondary truncate max-w-32">
+                          {plan.restaurant || '—'}
+                        </span>
                       </div>
                     </div>
 
                     <div className="mt-3 flex flex-wrap gap-1">
-                      {plan.applicableRoomTypes.map(rtId => {
-                        const rt = roomTypes.find(r => r.id === rtId);
+                      {plan.applicableRoomTypes.map((rtId) => {
+                        const rt = roomTypes.find((r) => r.id === rtId);
                         return (
-                          <span key={rtId} className="rounded-md bg-background border border-border px-1.5 py-0.5 text-[10px] text-text-muted">
+                          <span
+                            key={rtId}
+                            className="rounded-md bg-background border border-border px-1.5 py-0.5 text-[10px] text-text-muted"
+                          >
                             {rt?.name || rtId}
                           </span>
                         );
@@ -792,7 +1076,12 @@ export default function MealPlansPage() {
                     </div>
 
                     <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(plan)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => openEdit(plan)}
+                      >
                         <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit
                       </Button>
                       <button
@@ -824,10 +1113,18 @@ export default function MealPlansPage() {
                       <th className="px-4 py-3 text-left font-medium text-text-secondary">Plan</th>
                       <th className="px-4 py-3 text-left font-medium text-text-secondary">Code</th>
                       <th className="px-4 py-3 text-left font-medium text-text-secondary">Board</th>
-                      <th className="px-4 py-3 text-right font-medium text-text-secondary">Price</th>
-                      <th className="px-4 py-3 text-left font-medium text-text-secondary">Auto-Post</th>
-                      <th className="px-4 py-3 text-left font-medium text-text-secondary">Restaurant</th>
-                      <th className="px-4 py-3 text-left font-medium text-text-secondary">Status</th>
+                      <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                        Price
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                        Auto-Post
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                        Restaurant
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                        Status
+                      </th>
                       <th className="px-4 py-3 w-20"></th>
                     </tr>
                   </thead>
@@ -836,13 +1133,19 @@ export default function MealPlansPage() {
                       <tr key={plan.id} className="hover:bg-background/50 transition-colors">
                         <td className="px-4 py-3">
                           <p className="font-medium text-text-primary">{plan.name}</p>
-                          <p className="text-xs text-text-muted">{plan.applicableRoomTypes.length} room types</p>
+                          <p className="text-xs text-text-muted">
+                            {plan.applicableRoomTypes.length} room types
+                          </p>
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs text-text-secondary">{plan.code}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-text-secondary">
+                          {plan.code}
+                        </td>
                         <td className="px-4 py-3">
                           <BoardBasisBadge code={plan.boardBasis} />
                         </td>
-                        <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">{formatCurrency(plan.price)}</td>
+                        <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
+                          {formatCurrency(plan.price)}
+                        </td>
                         <td className="px-4 py-3 text-xs text-text-secondary">
                           {plan.autoPost ? (
                             <span className="flex items-center gap-1 text-accent">
@@ -852,7 +1155,9 @@ export default function MealPlansPage() {
                             <span className="text-text-muted">Manual</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-xs text-text-secondary">{plan.restaurant || '—'}</td>
+                        <td className="px-4 py-3 text-xs text-text-secondary">
+                          {plan.restaurant || '—'}
+                        </td>
                         <td className="px-4 py-3">
                           {plan.isActive ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-semibold text-accent">
@@ -866,10 +1171,16 @@ export default function MealPlansPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => openEdit(plan)} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary">
+                            <button
+                              onClick={() => openEdit(plan)}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                            >
                               <Edit3 className="h-4 w-4" />
                             </button>
-                            <button onClick={() => handleDelete(plan.id)} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger">
+                            <button
+                              onClick={() => handleDelete(plan.id)}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
@@ -897,7 +1208,9 @@ export default function MealPlansPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-text-primary">Auto-Posting Log</h3>
-              <p className="text-xs text-text-muted">Recent meal plan charges posted to guest folios</p>
+              <p className="text-xs text-text-muted">
+                Recent meal plan charges posted to guest folios
+              </p>
             </div>
             <Button variant="outline" size="sm">
               <Download className="mr-1.5 h-4 w-4" /> Export Log
@@ -909,13 +1222,27 @@ export default function MealPlansPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Date & Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Reservation</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Guest</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Plan</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Posted By</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Date & Time
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Reservation
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Guest
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Plan
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Posted By
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -928,12 +1255,21 @@ export default function MealPlansPage() {
                           <div>{entry.date}</div>
                           <div className="text-text-muted">{entry.time}</div>
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs text-text-primary">{entry.reservationId}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-text-primary">
+                          {entry.reservationId}
+                        </td>
                         <td className="px-4 py-3 text-text-primary text-sm">{entry.guest}</td>
                         <td className="px-4 py-3 text-text-secondary text-xs">{entry.plan}</td>
-                        <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">{formatCurrency(entry.amount)}</td>
+                        <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
+                          {formatCurrency(entry.amount)}
+                        </td>
                         <td className="px-4 py-3">
-                          <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                              meta.class
+                            )}
+                          >
                             <StatusIcon className="h-3 w-3" /> {meta.label}
                           </span>
                         </td>
@@ -947,13 +1283,16 @@ export default function MealPlansPage() {
           </div>
 
           {/* Failed Postings Alert */}
-          {postingLog.some(e => e.status === 'failed') && (
+          {postingLog.some((e) => e.status === 'failed') && (
             <div className="rounded-lg border border-danger/20 bg-danger/5 p-4 flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-danger shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-text-primary">{postingLog.filter(e => e.status === 'failed').length} posting(s) failed</p>
+                <p className="text-sm font-medium text-text-primary">
+                  {postingLog.filter((e) => e.status === 'failed').length} posting(s) failed
+                </p>
                 <p className="text-xs text-text-secondary mt-0.5">
-                  Review failed entries above. Common causes: credit limit exceeded, folio closed, or plan inactive.
+                  Review failed entries above. Common causes: credit limit exceeded, folio closed,
+                  or plan inactive.
                 </p>
               </div>
             </div>
@@ -967,7 +1306,9 @@ export default function MealPlansPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-text-primary">Linked Restaurants</h3>
-              <p className="text-xs text-text-muted">Restaurants available for meal plan fulfillment</p>
+              <p className="text-xs text-text-muted">
+                Restaurants available for meal plan fulfillment
+              </p>
             </div>
             <Button size="sm">
               <Plus className="mr-1.5 h-4 w-4" /> Add Restaurant
@@ -976,9 +1317,12 @@ export default function MealPlansPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {linkedRestaurants.map((rest) => {
-              const linkedPlans = mealPlans.filter(p => p.restaurantId === rest.id);
+              const linkedPlans = mealPlans.filter((p) => p.restaurantId === rest.id);
               return (
-                <div key={rest.id} className="rounded-xl border border-border bg-surface p-5 hover:shadow-md transition-all">
+                <div
+                  key={rest.id}
+                  className="rounded-xl border border-border bg-surface p-5 hover:shadow-md transition-all"
+                >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
@@ -986,7 +1330,9 @@ export default function MealPlansPage() {
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-text-primary">{rest.name}</h3>
-                        <p className="text-xs text-text-muted capitalize">{rest.type} · {rest.cuisine}</p>
+                        <p className="text-xs text-text-muted capitalize">
+                          {rest.type} · {rest.cuisine}
+                        </p>
                       </div>
                     </div>
                     <span className="inline-flex items-center rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-semibold text-accent">
@@ -1007,8 +1353,11 @@ export default function MealPlansPage() {
 
                   {linkedPlans.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1">
-                      {linkedPlans.map(p => (
-                        <span key={p.id} className="rounded-md bg-background border border-border px-1.5 py-0.5 text-[10px] text-text-muted">
+                      {linkedPlans.map((p) => (
+                        <span
+                          key={p.id}
+                          className="rounded-md bg-background border border-border px-1.5 py-0.5 text-[10px] text-text-muted"
+                        >
                           {p.code}
                         </span>
                       ))}
@@ -1032,11 +1381,7 @@ export default function MealPlansPage() {
 
       {/* Modal */}
       {showModal && (
-        <MealPlanModal
-          plan={editingPlan}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
-        />
+        <MealPlanModal plan={editingPlan} onClose={() => setShowModal(false)} onSave={handleSave} />
       )}
     </div>
   );

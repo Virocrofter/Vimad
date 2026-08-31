@@ -2,11 +2,37 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, Plus, Search, X, Check, Edit3, Trash2, Copy,
-  ChevronDown, ChevronUp, Users, Lock, Unlock, AlertTriangle,
-  Save, Ban, CheckCircle2, MoreHorizontal, Eye, FileText,
-  DollarSign, BedDouble, TrendingUp, Settings, ClipboardList,
-  User, Monitor, Sparkles, Briefcase, Database, Globe
+  Shield,
+  Plus,
+  Search,
+  X,
+  Check,
+  Edit3,
+  Trash2,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  Lock,
+  Unlock,
+  AlertTriangle,
+  Save,
+  Ban,
+  CheckCircle2,
+  MoreHorizontal,
+  Eye,
+  FileText,
+  DollarSign,
+  BedDouble,
+  TrendingUp,
+  Settings,
+  ClipboardList,
+  User,
+  Monitor,
+  Sparkles,
+  Briefcase,
+  Database,
+  Globe,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -184,7 +210,12 @@ const initialRoles = [
 ];
 
 const moduleMeta = {
-  reservations: { label: 'Reservations', icon: FileText, color: 'text-secondary', bg: 'bg-secondary/10' },
+  reservations: {
+    label: 'Reservations',
+    icon: FileText,
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+  },
   billing: { label: 'Billing', icon: DollarSign, color: 'text-accent', bg: 'bg-accent/10' },
   housekeeping: { label: 'Housekeeping', icon: Sparkles, color: 'text-info', bg: 'bg-info/10' },
   rates: { label: 'Rates', icon: TrendingUp, color: 'text-warning', bg: 'bg-warning/10' },
@@ -193,8 +224,18 @@ const moduleMeta = {
   settings: { label: 'Settings', icon: Settings, color: 'text-orange-500', bg: 'bg-orange-500/10' },
   auditLogs: { label: 'Audit Logs', icon: Shield, color: 'text-danger', bg: 'bg-danger/10' },
   groups: { label: 'Groups', icon: Briefcase, color: 'text-pink-500', bg: 'bg-pink-500/10' },
-  inventory: { label: 'Inventory', icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-  channelManager: { label: 'Channel Manager', icon: Globe, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  inventory: {
+    label: 'Inventory',
+    icon: Database,
+    color: 'text-indigo-500',
+    bg: 'bg-indigo-500/10',
+  },
+  channelManager: {
+    label: 'Channel Manager',
+    icon: Globe,
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+  },
   marketing: { label: 'Marketing', icon: Monitor, color: 'text-rose-500', bg: 'bg-rose-500/10' },
 };
 
@@ -227,8 +268,9 @@ function PermissionCell({ enabled, onToggle, label, disabled = false }) {
 }
 
 function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate }) {
-  const totalPerms = Object.values(role.permissions).reduce((sum, mod) =>
-    sum + Object.values(mod).filter(Boolean).length, 0
+  const totalPerms = Object.values(role.permissions).reduce(
+    (sum, mod) => sum + Object.values(mod).filter(Boolean).length,
+    0
   );
   const maxPerms = Object.keys(role.permissions).length * 4;
   const coverage = Math.round((totalPerms / maxPerms) * 100);
@@ -265,13 +307,21 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Permission Coverage</span>
-          <span className={cn('font-bold', coverage > 75 ? 'text-danger' : coverage > 40 ? 'text-warning' : 'text-accent')}>
+          <span
+            className={cn(
+              'font-bold',
+              coverage > 75 ? 'text-danger' : coverage > 40 ? 'text-warning' : 'text-accent'
+            )}
+          >
             {coverage}%
           </span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
           <div
-            className={cn('h-full rounded-full transition-all', coverage > 75 ? 'bg-danger' : coverage > 40 ? 'bg-warning' : 'bg-accent')}
+            className={cn(
+              'h-full rounded-full transition-all',
+              coverage > 75 ? 'bg-danger' : coverage > 40 ? 'bg-warning' : 'bg-accent'
+            )}
             style={{ width: `${coverage}%` }}
           />
         </div>
@@ -284,14 +334,20 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={(e) => { e.stopPropagation(); onEdit(role); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(role);
+            }}
             className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
             title="Edit"
           >
             <Edit3 className="h-3.5 w-3.5" />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onDuplicate(role); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate(role);
+            }}
             className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
             title="Duplicate"
           >
@@ -299,7 +355,10 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
           </button>
           {!role.isSystem && (
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(role.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(role.id);
+              }}
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
               title="Delete"
             >
@@ -317,13 +376,18 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
   const [form, setForm] = useState({
     name: role?.name || '',
     description: role?.description || '',
-    permissions: role?.permissions || Object.fromEntries(
-      Object.keys(moduleMeta).map(key => [key, { read: false, write: false, delete: false, approve: false }])
-    ),
+    permissions:
+      role?.permissions ||
+      Object.fromEntries(
+        Object.keys(moduleMeta).map((key) => [
+          key,
+          { read: false, write: false, delete: false, approve: false },
+        ])
+      ),
   });
 
   const handlePermToggle = (module, perm) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       permissions: {
         ...prev.permissions,
@@ -336,7 +400,7 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
   };
 
   const handleSetAll = (module, value) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       permissions: {
         ...prev.permissions,
@@ -366,7 +430,10 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
               {isNew ? 'Create Role' : `Edit Role: ${role?.name}`}
             </h3>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -375,7 +442,9 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
           {/* Basic Info */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Role Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Role Name
+              </label>
               <input
                 type="text"
                 required
@@ -386,7 +455,9 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Description
+              </label>
               <input
                 type="text"
                 value={form.description}
@@ -404,7 +475,14 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
               <div className="flex items-center gap-3 text-xs">
                 {Object.entries(permLabels).map(([key, meta]) => (
                   <span key={key} className="flex items-center gap-1">
-                    <span className={cn('inline-flex h-5 w-5 items-center justify-center rounded border text-[10px] font-bold', meta.bg, meta.color, 'border-current/30')}>
+                    <span
+                      className={cn(
+                        'inline-flex h-5 w-5 items-center justify-center rounded border text-[10px] font-bold',
+                        meta.bg,
+                        meta.color,
+                        'border-current/30'
+                      )}
+                    >
                       {meta.short}
                     </span>
                     <span className="text-text-muted">{meta.label}</span>
@@ -417,12 +495,24 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Module</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">Read</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">Write</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">Delete</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">Approve</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-28">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Module
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
+                      Read
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
+                      Write
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
+                      Delete
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
+                      Approve
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-28">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -430,15 +520,22 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                     const meta = moduleMeta[moduleKey];
                     const Icon = meta.icon;
                     const allEnabled = Object.values(perms).every(Boolean);
-                    const noneEnabled = Object.values(perms).every(v => !v);
+                    const noneEnabled = Object.values(perms).every((v) => !v);
                     return (
                       <tr key={moduleKey} className="hover:bg-background/50">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', meta.bg)}>
+                            <div
+                              className={cn(
+                                'flex h-8 w-8 items-center justify-center rounded-lg',
+                                meta.bg
+                              )}
+                            >
                               <Icon className={cn('h-4 w-4', meta.color)} />
                             </div>
-                            <span className="text-sm font-medium text-text-primary">{meta.label}</span>
+                            <span className="text-sm font-medium text-text-primary">
+                              {meta.label}
+                            </span>
                           </div>
                         </td>
                         {['read', 'write', 'delete', 'approve'].map((permKey) => (
@@ -479,31 +576,65 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
 
           {/* Quick Presets */}
           <div className="rounded-lg border border-border bg-surface p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Quick Presets</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+              Quick Presets
+            </h4>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => {
-                const allTrue = Object.fromEntries(Object.keys(moduleMeta).map(k => [k, { read: true, write: true, delete: true, approve: true }]));
-                setForm(prev => ({ ...prev, permissions: allTrue }));
-              }}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const allTrue = Object.fromEntries(
+                    Object.keys(moduleMeta).map((k) => [
+                      k,
+                      { read: true, write: true, delete: true, approve: true },
+                    ])
+                  );
+                  setForm((prev) => ({ ...prev, permissions: allTrue }));
+                }}
+              >
                 <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Grant All
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => {
-                const allRead = Object.fromEntries(Object.keys(moduleMeta).map(k => [k, { read: true, write: false, delete: false, approve: false }]));
-                setForm(prev => ({ ...prev, permissions: allRead }));
-              }}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const allRead = Object.fromEntries(
+                    Object.keys(moduleMeta).map((k) => [
+                      k,
+                      { read: true, write: false, delete: false, approve: false },
+                    ])
+                  );
+                  setForm((prev) => ({ ...prev, permissions: allRead }));
+                }}
+              >
                 <Eye className="mr-1.5 h-3.5 w-3.5" /> Read-Only All
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => {
-                const allFalse = Object.fromEntries(Object.keys(moduleMeta).map(k => [k, { read: false, write: false, delete: false, approve: false }]));
-                setForm(prev => ({ ...prev, permissions: allFalse }));
-              }}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const allFalse = Object.fromEntries(
+                    Object.keys(moduleMeta).map((k) => [
+                      k,
+                      { read: false, write: false, delete: false, approve: false },
+                    ])
+                  );
+                  setForm((prev) => ({ ...prev, permissions: allFalse }));
+                }}
+              >
                 <Ban className="mr-1.5 h-3.5 w-3.5" /> Revoke All
               </Button>
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Save className="mr-1.5 h-4 w-4" /> {isNew ? 'Create Role' : 'Save Changes'}
             </Button>
@@ -525,30 +656,31 @@ export default function RolesPage() {
   const [expandedModules, setExpandedModules] = useState(new Set());
 
   const filteredRoles = useMemo(() => {
-    return roles.filter((r) =>
-      r.name.toLowerCase().includes(query.toLowerCase()) ||
-      r.description.toLowerCase().includes(query.toLowerCase()) ||
-      r.id.toLowerCase().includes(query.toLowerCase())
+    return roles.filter(
+      (r) =>
+        r.name.toLowerCase().includes(query.toLowerCase()) ||
+        r.description.toLowerCase().includes(query.toLowerCase()) ||
+        r.id.toLowerCase().includes(query.toLowerCase())
     );
   }, [roles, query]);
 
   const handleSaveRole = (roleData) => {
     if (editingRole) {
-      setRoles(prev => prev.map(r => r.id === roleData.id ? roleData : r));
+      setRoles((prev) => prev.map((r) => (r.id === roleData.id ? roleData : r)));
     } else {
-      setRoles(prev => [...prev, { ...roleData, userCount: 0, isSystem: false }]);
+      setRoles((prev) => [...prev, { ...roleData, userCount: 0, isSystem: false }]);
     }
     setEditingRole(null);
     setShowEditor(false);
   };
 
   const handleDeleteRole = (id) => {
-    const role = roles.find(r => r.id === id);
+    const role = roles.find((r) => r.id === id);
     if (role?.userCount > 0) {
       alert(`Cannot delete role with ${role.userCount} assigned users. Reassign users first.`);
       return;
     }
-    setRoles(prev => prev.filter(r => r.id !== id));
+    setRoles((prev) => prev.filter((r) => r.id !== id));
     if (selectedRole?.id === id) setSelectedRole(null);
   };
 
@@ -564,7 +696,7 @@ export default function RolesPage() {
   };
 
   const toggleModule = (moduleKey) => {
-    setExpandedModules(prev => {
+    setExpandedModules((prev) => {
       const next = new Set(prev);
       if (next.has(moduleKey)) next.delete(moduleKey);
       else next.add(moduleKey);
@@ -572,12 +704,15 @@ export default function RolesPage() {
     });
   };
 
-  const stats = useMemo(() => ({
-    total: roles.length,
-    system: roles.filter(r => r.isSystem).length,
-    custom: roles.filter(r => !r.isSystem).length,
-    totalUsers: roles.reduce((s, r) => s + r.userCount, 0),
-  }), [roles]);
+  const stats = useMemo(
+    () => ({
+      total: roles.length,
+      system: roles.filter((r) => r.isSystem).length,
+      custom: roles.filter((r) => !r.isSystem).length,
+      totalUsers: roles.reduce((s, r) => s + r.userCount, 0),
+    }),
+    [roles]
+  );
 
   return (
     <div className="space-y-6">
@@ -585,9 +720,16 @@ export default function RolesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Role Management</h1>
-          <p className="text-sm text-text-secondary">Create and manage user roles with granular permissions</p>
+          <p className="text-sm text-text-secondary">
+            Create and manage user roles with granular permissions
+          </p>
         </div>
-        <Button onClick={() => { setEditingRole(null); setShowEditor(true); }}>
+        <Button
+          onClick={() => {
+            setEditingRole(null);
+            setShowEditor(true);
+          }}
+        >
           <Plus className="mr-1.5 h-4 w-4" /> Create Role
         </Button>
       </div>
@@ -603,7 +745,9 @@ export default function RolesPage() {
           <div key={stat.label} className="rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{stat.label}</p>
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+                  {stat.label}
+                </p>
                 <p className={cn('mt-1 text-2xl font-bold', stat.color)}>{stat.value}</p>
               </div>
               <stat.icon className={cn('h-6 w-6', stat.color)} />
@@ -633,7 +777,10 @@ export default function RolesPage() {
                 role={role}
                 isSelected={selectedRole?.id === role.id}
                 onSelect={() => setSelectedRole(role)}
-                onEdit={(r) => { setEditingRole(r); setShowEditor(true); }}
+                onEdit={(r) => {
+                  setEditingRole(r);
+                  setShowEditor(true);
+                }}
                 onDelete={handleDeleteRole}
                 onDuplicate={handleDuplicateRole}
               />
@@ -667,15 +814,28 @@ export default function RolesPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-text-muted">{selectedRole.id} · {selectedRole.userCount} users assigned</p>
+                      <p className="text-xs text-text-muted">
+                        {selectedRole.id} · {selectedRole.userCount} users assigned
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleDuplicateRole(selectedRole)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDuplicateRole(selectedRole)}
+                    >
                       <Copy className="mr-1.5 h-3.5 w-3.5" /> Duplicate
                     </Button>
                     {!selectedRole.isSystem && (
-                      <Button variant="outline" size="sm" onClick={() => { setEditingRole(selectedRole); setShowEditor(true); }}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingRole(selectedRole);
+                          setShowEditor(true);
+                        }}
+                      >
                         <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit
                       </Button>
                     )}
@@ -686,7 +846,9 @@ export default function RolesPage() {
 
               {/* Permission Breakdown */}
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Permission Breakdown</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Permission Breakdown
+                </h3>
                 <div className="space-y-2">
                   {Object.entries(selectedRole.permissions).map(([moduleKey, perms]) => {
                     const meta = moduleMeta[moduleKey];
@@ -695,23 +857,41 @@ export default function RolesPage() {
                     const isExpanded = expandedModules.has(moduleKey);
 
                     return (
-                      <div key={moduleKey} className="rounded-lg border border-border overflow-hidden">
+                      <div
+                        key={moduleKey}
+                        className="rounded-lg border border-border overflow-hidden"
+                      >
                         <button
                           onClick={() => toggleModule(moduleKey)}
                           className="w-full flex items-center justify-between px-4 py-3 hover:bg-background/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', meta.bg)}>
+                            <div
+                              className={cn(
+                                'flex h-8 w-8 items-center justify-center rounded-lg',
+                                meta.bg
+                              )}
+                            >
                               <Icon className={cn('h-4 w-4', meta.color)} />
                             </div>
-                            <span className="text-sm font-medium text-text-primary">{meta.label}</span>
+                            <span className="text-sm font-medium text-text-primary">
+                              {meta.label}
+                            </span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1">
                               {Object.entries(perms).map(([pk, pv]) => {
                                 const pl = permLabels[pk];
                                 return pv ? (
-                                  <span key={pk} className={cn('inline-flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold', pl.bg, pl.color, 'border border-current/20')}>
+                                  <span
+                                    key={pk}
+                                    className={cn(
+                                      'inline-flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold',
+                                      pl.bg,
+                                      pl.color,
+                                      'border border-current/20'
+                                    )}
+                                  >
                                     {pl.short}
                                   </span>
                                 ) : null;
@@ -720,7 +900,11 @@ export default function RolesPage() {
                                 <span className="text-xs text-text-muted">No access</span>
                               )}
                             </div>
-                            {isExpanded ? <ChevronUp className="h-4 w-4 text-text-muted" /> : <ChevronDown className="h-4 w-4 text-text-muted" />}
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 text-text-muted" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-text-muted" />
+                            )}
                           </div>
                         </button>
 
@@ -730,12 +914,29 @@ export default function RolesPage() {
                               {Object.entries(perms).map(([pk, pv]) => {
                                 const pl = permLabels[pk];
                                 return (
-                                  <div key={pk} className={cn(
-                                    'rounded-md border px-3 py-2 text-center',
-                                    pv ? cn(pl.bg, 'border-current/20') : 'bg-surface border-border'
-                                  )}>
-                                    <p className={cn('text-xs font-bold', pv ? pl.color : 'text-text-muted')}>{pl.label}</p>
-                                    <p className={cn('text-[10px]', pv ? 'text-text-secondary' : 'text-text-muted')}>
+                                  <div
+                                    key={pk}
+                                    className={cn(
+                                      'rounded-md border px-3 py-2 text-center',
+                                      pv
+                                        ? cn(pl.bg, 'border-current/20')
+                                        : 'bg-surface border-border'
+                                    )}
+                                  >
+                                    <p
+                                      className={cn(
+                                        'text-xs font-bold',
+                                        pv ? pl.color : 'text-text-muted'
+                                      )}
+                                    >
+                                      {pl.label}
+                                    </p>
+                                    <p
+                                      className={cn(
+                                        'text-[10px]',
+                                        pv ? 'text-text-secondary' : 'text-text-muted'
+                                      )}
+                                    >
                                       {pv ? 'Granted' : 'Denied'}
                                     </p>
                                   </div>
@@ -752,21 +953,37 @@ export default function RolesPage() {
 
               {/* Permission Summary Chart */}
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Access Summary</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Access Summary
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {Object.entries(permLabels).map(([key, meta]) => {
-                    const count = Object.values(selectedRole.permissions).filter(m => m[key]).length;
+                    const count = Object.values(selectedRole.permissions).filter(
+                      (m) => m[key]
+                    ).length;
                     const total = Object.keys(selectedRole.permissions).length;
                     const pct = Math.round((count / total) * 100);
                     return (
                       <div key={key} className="text-center">
-                        <div className={cn('inline-flex h-12 w-12 items-center justify-center rounded-xl border', meta.bg, 'border-current/20 mb-2')}>
+                        <div
+                          className={cn(
+                            'inline-flex h-12 w-12 items-center justify-center rounded-xl border',
+                            meta.bg,
+                            'border-current/20 mb-2'
+                          )}
+                        >
                           <span className={cn('text-lg font-bold', meta.color)}>{meta.short}</span>
                         </div>
                         <p className="text-sm font-medium text-text-primary">{meta.label}</p>
-                        <p className={cn('text-lg font-bold', meta.color)}>{count}<span className="text-xs text-text-muted font-normal">/{total}</span></p>
+                        <p className={cn('text-lg font-bold', meta.color)}>
+                          {count}
+                          <span className="text-xs text-text-muted font-normal">/{total}</span>
+                        </p>
                         <div className="mt-1 h-1.5 w-full rounded-full bg-border overflow-hidden">
-                          <div className={cn('h-full rounded-full', meta.bg.replace('/10', ''))} style={{ width: `${pct}%` }} />
+                          <div
+                            className={cn('h-full rounded-full', meta.bg.replace('/10', ''))}
+                            style={{ width: `${pct}%` }}
+                          />
                         </div>
                       </div>
                     );
@@ -789,7 +1006,10 @@ export default function RolesPage() {
         <RoleEditorModal
           role={editingRole}
           isNew={!editingRole?.id}
-          onClose={() => { setShowEditor(false); setEditingRole(null); }}
+          onClose={() => {
+            setShowEditor(false);
+            setEditingRole(null);
+          }}
           onSave={handleSaveRole}
         />
       )}

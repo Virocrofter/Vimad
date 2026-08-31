@@ -1,26 +1,57 @@
 /* src/app/admin/rbac/components.jsx */
 import { useState } from 'react';
 import {
-  Shield, Users, Key, Globe, Check, X, ChevronDown, ChevronUp,
-  Copy, Eye, EyeOff, Trash2, Edit3, RefreshCw, AlertTriangle,
-  CheckCircle2, Clock, MoreHorizontal, Lock, Unlock, Zap,
-  BarChart3, Activity, ToggleLeft, ToggleRight, Tag, Building2
+  Shield,
+  Users,
+  Key,
+  Globe,
+  Check,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
+  EyeOff,
+  Trash2,
+  Edit3,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  MoreHorizontal,
+  Lock,
+  Unlock,
+  Zap,
+  BarChart3,
+  Activity,
+  ToggleLeft,
+  ToggleRight,
+  Tag,
+  Building2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  roleTypeMeta, apiKeyStatusMeta, ssoProviderMeta, environmentMeta,
-  getPermissionLabel, getKeyStatus
+  roleTypeMeta,
+  apiKeyStatusMeta,
+  ssoProviderMeta,
+  environmentMeta,
+  getPermissionLabel,
+  getKeyStatus,
 } from './data';
 
 /* ─── Role Type Badge ─── */
 export function RoleTypeBadge({ type }) {
   const meta = roleTypeMeta[type] || roleTypeMeta.custom;
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -35,11 +66,15 @@ export function RoleCard({ role, onEdit, onDelete, onAssign }) {
     <div className="rounded-xl border border-border bg-surface p-4 transition-all hover:shadow-md hover:border-secondary/30">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-lg',
-            role.type === 'system' ? 'bg-info/10' : 'bg-secondary/10'
-          )}>
-            <Shield className={cn('h-5 w-5', role.type === 'system' ? 'text-info' : 'text-secondary')} />
+          <div
+            className={cn(
+              'flex h-10 w-10 items-center justify-center rounded-lg',
+              role.type === 'system' ? 'bg-info/10' : 'bg-secondary/10'
+            )}
+          >
+            <Shield
+              className={cn('h-5 w-5', role.type === 'system' ? 'text-info' : 'text-secondary')}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{role.name}</h3>
@@ -126,9 +161,14 @@ export function PermissionMatrixRow({ category, rolePermissions, onToggle, readO
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-text-muted">
-            {category.permissions.filter(p => rolePermissions.includes(p.key)).length} / {category.permissions.length}
+            {category.permissions.filter((p) => rolePermissions.includes(p.key)).length} /{' '}
+            {category.permissions.length}
           </span>
-          {expanded ? <ChevronUp className="h-4 w-4 text-text-muted" /> : <ChevronDown className="h-4 w-4 text-text-muted" />}
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 text-text-muted" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-text-muted" />
+          )}
         </div>
       </button>
 
@@ -142,7 +182,9 @@ export function PermissionMatrixRow({ category, rolePermissions, onToggle, readO
                   key={perm.key}
                   className={cn(
                     'flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors',
-                    enabled ? 'border-accent/30 bg-accent/5' : 'border-border bg-background hover:bg-surface-elevated',
+                    enabled
+                      ? 'border-accent/30 bg-accent/5'
+                      : 'border-border bg-background hover:bg-surface-elevated',
                     readOnly && 'cursor-default opacity-60'
                   )}
                 >
@@ -157,11 +199,20 @@ export function PermissionMatrixRow({ category, rolePermissions, onToggle, readO
                   )}
                   {readOnly && (
                     <div className="mt-0.5">
-                      {enabled ? <Check className="h-4 w-4 text-accent" /> : <X className="h-4 w-4 text-text-muted" />}
+                      {enabled ? (
+                        <Check className="h-4 w-4 text-accent" />
+                      ) : (
+                        <X className="h-4 w-4 text-text-muted" />
+                      )}
                     </div>
                   )}
                   <div>
-                    <p className={cn('text-sm font-medium', enabled ? 'text-accent' : 'text-text-secondary')}>
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        enabled ? 'text-accent' : 'text-text-secondary'
+                      )}
+                    >
                       {perm.label}
                     </p>
                     <p className="text-xs text-text-muted">{perm.description}</p>
@@ -198,11 +249,23 @@ export function ApiKeyRow({ apiKey, onRevoke, onRegenerate, onView }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+          <span
+            className={cn(
+              'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
+              meta.class
+            )}
+          >
             <span className={cn('h-1.5 w-1.5 rounded-full mr-1', meta.dot)} />
             {meta.label}
           </span>
-          <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', envMeta.bg, envMeta.color, 'border-current/20')}>
+          <span
+            className={cn(
+              'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
+              envMeta.bg,
+              envMeta.color,
+              'border-current/20'
+            )}
+          >
             {envMeta.label}
           </span>
         </div>
@@ -231,7 +294,10 @@ export function ApiKeyRow({ apiKey, onRevoke, onRegenerate, onView }) {
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-1">
           {apiKey.scopes.slice(0, 3).map((scope) => (
-            <span key={scope} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+            <span
+              key={scope}
+              className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary"
+            >
               {scope === '*' ? 'All' : getPermissionLabel(scope)}
             </span>
           ))}
@@ -291,10 +357,14 @@ export function SSOCard({ provider, onEdit, onToggle, onSync, onDelete }) {
   const iconColor = provider.status === 'active' ? 'text-accent' : 'text-warning';
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      provider.status === 'active' ? 'border-border hover:border-secondary/30' : 'border-warning/30 hover:border-warning/50'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        provider.status === 'active'
+          ? 'border-border hover:border-secondary/30'
+          : 'border-warning/30 hover:border-warning/50'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', meta.bg)}>
@@ -303,7 +373,14 @@ export function SSOCard({ provider, onEdit, onToggle, onSync, onDelete }) {
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{provider.name}</h3>
             <div className="mt-0.5 flex items-center gap-2">
-              <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', provider.status === 'active' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-warning/10 text-warning border-warning/20')}>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                  provider.status === 'active'
+                    ? 'bg-accent/10 text-accent border-accent/20'
+                    : 'bg-warning/10 text-warning border-warning/20'
+                )}
+              >
                 <Icon className={cn('h-3 w-3', iconColor)} />
                 {provider.status === 'active' ? 'Active' : 'Inactive'}
               </span>
@@ -350,8 +427,11 @@ export function SSOCard({ provider, onEdit, onToggle, onSync, onDelete }) {
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Domains</span>
           <div className="flex gap-1">
-            {provider.domains.map(d => (
-              <span key={d} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+            {provider.domains.map((d) => (
+              <span
+                key={d}
+                className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary"
+              >
                 {d}
               </span>
             ))}
@@ -359,17 +439,29 @@ export function SSOCard({ provider, onEdit, onToggle, onSync, onDelete }) {
         </div>
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Auto-Provision</span>
-          <span className={cn('font-medium', provider.autoProvision ? 'text-accent' : 'text-text-muted')}>
+          <span
+            className={cn(
+              'font-medium',
+              provider.autoProvision ? 'text-accent' : 'text-text-muted'
+            )}
+          >
             {provider.autoProvision ? 'Enabled' : 'Disabled'}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Default Role</span>
-          <span className="text-text-secondary">{provider.defaultRole.replace('role-', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+          <span className="text-text-secondary">
+            {provider.defaultRole
+              .replace('role-', '')
+              .replace(/-/g, ' ')
+              .replace(/\b\w/g, (l) => l.toUpperCase())}
+          </span>
         </div>
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Force SSO</span>
-          <span className={cn('font-medium', provider.forceSSO ? 'text-accent' : 'text-text-muted')}>
+          <span
+            className={cn('font-medium', provider.forceSSO ? 'text-accent' : 'text-text-muted')}
+          >
             {provider.forceSSO ? 'Required' : 'Optional'}
           </span>
         </div>
@@ -382,7 +474,10 @@ export function SSOCard({ provider, onEdit, onToggle, onSync, onDelete }) {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-text-muted">
           <Clock className="h-3.5 w-3.5" />
-          <span>Last sync: {provider.lastSyncAt ? new Date(provider.lastSyncAt).toLocaleTimeString() : 'Never'}</span>
+          <span>
+            Last sync:{' '}
+            {provider.lastSyncAt ? new Date(provider.lastSyncAt).toLocaleTimeString() : 'Never'}
+          </span>
         </div>
         {provider.syncErrors > 0 && (
           <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 border border-danger/20 px-2 py-0.5 text-[10px] text-danger">
@@ -410,15 +505,26 @@ export function RbacStatCard({ label, value, subtext, icon: Icon, color, trend }
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -433,7 +539,12 @@ export function UserAssignmentRow({ user, roles, onRoleChange }) {
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+            {user.name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')
+              .slice(0, 2)
+              .toUpperCase()}
           </div>
           <div>
             <p className="text-sm font-medium text-text-primary">{user.name}</p>
@@ -447,22 +558,40 @@ export function UserAssignmentRow({ user, roles, onRoleChange }) {
           onChange={(e) => onRoleChange(user.id, e.target.value)}
           className="h-8 rounded-md border border-border bg-background px-2 text-xs text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {roles.map(r => (
-            <option key={r.id} value={r.id}>{r.name}</option>
+          {roles.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
           ))}
         </select>
       </td>
       <td className="px-4 py-3">
-        <span className={cn(
-          'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-          user.status === 'active' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-danger/10 text-danger border-danger/20'
-        )}>
-          <span className={cn('h-1.5 w-1.5 rounded-full', user.status === 'active' ? 'bg-accent' : 'bg-danger')} />
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+            user.status === 'active'
+              ? 'bg-accent/10 text-accent border-accent/20'
+              : 'bg-danger/10 text-danger border-danger/20'
+          )}
+        >
+          <span
+            className={cn(
+              'h-1.5 w-1.5 rounded-full',
+              user.status === 'active' ? 'bg-accent' : 'bg-danger'
+            )}
+          />
           {user.status === 'active' ? 'Active' : 'Suspended'}
         </span>
       </td>
       <td className="px-4 py-3 text-xs text-text-secondary">
-        {user.lastActive ? new Date(user.lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Never'}
+        {user.lastActive
+          ? new Date(user.lastActive).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : 'Never'}
       </td>
     </tr>
   );

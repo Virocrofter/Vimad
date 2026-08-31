@@ -1,9 +1,26 @@
 /* src/app/admin/billing/revenue/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  TrendingUp, TrendingDown, DollarSign, Users, ArrowUpRight, ArrowDownRight,
-  BarChart3, PieChart, Activity, Calendar, Filter, Download, ChevronDown,
-  ChevronUp, Minus, CreditCard, Repeat, UserMinus, Zap, Target
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Users,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart3,
+  PieChart,
+  Activity,
+  Calendar,
+  Filter,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  Minus,
+  CreditCard,
+  Repeat,
+  UserMinus,
+  Zap,
+  Target,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -38,8 +55,20 @@ const mrrBreakdown = [
 
 const planDistribution = [
   { plan: 'Starter', customers: 78, mrr: 15522, color: 'bg-info', textColor: 'text-info' },
-  { plan: 'Professional', customers: 45, mrr: 22455, color: 'bg-secondary', textColor: 'text-secondary' },
-  { plan: 'Enterprise', customers: 19, mrr: 10473, color: 'bg-purple-500', textColor: 'text-purple-500' },
+  {
+    plan: 'Professional',
+    customers: 45,
+    mrr: 22455,
+    color: 'bg-secondary',
+    textColor: 'text-secondary',
+  },
+  {
+    plan: 'Enterprise',
+    customers: 19,
+    mrr: 10473,
+    color: 'bg-purple-500',
+    textColor: 'text-purple-500',
+  },
 ];
 
 const churnReasons = [
@@ -52,16 +81,55 @@ const churnReasons = [
 ];
 
 const topCustomers = [
-  { id: 'TNT-001', name: 'Grand Hotel Boston', plan: 'Enterprise', mrr: 4990, trend: 5.2, since: '2025-03' },
-  { id: 'TNT-007', name: 'Urban Hotel NYC', plan: 'Professional', mrr: 499, trend: 12.8, since: '2025-04' },
-  { id: 'TNT-002', name: 'Seaside Resort Miami', plan: 'Professional', mrr: 499, trend: -2.1, since: '2025-06' },
-  { id: 'TNT-005', name: 'Coastal Inn San Diego', plan: 'Starter', mrr: 199, trend: 0, since: '2025-09' },
-  { id: 'TNT-003', name: 'Mountain Lodge Aspen', plan: 'Professional', mrr: 0, trend: 0, since: '2026-08' },
+  {
+    id: 'TNT-001',
+    name: 'Grand Hotel Boston',
+    plan: 'Enterprise',
+    mrr: 4990,
+    trend: 5.2,
+    since: '2025-03',
+  },
+  {
+    id: 'TNT-007',
+    name: 'Urban Hotel NYC',
+    plan: 'Professional',
+    mrr: 499,
+    trend: 12.8,
+    since: '2025-04',
+  },
+  {
+    id: 'TNT-002',
+    name: 'Seaside Resort Miami',
+    plan: 'Professional',
+    mrr: 499,
+    trend: -2.1,
+    since: '2025-06',
+  },
+  {
+    id: 'TNT-005',
+    name: 'Coastal Inn San Diego',
+    plan: 'Starter',
+    mrr: 199,
+    trend: 0,
+    since: '2025-09',
+  },
+  {
+    id: 'TNT-003',
+    name: 'Mountain Lodge Aspen',
+    plan: 'Professional',
+    mrr: 0,
+    trend: 0,
+    since: '2026-08',
+  },
 ];
 
 /* ─── Helpers ─── */
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 function formatCompactCurrency(amount) {
@@ -75,12 +143,21 @@ function TrendBadge({ value, suffix = '%', invert = false }) {
   const isNegative = value < 0;
   const isGood = invert ? isNegative : isPositive;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-0.5 text-xs font-medium',
-      isGood ? 'text-accent' : isNegative || isPositive ? 'text-danger' : 'text-text-muted'
-    )}>
-      {isPositive ? <ArrowUpRight className="h-3 w-3" /> : isNegative ? <ArrowDownRight className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-      {Math.abs(value)}{suffix}
+    <span
+      className={cn(
+        'inline-flex items-center gap-0.5 text-xs font-medium',
+        isGood ? 'text-accent' : isNegative || isPositive ? 'text-danger' : 'text-text-muted'
+      )}
+    >
+      {isPositive ? (
+        <ArrowUpRight className="h-3 w-3" />
+      ) : isNegative ? (
+        <ArrowDownRight className="h-3 w-3" />
+      ) : (
+        <Minus className="h-3 w-3" />
+      )}
+      {Math.abs(value)}
+      {suffix}
     </span>
   );
 }
@@ -100,10 +177,19 @@ function RevenueStatCard({ label, value, subtext, icon: Icon, color, trend, inve
             </div>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10').replace('purple-500', 'purple-500/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+              .replace('purple-500', 'purple-500/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -113,13 +199,17 @@ function RevenueStatCard({ label, value, subtext, icon: Icon, color, trend, inve
 
 /* ─── Simple Bar Chart (SVG) ─── */
 function SimpleBarChart({ data, dataKey, labelKey, color = '#863bff', height = 160 }) {
-  const max = Math.max(...data.map(d => d[dataKey]));
+  const max = Math.max(...data.map((d) => d[dataKey]));
   const barWidth = data.length > 0 ? (100 / data.length) * 0.7 : 0;
   const gap = data.length > 0 ? (100 / data.length) * 0.3 : 0;
 
   return (
     <div className="w-full" style={{ height }}>
-      <svg viewBox={`0 0 ${data.length * 40} ${height}`} className="w-full h-full" preserveAspectRatio="none">
+      <svg
+        viewBox={`0 0 ${data.length * 40} ${height}`}
+        className="w-full h-full"
+        preserveAspectRatio="none"
+      >
         {data.map((d, i) => {
           const barHeight = max > 0 ? (d[dataKey] / max) * (height - 24) : 0;
           const x = i * 40 + 5;
@@ -127,7 +217,15 @@ function SimpleBarChart({ data, dataKey, labelKey, color = '#863bff', height = 1
           return (
             <g key={i}>
               <rect x={x} y={y} width={30} height={barHeight} rx={4} fill={color} opacity={0.85} />
-              <text x={x + 15} y={height - 6} textAnchor="middle" className="fill-text-muted" style={{ fontSize: '9px' }}>{d[labelKey]}</text>
+              <text
+                x={x + 15}
+                y={height - 6}
+                textAnchor="middle"
+                className="fill-text-muted"
+                style={{ fontSize: '9px' }}
+              >
+                {d[labelKey]}
+              </text>
             </g>
           );
         })}
@@ -138,13 +236,17 @@ function SimpleBarChart({ data, dataKey, labelKey, color = '#863bff', height = 1
 
 /* ─── Stacked Bar Chart for MRR Breakdown ─── */
 function MrrStackedChart({ data }) {
-  const max = Math.max(...data.map(d => d.mrr));
+  const max = Math.max(...data.map((d) => d.mrr));
   const height = 200;
   const barWidth = data.length > 0 ? (100 / data.length) * 0.65 : 0;
 
   return (
     <div className="w-full" style={{ height }}>
-      <svg viewBox={`0 0 ${data.length * 60} ${height}`} className="w-full h-full" preserveAspectRatio="none">
+      <svg
+        viewBox={`0 0 ${data.length * 60} ${height}`}
+        className="w-full h-full"
+        preserveAspectRatio="none"
+      >
         {data.map((d, i) => {
           const totalHeight = max > 0 ? (d.mrr / max) * (height - 30) : 0;
           const newH = max > 0 ? (d.new / max) * (height - 30) : 0;
@@ -157,7 +259,15 @@ function MrrStackedChart({ data }) {
           return (
             <g key={i}>
               {/* Base MRR */}
-              <rect x={x} y={baseY - totalHeight} width={44} height={totalHeight} rx={4} fill="#e2e8f0" className="dark:fill-slate-700" />
+              <rect
+                x={x}
+                y={baseY - totalHeight}
+                width={44}
+                height={totalHeight}
+                rx={4}
+                fill="#e2e8f0"
+                className="dark:fill-slate-700"
+              />
               {/* New */}
               <rect x={x} y={baseY - newH} width={44} height={newH} rx={2} fill="#22c55e" />
               {/* Expansion */}
@@ -165,11 +275,33 @@ function MrrStackedChart({ data }) {
               {/* Contraction */}
               <rect x={x} y={baseY - conH} width={44} height={conH} rx={2} fill="#f59e0b" />
               {/* Churned (negative, shown from bottom) */}
-              <rect x={x} y={baseY} width={44} height={churnH * 0.5} rx={2} fill="#ef4444" opacity={0.6} />
+              <rect
+                x={x}
+                y={baseY}
+                width={44}
+                height={churnH * 0.5}
+                rx={2}
+                fill="#ef4444"
+                opacity={0.6}
+              />
               {/* Label */}
-              <text x={x + 22} y={height - 8} textAnchor="middle" className="fill-text-muted" style={{ fontSize: '10px' }}>{d.month}</text>
+              <text
+                x={x + 22}
+                y={height - 8}
+                textAnchor="middle"
+                className="fill-text-muted"
+                style={{ fontSize: '10px' }}
+              >
+                {d.month}
+              </text>
               {/* MRR value */}
-              <text x={x + 22} y={baseY - totalHeight - 6} textAnchor="middle" className="fill-text-primary font-mono" style={{ fontSize: '9px', fontWeight: 600 }}>
+              <text
+                x={x + 22}
+                y={baseY - totalHeight - 6}
+                textAnchor="middle"
+                className="fill-text-primary font-mono"
+                style={{ fontSize: '9px', fontWeight: 600 }}
+              >
                 {formatCompactCurrency(d.mrr)}
               </text>
             </g>
@@ -177,10 +309,18 @@ function MrrStackedChart({ data }) {
         })}
       </svg>
       <div className="mt-2 flex items-center justify-center gap-4 text-[10px] text-text-muted">
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-accent" /> New</span>
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-secondary" /> Expansion</span>
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-warning" /> Contraction</span>
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-danger" /> Churn</span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-sm bg-accent" /> New
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-sm bg-secondary" /> Expansion
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-sm bg-warning" /> Contraction
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2 w-2 rounded-sm bg-danger" /> Churn
+        </span>
       </div>
     </div>
   );
@@ -208,7 +348,9 @@ function DonutChart({ data, size = 140 }) {
           return (
             <circle
               key={i}
-              cx={center} cy={center} r={radius}
+              cx={center}
+              cy={center}
+              r={radius}
               fill="none"
               stroke={color}
               strokeWidth={14}
@@ -219,10 +361,22 @@ function DonutChart({ data, size = 140 }) {
             />
           );
         })}
-        <text x={center} y={center - 4} textAnchor="middle" className="fill-text-primary" style={{ fontSize: '14px', fontWeight: 700 }}>
+        <text
+          x={center}
+          y={center - 4}
+          textAnchor="middle"
+          className="fill-text-primary"
+          style={{ fontSize: '14px', fontWeight: 700 }}
+        >
           {data.length}
         </text>
-        <text x={center} y={center + 10} textAnchor="middle" className="fill-text-muted" style={{ fontSize: '9px' }}>
+        <text
+          x={center}
+          y={center + 10}
+          textAnchor="middle"
+          className="fill-text-muted"
+          style={{ fontSize: '9px' }}
+        >
           customers
         </text>
       </svg>
@@ -231,7 +385,9 @@ function DonutChart({ data, size = 140 }) {
           <div key={d.plan} className="flex items-center gap-2">
             <span className={cn('h-2.5 w-2.5 rounded-full', d.color)} />
             <span className="text-xs text-text-secondary">{d.plan}</span>
-            <span className="text-xs font-mono font-medium text-text-primary">{formatCurrency(d.mrr)}</span>
+            <span className="text-xs font-mono font-medium text-text-primary">
+              {formatCurrency(d.mrr)}
+            </span>
             <span className="text-[10px] text-text-muted">({d.customers})</span>
           </div>
         ))}
@@ -245,7 +401,10 @@ export default function RevenuePage() {
   const [timeRange, setTimeRange] = useState('12m');
   const [showChurnDetails, setShowChurnDetails] = useState(false);
 
-  const mrrGrowth = ((revenueOverview.mrr - revenueOverview.lastMonthMrr) / revenueOverview.lastMonthMrr * 100).toFixed(1);
+  const mrrGrowth = (
+    ((revenueOverview.mrr - revenueOverview.lastMonthMrr) / revenueOverview.lastMonthMrr) *
+    100
+  ).toFixed(1);
   const churnChange = (revenueOverview.churnRate - revenueOverview.lastMonthChurn).toFixed(1);
   const nrrChange = (revenueOverview.netRevenueRetention - revenueOverview.lastMonthNrr).toFixed(1);
 
@@ -258,7 +417,9 @@ export default function RevenuePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Revenue Analytics</h1>
-          <p className="text-sm text-text-secondary">MRR, ARR, churn analysis, and revenue breakdown</p>
+          <p className="text-sm text-text-secondary">
+            MRR, ARR, churn analysis, and revenue breakdown
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <select
@@ -359,7 +520,9 @@ export default function RevenuePage() {
               <BarChart3 className="h-4 w-4 text-secondary" /> MRR Breakdown
             </h3>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-text-muted">Growth: <span className="font-mono font-medium text-accent">+{mrrGrowth}%</span></span>
+              <span className="text-xs text-text-muted">
+                Growth: <span className="font-mono font-medium text-accent">+{mrrGrowth}%</span>
+              </span>
             </div>
           </div>
           <MrrStackedChart data={mrrBreakdown} />
@@ -379,10 +542,15 @@ export default function RevenuePage() {
                 <div key={d.plan} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-text-secondary">{d.plan}</span>
-                    <span className="font-mono text-text-primary">{pct}% · {formatCurrency(d.mrr)}</span>
+                    <span className="font-mono text-text-primary">
+                      {pct}% · {formatCurrency(d.mrr)}
+                    </span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
-                    <div className={cn('h-full rounded-full transition-all', d.color)} style={{ width: `${mrrPct}%` }} />
+                    <div
+                      className={cn('h-full rounded-full transition-all', d.color)}
+                      style={{ width: `${mrrPct}%` }}
+                    />
                   </div>
                 </div>
               );
@@ -401,7 +569,11 @@ export default function RevenuePage() {
             onClick={() => setShowChurnDetails(!showChurnDetails)}
             className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
           >
-            {showChurnDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            {showChurnDetails ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
             {showChurnDetails ? 'Hide Details' : 'View Details'}
           </button>
         </div>
@@ -409,13 +581,17 @@ export default function RevenuePage() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Churn Reasons */}
           <div>
-            <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">Top Churn Reasons</h4>
+            <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">
+              Top Churn Reasons
+            </h4>
             <div className="space-y-3">
               {churnReasons.map((r) => (
                 <div key={r.reason} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-text-secondary">{r.reason}</span>
-                    <span className="font-mono text-text-primary">{r.count} ({r.pct}%)</span>
+                    <span className="font-mono text-text-primary">
+                      {r.count} ({r.pct}%)
+                    </span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                     <div
@@ -437,11 +613,15 @@ export default function RevenuePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Gross Churn</p>
-                  <p className="mt-1 text-xl font-bold font-mono text-danger">{revenueOverview.churnRate}%</p>
+                  <p className="mt-1 text-xl font-bold font-mono text-danger">
+                    {revenueOverview.churnRate}%
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-text-muted">Monthly</p>
-                  <p className="text-sm font-mono text-text-primary">{revenueOverview.churnedCustomersThisMonth} customers</p>
+                  <p className="text-sm font-mono text-text-primary">
+                    {revenueOverview.churnedCustomersThisMonth} customers
+                  </p>
                 </div>
               </div>
             </div>
@@ -450,21 +630,36 @@ export default function RevenuePage() {
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Net Churn</p>
                   <p className="mt-1 text-xl font-bold font-mono text-accent">
-                    {((revenueOverview.newCustomersThisMonth - revenueOverview.churnedCustomersThisMonth) / revenueOverview.activeCustomers * 100).toFixed(1)}%
+                    {(
+                      ((revenueOverview.newCustomersThisMonth -
+                        revenueOverview.churnedCustomersThisMonth) /
+                        revenueOverview.activeCustomers) *
+                      100
+                    ).toFixed(1)}
+                    %
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-text-muted">Net growth</p>
-                  <p className="text-sm font-mono text-text-primary">+{revenueOverview.newCustomersThisMonth - revenueOverview.churnedCustomersThisMonth} customers</p>
+                  <p className="text-sm font-mono text-text-primary">
+                    +
+                    {revenueOverview.newCustomersThisMonth -
+                      revenueOverview.churnedCustomersThisMonth}{' '}
+                    customers
+                  </p>
                 </div>
               </div>
             </div>
             <div className="rounded-lg border border-border bg-background p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-text-muted uppercase tracking-wider">Customer Lifetime Value</p>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">
+                    Customer Lifetime Value
+                  </p>
                   <p className="mt-1 text-xl font-bold font-mono text-secondary">
-                    {formatCurrency(revenueOverview.avgRevenuePerUser / (revenueOverview.churnRate / 100))}
+                    {formatCurrency(
+                      revenueOverview.avgRevenuePerUser / (revenueOverview.churnRate / 100)
+                    )}
                   </p>
                 </div>
                 <div className="text-right">
@@ -489,11 +684,21 @@ export default function RevenuePage() {
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Plan</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">MRR</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Trend</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Since</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Plan
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  MRR
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Trend
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Since
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -502,7 +707,12 @@ export default function RevenuePage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-xs font-bold text-secondary">
-                        {c.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        {c.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-text-primary">{c.name}</p>
@@ -511,12 +721,16 @@ export default function RevenuePage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn(
-                      'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                      c.plan === 'Enterprise' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' :
-                      c.plan === 'Professional' ? 'bg-secondary/10 text-secondary border-secondary/20' :
-                      'bg-info/10 text-info border-info/20'
-                    )}>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                        c.plan === 'Enterprise'
+                          ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                          : c.plan === 'Professional'
+                            ? 'bg-secondary/10 text-secondary border-secondary/20'
+                            : 'bg-info/10 text-info border-info/20'
+                      )}
+                    >
                       {c.plan}
                     </span>
                   </td>
@@ -526,9 +740,7 @@ export default function RevenuePage() {
                   <td className="px-4 py-3 text-right">
                     <TrendBadge value={c.trend} />
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">
-                    {c.since}
-                  </td>
+                  <td className="px-4 py-3 text-text-secondary text-xs">{c.since}</td>
                 </tr>
               ))}
             </tbody>

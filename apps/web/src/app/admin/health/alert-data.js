@@ -234,9 +234,27 @@ export const alertHistory = [
 
 /* ─── Notification Channels ─── */
 export const notificationChannels = [
-  { id: 'email', label: 'Email', icon: 'Mail', configured: true, target: 'ops-team@unifiedpms.com' },
-  { id: 'slack', label: 'Slack', icon: 'MessageSquare', configured: true, target: '#alerts-platform' },
-  { id: 'pagerduty', label: 'PagerDuty', icon: 'Radio', configured: true, target: 'Platform Oncall' },
+  {
+    id: 'email',
+    label: 'Email',
+    icon: 'Mail',
+    configured: true,
+    target: 'ops-team@unifiedpms.com',
+  },
+  {
+    id: 'slack',
+    label: 'Slack',
+    icon: 'MessageSquare',
+    configured: true,
+    target: '#alerts-platform',
+  },
+  {
+    id: 'pagerduty',
+    label: 'PagerDuty',
+    icon: 'Radio',
+    configured: true,
+    target: 'Platform Oncall',
+  },
   { id: 'webhook', label: 'Webhook', icon: 'Globe', configured: false, target: null },
   { id: 'sms', label: 'SMS', icon: 'Phone', configured: false, target: null },
 ];
@@ -265,15 +283,30 @@ export const alertConditions = [
 
 /* ─── Alert Severity Colors ─── */
 export const alertSeverityMeta = {
-  critical: { label: 'Critical', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
-  warning: { label: 'Warning', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
-  info: { label: 'Info', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20', iconColor: 'text-info' },
+  critical: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
+  warning: {
+    label: 'Warning',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    iconColor: 'text-warning',
+  },
+  info: {
+    label: 'Info',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+    iconColor: 'text-info',
+  },
 };
 
 /* ─── Alert Status Helpers ─── */
 export function getAlertStatus(alert) {
   if (!alert.enabled) return 'disabled';
-  const history = alertHistory.filter(h => h.ruleId === alert.id && !h.resolvedAt);
+  const history = alertHistory.filter((h) => h.ruleId === alert.id && !h.resolvedAt);
   if (history.length > 0) return 'firing';
   return 'ok';
 }

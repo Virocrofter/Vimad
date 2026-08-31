@@ -2,10 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import {
-  Menu, Bell, Search, ChevronDown, Check, Building2,
-  User, Settings, LogOut, X
+  Menu,
+  Bell,
+  Search,
+  ChevronDown,
+  Check,
+  Building2,
+  User,
+  Settings,
+  LogOut,
+  X,
 } from 'lucide-react';
-import { ThemeToggle } from '../theme/ThemeToggle';
+import { ThemeToggle } from '../theme/themeToggle';
 import { useAuthStore } from '../../stores/authStores';
 import { useNotificationStore } from '../../stores/notificationStore';
 
@@ -96,15 +104,22 @@ export function Topbar({ title, onMenuClick }) {
                         !n.read && 'bg-secondary/5'
                       )}
                     >
-                      <div className={cn(
-                        'mt-0.5 h-2 w-2 rounded-full shrink-0',
-                        n.type === 'success' && 'bg-accent',
-                        n.type === 'warning' && 'bg-warning',
-                        n.type === 'danger' && 'bg-danger',
-                        n.type === 'info' && 'bg-info',
-                      )} />
+                      <div
+                        className={cn(
+                          'mt-0.5 h-2 w-2 rounded-full shrink-0',
+                          n.type === 'success' && 'bg-accent',
+                          n.type === 'warning' && 'bg-warning',
+                          n.type === 'danger' && 'bg-danger',
+                          n.type === 'info' && 'bg-info'
+                        )}
+                      />
                       <div className="flex-1 min-w-0">
-                        <p className={cn('text-sm', !n.read ? 'font-medium text-text-primary' : 'text-text-secondary')}>
+                        <p
+                          className={cn(
+                            'text-sm',
+                            !n.read ? 'font-medium text-text-primary' : 'text-text-secondary'
+                          )}
+                        >
                           {n.title}
                         </p>
                         <p className="text-xs text-text-muted truncate">{n.message}</p>
@@ -132,7 +147,9 @@ export function Topbar({ title, onMenuClick }) {
             </button>
             {propOpen && (
               <div className="absolute right-0 mt-2 w-64 rounded-lg border border-border bg-surface-elevated shadow-xl z-50 py-1">
-                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-text-muted">Properties</p>
+                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Properties
+                </p>
                 {availableProperties.map((p) => (
                   <button
                     key={p.id}
@@ -142,7 +159,9 @@ export function Topbar({ title, onMenuClick }) {
                     }}
                     className={cn(
                       'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
-                      p.id === property.id ? 'bg-secondary/10 text-secondary' : 'text-text-secondary hover:bg-surface'
+                      p.id === property.id
+                        ? 'bg-secondary/10 text-secondary'
+                        : 'text-text-secondary hover:bg-surface'
                     )}
                   >
                     <Building2 className="h-4 w-4" />
@@ -161,7 +180,12 @@ export function Topbar({ title, onMenuClick }) {
             onClick={() => setProfileOpen(!profileOpen)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/10 text-sm font-medium text-secondary hover:bg-secondary/20"
           >
-            {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'U'}
+            {user?.name
+              ?.split(' ')
+              .map((n) => n[0])
+              .join('')
+              .slice(0, 2)
+              .toUpperCase() || 'U'}
           </button>
           {profileOpen && (
             <div className="absolute right-0 mt-2 w-56 rounded-lg border border-border bg-surface-elevated shadow-xl z-50 py-1">
@@ -201,7 +225,10 @@ export function Topbar({ title, onMenuClick }) {
               placeholder="Search..."
               className="h-10 w-full rounded-md border border-border bg-background pl-9 pr-9 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
-            <button onClick={() => setSearchOpen(false)} className="absolute right-3 top-1/2 -translate-y-1/2">
+            <button
+              onClick={() => setSearchOpen(false)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
               <X className="h-4 w-4 text-text-muted" />
             </button>
           </div>

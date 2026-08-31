@@ -416,8 +416,16 @@ export const testRestoreRuns = [
       { time: '04:00:05', level: 'info', message: 'Downloading backup from S3 (4.15 GB)' },
       { time: '04:08:12', level: 'info', message: 'Download complete. Decrypting...' },
       { time: '04:10:45', level: 'info', message: 'Restore to staging-restore-01 started' },
-      { time: '04:18:30', level: 'info', message: 'Database restore complete. Rebuilding indexes...' },
-      { time: '04:20:15', level: 'info', message: 'Index rebuild complete. Running integrity checks...' },
+      {
+        time: '04:18:30',
+        level: 'info',
+        message: 'Database restore complete. Rebuilding indexes...',
+      },
+      {
+        time: '04:20:15',
+        level: 'info',
+        message: 'Index rebuild complete. Running integrity checks...',
+      },
       { time: '04:21:30', level: 'info', message: 'Row count validation: 2,847,392 rows ✓' },
       { time: '04:22:00', level: 'info', message: 'Smoke tests passed. Test restore successful.' },
     ],
@@ -447,7 +455,11 @@ export const testRestoreRuns = [
       { time: '04:00:04', level: 'info', message: 'Downloading backup from S3 (4.12 GB)' },
       { time: '04:07:30', level: 'info', message: 'Download complete. Decrypting...' },
       { time: '04:09:50', level: 'info', message: 'Restore to staging-restore-01 started' },
-      { time: '04:16:00', level: 'info', message: 'Database restore complete. Rebuilding indexes...' },
+      {
+        time: '04:16:00',
+        level: 'info',
+        message: 'Database restore complete. Rebuilding indexes...',
+      },
       { time: '04:18:00', level: 'info', message: 'All checks passed. Test restore successful.' },
     ],
   },
@@ -472,7 +484,11 @@ export const testRestoreRuns = [
     rpoTarget: '4 hours',
     issues: [
       { severity: 'warning', message: 'RTO exceeded target by 2 minutes', component: 'restore' },
-      { severity: 'warning', message: 'Smoke test: 2 API endpoints responded slowly (>2s)', component: 'app' },
+      {
+        severity: 'warning',
+        message: 'Smoke test: 2 API endpoints responded slowly (>2s)',
+        component: 'app',
+      },
     ],
     logs: [
       { time: '10:00:00', level: 'info', message: 'Test restore initiated (manual by David Park)' },
@@ -480,8 +496,16 @@ export const testRestoreRuns = [
       { time: '10:09:00', level: 'info', message: 'Download complete. Decrypting...' },
       { time: '10:12:00', level: 'info', message: 'Restore to staging-restore-02 started' },
       { time: '10:28:00', level: 'info', message: 'Database restore complete' },
-      { time: '10:32:00', level: 'warning', message: 'Index rebuild slower than usual (4m vs 2m avg)' },
-      { time: '10:34:00', level: 'warning', message: 'Smoke test: /api/v1/reservations latency 2.3s' },
+      {
+        time: '10:32:00',
+        level: 'warning',
+        message: 'Index rebuild slower than usual (4m vs 2m avg)',
+      },
+      {
+        time: '10:34:00',
+        level: 'warning',
+        message: 'Smoke test: /api/v1/reservations latency 2.3s',
+      },
       { time: '10:35:00', level: 'warning', message: 'Test restore completed with warnings' },
     ],
   },
@@ -505,8 +529,16 @@ export const testRestoreRuns = [
     rpoAchieved: null,
     rpoTarget: '4 hours',
     issues: [
-      { severity: 'critical', message: 'Corrupted backup file detected at offset 0x4A2F', component: 'storage' },
-      { severity: 'critical', message: 'Checksum mismatch: expected a3f7c9, got b8e2d1', component: 'integrity' },
+      {
+        severity: 'critical',
+        message: 'Corrupted backup file detected at offset 0x4A2F',
+        component: 'storage',
+      },
+      {
+        severity: 'critical',
+        message: 'Checksum mismatch: expected a3f7c9, got b8e2d1',
+        component: 'integrity',
+      },
     ],
     logs: [
       { time: '04:00:00', level: 'info', message: 'Test restore initiated (automated)' },
@@ -545,11 +577,46 @@ export const testRestoreRuns = [
 
 /* ─── RTO/RPO Metrics History ─── */
 export const rtoRpoHistory = [
-  { date: '2026-08-12', rtoActual: 17.5, rtoTarget: 30, rpoActual: 2, rpoTarget: 4, status: 'success' },
-  { date: '2026-08-13', rtoActual: null, rtoTarget: 30, rpoActual: null, rpoTarget: 4, status: 'failed' },
-  { date: '2026-08-14', rtoActual: 32, rtoTarget: 30, rpoActual: 2, rpoTarget: 4, status: 'warning' },
-  { date: '2026-08-15', rtoActual: 16.75, rtoTarget: 30, rpoActual: 2, rpoTarget: 4, status: 'success' },
-  { date: '2026-08-16', rtoActual: 18.5, rtoTarget: 30, rpoActual: 2, rpoTarget: 4, status: 'success' },
+  {
+    date: '2026-08-12',
+    rtoActual: 17.5,
+    rtoTarget: 30,
+    rpoActual: 2,
+    rpoTarget: 4,
+    status: 'success',
+  },
+  {
+    date: '2026-08-13',
+    rtoActual: null,
+    rtoTarget: 30,
+    rpoActual: null,
+    rpoTarget: 4,
+    status: 'failed',
+  },
+  {
+    date: '2026-08-14',
+    rtoActual: 32,
+    rtoTarget: 30,
+    rpoActual: 2,
+    rpoTarget: 4,
+    status: 'warning',
+  },
+  {
+    date: '2026-08-15',
+    rtoActual: 16.75,
+    rtoTarget: 30,
+    rpoActual: 2,
+    rpoTarget: 4,
+    status: 'success',
+  },
+  {
+    date: '2026-08-16',
+    rtoActual: 18.5,
+    rtoTarget: 30,
+    rpoActual: 2,
+    rpoTarget: 4,
+    status: 'success',
+  },
 ];
 
 /* ─── Storage Usage ─── */
@@ -557,10 +624,38 @@ export const storageUsage = {
   totalUsed: '186.4 GB',
   totalAllocated: '2 TB',
   breakdown: [
-    { storage: 's3-us-east', used: 124.2, allocated: 500, unit: 'GB', region: 'us-east-1', tier: 'Standard' },
-    { storage: 's3-us-west', used: 42.8, allocated: 500, unit: 'GB', region: 'us-west-2', tier: 'Standard-IA' },
-    { storage: 's3-glacier', used: 18.4, allocated: 1000, unit: 'GB', region: 'us-east-1', tier: 'Glacier Deep Archive' },
-    { storage: 's3-eu-west', used: 1.0, allocated: 500, unit: 'GB', region: 'eu-west-1', tier: 'Standard-IA' },
+    {
+      storage: 's3-us-east',
+      used: 124.2,
+      allocated: 500,
+      unit: 'GB',
+      region: 'us-east-1',
+      tier: 'Standard',
+    },
+    {
+      storage: 's3-us-west',
+      used: 42.8,
+      allocated: 500,
+      unit: 'GB',
+      region: 'us-west-2',
+      tier: 'Standard-IA',
+    },
+    {
+      storage: 's3-glacier',
+      used: 18.4,
+      allocated: 1000,
+      unit: 'GB',
+      region: 'us-east-1',
+      tier: 'Glacier Deep Archive',
+    },
+    {
+      storage: 's3-eu-west',
+      used: 1.0,
+      allocated: 500,
+      unit: 'GB',
+      region: 'eu-west-1',
+      tier: 'Standard-IA',
+    },
   ],
   monthlyGrowth: '12.5 GB',
   costMonth: 980,
@@ -568,40 +663,116 @@ export const storageUsage = {
 
 /* ─── Metadata ─── */
 export const backupTypeMeta = {
-  full: { label: 'Full', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
-  incremental: { label: 'Incremental', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  snapshot: { label: 'Snapshot', color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20', dot: 'bg-secondary' },
-  differential: { label: 'Differential', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
+  full: {
+    label: 'Full',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
+  incremental: {
+    label: 'Incremental',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  snapshot: {
+    label: 'Snapshot',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    border: 'border-secondary/20',
+    dot: 'bg-secondary',
+  },
+  differential: {
+    label: 'Differential',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
 };
 
 export const scheduleStatusMeta = {
-  success: { label: 'Healthy', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  warning: { label: 'Warning', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+  success: {
+    label: 'Healthy',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  warning: {
+    label: 'Warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
   failed: { label: 'Failed', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  disabled: { label: 'Disabled', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
-  running: { label: 'Running', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info animate-pulse' },
+  disabled: {
+    label: 'Disabled',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
+  running: {
+    label: 'Running',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info animate-pulse',
+  },
 };
 
 export const restorePointStatusMeta = {
-  available: { label: 'Available', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  expiring: { label: 'Expiring Soon', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+  available: {
+    label: 'Available',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  expiring: {
+    label: 'Expiring Soon',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
   archived: { label: 'Archived', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
-  restoring: { label: 'Restoring', class: 'bg-secondary/10 text-secondary border-secondary/20', dot: 'bg-secondary animate-pulse' },
-  deleted: { label: 'Deleted', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  restoring: {
+    label: 'Restoring',
+    class: 'bg-secondary/10 text-secondary border-secondary/20',
+    dot: 'bg-secondary animate-pulse',
+  },
+  deleted: {
+    label: 'Deleted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const replicationStatusMeta = {
   active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  paused: { label: 'Paused', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+  paused: {
+    label: 'Paused',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
   failed: { label: 'Failed', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  syncing: { label: 'Syncing', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info animate-pulse' },
+  syncing: {
+    label: 'Syncing',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info animate-pulse',
+  },
 };
 
 export const testStatusMeta = {
-  success: { label: 'Passed', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  warning: { label: 'Warning', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+  success: {
+    label: 'Passed',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  warning: {
+    label: 'Warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
   failed: { label: 'Failed', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  running: { label: 'Running', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info animate-pulse' },
+  running: {
+    label: 'Running',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info animate-pulse',
+  },
 };
 
 export const frequencyMeta = {

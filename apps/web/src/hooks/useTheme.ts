@@ -1,4 +1,4 @@
-import { useThemeStore }  from '../stores/themeStore';
+import { useThemeStore } from '../stores/themeStore';
 
 export const useTheme = () => {
   const theme = useThemeStore((state) => state.theme);

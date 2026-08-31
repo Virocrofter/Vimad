@@ -3,10 +3,35 @@ import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
-  Calendar, DollarSign, Tag, AlertTriangle, TrendingUp, TrendingDown,
-  ChevronLeft, ChevronRight, Plus, Trash2, Edit3, Save, X, Copy,
-  Check, Filter, Download, Settings, Grid3X3, BedDouble, Clock,
-  Ban, Users, ArrowRight, Minus, Percent, Hash, Info, Globe
+  Calendar,
+  DollarSign,
+  Tag,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Edit3,
+  Save,
+  X,
+  Copy,
+  Check,
+  Filter,
+  Download,
+  Settings,
+  Grid3X3,
+  BedDouble,
+  Clock,
+  Ban,
+  Users,
+  ArrowRight,
+  Minus,
+  Percent,
+  Hash,
+  Info,
+  Globe,
 } from 'lucide-react';
 
 /* ─── Mock Data ─── */
@@ -158,20 +183,43 @@ const tabs = [
 /* ─── Rate Heat Map Color ─── */
 function getRateColor(rate, baseRate, theme) {
   const ratio = rate / baseRate;
-  if (ratio >= 1.3) return theme === 'dark' ? 'bg-danger/30 text-danger' : 'bg-danger/15 text-danger';
-  if (ratio >= 1.15) return theme === 'dark' ? 'bg-warning/30 text-warning' : 'bg-warning/15 text-warning';
-  if (ratio >= 1.0) return theme === 'dark' ? 'bg-accent/20 text-accent' : 'bg-accent/10 text-accent';
+  if (ratio >= 1.3)
+    return theme === 'dark' ? 'bg-danger/30 text-danger' : 'bg-danger/15 text-danger';
+  if (ratio >= 1.15)
+    return theme === 'dark' ? 'bg-warning/30 text-warning' : 'bg-warning/15 text-warning';
+  if (ratio >= 1.0)
+    return theme === 'dark' ? 'bg-accent/20 text-accent' : 'bg-accent/10 text-accent';
   if (ratio >= 0.85) return theme === 'dark' ? 'bg-info/20 text-info' : 'bg-info/10 text-info';
   return theme === 'dark' ? 'bg-secondary/20 text-secondary' : 'bg-secondary/10 text-secondary';
 }
 
 function getAvailabilityStatus(available, total, ooo, overbookingLimit) {
   const effective = available - ooo;
-  if (effective < 0) return { label: 'Overbooked', class: 'bg-danger/15 text-danger border-danger/30', dot: 'bg-danger' };
-  if (effective === 0) return { label: 'Sold Out', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' };
-  if (effective <= total * 0.1) return { label: 'Critical', class: 'bg-warning/15 text-warning border-warning/30', dot: 'bg-warning' };
-  if (effective <= total * 0.3) return { label: 'Low', class: 'bg-info/15 text-info border-info/30', dot: 'bg-info' };
-  return { label: 'Available', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' };
+  if (effective < 0)
+    return {
+      label: 'Overbooked',
+      class: 'bg-danger/15 text-danger border-danger/30',
+      dot: 'bg-danger',
+    };
+  if (effective === 0)
+    return {
+      label: 'Sold Out',
+      class: 'bg-neutral/10 text-text-muted border-border',
+      dot: 'bg-text-muted',
+    };
+  if (effective <= total * 0.1)
+    return {
+      label: 'Critical',
+      class: 'bg-warning/15 text-warning border-warning/30',
+      dot: 'bg-warning',
+    };
+  if (effective <= total * 0.3)
+    return { label: 'Low', class: 'bg-info/15 text-info border-info/30', dot: 'bg-info' };
+  return {
+    label: 'Available',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  };
 }
 
 /* ─── Components ─── */
@@ -192,7 +240,10 @@ function RateCell({ value, baseRate, onChange, isEditing, onStartEdit, onSave, o
             if (e.key === 'Escape') onCancel();
           }}
         />
-        <button onClick={() => onSave(Number(editValue))} className="text-accent hover:text-accent/80">
+        <button
+          onClick={() => onSave(Number(editValue))}
+          className="text-accent hover:text-accent/80"
+        >
           <Check className="h-3 w-3" />
         </button>
       </div>
@@ -238,9 +289,8 @@ export default function RatesPage() {
     setRateData(generateRateData(dates, roomTypes));
   }, [dateOffset]);
 
-  const filteredRoomTypes = filterRoomType === 'all'
-    ? roomTypes
-    : roomTypes.filter((r) => r.id === filterRoomType);
+  const filteredRoomTypes =
+    filterRoomType === 'all' ? roomTypes : roomTypes.filter((r) => r.id === filterRoomType);
 
   const handleRateUpdate = (dateStr, roomId, newRate) => {
     setRateData((prev) => ({
@@ -335,7 +385,10 @@ export default function RatesPage() {
               <Button size="sm" variant="outline" onClick={() => setBulkEditOpen(true)}>
                 <Edit3 className="mr-1 h-3.5 w-3.5" /> Bulk Edit
               </Button>
-              <button onClick={() => setSelectedCells(new Set())} className="text-xs text-text-muted hover:text-text-primary">
+              <button
+                onClick={() => setSelectedCells(new Set())}
+                className="text-xs text-text-muted hover:text-text-primary"
+              >
                 Clear
               </button>
             </>
@@ -360,7 +413,9 @@ export default function RatesPage() {
           >
             <option value="all">All Types</option>
             {roomTypes.map((rt) => (
-              <option key={rt.id} value={rt.id}>{rt.name}</option>
+              <option key={rt.id} value={rt.id}>
+                {rt.name}
+              </option>
             ))}
           </select>
         </div>
@@ -369,7 +424,12 @@ export default function RatesPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
         {[
-          { label: 'Min Rate', value: `$${stats.min}`, icon: TrendingDown, color: 'text-secondary' },
+          {
+            label: 'Min Rate',
+            value: `$${stats.min}`,
+            icon: TrendingDown,
+            color: 'text-secondary',
+          },
           { label: 'Max Rate', value: `$${stats.max}`, icon: TrendingUp, color: 'text-accent' },
           { label: 'Avg Rate', value: `$${stats.avg}`, icon: DollarSign, color: 'text-info' },
         ].map((s) => (
@@ -387,10 +447,18 @@ export default function RatesPage() {
             <span className="text-xs text-text-muted">Rate Heat Map</span>
           </div>
           <div className="flex items-center gap-3 text-[10px]">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-secondary" /> Below Base</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-accent" /> Base</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-warning" /> Premium</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-danger" /> Peak</span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-secondary" /> Below Base
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-accent" /> Base
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-warning" /> Premium
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-danger" /> Peak
+            </span>
           </div>
         </div>
       </div>
@@ -486,8 +554,12 @@ export default function RatesPage() {
                 onChange={(e) => setBulkEditValue(e.target.value)}
               />
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setBulkEditOpen(false)}>Cancel</Button>
-                <Button className="flex-1" onClick={handleBulkApply}>Apply</Button>
+                <Button variant="outline" className="flex-1" onClick={() => setBulkEditOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={handleBulkApply}>
+                  Apply
+                </Button>
               </div>
             </div>
           </div>
@@ -525,19 +597,25 @@ export default function RatesPage() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Tag className={cn('h-4 w-4', code.isActive ? 'text-secondary' : 'text-text-muted')} />
+                  <Tag
+                    className={cn('h-4 w-4', code.isActive ? 'text-secondary' : 'text-text-muted')}
+                  />
                   <span className="text-sm font-medium text-text-primary">{code.name}</span>
                 </div>
-                <span className={cn(
-                  'text-[10px] font-bold px-1.5 py-0.5 rounded',
-                  code.isActive ? 'bg-accent/10 text-accent' : 'bg-neutral/10 text-text-muted'
-                )}>
+                <span
+                  className={cn(
+                    'text-[10px] font-bold px-1.5 py-0.5 rounded',
+                    code.isActive ? 'bg-accent/10 text-accent' : 'bg-neutral/10 text-text-muted'
+                  )}
+                >
                   {code.code}
                 </span>
               </div>
               <p className="mt-1 text-xs text-text-secondary truncate">{code.description}</p>
               <div className="mt-2 flex items-center gap-2">
-                <span className="text-xs font-mono font-semibold text-text-primary">${code.baseRate}</span>
+                <span className="text-xs font-mono font-semibold text-text-primary">
+                  ${code.baseRate}
+                </span>
                 <span className="text-[10px] text-text-muted">
                   {code.derivationType === 'percent_off' && `-${code.derivationValue}%`}
                   {code.derivationType === 'fixed_off' && `-$${code.derivationValue}`}
@@ -556,10 +634,14 @@ export default function RatesPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <h3 className="text-xl font-bold text-text-primary">{selectedRateCode.name}</h3>
-                    <span className={cn(
-                      'text-xs font-medium px-2 py-0.5 rounded-full',
-                      selectedRateCode.isActive ? 'bg-accent/10 text-accent' : 'bg-danger/10 text-danger'
-                    )}>
+                    <span
+                      className={cn(
+                        'text-xs font-medium px-2 py-0.5 rounded-full',
+                        selectedRateCode.isActive
+                          ? 'bg-accent/10 text-accent'
+                          : 'bg-danger/10 text-danger'
+                      )}
+                    >
                       {selectedRateCode.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
@@ -579,16 +661,36 @@ export default function RatesPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: 'Base Rate', value: `$${selectedRateCode.baseRate}`, icon: DollarSign },
-                  { label: 'Min Stay', value: `${selectedRateCode.minStay} night${selectedRateCode.minStay > 1 ? 's' : ''}`, icon: Clock },
-                  { label: 'Advance', value: selectedRateCode.advanceBooking > 0 ? `${selectedRateCode.advanceBooking} days` : 'None', icon: Calendar },
-                  { label: 'Channels', value: selectedRateCode.channels.length.toString(), icon: Globe },
+                  {
+                    label: 'Min Stay',
+                    value: `${selectedRateCode.minStay} night${selectedRateCode.minStay > 1 ? 's' : ''}`,
+                    icon: Clock,
+                  },
+                  {
+                    label: 'Advance',
+                    value:
+                      selectedRateCode.advanceBooking > 0
+                        ? `${selectedRateCode.advanceBooking} days`
+                        : 'None',
+                    icon: Calendar,
+                  },
+                  {
+                    label: 'Channels',
+                    value: selectedRateCode.channels.length.toString(),
+                    icon: Globe,
+                  },
                 ].map((stat) => (
-                  <div key={stat.label} className="rounded-lg border border-border bg-background p-3">
+                  <div
+                    key={stat.label}
+                    className="rounded-lg border border-border bg-background p-3"
+                  >
                     <div className="flex items-center gap-1.5 text-text-muted">
                       <stat.icon className="h-3.5 w-3.5" />
                       <span className="text-[10px] uppercase tracking-wider">{stat.label}</span>
                     </div>
-                    <p className="mt-1 text-lg font-bold font-mono text-text-primary">{stat.value}</p>
+                    <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                      {stat.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -608,8 +710,10 @@ export default function RatesPage() {
                   <div className="flex items-center justify-between py-2 border-b border-border/50">
                     <span className="text-sm text-text-secondary">Value</span>
                     <span className="text-sm font-medium text-text-primary">
-                      {selectedRateCode.derivationType === 'percent_off' && `${selectedRateCode.derivationValue}%`}
-                      {selectedRateCode.derivationType === 'fixed_off' && `$${selectedRateCode.derivationValue}`}
+                      {selectedRateCode.derivationType === 'percent_off' &&
+                        `${selectedRateCode.derivationValue}%`}
+                      {selectedRateCode.derivationType === 'fixed_off' &&
+                        `$${selectedRateCode.derivationValue}`}
                       {selectedRateCode.derivationType === 'fixed' && '—'}
                     </span>
                   </div>
@@ -622,7 +726,9 @@ export default function RatesPage() {
                   <div className="flex items-center justify-between py-2">
                     <span className="text-sm text-text-secondary">Max Stay</span>
                     <span className="text-sm font-medium text-text-primary">
-                      {selectedRateCode.maxStay ? `${selectedRateCode.maxStay} nights` : 'Unlimited'}
+                      {selectedRateCode.maxStay
+                        ? `${selectedRateCode.maxStay} nights`
+                        : 'Unlimited'}
                     </span>
                   </div>
                 </div>
@@ -654,7 +760,10 @@ export default function RatesPage() {
                 </h4>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {selectedRateCode.channels.map((ch) => (
-                    <span key={ch} className="inline-flex items-center rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary">
+                    <span
+                      key={ch}
+                      className="inline-flex items-center rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary"
+                    >
                       <Check className="mr-1 h-3 w-3" /> {ch}
                     </span>
                   ))}
@@ -665,7 +774,9 @@ export default function RatesPage() {
             <div className="flex h-full min-h-[400px] items-center justify-center rounded-xl border border-border bg-surface">
               <div className="text-center">
                 <Tag className="mx-auto h-10 w-10 text-text-muted" />
-                <p className="mt-3 text-sm text-text-secondary">Select a rate code to view details</p>
+                <p className="mt-3 text-sm text-text-secondary">
+                  Select a rate code to view details
+                </p>
               </div>
             </div>
           )}
@@ -760,30 +871,46 @@ export default function RatesPage() {
                       <BedDouble className="h-4 w-4 text-secondary" />
                       <div>
                         <p className="text-sm font-medium text-text-primary">{room.name}</p>
-                        <p className="text-[10px] text-text-muted">{room.id === 'suite' ? 8 : room.id === 'del-king' ? 15 : 20} total</p>
+                        <p className="text-[10px] text-text-muted">
+                          {room.id === 'suite' ? 8 : room.id === 'del-king' ? 15 : 20} total
+                        </p>
                       </div>
                     </div>
                   </td>
                   {dateStrs.map((dateStr) => {
                     const avail = availabilityData[dateStr]?.[room.id];
-                    if (!avail) return <td key={dateStr} className="px-2 py-2 text-center text-text-muted">—</td>;
+                    if (!avail)
+                      return (
+                        <td key={dateStr} className="px-2 py-2 text-center text-text-muted">
+                          —
+                        </td>
+                      );
 
-                    const status = getAvailabilityStatus(avail.available, avail.total, avail.ooo, avail.overbookingLimit);
+                    const status = getAvailabilityStatus(
+                      avail.available,
+                      avail.total,
+                      avail.ooo,
+                      avail.overbookingLimit
+                    );
                     const isOverbooked = avail.available - avail.ooo < 0;
                     const isLow = avail.available - avail.ooo <= avail.total * 0.1 && !isOverbooked;
 
                     return (
                       <td key={dateStr} className="px-2 py-2">
-                        <div className={cn(
-                          'rounded-lg border p-2 text-center transition-all hover:shadow-sm',
-                          status.class
-                        )}>
+                        <div
+                          className={cn(
+                            'rounded-lg border p-2 text-center transition-all hover:shadow-sm',
+                            status.class
+                          )}
+                        >
                           <div className="flex items-center justify-center gap-1.5">
                             <span className={cn('h-1.5 w-1.5 rounded-full', status.dot)} />
-                            <span className={cn(
-                              'text-lg font-bold font-mono',
-                              isOverbooked ? 'text-danger' : 'text-text-primary'
-                            )}>
+                            <span
+                              className={cn(
+                                'text-lg font-bold font-mono',
+                                isOverbooked ? 'text-danger' : 'text-text-primary'
+                              )}
+                            >
                               {avail.available - avail.ooo}
                             </span>
                           </div>
@@ -837,13 +964,23 @@ export default function RatesPage() {
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-text-secondary">Overbooked days</span>
-                  <span className={cn('font-bold font-mono', overbookedDays > 0 ? 'text-danger' : 'text-accent')}>
+                  <span
+                    className={cn(
+                      'font-bold font-mono',
+                      overbookedDays > 0 ? 'text-danger' : 'text-accent'
+                    )}
+                  >
                     {overbookedDays}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-text-secondary">Low inventory days</span>
-                  <span className={cn('font-bold font-mono', lowDays > 0 ? 'text-warning' : 'text-accent')}>
+                  <span
+                    className={cn(
+                      'font-bold font-mono',
+                      lowDays > 0 ? 'text-warning' : 'text-accent'
+                    )}
+                  >
                     {lowDays}
                   </span>
                 </div>
@@ -861,7 +998,9 @@ export default function RatesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Rates & Inventory</h1>
-          <p className="text-sm text-text-secondary">Manage pricing, rate codes, and room availability</p>
+          <p className="text-sm text-text-secondary">
+            Manage pricing, rate codes, and room availability
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">

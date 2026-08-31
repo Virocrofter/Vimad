@@ -1,7 +1,14 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Handshake, Zap, Globe, Award,
-  Check, Code, Building2, TrendingUp
+  ArrowRight,
+  Handshake,
+  Zap,
+  Globe,
+  Award,
+  Check,
+  Code,
+  Building2,
+  TrendingUp,
 } from 'lucide-react';
 
 const partnerTypes = [
@@ -15,19 +22,37 @@ const partnerTypes = [
     icon: Building2,
     title: 'Reseller Partners',
     desc: 'Sell Unified PMS to your hospitality clients. Earn recurring commissions on every deal.',
-    benefits: ['20% recurring commission', 'Sales enablement kit', 'Partner portal', 'Deal registration'],
+    benefits: [
+      '20% recurring commission',
+      'Sales enablement kit',
+      'Partner portal',
+      'Deal registration',
+    ],
   },
   {
     icon: TrendingUp,
     title: 'Referral Partners',
     desc: 'Refer properties to Unified PMS and earn rewards for every successful signup.',
-    benefits: ['1 free month per referral', 'No commitment', 'Tracking dashboard', 'Instant payout'],
+    benefits: [
+      '1 free month per referral',
+      'No commitment',
+      'Tracking dashboard',
+      'Instant payout',
+    ],
   },
 ];
 
 const existing = [
-  'Stripe', 'Adyen', 'Booking.com', 'Expedia', 'Airbnb',
-  'Salesforce', 'HubSpot', 'QuickBooks', 'Toast', 'Oracle MICROS',
+  'Stripe',
+  'Adyen',
+  'Booking.com',
+  'Expedia',
+  'Airbnb',
+  'Salesforce',
+  'HubSpot',
+  'QuickBooks',
+  'Toast',
+  'Oracle MICROS',
 ];
 
 export default function PartnersPage() {
@@ -75,7 +100,10 @@ export default function PartnersPage() {
           <h2 className="text-2xl font-bold text-text-primary">Already integrated</h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {existing.map((name) => (
-              <div key={name} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary">
+              <div
+                key={name}
+                className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary"
+              >
                 {name}
               </div>
             ))}
@@ -92,7 +120,10 @@ export default function PartnersPage() {
           <p className="mt-2 text-text-secondary">
             Apply to our partner program and start growing together.
           </p>
-          <Link to="/contact" className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+          <Link
+            to="/contact"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+          >
             Apply Now <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </div>

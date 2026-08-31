@@ -2,8 +2,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bell, ChevronLeft, Mail, MessageSquare, Smartphone, Volume2,
-  Moon, Sun, Trash2, CheckCheck, Filter, Search
+  Bell,
+  ChevronLeft,
+  Mail,
+  MessageSquare,
+  Smartphone,
+  Volume2,
+  Moon,
+  Sun,
+  Trash2,
+  CheckCheck,
+  Filter,
+  Search,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -65,26 +75,25 @@ export default function NotificationsPage() {
     marketing: false,
   });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAsRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const archiveNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  const filteredNotifications = activeTab === 'inbox'
-    ? notifications
-    : notifications.filter(n => !n.read);
+  const filteredNotifications =
+    activeTab === 'inbox' ? notifications : notifications.filter((n) => !n.read);
 
   const togglePref = (key) => {
-    setPrefs(prev => ({ ...prev, [key]: !prev[key] }));
+    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -116,7 +125,7 @@ export default function NotificationsPage() {
         {[
           { id: 'inbox', label: 'All', count: notifications.length },
           { id: 'unread', label: 'Unread', count: unreadCount },
-        ].map(tab => (
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -136,7 +145,7 @@ export default function NotificationsPage() {
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications.length > 0 ? (
-          filteredNotifications.map(notification => (
+          filteredNotifications.map((notification) => (
             <NotificationItem
               key={notification.id}
               notification={notification}
@@ -154,7 +163,9 @@ export default function NotificationsPage() {
 
       {/* Preferences */}
       <div className="space-y-4">
-        <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Preferences</h2>
+        <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider">
+          Preferences
+        </h2>
         <div className="space-y-3">
           <NotificationPrefCard
             icon={Bell}

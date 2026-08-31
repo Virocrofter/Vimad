@@ -9,8 +9,8 @@ import { getOrchestrator, formatSimDuration } from './simulation-engine';
 */
 export function useLiveMetrics(options = {}) {
   const {
-    serviceId = null,      // null = all services
-    refreshRate = 1000,    // UI refresh rate (may differ from sim tick)
+    serviceId = null, // null = all services
+    refreshRate = 1000, // UI refresh rate (may differ from sim tick)
     includeHistory = true, // Include metric history arrays
   } = options;
 
@@ -35,7 +35,9 @@ export function useLiveMetrics(options = {}) {
     const unsubscribe = orchestrator.subscribe((overview) => {
       if (serviceId) {
         const svc = overview.snapshots?.[serviceId];
-        setData(svc ? { ...svc, systemStatus: overview.status, timestamp: overview.timestamp } : null);
+        setData(
+          svc ? { ...svc, systemStatus: overview.status, timestamp: overview.timestamp } : null
+        );
       } else {
         setData(overview);
       }
@@ -102,7 +104,7 @@ export function useTrafficSimulator() {
     // Poll for status updates
     const interval = setInterval(() => {
       const stats = orch.getStats();
-      setControls(prev => ({
+      setControls((prev) => ({
         ...prev,
         isRunning: stats.isRunning,
         elapsed: stats.elapsed,
@@ -116,7 +118,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.setTrafficPattern(pattern);
-      setControls(prev => ({ ...prev, pattern }));
+      setControls((prev) => ({ ...prev, pattern }));
     }
   }, []);
 
@@ -124,7 +126,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.setGlobalStress(level);
-      setControls(prev => ({ ...prev, stress: level }));
+      setControls((prev) => ({ ...prev, stress: level }));
     }
   }, []);
 
@@ -132,7 +134,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.triggerSpike();
-      setControls(prev => ({ ...prev, pattern: 'spike' }));
+      setControls((prev) => ({ ...prev, pattern: 'spike' }));
     }
   }, []);
 
@@ -140,7 +142,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.triggerRamp();
-      setControls(prev => ({ ...prev, pattern: 'ramp' }));
+      setControls((prev) => ({ ...prev, pattern: 'ramp' }));
     }
   }, []);
 
@@ -148,7 +150,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.triggerDDoS();
-      setControls(prev => ({ ...prev, pattern: 'erratic', stress: 1.5 }));
+      setControls((prev) => ({ ...prev, pattern: 'erratic', stress: 1.5 }));
     }
   }, []);
 
@@ -156,7 +158,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.start();
-      setControls(prev => ({ ...prev, isRunning: true }));
+      setControls((prev) => ({ ...prev, isRunning: true }));
     }
   }, []);
 
@@ -164,7 +166,7 @@ export function useTrafficSimulator() {
     const orch = orchestratorRef.current;
     if (orch) {
       orch.stop();
-      setControls(prev => ({ ...prev, isRunning: false }));
+      setControls((prev) => ({ ...prev, isRunning: false }));
     }
   }, []);
 
@@ -173,10 +175,10 @@ export function useTrafficSimulator() {
     if (orch) {
       if (orch.isRunning) {
         orch.stop();
-        setControls(prev => ({ ...prev, isRunning: false }));
+        setControls((prev) => ({ ...prev, isRunning: false }));
       } else {
         orch.start();
-        setControls(prev => ({ ...prev, isRunning: true }));
+        setControls((prev) => ({ ...prev, isRunning: true }));
       }
     }
   }, []);
@@ -243,18 +245,16 @@ export function useServiceHistory(serviceId, metric = 'latency', points = 60) {
     const interval = setInterval(() => {
       const snapshot = orch.getServiceSnapshot(serviceId);
       if (snapshot?.history?.[metric]) {
-        const data = snapshot.history[metric]
-          .slice(-points)
-          .map((p, i) => ({
-            time: new Date(p.timestamp).toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-            }),
-            value: p.value,
-            index: i,
-          }));
+        const data = snapshot.history[metric].slice(-points).map((p, i) => ({
+          time: new Date(p.timestamp).toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+          value: p.value,
+          index: i,
+        }));
         setHistory(data);
       }
     }, 1000);
@@ -304,7 +304,7 @@ export function useLiveLatencyChart(points = 30) {
         }
       });
 
-      setChartData(prev => {
+      setChartData((prev) => {
         const next = [...prev, newPoint];
         if (next.length > points) next.shift();
         return next;

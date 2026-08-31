@@ -2,17 +2,42 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Building2, User, Users, Phone, Mail, MapPin, Calendar, DollarSign,
-  Star, TrendingUp, Search, X, Tag, MessageSquare,
-  PartyPopper, FileText, ArrowUpRight, ArrowLeft, Plus,
-  PhoneCall, Mail as MailIcon, Video, StickyNote, Award,
+  Building2,
+  User,
+  Users,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Star,
+  TrendingUp,
+  Search,
+  X,
+  Tag,
+  MessageSquare,
+  PartyPopper,
+  FileText,
+  ArrowUpRight,
+  ArrowLeft,
+  Plus,
+  PhoneCall,
+  Mail as MailIcon,
+  Video,
+  StickyNote,
+  Award,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 
 /* ─── Mock Data ─── */
 const clientTypeMeta = {
-  corporate: { label: 'Corporate', icon: Building2, color: 'text-secondary', bg: 'bg-secondary/10' },
+  corporate: {
+    label: 'Corporate',
+    icon: Building2,
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+  },
   wedding: { label: 'Wedding', icon: PartyPopper, color: 'text-accent', bg: 'bg-accent/10' },
   social: { label: 'Social', icon: Users, color: 'text-info', bg: 'bg-info/10' },
   nonprofit: { label: 'Nonprofit', icon: Award, color: 'text-warning', bg: 'bg-warning/10' },
@@ -42,18 +67,75 @@ const initialClients = [
     totalEvents: 4,
     lastEventDate: '2026-05-18',
     nextEventDate: '2026-10-05',
-    notes: 'Prefers working lunches over plated service. Always requests breakout rooms for offsites.',
+    notes:
+      'Prefers working lunches over plated service. Always requests breakout rooms for offsites.',
     history: [
-      { id: 1, type: 'email', date: '2026-08-12', by: 'James M.', summary: 'Sent revised proposal for Q4 offsite with breakout room pricing.' },
-      { id: 2, type: 'call', date: '2026-08-05', by: 'James M.', summary: 'Discussed AV requirements and headcount estimate for October event.' },
-      { id: 3, type: 'meeting', date: '2026-07-22', by: 'Maria G.', summary: 'Site walkthrough of Conference Center A with facilities lead.' },
-      { id: 4, type: 'note', date: '2026-05-19', by: 'James M.', summary: 'Post-event survey came back 9/10 — praised catering and AV support.' },
+      {
+        id: 1,
+        type: 'email',
+        date: '2026-08-12',
+        by: 'James M.',
+        summary: 'Sent revised proposal for Q4 offsite with breakout room pricing.',
+      },
+      {
+        id: 2,
+        type: 'call',
+        date: '2026-08-05',
+        by: 'James M.',
+        summary: 'Discussed AV requirements and headcount estimate for October event.',
+      },
+      {
+        id: 3,
+        type: 'meeting',
+        date: '2026-07-22',
+        by: 'Maria G.',
+        summary: 'Site walkthrough of Conference Center A with facilities lead.',
+      },
+      {
+        id: 4,
+        type: 'note',
+        date: '2026-05-19',
+        by: 'James M.',
+        summary: 'Post-event survey came back 9/10 — praised catering and AV support.',
+      },
     ],
     events: [
-      { id: 'EVT-2026-0518-002', name: 'Q2 Leadership Offsite', date: '2026-05-18', type: 'Corporate Meeting', guests: 40, revenue: 12800, status: 'completed' },
-      { id: 'EVT-2025-1112-001', name: 'Sales Kickoff', date: '2025-11-12', type: 'Corporate Meeting', guests: 60, revenue: 21600, status: 'completed' },
-      { id: 'EVT-2025-0608-003', name: 'Product Launch Reception', date: '2025-06-08', type: 'Cocktail Reception', guests: 90, revenue: 28000, status: 'completed' },
-      { id: 'EVT-2024-0910-001', name: 'Regional Sales Meeting', date: '2024-09-10', type: 'Corporate Meeting', guests: 35, revenue: 34000, status: 'completed' },
+      {
+        id: 'EVT-2026-0518-002',
+        name: 'Q2 Leadership Offsite',
+        date: '2026-05-18',
+        type: 'Corporate Meeting',
+        guests: 40,
+        revenue: 12800,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2025-1112-001',
+        name: 'Sales Kickoff',
+        date: '2025-11-12',
+        type: 'Corporate Meeting',
+        guests: 60,
+        revenue: 21600,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2025-0608-003',
+        name: 'Product Launch Reception',
+        date: '2025-06-08',
+        type: 'Cocktail Reception',
+        guests: 90,
+        revenue: 28000,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2024-0910-001',
+        name: 'Regional Sales Meeting',
+        date: '2024-09-10',
+        type: 'Corporate Meeting',
+        guests: 35,
+        revenue: 34000,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -71,12 +153,37 @@ const initialClients = [
     totalEvents: 1,
     lastEventDate: null,
     nextEventDate: '2026-08-20',
-    notes: 'Bride is detail-oriented — weekly check-ins requested leading up to the event. Deposit received.',
+    notes:
+      'Bride is detail-oriented — weekly check-ins requested leading up to the event. Deposit received.',
     history: [
-      { id: 1, type: 'email', date: '2026-08-11', by: 'Maria G.', summary: 'Confirmed final headcount at 150 guests and floor plan sign-off.' },
-      { id: 2, type: 'call', date: '2026-08-04', by: 'Maria G.', summary: 'Walked through timeline for ceremony-to-reception transition.' },
-      { id: 3, type: 'meeting', date: '2026-07-15', by: 'Maria G.', summary: 'Tasting session — selected plated dinner menu and bar package.' },
-      { id: 4, type: 'note', date: '2026-06-02', by: 'Maria G.', summary: 'Contract signed, 50% deposit received via wire transfer.' },
+      {
+        id: 1,
+        type: 'email',
+        date: '2026-08-11',
+        by: 'Maria G.',
+        summary: 'Confirmed final headcount at 150 guests and floor plan sign-off.',
+      },
+      {
+        id: 2,
+        type: 'call',
+        date: '2026-08-04',
+        by: 'Maria G.',
+        summary: 'Walked through timeline for ceremony-to-reception transition.',
+      },
+      {
+        id: 3,
+        type: 'meeting',
+        date: '2026-07-15',
+        by: 'Maria G.',
+        summary: 'Tasting session — selected plated dinner menu and bar package.',
+      },
+      {
+        id: 4,
+        type: 'note',
+        date: '2026-06-02',
+        by: 'Maria G.',
+        summary: 'Contract signed, 50% deposit received via wire transfer.',
+      },
     ],
     events: [],
   },
@@ -97,8 +204,20 @@ const initialClients = [
     nextEventDate: '2026-09-15',
     notes: 'Comparing us against a competitor venue on rate — needs a decision by 8/20.',
     history: [
-      { id: 1, type: 'call', date: '2026-08-10', by: 'James M.', summary: 'Client pushing back on room rate; exploring bundled AV discount.' },
-      { id: 2, type: 'email', date: '2026-08-03', by: 'James M.', summary: 'Sent conference package comparison with breakout session pricing.' },
+      {
+        id: 1,
+        type: 'call',
+        date: '2026-08-10',
+        by: 'James M.',
+        summary: 'Client pushing back on room rate; exploring bundled AV discount.',
+      },
+      {
+        id: 2,
+        type: 'email',
+        date: '2026-08-03',
+        by: 'James M.',
+        summary: 'Sent conference package comparison with breakout session pricing.',
+      },
     ],
     events: [],
   },
@@ -117,17 +236,68 @@ const initialClients = [
     totalEvents: 6,
     lastEventDate: '2026-02-14',
     nextEventDate: '2026-11-10',
-    notes: 'One of our highest-value corporate accounts. Annual sales kickoff is a standing booking each November.',
+    notes:
+      'One of our highest-value corporate accounts. Annual sales kickoff is a standing booking each November.',
     history: [
-      { id: 1, type: 'meeting', date: '2026-08-12', by: 'Maria G.', summary: 'BEO review for November kickoff — finalized AV and staging needs.' },
-      { id: 2, type: 'email', date: '2026-08-01', by: 'Maria G.', summary: 'Signed contract received for Sales Kickoff 2026.' },
-      { id: 3, type: 'call', date: '2026-02-15', by: 'Maria G.', summary: 'Post-event debrief — client requested earlier load-in time next year.' },
+      {
+        id: 1,
+        type: 'meeting',
+        date: '2026-08-12',
+        by: 'Maria G.',
+        summary: 'BEO review for November kickoff — finalized AV and staging needs.',
+      },
+      {
+        id: 2,
+        type: 'email',
+        date: '2026-08-01',
+        by: 'Maria G.',
+        summary: 'Signed contract received for Sales Kickoff 2026.',
+      },
+      {
+        id: 3,
+        type: 'call',
+        date: '2026-02-15',
+        by: 'Maria G.',
+        summary: 'Post-event debrief — client requested earlier load-in time next year.',
+      },
     ],
     events: [
-      { id: 'EVT-2026-0214-001', name: 'Regional Training Summit', date: '2026-02-14', type: 'Corporate Meeting', guests: 55, revenue: 31200, status: 'completed' },
-      { id: 'EVT-2025-1108-002', name: 'Sales Kickoff', date: '2025-11-08', type: 'Corporate Meeting', guests: 70, revenue: 42800, status: 'completed' },
-      { id: 'EVT-2025-0312-001', name: 'Product Advisory Board Dinner', date: '2025-03-12', type: 'Plated Dinner', guests: 20, revenue: 18400, status: 'completed' },
-      { id: 'EVT-2024-1105-001', name: 'Sales Kickoff', date: '2024-11-05', type: 'Corporate Meeting', guests: 65, revenue: 39200, status: 'completed' },
+      {
+        id: 'EVT-2026-0214-001',
+        name: 'Regional Training Summit',
+        date: '2026-02-14',
+        type: 'Corporate Meeting',
+        guests: 55,
+        revenue: 31200,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2025-1108-002',
+        name: 'Sales Kickoff',
+        date: '2025-11-08',
+        type: 'Corporate Meeting',
+        guests: 70,
+        revenue: 42800,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2025-0312-001',
+        name: 'Product Advisory Board Dinner',
+        date: '2025-03-12',
+        type: 'Plated Dinner',
+        guests: 20,
+        revenue: 18400,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2024-1105-001',
+        name: 'Sales Kickoff',
+        date: '2024-11-05',
+        type: 'Corporate Meeting',
+        guests: 65,
+        revenue: 39200,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -147,7 +317,13 @@ const initialClients = [
     nextEventDate: '2026-08-14',
     notes: 'First-time client. Tight budget — needs menu options under $35/pp.',
     history: [
-      { id: 1, type: 'call', date: '2026-08-08', by: 'James M.', summary: 'Discussed buffet options and applied 15% nonprofit discount.' },
+      {
+        id: 1,
+        type: 'call',
+        date: '2026-08-08',
+        by: 'James M.',
+        summary: 'Discussed buffet options and applied 15% nonprofit discount.',
+      },
     ],
     events: [],
   },
@@ -168,13 +344,49 @@ const initialClients = [
     nextEventDate: null,
     notes: 'Sister-property referral partner — sends overflow gala bookings each summer.',
     history: [
-      { id: 1, type: 'note', date: '2026-08-01', by: 'Maria G.', summary: 'Post-event survey sent for Corporate Gala; awaiting response.' },
-      { id: 2, type: 'meeting', date: '2026-07-10', by: 'Maria G.', summary: 'Final walkthrough and vendor coordination for gala.' },
+      {
+        id: 1,
+        type: 'note',
+        date: '2026-08-01',
+        by: 'Maria G.',
+        summary: 'Post-event survey sent for Corporate Gala; awaiting response.',
+      },
+      {
+        id: 2,
+        type: 'meeting',
+        date: '2026-07-10',
+        by: 'Maria G.',
+        summary: 'Final walkthrough and vendor coordination for gala.',
+      },
     ],
     events: [
-      { id: 'EVT-2026-0728-001', name: 'Corporate Gala', date: '2026-07-28', type: 'Corporate Gala', guests: 200, revenue: 42000, status: 'completed' },
-      { id: 'EVT-2025-0730-001', name: 'Corporate Gala', date: '2025-07-30', type: 'Corporate Gala', guests: 180, revenue: 38400, status: 'completed' },
-      { id: 'EVT-2024-0801-001', name: 'Corporate Gala', date: '2024-08-01', type: 'Corporate Gala', guests: 170, revenue: 35600, status: 'completed' },
+      {
+        id: 'EVT-2026-0728-001',
+        name: 'Corporate Gala',
+        date: '2026-07-28',
+        type: 'Corporate Gala',
+        guests: 200,
+        revenue: 42000,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2025-0730-001',
+        name: 'Corporate Gala',
+        date: '2025-07-30',
+        type: 'Corporate Gala',
+        guests: 180,
+        revenue: 38400,
+        status: 'completed',
+      },
+      {
+        id: 'EVT-2024-0801-001',
+        name: 'Corporate Gala',
+        date: '2024-08-01',
+        type: 'Corporate Gala',
+        guests: 170,
+        revenue: 35600,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -194,18 +406,42 @@ const initialClients = [
     nextEventDate: null,
     notes: 'Declined most recent proposal over budget — worth a follow-up next quarter.',
     history: [
-      { id: 1, type: 'email', date: '2026-08-12', by: 'James M.', summary: 'Client went with a competitor venue for the September dinner.' },
-      { id: 2, type: 'call', date: '2026-02-21', by: 'James M.', summary: 'Positive feedback on Client Appreciation Dinner service.' },
+      {
+        id: 1,
+        type: 'email',
+        date: '2026-08-12',
+        by: 'James M.',
+        summary: 'Client went with a competitor venue for the September dinner.',
+      },
+      {
+        id: 2,
+        type: 'call',
+        date: '2026-02-21',
+        by: 'James M.',
+        summary: 'Positive feedback on Client Appreciation Dinner service.',
+      },
     ],
     events: [
-      { id: 'EVT-2026-0220-001', name: 'Client Appreciation Dinner', date: '2026-02-20', type: 'Plated Dinner', guests: 50, revenue: 8600, status: 'completed' },
+      {
+        id: 'EVT-2026-0220-001',
+        name: 'Client Appreciation Dinner',
+        date: '2026-02-20',
+        type: 'Plated Dinner',
+        guests: 50,
+        revenue: 8600,
+        status: 'completed',
+      },
     ],
   },
 ];
 
 /* ─── Helpers ─── */
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 function avgEventValue(client) {
@@ -229,7 +465,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -249,7 +496,12 @@ function ClientCard({ client, onClick }) {
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', type.bg)}>
+          <div
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+              type.bg
+            )}
+          >
             <TypeIcon className={cn('h-5 w-5', type.color)} />
           </div>
           <div className="min-w-0">
@@ -257,13 +509,17 @@ function ClientCard({ client, onClick }) {
             <p className="text-xs text-text-muted truncate">{client.primaryContact}</p>
           </div>
         </div>
-        {client.tags.includes('VIP') && <Star className="h-4 w-4 shrink-0 text-warning fill-warning" />}
+        {client.tags.includes('VIP') && (
+          <Star className="h-4 w-4 shrink-0 text-warning fill-warning" />
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-text-muted">Lifetime Value</p>
-          <p className="text-sm font-bold font-mono text-text-primary">{formatCurrency(client.lifetimeValue)}</p>
+          <p className="text-sm font-bold font-mono text-text-primary">
+            {formatCurrency(client.lifetimeValue)}
+          </p>
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-wider text-text-muted">Events</p>
@@ -274,7 +530,10 @@ function ClientCard({ client, onClick }) {
       {client.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {client.tags.map((tag) => (
-            <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary"
+            >
               <Tag className="h-2.5 w-2.5" /> {tag}
             </span>
           ))}
@@ -282,7 +541,9 @@ function ClientCard({ client, onClick }) {
       )}
 
       <div className="flex items-center justify-between border-t border-border pt-2 text-xs text-text-muted">
-        <span>{client.lastEventDate ? `Last event ${client.lastEventDate}` : 'No past events'}</span>
+        <span>
+          {client.lastEventDate ? `Last event ${client.lastEventDate}` : 'No past events'}
+        </span>
         {client.nextEventDate && (
           <span className={cn('font-medium', next <= 3 ? 'text-warning' : 'text-text-secondary')}>
             Next in {next}d
@@ -306,22 +567,34 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
         {/* Header */}
         <div className="border-b border-border bg-surface px-6 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg', type.bg)}>
+            <div
+              className={cn(
+                'flex h-11 w-11 shrink-0 items-center justify-center rounded-lg',
+                type.bg
+              )}
+            >
               <TypeIcon className={cn('h-5 w-5', type.color)} />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-text-primary truncate">{client.name}</h3>
-                {client.tags.includes('VIP') && <Star className="h-4 w-4 shrink-0 text-warning fill-warning" />}
+                {client.tags.includes('VIP') && (
+                  <Star className="h-4 w-4 shrink-0 text-warning fill-warning" />
+                )}
               </div>
-              <p className="text-xs text-text-muted">{client.id} · {type.label} · Client since {client.clientSince}</p>
+              <p className="text-xs text-text-muted">
+                {client.id} · {type.label} · Client since {client.clientSince}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="outline" size="sm" onClick={onNavigateProposals}>
               <FileText className="mr-1.5 h-3.5 w-3.5" /> New Proposal
             </Button>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -339,7 +612,9 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
               onClick={() => setTab(t.id)}
               className={cn(
                 'px-3 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-                tab === t.id ? 'border-secondary text-secondary' : 'border-transparent text-text-muted hover:text-text-primary'
+                tab === t.id
+                  ? 'border-secondary text-secondary'
+                  : 'border-transparent text-text-muted hover:text-text-primary'
               )}
             >
               {t.label}
@@ -354,21 +629,31 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
               <div className="grid grid-cols-3 gap-4">
                 <div className="rounded-xl border border-border bg-surface p-4 text-center">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Lifetime Value</p>
-                  <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatCurrency(client.lifetimeValue)}</p>
+                  <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                    {formatCurrency(client.lifetimeValue)}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-border bg-surface p-4 text-center">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Events</p>
-                  <p className="mt-1 text-xl font-bold font-mono text-secondary">{client.totalEvents}</p>
+                  <p className="mt-1 text-xl font-bold font-mono text-secondary">
+                    {client.totalEvents}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-border bg-surface p-4 text-center">
-                  <p className="text-xs text-text-muted uppercase tracking-wider">Avg. Event Value</p>
-                  <p className="mt-1 text-xl font-bold font-mono text-accent">{formatCurrency(avgEventValue(client))}</p>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">
+                    Avg. Event Value
+                  </p>
+                  <p className="mt-1 text-xl font-bold font-mono text-accent">
+                    {formatCurrency(avgEventValue(client))}
+                  </p>
                 </div>
               </div>
 
               {/* Contact Info */}
               <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Contact Information</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Contact Information
+                </h4>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <div className="flex items-center gap-2 text-sm text-text-primary">
                     <User className="h-4 w-4 text-text-muted" /> {client.primaryContact}
@@ -383,18 +668,23 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
                     <MapPin className="h-4 w-4 text-text-muted" /> {client.address}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-text-primary">
-                    <ArrowUpRight className="h-4 w-4 text-text-muted" /> Account Manager: {client.accountManager}
+                    <ArrowUpRight className="h-4 w-4 text-text-muted" /> Account Manager:{' '}
+                    {client.accountManager}
                   </div>
                   {client.nextEventDate && (
                     <div className="flex items-center gap-2 text-sm text-text-primary">
-                      <Calendar className="h-4 w-4 text-text-muted" /> Next event: {client.nextEventDate}
+                      <Calendar className="h-4 w-4 text-text-muted" /> Next event:{' '}
+                      {client.nextEventDate}
                     </div>
                   )}
                 </div>
                 {client.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border">
                     {client.tags.map((tag) => (
-                      <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2.5 py-1 text-xs text-text-secondary">
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2.5 py-1 text-xs text-text-secondary"
+                      >
                         <Tag className="h-3 w-3" /> {tag}
                       </span>
                     ))}
@@ -404,7 +694,9 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
 
               {/* Notes */}
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Account Notes</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Account Notes
+                </h4>
                 <p className="text-sm text-text-secondary leading-relaxed">{client.notes}</p>
               </div>
             </>
@@ -413,13 +705,17 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
           {tab === 'history' && (
             <div className="rounded-xl border border-border bg-surface p-5">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Contact History</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Contact History
+                </h4>
                 <Button variant="ghost" size="sm">
                   <Plus className="mr-1.5 h-3.5 w-3.5" /> Log Contact
                 </Button>
               </div>
               {client.history.length === 0 ? (
-                <p className="text-sm text-text-muted text-center py-6">No contact history recorded yet.</p>
+                <p className="text-sm text-text-muted text-center py-6">
+                  No contact history recorded yet.
+                </p>
               ) : (
                 <div className="space-y-4">
                   {client.history.map((entry) => {
@@ -431,7 +727,9 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm text-text-primary">{entry.summary}</p>
-                          <p className="text-xs text-text-muted mt-0.5">{entry.date} · {entry.by}</p>
+                          <p className="text-xs text-text-muted mt-0.5">
+                            {entry.date} · {entry.by}
+                          </p>
                         </div>
                       </div>
                     );
@@ -444,19 +742,31 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
           {tab === 'events' && (
             <div className="rounded-xl border border-border bg-surface overflow-hidden">
               <div className="border-b border-border bg-background px-5 py-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Past Events</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Past Events
+                </h4>
               </div>
               {client.events.length === 0 ? (
-                <p className="text-sm text-text-muted text-center py-8">No completed events on file yet.</p>
+                <p className="text-sm text-text-muted text-center py-8">
+                  No completed events on file yet.
+                </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-background border-b border-border">
                       <tr>
-                        <th className="px-4 py-2.5 text-left text-xs font-medium text-text-secondary uppercase">Event</th>
-                        <th className="px-4 py-2.5 text-left text-xs font-medium text-text-secondary uppercase">Date</th>
-                        <th className="px-4 py-2.5 text-right text-xs font-medium text-text-secondary uppercase">Guests</th>
-                        <th className="px-4 py-2.5 text-right text-xs font-medium text-text-secondary uppercase">Revenue</th>
+                        <th className="px-4 py-2.5 text-left text-xs font-medium text-text-secondary uppercase">
+                          Event
+                        </th>
+                        <th className="px-4 py-2.5 text-left text-xs font-medium text-text-secondary uppercase">
+                          Date
+                        </th>
+                        <th className="px-4 py-2.5 text-right text-xs font-medium text-text-secondary uppercase">
+                          Guests
+                        </th>
+                        <th className="px-4 py-2.5 text-right text-xs font-medium text-text-secondary uppercase">
+                          Revenue
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -467,8 +777,12 @@ function ClientDetailModal({ client, onClose, onNavigateProposals }) {
                             <p className="text-xs text-text-muted">{event.type}</p>
                           </td>
                           <td className="px-4 py-3 text-text-secondary">{event.date}</td>
-                          <td className="px-4 py-3 text-right text-text-secondary font-mono">{event.guests}</td>
-                          <td className="px-4 py-3 text-right font-mono font-semibold text-text-primary">{formatCurrency(event.revenue)}</td>
+                          <td className="px-4 py-3 text-right text-text-secondary font-mono">
+                            {event.guests}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono font-semibold text-text-primary">
+                            {formatCurrency(event.revenue)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -495,7 +809,8 @@ export default function ClientsPage() {
   const filteredClients = useMemo(() => {
     const filtered = clients.filter((c) => {
       const matchesType = typeFilter === 'all' || c.type === typeFilter;
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         c.name.toLowerCase().includes(query.toLowerCase()) ||
         c.primaryContact.toLowerCase().includes(query.toLowerCase()) ||
         c.id.toLowerCase().includes(query.toLowerCase());
@@ -504,7 +819,8 @@ export default function ClientsPage() {
     const sorted = [...filtered];
     if (sortBy === 'ltv') sorted.sort((a, b) => b.lifetimeValue - a.lifetimeValue);
     if (sortBy === 'events') sorted.sort((a, b) => b.totalEvents - a.totalEvents);
-    if (sortBy === 'recent') sorted.sort((a, b) => (b.lastEventDate || '').localeCompare(a.lastEventDate || ''));
+    if (sortBy === 'recent')
+      sorted.sort((a, b) => (b.lastEventDate || '').localeCompare(a.lastEventDate || ''));
     if (sortBy === 'name') sorted.sort((a, b) => a.name.localeCompare(b.name));
     return sorted;
   }, [clients, typeFilter, query, sortBy]);
@@ -529,7 +845,9 @@ export default function ClientsPage() {
             <ArrowLeft className="h-3 w-3" /> Sales & Catering
           </button>
           <h1 className="text-2xl font-bold text-text-primary">Clients & Accounts</h1>
-          <p className="text-sm text-text-secondary">Contact history, past events, and lifetime value by account</p>
+          <p className="text-sm text-text-secondary">
+            Contact history, past events, and lifetime value by account
+          </p>
         </div>
         <Button size="sm">
           <Plus className="mr-1.5 h-4 w-4" /> New Client
@@ -538,10 +856,26 @@ export default function ClientsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Total Lifetime Value" value={formatCurrency(stats.totalLTV)} icon={DollarSign} color="text-secondary" subtext={`${clients.length} accounts`} />
-        <StatCard label="Avg. Account Value" value={formatCurrency(stats.avgLTV)} icon={TrendingUp} color="text-accent" />
+        <StatCard
+          label="Total Lifetime Value"
+          value={formatCurrency(stats.totalLTV)}
+          icon={DollarSign}
+          color="text-secondary"
+          subtext={`${clients.length} accounts`}
+        />
+        <StatCard
+          label="Avg. Account Value"
+          value={formatCurrency(stats.avgLTV)}
+          icon={TrendingUp}
+          color="text-accent"
+        />
         <StatCard label="VIP Accounts" value={stats.vipCount} icon={Star} color="text-warning" />
-        <StatCard label="Upcoming Events" value={stats.upcoming} icon={Calendar} color="text-info" />
+        <StatCard
+          label="Upcoming Events"
+          value={stats.upcoming}
+          icon={Calendar}
+          color="text-info"
+        />
       </div>
 
       {/* Toolbar */}
@@ -574,7 +908,12 @@ export default function ClientsPage() {
       <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => setTypeFilter('all')}
-          className={cn('rounded-full px-3 py-1 text-xs font-medium transition-colors border', typeFilter === 'all' ? 'bg-secondary text-white border-secondary' : 'bg-surface text-text-secondary border-border')}
+          className={cn(
+            'rounded-full px-3 py-1 text-xs font-medium transition-colors border',
+            typeFilter === 'all'
+              ? 'bg-secondary text-white border-secondary'
+              : 'bg-surface text-text-secondary border-border'
+          )}
         >
           All Accounts
         </button>
@@ -584,7 +923,9 @@ export default function ClientsPage() {
             onClick={() => setTypeFilter(key)}
             className={cn(
               'rounded-full px-3 py-1 text-xs font-medium transition-colors border flex items-center gap-1.5',
-              typeFilter === key ? cn(meta.bg, meta.color, 'border-transparent') : 'bg-surface text-text-secondary border-border'
+              typeFilter === key
+                ? cn(meta.bg, meta.color, 'border-transparent')
+                : 'bg-surface text-text-secondary border-border'
             )}
           >
             <meta.icon className="h-3 w-3" /> {meta.label}

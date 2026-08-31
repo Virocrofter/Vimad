@@ -22,22 +22,22 @@ export default function ApiKeyModal({ onClose, onSave }) {
   const [generatedKey, setGeneratedKey] = useState(null);
   const [showKey, setShowKey] = useState(false);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const toggleScope = (scopeKey) => {
     if (scopeKey === '*') {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         scopes: prev.scopes.includes('*') ? [] : ['*'],
       }));
       return;
     }
-    setForm(prev => {
+    setForm((prev) => {
       if (prev.scopes.includes('*')) return { ...prev, scopes: [scopeKey] };
       return {
         ...prev,
         scopes: prev.scopes.includes(scopeKey)
-          ? prev.scopes.filter(s => s !== scopeKey)
+          ? prev.scopes.filter((s) => s !== scopeKey)
           : [...prev.scopes, scopeKey],
       };
     });
@@ -47,10 +47,10 @@ export default function ApiKeyModal({ onClose, onSave }) {
     e.preventDefault();
     const prefix = form.environment === 'production' ? 'pk_live_' : 'pk_test_';
     const random = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map(b => b.toString(16).padStart(2, '0'))
+      .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
     const key = `${prefix}${random}`;
-    
+
     setGeneratedKey({
       ...form,
       id: `key-${Date.now().toString(36)}`,
@@ -58,7 +58,9 @@ export default function ApiKeyModal({ onClose, onSave }) {
       keyPrefix: `${key.slice(0, 12)}...`,
       status: 'active',
       createdAt: new Date().toISOString().split('T')[0],
-      expiresAt: form.expiresIn ? new Date(Date.now() + parseInt(form.expiresIn) * 86400000).toISOString().split('T')[0] : null,
+      expiresAt: form.expiresIn
+        ? new Date(Date.now() + parseInt(form.expiresIn) * 86400000).toISOString().split('T')[0]
+        : null,
       lastUsedAt: null,
       createdBy: 'You',
       usageCount: 0,
@@ -71,7 +73,7 @@ export default function ApiKeyModal({ onClose, onSave }) {
     onClose();
   };
 
-  const allPerms = permissionCategories.flatMap(c => c.permissions.map(p => p.key));
+  const allPerms = permissionCategories.flatMap((c) => c.permissions.map((p) => p.key));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -85,10 +87,15 @@ export default function ApiKeyModal({ onClose, onSave }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-text-primary">Create API Key</h3>
-              <p className="text-xs text-text-muted">Generate a new API key with scoped permissions</p>
+              <p className="text-xs text-text-muted">
+                Generate a new API key with scoped permissions
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -98,7 +105,9 @@ export default function ApiKeyModal({ onClose, onSave }) {
             {/* Basic Info */}
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Key Name</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Key Name
+                </label>
                 <input
                   type="text"
                   required
@@ -111,17 +120,25 @@ export default function ApiKeyModal({ onClose, onSave }) {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Environment</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Environment
+                  </label>
                   <select
                     value={form.environment}
                     onChange={(e) => update('environment', e.target.value)}
                     className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {environments.map(e => <option key={e.key} value={e.key}>{e.label}</option>)}
+                    {environments.map((e) => (
+                      <option key={e.key} value={e.key}>
+                        {e.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Expires In</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Expires In
+                  </label>
                   <select
                     value={form.expiresIn}
                     onChange={(e) => update('expiresIn', e.target.value)}
@@ -135,7 +152,9 @@ export default function ApiKeyModal({ onClose, onSave }) {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Rate Limit</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Rate Limit
+                  </label>
                   <select
                     value={form.rateLimit}
                     onChange={(e) => update('rateLimit', e.target.value)}
@@ -153,7 +172,9 @@ export default function ApiKeyModal({ onClose, onSave }) {
             {/* Scopes */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Scopes</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Scopes
+                </h4>
                 <button
                   type="button"
                   onClick={() => toggleScope('*')}
@@ -165,7 +186,7 @@ export default function ApiKeyModal({ onClose, onSave }) {
                   {form.scopes.includes('*') ? 'Clear All' : 'Grant All'}
                 </button>
               </div>
-              
+
               <div className="space-y-2">
                 {permissionCategories.map((cat) => (
                   <div key={cat.key} className="rounded-lg border border-border bg-surface p-3">
@@ -183,7 +204,9 @@ export default function ApiKeyModal({ onClose, onSave }) {
                               : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
                           )}
                         >
-                          {(form.scopes.includes(perm.key) || form.scopes.includes('*')) && <Check className="h-3 w-3" />}
+                          {(form.scopes.includes(perm.key) || form.scopes.includes('*')) && (
+                            <Check className="h-3 w-3" />
+                          )}
                           {perm.label}
                         </button>
                       ))}
@@ -195,7 +218,9 @@ export default function ApiKeyModal({ onClose, onSave }) {
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
               <Button type="submit" variant="secondary">
                 <Key className="mr-1.5 h-4 w-4" /> Generate Key
               </Button>
@@ -210,9 +235,11 @@ export default function ApiKeyModal({ onClose, onSave }) {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-text-primary">API Key Generated</h4>
-                <p className="text-sm text-text-secondary">Copy this key now. You won't be able to see it again.</p>
+                <p className="text-sm text-text-secondary">
+                  Copy this key now. You won't be able to see it again.
+                </p>
               </div>
-              
+
               <div className="flex items-center justify-center gap-2">
                 <code className="rounded-lg border border-border bg-background px-4 py-3 text-sm font-mono text-text-primary break-all max-w-md">
                   {showKey ? generatedKey.keyFull : generatedKey.keyPrefix}
@@ -249,7 +276,11 @@ export default function ApiKeyModal({ onClose, onSave }) {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Scopes</span>
-                <span className="text-text-primary">{generatedKey.scopes.includes('*') ? 'All permissions' : `${generatedKey.scopes.length} permissions`}</span>
+                <span className="text-text-primary">
+                  {generatedKey.scopes.includes('*')
+                    ? 'All permissions'
+                    : `${generatedKey.scopes.length} permissions`}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Expires</span>

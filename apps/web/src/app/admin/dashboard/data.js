@@ -1,10 +1,33 @@
 /* src/app/admin/dashboard/data.js */
 
 export const kpiData = {
-  totalTenants: { value: 2847, change: +12.4, changeLabel: 'vs last month', trend: [2100, 2150, 2230, 2310, 2380, 2450, 2520, 2600, 2680, 2750, 2800, 2847] },
-  mrr: { value: 142650, change: +8.7, changeLabel: 'vs last month', trend: [98000, 102000, 108000, 112000, 118000, 122000, 126000, 130000, 134000, 138000, 140000, 142650] },
-  churnRate: { value: 2.3, change: -0.4, changeLabel: 'vs last month', isInverse: true, trend: [3.8, 3.5, 3.2, 3.0, 2.9, 2.8, 2.7, 2.6, 2.5, 2.4, 2.35, 2.3] },
-  activeUsers: { value: 18420, change: +15.2, changeLabel: 'vs last month', trend: [12000, 12500, 13100, 13800, 14300, 14800, 15300, 15900, 16500, 17200, 17800, 18420] },
+  totalTenants: {
+    value: 2847,
+    change: +12.4,
+    changeLabel: 'vs last month',
+    trend: [2100, 2150, 2230, 2310, 2380, 2450, 2520, 2600, 2680, 2750, 2800, 2847],
+  },
+  mrr: {
+    value: 142650,
+    change: +8.7,
+    changeLabel: 'vs last month',
+    trend: [
+      98000, 102000, 108000, 112000, 118000, 122000, 126000, 130000, 134000, 138000, 140000, 142650,
+    ],
+  },
+  churnRate: {
+    value: 2.3,
+    change: -0.4,
+    changeLabel: 'vs last month',
+    isInverse: true,
+    trend: [3.8, 3.5, 3.2, 3.0, 2.9, 2.8, 2.7, 2.6, 2.5, 2.4, 2.35, 2.3],
+  },
+  activeUsers: {
+    value: 18420,
+    change: +15.2,
+    changeLabel: 'vs last month',
+    trend: [12000, 12500, 13100, 13800, 14300, 14800, 15300, 15900, 16500, 17200, 17800, 18420],
+  },
 };
 
 export const systemHealth = {
@@ -79,22 +102,114 @@ export const recentAlerts = [
 ];
 
 export const quickActions = [
-  { id: 'new-tenant', label: 'Create Tenant', icon: 'Building2', description: 'Onboard a new property', color: 'secondary' },
-  { id: 'feature-flag', label: 'Feature Flag', icon: 'ToggleLeft', description: 'Toggle platform features', color: 'accent' },
-  { id: 'announcement', label: 'Announcement', icon: 'Megaphone', description: 'Send global notification', color: 'info' },
-  { id: 'maintenance', label: 'Maintenance', icon: 'Wrench', description: 'Schedule downtime window', color: 'warning' },
-  { id: 'audit-log', label: 'Audit Log', icon: 'ScrollText', description: 'View recent admin actions', color: 'neutral' },
-  { id: 'export', label: 'Export Data', icon: 'Download', description: 'Download tenant reports', color: 'secondary' },
+  {
+    id: 'new-tenant',
+    label: 'Create Tenant',
+    icon: 'Building2',
+    description: 'Onboard a new property',
+    color: 'secondary',
+  },
+  {
+    id: 'feature-flag',
+    label: 'Feature Flag',
+    icon: 'ToggleLeft',
+    description: 'Toggle platform features',
+    color: 'accent',
+  },
+  {
+    id: 'announcement',
+    label: 'Announcement',
+    icon: 'Megaphone',
+    description: 'Send global notification',
+    color: 'info',
+  },
+  {
+    id: 'maintenance',
+    label: 'Maintenance',
+    icon: 'Wrench',
+    description: 'Schedule downtime window',
+    color: 'warning',
+  },
+  {
+    id: 'audit-log',
+    label: 'Audit Log',
+    icon: 'ScrollText',
+    description: 'View recent admin actions',
+    color: 'neutral',
+  },
+  {
+    id: 'export',
+    label: 'Export Data',
+    icon: 'Download',
+    description: 'Download tenant reports',
+    color: 'secondary',
+  },
 ];
 
 export const tenantActivity = [
-  { id: 'ACT-001', tenant: 'Grand Hotel Boston', action: 'Plan upgraded', detail: 'Starter → Professional', user: 'Robert Chen', time: '2 min ago', type: 'upgrade' },
-  { id: 'ACT-002', tenant: 'Seaside Resort Miami', action: 'New reservation', detail: 'Booking #4023 confirmed via booking engine', user: 'Maria Garcia', time: '5 min ago', type: 'booking' },
-  { id: 'ACT-003', tenant: 'Mountain Lodge Aspen', action: 'User invited', detail: 'Front desk staff added (2 users)', user: 'James Miller', time: '12 min ago', type: 'user' },
-  { id: 'ACT-004', tenant: 'Urban Hotel NYC', action: 'API key rotated', detail: 'Production API key regenerated', user: 'Kevin Lee', time: '18 min ago', type: 'security' },
-  { id: 'ACT-005', tenant: 'Coastal Inn San Diego', action: 'Rate updated', detail: 'Deluxe King rate changed to $219', user: 'David Park', time: '25 min ago', type: 'rate' },
-  { id: 'ACT-006', tenant: 'Downtown Suites Chicago', action: 'Payment failed', detail: 'Auto-retry #3 failed — card expired', user: 'System', time: '32 min ago', type: 'billing' },
-  { id: 'ACT-007', tenant: 'Grand Hotel Boston', action: 'Channel sync', detail: 'Synced 142 rooms across 6 channels', user: 'System', time: '45 min ago', type: 'sync' },
+  {
+    id: 'ACT-001',
+    tenant: 'Grand Hotel Boston',
+    action: 'Plan upgraded',
+    detail: 'Starter → Professional',
+    user: 'Robert Chen',
+    time: '2 min ago',
+    type: 'upgrade',
+  },
+  {
+    id: 'ACT-002',
+    tenant: 'Seaside Resort Miami',
+    action: 'New reservation',
+    detail: 'Booking #4023 confirmed via booking engine',
+    user: 'Maria Garcia',
+    time: '5 min ago',
+    type: 'booking',
+  },
+  {
+    id: 'ACT-003',
+    tenant: 'Mountain Lodge Aspen',
+    action: 'User invited',
+    detail: 'Front desk staff added (2 users)',
+    user: 'James Miller',
+    time: '12 min ago',
+    type: 'user',
+  },
+  {
+    id: 'ACT-004',
+    tenant: 'Urban Hotel NYC',
+    action: 'API key rotated',
+    detail: 'Production API key regenerated',
+    user: 'Kevin Lee',
+    time: '18 min ago',
+    type: 'security',
+  },
+  {
+    id: 'ACT-005',
+    tenant: 'Coastal Inn San Diego',
+    action: 'Rate updated',
+    detail: 'Deluxe King rate changed to $219',
+    user: 'David Park',
+    time: '25 min ago',
+    type: 'rate',
+  },
+  {
+    id: 'ACT-006',
+    tenant: 'Downtown Suites Chicago',
+    action: 'Payment failed',
+    detail: 'Auto-retry #3 failed — card expired',
+    user: 'System',
+    time: '32 min ago',
+    type: 'billing',
+  },
+  {
+    id: 'ACT-007',
+    tenant: 'Grand Hotel Boston',
+    action: 'Channel sync',
+    detail: 'Synced 142 rooms across 6 channels',
+    user: 'System',
+    time: '45 min ago',
+    type: 'sync',
+  },
 ];
 
 export const planDistribution = [
@@ -113,7 +228,11 @@ export const regionDistribution = [
 
 /* ─── Helpers ─── */
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 export function timeAgo(timestamp) {

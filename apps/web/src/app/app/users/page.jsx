@@ -2,10 +2,36 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, Shield, ShieldCheck, Search, Filter, Plus, ChevronDown, ChevronUp,
-  LayoutGrid, List, Eye, Edit3, UserX, UserCheck, Key, Lock, Unlock,
-  Activity, FileText, AlertTriangle, Check, X, MoreHorizontal,
-  Download, RefreshCw, Clock, Mail, Phone, Building2, Crown
+  Users,
+  Shield,
+  ShieldCheck,
+  Search,
+  Filter,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  List,
+  Eye,
+  Edit3,
+  UserX,
+  UserCheck,
+  Key,
+  Lock,
+  Unlock,
+  Activity,
+  FileText,
+  AlertTriangle,
+  Check,
+  X,
+  MoreHorizontal,
+  Download,
+  RefreshCw,
+  Clock,
+  Mail,
+  Phone,
+  Building2,
+  Crown,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -48,7 +74,9 @@ export default function UsersPage() {
     const suspended = users.filter((u) => u.status === 'suspended').length;
     const onLeave = users.filter((u) => u.status === 'on-leave').length;
     const mfaEnabled = users.filter((u) => u.mfaEnabled).length;
-    const onlineNow = users.filter((u) => u.sessionExpiry && new Date(u.sessionExpiry) > new Date()).length;
+    const onlineNow = users.filter(
+      (u) => u.sessionExpiry && new Date(u.sessionExpiry) > new Date()
+    ).length;
     const adminCount = users.filter((u) => {
       const r = roles.find((rl) => rl.id === u.roleId);
       return r?.level >= 80;
@@ -135,11 +163,21 @@ export default function UsersPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         <StatCard label="Total Users" value={stats.total} icon={Users} color="text-text-primary" />
         <StatCard label="Active" value={stats.active} icon={UserCheck} color="text-accent" />
-        <StatCard label="Online Now" value={stats.onlineNow} icon={Activity} color="text-secondary" />
+        <StatCard
+          label="Online Now"
+          value={stats.onlineNow}
+          icon={Activity}
+          color="text-secondary"
+        />
         <StatCard label="Admins" value={stats.adminCount} icon={Crown} color="text-warning" />
         <StatCard label="Suspended" value={stats.suspended} icon={UserX} color="text-danger" />
         <StatCard label="On Leave" value={stats.onLeave} icon={Clock} color="text-info" />
-        <StatCard label="MFA Enabled" value={`${Math.round((stats.mfaEnabled / stats.total) * 100)}%`} icon={ShieldCheck} color="text-accent" />
+        <StatCard
+          label="MFA Enabled"
+          value={`${Math.round((stats.mfaEnabled / stats.total) * 100)}%`}
+          icon={ShieldCheck}
+          color="text-accent"
+        />
       </div>
 
       {/* Security Alert Banner */}
@@ -186,7 +224,9 @@ export default function UsersPage() {
               onClick={() => setViewMode('table')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors',
-                viewMode === 'table' ? 'bg-background shadow-sm text-text-primary' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'table'
+                  ? 'bg-background shadow-sm text-text-primary'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <List className="h-4 w-4" />
@@ -195,7 +235,9 @@ export default function UsersPage() {
               onClick={() => setViewMode('grid')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors',
-                viewMode === 'grid' ? 'bg-background shadow-sm text-text-primary' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'grid'
+                  ? 'bg-background shadow-sm text-text-primary'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -231,7 +273,9 @@ export default function UsersPage() {
               >
                 <option value="all">All Roles</option>
                 {roles.map((r) => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -244,7 +288,9 @@ export default function UsersPage() {
               >
                 <option value="all">All Departments</option>
                 {departments.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -267,7 +313,8 @@ export default function UsersPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filtered.length}</span> of {users.length} users
+        Showing <span className="font-medium text-text-primary">{filtered.length}</span> of{' '}
+        {users.length} users
       </p>
 
       {/* ─── Table View ─── */}
@@ -308,10 +355,7 @@ export default function UsersPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {filtered.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-background/50 transition-colors group"
-                  >
+                  <tr key={user.id} className="hover:bg-background/50 transition-colors group">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <UserAvatar user={user} size="md" />
@@ -446,7 +490,9 @@ export default function UsersPage() {
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-text-muted">Logins</p>
-                  <p className="text-xs font-medium text-text-primary">{user.loginCount.toLocaleString()}</p>
+                  <p className="text-xs font-medium text-text-primary">
+                    {user.loginCount.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
@@ -488,8 +534,8 @@ export default function UsersPage() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
                 <p className="text-xs text-text-secondary">
-                  Suspending will immediately terminate all active sessions and revoke access.
-                  The user will be unable to log in until reactivated.
+                  Suspending will immediately terminate all active sessions and revoke access. The
+                  user will be unable to log in until reactivated.
                 </p>
               </div>
             </div>

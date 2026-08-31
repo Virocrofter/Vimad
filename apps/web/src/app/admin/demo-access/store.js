@@ -6,17 +6,12 @@ export const useDemoStore = create((set, get) => ({
   demos: initialDemos,
   analytics: usageAnalytics,
 
-  addDemo: (newDemo) =>
-    set((state) => ({ demos: [newDemo, ...state.demos] })),
+  addDemo: (newDemo) => set((state) => ({ demos: [newDemo, ...state.demos] })),
 
   updateDemo: (id, updater) =>
     set((state) => ({
       demos: state.demos.map((d) =>
-        d.id === id
-          ? typeof updater === 'function'
-            ? updater(d)
-            : { ...d, ...updater }
-          : d
+        d.id === id ? (typeof updater === 'function' ? updater(d) : { ...d, ...updater }) : d
       ),
     })),
 
@@ -88,9 +83,7 @@ export const useDemoStore = create((set, get) => ({
 
   sendReminder: (id) =>
     set((state) => ({
-      demos: state.demos.map((d) =>
-        d.id === id ? { ...d, reminderSent: true } : d
-      ),
+      demos: state.demos.map((d) => (d.id === id ? { ...d, reminderSent: true } : d)),
     })),
 
   getDemoById: (id) => get().demos.find((d) => d.id === id),
@@ -113,7 +106,8 @@ export const useDemoStore = create((set, get) => ({
     const convertedMrr = demos
       .filter((d) => d.status === 'converted')
       .reduce((s, d) => {
-        const tier = d.convertedPlan === 'Starter' ? 199 : d.convertedPlan === 'Professional' ? 499 : 999;
+        const tier =
+          d.convertedPlan === 'Starter' ? 199 : d.convertedPlan === 'Professional' ? 499 : 999;
         return s + tier;
       }, 0);
 

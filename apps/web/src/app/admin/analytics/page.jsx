@@ -1,16 +1,52 @@
 /* src/app/admin/analytics/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Activity, BarChart3, Target, Users, Zap, TrendingUp, TrendingDown,
-  Clock, MousePointer, Eye, Filter, Search, ChevronDown, ChevronUp,
-  Download, Calendar, Timer, Layers, Crown, AlertTriangle, Lightbulb,
-  ArrowRight, Percent, MousePointerClick, Star, Flame, RefreshCw
+  Activity,
+  BarChart3,
+  Target,
+  Users,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  MousePointer,
+  Eye,
+  Filter,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  Calendar,
+  Timer,
+  Layers,
+  Crown,
+  AlertTriangle,
+  Lightbulb,
+  ArrowRight,
+  Percent,
+  MousePointerClick,
+  Star,
+  Flame,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 import {
@@ -53,13 +89,15 @@ export default function AnalyticsPage() {
   const stats = useMemo(() => {
     const totalEvents = featureUsageHeatmap.reduce((s, f) => s + f.totalEvents, 0);
     const totalUsers = featureUsageHeatmap.reduce((s, f) => s + f.uniqueUsers, 0);
-    const avgSession = featureUsageHeatmap.reduce((s, f) => s + f.avgSessionMin * f.uniqueUsers, 0) / totalUsers;
-    const powerUserCount = engagementScores.filter(e => e.classification === 'power').length;
-    const atRiskCount = engagementScores.filter(e => e.classification === 'at-risk').length;
-    const totalDropOff = dropOffPoints.reduce((s, d) => s + d.dropOffRate, 0) / dropOffPoints.length;
+    const avgSession =
+      featureUsageHeatmap.reduce((s, f) => s + f.avgSessionMin * f.uniqueUsers, 0) / totalUsers;
+    const powerUserCount = engagementScores.filter((e) => e.classification === 'power').length;
+    const atRiskCount = engagementScores.filter((e) => e.classification === 'at-risk').length;
+    const totalDropOff =
+      dropOffPoints.reduce((s, d) => s + d.dropOffRate, 0) / dropOffPoints.length;
     const latestDau = dauTrend[dauTrend.length - 1];
     const prevDau = dauTrend[dauTrend.length - 8];
-    const dauGrowth = ((latestDau.dau - prevDau.dau) / prevDau.dau * 100).toFixed(1);
+    const dauGrowth = (((latestDau.dau - prevDau.dau) / prevDau.dau) * 100).toFixed(1);
 
     return {
       totalEvents,
@@ -77,17 +115,20 @@ export default function AnalyticsPage() {
   /* ─── Filtered Data ─── */
   const filteredEngagement = useMemo(() => {
     return engagementScores.filter((e) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         e.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         e.tenantId.toLowerCase().includes(query.toLowerCase());
-      const matchesClass = classificationFilter === 'all' || e.classification === classificationFilter;
+      const matchesClass =
+        classificationFilter === 'all' || e.classification === classificationFilter;
       return matchesQuery && matchesClass;
     });
   }, [query, classificationFilter]);
 
   const filteredDropOffs = useMemo(() => {
     return dropOffPoints.filter((d) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         d.location.toLowerCase().includes(query.toLowerCase()) ||
         d.reason.toLowerCase().includes(query.toLowerCase());
       return matchesQuery;
@@ -95,19 +136,26 @@ export default function AnalyticsPage() {
   }, [query]);
 
   const maxHeatmapValue = useMemo(() => {
-    return Math.max(...featureUsageHeatmap.flatMap(f => f.hourly));
+    return Math.max(...featureUsageHeatmap.flatMap((f) => f.hourly));
   }, []);
 
   /* ─── Classification Distribution for Pie Chart ─── */
   const classificationDistribution = useMemo(() => {
     const dist = {};
-    engagementScores.forEach(e => {
+    engagementScores.forEach((e) => {
       dist[e.classification] = (dist[e.classification] || 0) + 1;
     });
     return Object.entries(dist).map(([key, value]) => ({
       name: classificationMeta[key]?.label || key,
       value,
-      color: key === 'power' ? '#a855f7' : key === 'engaged' ? '#22c55e' : key === 'at-risk' ? '#f59e0b' : '#ef4444',
+      color:
+        key === 'power'
+          ? '#a855f7'
+          : key === 'engaged'
+            ? '#22c55e'
+            : key === 'at-risk'
+              ? '#f59e0b'
+              : '#ef4444',
     }));
   }, []);
 
@@ -155,7 +203,9 @@ export default function AnalyticsPage() {
             onClick={() => setTimeRange(range)}
             className={cn(
               'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-              timeRange === range ? 'bg-secondary text-white' : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              timeRange === range
+                ? 'bg-secondary text-white'
+                : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             Last {range}
@@ -211,7 +261,9 @@ export default function AnalyticsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -242,13 +294,29 @@ export default function AnalyticsPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="var(--text-muted)" tickFormatter={(v) => v.slice(5)} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 9 }}
+                      stroke="var(--text-muted)"
+                      tickFormatter={(v) => v.slice(5)}
+                    />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                     <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
                       labelStyle={{ color: 'var(--text-primary)' }}
                     />
-                    <Area type="monotone" dataKey="dau" stroke="#22c55e" fill="url(#dauGradient)" strokeWidth={2} name="DAU" />
+                    <Area
+                      type="monotone"
+                      dataKey="dau"
+                      stroke="#22c55e"
+                      fill="url(#dauGradient)"
+                      strokeWidth={2}
+                      name="DAU"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -266,11 +334,27 @@ export default function AnalyticsPage() {
                     <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="var(--text-muted)" />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
                     <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
                     />
                     <Legend wrapperStyle={{ fontSize: '11px' }} />
-                    <Bar dataKey="newUsers" stackId="a" fill="#863bff" radius={[0, 0, 0, 0]} name="New" />
-                    <Bar dataKey="returning" stackId="a" fill="#22c55e" radius={[4, 4, 0, 0]} name="Returning" />
+                    <Bar
+                      dataKey="newUsers"
+                      stackId="a"
+                      fill="#863bff"
+                      radius={[0, 0, 0, 0]}
+                      name="New"
+                    />
+                    <Bar
+                      dataKey="returning"
+                      stackId="a"
+                      fill="#22c55e"
+                      radius={[4, 4, 0, 0]}
+                      name="Returning"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -309,7 +393,11 @@ export default function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -318,7 +406,10 @@ export default function AnalyticsPage() {
                 {classificationDistribution.map((item) => (
                   <div key={item.name} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
                       <span className="text-text-secondary">{item.name}</span>
                     </div>
                     <span className="font-mono font-medium text-text-primary">{item.value}</span>
@@ -334,7 +425,10 @@ export default function AnalyticsPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <Layers className="h-4 w-4 text-secondary" /> Most Used Features
               </h3>
-              <button onClick={() => setActiveTab('features')} className="text-xs text-secondary hover:underline">
+              <button
+                onClick={() => setActiveTab('features')}
+                className="text-xs text-secondary hover:underline"
+              >
                 View Heatmap →
               </button>
             </div>
@@ -348,15 +442,21 @@ export default function AnalyticsPage() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-text-primary">{feature.feature}</span>
+                          <span className="text-sm font-medium text-text-primary">
+                            {feature.feature}
+                          </span>
                           <CategoryBadge category={feature.category} />
                         </div>
-                        <span className="text-xs font-mono text-text-primary">{formatNumber(feature.totalEvents)}</span>
+                        <span className="text-xs font-mono text-text-primary">
+                          {formatNumber(feature.totalEvents)}
+                        </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                         <div
                           className={cn('h-full rounded-full bg-secondary transition-all')}
-                          style={{ width: `${(feature.totalEvents / featureUsageHeatmap[0].totalEvents) * 100}%` }}
+                          style={{
+                            width: `${(feature.totalEvents / featureUsageHeatmap[0].totalEvents) * 100}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -375,7 +475,10 @@ export default function AnalyticsPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <Crown className="h-4 w-4 text-purple-500" /> Top Power Users
               </h3>
-              <button onClick={() => setActiveTab('engagement')} className="text-xs text-secondary hover:underline">
+              <button
+                onClick={() => setActiveTab('engagement')}
+                className="text-xs text-secondary hover:underline"
+              >
                 View All →
               </button>
             </div>
@@ -443,24 +546,49 @@ export default function AnalyticsPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Feature</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Category</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Events</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Users</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Avg Session</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Events/User</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Feature
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Category
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Events
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Users
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Avg Session
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Events/User
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {featureUsageHeatmap
                     .sort((a, b) => b.totalEvents - a.totalEvents)
                     .map((feature) => (
-                      <tr key={feature.feature} className="hover:bg-background/50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-text-primary">{feature.feature}</td>
-                        <td className="px-4 py-3"><CategoryBadge category={feature.category} /></td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{formatNumber(feature.totalEvents)}</td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{feature.uniqueUsers}</td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{feature.avgSessionMin}m</td>
+                      <tr
+                        key={feature.feature}
+                        className="hover:bg-background/50 transition-colors"
+                      >
+                        <td className="px-4 py-3 font-medium text-text-primary">
+                          {feature.feature}
+                        </td>
+                        <td className="px-4 py-3">
+                          <CategoryBadge category={feature.category} />
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {formatNumber(feature.totalEvents)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {feature.uniqueUsers}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {feature.avgSessionMin}m
+                        </td>
                         <td className="px-4 py-3 text-right font-mono text-text-primary">
                           {Math.round(feature.totalEvents / feature.uniqueUsers)}
                         </td>
@@ -501,7 +629,7 @@ export default function AnalyticsPage() {
             />
             <AnalyticsStatCard
               label="Critical Issues"
-              value={dropOffPoints.filter(d => d.severity === 'critical').length}
+              value={dropOffPoints.filter((d) => d.severity === 'critical').length}
               icon={Zap}
               color="text-danger"
               subtext="Require immediate fix"
@@ -511,11 +639,7 @@ export default function AnalyticsPage() {
           {/* Funnel Grid */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {funnelData.map((funnel) => (
-              <FunnelChart
-                key={funnel.id}
-                funnel={funnel}
-                onSelect={setSelectedFunnel}
-              />
+              <FunnelChart key={funnel.id} funnel={funnel} onSelect={setSelectedFunnel} />
             ))}
           </div>
 
@@ -523,8 +647,13 @@ export default function AnalyticsPage() {
           {selectedFunnel && (
             <div className="rounded-xl border border-secondary/30 bg-surface p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-text-primary">{selectedFunnel.name} — Step Details</h3>
-                <button onClick={() => setSelectedFunnel(null)} className="text-xs text-text-muted hover:text-text-primary">
+                <h3 className="text-sm font-semibold text-text-primary">
+                  {selectedFunnel.name} — Step Details
+                </h3>
+                <button
+                  onClick={() => setSelectedFunnel(null)}
+                  className="text-xs text-text-muted hover:text-text-primary"
+                >
                   Close
                 </button>
               </div>
@@ -542,14 +671,20 @@ export default function AnalyticsPage() {
                           <span className="text-sm text-text-primary">{step.name}</span>
                           <div className="flex items-center gap-3">
                             <span className="text-xs text-text-muted">{retention}% retention</span>
-                            <span className="text-xs font-mono font-medium text-text-primary">{step.count.toLocaleString()}</span>
+                            <span className="text-xs font-mono font-medium text-text-primary">
+                              {step.count.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                         <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                           <div
-                            className={cn('h-full rounded-full transition-all',
-                              parseFloat(retention) > 80 ? 'bg-accent' :
-                              parseFloat(retention) > 60 ? 'bg-warning' : 'bg-danger'
+                            className={cn(
+                              'h-full rounded-full transition-all',
+                              parseFloat(retention) > 80
+                                ? 'bg-accent'
+                                : parseFloat(retention) > 60
+                                  ? 'bg-warning'
+                                  : 'bg-danger'
                             )}
                             style={{ width: `${retention}%` }}
                           />
@@ -571,7 +706,9 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <AnalyticsStatCard
               label="Avg Score"
-              value={Math.round(engagementScores.reduce((s, e) => s + e.score, 0) / engagementScores.length)}
+              value={Math.round(
+                engagementScores.reduce((s, e) => s + e.score, 0) / engagementScores.length
+              )}
               icon={Star}
               color="text-purple-500"
               subtext="Out of 100"
@@ -579,14 +716,14 @@ export default function AnalyticsPage() {
             />
             <AnalyticsStatCard
               label="Power Users"
-              value={engagementScores.filter(e => e.classification === 'power').length}
+              value={engagementScores.filter((e) => e.classification === 'power').length}
               icon={Crown}
               color="text-purple-500"
               subtext="Top 10% performers"
             />
             <AnalyticsStatCard
               label="At Risk"
-              value={engagementScores.filter(e => e.classification === 'at-risk').length}
+              value={engagementScores.filter((e) => e.classification === 'at-risk').length}
               icon={AlertTriangle}
               color="text-warning"
               subtext="Need attention"
@@ -594,7 +731,7 @@ export default function AnalyticsPage() {
             />
             <AnalyticsStatCard
               label="Dormant"
-              value={engagementScores.filter(e => e.classification === 'dormant').length}
+              value={engagementScores.filter((e) => e.classification === 'dormant').length}
               icon={Zap}
               color="text-danger"
               subtext="Re-engagement needed"
@@ -630,7 +767,9 @@ export default function AnalyticsPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredEngagement.length}</span> of {engagementScores.length} tenants
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredEngagement.length}</span> of{' '}
+            {engagementScores.length} tenants
           </p>
 
           {/* Engagement Grid */}
@@ -662,7 +801,7 @@ export default function AnalyticsPage() {
             />
             <AnalyticsStatCard
               label="Critical"
-              value={dropOffPoints.filter(d => d.severity === 'critical').length}
+              value={dropOffPoints.filter((d) => d.severity === 'critical').length}
               icon={Zap}
               color="text-danger"
               subtext="Immediate action required"
@@ -715,28 +854,38 @@ export default function AnalyticsPage() {
             </h3>
             <div className="space-y-3">
               {dropOffPoints
-                .filter(d => d.severity === 'critical' || d.severity === 'high')
+                .filter((d) => d.severity === 'critical' || d.severity === 'high')
                 .sort((a, b) => b.dropOffRate - a.dropOffRate)
                 .map((dropOff, idx) => (
-                  <div key={dropOff.id} className="flex items-start gap-3 rounded-lg border border-border bg-background p-3">
-                    <div className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                      dropOff.severity === 'critical' ? 'bg-danger/10' : 'bg-warning/10'
-                    )}>
+                  <div
+                    key={dropOff.id}
+                    className="flex items-start gap-3 rounded-lg border border-border bg-background p-3"
+                  >
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                        dropOff.severity === 'critical' ? 'bg-danger/10' : 'bg-warning/10'
+                      )}
+                    >
                       <span className="text-xs font-bold text-text-primary">{idx + 1}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-sm font-medium text-text-primary">{dropOff.location}</h4>
+                        <h4 className="text-sm font-medium text-text-primary">
+                          {dropOff.location}
+                        </h4>
                         <SeverityBadge severity={dropOff.severity} />
                       </div>
                       <p className="text-xs text-text-secondary">{dropOff.suggestedFix}</p>
                       <p className="text-xs text-text-muted mt-1">Impact: {dropOff.impact}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={cn('text-sm font-bold font-mono',
-                        dropOff.dropOffRate >= 35 ? 'text-danger' : 'text-warning'
-                      )}>
+                      <p
+                        className={cn(
+                          'text-sm font-bold font-mono',
+                          dropOff.dropOffRate >= 35 ? 'text-danger' : 'text-warning'
+                        )}
+                      >
                         {dropOff.dropOffRate}%
                       </p>
                       <p className="text-[10px] text-text-muted">drop-off</p>

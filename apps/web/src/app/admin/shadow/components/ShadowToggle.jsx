@@ -1,8 +1,16 @@
 /* src/app/admin/shadow/components/ShadowToggle.jsx */
 import { useState, useRef, useEffect } from 'react';
 import {
-  Eye, EyeOff, Zap, LogOut, Shield, ChevronRight, Clock,
-  ArrowLeftRight, User, Ghost
+  Eye,
+  EyeOff,
+  Zap,
+  LogOut,
+  Shield,
+  ChevronRight,
+  Clock,
+  ArrowLeftRight,
+  User,
+  Ghost,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useShadowStore } from '../store';
@@ -16,7 +24,7 @@ export function ShadowToggle() {
   const [open, setOpen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const ref = useRef(null);
-  
+
   const isShadowActive = useShadowStore((s) => s.isShadowActive);
   const shadowUser = useShadowStore((s) => s.shadowUser);
   const stealthMode = useShadowStore((s) => s.stealthMode);
@@ -67,10 +75,18 @@ export function ShadowToggle() {
           <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10 text-sm font-bold text-purple-500">
-                {shadowUser.avatar || shadowUser.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                {shadowUser.avatar ||
+                  shadowUser.name
+                    ?.split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-text-primary truncate">{shadowUser.name}</p>
+                <p className="text-sm font-semibold text-text-primary truncate">
+                  {shadowUser.name}
+                </p>
                 <p className="text-xs text-text-muted">{shadowUser.email}</p>
               </div>
             </div>
@@ -96,11 +112,17 @@ export function ShadowToggle() {
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-surface transition-colors"
             >
               <ArrowLeftRight className="h-4 w-4 text-purple-500" />
-              <span className="flex-1 text-left">Switch to {viewContext === 'user' ? 'Admin View' : 'User View'}</span>
-              <span className={cn(
-                'text-[10px] font-medium px-1.5 py-0 rounded',
-                viewContext === 'user' ? 'bg-purple-500/10 text-purple-500' : 'bg-secondary/10 text-secondary'
-              )}>
+              <span className="flex-1 text-left">
+                Switch to {viewContext === 'user' ? 'Admin View' : 'User View'}
+              </span>
+              <span
+                className={cn(
+                  'text-[10px] font-medium px-1.5 py-0 rounded',
+                  viewContext === 'user'
+                    ? 'bg-purple-500/10 text-purple-500'
+                    : 'bg-secondary/10 text-secondary'
+                )}
+              >
                 {viewContext === 'user' ? 'USER' : 'ADMIN'}
               </span>
             </button>
@@ -113,10 +135,18 @@ export function ShadowToggle() {
               }}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-surface transition-colors"
             >
-              {stealthMode ? <Eye className="h-4 w-4 text-accent" /> : <Ghost className="h-4 w-4 text-purple-500" />}
-              <span className="flex-1 text-left">{stealthMode ? 'Disable Stealth' : 'Enable Stealth'}</span>
+              {stealthMode ? (
+                <Eye className="h-4 w-4 text-accent" />
+              ) : (
+                <Ghost className="h-4 w-4 text-purple-500" />
+              )}
+              <span className="flex-1 text-left">
+                {stealthMode ? 'Disable Stealth' : 'Enable Stealth'}
+              </span>
               {stealthMode && (
-                <span className="text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0 rounded">ON</span>
+                <span className="text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0 rounded">
+                  ON
+                </span>
               )}
             </button>
 

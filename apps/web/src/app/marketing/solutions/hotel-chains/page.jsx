@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Building2, Globe, BarChart3, Users, Shield, Layers,
-  Repeat, FileText, Settings, TrendingUp, Check
+  ArrowRight,
+  Building2,
+  Globe,
+  BarChart3,
+  Users,
+  Shield,
+  Layers,
+  Repeat,
+  FileText,
+  Settings,
+  TrendingUp,
+  Check,
 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 
@@ -61,10 +71,12 @@ export default function HotelChainsPage() {
               For Hotel Chains & Management Companies
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-6xl">
-              One Platform. <span className="text-secondary">Every Property.</span> Complete Visibility.
+              One Platform. <span className="text-secondary">Every Property.</span> Complete
+              Visibility.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Stop managing fragmented PMS instances. Unified PMS gives chains and management companies centralized control with property-level flexibility.
+              Stop managing fragmented PMS instances. Unified PMS gives chains and management
+              companies centralized control with property-level flexibility.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -95,7 +107,10 @@ export default function HotelChainsPage() {
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
-              <div key={f.title} className="group rounded-xl border border-border bg-background p-6 transition-all hover:border-secondary/50 hover:shadow-lg">
+              <div
+                key={f.title}
+                className="group rounded-xl border border-border bg-background p-6 transition-all hover:border-secondary/50 hover:shadow-lg"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
                   <f.icon className="h-6 w-6 text-secondary" />
                 </div>
@@ -114,7 +129,8 @@ export default function HotelChainsPage() {
             <div>
               <h2 className="text-3xl font-bold text-text-primary">Enterprise-grade governance</h2>
               <p className="mt-4 text-text-secondary leading-relaxed">
-                Corporate-level controls with property-level autonomy. Set mandatory policies across your portfolio while letting each GM optimize for their market.
+                Corporate-level controls with property-level autonomy. Set mandatory policies across
+                your portfolio while letting each GM optimize for their market.
               </p>
               <ul className="mt-6 space-y-3">
                 {enterpriseFeatures.map((item) => (
@@ -141,14 +157,19 @@ export default function HotelChainsPage() {
                   { label: 'ADR', value: '$195' },
                   { label: 'RevPAR', value: '$158' },
                 ].map((kpi) => (
-                  <div key={kpi.label} className="rounded-lg border border-border bg-background p-3 text-center">
+                  <div
+                    key={kpi.label}
+                    className="rounded-lg border border-border bg-background p-3 text-center"
+                  >
                     <p className="text-xs text-text-muted">{kpi.label}</p>
                     <p className="text-lg font-bold text-text-primary">{kpi.value}</p>
                   </div>
                 ))}
               </div>
               <div className="rounded-lg border border-border bg-background p-3">
-                <p className="text-xs font-medium text-text-secondary mb-2">Brand Compliance Score</p>
+                <p className="text-xs font-medium text-text-secondary mb-2">
+                  Brand Compliance Score
+                </p>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-2 rounded-full bg-border overflow-hidden">
                     <div className="h-full w-[92%] rounded-full bg-accent" />
@@ -166,7 +187,8 @@ export default function HotelChainsPage() {
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="text-3xl font-bold text-text-primary">Manage your portfolio like a pro</h2>
           <p className="mt-4 text-text-secondary">
-            Join growing hotel chains that have replaced fragmented systems with one unified platform.
+            Join growing hotel chains that have replaced fragmented systems with one unified
+            platform.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link

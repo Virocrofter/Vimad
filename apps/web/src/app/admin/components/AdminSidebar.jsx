@@ -1,13 +1,43 @@
 /* src/app/admin/components/AdminSidebar.jsx */
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  Shield, Building2, ToggleLeft, Users, BarChart3, Settings,
-  Activity, LogOut, ChevronLeft, ChevronRight, LayoutDashboard,
-  Megaphone, Database, HardDrive, HeartPulse, Gauge, Eye,
-  CreditCard, FileText, RefreshCw, AlertTriangle, DollarSign,
-  Landmark, Lock, Globe, CircleDollarSign, UserPlus, Sparkles,
-  TicketCheck, MessageSquare, FileBarChart, Download, Plug,
-  Flag, ChevronDown, ChevronRightIcon, Zap
+  Shield,
+  Building2,
+  ToggleLeft,
+  Users,
+  BarChart3,
+  Settings,
+  Activity,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  Megaphone,
+  Database,
+  HardDrive,
+  HeartPulse,
+  Gauge,
+  Eye,
+  CreditCard,
+  FileText,
+  RefreshCw,
+  AlertTriangle,
+  DollarSign,
+  Landmark,
+  Lock,
+  Globe,
+  CircleDollarSign,
+  UserPlus,
+  Sparkles,
+  TicketCheck,
+  MessageSquare,
+  FileBarChart,
+  Download,
+  Plug,
+  Flag,
+  ChevronDown,
+  ChevronRightIcon,
+  Zap,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useState } from 'react';
@@ -79,9 +109,7 @@ const navGroups = [
 /* ─── Nav Item ─── */
 function SidebarItem({ to, label, icon: Icon, exact, collapsed }) {
   const location = useLocation();
-  const isActive = exact
-    ? location.pathname === to
-    : location.pathname.startsWith(to);
+  const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
 
   return (
     <NavLink
@@ -168,9 +196,7 @@ export default function AdminSidebar() {
       <nav className="flex-1 overflow-auto px-2 py-4 space-y-3">
         {navGroups.map((group) => {
           const hasActiveChild = group.items.some((item) =>
-            item.exact
-              ? location.pathname === item.to
-              : location.pathname.startsWith(item.to)
+            item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to)
           );
           return (
             <NavGroup

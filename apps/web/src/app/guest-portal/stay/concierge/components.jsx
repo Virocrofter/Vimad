@@ -1,7 +1,14 @@
 /* src/app/guest-portal/stay/concierge/components.jsx */
 import { useState } from 'react';
 import {
-  Star, Clock, Phone, ChevronRight, Heart, Share2, ExternalLink, Navigation
+  Star,
+  Clock,
+  Phone,
+  ChevronRight,
+  Heart,
+  Share2,
+  ExternalLink,
+  Navigation,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
@@ -35,17 +42,23 @@ export function ConciergeServiceCard({ service, onBook, isFavorite, onToggleFavo
 
         {/* Category Badge */}
         <div className="absolute top-3 left-3">
-          <span className={cn(
-            'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase border',
-            categoryColors[service.category] || 'bg-secondary/10 text-secondary border-secondary/20'
-          )}>
+          <span
+            className={cn(
+              'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase border',
+              categoryColors[service.category] ||
+                'bg-secondary/10 text-secondary border-secondary/20'
+            )}
+          >
             {service.category}
           </span>
         </div>
 
         {/* Favorite Button */}
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite?.();
+          }}
           className="absolute top-3 right-3 rounded-full bg-black/30 p-1.5 text-white hover:bg-black/50 transition-colors"
         >
           <Heart className={cn('h-4 w-4', isFavorite && 'fill-white')} />

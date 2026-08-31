@@ -2,11 +2,34 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, LogOut, CheckCircle2, AlertTriangle, Loader2,
-  CreditCard, Receipt, Star, KeyRound, Clock, Calendar,
-  ChevronRight, Mail, Download, Share2, Printer, Home,
-  ArrowRight, Bell, MessageSquare, ThumbsUp, ThumbsDown,
-  Wallet, Shield, X, Minus, Plus, FileText
+  ArrowLeft,
+  LogOut,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  CreditCard,
+  Receipt,
+  Star,
+  KeyRound,
+  Clock,
+  Calendar,
+  ChevronRight,
+  Mail,
+  Download,
+  Share2,
+  Printer,
+  Home,
+  ArrowRight,
+  Bell,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Wallet,
+  Shield,
+  X,
+  Minus,
+  Plus,
+  FileText,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -32,14 +55,14 @@ export default function CheckoutPage() {
   const handleExpressCheckout = async () => {
     setStep('processing');
     setExpressMode(true);
-    await new Promise(r => setTimeout(r, 2500));
+    await new Promise((r) => setTimeout(r, 2500));
     setStep('complete');
   };
 
   const handleStandardCheckout = async () => {
     setStep('processing');
     setExpressMode(false);
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 3000));
     setStep('complete');
   };
 
@@ -80,7 +103,8 @@ export default function CheckoutPage() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-xs font-medium text-accent">
             <Clock className="h-3.5 w-3.5" />
-            Checked out at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            Checked out at{' '}
+            {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
 
@@ -94,7 +118,9 @@ export default function CheckoutPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary">Room</span>
-              <span className="text-text-primary font-medium">{stay.room.type} ({stay.room.number})</span>
+              <span className="text-text-primary font-medium">
+                {stay.room.type} ({stay.room.number})
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary">Dates</span>
@@ -109,7 +135,9 @@ export default function CheckoutPage() {
             <div className="border-t border-border pt-3">
               <div className="flex items-center justify-between">
                 <span className="text-text-secondary">Total Paid</span>
-                <span className="text-lg font-bold font-mono text-text-primary">{formatCurrency(stay.folio.total)}</span>
+                <span className="text-lg font-bold font-mono text-text-primary">
+                  {formatCurrency(stay.folio.total)}
+                </span>
               </div>
             </div>
           </div>
@@ -126,7 +154,9 @@ export default function CheckoutPage() {
               <p className="text-xs text-text-muted">From this stay</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold font-mono text-secondary">+{Math.round(stay.folio.total * 1.5)}</p>
+              <p className="text-2xl font-bold font-mono text-secondary">
+                +{Math.round(stay.folio.total * 1.5)}
+              </p>
               <p className="text-xs text-text-muted">pts</p>
             </div>
           </div>
@@ -148,7 +178,9 @@ export default function CheckoutPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-text-primary">Digital Key Deactivated</p>
-              <p className="text-xs text-text-muted">Your mobile key has been automatically revoked</p>
+              <p className="text-xs text-text-muted">
+                Your mobile key has been automatically revoked
+              </p>
             </div>
             <CheckCircle2 className="h-5 w-5 text-accent ml-auto" />
           </div>
@@ -192,7 +224,10 @@ export default function CheckoutPage() {
         {/* Receipt Modal */}
         {showReceipt && (
           <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowReceipt(false)} />
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowReceipt(false)}
+            />
             <div className="relative w-full max-w-lg rounded-t-xl sm:rounded-xl border border-border bg-background shadow-2xl max-h-[85vh] overflow-y-auto">
               <div className="border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 bg-background z-10">
                 <div className="flex items-center gap-2">
@@ -215,7 +250,10 @@ export default function CheckoutPage() {
                   </div>
                   <h4 className="text-lg font-bold text-text-primary">{stay.property.name}</h4>
                   <p className="text-xs text-text-muted">{stay.property.address.street}</p>
-                  <p className="text-xs text-text-muted">{stay.property.address.city}, {stay.property.address.state} {stay.property.address.zip}</p>
+                  <p className="text-xs text-text-muted">
+                    {stay.property.address.city}, {stay.property.address.state}{' '}
+                    {stay.property.address.zip}
+                  </p>
                   <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Paid in Full
                   </div>
@@ -233,42 +271,58 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-text-secondary">Room</span>
-                    <span className="text-text-primary">{stay.room.number} · {stay.room.type}</span>
+                    <span className="text-text-primary">
+                      {stay.room.number} · {stay.room.type}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-text-secondary">Check-in</span>
-                    <span className="text-text-primary">{formatDate(stay.dates.arrival)} at {stay.dates.arrivalTime}</span>
+                    <span className="text-text-primary">
+                      {formatDate(stay.dates.arrival)} at {stay.dates.arrivalTime}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-text-secondary">Check-out</span>
-                    <span className="text-text-primary">{formatDate(stay.dates.departure)} at {stay.dates.departureTime}</span>
+                    <span className="text-text-primary">
+                      {formatDate(stay.dates.departure)} at {stay.dates.departureTime}
+                    </span>
                   </div>
                 </div>
 
                 {/* Charges */}
                 <div className="border-t border-border pt-4">
-                  <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Charges</h5>
+                  <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
+                    Charges
+                  </h5>
                   <div className="space-y-2 text-sm">
                     {stay.folio.charges.map((charge) => (
                       <div key={charge.id} className="flex items-center justify-between">
                         <span className="text-text-secondary">{charge.description}</span>
-                        <span className="font-mono text-text-primary">{formatCurrency(charge.amount)}</span>
+                        <span className="font-mono text-text-primary">
+                          {formatCurrency(charge.amount)}
+                        </span>
                       </div>
                     ))}
                     <div className="border-t border-border pt-2 mt-2">
                       <div className="flex items-center justify-between">
                         <span className="text-text-secondary">Subtotal</span>
-                        <span className="font-mono text-text-primary">{formatCurrency(stay.rate.total)}</span>
+                        <span className="font-mono text-text-primary">
+                          {formatCurrency(stay.rate.total)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-text-secondary">Taxes & Fees</span>
-                        <span className="font-mono text-text-primary">{formatCurrency(stay.rate.taxes + stay.rate.fees)}</span>
+                        <span className="font-mono text-text-primary">
+                          {formatCurrency(stay.rate.taxes + stay.rate.fees)}
+                        </span>
                       </div>
                     </div>
                     <div className="border-t border-border pt-2">
                       <div className="flex items-center justify-between font-bold">
                         <span className="text-text-primary">Total</span>
-                        <span className="font-mono text-lg text-text-primary">{formatCurrency(stay.folio.total)}</span>
+                        <span className="font-mono text-lg text-text-primary">
+                          {formatCurrency(stay.folio.total)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -276,16 +330,22 @@ export default function CheckoutPage() {
 
                 {/* Payment */}
                 <div className="border-t border-border pt-4">
-                  <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Payment</h5>
+                  <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
+                    Payment
+                  </h5>
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-14 items-center justify-center rounded-md bg-blue-600 text-white text-xs font-bold">
                       VISA
                     </div>
                     <div>
                       <p className="text-sm text-text-primary">Visa ending in 4242</p>
-                      <p className="text-xs text-text-muted">{formatDate(new Date().toISOString())}</p>
+                      <p className="text-xs text-text-muted">
+                        {formatDate(new Date().toISOString())}
+                      </p>
                     </div>
-                    <span className="ml-auto text-sm font-mono text-accent">-{formatCurrency(stay.folio.paid)}</span>
+                    <span className="ml-auto text-sm font-mono text-accent">
+                      -{formatCurrency(stay.folio.paid)}
+                    </span>
                   </div>
                 </div>
 
@@ -309,7 +369,10 @@ export default function CheckoutPage() {
         {/* Review Modal */}
         {showReviewModal && (
           <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowReviewModal(false)} />
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowReviewModal(false)}
+            />
             <div className="relative w-full max-w-lg rounded-t-xl sm:rounded-xl border border-border bg-background shadow-2xl max-h-[85vh] overflow-y-auto">
               <div className="border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 bg-background z-10">
                 <div className="flex items-center gap-2">
@@ -326,33 +389,43 @@ export default function CheckoutPage() {
 
               <div className="p-6 space-y-6">
                 <div className="text-center">
-                  <p className="text-sm text-text-muted mb-4">How was your stay at {stay.property.name}?</p>
+                  <p className="text-sm text-text-muted mb-4">
+                    How was your stay at {stay.property.name}?
+                  </p>
                   <div className="flex items-center justify-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
-                        onClick={() => setReviewData(p => ({ ...p, rating: star }))}
+                        onClick={() => setReviewData((p) => ({ ...p, rating: star }))}
                         className="transition-transform hover:scale-110"
                       >
                         <Star
                           className={cn(
                             'h-10 w-10 transition-colors',
-                            reviewData.rating >= star ? 'fill-yellow-400 text-yellow-400' : 'text-border'
+                            reviewData.rating >= star
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-border'
                           )}
                         />
                       </button>
                     ))}
                   </div>
                   <p className="text-xs text-text-muted mt-2">
-                    {reviewData.rating > 0 ? ['Terrible', 'Poor', 'Average', 'Very Good', 'Excellent'][reviewData.rating - 1] : 'Tap to rate'}
+                    {reviewData.rating > 0
+                      ? ['Terrible', 'Poor', 'Average', 'Very Good', 'Excellent'][
+                          reviewData.rating - 1
+                        ]
+                      : 'Tap to rate'}
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-sm text-text-secondary mb-2 block">Tell us about your experience</label>
+                  <label className="text-sm text-text-secondary mb-2 block">
+                    Tell us about your experience
+                  </label>
                   <textarea
                     value={reviewData.comment}
-                    onChange={(e) => setReviewData(p => ({ ...p, comment: e.target.value }))}
+                    onChange={(e) => setReviewData((p) => ({ ...p, comment: e.target.value }))}
                     rows={4}
                     placeholder="What did you like? What could we improve?"
                     className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
@@ -361,7 +434,9 @@ export default function CheckoutPage() {
 
                 <div className="flex items-center gap-2">
                   <ThumbsUp className="h-4 w-4 text-text-muted" />
-                  <span className="text-xs text-text-muted">Your review helps other guests and helps us improve</span>
+                  <span className="text-xs text-text-muted">
+                    Your review helps other guests and helps us improve
+                  </span>
                 </div>
 
                 <Button
@@ -424,7 +499,9 @@ export default function CheckoutPage() {
         </button>
         <div>
           <h1 className="text-xl font-bold text-text-primary">Check Out</h1>
-          <p className="text-xs text-text-muted">Room {stay.room.number} · {stay.property.name}</p>
+          <p className="text-xs text-text-muted">
+            Room {stay.room.number} · {stay.property.name}
+          </p>
         </div>
       </div>
 
@@ -439,7 +516,9 @@ export default function CheckoutPage() {
             Your folio is settled. No additional charges pending.
           </p>
         </div>
-        <span className="text-xs font-mono text-accent font-medium">{formatCurrency(stay.folio.balance)}</span>
+        <span className="text-xs font-mono text-accent font-medium">
+          {formatCurrency(stay.folio.balance)}
+        </span>
       </div>
 
       {/* Folio Summary */}
@@ -505,10 +584,12 @@ export default function CheckoutPage() {
                   : 'border-border bg-background hover:bg-surface-elevated'
               )}
             >
-              <div className={cn(
-                'h-4 w-4 rounded-full border flex items-center justify-center',
-                selectedPayment === pm.id ? 'border-secondary bg-secondary' : 'border-border'
-              )}>
+              <div
+                className={cn(
+                  'h-4 w-4 rounded-full border flex items-center justify-center',
+                  selectedPayment === pm.id ? 'border-secondary bg-secondary' : 'border-border'
+                )}
+              >
                 {selectedPayment === pm.id && <div className="h-2 w-2 rounded-full bg-white" />}
               </div>
               <div className="flex-1">
@@ -541,7 +622,7 @@ export default function CheckoutPage() {
             <input
               type="checkbox"
               checked={notifications.receipt}
-              onChange={(e) => setNotifications(p => ({ ...p, receipt: e.target.checked }))}
+              onChange={(e) => setNotifications((p) => ({ ...p, receipt: e.target.checked }))}
               className="h-4 w-4 rounded border-border text-secondary"
             />
             <div className="flex-1">
@@ -554,7 +635,7 @@ export default function CheckoutPage() {
             <input
               type="checkbox"
               checked={notifications.review}
-              onChange={(e) => setNotifications(p => ({ ...p, review: e.target.checked }))}
+              onChange={(e) => setNotifications((p) => ({ ...p, review: e.target.checked }))}
               className="h-4 w-4 rounded border-border text-secondary"
             />
             <div className="flex-1">
@@ -567,7 +648,7 @@ export default function CheckoutPage() {
             <input
               type="checkbox"
               checked={notifications.survey}
-              onChange={(e) => setNotifications(p => ({ ...p, survey: e.target.checked }))}
+              onChange={(e) => setNotifications((p) => ({ ...p, survey: e.target.checked }))}
               className="h-4 w-4 rounded border-border text-secondary"
             />
             <div className="flex-1">
@@ -604,7 +685,8 @@ export default function CheckoutPage() {
           </button>
         </div>
         <p className="text-xs text-text-muted mt-2">
-          As a Gold member, you may be eligible for complimentary late checkout subject to availability.
+          As a Gold member, you may be eligible for complimentary late checkout subject to
+          availability.
         </p>
       </div>
 
@@ -647,7 +729,18 @@ export default function CheckoutPage() {
 /* Zap icon helper */
 function ZapIcon({ className }) {
   return (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
     </svg>
   );

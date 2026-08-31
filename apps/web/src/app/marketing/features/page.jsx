@@ -1,8 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Check, X, Calendar, Users, BarChart3, Shield, Zap, Globe,
-  BedDouble, CreditCard, MessageSquare, TrendingUp, Plug, Clock, Building2
+  ArrowRight,
+  Check,
+  X,
+  Calendar,
+  Users,
+  BarChart3,
+  Shield,
+  Zap,
+  Globe,
+  BedDouble,
+  CreditCard,
+  MessageSquare,
+  TrendingUp,
+  Plug,
+  Clock,
+  Building2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -13,12 +27,36 @@ const categories = [
     label: 'Operations',
     icon: Building2,
     features: [
-      { title: 'Command Center Dashboard', desc: 'Real-time KPIs, alerts, and activity feed with WebSocket-powered live updates.', icon: BarChart3 },
-      { title: 'Reservation Management', desc: 'Intuitive booking wizard with auto-suggest rooms, upsell prompts, and OTA cross-reference.', icon: Calendar },
-      { title: 'Front Desk Operations', desc: 'One-stroke check-in for returning guests, digital key issuance, and ID OCR auto-fill.', icon: Users },
-      { title: 'Cashiering & Billing', desc: 'Multi-window folios, split payments, PCI-compliant tokenization, and automatic gratuity.', icon: CreditCard },
-      { title: 'Room & Housekeeping', desc: 'Drag-and-drop tape chart, attendant mobile app, and auto-release OOO rooms.', icon: BedDouble },
-      { title: 'Night Audit', desc: 'Guided audit wizard with pre-audit error detection and scheduled auto-audit.', icon: Clock },
+      {
+        title: 'Command Center Dashboard',
+        desc: 'Real-time KPIs, alerts, and activity feed with WebSocket-powered live updates.',
+        icon: BarChart3,
+      },
+      {
+        title: 'Reservation Management',
+        desc: 'Intuitive booking wizard with auto-suggest rooms, upsell prompts, and OTA cross-reference.',
+        icon: Calendar,
+      },
+      {
+        title: 'Front Desk Operations',
+        desc: 'One-stroke check-in for returning guests, digital key issuance, and ID OCR auto-fill.',
+        icon: Users,
+      },
+      {
+        title: 'Cashiering & Billing',
+        desc: 'Multi-window folios, split payments, PCI-compliant tokenization, and automatic gratuity.',
+        icon: CreditCard,
+      },
+      {
+        title: 'Room & Housekeeping',
+        desc: 'Drag-and-drop tape chart, attendant mobile app, and auto-release OOO rooms.',
+        icon: BedDouble,
+      },
+      {
+        title: 'Night Audit',
+        desc: 'Guided audit wizard with pre-audit error detection and scheduled auto-audit.',
+        icon: Clock,
+      },
     ],
   },
   {
@@ -26,12 +64,36 @@ const categories = [
     label: 'Revenue',
     icon: TrendingUp,
     features: [
-      { title: 'AI Revenue Manager', desc: 'LSTM demand forecasting, Bayesian price elasticity, and auto-yield rules with confidence scores.', icon: Zap },
-      { title: 'Rate & Inventory', desc: 'Visual rate calendar, dynamic pricing rules, LOS restrictions, and rate parity monitor.', icon: BarChart3 },
-      { title: 'Upsell Engine', desc: 'AI-suggested room upgrades, late checkout, and add-ons with dynamic pricing.', icon: TrendingUp },
-      { title: 'Channel Management', desc: 'Two-way real-time sync with Booking.com, Expedia, Airbnb, and GDS connectivity.', icon: Globe },
-      { title: 'Commission Processing', desc: 'Automated travel agent and OTA commission accrual, payment batches, and reconciliation.', icon: CreditCard },
-      { title: 'Groups & Blocks', desc: 'Rooming list drag-and-drop, group billing accounts, and pickup forecasting.', icon: Users },
+      {
+        title: 'AI Revenue Manager',
+        desc: 'LSTM demand forecasting, Bayesian price elasticity, and auto-yield rules with confidence scores.',
+        icon: Zap,
+      },
+      {
+        title: 'Rate & Inventory',
+        desc: 'Visual rate calendar, dynamic pricing rules, LOS restrictions, and rate parity monitor.',
+        icon: BarChart3,
+      },
+      {
+        title: 'Upsell Engine',
+        desc: 'AI-suggested room upgrades, late checkout, and add-ons with dynamic pricing.',
+        icon: TrendingUp,
+      },
+      {
+        title: 'Channel Management',
+        desc: 'Two-way real-time sync with Booking.com, Expedia, Airbnb, and GDS connectivity.',
+        icon: Globe,
+      },
+      {
+        title: 'Commission Processing',
+        desc: 'Automated travel agent and OTA commission accrual, payment batches, and reconciliation.',
+        icon: CreditCard,
+      },
+      {
+        title: 'Groups & Blocks',
+        desc: 'Rooming list drag-and-drop, group billing accounts, and pickup forecasting.',
+        icon: Users,
+      },
     ],
   },
   {
@@ -39,12 +101,36 @@ const categories = [
     label: 'Guest Experience',
     icon: MessageSquare,
     features: [
-      { title: 'Booking Engine', desc: 'White-label, multi-language, multi-currency direct booking with abandoned cart recovery.', icon: Globe },
-      { title: 'Guest Portal', desc: 'Online check-in/out, folio viewer, room upgrades, and messaging center.', icon: Users },
-      { title: 'Mobile App', desc: 'PWA with digital key, offline mode, biometric login, and geofencing auto check-in.', icon: Zap },
-      { title: 'AI Concierge', desc: '24/7 multilingual chatbot with context awareness and proactive guest messaging.', icon: MessageSquare },
-      { title: 'Loyalty & Membership', desc: 'Configurable tiers, points accrual, redemption, and partner airline miles integration.', icon: Shield },
-      { title: 'Unified Communication', desc: 'Single inbox for email, SMS, WhatsApp, and in-app chat with SLA monitoring.', icon: Calendar },
+      {
+        title: 'Booking Engine',
+        desc: 'White-label, multi-language, multi-currency direct booking with abandoned cart recovery.',
+        icon: Globe,
+      },
+      {
+        title: 'Guest Portal',
+        desc: 'Online check-in/out, folio viewer, room upgrades, and messaging center.',
+        icon: Users,
+      },
+      {
+        title: 'Mobile App',
+        desc: 'PWA with digital key, offline mode, biometric login, and geofencing auto check-in.',
+        icon: Zap,
+      },
+      {
+        title: 'AI Concierge',
+        desc: '24/7 multilingual chatbot with context awareness and proactive guest messaging.',
+        icon: MessageSquare,
+      },
+      {
+        title: 'Loyalty & Membership',
+        desc: 'Configurable tiers, points accrual, redemption, and partner airline miles integration.',
+        icon: Shield,
+      },
+      {
+        title: 'Unified Communication',
+        desc: 'Single inbox for email, SMS, WhatsApp, and in-app chat with SLA monitoring.',
+        icon: Calendar,
+      },
     ],
   },
   {
@@ -52,12 +138,36 @@ const categories = [
     label: 'Analytics',
     icon: BarChart3,
     features: [
-      { title: 'Predictive Maintenance', desc: 'IoT sensor integration and ML failure prediction with auto-generated work orders.', icon: Zap },
-      { title: 'Sentiment Analysis', desc: 'Review aggregation from TripAdvisor, Google, Booking.com with AI-drafted responses.', icon: MessageSquare },
-      { title: 'Fraud Detection', desc: 'ML risk scoring, chargeback tracking, and fake booking pattern detection.', icon: Shield },
-      { title: 'Guest Journey Analytics', desc: 'End-to-end touchpoint tracking, drop-off analysis, and churn prediction.', icon: Users },
-      { title: 'Housekeeping AI', desc: 'Optimal route generation, task priority matrix, and linen supply forecasting.', icon: BedDouble },
-      { title: 'Labor Optimization', desc: 'Occupancy-based staffing recommendations and F&B demand forecasting.', icon: TrendingUp },
+      {
+        title: 'Predictive Maintenance',
+        desc: 'IoT sensor integration and ML failure prediction with auto-generated work orders.',
+        icon: Zap,
+      },
+      {
+        title: 'Sentiment Analysis',
+        desc: 'Review aggregation from TripAdvisor, Google, Booking.com with AI-drafted responses.',
+        icon: MessageSquare,
+      },
+      {
+        title: 'Fraud Detection',
+        desc: 'ML risk scoring, chargeback tracking, and fake booking pattern detection.',
+        icon: Shield,
+      },
+      {
+        title: 'Guest Journey Analytics',
+        desc: 'End-to-end touchpoint tracking, drop-off analysis, and churn prediction.',
+        icon: Users,
+      },
+      {
+        title: 'Housekeeping AI',
+        desc: 'Optimal route generation, task priority matrix, and linen supply forecasting.',
+        icon: BedDouble,
+      },
+      {
+        title: 'Labor Optimization',
+        desc: 'Occupancy-based staffing recommendations and F&B demand forecasting.',
+        icon: TrendingUp,
+      },
     ],
   },
   {
@@ -65,12 +175,36 @@ const categories = [
     label: 'Integrations',
     icon: Plug,
     features: [
-      { title: 'Payment Gateways', desc: 'Pre-built connectors for Stripe, Adyen, Square, and Worldpay with tokenized vault.', icon: CreditCard },
-      { title: 'POS Systems', desc: 'Oracle MICROS, Toast, Lightspeed, and Square integration for seamless incidental posting.', icon: Zap },
-      { title: 'Door Locks', desc: 'Assa Abloy, SALTO, and Dormakaba digital key issuance from the front desk.', icon: Shield },
-      { title: 'Accounting', desc: 'Daily revenue export to QuickBooks, Xero, and Sage with GL mapping.', icon: BarChart3 },
-      { title: 'CRM & Sales', desc: 'Salesforce and HubSpot bidirectional sync for guest profiles and lead tracking.', icon: Users },
-      { title: 'Open API', desc: 'RESTful API, webhooks, and sandbox environment for custom integrations.', icon: Plug },
+      {
+        title: 'Payment Gateways',
+        desc: 'Pre-built connectors for Stripe, Adyen, Square, and Worldpay with tokenized vault.',
+        icon: CreditCard,
+      },
+      {
+        title: 'POS Systems',
+        desc: 'Oracle MICROS, Toast, Lightspeed, and Square integration for seamless incidental posting.',
+        icon: Zap,
+      },
+      {
+        title: 'Door Locks',
+        desc: 'Assa Abloy, SALTO, and Dormakaba digital key issuance from the front desk.',
+        icon: Shield,
+      },
+      {
+        title: 'Accounting',
+        desc: 'Daily revenue export to QuickBooks, Xero, and Sage with GL mapping.',
+        icon: BarChart3,
+      },
+      {
+        title: 'CRM & Sales',
+        desc: 'Salesforce and HubSpot bidirectional sync for guest profiles and lead tracking.',
+        icon: Users,
+      },
+      {
+        title: 'Open API',
+        desc: 'RESTful API, webhooks, and sandbox environment for custom integrations.',
+        icon: Plug,
+      },
     ],
   },
 ];
@@ -84,18 +218,42 @@ const comparisonRows = [
   { feature: 'AI Revenue Management', opera: false, onq: false, cloudbeds: false, unified: true },
   { feature: 'Real-Time Sync', opera: false, onq: false, cloudbeds: 'Partial', unified: true },
   { feature: 'Open API & Webhooks', opera: 'Partial', onq: false, cloudbeds: true, unified: true },
-  { feature: 'Built-in Guest Portal', opera: 'Add-on', onq: 'Add-on', cloudbeds: true, unified: true },
+  {
+    feature: 'Built-in Guest Portal',
+    opera: 'Add-on',
+    onq: 'Add-on',
+    cloudbeds: true,
+    unified: true,
+  },
   { feature: 'Contactless Check-In', opera: false, onq: false, cloudbeds: true, unified: true },
   { feature: 'Service Recovery Center', opera: false, onq: true, cloudbeds: false, unified: true },
   { feature: 'House Account Manager', opera: false, onq: false, cloudbeds: false, unified: true },
-  { feature: 'No-Show Automation', opera: 'Partial', onq: 'Partial', cloudbeds: false, unified: true },
+  {
+    feature: 'No-Show Automation',
+    opera: 'Partial',
+    onq: 'Partial',
+    cloudbeds: false,
+    unified: true,
+  },
   { feature: 'Vacation Ownership', opera: 'Add-on', onq: false, cloudbeds: false, unified: true },
   { feature: 'Sales & Catering', opera: 'Add-on', onq: false, cloudbeds: false, unified: true },
   { feature: 'Predictive Maintenance', opera: false, onq: false, cloudbeds: false, unified: true },
   { feature: 'Sentiment Analysis', opera: false, onq: false, cloudbeds: false, unified: true },
   { feature: 'Fraud Detection', opera: false, onq: false, cloudbeds: false, unified: true },
-  { feature: 'Training Time', opera: '40 hours', onq: '40 hours', cloudbeds: '8 hours', unified: '4 hours' },
-  { feature: 'Starting Price', opera: '$50K+', onq: 'Proprietary', cloudbeds: '$200/mo', unified: '$199/mo' },
+  {
+    feature: 'Training Time',
+    opera: '40 hours',
+    onq: '40 hours',
+    cloudbeds: '8 hours',
+    unified: '4 hours',
+  },
+  {
+    feature: 'Starting Price',
+    opera: '$50K+',
+    onq: 'Proprietary',
+    cloudbeds: '$200/mo',
+    unified: '$199/mo',
+  },
 ];
 
 function ComparisonCell({ value }) {
@@ -122,7 +280,8 @@ export default function FeaturesPage() {
               Everything you need to <span className="text-secondary">run a modern hotel</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              From reservations to revenue management, Unified PMS replaces your entire tech stack with one intelligent platform.
+              From reservations to revenue management, Unified PMS replaces your entire tech stack
+              with one intelligent platform.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -173,8 +332,12 @@ export default function FeaturesPage() {
       <section className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-text-primary">{activeCategory?.label} Features</h2>
-            <p className="mt-2 text-text-secondary">Deep operational tools designed for speed and clarity.</p>
+            <h2 className="text-3xl font-bold text-text-primary">
+              {activeCategory?.label} Features
+            </h2>
+            <p className="mt-2 text-text-secondary">
+              Deep operational tools designed for speed and clarity.
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {activeCategory?.features.map((f) => (
@@ -223,12 +386,23 @@ export default function FeaturesPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {comparisonRows.map((row) => (
-                  <tr key={row.feature} className="bg-surface hover:bg-background/50 transition-colors">
+                  <tr
+                    key={row.feature}
+                    className="bg-surface hover:bg-background/50 transition-colors"
+                  >
                     <td className="px-6 py-3.5 font-medium text-text-primary">{row.feature}</td>
-                    <td className="px-6 py-3.5 text-center"><ComparisonCell value={row.opera} /></td>
-                    <td className="px-6 py-3.5 text-center"><ComparisonCell value={row.onq} /></td>
-                    <td className="px-6 py-3.5 text-center"><ComparisonCell value={row.cloudbeds} /></td>
-                    <td className="px-6 py-3.5 text-center bg-secondary/5"><ComparisonCell value={row.unified} /></td>
+                    <td className="px-6 py-3.5 text-center">
+                      <ComparisonCell value={row.opera} />
+                    </td>
+                    <td className="px-6 py-3.5 text-center">
+                      <ComparisonCell value={row.onq} />
+                    </td>
+                    <td className="px-6 py-3.5 text-center">
+                      <ComparisonCell value={row.cloudbeds} />
+                    </td>
+                    <td className="px-6 py-3.5 text-center bg-secondary/5">
+                      <ComparisonCell value={row.unified} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

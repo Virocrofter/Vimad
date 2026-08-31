@@ -2,23 +2,84 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Briefcase, Calendar, Users, DollarSign, TrendingUp, TrendingDown,
-  Phone, Mail, CheckCircle2, AlertCircle, Clock, ArrowRight,
-  Plus, Filter, Search, ChevronRight, BarChart3, PieChart,
-  Target, Award, FileText, MessageSquare, Star, MoreHorizontal,
-  Building2, Utensils, PartyPopper, X, Download, RefreshCw
+  Briefcase,
+  Calendar,
+  Users,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Phone,
+  Mail,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  ArrowRight,
+  Plus,
+  Filter,
+  Search,
+  ChevronRight,
+  BarChart3,
+  PieChart,
+  Target,
+  Award,
+  FileText,
+  MessageSquare,
+  Star,
+  MoreHorizontal,
+  Building2,
+  Utensils,
+  PartyPopper,
+  X,
+  Download,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 
 /* ─── Mock Data ─── */
 const pipelineStages = [
-  { id: 'inquiry', label: 'Inquiry', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  { id: 'proposal', label: 'Proposal Sent', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
-  { id: 'negotiation', label: 'Negotiation', color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20' },
-  { id: 'contract', label: 'Contract', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
-  { id: 'definite', label: 'Definite', color: 'text-success', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  { id: 'completed', label: 'Completed', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border' },
+  {
+    id: 'inquiry',
+    label: 'Inquiry',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+  },
+  {
+    id: 'proposal',
+    label: 'Proposal Sent',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+  },
+  {
+    id: 'negotiation',
+    label: 'Negotiation',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    border: 'border-secondary/20',
+  },
+  {
+    id: 'contract',
+    label: 'Contract',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+  },
+  {
+    id: 'definite',
+    label: 'Definite',
+    color: 'text-success',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+  },
+  {
+    id: 'completed',
+    label: 'Completed',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+  },
 ];
 
 const leads = [
@@ -198,7 +259,11 @@ const eventTypeBreakdown = [
 
 /* ─── Helpers ─── */
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 function daysUntil(dateStr) {
@@ -209,7 +274,7 @@ function daysUntil(dateStr) {
 }
 
 function getStageMeta(stageId) {
-  return pipelineStages.find(s => s.id === stageId) || pipelineStages[0];
+  return pipelineStages.find((s) => s.id === stageId) || pipelineStages[0];
 }
 
 /* ─── Components ─── */
@@ -222,13 +287,34 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium flex items-center gap-1', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn(
+                'mt-1 text-xs font-medium flex items-center gap-1',
+                trend >= 0 ? 'text-accent' : 'text-danger'
+              )}
+            >
+              {trend >= 0 ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -238,7 +324,7 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
 
 function PipelineColumn({ stage, leads, onLeadClick }) {
   const meta = getStageMeta(stage);
-  const stageLeads = leads.filter(l => l.stage === stage);
+  const stageLeads = leads.filter((l) => l.stage === stage);
   const totalValue = stageLeads.reduce((s, l) => s + l.revenue * (l.probability / 100), 0);
 
   return (
@@ -258,8 +344,19 @@ function PipelineColumn({ stage, leads, onLeadClick }) {
             className="w-full rounded-xl border border-border bg-surface p-4 text-left transition-all hover:border-secondary/50 hover:shadow-md group"
           >
             <div className="flex items-start justify-between mb-2">
-              <h4 className="text-sm font-semibold text-text-primary group-hover:text-secondary transition-colors">{lead.client}</h4>
-              <span className={cn('text-xs font-bold font-mono', lead.probability >= 80 ? 'text-accent' : lead.probability >= 50 ? 'text-warning' : 'text-info')}>
+              <h4 className="text-sm font-semibold text-text-primary group-hover:text-secondary transition-colors">
+                {lead.client}
+              </h4>
+              <span
+                className={cn(
+                  'text-xs font-bold font-mono',
+                  lead.probability >= 80
+                    ? 'text-accent'
+                    : lead.probability >= 50
+                      ? 'text-warning'
+                      : 'text-info'
+                )}
+              >
                 {lead.probability}%
               </span>
             </div>
@@ -269,13 +366,20 @@ function PipelineColumn({ stage, leads, onLeadClick }) {
               {lead.eventDate}
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold font-mono text-text-primary">{formatCurrency(lead.revenue)}</span>
+              <span className="text-sm font-bold font-mono text-text-primary">
+                {formatCurrency(lead.revenue)}
+              </span>
               <span className="text-[10px] text-text-muted">{lead.assignedTo}</span>
             </div>
             {lead.nextFollowUp && daysUntil(lead.nextFollowUp) <= 2 && (
               <div className="mt-2 flex items-center gap-1 text-[10px] text-warning">
                 <Clock className="h-3 w-3" />
-                Follow-up {daysUntil(lead.nextFollowUp) === 0 ? 'today' : daysUntil(lead.nextFollowUp) === 1 ? 'tomorrow' : `in ${daysUntil(lead.nextFollowUp)} days`}
+                Follow-up{' '}
+                {daysUntil(lead.nextFollowUp) === 0
+                  ? 'today'
+                  : daysUntil(lead.nextFollowUp) === 1
+                    ? 'tomorrow'
+                    : `in ${daysUntil(lead.nextFollowUp)} days`}
               </div>
             )}
           </button>
@@ -288,7 +392,10 @@ function PipelineColumn({ stage, leads, onLeadClick }) {
       </div>
       <div className="mt-3 pt-3 border-t border-border">
         <p className="text-xs text-text-muted text-center">
-          Weighted: <span className="font-mono font-medium text-text-primary">{formatCurrency(totalValue)}</span>
+          Weighted:{' '}
+          <span className="font-mono font-medium text-text-primary">
+            {formatCurrency(totalValue)}
+          </span>
         </p>
       </div>
     </div>
@@ -306,16 +413,25 @@ function EventCard({ event, compact = false }) {
   if (compact) {
     return (
       <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 hover:bg-background/50 transition-colors">
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', statusMeta.class.split(' ')[0])}>
+        <div
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-lg',
+            statusMeta.class.split(' ')[0]
+          )}
+        >
           <Calendar className={cn('h-5 w-5', statusMeta.class.split(' ')[1])} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-text-primary truncate">{event.name}</p>
-          <p className="text-xs text-text-muted">{event.venue} · {event.guests} guests</p>
+          <p className="text-xs text-text-muted">
+            {event.venue} · {event.guests} guests
+          </p>
         </div>
         <div className="text-right">
           <p className="text-xs font-medium text-text-primary">{event.date}</p>
-          <p className={cn('text-[10px]', days <= 1 ? 'text-danger font-medium' : 'text-text-muted')}>
+          <p
+            className={cn('text-[10px]', days <= 1 ? 'text-danger font-medium' : 'text-text-muted')}
+          >
             {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
           </p>
         </div>
@@ -327,7 +443,12 @@ function EventCard({ event, compact = false }) {
     <div className="rounded-xl border border-border bg-surface p-5 hover:border-secondary/50 transition-all">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', statusMeta.class.split(' ')[0])}>
+          <div
+            className={cn(
+              'flex h-10 w-10 items-center justify-center rounded-lg',
+              statusMeta.class.split(' ')[0]
+            )}
+          >
             <PartyPopper className={cn('h-5 w-5', statusMeta.class.split(' ')[1])} />
           </div>
           <div>
@@ -335,7 +456,12 @@ function EventCard({ event, compact = false }) {
             <p className="text-xs text-text-muted">{event.client}</p>
           </div>
         </div>
-        <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-medium', statusMeta.class)}>
+        <span
+          className={cn(
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-medium',
+            statusMeta.class
+          )}
+        >
           {statusMeta.label}
         </span>
       </div>
@@ -365,7 +491,9 @@ function EventCard({ event, compact = false }) {
           <span className="text-xs text-text-muted">·</span>
           <span className="text-xs text-text-muted">{event.catering}</span>
         </div>
-        <span className="text-sm font-bold font-mono text-text-primary">{formatCurrency(event.revenue)}</span>
+        <span className="text-sm font-bold font-mono text-text-primary">
+          {formatCurrency(event.revenue)}
+        </span>
       </div>
     </div>
   );
@@ -386,17 +514,29 @@ function LeadDetailModal({ lead, onClose }) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-text-primary">{lead.client}</h3>
-                <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.bg, meta.color, meta.border)}>
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+                    meta.bg,
+                    meta.color,
+                    meta.border
+                  )}
+                >
                   {meta.label}
                 </span>
               </div>
-              <p className="text-xs text-text-muted mt-0.5">{lead.id} · {lead.eventType}</p>
+              <p className="text-xs text-text-muted mt-0.5">
+                {lead.id} · {lead.eventType}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
                 <FileText className="mr-1.5 h-3.5 w-3.5" /> Proposal
               </Button>
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -408,23 +548,38 @@ function LeadDetailModal({ lead, onClose }) {
           <div className="grid grid-cols-3 gap-4">
             <div className="rounded-xl border border-border bg-surface p-4 text-center">
               <p className="text-xs text-text-muted uppercase tracking-wider">Potential Revenue</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatCurrency(lead.revenue)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {formatCurrency(lead.revenue)}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4 text-center">
               <p className="text-xs text-text-muted uppercase tracking-wider">Probability</p>
-              <p className={cn('mt-1 text-xl font-bold font-mono', lead.probability >= 80 ? 'text-accent' : lead.probability >= 50 ? 'text-warning' : 'text-info')}>
+              <p
+                className={cn(
+                  'mt-1 text-xl font-bold font-mono',
+                  lead.probability >= 80
+                    ? 'text-accent'
+                    : lead.probability >= 50
+                      ? 'text-warning'
+                      : 'text-info'
+                )}
+              >
                 {lead.probability}%
               </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4 text-center">
               <p className="text-xs text-text-muted uppercase tracking-wider">Weighted Value</p>
-              <p className="mt-1 text-xl font-bold font-mono text-secondary">{formatCurrency(lead.revenue * (lead.probability / 100))}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-secondary">
+                {formatCurrency(lead.revenue * (lead.probability / 100))}
+              </p>
             </div>
           </div>
 
           {/* Contact Info */}
           <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Contact Information</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Contact Information
+            </h4>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="flex items-center gap-2 text-sm text-text-primary">
                 <Users className="h-4 w-4 text-text-muted" /> {lead.contact}
@@ -443,28 +598,41 @@ function LeadDetailModal({ lead, onClose }) {
 
           {/* Pipeline Progress */}
           <div className="rounded-xl border border-border bg-surface p-5">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">Pipeline Progress</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">
+              Pipeline Progress
+            </h4>
             <div className="flex items-center">
               {pipelineStages.map((stage, i) => {
-                const isActive = pipelineStages.findIndex(s => s.id === lead.stage) >= i;
+                const isActive = pipelineStages.findIndex((s) => s.id === lead.stage) >= i;
                 const isCurrent = stage.id === lead.stage;
                 return (
                   <div key={stage.id} className="flex items-center flex-1">
                     <div className="flex flex-col items-center flex-1">
-                      <div className={cn(
-                        'h-8 w-8 rounded-full flex items-center justify-center border-2 text-xs font-bold transition-colors',
-                        isCurrent ? 'border-secondary bg-secondary text-white' :
-                        isActive ? 'border-accent bg-accent/10 text-accent' :
-                        'border-border bg-background text-text-muted'
-                      )}>
+                      <div
+                        className={cn(
+                          'h-8 w-8 rounded-full flex items-center justify-center border-2 text-xs font-bold transition-colors',
+                          isCurrent
+                            ? 'border-secondary bg-secondary text-white'
+                            : isActive
+                              ? 'border-accent bg-accent/10 text-accent'
+                              : 'border-border bg-background text-text-muted'
+                        )}
+                      >
                         {isActive ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
                       </div>
-                      <span className={cn('mt-1.5 text-[10px] font-medium text-center', isActive ? 'text-text-primary' : 'text-text-muted')}>
+                      <span
+                        className={cn(
+                          'mt-1.5 text-[10px] font-medium text-center',
+                          isActive ? 'text-text-primary' : 'text-text-muted'
+                        )}
+                      >
                         {stage.label}
                       </span>
                     </div>
                     {i < pipelineStages.length - 1 && (
-                      <div className={cn('h-0.5 flex-1 mx-1', isActive ? 'bg-accent' : 'bg-border')} />
+                      <div
+                        className={cn('h-0.5 flex-1 mx-1', isActive ? 'bg-accent' : 'bg-border')}
+                      />
                     )}
                   </div>
                 );
@@ -474,23 +642,35 @@ function LeadDetailModal({ lead, onClose }) {
 
           {/* Notes */}
           <div className="rounded-xl border border-border bg-surface p-5">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Internal Notes</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+              Internal Notes
+            </h4>
             <p className="text-sm text-text-secondary leading-relaxed">{lead.notes}</p>
           </div>
 
           {/* Activity */}
           <div className="rounded-xl border border-border bg-surface p-5">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Recent Activity</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+              Recent Activity
+            </h4>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">JM</div>
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
+                  JM
+                </div>
                 <div>
-                  <p className="text-sm text-text-primary">Updated probability to {lead.probability}%</p>
-                  <p className="text-xs text-text-muted">{lead.lastActivity} · {lead.assignedTo}</p>
+                  <p className="text-sm text-text-primary">
+                    Updated probability to {lead.probability}%
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {lead.lastActivity} · {lead.assignedTo}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-info/10 text-xs font-bold text-info">SY</div>
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-info/10 text-xs font-bold text-info">
+                  SY
+                </div>
                 <div>
                   <p className="text-sm text-text-primary">Initial inquiry received via website</p>
                   <p className="text-xs text-text-muted">2026-08-01 · System</p>
@@ -517,7 +697,8 @@ export default function SalesCateringPage() {
   const filteredLeads = useMemo(() => {
     return leads.filter((l) => {
       const matchesStage = stageFilter === 'all' || l.stage === stageFilter;
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         l.client.toLowerCase().includes(query.toLowerCase()) ||
         l.contact.toLowerCase().includes(query.toLowerCase()) ||
         l.eventType.toLowerCase().includes(query.toLowerCase()) ||
@@ -527,15 +708,18 @@ export default function SalesCateringPage() {
   }, [stageFilter, query]);
 
   const stats = useMemo(() => {
-    const activeLeads = leads.filter(l => l.stage !== 'completed');
+    const activeLeads = leads.filter((l) => l.stage !== 'completed');
     const totalPipeline = activeLeads.reduce((s, l) => s + l.revenue * (l.probability / 100), 0);
     const totalPotential = activeLeads.reduce((s, l) => s + l.revenue, 0);
     const thisMonthRevenue = monthlyRevenue[monthlyRevenue.length - 1].revenue;
-    const winRate = leads.filter(l => l.stage === 'completed').length / leads.filter(l => l.stage === 'completed' || l.stage === 'definite').length * 100;
+    const winRate =
+      (leads.filter((l) => l.stage === 'completed').length /
+        leads.filter((l) => l.stage === 'completed' || l.stage === 'definite').length) *
+      100;
     return { totalPipeline, totalPotential, thisMonthRevenue, winRate: Math.round(winRate) || 0 };
   }, []);
 
-  const upcomingThisWeek = upcomingEvents.filter(e => daysUntil(e.date) <= 7);
+  const upcomingThisWeek = upcomingEvents.filter((e) => daysUntil(e.date) <= 7);
 
   return (
     <div className="space-y-6">
@@ -543,7 +727,9 @@ export default function SalesCateringPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Sales & Catering</h1>
-          <p className="text-sm text-text-secondary">Event pipeline, lead management, and revenue tracking</p>
+          <p className="text-sm text-text-secondary">
+            Event pipeline, lead management, and revenue tracking
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -562,7 +748,7 @@ export default function SalesCateringPage() {
           value={formatCurrency(stats.totalPipeline)}
           icon={Target}
           color="text-secondary"
-          subtext={`${leads.filter(l => l.stage !== 'completed').length} active leads`}
+          subtext={`${leads.filter((l) => l.stage !== 'completed').length} active leads`}
         />
         <StatCard
           label="Potential Revenue"
@@ -602,7 +788,9 @@ export default function SalesCateringPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" /> {tab.label}
@@ -622,7 +810,11 @@ export default function SalesCateringPage() {
                 <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-secondary" /> Upcoming Events
                 </h3>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/app/sales-catering/events')}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/app/sales-catering/events')}
+                >
                   View Calendar <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
@@ -631,7 +823,8 @@ export default function SalesCateringPage() {
                 <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-warning shrink-0" />
                   <p className="text-xs text-text-secondary">
-                    <span className="font-medium">{upcomingThisWeek.length} events</span> happening in the next 7 days
+                    <span className="font-medium">{upcomingThisWeek.length} events</span> happening
+                    in the next 7 days
                   </p>
                 </div>
               )}
@@ -655,7 +848,9 @@ export default function SalesCateringPage() {
                     <div key={item.type}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-text-secondary">{item.type}</span>
-                        <span className="text-xs font-mono font-bold text-text-primary">{formatCurrency(item.revenue)}</span>
+                        <span className="text-xs font-mono font-bold text-text-primary">
+                          {formatCurrency(item.revenue)}
+                        </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                         <div
@@ -670,7 +865,9 @@ export default function SalesCateringPage() {
                 <div className="mt-4 pt-3 border-t border-border">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-text-primary">Total YTD</span>
-                    <span className="font-bold font-mono text-text-primary">{formatCurrency(490000)}</span>
+                    <span className="font-bold font-mono text-text-primary">
+                      {formatCurrency(490000)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -686,7 +883,10 @@ export default function SalesCateringPage() {
                     const targetPct = (m.target / 70000) * 100;
                     return (
                       <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
-                        <div className="relative w-full flex justify-center" style={{ height: `${targetPct}%` }}>
+                        <div
+                          className="relative w-full flex justify-center"
+                          style={{ height: `${targetPct}%` }}
+                        >
                           <div
                             className="absolute bottom-0 w-full max-w-[28px] rounded-t bg-border/50"
                             style={{ height: '100%' }}
@@ -705,8 +905,12 @@ export default function SalesCateringPage() {
                   })}
                 </div>
                 <div className="mt-3 flex items-center gap-4 text-[10px] text-text-muted">
-                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-accent" /> Actual</span>
-                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-border" /> Target</span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-sm bg-accent" /> Actual
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-sm bg-border" /> Target
+                  </span>
                 </div>
               </div>
 
@@ -714,16 +918,36 @@ export default function SalesCateringPage() {
               <div className="rounded-xl border border-border bg-surface p-5">
                 <h3 className="text-sm font-semibold text-text-primary mb-3">Quick Actions</h3>
                 <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => navigate('/app/sales-catering/events')}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    size="sm"
+                    onClick={() => navigate('/app/sales-catering/events')}
+                  >
                     <Calendar className="mr-2 h-4 w-4" /> Event Calendar
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => navigate('/app/sales-catering/leads')}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    size="sm"
+                    onClick={() => navigate('/app/sales-catering/leads')}
+                  >
                     <Briefcase className="mr-2 h-4 w-4" /> Manage Leads
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => navigate('/app/sales-catering/catering')}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    size="sm"
+                    onClick={() => navigate('/app/sales-catering/catering')}
+                  >
                     <Utensils className="mr-2 h-4 w-4" /> Catering Menus
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => navigate('/app/sales-catering/venues')}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    size="sm"
+                    onClick={() => navigate('/app/sales-catering/venues')}
+                  >
                     <Building2 className="mr-2 h-4 w-4" /> Venue Setup
                   </Button>
                 </div>
@@ -753,7 +977,9 @@ export default function SalesCateringPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filter
@@ -772,37 +998,45 @@ export default function SalesCateringPage() {
                 onClick={() => setStageFilter('all')}
                 className={cn(
                   'rounded-full px-3 py-1 text-xs font-medium transition-colors',
-                  stageFilter === 'all' ? 'bg-secondary text-white' : 'bg-background text-text-secondary border border-border'
+                  stageFilter === 'all'
+                    ? 'bg-secondary text-white'
+                    : 'bg-background text-text-secondary border border-border'
                 )}
               >
                 All
               </button>
-              {pipelineStages.filter(s => s.id !== 'completed').map((stage) => (
-                <button
-                  key={stage.id}
-                  onClick={() => setStageFilter(stage.id)}
-                  className={cn(
-                    'rounded-full px-3 py-1 text-xs font-medium transition-colors border',
-                    stageFilter === stage.id ? stage.bg + ' ' + stage.color + ' ' + stage.border : 'bg-background text-text-secondary border-border'
-                  )}
-                >
-                  {stage.label}
-                </button>
-              ))}
+              {pipelineStages
+                .filter((s) => s.id !== 'completed')
+                .map((stage) => (
+                  <button
+                    key={stage.id}
+                    onClick={() => setStageFilter(stage.id)}
+                    className={cn(
+                      'rounded-full px-3 py-1 text-xs font-medium transition-colors border',
+                      stageFilter === stage.id
+                        ? stage.bg + ' ' + stage.color + ' ' + stage.border
+                        : 'bg-background text-text-secondary border-border'
+                    )}
+                  >
+                    {stage.label}
+                  </button>
+                ))}
             </div>
           )}
 
           {/* Pipeline Board */}
           <div className="overflow-x-auto pb-2">
             <div className="flex gap-4 min-w-max">
-              {pipelineStages.filter(s => s.id !== 'completed').map((stage) => (
-                <PipelineColumn
-                  key={stage.id}
-                  stage={stage.id}
-                  leads={filteredLeads}
-                  onLeadClick={setSelectedLead}
-                />
-              ))}
+              {pipelineStages
+                .filter((s) => s.id !== 'completed')
+                .map((stage) => (
+                  <PipelineColumn
+                    key={stage.id}
+                    stage={stage.id}
+                    leads={filteredLeads}
+                    onLeadClick={setSelectedLead}
+                  />
+                ))}
             </div>
           </div>
 
@@ -812,26 +1046,34 @@ export default function SalesCateringPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-accent" /> Recently Completed
               </h3>
-              <span className="text-xs text-text-muted">{leads.filter(l => l.stage === 'completed').length} events</span>
+              <span className="text-xs text-text-muted">
+                {leads.filter((l) => l.stage === 'completed').length} events
+              </span>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {leads.filter(l => l.stage === 'completed').map((lead) => (
-                <button
-                  key={lead.id}
-                  onClick={() => setSelectedLead(lead)}
-                  className="rounded-lg border border-border bg-background p-4 text-left hover:border-secondary/50 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-semibold text-text-primary">{lead.client}</h4>
-                    <Star className="h-4 w-4 text-warning fill-warning" />
-                  </div>
-                  <p className="text-xs text-text-muted mb-2">{lead.eventType} · {lead.eventDate}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold font-mono text-accent">{formatCurrency(lead.revenue)}</span>
-                    <span className="text-[10px] text-text-muted">{lead.assignedTo}</span>
-                  </div>
-                </button>
-              ))}
+              {leads
+                .filter((l) => l.stage === 'completed')
+                .map((lead) => (
+                  <button
+                    key={lead.id}
+                    onClick={() => setSelectedLead(lead)}
+                    className="rounded-lg border border-border bg-background p-4 text-left hover:border-secondary/50 transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-text-primary">{lead.client}</h4>
+                      <Star className="h-4 w-4 text-warning fill-warning" />
+                    </div>
+                    <p className="text-xs text-text-muted mb-2">
+                      {lead.eventType} · {lead.eventDate}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold font-mono text-accent">
+                        {formatCurrency(lead.revenue)}
+                      </span>
+                      <span className="text-[10px] text-text-muted">{lead.assignedTo}</span>
+                    </div>
+                  </button>
+                ))}
             </div>
           </div>
         </div>

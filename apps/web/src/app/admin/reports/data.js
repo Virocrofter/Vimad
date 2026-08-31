@@ -6,7 +6,8 @@ export const complianceRules = [
     id: 'RULE-001',
     name: 'GDPR Data Retention',
     framework: 'gdpr',
-    description: 'Personal data must not be retained longer than necessary for the purposes for which it was collected.',
+    description:
+      'Personal data must not be retained longer than necessary for the purposes for which it was collected.',
     severity: 'critical',
     category: 'data_retention',
     check: 'retention_policy',
@@ -72,12 +73,42 @@ export const complianceRules = [
 
 /* ─── Compliance Frameworks ─── */
 export const complianceFrameworks = [
-  { id: 'gdpr', label: 'GDPR', description: 'General Data Protection Regulation (EU)', region: 'EU', color: '#3b82f6' },
-  { id: 'hipaa', label: 'HIPAA', description: 'Health Insurance Portability and Accountability Act (US)', region: 'US', color: '#22c55e' },
-  { id: 'pci-dss', label: 'PCI DSS', description: 'Payment Card Industry Data Security Standard', region: 'Global', color: '#f59e0b' },
+  {
+    id: 'gdpr',
+    label: 'GDPR',
+    description: 'General Data Protection Regulation (EU)',
+    region: 'EU',
+    color: '#3b82f6',
+  },
+  {
+    id: 'hipaa',
+    label: 'HIPAA',
+    description: 'Health Insurance Portability and Accountability Act (US)',
+    region: 'US',
+    color: '#22c55e',
+  },
+  {
+    id: 'pci-dss',
+    label: 'PCI DSS',
+    description: 'Payment Card Industry Data Security Standard',
+    region: 'Global',
+    color: '#f59e0b',
+  },
   { id: 'sox', label: 'SOX', description: 'Sarbanes-Oxley Act', region: 'US', color: '#863bff' },
-  { id: 'iso27001', label: 'ISO 27001', description: 'Information Security Management', region: 'Global', color: '#ef4444' },
-  { id: 'soc2', label: 'SOC 2', description: 'Service Organization Control 2', region: 'US', color: '#06b6d4' },
+  {
+    id: 'iso27001',
+    label: 'ISO 27001',
+    description: 'Information Security Management',
+    region: 'Global',
+    color: '#ef4444',
+  },
+  {
+    id: 'soc2',
+    label: 'SOC 2',
+    description: 'Service Organization Control 2',
+    region: 'US',
+    color: '#06b6d4',
+  },
 ];
 
 /* ─── Mock Compliance Reports ─── */
@@ -91,7 +122,8 @@ export const complianceReports = [
     generatedAt: '2026-08-16 12:00:00',
     generatedBy: 'System',
     recordCount: 1247,
-    description: 'Comprehensive GDPR compliance assessment covering data retention, subject rights, and cross-border transfers.',
+    description:
+      'Comprehensive GDPR compliance assessment covering data retention, subject rights, and cross-border transfers.',
     downloadUrl: '#',
   },
   {
@@ -115,7 +147,8 @@ export const complianceReports = [
     generatedAt: '2026-08-01 00:00:00',
     generatedBy: 'Alex Morgan',
     recordCount: 3847,
-    description: 'Semi-annual internal audit covering all ISO 27001 controls and Annex A requirements.',
+    description:
+      'Semi-annual internal audit covering all ISO 27001 controls and Annex A requirements.',
     downloadUrl: '#',
   },
   {
@@ -331,7 +364,13 @@ export function formatDate(dateStr) {
 export function formatDateTime(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr.replace(' ', 'T'));
-  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function timeAgo(dateStr) {
@@ -347,32 +386,86 @@ export function timeAgo(dateStr) {
 }
 
 export function getFrameworkColor(id) {
-  const fw = complianceFrameworks.find(f => f.id === id);
+  const fw = complianceFrameworks.find((f) => f.id === id);
   return fw?.color || '#6b7280';
 }
 
 export function getFrameworkLabel(id) {
-  const fw = complianceFrameworks.find(f => f.id === id);
+  const fw = complianceFrameworks.find((f) => f.id === id);
   return fw?.label || id;
 }
 
 export function getSeverityMeta(severity) {
   const map = {
-    critical: { color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500', label: 'Critical' },
-    high: { color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500', label: 'High' },
-    medium: { color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', dot: 'bg-blue-500', label: 'Medium' },
-    low: { color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted', label: 'Low' },
+    critical: {
+      color: 'text-rose-500',
+      bg: 'bg-rose-500/10',
+      border: 'border-rose-500/20',
+      dot: 'bg-rose-500',
+      label: 'Critical',
+    },
+    high: {
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/20',
+      dot: 'bg-amber-500',
+      label: 'High',
+    },
+    medium: {
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/20',
+      dot: 'bg-blue-500',
+      label: 'Medium',
+    },
+    low: {
+      color: 'text-text-muted',
+      bg: 'bg-neutral/10',
+      border: 'border-border',
+      dot: 'bg-text-muted',
+      label: 'Low',
+    },
   };
   return map[severity] || map.low;
 }
 
 export function getStatusMeta(status) {
   const map = {
-    complete: { color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500', label: 'Complete' },
-    pending: { color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500', label: 'Pending' },
-    running: { color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', dot: 'bg-blue-500', label: 'Running' },
-    failed: { color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500', label: 'Failed' },
-    generating: { color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', dot: 'bg-blue-500', label: 'Generating' },
+    complete: {
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10',
+      border: 'border-emerald-500/20',
+      dot: 'bg-emerald-500',
+      label: 'Complete',
+    },
+    pending: {
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/20',
+      dot: 'bg-amber-500',
+      label: 'Pending',
+    },
+    running: {
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/20',
+      dot: 'bg-blue-500',
+      label: 'Running',
+    },
+    failed: {
+      color: 'text-rose-500',
+      bg: 'bg-rose-500/10',
+      border: 'border-rose-500/20',
+      dot: 'bg-rose-500',
+      label: 'Failed',
+    },
+    generating: {
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/20',
+      dot: 'bg-blue-500',
+      label: 'Generating',
+    },
   };
   return map[status] || map.pending;
 }
@@ -381,7 +474,13 @@ export function getStatusMeta(status) {
 export const exportFormats = [
   { id: 'pdf', label: 'PDF', ext: '.pdf', mime: 'application/pdf', icon: 'FileText' },
   { id: 'csv', label: 'CSV', ext: '.csv', mime: 'text/csv', icon: 'FileSpreadsheet' },
-  { id: 'xlsx', label: 'Excel', ext: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', icon: 'FileSpreadsheet' },
+  {
+    id: 'xlsx',
+    label: 'Excel',
+    ext: '.xlsx',
+    mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    icon: 'FileSpreadsheet',
+  },
   { id: 'json', label: 'JSON', ext: '.json', mime: 'application/json', icon: 'FileJson' },
 ];
 
@@ -459,26 +558,110 @@ export function getRegionName(code) {
 
 /* ─── Migration Status Meta ─── */
 export const migrationStatusMeta = {
-  pending: { label: 'Pending', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500' },
-  running: { label: 'Running', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', dot: 'bg-blue-500' },
-  completed: { label: 'Completed', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500' },
-  failed: { label: 'Failed', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500' },
-  cancelled: { label: 'Cancelled', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
+  pending: {
+    label: 'Pending',
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    dot: 'bg-amber-500',
+  },
+  running: {
+    label: 'Running',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/20',
+    dot: 'bg-blue-500',
+  },
+  completed: {
+    label: 'Completed',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+    dot: 'bg-emerald-500',
+  },
+  failed: {
+    label: 'Failed',
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/20',
+    dot: 'bg-rose-500',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 /* ─── Region Status Meta ─── */
 export const regionStatusMeta = {
-  active: { label: 'Active', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500' },
-  deploying: { label: 'Deploying', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', dot: 'bg-blue-500' },
-  maintenance: { label: 'Maintenance', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500' },
-  degraded: { label: 'Degraded', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500' },
-  offline: { label: 'Offline', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
+  active: {
+    label: 'Active',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+    dot: 'bg-emerald-500',
+  },
+  deploying: {
+    label: 'Deploying',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/20',
+    dot: 'bg-blue-500',
+  },
+  maintenance: {
+    label: 'Maintenance',
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    dot: 'bg-amber-500',
+  },
+  degraded: {
+    label: 'Degraded',
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/20',
+    dot: 'bg-rose-500',
+  },
+  offline: {
+    label: 'Offline',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 /* ─── Region Tenants (cross-region tenant distribution) ─── */
 export const regionTenants = [
-  { regionId: 'REG-001', regionCode: 'us-east-1', tenantCount: 89, activeUsers: 2840, dataVolumeGb: 124.2 },
-  { regionId: 'REG-002', regionCode: 'us-west-2', tenantCount: 34, activeUsers: 920, dataVolumeGb: 42.8 },
-  { regionId: 'REG-003', regionCode: 'eu-west-1', tenantCount: 56, activeUsers: 1680, dataVolumeGb: 68.4 },
-  { regionId: 'REG-004', regionCode: 'ap-southeast-1', tenantCount: 12, activeUsers: 340, dataVolumeGb: 15.6 },
+  {
+    regionId: 'REG-001',
+    regionCode: 'us-east-1',
+    tenantCount: 89,
+    activeUsers: 2840,
+    dataVolumeGb: 124.2,
+  },
+  {
+    regionId: 'REG-002',
+    regionCode: 'us-west-2',
+    tenantCount: 34,
+    activeUsers: 920,
+    dataVolumeGb: 42.8,
+  },
+  {
+    regionId: 'REG-003',
+    regionCode: 'eu-west-1',
+    tenantCount: 56,
+    activeUsers: 1680,
+    dataVolumeGb: 68.4,
+  },
+  {
+    regionId: 'REG-004',
+    regionCode: 'ap-southeast-1',
+    tenantCount: 12,
+    activeUsers: 340,
+    dataVolumeGb: 15.6,
+  },
 ];

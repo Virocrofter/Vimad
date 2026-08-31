@@ -1,23 +1,55 @@
 /* src/app/admin/data-export/components.jsx */
 import { useState } from 'react';
 import {
-  Download, CheckCircle2, XCircle, Clock, AlertTriangle, Loader2,
-  Database, Shield, Trash2, FileText, BarChart3, Users, CreditCard,
-  MessageSquare, Calendar, Eye, MoreHorizontal, Pause, Play, RotateCcw,
-  Hash, FileDigit, HardDrive, Check
+  Download,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertTriangle,
+  Loader2,
+  Database,
+  Shield,
+  Trash2,
+  FileText,
+  BarChart3,
+  Users,
+  CreditCard,
+  MessageSquare,
+  Calendar,
+  Eye,
+  MoreHorizontal,
+  Pause,
+  Play,
+  RotateCcw,
+  Hash,
+  FileDigit,
+  HardDrive,
+  Check,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  exportStatusMeta, erasureStatusMeta, priorityMeta, anonymizeStatusMeta,
-  strategyMeta, getCategoryMeta, formatDuration, formatFileSize, timeAgo
+  exportStatusMeta,
+  erasureStatusMeta,
+  priorityMeta,
+  anonymizeStatusMeta,
+  strategyMeta,
+  getCategoryMeta,
+  formatDuration,
+  formatFileSize,
+  timeAgo,
 } from './data';
 
 /* ─── Export Status Badge ─── */
 export function ExportStatusBadge({ status }) {
   const meta = exportStatusMeta[status] || exportStatusMeta.pending;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -28,7 +60,12 @@ export function ExportStatusBadge({ status }) {
 export function ErasureStatusBadge({ status }) {
   const meta = erasureStatusMeta[status] || erasureStatusMeta.pending_review;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -39,7 +76,12 @@ export function ErasureStatusBadge({ status }) {
 export function PriorityBadge({ priority }) {
   const meta = priorityMeta[priority] || priorityMeta.medium;
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -50,7 +92,14 @@ export function PriorityBadge({ priority }) {
 export function CategoryBadge({ category }) {
   const meta = getCategoryMeta(category);
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.bg, meta.color, 'border-current/20')}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -76,12 +125,26 @@ export function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -91,18 +154,29 @@ export function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
 
 /* ─── Export Job Row ─── */
 export function ExportJobRow({ job, onDownload, onDelete }) {
-  const isExpired = job.status === 'completed' && new Date(job.expiresAt) < new Date('2026-08-16T14:20:00');
+  const isExpired =
+    job.status === 'completed' && new Date(job.expiresAt) < new Date('2026-08-16T14:20:00');
   const displayStatus = isExpired ? 'expired' : job.status;
 
   return (
     <tr className="hover:bg-background/50 transition-colors">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', exportStatusMeta[displayStatus]?.class || 'bg-surface')}>
-            {displayStatus === 'completed' ? <CheckCircle2 className="h-4 w-4 text-accent" /> :
-             displayStatus === 'processing' ? <Loader2 className="h-4 w-4 text-info animate-spin" /> :
-             displayStatus === 'failed' ? <XCircle className="h-4 w-4 text-danger" /> :
-             <Clock className="h-4 w-4 text-warning" />}
+          <div
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-lg',
+              exportStatusMeta[displayStatus]?.class || 'bg-surface'
+            )}
+          >
+            {displayStatus === 'completed' ? (
+              <CheckCircle2 className="h-4 w-4 text-accent" />
+            ) : displayStatus === 'processing' ? (
+              <Loader2 className="h-4 w-4 text-info animate-spin" />
+            ) : displayStatus === 'failed' ? (
+              <XCircle className="h-4 w-4 text-danger" />
+            ) : (
+              <Clock className="h-4 w-4 text-warning" />
+            )}
           </div>
           <div>
             <p className="text-sm font-medium text-text-primary">{job.id}</p>
@@ -119,9 +193,7 @@ export function ExportJobRow({ job, onDownload, onDelete }) {
       <td className="px-4 py-3">
         <ExportStatusBadge status={displayStatus} />
       </td>
-      <td className="px-4 py-3 text-xs text-text-secondary">
-        {job.requestedAt}
-      </td>
+      <td className="px-4 py-3 text-xs text-text-secondary">{job.requestedAt}</td>
       <td className="px-4 py-3 text-xs text-text-secondary">
         {displayStatus === 'completed' ? (
           <div>
@@ -129,7 +201,9 @@ export function ExportJobRow({ job, onDownload, onDelete }) {
             <span className="text-text-muted"> · {job.recordCount?.toLocaleString()} records</span>
           </div>
         ) : displayStatus === 'failed' ? (
-          <span className="text-danger truncate max-w-[200px] block" title={job.error}>{job.error}</span>
+          <span className="text-danger truncate max-w-[200px] block" title={job.error}>
+            {job.error}
+          </span>
         ) : (
           <span className="text-text-muted">—</span>
         )}
@@ -163,30 +237,48 @@ export function ErasureRequestCard({ request, onReview, onApprove, onHold, onCom
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      request.status === 'pending_review' ? 'border-warning/30 hover:border-warning/50' :
-      request.status === 'on_hold' ? 'border-danger/30 hover:border-danger/50' :
-      request.status === 'in_progress' ? 'border-secondary/30 hover:border-secondary/50' :
-      'border-border hover:border-secondary/30'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        request.status === 'pending_review'
+          ? 'border-warning/30 hover:border-warning/50'
+          : request.status === 'on_hold'
+            ? 'border-danger/30 hover:border-danger/50'
+            : request.status === 'in_progress'
+              ? 'border-secondary/30 hover:border-secondary/50'
+              : 'border-border hover:border-secondary/30'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg',
-            request.status === 'pending_review' ? 'bg-warning/10' :
-            request.status === 'on_hold' ? 'bg-danger/10' :
-            request.status === 'in_progress' ? 'bg-secondary/10' :
-            request.status === 'completed' ? 'bg-accent/10' :
-            'bg-neutral/10'
-          )}>
-            <Shield className={cn('h-4 w-4',
-              request.status === 'pending_review' ? 'text-warning' :
-              request.status === 'on_hold' ? 'text-danger' :
-              request.status === 'in_progress' ? 'text-secondary' :
-              request.status === 'completed' ? 'text-accent' :
-              'text-text-muted'
-            )} />
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              request.status === 'pending_review'
+                ? 'bg-warning/10'
+                : request.status === 'on_hold'
+                  ? 'bg-danger/10'
+                  : request.status === 'in_progress'
+                    ? 'bg-secondary/10'
+                    : request.status === 'completed'
+                      ? 'bg-accent/10'
+                      : 'bg-neutral/10'
+            )}
+          >
+            <Shield
+              className={cn(
+                'h-4 w-4',
+                request.status === 'pending_review'
+                  ? 'text-warning'
+                  : request.status === 'on_hold'
+                    ? 'text-danger'
+                    : request.status === 'in_progress'
+                      ? 'text-secondary'
+                      : request.status === 'completed'
+                        ? 'text-accent'
+                        : 'text-text-muted'
+              )}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{request.id}</h3>
@@ -203,7 +295,7 @@ export function ErasureRequestCard({ request, onReview, onApprove, onHold, onCom
 
       {/* Data Categories */}
       <div className="mt-3 flex flex-wrap gap-1">
-        {request.dataCategories.map(cat => (
+        {request.dataCategories.map((cat) => (
           <CategoryBadge key={cat} category={cat} />
         ))}
       </div>
@@ -218,7 +310,9 @@ export function ErasureRequestCard({ request, onReview, onApprove, onHold, onCom
       {request.legalHold && (
         <div className="mt-3 rounded-lg border border-danger/20 bg-danger/5 p-2 flex items-center gap-2">
           <AlertTriangle className="h-3.5 w-3.5 text-danger shrink-0" />
-          <span className="text-xs text-danger font-medium">Legal Hold Active — Deletion Blocked</span>
+          <span className="text-xs text-danger font-medium">
+            Legal Hold Active — Deletion Blocked
+          </span>
         </div>
       )}
 
@@ -228,11 +322,15 @@ export function ErasureRequestCard({ request, onReview, onApprove, onHold, onCom
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
               <span className="text-text-muted">Scope:</span>
-              <span className="ml-1 text-text-primary capitalize">{request.scope.replace(/_/g, ' ')}</span>
+              <span className="ml-1 text-text-primary capitalize">
+                {request.scope.replace(/_/g, ' ')}
+              </span>
             </div>
             <div>
               <span className="text-text-muted">Estimated Records:</span>
-              <span className="ml-1 text-text-primary font-mono">{request.estimatedRecords?.toLocaleString()}</span>
+              <span className="ml-1 text-text-primary font-mono">
+                {request.estimatedRecords?.toLocaleString()}
+              </span>
             </div>
             <div>
               <span className="text-text-muted">Estimated Size:</span>
@@ -240,7 +338,12 @@ export function ErasureRequestCard({ request, onReview, onApprove, onHold, onCom
             </div>
             <div>
               <span className="text-text-muted">Retention Override:</span>
-              <span className={cn('ml-1 font-medium', request.retentionOverride ? 'text-accent' : 'text-text-muted')}>
+              <span
+                className={cn(
+                  'ml-1 font-medium',
+                  request.retentionOverride ? 'text-accent' : 'text-text-muted'
+                )}
+              >
                 {request.retentionOverride ? 'Yes' : 'No'}
               </span>
             </div>
@@ -296,17 +399,25 @@ export function RetentionPolicyCard({ policy, onEdit, onToggle, onRunNow }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      !policy.active ? 'border-dashed border-border opacity-75' : 'border-border hover:border-secondary/30'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        !policy.active
+          ? 'border-dashed border-border opacity-75'
+          : 'border-border hover:border-secondary/30'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg',
-            policy.active ? 'bg-secondary/10' : 'bg-neutral/10'
-          )}>
-            <Clock className={cn('h-4 w-4', policy.active ? 'text-secondary' : 'text-text-muted')} />
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              policy.active ? 'bg-secondary/10' : 'bg-neutral/10'
+            )}
+          >
+            <Clock
+              className={cn('h-4 w-4', policy.active ? 'text-secondary' : 'text-text-muted')}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{policy.name}</h3>
@@ -322,10 +433,12 @@ export function RetentionPolicyCard({ policy, onEdit, onToggle, onRunNow }) {
               policy.active ? 'bg-accent' : 'bg-border'
             )}
           >
-            <span className={cn(
-              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
-              policy.active ? 'translate-x-6' : 'translate-x-1'
-            )} />
+            <span
+              className={cn(
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
+                policy.active ? 'translate-x-6' : 'translate-x-1'
+              )}
+            />
           </button>
         </div>
       </div>
@@ -336,15 +449,21 @@ export function RetentionPolicyCard({ policy, onEdit, onToggle, onRunNow }) {
       <div className="mt-3 grid grid-cols-3 gap-2">
         <div className="rounded-lg border border-border bg-background p-2 text-center">
           <p className="text-[10px] text-text-muted uppercase">Retention</p>
-          <p className="text-sm font-bold font-mono text-text-primary">{formatDuration(policy.retentionPeriod)}</p>
+          <p className="text-sm font-bold font-mono text-text-primary">
+            {formatDuration(policy.retentionPeriod)}
+          </p>
         </div>
         <div className="rounded-lg border border-border bg-background p-2 text-center">
           <p className="text-[10px] text-text-muted uppercase">Action</p>
-          <p className="text-sm font-bold font-mono text-secondary capitalize">{policy.action.replace(/_/g, ' ')}</p>
+          <p className="text-sm font-bold font-mono text-secondary capitalize">
+            {policy.action.replace(/_/g, ' ')}
+          </p>
         </div>
         <div className="rounded-lg border border-border bg-background p-2 text-center">
           <p className="text-[10px] text-text-muted uppercase">Records</p>
-          <p className="text-sm font-bold font-mono text-text-primary">{policy.recordsAffected?.toLocaleString()}</p>
+          <p className="text-sm font-bold font-mono text-text-primary">
+            {policy.recordsAffected?.toLocaleString()}
+          </p>
         </div>
       </div>
 
@@ -358,7 +477,9 @@ export function RetentionPolicyCard({ policy, onEdit, onToggle, onRunNow }) {
             </div>
             <div>
               <span className="text-text-muted">Applies To:</span>
-              <span className="ml-1 text-text-primary">{policy.appliesTo.map(a => a.replace(/_/g, ' ')).join(', ')}</span>
+              <span className="ml-1 text-text-primary">
+                {policy.appliesTo.map((a) => a.replace(/_/g, ' ')).join(', ')}
+              </span>
             </div>
             <div>
               <span className="text-text-muted">Last Run:</span>
@@ -372,8 +493,11 @@ export function RetentionPolicyCard({ policy, onEdit, onToggle, onRunNow }) {
           {policy.exceptions.length > 0 && (
             <div className="flex flex-wrap gap-1">
               <span className="text-[10px] text-text-muted">Exceptions:</span>
-              {policy.exceptions.map(ex => (
-                <span key={ex} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+              {policy.exceptions.map((ex) => (
+                <span
+                  key={ex}
+                  className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary"
+                >
                   {ex.replace(/_/g, ' ')}
                 </span>
               ))}
@@ -406,17 +530,23 @@ export function RetentionPolicyCard({ policy, onEdit, onToggle, onRunNow }) {
 /* ─── Anonymization Job Row ─── */
 export function AnonymizeJobRow({ job, onView }) {
   const meta = anonymizeStatusMeta[job.status] || anonymizeStatusMeta.pending;
-  const progress = job.status === 'running' && job.recordsProcessed ? 
-    Math.round((job.recordsProcessed / (job.recordsProcessed + 1200)) * 100) : 100;
+  const progress =
+    job.status === 'running' && job.recordsProcessed
+      ? Math.round((job.recordsProcessed / (job.recordsProcessed + 1200)) * 100)
+      : 100;
 
   return (
     <tr className="hover:bg-background/50 transition-colors">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', meta.class)}>
-            {job.status === 'running' ? <Loader2 className="h-4 w-4 text-info animate-spin" /> :
-             job.status === 'completed' ? <CheckCircle2 className="h-4 w-4 text-accent" /> :
-             <XCircle className="h-4 w-4 text-danger" />}
+            {job.status === 'running' ? (
+              <Loader2 className="h-4 w-4 text-info animate-spin" />
+            ) : job.status === 'completed' ? (
+              <CheckCircle2 className="h-4 w-4 text-accent" />
+            ) : (
+              <XCircle className="h-4 w-4 text-danger" />
+            )}
           </div>
           <div>
             <p className="text-sm font-medium text-text-primary">{job.id}</p>
@@ -431,7 +561,12 @@ export function AnonymizeJobRow({ job, onView }) {
         <StrategyBadge strategy={job.strategy} />
       </td>
       <td className="px-4 py-3">
-        <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+            meta.class
+          )}
+        >
           <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
           {meta.label}
         </span>
@@ -443,7 +578,13 @@ export function AnonymizeJobRow({ job, onView }) {
             <span className="text-text-primary font-mono">{progress}%</span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
-            <div className={cn('h-full rounded-full transition-all', job.status === 'completed' ? 'bg-accent' : 'bg-info')} style={{ width: `${progress}%` }} />
+            <div
+              className={cn(
+                'h-full rounded-full transition-all',
+                job.status === 'completed' ? 'bg-accent' : 'bg-info'
+              )}
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
       </td>
@@ -480,22 +621,37 @@ export function ComplianceScoreCard({ score, checks }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
       <div className="flex items-center gap-4">
-        <div className={cn('flex h-16 w-16 items-center justify-center rounded-full', getScoreBg(score))}>
+        <div
+          className={cn(
+            'flex h-16 w-16 items-center justify-center rounded-full',
+            getScoreBg(score)
+          )}
+        >
           <span className={cn('text-2xl font-bold', getScoreColor(score))}>{score}</span>
         </div>
         <div>
           <h3 className="text-sm font-semibold text-text-primary">GDPR Compliance Score</h3>
-          <p className="text-xs text-text-muted">Based on retention policies, erasure requests, and data handling</p>
+          <p className="text-xs text-text-muted">
+            Based on retention policies, erasure requests, and data handling
+          </p>
         </div>
       </div>
       <div className="mt-4 space-y-2">
         {checks.map((check, i) => (
           <div key={i} className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              {check.passed ? <CheckCircle2 className="h-3.5 w-3.5 text-accent" /> : <AlertTriangle className="h-3.5 w-3.5 text-warning" />}
-              <span className={check.passed ? 'text-text-secondary' : 'text-warning'}>{check.label}</span>
+              {check.passed ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-accent" />
+              ) : (
+                <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+              )}
+              <span className={check.passed ? 'text-text-secondary' : 'text-warning'}>
+                {check.label}
+              </span>
             </div>
-            <span className={cn('font-mono font-medium', check.passed ? 'text-accent' : 'text-warning')}>
+            <span
+              className={cn('font-mono font-medium', check.passed ? 'text-accent' : 'text-warning')}
+            >
               {check.value}
             </span>
           </div>

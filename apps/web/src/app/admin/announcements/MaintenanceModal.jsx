@@ -1,8 +1,15 @@
 /* src/app/admin/announcements/MaintenanceModal.jsx */
 import { useState, useEffect } from 'react';
 import {
-  X, Check, Server, Calendar, Clock, Wrench, AlertTriangle,
-  CheckCircle2, XCircle
+  X,
+  Check,
+  Server,
+  Calendar,
+  Clock,
+  Wrench,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -45,12 +52,8 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
         title: window.title || '',
         description: window.description || '',
         status: window.status || 'scheduled',
-        startTime: window.startTime
-          ? new Date(window.startTime).toISOString().slice(0, 16)
-          : '',
-        endTime: window.endTime
-          ? new Date(window.endTime).toISOString().slice(0, 16)
-          : '',
+        startTime: window.startTime ? new Date(window.startTime).toISOString().slice(0, 16) : '',
+        endTime: window.endTime ? new Date(window.endTime).toISOString().slice(0, 16) : '',
         estimatedDuration: window.estimatedDuration || '',
         affectedServices: window.affectedServices || [],
         impact: window.impact || 'none',
@@ -59,11 +62,14 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
     }
   }, [window]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const toggleService = (svc) => {
     const current = form.affectedServices;
-    update('affectedServices', current.includes(svc) ? current.filter(s => s !== svc) : [...current, svc]);
+    update(
+      'affectedServices',
+      current.includes(svc) ? current.filter((s) => s !== svc) : [...current, svc]
+    );
   };
 
   const handleSubmit = (e) => {
@@ -100,7 +106,10 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -109,7 +118,9 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Title</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Title
+              </label>
               <input
                 type="text"
                 required
@@ -120,7 +131,9 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Description
+              </label>
               <textarea
                 required
                 value={form.description}
@@ -134,7 +147,9 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
 
           {/* Time Window */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Time Window</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Time Window
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-[10px] text-text-muted flex items-center gap-1">
@@ -175,7 +190,9 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
 
           {/* Impact Level */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Impact Level</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Impact Level
+            </label>
             <div className="grid grid-cols-2 gap-3">
               {impacts.map((imp) => {
                 const active = form.impact === imp.id;
@@ -191,7 +208,12 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
                         : 'border-border bg-surface hover:border-secondary/30'
                     )}
                   >
-                    <span className={cn('text-sm font-medium', active ? 'text-warning' : 'text-text-primary')}>
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        active ? 'text-warning' : 'text-text-primary'
+                      )}
+                    >
                       {imp.label}
                     </span>
                     <span className="text-xs text-text-muted">{imp.desc}</span>
@@ -203,7 +225,9 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
 
           {/* Affected Services */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Affected Services</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Affected Services
+            </label>
             <div className="flex flex-wrap gap-2">
               {allServices.map((svc) => (
                 <button
@@ -243,10 +267,12 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
                 form.tenantNotification ? 'bg-secondary' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.tenantNotification ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.tenantNotification ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
@@ -269,7 +295,9 @@ export default function MaintenanceModal({ window, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" />
               {isEditing ? 'Save Changes' : 'Schedule Maintenance'}

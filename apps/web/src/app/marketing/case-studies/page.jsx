@@ -7,7 +7,8 @@ const caseStudies = [
     property: 'Grand Plaza Hotel',
     location: 'Chicago, IL',
     type: 'Boutique Hotel · 120 Rooms',
-    quote: "We switched from OPERA 5 and trained our entire front desk staff in a single afternoon. The tape chart alone saves us 2 hours every day.",
+    quote:
+      'We switched from OPERA 5 and trained our entire front desk staff in a single afternoon. The tape chart alone saves us 2 hours every day.',
     author: 'Sarah Chen',
     role: 'General Manager',
     metrics: [
@@ -21,7 +22,8 @@ const caseStudies = [
     property: 'Seaside Resort & Spa',
     location: 'Miami, FL',
     type: 'Resort · 250 Rooms',
-    quote: "The AI revenue manager increased our ADR by 14% in the first quarter. It pays for itself.",
+    quote:
+      'The AI revenue manager increased our ADR by 14% in the first quarter. It pays for itself.',
     author: 'Marcus Johnson',
     role: 'Revenue Director',
     metrics: [
@@ -35,7 +37,7 @@ const caseStudies = [
     property: 'Harbor Inn Downtown',
     location: 'Seattle, WA',
     type: 'Independent · 45 Rooms',
-    quote: "Our guests love the self-service portal. Check-in lines disappeared overnight.",
+    quote: 'Our guests love the self-service portal. Check-in lines disappeared overnight.',
     author: 'Elena Rodriguez',
     role: 'Front Desk Manager',
     metrics: [
@@ -49,7 +51,8 @@ const caseStudies = [
     property: 'Mountain Lodge Collection',
     location: 'Aspen, CO',
     type: 'Hotel Group · 4 Properties',
-    quote: "Managing four properties from one dashboard changed everything. We finally have visibility across the portfolio.",
+    quote:
+      'Managing four properties from one dashboard changed everything. We finally have visibility across the portfolio.',
     author: 'David Park',
     role: 'VP of Operations',
     metrics: [
@@ -70,7 +73,8 @@ export default function CaseStudiesPage() {
             Trusted by hoteliers <span className="text-secondary">worldwide</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Real results from real properties. See how Unified PMS transforms operations, revenue, and guest experience.
+            Real results from real properties. See how Unified PMS transforms operations, revenue,
+            and guest experience.
           </p>
         </div>
       </section>
@@ -94,7 +98,10 @@ export default function CaseStudiesPage() {
 
                   <div className="mt-4 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 text-sm font-medium text-secondary">
-                      {study.author.split(' ').map(n => n[0]).join('')}
+                      {study.author
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">{study.author}</p>
@@ -103,8 +110,11 @@ export default function CaseStudiesPage() {
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {study.tags.map(tag => (
-                      <span key={tag} className="rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
+                    {study.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -113,7 +123,10 @@ export default function CaseStudiesPage() {
 
                 <div className="lg:w-64 space-y-3">
                   {study.metrics.map((m) => (
-                    <div key={m.label} className="rounded-lg border border-border bg-surface p-4 text-center">
+                    <div
+                      key={m.label}
+                      className="rounded-lg border border-border bg-surface p-4 text-center"
+                    >
                       <m.icon className="mx-auto h-5 w-5 text-secondary mb-1" />
                       <p className="text-2xl font-bold text-text-primary">{m.value}</p>
                       <p className="text-xs text-text-muted">{m.label}</p>
@@ -128,9 +141,16 @@ export default function CaseStudiesPage() {
 
       <section className="py-20 text-center">
         <div className="mx-auto max-w-xl px-4">
-          <h2 className="text-2xl font-bold text-text-primary">Ready to write your success story?</h2>
-          <p className="mt-2 text-text-secondary">Join hundreds of properties already using Unified PMS.</p>
-          <Link to="/demo" className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+          <h2 className="text-2xl font-bold text-text-primary">
+            Ready to write your success story?
+          </h2>
+          <p className="mt-2 text-text-secondary">
+            Join hundreds of properties already using Unified PMS.
+          </p>
+          <Link
+            to="/demo"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+          >
             Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </div>

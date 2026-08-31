@@ -1,6 +1,18 @@
 /* src/app/admin/onboarding/InterventionModal.jsx */
 import { useState } from 'react';
-import { X, Check, Flag, Mail, Phone, Monitor, Video, Tag, Clock, MessageSquare, Send } from 'lucide-react';
+import {
+  X,
+  Check,
+  Flag,
+  Mail,
+  Phone,
+  Monitor,
+  Video,
+  Tag,
+  Clock,
+  MessageSquare,
+  Send,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { interventionTypes, funnelStages } from './data';
@@ -52,7 +64,7 @@ const interventionTemplates = [
     id: 't7',
     type: 'in_app',
     subject: 'Complete your room setup',
-    body: "You're almost there! Finish configuring your room types to start accepting reservations."    ,
+    body: "You're almost there! Finish configuring your room types to start accepting reservations.",
     trigger: 'room_config',
   },
 ];
@@ -68,12 +80,12 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
   });
   const [preview, setPreview] = useState(false);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleTemplateSelect = (templateId) => {
-    const template = interventionTemplates.find(t => t.id === templateId);
+    const template = interventionTemplates.find((t) => t.id === templateId);
     if (template) {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         selectedTemplate: templateId,
         type: template.type,
@@ -91,7 +103,10 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
       subject: form.subject,
       body: form.body,
       status: form.type === 'call' || form.type === 'demo' ? 'scheduled' : 'sent',
-      sentAt: form.type === 'email' || form.type === 'in_app' ? new Date().toISOString().replace('T', ' ').slice(0, 19) : null,
+      sentAt:
+        form.type === 'email' || form.type === 'in_app'
+          ? new Date().toISOString().replace('T', ' ').slice(0, 19)
+          : null,
       scheduledAt: form.type === 'call' || form.type === 'demo' ? form.scheduledAt : null,
       notes: form.body.slice(0, 100),
     });
@@ -102,7 +117,7 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
 
   const dropOffStage = tenant.dropOffStage;
   const filteredTemplates = dropOffStage
-    ? interventionTemplates.filter(t => t.trigger === 'any' || t.trigger === dropOffStage)
+    ? interventionTemplates.filter((t) => t.trigger === 'any' || t.trigger === dropOffStage)
     : interventionTemplates;
 
   return (
@@ -117,10 +132,15 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-text-primary">Create Intervention</h3>
-              <p className="text-xs text-text-muted">{tenant.name} · {tenant.id}</p>
+              <p className="text-xs text-text-muted">
+                {tenant.name} · {tenant.id}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -128,10 +148,12 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Template Selection */}
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Suggested Templates</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Suggested Templates
+            </label>
             <div className="space-y-2">
               {filteredTemplates.map((template) => {
-                const intMeta = interventionTypes.find(t => t.id === template.type);
+                const intMeta = interventionTypes.find((t) => t.id === template.type);
                 const selected = form.selectedTemplate === template.id;
                 return (
                   <button
@@ -140,19 +162,45 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
                     onClick={() => handleTemplateSelect(template.id)}
                     className={cn(
                       'flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-all',
-                      selected ? 'border-secondary bg-secondary/5' : 'border-border bg-surface hover:border-secondary/30'
+                      selected
+                        ? 'border-secondary bg-secondary/5'
+                        : 'border-border bg-surface hover:border-secondary/30'
                     )}
                   >
-                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-md', intMeta?.bg)}>
-                      {template.type === 'email' && <Mail className={cn('h-4 w-4', intMeta?.color)} />}
-                      {template.type === 'call' && <Phone className={cn('h-4 w-4', intMeta?.color)} />}
-                      {template.type === 'in_app' && <Monitor className={cn('h-4 w-4', intMeta?.color)} />}
-                      {template.type === 'demo' && <Video className={cn('h-4 w-4', intMeta?.color)} />}
-                      {template.type === 'discount' && <Tag className={cn('h-4 w-4', intMeta?.color)} />}
-                      {template.type === 'extend_trial' && <Clock className={cn('h-4 w-4', intMeta?.color)} />}
+                    <div
+                      className={cn(
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-md',
+                        intMeta?.bg
+                      )}
+                    >
+                      {template.type === 'email' && (
+                        <Mail className={cn('h-4 w-4', intMeta?.color)} />
+                      )}
+                      {template.type === 'call' && (
+                        <Phone className={cn('h-4 w-4', intMeta?.color)} />
+                      )}
+                      {template.type === 'in_app' && (
+                        <Monitor className={cn('h-4 w-4', intMeta?.color)} />
+                      )}
+                      {template.type === 'demo' && (
+                        <Video className={cn('h-4 w-4', intMeta?.color)} />
+                      )}
+                      {template.type === 'discount' && (
+                        <Tag className={cn('h-4 w-4', intMeta?.color)} />
+                      )}
+                      {template.type === 'extend_trial' && (
+                        <Clock className={cn('h-4 w-4', intMeta?.color)} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn('text-sm font-medium', selected ? 'text-secondary' : 'text-text-primary')}>{template.subject}</p>
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          selected ? 'text-secondary' : 'text-text-primary'
+                        )}
+                      >
+                        {template.subject}
+                      </p>
                       <p className="text-xs text-text-muted mt-0.5 truncate">{template.body}</p>
                     </div>
                     {selected && <Check className="h-4 w-4 text-secondary shrink-0" />}
@@ -174,7 +222,9 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
 
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Intervention Type</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Intervention Type
+                </label>
                 <div className="grid grid-cols-3 gap-2">
                   {interventionTypes.map((type) => (
                     <button
@@ -201,7 +251,9 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Subject</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Subject
+                </label>
                 <input
                   type="text"
                   required
@@ -214,7 +266,9 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
 
               {(form.type === 'call' || form.type === 'demo') && (
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Schedule For</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Schedule For
+                  </label>
                   <input
                     type="datetime-local"
                     required
@@ -226,7 +280,9 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
               )}
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Message / Notes</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Message / Notes
+                </label>
                 <textarea
                   value={form.body}
                   onChange={(e) => update('body', e.target.value)}
@@ -259,9 +315,12 @@ export default function InterventionModal({ tenant, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
-              <Send className="mr-1.5 h-4 w-4" /> {form.type === 'call' || form.type === 'demo' ? 'Schedule' : 'Send Intervention'}
+              <Send className="mr-1.5 h-4 w-4" />{' '}
+              {form.type === 'call' || form.type === 'demo' ? 'Schedule' : 'Send Intervention'}
             </Button>
           </div>
         </form>

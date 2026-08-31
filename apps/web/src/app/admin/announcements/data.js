@@ -5,7 +5,8 @@ export const initialAnnouncements = [
   {
     id: 'ANN-001',
     title: 'New Revenue Dashboard Now Live',
-    content: 'We\'ve completely redesigned the revenue analytics dashboard with AI-powered forecasting, cohort analysis, and customizable widgets. Access it from Reports → Revenue Analytics.',
+    content:
+      "We've completely redesigned the revenue analytics dashboard with AI-powered forecasting, cohort analysis, and customizable widgets. Access it from Reports → Revenue Analytics.",
     type: 'feature',
     priority: 'high',
     status: 'published',
@@ -25,7 +26,8 @@ export const initialAnnouncements = [
   {
     id: 'ANN-002',
     title: 'Scheduled Maintenance: Database Upgrade',
-    content: 'We will be performing a database upgrade to improve query performance and add support for new analytics features. Expected downtime: 15 minutes.',
+    content:
+      'We will be performing a database upgrade to improve query performance and add support for new analytics features. Expected downtime: 15 minutes.',
     type: 'maintenance',
     priority: 'critical',
     status: 'published',
@@ -45,7 +47,8 @@ export const initialAnnouncements = [
   {
     id: 'ANN-003',
     title: 'Channel Manager v2 Beta Available',
-    content: 'Enterprise customers can now opt into the Channel Manager v2 beta. Features include real-time sync, conflict resolution, and rate parity monitoring.',
+    content:
+      'Enterprise customers can now opt into the Channel Manager v2 beta. Features include real-time sync, conflict resolution, and rate parity monitoring.',
     type: 'feature',
     priority: 'medium',
     status: 'published',
@@ -65,7 +68,8 @@ export const initialAnnouncements = [
   {
     id: 'ANN-004',
     title: 'Updated PCI-DSS Compliance Documentation',
-    content: 'Our latest PCI-DSS Level 1 compliance audit has been completed. Updated documentation and security certificates are now available in the Security Center.',
+    content:
+      'Our latest PCI-DSS Level 1 compliance audit has been completed. Updated documentation and security certificates are now available in the Security Center.',
     type: 'update',
     priority: 'low',
     status: 'published',
@@ -85,7 +89,8 @@ export const initialAnnouncements = [
   {
     id: 'ANN-005',
     title: 'End of Support: Legacy API v1',
-    content: 'API v1 will be deprecated on October 1, 2026. Please migrate to API v2 before this date. Migration guides and SDK updates are available.',
+    content:
+      'API v1 will be deprecated on October 1, 2026. Please migrate to API v2 before this date. Migration guides and SDK updates are available.',
     type: 'alert',
     priority: 'high',
     status: 'published',
@@ -105,7 +110,8 @@ export const initialAnnouncements = [
   {
     id: 'ANN-006',
     title: 'Holiday Pricing Recommendations',
-    content: 'Our AI revenue manager has generated holiday pricing recommendations for Q4 2026. Review and approve suggested rate adjustments.',
+    content:
+      'Our AI revenue manager has generated holiday pricing recommendations for Q4 2026. Review and approve suggested rate adjustments.',
     type: 'feature',
     priority: 'medium',
     status: 'draft',
@@ -133,7 +139,10 @@ export const initialChangelog = [
     title: 'August 2026 Release',
     summary: 'Revenue dashboard redesign, Channel Manager v2 beta, and performance improvements.',
     changes: [
-      { type: 'feature', text: 'Completely redesigned Revenue Analytics dashboard with AI forecasting' },
+      {
+        type: 'feature',
+        text: 'Completely redesigned Revenue Analytics dashboard with AI forecasting',
+      },
       { type: 'feature', text: 'Channel Manager v2 beta for Enterprise customers' },
       { type: 'improvement', text: 'Reduced page load times by 40% across the app' },
       { type: 'improvement', text: 'Enhanced mobile responsiveness for Front Desk module' },
@@ -149,7 +158,8 @@ export const initialChangelog = [
     version: '2.4.0',
     date: '2026-08-02',
     title: 'August Mid-Sprint Release',
-    summary: 'Guest portal enhancements, new housekeeping automation, and Stripe Connect improvements.',
+    summary:
+      'Guest portal enhancements, new housekeeping automation, and Stripe Connect improvements.',
     changes: [
       { type: 'feature', text: 'Guest self-check-in via mobile with digital key integration' },
       { type: 'feature', text: 'Smart Housekeeping AI for automated room assignment' },
@@ -213,7 +223,8 @@ export const initialMaintenanceWindows = [
   {
     id: 'MW-001',
     title: 'Database Cluster Upgrade',
-    description: 'Upgrading PostgreSQL cluster to v16.4 for improved performance and new JSON indexing features.',
+    description:
+      'Upgrading PostgreSQL cluster to v16.4 for improved performance and new JSON indexing features.',
     status: 'scheduled',
     startTime: '2026-08-20T02:00:00Z',
     endTime: '2026-08-20T02:30:00Z',
@@ -227,7 +238,8 @@ export const initialMaintenanceWindows = [
   {
     id: 'MW-002',
     title: 'Redis Cache Failover Test',
-    description: 'Scheduled failover test of Redis cluster to validate disaster recovery procedures.',
+    description:
+      'Scheduled failover test of Redis cluster to validate disaster recovery procedures.',
     status: 'scheduled',
     startTime: '2026-08-22T03:00:00Z',
     endTime: '2026-08-22T03:10:00Z',
@@ -241,7 +253,8 @@ export const initialMaintenanceWindows = [
   {
     id: 'MW-003',
     title: 'Elasticsearch Reindexing',
-    description: 'Full reindexing of search corpus to enable new fuzzy matching and autocomplete features.',
+    description:
+      'Full reindexing of search corpus to enable new fuzzy matching and autocomplete features.',
     status: 'scheduled',
     startTime: '2026-08-25T01:00:00Z',
     endTime: '2026-08-25T04:00:00Z',
@@ -285,7 +298,8 @@ export const initialMaintenanceWindows = [
   {
     id: 'MW-006',
     title: 'Kubernetes Cluster Upgrade',
-    description: 'Upgrading K8s control plane to v1.31 for improved scheduling and resource management.',
+    description:
+      'Upgrading K8s control plane to v1.31 for improved scheduling and resource management.',
     status: 'in-progress',
     startTime: '2026-08-17T01:00:00Z',
     endTime: '2026-08-17T03:00:00Z',
@@ -307,46 +321,177 @@ export const regions = ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1']
 
 /* ─── Metadata ─── */
 export const announcementTypeMeta = {
-  feature: { label: 'Feature', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', icon: 'Sparkles' },
-  maintenance: { label: 'Maintenance', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', icon: 'Wrench' },
-  alert: { label: 'Alert', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', icon: 'AlertTriangle' },
-  update: { label: 'Update', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', icon: 'Info' },
+  feature: {
+    label: 'Feature',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    icon: 'Sparkles',
+  },
+  maintenance: {
+    label: 'Maintenance',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    icon: 'Wrench',
+  },
+  alert: {
+    label: 'Alert',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    icon: 'AlertTriangle',
+  },
+  update: {
+    label: 'Update',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    icon: 'Info',
+  },
 };
 
 export const priorityMeta = {
-  critical: { label: 'Critical', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
-  high: { label: 'High', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
-  medium: { label: 'Medium', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  low: { label: 'Low', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
+  critical: {
+    label: 'Critical',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
+  high: {
+    label: 'High',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
+  medium: {
+    label: 'Medium',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  low: {
+    label: 'Low',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const announcementStatusMeta = {
-  draft: { label: 'Draft', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
-  scheduled: { label: 'Scheduled', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  published: { label: 'Published', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
-  archived: { label: 'Archived', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border', dot: 'bg-text-muted' },
+  draft: {
+    label: 'Draft',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
+  scheduled: {
+    label: 'Scheduled',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  published: {
+    label: 'Published',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
+  archived: {
+    label: 'Archived',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const maintenanceStatusMeta = {
-  scheduled: { label: 'Scheduled', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', dot: 'bg-info' },
-  'in-progress': { label: 'In Progress', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', dot: 'bg-warning' },
-  completed: { label: 'Completed', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', dot: 'bg-accent' },
-  cancelled: { label: 'Cancelled', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', dot: 'bg-danger' },
+  scheduled: {
+    label: 'Scheduled',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+    dot: 'bg-info',
+  },
+  'in-progress': {
+    label: 'In Progress',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+    dot: 'bg-warning',
+  },
+  completed: {
+    label: 'Completed',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+    dot: 'bg-accent',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 export const impactMeta = {
-  none: { label: 'No Impact', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
-  degraded: { label: 'Degraded', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
-  'read-only': { label: 'Read-Only', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  unavailable: { label: 'Unavailable', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
+  none: {
+    label: 'No Impact',
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
+  },
+  degraded: {
+    label: 'Degraded',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+  },
+  'read-only': {
+    label: 'Read-Only',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+  },
+  unavailable: {
+    label: 'Unavailable',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+  },
 };
 
 export const changelogTypeMeta = {
   feature: { label: 'New', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
-  improvement: { label: 'Improved', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
+  improvement: {
+    label: 'Improved',
+    color: 'text-info',
+    bg: 'bg-info/10',
+    border: 'border-info/20',
+  },
   fix: { label: 'Fixed', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
-  security: { label: 'Security', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
-  deprecated: { label: 'Deprecated', color: 'text-text-muted', bg: 'bg-neutral/10', border: 'border-border' },
+  security: {
+    label: 'Security',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+  },
+  deprecated: {
+    label: 'Deprecated',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+    border: 'border-border',
+  },
 };
 
 export const audienceMeta = {
@@ -360,8 +505,11 @@ export function formatDateTime(isoString) {
   if (!isoString) return '—';
   const d = new Date(isoString);
   return d.toLocaleString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 

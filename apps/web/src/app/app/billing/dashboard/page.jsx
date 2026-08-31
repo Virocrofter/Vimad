@@ -2,11 +2,33 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  CreditCard, Download, Check, AlertCircle, Zap, Shield,
-  Users, BedDouble, Calendar, ArrowUpRight, MoreHorizontal,
-  Plus, Trash2, Edit3, X, ChevronDown, Receipt, TrendingUp,
-  Clock, FileText, Lock, Sparkles, Ban, CheckCircle2,
-  ArrowRight, ArrowLeft, CalendarDays,
+  CreditCard,
+  Download,
+  Check,
+  AlertCircle,
+  Zap,
+  Shield,
+  Users,
+  BedDouble,
+  Calendar,
+  ArrowUpRight,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+  Edit3,
+  X,
+  ChevronDown,
+  Receipt,
+  TrendingUp,
+  Clock,
+  FileText,
+  Lock,
+  Sparkles,
+  Ban,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  CalendarDays,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -40,23 +62,121 @@ const currentPlan = {
 };
 
 const invoices = [
-  { id: 'INV-2026-0812', date: '2026-08-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0712', date: '2026-07-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0612', date: '2026-06-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0512', date: '2026-05-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0412', date: '2026-04-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0312', date: '2026-03-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0212', date: '2026-02-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2026-0112', date: '2026-01-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2025-1212', date: '2025-12-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2025-1112', date: '2025-11-12', amount: 499.00, status: 'paid', plan: 'Professional (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2025-1012', date: '2025-10-12', amount: 199.00, status: 'paid', plan: 'Starter (Monthly)', method: 'Visa •••• 4242' },
-  { id: 'INV-2025-0912', date: '2025-09-12', amount: 199.00, status: 'paid', plan: 'Starter (Monthly)', method: 'Visa •••• 4242' },
+  {
+    id: 'INV-2026-0812',
+    date: '2026-08-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0712',
+    date: '2026-07-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0612',
+    date: '2026-06-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0512',
+    date: '2026-05-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0412',
+    date: '2026-04-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0312',
+    date: '2026-03-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0212',
+    date: '2026-02-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2026-0112',
+    date: '2026-01-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2025-1212',
+    date: '2025-12-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2025-1112',
+    date: '2025-11-12',
+    amount: 499.0,
+    status: 'paid',
+    plan: 'Professional (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2025-1012',
+    date: '2025-10-12',
+    amount: 199.0,
+    status: 'paid',
+    plan: 'Starter (Monthly)',
+    method: 'Visa •••• 4242',
+  },
+  {
+    id: 'INV-2025-0912',
+    date: '2025-09-12',
+    amount: 199.0,
+    status: 'paid',
+    plan: 'Starter (Monthly)',
+    method: 'Visa •••• 4242',
+  },
 ];
 
 const paymentMethods = [
-  { id: 'pm-1', type: 'visa', last4: '4242', expiry: '09/28', isDefault: true, name: 'Grand Hotel Corp' },
-  { id: 'pm-2', type: 'mastercard', last4: '8891', expiry: '12/27', isDefault: false, name: 'Grand Hotel Corp' },
+  {
+    id: 'pm-1',
+    type: 'visa',
+    last4: '4242',
+    expiry: '09/28',
+    isDefault: true,
+    name: 'Grand Hotel Corp',
+  },
+  {
+    id: 'pm-2',
+    type: 'mastercard',
+    last4: '8891',
+    expiry: '12/27',
+    isDefault: false,
+    name: 'Grand Hotel Corp',
+  },
 ];
 
 const planTiers = [
@@ -96,10 +216,7 @@ const planTiers = [
       'Marketing Automation',
       'Priority Support',
     ],
-    notIncluded: [
-      'White-Label Portal',
-      'Dedicated Account Manager',
-    ],
+    notIncluded: ['White-Label Portal', 'Dedicated Account Manager'],
   },
   {
     name: 'Enterprise',
@@ -154,7 +271,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -167,12 +295,14 @@ function PlanCard({ plan, isCurrent, onSelect, billingInterval }) {
   const isPopular = plan.popular;
 
   return (
-    <div className={cn(
-      'relative rounded-xl border p-5 transition-all',
-      isCurrent
-        ? 'border-secondary bg-secondary/5 ring-1 ring-secondary/20'
-        : 'border-border bg-surface hover:border-secondary/30 hover:shadow-md'
-    )}>
+    <div
+      className={cn(
+        'relative rounded-xl border p-5 transition-all',
+        isCurrent
+          ? 'border-secondary bg-secondary/5 ring-1 ring-secondary/20'
+          : 'border-border bg-surface hover:border-secondary/30 hover:shadow-md'
+      )}
+    >
       {isPopular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
@@ -195,12 +325,14 @@ function PlanCard({ plan, isCurrent, onSelect, billingInterval }) {
 
       <div className="mb-4">
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold font-mono text-text-primary">{formatCurrency(price)}</span>
+          <span className="text-3xl font-bold font-mono text-text-primary">
+            {formatCurrency(price)}
+          </span>
           <span className="text-sm text-text-muted">/mo</span>
         </div>
         {billingInterval === 'annual' && (
           <p className="text-xs text-accent mt-1">
-            Billed annually · Save {formatCurrency((plan.price * 12) - plan.annualPrice)}/year
+            Billed annually · Save {formatCurrency(plan.price * 12 - plan.annualPrice)}/year
           </p>
         )}
       </div>
@@ -253,26 +385,31 @@ export default function BillingDashboardPage() {
   const [invoiceFilter, setInvoiceFilter] = useState('all');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
-  const totalSpent = useMemo(() => invoicesData.reduce((s, inv) => s + inv.amount, 0), [invoicesData]);
+  const totalSpent = useMemo(
+    () => invoicesData.reduce((s, inv) => s + inv.amount, 0),
+    [invoicesData]
+  );
   const avgMonthly = useMemo(() => {
-    const paid = invoicesData.filter(i => i.status === 'paid');
+    const paid = invoicesData.filter((i) => i.status === 'paid');
     return paid.length > 0 ? paid.reduce((s, i) => s + i.amount, 0) / paid.length : 0;
   }, [invoicesData]);
 
   const filteredInvoices = useMemo(() => {
     if (invoiceFilter === 'all') return invoicesData;
-    return invoicesData.filter(i => i.status === invoiceFilter);
+    return invoicesData.filter((i) => i.status === invoiceFilter);
   }, [invoicesData, invoiceFilter]);
 
   const handleSetDefault = (id) => {
-    setPaymentMethodsData(prev => prev.map(pm => ({
-      ...pm,
-      isDefault: pm.id === id
-    })));
+    setPaymentMethodsData((prev) =>
+      prev.map((pm) => ({
+        ...pm,
+        isDefault: pm.id === id,
+      }))
+    );
   };
 
   const handleDeleteCard = (id) => {
-    setPaymentMethodsData(prev => prev.filter(pm => pm.id !== id));
+    setPaymentMethodsData((prev) => prev.filter((pm) => pm.id !== id));
   };
 
   const handleUpgrade = (plan) => {
@@ -307,10 +444,20 @@ export default function BillingDashboardPage() {
         <div className="rounded-lg border border-warning/20 bg-warning/5 p-4 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-text-primary">You're approaching your room limit</p>
+            <p className="text-sm font-medium text-text-primary">
+              You're approaching your room limit
+            </p>
             <p className="text-xs text-text-secondary mt-0.5">
-              You're using {currentPlan.limits.rooms.used} of {currentPlan.limits.rooms.total} rooms ({Math.round((currentPlan.limits.rooms.used / currentPlan.limits.rooms.total) * 100)}%). 
-              <button onClick={() => setShowUpgrade(true)} className="text-secondary hover:underline ml-1">Upgrade now</button> to avoid service interruption.
+              You're using {currentPlan.limits.rooms.used} of {currentPlan.limits.rooms.total} rooms
+              ({Math.round((currentPlan.limits.rooms.used / currentPlan.limits.rooms.total) * 100)}
+              %).
+              <button
+                onClick={() => setShowUpgrade(true)}
+                className="text-secondary hover:underline ml-1"
+              >
+                Upgrade now
+              </button>{' '}
+              to avoid service interruption.
             </p>
           </div>
         </div>
@@ -327,7 +474,10 @@ export default function BillingDashboardPage() {
         />
         <StatCard
           label="Next Billing"
-          value={new Date(currentPlan.renewalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          value={new Date(currentPlan.renewalDate).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          })}
           icon={Calendar}
           color="text-info"
           subtext={formatCurrency(currentPlan.price) + ' due'}
@@ -362,12 +512,25 @@ export default function BillingDashboardPage() {
                   </span>
                 </div>
                 <p className="text-sm text-text-secondary">
-                  Renews on <span className="font-medium text-text-primary">{new Date(currentPlan.renewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  Renews on{' '}
+                  <span className="font-medium text-text-primary">
+                    {new Date(currentPlan.renewalDate).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold font-mono text-text-primary">{formatCurrency(currentPlan.price)}<span className="text-sm font-normal text-text-muted">/mo</span></p>
-                <button onClick={() => setShowUpgrade(true)} className="text-xs text-secondary hover:underline mt-1">
+                <p className="text-2xl font-bold font-mono text-text-primary">
+                  {formatCurrency(currentPlan.price)}
+                  <span className="text-sm font-normal text-text-muted">/mo</span>
+                </p>
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="text-xs text-secondary hover:underline mt-1"
+                >
                   Change plan or billing
                 </button>
               </div>
@@ -398,7 +561,9 @@ export default function BillingDashboardPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-secondary" /> Usage This Cycle
               </h3>
-              <span className="text-xs text-text-muted">Resets on {new Date(currentPlan.renewalDate).toLocaleDateString()}</span>
+              <span className="text-xs text-text-muted">
+                Resets on {new Date(currentPlan.renewalDate).toLocaleDateString()}
+              </span>
             </div>
 
             <div className="space-y-5">
@@ -410,7 +575,17 @@ export default function BillingDashboardPage() {
                     Rooms
                   </div>
                   <div className="text-sm">
-                    <span className={cn('font-mono font-bold', getUsageColor(getUsagePercent(currentPlan.limits.rooms.used, currentPlan.limits.rooms.total)))}>
+                    <span
+                      className={cn(
+                        'font-mono font-bold',
+                        getUsageColor(
+                          getUsagePercent(
+                            currentPlan.limits.rooms.used,
+                            currentPlan.limits.rooms.total
+                          )
+                        )
+                      )}
+                    >
                       {currentPlan.limits.rooms.used}
                     </span>
                     <span className="text-text-muted"> / {currentPlan.limits.rooms.total}</span>
@@ -418,8 +593,18 @@ export default function BillingDashboardPage() {
                 </div>
                 <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                   <div
-                    className={cn('h-full rounded-full transition-all', getUsageBarColor(getUsagePercent(currentPlan.limits.rooms.used, currentPlan.limits.rooms.total)))}
-                    style={{ width: `${getUsagePercent(currentPlan.limits.rooms.used, currentPlan.limits.rooms.total)}%` }}
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      getUsageBarColor(
+                        getUsagePercent(
+                          currentPlan.limits.rooms.used,
+                          currentPlan.limits.rooms.total
+                        )
+                      )
+                    )}
+                    style={{
+                      width: `${getUsagePercent(currentPlan.limits.rooms.used, currentPlan.limits.rooms.total)}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -432,7 +617,9 @@ export default function BillingDashboardPage() {
                     Team Members
                   </div>
                   <div className="text-sm">
-                    <span className="font-mono font-bold text-accent">{currentPlan.limits.users.used}</span>
+                    <span className="font-mono font-bold text-accent">
+                      {currentPlan.limits.users.used}
+                    </span>
                     <span className="text-text-muted"> / {currentPlan.limits.users.total}</span>
                   </div>
                 </div>
@@ -449,16 +636,41 @@ export default function BillingDashboardPage() {
                     Storage
                   </div>
                   <div className="text-sm">
-                    <span className={cn('font-mono font-bold', getUsageColor(getUsagePercent(currentPlan.limits.storage.used, currentPlan.limits.storage.total)))}>
-                      {currentPlan.limits.storage.used}{currentPlan.limits.storage.unit}
+                    <span
+                      className={cn(
+                        'font-mono font-bold',
+                        getUsageColor(
+                          getUsagePercent(
+                            currentPlan.limits.storage.used,
+                            currentPlan.limits.storage.total
+                          )
+                        )
+                      )}
+                    >
+                      {currentPlan.limits.storage.used}
+                      {currentPlan.limits.storage.unit}
                     </span>
-                    <span className="text-text-muted"> / {currentPlan.limits.storage.total}{currentPlan.limits.storage.unit}</span>
+                    <span className="text-text-muted">
+                      {' '}
+                      / {currentPlan.limits.storage.total}
+                      {currentPlan.limits.storage.unit}
+                    </span>
                   </div>
                 </div>
                 <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                   <div
-                    className={cn('h-full rounded-full transition-all', getUsageBarColor(getUsagePercent(currentPlan.limits.storage.used, currentPlan.limits.storage.total)))}
-                    style={{ width: `${getUsagePercent(currentPlan.limits.storage.used, currentPlan.limits.storage.total)}%` }}
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      getUsageBarColor(
+                        getUsagePercent(
+                          currentPlan.limits.storage.used,
+                          currentPlan.limits.storage.total
+                        )
+                      )
+                    )}
+                    style={{
+                      width: `${getUsagePercent(currentPlan.limits.storage.used, currentPlan.limits.storage.total)}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -471,16 +683,39 @@ export default function BillingDashboardPage() {
                     API Calls
                   </div>
                   <div className="text-sm">
-                    <span className={cn('font-mono font-bold', getUsageColor(getUsagePercent(currentPlan.limits.apiCalls.used, currentPlan.limits.apiCalls.total)))}>
+                    <span
+                      className={cn(
+                        'font-mono font-bold',
+                        getUsageColor(
+                          getUsagePercent(
+                            currentPlan.limits.apiCalls.used,
+                            currentPlan.limits.apiCalls.total
+                          )
+                        )
+                      )}
+                    >
                       {currentPlan.limits.apiCalls.used.toLocaleString()}
                     </span>
-                    <span className="text-text-muted"> / {currentPlan.limits.apiCalls.total.toLocaleString()}</span>
+                    <span className="text-text-muted">
+                      {' '}
+                      / {currentPlan.limits.apiCalls.total.toLocaleString()}
+                    </span>
                   </div>
                 </div>
                 <div className="h-2 w-full rounded-full bg-border overflow-hidden">
                   <div
-                    className={cn('h-full rounded-full transition-all', getUsageBarColor(getUsagePercent(currentPlan.limits.apiCalls.used, currentPlan.limits.apiCalls.total)))}
-                    style={{ width: `${getUsagePercent(currentPlan.limits.apiCalls.used, currentPlan.limits.apiCalls.total)}%` }}
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      getUsageBarColor(
+                        getUsagePercent(
+                          currentPlan.limits.apiCalls.used,
+                          currentPlan.limits.apiCalls.total
+                        )
+                      )
+                    )}
+                    style={{
+                      width: `${getUsagePercent(currentPlan.limits.apiCalls.used, currentPlan.limits.apiCalls.total)}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -513,11 +748,21 @@ export default function BillingDashboardPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Invoice</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Plan</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Invoice
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Plan
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
                   </tr>
                 </thead>
@@ -532,15 +777,27 @@ export default function BillingDashboardPage() {
                       </td>
                       <td className="px-4 py-3 text-text-secondary">{inv.date}</td>
                       <td className="px-4 py-3 text-text-secondary text-xs">{inv.plan}</td>
-                      <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">{formatCurrency(inv.amount)}</td>
+                      <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
+                        {formatCurrency(inv.amount)}
+                      </td>
                       <td className="px-4 py-3">
-                        <span className={cn(
-                          'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
-                          inv.status === 'paid' ? 'bg-accent/10 text-accent border-accent/20' :
-                          inv.status === 'pending' ? 'bg-warning/10 text-warning border-warning/20' :
-                          'bg-danger/10 text-danger border-danger/20'
-                        )}>
-                          {inv.status === 'paid' ? <CheckCircle2 className="h-3 w-3" /> : inv.status === 'pending' ? <Clock className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
+                            inv.status === 'paid'
+                              ? 'bg-accent/10 text-accent border-accent/20'
+                              : inv.status === 'pending'
+                                ? 'bg-warning/10 text-warning border-warning/20'
+                                : 'bg-danger/10 text-danger border-danger/20'
+                          )}
+                        >
+                          {inv.status === 'paid' ? (
+                            <CheckCircle2 className="h-3 w-3" />
+                          ) : inv.status === 'pending' ? (
+                            <Clock className="h-3 w-3" />
+                          ) : (
+                            <AlertCircle className="h-3 w-3" />
+                          )}
                           {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
                         </span>
                       </td>
@@ -592,23 +849,34 @@ export default function BillingDashboardPage() {
 
             <div className="space-y-3">
               {paymentMethodsData.map((pm) => (
-                <div key={pm.id} className={cn(
-                  'rounded-lg border p-4 transition-all',
-                  pm.isDefault ? 'border-secondary/30 bg-secondary/5' : 'border-border bg-background'
-                )}>
+                <div
+                  key={pm.id}
+                  className={cn(
+                    'rounded-lg border p-4 transition-all',
+                    pm.isDefault
+                      ? 'border-secondary/30 bg-secondary/5'
+                      : 'border-border bg-background'
+                  )}
+                >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-lg',
-                        pm.type === 'visa' ? 'bg-blue-500/10' : 'bg-orange-500/10'
-                      )}>
-                        <CreditCard className={cn(
-                          'h-5 w-5',
-                          pm.type === 'visa' ? 'text-blue-500' : 'text-orange-500'
-                        )} />
+                      <div
+                        className={cn(
+                          'flex h-10 w-10 items-center justify-center rounded-lg',
+                          pm.type === 'visa' ? 'bg-blue-500/10' : 'bg-orange-500/10'
+                        )}
+                      >
+                        <CreditCard
+                          className={cn(
+                            'h-5 w-5',
+                            pm.type === 'visa' ? 'text-blue-500' : 'text-orange-500'
+                          )}
+                        />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-text-primary capitalize">{pm.type} •••• {pm.last4}</p>
+                        <p className="text-sm font-medium text-text-primary capitalize">
+                          {pm.type} •••• {pm.last4}
+                        </p>
                         <p className="text-xs text-text-muted">Expires {pm.expiry}</p>
                       </div>
                     </div>
@@ -664,7 +932,11 @@ export default function BillingDashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Address</span>
-                <span className="text-text-primary text-right">123 Hotel Ave<br/>Boston, MA 02101</span>
+                <span className="text-text-primary text-right">
+                  123 Hotel Ave
+                  <br />
+                  Boston, MA 02101
+                </span>
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full mt-4">
@@ -676,8 +948,8 @@ export default function BillingDashboardPage() {
           <div className="rounded-lg border border-border bg-background p-4 flex items-start gap-3">
             <Lock className="h-4 w-4 text-text-muted shrink-0 mt-0.5" />
             <p className="text-xs text-text-muted">
-              Your payment information is encrypted and processed securely via Stripe. 
-              Unified PMS is PCI DSS compliant.
+              Your payment information is encrypted and processed securely via Stripe. Unified PMS
+              is PCI DSS compliant.
             </p>
           </div>
         </div>
@@ -686,14 +958,22 @@ export default function BillingDashboardPage() {
       {/* ─── Upgrade Modal ─── */}
       {showUpgrade && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowUpgrade(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowUpgrade(false)}
+          />
           <div className="relative w-full max-w-5xl max-h-[90vh] overflow-auto rounded-xl border border-border bg-background shadow-2xl">
             <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold text-text-primary">Change Your Plan</h2>
-                <p className="text-xs text-text-muted">Upgrade or downgrade at any time. Changes take effect next billing cycle.</p>
+                <p className="text-xs text-text-muted">
+                  Upgrade or downgrade at any time. Changes take effect next billing cycle.
+                </p>
               </div>
-              <button onClick={() => setShowUpgrade(false)} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={() => setShowUpgrade(false)}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -701,20 +981,40 @@ export default function BillingDashboardPage() {
             <div className="p-6 space-y-6">
               {/* Billing Toggle */}
               <div className="flex items-center justify-center gap-3">
-                <span className={cn('text-sm', billingInterval === 'monthly' ? 'text-text-primary font-medium' : 'text-text-muted')}>Monthly</span>
+                <span
+                  className={cn(
+                    'text-sm',
+                    billingInterval === 'monthly'
+                      ? 'text-text-primary font-medium'
+                      : 'text-text-muted'
+                  )}
+                >
+                  Monthly
+                </span>
                 <button
-                  onClick={() => setBillingInterval(billingInterval === 'monthly' ? 'annual' : 'monthly')}
+                  onClick={() =>
+                    setBillingInterval(billingInterval === 'monthly' ? 'annual' : 'monthly')
+                  }
                   className={cn(
                     'relative inline-flex h-7 w-12 items-center rounded-full transition-colors',
                     billingInterval === 'annual' ? 'bg-secondary' : 'bg-border'
                   )}
                 >
-                  <span className={cn(
-                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                    billingInterval === 'annual' ? 'translate-x-6' : 'translate-x-1'
-                  )} />
+                  <span
+                    className={cn(
+                      'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                      billingInterval === 'annual' ? 'translate-x-6' : 'translate-x-1'
+                    )}
+                  />
                 </button>
-                <span className={cn('text-sm', billingInterval === 'annual' ? 'text-text-primary font-medium' : 'text-text-muted')}>
+                <span
+                  className={cn(
+                    'text-sm',
+                    billingInterval === 'annual'
+                      ? 'text-text-primary font-medium'
+                      : 'text-text-muted'
+                  )}
+                >
                   Annual
                   <span className="ml-1.5 inline-flex items-center rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-bold text-accent">
                     Save 17%
@@ -737,7 +1037,11 @@ export default function BillingDashboardPage() {
 
               <div className="rounded-lg border border-border bg-surface p-4 text-center">
                 <p className="text-sm text-text-secondary">
-                  Need a custom solution? <button className="text-secondary hover:underline font-medium">Contact Sales</button> for Enterprise pricing.
+                  Need a custom solution?{' '}
+                  <button className="text-secondary hover:underline font-medium">
+                    Contact Sales
+                  </button>{' '}
+                  for Enterprise pricing.
                 </p>
               </div>
             </div>
@@ -748,7 +1052,10 @@ export default function BillingDashboardPage() {
       {/* ─── Upgrade Confirmation Modal ─── */}
       {showUpgradeConfirm && upgradePreview && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowUpgradeConfirm(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowUpgradeConfirm(false)}
+          />
           <div className="relative w-full max-w-lg rounded-xl border border-border bg-background shadow-2xl overflow-hidden">
             {/* Header */}
             <div className="border-b border-border bg-surface px-6 py-4">
@@ -757,7 +1064,10 @@ export default function BillingDashboardPage() {
                   <h3 className="text-lg font-bold text-text-primary">Confirm Plan Change</h3>
                   <p className="text-xs text-text-muted">Prorated billing breakdown</p>
                 </div>
-                <button onClick={() => setShowUpgradeConfirm(false)} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+                <button
+                  onClick={() => setShowUpgradeConfirm(false)}
+                  className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -770,13 +1080,27 @@ export default function BillingDashboardPage() {
                 <div className="flex-1 rounded-lg border border-border bg-surface p-3 text-center">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Current</p>
                   <p className="text-sm font-semibold text-text-primary mt-1">{currentPlan.name}</p>
-                  <p className="text-xs text-text-muted">{formatCurrency(billingInterval === 'annual' ? currentPlan.annualPrice : currentPlan.price)}/{billingInterval === 'annual' ? 'yr' : 'mo'}</p>
+                  <p className="text-xs text-text-muted">
+                    {formatCurrency(
+                      billingInterval === 'annual' ? currentPlan.annualPrice : currentPlan.price
+                    )}
+                    /{billingInterval === 'annual' ? 'yr' : 'mo'}
+                  </p>
                 </div>
                 <ArrowRightLeft className="h-5 w-5 text-secondary shrink-0" />
                 <div className="flex-1 rounded-lg border border-secondary/30 bg-secondary/5 p-3 text-center">
                   <p className="text-xs text-secondary uppercase tracking-wider font-medium">New</p>
-                  <p className="text-sm font-semibold text-text-primary mt-1">{upgradePreview.plan.name}</p>
-                  <p className="text-xs text-text-muted">{formatCurrency(billingInterval === 'annual' ? upgradePreview.plan.annualPrice : upgradePreview.plan.price)}/{billingInterval === 'annual' ? 'yr' : 'mo'}</p>
+                  <p className="text-sm font-semibold text-text-primary mt-1">
+                    {upgradePreview.plan.name}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {formatCurrency(
+                      billingInterval === 'annual'
+                        ? upgradePreview.plan.annualPrice
+                        : upgradePreview.plan.price
+                    )}
+                    /{billingInterval === 'annual' ? 'yr' : 'mo'}
+                  </p>
                 </div>
               </div>
 
@@ -784,14 +1108,22 @@ export default function BillingDashboardPage() {
               <div className="rounded-lg border border-border bg-surface p-4 space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-text-secondary">Billing cycle resets</span>
-                  <span className="text-text-primary font-medium">{new Date(currentPlan.renewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  <span className="text-text-primary font-medium">
+                    {new Date(currentPlan.renewalDate).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-text-secondary">Prorated charge today</span>
                   <span className="text-text-primary font-medium font-mono">
                     {formatCurrency(
                       billingInterval === 'annual'
-                        ? Math.round((upgradePreview.plan.annualPrice - currentPlan.annualPrice) * 0.3)
+                        ? Math.round(
+                            (upgradePreview.plan.annualPrice - currentPlan.annualPrice) * 0.3
+                          )
                         : Math.round((upgradePreview.plan.price - currentPlan.price) * 0.3)
                     )}
                   </span>
@@ -799,17 +1131,24 @@ export default function BillingDashboardPage() {
                 <div className="border-t border-border pt-2 flex items-center justify-between text-sm">
                   <span className="text-text-secondary font-medium">New recurring charge</span>
                   <span className="text-text-primary font-bold font-mono">
-                    {formatCurrency(billingInterval === 'annual' ? upgradePreview.plan.annualPrice : upgradePreview.plan.price)}/{billingInterval === 'annual' ? 'yr' : 'mo'}
+                    {formatCurrency(
+                      billingInterval === 'annual'
+                        ? upgradePreview.plan.annualPrice
+                        : upgradePreview.plan.price
+                    )}
+                    /{billingInterval === 'annual' ? 'yr' : 'mo'}
                   </span>
                 </div>
               </div>
 
               {/* Feature delta */}
               <div className="rounded-lg border border-border bg-surface p-4">
-                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">What changes</p>
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
+                  What changes
+                </p>
                 <div className="space-y-2">
                   {upgradePreview.plan.features
-                    .filter(f => !currentPlan.features.includes(f))
+                    .filter((f) => !currentPlan.features.includes(f))
                     .map((f) => (
                       <div key={f} className="flex items-start gap-2 text-sm text-text-secondary">
                         <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
@@ -817,17 +1156,21 @@ export default function BillingDashboardPage() {
                       </div>
                     ))}
                   {currentPlan.features
-                    .filter(f => !upgradePreview.plan.features.includes(f))
+                    .filter((f) => !upgradePreview.plan.features.includes(f))
                     .map((f) => (
                       <div key={f} className="flex items-start gap-2 text-sm text-text-secondary">
                         <Ban className="h-4 w-4 text-danger shrink-0 mt-0.5" />
                         <span className="text-text-muted">– {f}</span>
                       </div>
                     ))}
-                  {upgradePreview.plan.features.filter(f => !currentPlan.features.includes(f)).length === 0 &&
-                   currentPlan.features.filter(f => !upgradePreview.plan.features.includes(f)).length === 0 && (
-                    <p className="text-sm text-text-muted">Same feature set — billing change only</p>
-                  )}
+                  {upgradePreview.plan.features.filter((f) => !currentPlan.features.includes(f))
+                    .length === 0 &&
+                    currentPlan.features.filter((f) => !upgradePreview.plan.features.includes(f))
+                      .length === 0 && (
+                      <p className="text-sm text-text-muted">
+                        Same feature set — billing change only
+                      </p>
+                    )}
                 </div>
               </div>
 
@@ -836,14 +1179,20 @@ export default function BillingDashboardPage() {
                 <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
                   <p className="text-xs text-danger">
-                    You currently have {currentPlan.limits.rooms.used} rooms, but {upgradePreview.plan.name} supports up to {upgradePreview.plan.roomLimit}. Please reduce rooms or choose a higher plan.
+                    You currently have {currentPlan.limits.rooms.used} rooms, but{' '}
+                    {upgradePreview.plan.name} supports up to {upgradePreview.plan.roomLimit}.
+                    Please reduce rooms or choose a higher plan.
                   </p>
                 </div>
               )}
 
               {/* Confirm button */}
               <div className="flex items-center gap-3 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowUpgradeConfirm(false)}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowUpgradeConfirm(false)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -863,17 +1212,31 @@ export default function BillingDashboardPage() {
       {/* ─── Add Card Modal ─── */}
       {showAddCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddCard(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowAddCard(false)}
+          />
           <div className="relative w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-text-primary">Add Payment Method</h3>
-              <button onClick={() => setShowAddCard(false)} className="rounded-md p-1 hover:bg-surface text-text-muted">
+              <button
+                onClick={() => setShowAddCard(false)}
+                className="rounded-md p-1 hover:bg-surface text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowAddCard(false); }}>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setShowAddCard(false);
+              }}
+            >
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Card Number</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Card Number
+                </label>
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                   <input
@@ -885,7 +1248,9 @@ export default function BillingDashboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Expiry</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Expiry
+                  </label>
                   <input
                     type="text"
                     placeholder="MM / YY"
@@ -893,7 +1258,9 @@ export default function BillingDashboardPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">CVC</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    CVC
+                  </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                     <input
@@ -905,7 +1272,9 @@ export default function BillingDashboardPage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Name on Card</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Name on Card
+                </label>
                 <input
                   type="text"
                   placeholder="Grand Hotel Corp"
@@ -913,7 +1282,9 @@ export default function BillingDashboardPage() {
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setShowAddCard(false)}>Cancel</Button>
+                <Button type="button" variant="outline" onClick={() => setShowAddCard(false)}>
+                  Cancel
+                </Button>
                 <Button type="submit" variant="secondary">
                   <Check className="mr-1.5 h-4 w-4" /> Add Card
                 </Button>
@@ -926,14 +1297,22 @@ export default function BillingDashboardPage() {
       {/* ─── Invoice Detail Modal ─── */}
       {selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedInvoice(null)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedInvoice(null)}
+          />
           <div className="relative w-full max-w-lg rounded-xl border border-border bg-white dark:bg-slate-900 p-0 shadow-2xl overflow-hidden">
             <div className="bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-sm font-bold text-white">U</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-sm font-bold text-white">
+                  U
+                </div>
                 <span className="text-sm font-semibold text-text-primary">Unified PMS</span>
               </div>
-              <button onClick={() => setSelectedInvoice(null)} className="rounded-md p-1 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={() => setSelectedInvoice(null)}
+                className="rounded-md p-1 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -954,21 +1333,28 @@ export default function BillingDashboardPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-text-secondary">Status</span>
-                  <span className={cn(
-                    'text-xs font-medium',
-                    selectedInvoice.status === 'paid' ? 'text-accent' : 'text-warning'
-                  )}>
-                    {selectedInvoice.status.charAt(0).toUpperCase() + selectedInvoice.status.slice(1)}
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      selectedInvoice.status === 'paid' ? 'text-accent' : 'text-warning'
+                    )}
+                  >
+                    {selectedInvoice.status.charAt(0).toUpperCase() +
+                      selectedInvoice.status.slice(1)}
                   </span>
                 </div>
               </div>
               <div className="border-t border-border pt-3 flex justify-between text-base font-bold">
                 <span className="text-text-primary">Total</span>
-                <span className="font-mono text-text-primary">{formatCurrency(selectedInvoice.amount)}</span>
+                <span className="font-mono text-text-primary">
+                  {formatCurrency(selectedInvoice.amount)}
+                </span>
               </div>
             </div>
             <div className="border-t border-border bg-surface px-6 py-3 flex items-center justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setSelectedInvoice(null)}>Close</Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedInvoice(null)}>
+                Close
+              </Button>
               <Button variant="outline" size="sm">
                 <Download className="mr-1.5 h-3.5 w-3.5" /> Download PDF
               </Button>

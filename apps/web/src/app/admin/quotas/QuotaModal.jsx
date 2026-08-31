@@ -59,7 +59,7 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
     }
   }, [rule]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleResourceChange = (resource) => {
     update('resource', resource);
@@ -96,11 +96,18 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
               <Zap className="h-5 w-5 text-secondary" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-text-primary">{isEditing ? 'Edit Quota Rule' : 'Create Quota Rule'}</h3>
-              <p className="text-xs text-text-muted">{isEditing ? rule.id : 'Define limits and enforcement'}</p>
+              <h3 className="text-lg font-bold text-text-primary">
+                {isEditing ? 'Edit Quota Rule' : 'Create Quota Rule'}
+              </h3>
+              <p className="text-xs text-text-muted">
+                {isEditing ? rule.id : 'Define limits and enforcement'}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -109,7 +116,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Rule Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Rule Name
+              </label>
               <input
                 type="text"
                 required
@@ -120,7 +129,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Description
+              </label>
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
@@ -133,7 +144,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
 
           {/* Resource Selection */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Resource Type</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Resource Type
+            </label>
             <div className="grid grid-cols-4 gap-3">
               {resources.map((res) => {
                 const meta = resourceMeta[res];
@@ -145,11 +158,22 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                     onClick={() => handleResourceChange(res)}
                     className={cn(
                       'flex items-center gap-2 rounded-lg border p-3 text-left transition-all',
-                      active ? 'border-secondary bg-secondary/5' : 'border-border bg-surface hover:border-secondary/30'
+                      active
+                        ? 'border-secondary bg-secondary/5'
+                        : 'border-border bg-surface hover:border-secondary/30'
                     )}
                   >
-                    <div className={cn('h-2 w-2 rounded-full', meta.color.replace('text-', 'bg-'))} />
-                    <span className={cn('text-sm font-medium', active ? 'text-secondary' : 'text-text-primary')}>{meta.label}</span>
+                    <div
+                      className={cn('h-2 w-2 rounded-full', meta.color.replace('text-', 'bg-'))}
+                    />
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        active ? 'text-secondary' : 'text-text-primary'
+                      )}
+                    >
+                      {meta.label}
+                    </span>
                   </button>
                 );
               })}
@@ -158,7 +182,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
 
           {/* Scope Selection */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Scope</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Scope
+            </label>
             <div className="grid grid-cols-3 gap-3">
               {scopes.map((s) => {
                 const Icon = s.icon;
@@ -170,12 +196,23 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                     onClick={() => handleScopeChange(s.id)}
                     className={cn(
                       'flex items-center gap-3 rounded-lg border p-3 text-left transition-all',
-                      active ? 'border-secondary bg-secondary/5' : 'border-border bg-surface hover:border-secondary/30'
+                      active
+                        ? 'border-secondary bg-secondary/5'
+                        : 'border-border bg-surface hover:border-secondary/30'
                     )}
                   >
-                    <Icon className={cn('h-5 w-5', active ? 'text-secondary' : 'text-text-muted')} />
+                    <Icon
+                      className={cn('h-5 w-5', active ? 'text-secondary' : 'text-text-muted')}
+                    />
                     <div>
-                      <p className={cn('text-sm font-medium', active ? 'text-secondary' : 'text-text-primary')}>{s.label}</p>
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          active ? 'text-secondary' : 'text-text-primary'
+                        )}
+                      >
+                        {s.label}
+                      </p>
                     </div>
                   </button>
                 );
@@ -209,7 +246,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {tenants?.map((t) => (
-                  <option key={t.id} value={t.id}>{t.id} — {t.name}</option>
+                  <option key={t.id} value={t.id}>
+                    {t.id} — {t.name}
+                  </option>
                 ))}
               </select>
             )}
@@ -217,10 +256,14 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
 
           {/* Limit & Period */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Limit Configuration</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Limit Configuration
+            </h4>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Limit Value</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Limit Value
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -247,7 +290,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {periods.map((p) => (
-                    <option key={p} value={p}>{periodMeta[p].label}</option>
+                    <option key={p} value={p}>
+                      {periodMeta[p].label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -255,7 +300,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Warn Threshold (%)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Warn Threshold (%)
+                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
@@ -265,11 +312,15 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                     onChange={(e) => update('warnThreshold', parseInt(e.target.value))}
                     className="flex-1 accent-secondary"
                   />
-                  <span className="text-sm font-mono font-medium text-text-primary w-10 text-right">{form.warnThreshold}%</span>
+                  <span className="text-sm font-mono font-medium text-text-primary w-10 text-right">
+                    {form.warnThreshold}%
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Hard Limit (%)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Hard Limit (%)
+                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
@@ -279,7 +330,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                     onChange={(e) => update('hardLimit', parseInt(e.target.value))}
                     className="flex-1 accent-danger"
                   />
-                  <span className="text-sm font-mono font-medium text-text-primary w-10 text-right">{form.hardLimit}%</span>
+                  <span className="text-sm font-mono font-medium text-text-primary w-10 text-right">
+                    {form.hardLimit}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -287,7 +340,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
 
           {/* Action */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Enforcement Action</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Enforcement Action
+            </label>
             <div className="grid grid-cols-3 gap-3">
               {actions.map((act) => {
                 const meta = actionMeta[act];
@@ -299,10 +354,19 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                     onClick={() => update('action', act)}
                     className={cn(
                       'rounded-lg border p-3 text-left transition-all',
-                      active ? cn(meta.class, 'border-current') : 'border-border bg-surface hover:bg-surface-elevated'
+                      active
+                        ? cn(meta.class, 'border-current')
+                        : 'border-border bg-surface hover:bg-surface-elevated'
                     )}
                   >
-                    <p className={cn('text-sm font-medium', active ? meta.class.split(' ')[1] : 'text-text-primary')}>{meta.label}</p>
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        active ? meta.class.split(' ')[1] : 'text-text-primary'
+                      )}
+                    >
+                      {meta.label}
+                    </p>
                     <p className="text-xs text-text-muted mt-0.5">{meta.desc}</p>
                   </button>
                 );
@@ -310,7 +374,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
             </div>
             {form.action === 'throttle' && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Throttle Rate (requests/sec)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Throttle Rate (requests/sec)
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -326,8 +392,12 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
           <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Overage Billing</h4>
-                <p className="text-xs text-text-muted mt-0.5">Charge tenants for usage beyond the limit</p>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Overage Billing
+                </h4>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Charge tenants for usage beyond the limit
+                </p>
               </div>
               <button
                 type="button"
@@ -337,17 +407,21 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                   form.overageEnabled ? 'bg-accent' : 'bg-border'
                 )}
               >
-                <span className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  form.overageEnabled ? 'translate-x-6' : 'translate-x-1'
-                )} />
+                <span
+                  className={cn(
+                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                    form.overageEnabled ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
               </button>
             </div>
 
             {form.overageEnabled && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">Rate per Unit ($)</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">
+                    Rate per Unit ($)
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -358,7 +432,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">Monthly Cap ($)</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">
+                    Monthly Cap ($)
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -375,7 +451,9 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
             <div>
               <p className="text-sm font-medium text-text-primary">Enable Rule</p>
-              <p className="text-xs text-text-muted">{form.enabled ? 'Rule is actively enforced' : 'Rule is disabled'}</p>
+              <p className="text-xs text-text-muted">
+                {form.enabled ? 'Rule is actively enforced' : 'Rule is disabled'}
+              </p>
             </div>
             <button
               type="button"
@@ -385,16 +463,20 @@ export default function QuotaModal({ rule, onClose, onSave, tenants }) {
                 form.enabled ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.enabled ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.enabled ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Rule'}
             </Button>

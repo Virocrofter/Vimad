@@ -2,9 +2,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Star, ChevronLeft, Camera, Send, ThumbsUp, MessageCircle,
-  Hotel, Sparkles, Utensils, Users, MapPin, Wifi, BedDouble,
-  CheckCircle2, AlertCircle
+  Star,
+  ChevronLeft,
+  Camera,
+  Send,
+  ThumbsUp,
+  MessageCircle,
+  Hotel,
+  Sparkles,
+  Utensils,
+  Users,
+  MapPin,
+  Wifi,
+  BedDouble,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -34,27 +46,27 @@ export default function ReviewsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCategoryRating = (categoryId, rating) => {
-    setCategoryRatings(prev => ({ ...prev, [categoryId]: rating }));
+    setCategoryRatings((prev) => ({ ...prev, [categoryId]: rating }));
   };
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newPhotos = files.map(file => ({
+    const newPhotos = files.map((file) => ({
       id: `photo-${Date.now()}-${Math.random()}`,
       name: file.name,
       url: URL.createObjectURL(file),
     }));
-    setPhotos(prev => [...prev, ...newPhotos].slice(0, 5));
+    setPhotos((prev) => [...prev, ...newPhotos].slice(0, 5));
   };
 
   const removePhoto = (id) => {
-    setPhotos(prev => prev.filter(p => p.id !== id));
+    setPhotos((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleSubmit = async () => {
     if (overallRating === 0) return;
     setIsSubmitting(true);
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
     setIsSubmitting(false);
     setSubmitted(true);
   };
@@ -78,9 +90,7 @@ export default function ReviewsPage() {
           <Button variant="outline" onClick={() => navigate('/guest-portal')}>
             Back to Dashboard
           </Button>
-          <Button onClick={() => navigate('/guest-portal/reviews/history')}>
-            View My Reviews
-          </Button>
+          <Button onClick={() => navigate('/guest-portal/reviews/history')}>View My Reviews</Button>
         </div>
       </div>
     );
@@ -110,9 +120,12 @@ export default function ReviewsPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-text-primary">{stay.room.type}</p>
-            <p className="text-xs text-text-muted">Room {stay.room.number} - {stay.dates.nights} nights</p>
             <p className="text-xs text-text-muted">
-              {new Date(stay.dates.arrival).toLocaleDateString()} - {new Date(stay.dates.departure).toLocaleDateString()}
+              Room {stay.room.number} - {stay.dates.nights} nights
+            </p>
+            <p className="text-xs text-text-muted">
+              {new Date(stay.dates.arrival).toLocaleDateString()} -{' '}
+              {new Date(stay.dates.departure).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -120,7 +133,9 @@ export default function ReviewsPage() {
 
       {/* Overall Rating */}
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
-        <h3 className="text-sm font-semibold text-text-primary mb-4">How was your overall experience?</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-4">
+          How was your overall experience?
+        </h3>
         <div className="flex items-center justify-center gap-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -202,10 +217,7 @@ export default function ReviewsPage() {
           className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary resize-none"
         />
         <div className="flex items-center justify-between mt-2">
-          <span className={cn(
-            'text-xs',
-            comment.length < 10 ? 'text-text-muted' : 'text-accent'
-          )}>
+          <span className={cn('text-xs', comment.length < 10 ? 'text-text-muted' : 'text-accent')}>
             {comment.length} characters {comment.length < 10 && '(min 10)'}
           </span>
         </div>
@@ -215,8 +227,11 @@ export default function ReviewsPage() {
       <div className="rounded-xl border border-border bg-surface p-5">
         <h3 className="text-sm font-semibold text-text-primary mb-3">Add Photos (optional)</h3>
         <div className="flex flex-wrap gap-3">
-          {photos.map(photo => (
-            <div key={photo.id} className="relative h-20 w-20 rounded-lg overflow-hidden border border-border">
+          {photos.map((photo) => (
+            <div
+              key={photo.id}
+              className="relative h-20 w-20 rounded-lg overflow-hidden border border-border"
+            >
               <img src={photo.url} alt={photo.name} className="h-full w-full object-cover" />
               <button
                 onClick={() => removePhoto(photo.id)}
@@ -244,18 +259,10 @@ export default function ReviewsPage() {
 
       {/* Submit */}
       <div className="flex items-center gap-3 pb-6">
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => navigate('/guest-portal')}
-        >
+        <Button variant="outline" className="flex-1" onClick={() => navigate('/guest-portal')}>
           Skip for Now
         </Button>
-        <Button
-          className="flex-1"
-          disabled={!canSubmit || isSubmitting}
-          onClick={handleSubmit}
-        >
+        <Button className="flex-1" disabled={!canSubmit || isSubmitting} onClick={handleSubmit}>
           <Send className="mr-1.5 h-4 w-4" /> Submit Review
         </Button>
       </div>

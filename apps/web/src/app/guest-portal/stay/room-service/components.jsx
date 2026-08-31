@@ -1,9 +1,22 @@
 /* src/app/guest-portal/stay/room-service/components.jsx */
 import { useState } from 'react';
 import {
-  Coffee, UtensilsCrossed, Wine, Sparkles, X, Plus, Minus,
-  CheckCircle2, Clock, ChevronRight, Leaf, Wheat, Egg, Milk,
-  Fish, AlertCircle
+  Coffee,
+  UtensilsCrossed,
+  Wine,
+  Sparkles,
+  X,
+  Plus,
+  Minus,
+  CheckCircle2,
+  Clock,
+  ChevronRight,
+  Leaf,
+  Wheat,
+  Egg,
+  Milk,
+  Fish,
+  AlertCircle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
@@ -25,10 +38,12 @@ export function MenuCategoryCard({ category, onSelect, isAvailable }) {
         !isAvailable && 'opacity-50'
       )}
     >
-      <div className={cn(
-        'flex h-12 w-12 items-center justify-center rounded-full',
-        isAvailable ? 'bg-secondary/10' : 'bg-border'
-      )}>
+      <div
+        className={cn(
+          'flex h-12 w-12 items-center justify-center rounded-full',
+          isAvailable ? 'bg-secondary/10' : 'bg-border'
+        )}
+      >
         <Icon className={cn('h-6 w-6', isAvailable ? 'text-secondary' : 'text-text-muted')} />
       </div>
       <span className="text-sm font-medium text-text-primary">{category.name}</span>
@@ -85,14 +100,20 @@ export function MenuItemCard({ item, onAdd, qty = 0, onUpdateQty }) {
         {/* Dietary & Allergens */}
         <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
           {item.dietary.map((d) => (
-            <span key={d} className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] text-accent capitalize">
+            <span
+              key={d}
+              className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] text-accent capitalize"
+            >
               {d}
             </span>
           ))}
           {item.allergens.map((a) => {
             const AllergenIcon = allergenIcons[a] || AlertCircle;
             return (
-              <span key={a} className="inline-flex items-center gap-0.5 rounded-full bg-warning/10 px-2 py-0.5 text-[10px] text-warning capitalize">
+              <span
+                key={a}
+                className="inline-flex items-center gap-0.5 rounded-full bg-warning/10 px-2 py-0.5 text-[10px] text-warning capitalize"
+              >
                 <AllergenIcon className="h-3 w-3" />
                 {a}
               </span>
@@ -159,8 +180,12 @@ export function CartSummary({ items, total, onCheckout, onClear }) {
       <div className="space-y-2">
         {items.map((item) => (
           <div key={item.id} className="flex items-center justify-between text-sm">
-            <span className="text-text-secondary">{item.qty}x {item.name}</span>
-            <span className="text-text-primary font-medium">${(item.price * item.qty).toFixed(2)}</span>
+            <span className="text-text-secondary">
+              {item.qty}x {item.name}
+            </span>
+            <span className="text-text-primary font-medium">
+              ${(item.price * item.qty).toFixed(2)}
+            </span>
           </div>
         ))}
       </div>
@@ -207,7 +232,12 @@ export function OrderStatusCard({ order }) {
           <p className="text-xs text-text-muted">Order #{order.id}</p>
           <p className="text-sm font-semibold text-text-primary">{statusLabels[order.status]}</p>
         </div>
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-full', statusColors[order.status]?.replace('text-', 'bg-') + '/10')}>
+        <div
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-full',
+            statusColors[order.status]?.replace('text-', 'bg-') + '/10'
+          )}
+        >
           <Clock className={cn('h-5 w-5', statusColors[order.status])} />
         </div>
       </div>
@@ -216,11 +246,15 @@ export function OrderStatusCard({ order }) {
       <div className="flex items-center gap-1">
         {statusSteps.map((step, i) => (
           <div key={step} className="flex-1 flex items-center gap-1">
-            <div className={cn(
-              'h-2 flex-1 rounded-full transition-all',
-              i <= currentStep ? (i === currentStep ? 'bg-secondary' : 'bg-accent') : 'bg-border'
-            )} />
-            {i < 3 && <div className={cn('h-px w-2', i < currentStep ? 'bg-accent' : 'bg-border')} />}
+            <div
+              className={cn(
+                'h-2 flex-1 rounded-full transition-all',
+                i <= currentStep ? (i === currentStep ? 'bg-secondary' : 'bg-accent') : 'bg-border'
+              )}
+            />
+            {i < 3 && (
+              <div className={cn('h-px w-2', i < currentStep ? 'bg-accent' : 'bg-border')} />
+            )}
           </div>
         ))}
       </div>
@@ -228,7 +262,9 @@ export function OrderStatusCard({ order }) {
       <div className="space-y-1">
         {order.items.map((item, i) => (
           <div key={i} className="flex items-center justify-between text-xs">
-            <span className="text-text-secondary">{item.qty}x {item.name}</span>
+            <span className="text-text-secondary">
+              {item.qty}x {item.name}
+            </span>
             <span className="text-text-primary">${(item.price * item.qty).toFixed(2)}</span>
           </div>
         ))}

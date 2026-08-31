@@ -1,9 +1,21 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BedDouble, Sparkles, AlertTriangle, Wrench, CheckCircle2,
-  Search, Filter, Calendar, Clock, User, ChevronDown, Plus,
-  ArrowUpDown, LayoutGrid, List
+  BedDouble,
+  Sparkles,
+  AlertTriangle,
+  Wrench,
+  CheckCircle2,
+  Search,
+  Filter,
+  Calendar,
+  Clock,
+  User,
+  ChevronDown,
+  Plus,
+  ArrowUpDown,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -12,37 +24,220 @@ import { Input } from '../../../components/ui/input';
 /* ─── Mock Data ─── */
 const initialRooms = [
   // Floor 1
-  { id: '101', floor: 1, type: 'Standard King', status: 'clean', guest: null, vip: false, arrival: null, departure: null },
-  { id: '102', floor: 1, type: 'Standard King', status: 'occupied', guest: 'John Smith', vip: false, arrival: '2026-08-12', departure: '2026-08-15' },
-  { id: '103', floor: 1, type: 'Deluxe Queen', status: 'dirty', guest: null, vip: false, arrival: null, departure: null },
-  { id: '104', floor: 1, type: 'Accessible', status: 'inspected', guest: null, vip: false, arrival: null, departure: null },
-  { id: '105', floor: 1, type: 'Standard Twin', status: 'ooo', guest: null, vip: false, arrival: null, departure: null, oooReason: 'HVAC Repair' },
+  {
+    id: '101',
+    floor: 1,
+    type: 'Standard King',
+    status: 'clean',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '102',
+    floor: 1,
+    type: 'Standard King',
+    status: 'occupied',
+    guest: 'John Smith',
+    vip: false,
+    arrival: '2026-08-12',
+    departure: '2026-08-15',
+  },
+  {
+    id: '103',
+    floor: 1,
+    type: 'Deluxe Queen',
+    status: 'dirty',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '104',
+    floor: 1,
+    type: 'Accessible',
+    status: 'inspected',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '105',
+    floor: 1,
+    type: 'Standard Twin',
+    status: 'ooo',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+    oooReason: 'HVAC Repair',
+  },
   // Floor 2
-  { id: '201', floor: 2, type: 'Deluxe King', status: 'clean', guest: null, vip: false, arrival: null, departure: null },
-  { id: '202', floor: 2, type: 'Deluxe King', status: 'occupied', guest: 'Sarah Chen', vip: true, arrival: '2026-08-11', departure: '2026-08-14' },
-  { id: '203', floor: 2, type: 'Suite', status: 'dirty', guest: null, vip: false, arrival: null, departure: null },
-  { id: '204', floor: 2, type: 'Deluxe King', status: 'occupied', guest: 'Mike Brown', vip: false, arrival: '2026-08-10', departure: '2026-08-13' },
-  { id: '205', floor: 2, type: 'Standard Queen', status: 'clean', guest: null, vip: false, arrival: null, departure: null },
+  {
+    id: '201',
+    floor: 2,
+    type: 'Deluxe King',
+    status: 'clean',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '202',
+    floor: 2,
+    type: 'Deluxe King',
+    status: 'occupied',
+    guest: 'Sarah Chen',
+    vip: true,
+    arrival: '2026-08-11',
+    departure: '2026-08-14',
+  },
+  {
+    id: '203',
+    floor: 2,
+    type: 'Suite',
+    status: 'dirty',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '204',
+    floor: 2,
+    type: 'Deluxe King',
+    status: 'occupied',
+    guest: 'Mike Brown',
+    vip: false,
+    arrival: '2026-08-10',
+    departure: '2026-08-13',
+  },
+  {
+    id: '205',
+    floor: 2,
+    type: 'Standard Queen',
+    status: 'clean',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
   // Floor 3
-  { id: '301', floor: 3, type: 'Suite', status: 'inspected', guest: null, vip: false, arrival: null, departure: null },
-  { id: '302', floor: 3, type: 'Deluxe King', status: 'occupied', guest: 'Emily Davis', vip: true, arrival: '2026-08-12', departure: '2026-08-16' },
-  { id: '303', floor: 3, type: 'Standard Twin', status: 'dirty', guest: null, vip: false, arrival: null, departure: null },
-  { id: '304', floor: 3, type: 'Deluxe Queen', status: 'ooo', guest: null, vip: false, arrival: null, departure: null, oooReason: 'Plumbing' },
-  { id: '305', floor: 3, type: 'Suite', status: 'clean', guest: null, vip: false, arrival: null, departure: null },
+  {
+    id: '301',
+    floor: 3,
+    type: 'Suite',
+    status: 'inspected',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '302',
+    floor: 3,
+    type: 'Deluxe King',
+    status: 'occupied',
+    guest: 'Emily Davis',
+    vip: true,
+    arrival: '2026-08-12',
+    departure: '2026-08-16',
+  },
+  {
+    id: '303',
+    floor: 3,
+    type: 'Standard Twin',
+    status: 'dirty',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
+  {
+    id: '304',
+    floor: 3,
+    type: 'Deluxe Queen',
+    status: 'ooo',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+    oooReason: 'Plumbing',
+  },
+  {
+    id: '305',
+    floor: 3,
+    type: 'Suite',
+    status: 'clean',
+    guest: null,
+    vip: false,
+    arrival: null,
+    departure: null,
+  },
 ];
 
 const attendants = [
-  { id: 1, name: 'Maria G.', initials: 'MG', shift: '7:00 AM - 3:00 PM', assigned: ['101', '103', '201', '203', '303'], completed: ['101', '201'] },
-  { id: 2, name: 'James L.', initials: 'JL', shift: '7:00 AM - 3:00 PM', assigned: ['102', '104', '202', '204', '205'], completed: ['104', '205'] },
-  { id: 3, name: 'Priya K.', initials: 'PK', shift: '3:00 PM - 11:00 PM', assigned: ['301', '302', '303', '304', '305'], completed: ['301'] },
+  {
+    id: 1,
+    name: 'Maria G.',
+    initials: 'MG',
+    shift: '7:00 AM - 3:00 PM',
+    assigned: ['101', '103', '201', '203', '303'],
+    completed: ['101', '201'],
+  },
+  {
+    id: 2,
+    name: 'James L.',
+    initials: 'JL',
+    shift: '7:00 AM - 3:00 PM',
+    assigned: ['102', '104', '202', '204', '205'],
+    completed: ['104', '205'],
+  },
+  {
+    id: 3,
+    name: 'Priya K.',
+    initials: 'PK',
+    shift: '3:00 PM - 11:00 PM',
+    assigned: ['301', '302', '303', '304', '305'],
+    completed: ['301'],
+  },
 ];
 
 const statusMeta = {
-  clean: { label: 'Clean', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', icon: CheckCircle2 },
-  dirty: { label: 'Dirty', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: AlertTriangle },
-  inspected: { label: 'Inspected', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', icon: Sparkles },
-  ooo: { label: 'OOO', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', icon: Wrench },
-  occupied: { label: 'Occupied', class: 'bg-secondary/10 text-secondary border-secondary/20', dot: 'bg-secondary', icon: BedDouble },
+  clean: {
+    label: 'Clean',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: CheckCircle2,
+  },
+  dirty: {
+    label: 'Dirty',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: AlertTriangle,
+  },
+  inspected: {
+    label: 'Inspected',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: Sparkles,
+  },
+  ooo: {
+    label: 'OOO',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: Wrench,
+  },
+  occupied: {
+    label: 'Occupied',
+    class: 'bg-secondary/10 text-secondary border-secondary/20',
+    dot: 'bg-secondary',
+    icon: BedDouble,
+  },
 };
 
 const floors = [1, 2, 3];
@@ -79,42 +274,60 @@ function RoomCard({ room, onStatusChange, isDragging, onDragStart, onDragEnd, on
         <span className="text-lg font-bold text-text-primary">{room.id}</span>
         <span className={cn('h-2.5 w-2.5 rounded-full', meta.dot)} />
       </div>
-      <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">{room.type}</p>
-      
+      <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+        {room.type}
+      </p>
+
       {room.guest && (
         <div className="mt-2 flex items-center gap-1.5 text-xs text-text-secondary">
           <User className="h-3 w-3" />
           <span className="truncate">{room.guest}</span>
-          {room.vip && <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold text-warning">VIP</span>}
+          {room.vip && (
+            <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold text-warning">
+              VIP
+            </span>
+          )}
         </div>
       )}
-      
+
       {room.oooReason && (
         <p className="mt-1.5 text-[10px] font-medium text-warning">{room.oooReason}</p>
       )}
 
       <div className="mt-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {Object.keys(statusMeta).map((s) => (
-          s !== room.status && (
-            <button
-              key={s}
-              onClick={(e) => { e.stopPropagation(); onStatusChange(room.id, s); }}
-              className={cn(
-                'h-6 w-6 rounded-full border flex items-center justify-center transition-colors',
-                statusMeta[s].class
-              )}
-              title={`Mark ${statusMeta[s].label}`}
-            >
-              <div className={cn('h-2 w-2 rounded-full', statusMeta[s].dot)} />
-            </button>
-          )
-        ))}
+        {Object.keys(statusMeta).map(
+          (s) =>
+            s !== room.status && (
+              <button
+                key={s}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStatusChange(room.id, s);
+                }}
+                className={cn(
+                  'h-6 w-6 rounded-full border flex items-center justify-center transition-colors',
+                  statusMeta[s].class
+                )}
+                title={`Mark ${statusMeta[s].label}`}
+              >
+                <div className={cn('h-2 w-2 rounded-full', statusMeta[s].dot)} />
+              </button>
+            )
+        )}
       </div>
     </div>
   );
 }
 
-function StatusColumn({ status, rooms, onStatusChange, onDragStart, onDragEnd, onDrop, draggedRoom }) {
+function StatusColumn({
+  status,
+  rooms,
+  onStatusChange,
+  onDragStart,
+  onDragEnd,
+  onDrop,
+  draggedRoom,
+}) {
   const meta = statusMeta[status];
   const StatusIcon = meta.icon;
 
@@ -167,11 +380,11 @@ export default function HousekeepingPage() {
 
   const stats = useMemo(() => {
     const total = rooms.length;
-    const clean = rooms.filter(r => r.status === 'clean').length;
-    const dirty = rooms.filter(r => r.status === 'dirty').length;
-    const inspected = rooms.filter(r => r.status === 'inspected').length;
-    const ooo = rooms.filter(r => r.status === 'ooo').length;
-    const occupied = rooms.filter(r => r.status === 'occupied').length;
+    const clean = rooms.filter((r) => r.status === 'clean').length;
+    const dirty = rooms.filter((r) => r.status === 'dirty').length;
+    const inspected = rooms.filter((r) => r.status === 'inspected').length;
+    const ooo = rooms.filter((r) => r.status === 'ooo').length;
+    const occupied = rooms.filter((r) => r.status === 'occupied').length;
     return { total, clean, dirty, inspected, ooo, occupied };
   }, [rooms]);
 
@@ -179,7 +392,11 @@ export default function HousekeepingPage() {
     return rooms.filter((r) => {
       const matchesFloor = floorFilter === 'all' || r.floor === parseInt(floorFilter);
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-      const matchesQuery = !query || r.id.includes(query) || r.type.toLowerCase().includes(query.toLowerCase()) || (r.guest && r.guest.toLowerCase().includes(query.toLowerCase()));
+      const matchesQuery =
+        !query ||
+        r.id.includes(query) ||
+        r.type.toLowerCase().includes(query.toLowerCase()) ||
+        (r.guest && r.guest.toLowerCase().includes(query.toLowerCase()));
       return matchesFloor && matchesStatus && matchesQuery;
     });
   }, [rooms, floorFilter, statusFilter, query]);
@@ -214,11 +431,21 @@ export default function HousekeepingPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Housekeeping</h1>
-          <p className="text-sm text-text-secondary">Room status, schedules, and attendant assignments</p>
+          <p className="text-sm text-text-secondary">
+            Room status, schedules, and attendant assignments
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'grid' ? 'board' : 'grid')}>
-            {viewMode === 'grid' ? <List className="mr-1.5 h-4 w-4" /> : <LayoutGrid className="mr-1.5 h-4 w-4" />}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(viewMode === 'grid' ? 'board' : 'grid')}
+          >
+            {viewMode === 'grid' ? (
+              <List className="mr-1.5 h-4 w-4" />
+            ) : (
+              <LayoutGrid className="mr-1.5 h-4 w-4" />
+            )}
             {viewMode === 'grid' ? 'Board View' : 'Grid View'}
           </Button>
           <Button size="sm">
@@ -235,10 +462,17 @@ export default function HousekeepingPage() {
           { label: 'Dirty', value: stats.dirty, color: 'text-danger', bg: 'bg-danger/10' },
           { label: 'Inspected', value: stats.inspected, color: 'text-info', bg: 'bg-info/10' },
           { label: 'OOO', value: stats.ooo, color: 'text-warning', bg: 'bg-warning/10' },
-          { label: 'Occupied', value: stats.occupied, color: 'text-secondary', bg: 'bg-secondary/10' },
+          {
+            label: 'Occupied',
+            value: stats.occupied,
+            color: 'text-secondary',
+            bg: 'bg-secondary/10',
+          },
         ].map((s) => (
           <div key={s.label} className={cn('rounded-xl border border-border p-4', s.bg)}>
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{s.label}</p>
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              {s.label}
+            </p>
             <p className={cn('mt-1 text-2xl font-bold', s.color)}>{s.value}</p>
           </div>
         ))}
@@ -263,7 +497,11 @@ export default function HousekeepingPage() {
             className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="all">All Floors</option>
-            {floors.map((f) => <option key={f} value={f}>Floor {f}</option>)}
+            {floors.map((f) => (
+              <option key={f} value={f}>
+                Floor {f}
+              </option>
+            ))}
           </select>
           <select
             value={statusFilter}
@@ -272,7 +510,9 @@ export default function HousekeepingPage() {
           >
             <option value="all">All Statuses</option>
             {Object.entries(statusMeta).map(([key, meta]) => (
-              <option key={key} value={key}>{meta.label}</option>
+              <option key={key} value={key}>
+                {meta.label}
+              </option>
             ))}
           </select>
         </div>
@@ -286,7 +526,9 @@ export default function HousekeepingPage() {
             if (floorRooms.length === 0) return null;
             return (
               <div key={floor}>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-muted">Floor {floor}</h3>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-muted">
+                  Floor {floor}
+                </h3>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                   {floorRooms.map((room) => (
                     <RoomCard
@@ -349,7 +591,9 @@ export default function HousekeepingPage() {
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Attendant</th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Shift</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Assigned Rooms</th>
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                  Assigned Rooms
+                </th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Progress</th>
                 <th className="px-4 py-3 text-right font-medium text-text-secondary">Status</th>
               </tr>
@@ -407,10 +651,14 @@ export default function HousekeepingPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className={cn(
-                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border',
-                        progress === 100 ? 'bg-accent/10 text-accent border-accent/20' : 'bg-warning/10 text-warning border-warning/20'
-                      )}>
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border',
+                          progress === 100
+                            ? 'bg-accent/10 text-accent border-accent/20'
+                            : 'bg-warning/10 text-warning border-warning/20'
+                        )}
+                      >
                         {progress === 100 ? 'Complete' : 'In Progress'}
                       </span>
                     </td>

@@ -25,11 +25,7 @@ export const useUserStore = create((set, get) => ({
   updateUser: (id, updater) =>
     set((state) => ({
       users: state.users.map((u) =>
-        u.id === id
-          ? typeof updater === 'function'
-            ? updater(u)
-            : { ...u, ...updater }
-          : u
+        u.id === id ? (typeof updater === 'function' ? updater(u) : { ...u, ...updater }) : u
       ),
     })),
 
@@ -90,11 +86,7 @@ export const useUserStore = create((set, get) => ({
   updateRole: (id, updater) =>
     set((state) => ({
       roles: state.roles.map((r) =>
-        r.id === id
-          ? typeof updater === 'function'
-            ? updater(r)
-            : { ...r, ...updater }
-          : r
+        r.id === id ? (typeof updater === 'function' ? updater(r) : { ...r, ...updater }) : r
       ),
     })),
 
@@ -102,9 +94,7 @@ export const useUserStore = create((set, get) => ({
     set((state) => ({
       roles: state.roles.filter((r) => r.id !== id),
       // Reassign users with deleted role to read-only
-      users: state.users.map((u) =>
-        u.roleId === id ? { ...u, roleId: 'role-readonly' } : u
-      ),
+      users: state.users.map((u) => (u.roleId === id ? { ...u, roleId: 'role-readonly' } : u)),
     })),
 
   getRoleById: (id) => get().roles.find((r) => r.id === id),

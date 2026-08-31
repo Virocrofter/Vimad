@@ -225,7 +225,7 @@ export const initialRateLimits = {
 /* ─── Maintenance Mode ─── */
 export const initialMaintenance = {
   enabled: false,
-  message: 'Vimad is currently undergoing scheduled maintenance. We\'ll be back shortly.',
+  message: "Vimad is currently undergoing scheduled maintenance. We'll be back shortly.",
   allowedIps: ['127.0.0.1'],
   estimatedDuration: 30, // minutes
   startTime: null,
@@ -282,13 +282,33 @@ export const templateCategories = [
 ];
 
 export const timezones = [
-  'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-  'America/Phoenix', 'America/Toronto', 'America/Vancouver', 'America/Mexico_City',
-  'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Madrid',
-  'Europe/Amsterdam', 'Europe/Zurich', 'Europe/Dublin', 'Europe/Rome',
-  'Asia/Dubai', 'Asia/Singapore', 'Asia/Tokyo', 'Asia/Shanghai',
-  'Asia/Hong_Kong', 'Asia/Mumbai', 'Asia/Seoul', 'Asia/Bangkok',
-  'Australia/Sydney', 'Australia/Melbourne', 'Pacific/Auckland',
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Phoenix',
+  'America/Toronto',
+  'America/Vancouver',
+  'America/Mexico_City',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Madrid',
+  'Europe/Amsterdam',
+  'Europe/Zurich',
+  'Europe/Dublin',
+  'Europe/Rome',
+  'Asia/Dubai',
+  'Asia/Singapore',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Asia/Hong_Kong',
+  'Asia/Mumbai',
+  'Asia/Seoul',
+  'Asia/Bangkok',
+  'Australia/Sydney',
+  'Australia/Melbourne',
+  'Pacific/Auckland',
 ];
 
 export const currencies = [
@@ -330,5 +350,5 @@ export function formatNumber(num) {
 }
 
 export function getCategoryMeta(key) {
-  return templateCategories.find(c => c.key === key) || templateCategories[0];
+  return templateCategories.find((c) => c.key === key) || templateCategories[0];
 }

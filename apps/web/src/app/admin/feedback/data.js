@@ -9,7 +9,8 @@ export const npsResponses = [
     user: { name: 'Robert Chen', email: 'robert@grandhotel.com', role: 'Owner' },
     score: 9,
     category: 'product',
-    comment: 'The new dashboard is fantastic. Love the real-time occupancy widget. Would be great to have customizable widgets though.',
+    comment:
+      'The new dashboard is fantastic. Love the real-time occupancy widget. Would be great to have customizable widgets though.',
     sentiment: 'positive',
     sentimentScore: 0.87,
     keywords: ['dashboard', 'real-time', 'occupancy', 'customizable widgets'],
@@ -26,7 +27,8 @@ export const npsResponses = [
     user: { name: 'Maria Garcia', email: 'maria@seasideresort.com', role: 'Manager' },
     score: 3,
     category: 'support',
-    comment: 'Had a critical issue with channel manager sync last week. Support took 6 hours to respond. Unacceptable for our business.',
+    comment:
+      'Had a critical issue with channel manager sync last week. Support took 6 hours to respond. Unacceptable for our business.',
     sentiment: 'negative',
     sentimentScore: -0.72,
     keywords: ['channel manager', 'sync', 'support', 'response time'],
@@ -34,7 +36,7 @@ export const npsResponses = [
     responded: true,
     response: {
       by: 'Sarah J.',
-      text: 'Hi Maria, we sincerely apologize for the delay. We\'ve identified a gap in our weekend coverage and have added an additional on-call engineer. We\'ve also prioritized the channel sync reliability improvements in our next sprint.',
+      text: "Hi Maria, we sincerely apologize for the delay. We've identified a gap in our weekend coverage and have added an additional on-call engineer. We've also prioritized the channel sync reliability improvements in our next sprint.",
       at: '2026-08-16 10:15',
     },
     createdAt: '2026-08-15 09:20',
@@ -48,7 +50,8 @@ export const npsResponses = [
     user: { name: 'James Miller', email: 'james@mountainlodge.com', role: 'Owner' },
     score: 7,
     category: 'feature',
-    comment: 'Good overall but missing group booking functionality. We handle a lot of ski groups and need bulk check-in/check-out.',
+    comment:
+      'Good overall but missing group booking functionality. We handle a lot of ski groups and need bulk check-in/check-out.',
     sentiment: 'neutral',
     sentimentScore: 0.15,
     keywords: ['group booking', 'bulk check-in', 'ski groups'],
@@ -65,7 +68,8 @@ export const npsResponses = [
     user: { name: 'Lisa Wong', email: 'lisa@downtownsuites.com', role: 'GM' },
     score: 2,
     category: 'billing',
-    comment: 'Billing module is confusing. Can\'t figure out how to split charges between guests. Invoice formatting is also terrible.',
+    comment:
+      "Billing module is confusing. Can't figure out how to split charges between guests. Invoice formatting is also terrible.",
     sentiment: 'negative',
     sentimentScore: -0.68,
     keywords: ['billing', 'split charges', 'invoice formatting'],
@@ -82,7 +86,8 @@ export const npsResponses = [
     user: { name: 'David Park', email: 'david@coastalinn.com', role: 'Owner' },
     score: 10,
     category: 'product',
-    comment: 'Absolutely love it. The mobile app has transformed how our front desk operates. Night audit is now a 5-minute job instead of 45.',
+    comment:
+      'Absolutely love it. The mobile app has transformed how our front desk operates. Night audit is now a 5-minute job instead of 45.',
     sentiment: 'positive',
     sentimentScore: 0.95,
     keywords: ['mobile app', 'front desk', 'night audit'],
@@ -90,7 +95,7 @@ export const npsResponses = [
     responded: true,
     response: {
       by: 'Product Team',
-      text: 'Thank you so much, David! We\'re thrilled the mobile app is making such a difference. We\'d love to feature your story in an upcoming case study — our team will reach out.',
+      text: "Thank you so much, David! We're thrilled the mobile app is making such a difference. We'd love to feature your story in an upcoming case study — our team will reach out.",
       at: '2026-08-14 09:00',
     },
     createdAt: '2026-08-13 08:30',
@@ -104,7 +109,8 @@ export const npsResponses = [
     user: { name: 'Kevin Lee', email: 'kevin@urbanhotel.com', role: 'Revenue Manager' },
     score: 6,
     category: 'feature',
-    comment: 'Rate management is decent but lacks dynamic pricing rules. Competitors have AI-driven pricing — we need this to stay competitive.',
+    comment:
+      'Rate management is decent but lacks dynamic pricing rules. Competitors have AI-driven pricing — we need this to stay competitive.',
     sentiment: 'neutral',
     sentimentScore: -0.12,
     keywords: ['rate management', 'dynamic pricing', 'AI pricing'],
@@ -121,7 +127,8 @@ export const npsResponses = [
     user: { name: 'Sarah Johnson', email: 'sarah@grandhotel.com', role: 'Front Desk' },
     score: 8,
     category: 'product',
-    comment: 'Housekeeping status updates are great. Would love push notifications when rooms are ready for check-in.',
+    comment:
+      'Housekeeping status updates are great. Would love push notifications when rooms are ready for check-in.',
     sentiment: 'positive',
     sentimentScore: 0.62,
     keywords: ['housekeeping', 'status updates', 'push notifications'],
@@ -138,7 +145,8 @@ export const npsResponses = [
     user: { name: 'Amanda Wilson', email: 'amanda@lakesideresort.com', role: 'Owner' },
     score: 4,
     category: 'onboarding',
-    comment: 'Onboarding was overwhelming. Too many features introduced at once. Need a more gradual walkthrough for new properties.',
+    comment:
+      'Onboarding was overwhelming. Too many features introduced at once. Need a more gradual walkthrough for new properties.',
     sentiment: 'negative',
     sentimentScore: -0.45,
     keywords: ['onboarding', 'walkthrough', 'new properties'],
@@ -146,7 +154,7 @@ export const npsResponses = [
     responded: true,
     response: {
       by: 'Customer Success',
-      text: 'Hi Amanda, thank you for the honest feedback. We\'re completely redesigning our onboarding flow with a phased approach — core features first, advanced tools later. We\'d love your input on the beta — I\'ll schedule a call.',
+      text: "Hi Amanda, thank you for the honest feedback. We're completely redesigning our onboarding flow with a phased approach — core features first, advanced tools later. We'd love your input on the beta — I'll schedule a call.",
       at: '2026-08-12 14:00',
     },
     createdAt: '2026-08-10 15:30',
@@ -160,7 +168,8 @@ export const npsResponses = [
     user: { name: 'Carlos Mendez', email: 'carlos@seasideresort.com', role: 'IT Admin' },
     score: 9,
     category: 'product',
-    comment: 'API documentation is excellent. Webhooks are reliable. Made our custom integrations painless.',
+    comment:
+      'API documentation is excellent. Webhooks are reliable. Made our custom integrations painless.',
     sentiment: 'positive',
     sentimentScore: 0.91,
     keywords: ['API', 'documentation', 'webhooks', 'integrations'],
@@ -177,7 +186,8 @@ export const npsResponses = [
     user: { name: 'David Park', email: 'david@coastalinn.com', role: 'Owner' },
     score: 5,
     category: 'performance',
-    comment: 'System gets slow during peak check-in/check-out hours. Pages take 5+ seconds to load. Very frustrating for guests waiting.',
+    comment:
+      'System gets slow during peak check-in/check-out hours. Pages take 5+ seconds to load. Very frustrating for guests waiting.',
     sentiment: 'negative',
     sentimentScore: -0.55,
     keywords: ['performance', 'slow', 'check-in', 'load time'],
@@ -194,7 +204,8 @@ export const npsResponses = [
     user: { name: 'Jessica Kim', email: 'jessica@urbanhotel.com', role: 'Front Desk' },
     score: 8,
     category: 'product',
-    comment: 'Guest messaging feature is a game changer. Guests love texting us instead of calling. Would like auto-reply templates.',
+    comment:
+      'Guest messaging feature is a game changer. Guests love texting us instead of calling. Would like auto-reply templates.',
     sentiment: 'positive',
     sentimentScore: 0.74,
     keywords: ['guest messaging', 'auto-reply', 'templates'],
@@ -211,7 +222,8 @@ export const npsResponses = [
     user: { name: 'James Miller', email: 'james@mountainlodge.com', role: 'Owner' },
     score: 7,
     category: 'feature',
-    comment: 'Reporting is good but export to Excel loses formatting. Need better PDF exports with our branding.',
+    comment:
+      'Reporting is good but export to Excel loses formatting. Need better PDF exports with our branding.',
     sentiment: 'neutral',
     sentimentScore: 0.22,
     keywords: ['reporting', 'Excel export', 'PDF', 'branding'],
@@ -228,7 +240,8 @@ export const featureRequests = [
   {
     id: 'FR-001',
     title: 'AI-Driven Dynamic Pricing',
-    description: 'Automatically adjust room rates based on demand, competitor pricing, local events, and historical data. Include revenue forecasting.',
+    description:
+      'Automatically adjust room rates based on demand, competitor pricing, local events, and historical data. Include revenue forecasting.',
     category: 'revenue',
     status: 'planned',
     votes: 47,
@@ -244,7 +257,8 @@ export const featureRequests = [
   {
     id: 'FR-002',
     title: 'Group Booking & Bulk Operations',
-    description: 'Allow reservations for 10+ rooms with unified billing, bulk check-in/check-out, and group folio management. Essential for event hotels.',
+    description:
+      'Allow reservations for 10+ rooms with unified billing, bulk check-in/check-out, and group folio management. Essential for event hotels.',
     category: 'operations',
     status: 'in-progress',
     votes: 34,
@@ -260,7 +274,8 @@ export const featureRequests = [
   {
     id: 'FR-003',
     title: 'Push Notifications for Housekeeping',
-    description: 'Real-time push notifications to front desk when housekeeping marks rooms as clean/inspected. Reduce guest wait times.',
+    description:
+      'Real-time push notifications to front desk when housekeeping marks rooms as clean/inspected. Reduce guest wait times.',
     category: 'operations',
     status: 'planned',
     votes: 28,
@@ -276,7 +291,8 @@ export const featureRequests = [
   {
     id: 'FR-004',
     title: 'White-Label Guest Portal',
-    description: 'Fully customizable guest-facing portal with hotel branding, custom domain, and tailored messaging.',
+    description:
+      'Fully customizable guest-facing portal with hotel branding, custom domain, and tailored messaging.',
     category: 'guest-experience',
     status: 'in-progress',
     votes: 52,
@@ -292,7 +308,8 @@ export const featureRequests = [
   {
     id: 'FR-005',
     title: 'Auto-Reply Templates for Guest Messaging',
-    description: 'Configurable auto-reply templates for common guest inquiries (check-in time, WiFi password, amenities). Support variables.',
+    description:
+      'Configurable auto-reply templates for common guest inquiries (check-in time, WiFi password, amenities). Support variables.',
     category: 'guest-experience',
     status: 'backlog',
     votes: 19,
@@ -308,7 +325,8 @@ export const featureRequests = [
   {
     id: 'FR-006',
     title: 'Gradual Onboarding Walkthrough',
-    description: 'Phased onboarding that introduces features progressively. Core setup first, advanced tools unlocked over 30 days.',
+    description:
+      'Phased onboarding that introduces features progressively. Core setup first, advanced tools unlocked over 30 days.',
     category: 'onboarding',
     status: 'in-progress',
     votes: 15,
@@ -324,7 +342,8 @@ export const featureRequests = [
   {
     id: 'FR-007',
     title: 'Branded PDF Report Exports',
-    description: 'PDF exports with custom hotel logo, colors, and cover page. Maintain formatting consistency across all reports.',
+    description:
+      'PDF exports with custom hotel logo, colors, and cover page. Maintain formatting consistency across all reports.',
     category: 'reporting',
     status: 'backlog',
     votes: 11,
@@ -340,7 +359,8 @@ export const featureRequests = [
   {
     id: 'FR-008',
     title: 'Performance Optimization for Peak Hours',
-    description: 'Optimize database queries and caching for high-traffic periods. Target <2s load time during check-in rush.',
+    description:
+      'Optimize database queries and caching for high-traffic periods. Target <2s load time during check-in rush.',
     category: 'performance',
     status: 'in-progress',
     votes: 23,
@@ -401,34 +421,97 @@ export const categoryDistribution = [
 
 /* ─── NPS Score Distribution ─── */
 export const npsDistribution = [
-  { score: 0, count: 2 }, { score: 1, count: 1 }, { score: 2, count: 3 },
-  { score: 3, count: 4 }, { score: 4, count: 5 }, { score: 5, count: 8 },
-  { score: 6, count: 12 }, { score: 7, count: 18 }, { score: 8, count: 24 },
-  { score: 9, count: 22 }, { score: 10, count: 16 },
+  { score: 0, count: 2 },
+  { score: 1, count: 1 },
+  { score: 2, count: 3 },
+  { score: 3, count: 4 },
+  { score: 4, count: 5 },
+  { score: 5, count: 8 },
+  { score: 6, count: 12 },
+  { score: 7, count: 18 },
+  { score: 8, count: 24 },
+  { score: 9, count: 22 },
+  { score: 10, count: 16 },
 ];
 
 /* ─── Metadata ─── */
 export const npsCategoryMeta = {
-  product: { label: 'Product', color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20' },
+  product: {
+    label: 'Product',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    border: 'border-secondary/20',
+  },
   feature: { label: 'Feature', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  support: { label: 'Support', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
-  billing: { label: 'Billing', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
-  performance: { label: 'Performance', color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  onboarding: { label: 'Onboarding', color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+  support: {
+    label: 'Support',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/20',
+  },
+  billing: {
+    label: 'Billing',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+  },
+  performance: {
+    label: 'Performance',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+  },
+  onboarding: {
+    label: 'Onboarding',
+    color: 'text-pink-500',
+    bg: 'bg-pink-500/10',
+    border: 'border-pink-500/20',
+  },
 };
 
 export const sentimentMeta = {
-  positive: { label: 'Positive', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', iconColor: 'text-accent' },
-  neutral: { label: 'Neutral', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
-  negative: { label: 'Negative', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
+  positive: {
+    label: 'Positive',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    iconColor: 'text-accent',
+  },
+  neutral: {
+    label: 'Neutral',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    iconColor: 'text-warning',
+  },
+  negative: {
+    label: 'Negative',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
 };
 
 export const featureStatusMeta = {
-  backlog: { label: 'Backlog', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  backlog: {
+    label: 'Backlog',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
   planned: { label: 'Planned', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
-  'in-progress': { label: 'In Progress', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  shipped: { label: 'Shipped', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  declined: { label: 'Declined', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
+  'in-progress': {
+    label: 'In Progress',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  shipped: {
+    label: 'Shipped',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  declined: {
+    label: 'Declined',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 export const priorityMeta = {
@@ -449,9 +532,9 @@ export const touchpointMeta = {
 export function calculateNPS(responses) {
   const total = responses.length;
   if (total === 0) return { score: 0, promoters: 0, passives: 0, detractors: 0 };
-  const promoters = responses.filter(r => r.score >= 9).length;
-  const passives = responses.filter(r => r.score >= 7 && r.score <= 8).length;
-  const detractors = responses.filter(r => r.score <= 6).length;
+  const promoters = responses.filter((r) => r.score >= 9).length;
+  const passives = responses.filter((r) => r.score >= 7 && r.score <= 8).length;
+  const detractors = responses.filter((r) => r.score <= 6).length;
   const score = Math.round(((promoters - detractors) / total) * 100);
   return { score, promoters, passives, detractors, total };
 }

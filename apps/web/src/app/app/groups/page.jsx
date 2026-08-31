@@ -2,9 +2,23 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, BedDouble, Calendar, DollarSign, Search, Filter,
-  ChevronDown, ChevronUp, Plus, Check, Clock, TrendingUp,
-  LayoutGrid, List, Eye, Edit3, Trash2
+  Users,
+  BedDouble,
+  Calendar,
+  DollarSign,
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Check,
+  Clock,
+  TrendingUp,
+  LayoutGrid,
+  List,
+  Eye,
+  Edit3,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -24,7 +38,8 @@ export default function GroupsPage() {
 
   const filtered = useMemo(() => {
     let data = groups.filter((g) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         g.name.toLowerCase().includes(query.toLowerCase()) ||
         g.id.toLowerCase().includes(query.toLowerCase()) ||
         (g.company && g.company.toLowerCase().includes(query.toLowerCase())) ||
@@ -42,18 +57,25 @@ export default function GroupsPage() {
     return data;
   }, [groups, query, statusFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: groups.length,
-    definite: groups.filter(g => g.status === 'definite').reduce((s, g) => s + g.roomsBlocked, 0),
-    tentative: groups.filter(g => g.status === 'tentative').reduce((s, g) => s + g.roomsBlocked, 0),
-    totalPickup: groups.reduce((s, g) => s + g.roomsPickedUp, 0),
-    totalBlocked: groups.reduce((s, g) => s + g.roomsBlocked, 0),
-  }), [groups]);
+  const stats = useMemo(
+    () => ({
+      total: groups.length,
+      definite: groups
+        .filter((g) => g.status === 'definite')
+        .reduce((s, g) => s + g.roomsBlocked, 0),
+      tentative: groups
+        .filter((g) => g.status === 'tentative')
+        .reduce((s, g) => s + g.roomsBlocked, 0),
+      totalPickup: groups.reduce((s, g) => s + g.roomsPickedUp, 0),
+      totalBlocked: groups.reduce((s, g) => s + g.roomsBlocked, 0),
+    }),
+    [groups]
+  );
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
-      dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc'
+      dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
   };
 
@@ -63,7 +85,9 @@ export default function GroupsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Groups & Blocks</h1>
-          <p className="text-sm text-text-secondary">Manage group reservations, rooming lists, and event blocks</p>
+          <p className="text-sm text-text-secondary">
+            Manage group reservations, rooming lists, and event blocks
+          </p>
         </div>
         <Button onClick={() => navigate('/app/groups/new')}>
           <Plus className="mr-1.5 h-4 w-4" /> New Block
@@ -72,9 +96,24 @@ export default function GroupsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <GroupStatCard label="Active Blocks" value={stats.total} icon={Users} color="text-secondary" />
-        <GroupStatCard label="Definite Rooms" value={stats.definite} icon={Check} color="text-accent" />
-        <GroupStatCard label="Tentative Rooms" value={stats.tentative} icon={Clock} color="text-warning" />
+        <GroupStatCard
+          label="Active Blocks"
+          value={stats.total}
+          icon={Users}
+          color="text-secondary"
+        />
+        <GroupStatCard
+          label="Definite Rooms"
+          value={stats.definite}
+          icon={Check}
+          color="text-accent"
+        />
+        <GroupStatCard
+          label="Tentative Rooms"
+          value={stats.tentative}
+          icon={Clock}
+          color="text-warning"
+        />
         <GroupStatCard
           label="Pickup Rate"
           value={`${stats.totalBlocked > 0 ? Math.round((stats.totalPickup / stats.totalBlocked) * 100) : 0}%`}
@@ -110,13 +149,23 @@ export default function GroupsPage() {
           <div className="flex rounded-md border border-border bg-surface p-0.5">
             <button
               onClick={() => setViewMode('list')}
-              className={cn('inline-flex h-9 w-9 items-center justify-center rounded-sm transition-colors', viewMode === 'list' ? 'bg-background shadow-sm text-text-primary' : 'text-text-muted hover:text-text-primary')}
+              className={cn(
+                'inline-flex h-9 w-9 items-center justify-center rounded-sm transition-colors',
+                viewMode === 'list'
+                  ? 'bg-background shadow-sm text-text-primary'
+                  : 'text-text-muted hover:text-text-primary'
+              )}
             >
               <List className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={cn('inline-flex h-9 w-9 items-center justify-center rounded-sm transition-colors', viewMode === 'grid' ? 'bg-background shadow-sm text-text-primary' : 'text-text-muted hover:text-text-primary')}
+              className={cn(
+                'inline-flex h-9 w-9 items-center justify-center rounded-sm transition-colors',
+                viewMode === 'grid'
+                  ? 'bg-background shadow-sm text-text-primary'
+                  : 'text-text-muted hover:text-text-primary'
+              )}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
@@ -146,13 +195,18 @@ export default function GroupsPage() {
                     >
                       <div className="flex items-center gap-1">
                         {col.label}
-                        {sortConfig.key === col.key && (
-                          sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                        )}
+                        {sortConfig.key === col.key &&
+                          (sortConfig.dir === 'asc' ? (
+                            <ChevronUp className="h-3 w-3" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3" />
+                          ))}
                       </div>
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -160,17 +214,26 @@ export default function GroupsPage() {
                   <tr key={g.id} className="hover:bg-background/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg border', g.color)}>
+                        <div
+                          className={cn(
+                            'flex h-9 w-9 items-center justify-center rounded-lg border',
+                            g.color
+                          )}
+                        >
                           <Users className={cn('h-4 w-4', g.textColor)} />
                         </div>
                         <div>
                           <p className="font-medium text-text-primary">{g.name}</p>
-                          <p className="text-xs text-text-muted">{g.contact} · {g.company || 'Individual'}</p>
+                          <p className="text-xs text-text-muted">
+                            {g.contact} · {g.company || 'Individual'}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-text-primary text-xs">{g.arrival} → {g.departure}</div>
+                      <div className="text-text-primary text-xs">
+                        {g.arrival} → {g.departure}
+                      </div>
                       <p className="text-[10px] text-text-muted">Cut-off: {g.cutOffDate}</p>
                     </td>
                     <td className="px-4 py-3">
@@ -181,9 +244,13 @@ export default function GroupsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <PickupBar picked={g.roomsPickedUp} blocked={g.roomsBlocked} />
-                      <p className="text-[10px] text-text-muted mt-1">{g.roomsPickedUp} / {g.roomsBlocked} rooms</p>
+                      <p className="text-[10px] text-text-muted mt-1">
+                        {g.roomsPickedUp} / {g.roomsBlocked} rooms
+                      </p>
                     </td>
-                    <td className="px-4 py-3 font-mono text-text-primary">{formatCurrency(g.rate)}</td>
+                    <td className="px-4 py-3 font-mono text-text-primary">
+                      {formatCurrency(g.rate)}
+                    </td>
                     <td className="px-4 py-3 text-text-secondary text-xs">{g.eventSpace || '—'}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
@@ -194,7 +261,10 @@ export default function GroupsPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary" title="Edit">
+                        <button
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                          title="Edit"
+                        >
                           <Edit3 className="h-4 w-4" />
                         </button>
                         <button
@@ -234,7 +304,12 @@ export default function GroupsPage() {
               )}
             >
               <div className="flex items-start justify-between mb-3">
-                <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg border', g.color)}>
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-lg border',
+                    g.color
+                  )}
+                >
                   <Users className={cn('h-5 w-5', g.textColor)} />
                 </div>
                 <StatusBadge status={g.status} />

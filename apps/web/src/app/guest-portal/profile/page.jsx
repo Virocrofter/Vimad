@@ -1,9 +1,26 @@
 /* src/app/guest-portal/profile/page.jsx */
 import { useState } from 'react';
 import {
-  User, Mail, Phone, Globe, Calendar, Shield, CreditCard,
-  Edit3, Check, X, Camera, Loader2, Crown, MapPin,
-  ChevronRight, Bell, Lock, FileText, HelpCircle, Settings,
+  User,
+  Mail,
+  Phone,
+  Globe,
+  Calendar,
+  Shield,
+  CreditCard,
+  Edit3,
+  Check,
+  X,
+  Camera,
+  Loader2,
+  Crown,
+  MapPin,
+  ChevronRight,
+  Bell,
+  Lock,
+  FileText,
+  HelpCircle,
+  Settings,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -25,7 +42,7 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
     setSaving(false);
     setEditing(false);
   };
@@ -54,21 +71,27 @@ export default function ProfilePage() {
       <SectionHeader
         title="My Profile"
         subtitle="Manage your personal information and account settings"
-        action={!editing ? (
-          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-            <Edit3 className="mr-1.5 h-4 w-4" /> Edit Profile
-          </Button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
-              <X className="mr-1.5 h-4 w-4" /> Cancel
+        action={
+          !editing ? (
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              <Edit3 className="mr-1.5 h-4 w-4" /> Edit Profile
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={saving}>
-              {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Check className="mr-1.5 h-4 w-4" />}
-              Save
-            </Button>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
+                <X className="mr-1.5 h-4 w-4" /> Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-1.5 h-4 w-4" />
+                )}
+                Save
+              </Button>
+            </div>
+          )
+        }
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -87,7 +110,12 @@ export default function ProfilePage() {
               {editing && (
                 <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-secondary text-white shadow-md hover:bg-secondary/90">
                   <Camera className="h-4 w-4" />
-                  <input type="file" accept="image/*" className="sr-only" onChange={handleAvatarChange} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleAvatarChange}
+                  />
                 </label>
               )}
             </div>
@@ -112,16 +140,22 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-text-secondary">Points Balance</span>
-                <span className="font-mono font-bold text-text-primary">{guestProfile.points.toLocaleString()}</span>
+                <span className="font-mono font-bold text-text-primary">
+                  {guestProfile.points.toLocaleString()}
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-text-secondary">To Next Tier</span>
-                <span className="font-mono font-bold text-text-primary">{guestProfile.pointsToNextTier.toLocaleString()}</span>
+                <span className="font-mono font-bold text-text-primary">
+                  {guestProfile.pointsToNextTier.toLocaleString()}
+                </span>
               </div>
               <div className="h-2 w-full rounded-full bg-border overflow-hidden mt-2">
                 <div
                   className="h-full rounded-full bg-yellow-500"
-                  style={{ width: `${(guestProfile.points / (guestProfile.points + guestProfile.pointsToNextTier)) * 100}%` }}
+                  style={{
+                    width: `${(guestProfile.points / (guestProfile.points + guestProfile.pointsToNextTier)) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -166,14 +200,14 @@ export default function ProfilePage() {
               <FormInput
                 label="First Name"
                 value={form.firstName}
-                onChange={(e) => setForm(p => ({ ...p, firstName: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
                 disabled={!editing}
                 required
               />
               <FormInput
                 label="Last Name"
                 value={form.lastName}
-                onChange={(e) => setForm(p => ({ ...p, lastName: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
                 disabled={!editing}
                 required
               />
@@ -181,7 +215,7 @@ export default function ProfilePage() {
                 label="Email"
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 disabled={!editing}
                 required
               />
@@ -189,13 +223,13 @@ export default function ProfilePage() {
                 label="Phone"
                 type="tel"
                 value={form.phone}
-                onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
                 disabled={!editing}
               />
               <FormSelect
                 label="Language"
                 value={form.language}
-                onChange={(e) => setForm(p => ({ ...p, language: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, language: e.target.value }))}
                 options={languageOptions}
                 disabled={!editing}
               />
@@ -219,7 +253,9 @@ export default function ProfilePage() {
                   <Mail className="h-4 w-4 text-text-muted" />
                   <div>
                     <p className="text-sm font-medium text-text-primary">Email Notifications</p>
-                    <p className="text-xs text-text-muted">Booking confirmations, offers, updates</p>
+                    <p className="text-xs text-text-muted">
+                      Booking confirmations, offers, updates
+                    </p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-medium text-accent">
@@ -243,7 +279,9 @@ export default function ProfilePage() {
                   <Bell className="h-4 w-4 text-text-muted" />
                   <div>
                     <p className="text-sm font-medium text-text-primary">Push Notifications</p>
-                    <p className="text-xs text-text-muted">Real-time updates on your mobile device</p>
+                    <p className="text-xs text-text-muted">
+                      Real-time updates on your mobile device
+                    </p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-medium text-accent">
@@ -273,17 +311,23 @@ export default function ProfilePage() {
                     <p className="text-xs text-text-muted">Last changed 3 months ago</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">Change</Button>
+                <Button variant="outline" size="sm">
+                  Change
+                </Button>
               </div>
               <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
                 <div className="flex items-center gap-3">
                   <Shield className="h-4 w-4 text-text-muted" />
                   <div>
-                    <p className="text-sm font-medium text-text-primary">Two-Factor Authentication</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      Two-Factor Authentication
+                    </p>
                     <p className="text-xs text-text-muted">Add an extra layer of security</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">Enable</Button>
+                <Button variant="outline" size="sm">
+                  Enable
+                </Button>
               </div>
             </div>
           </div>

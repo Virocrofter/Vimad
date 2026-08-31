@@ -2,8 +2,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Star, MessageSquare, ThumbsUp, Filter, Search,
-  Calendar, Hotel, Edit3, Trash2
+  ChevronLeft,
+  Star,
+  MessageSquare,
+  ThumbsUp,
+  Filter,
+  Search,
+  Calendar,
+  Hotel,
+  Edit3,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -17,7 +25,8 @@ const myReviews = [
     date: 'Aug 16, 2026',
     property: 'Grand Hotel Boston',
     stayDate: 'Aug 12-15, 2026',
-    comment: 'Wonderful stay! The staff was incredibly helpful, especially Sarah at the front desk who went above and beyond to accommodate our late checkout request. The room was spotless and the bed was extremely comfortable. Will definitely be returning!',
+    comment:
+      'Wonderful stay! The staff was incredibly helpful, especially Sarah at the front desk who went above and beyond to accommodate our late checkout request. The room was spotless and the bed was extremely comfortable. Will definitely be returning!',
     verified: true,
     categories: { cleanliness: 5, service: 5, location: 4, value: 4, amenities: 5, comfort: 5 },
     photos: [],
@@ -31,7 +40,8 @@ const myReviews = [
     date: 'Mar 10, 2026',
     property: 'Seaside Resort Miami',
     stayDate: 'Mar 5-8, 2026',
-    comment: 'Great location right on the beach. The pool area was beautiful and the restaurant had excellent seafood. Only minor complaint was the WiFi was a bit spotty in the room, but overall a very enjoyable stay.',
+    comment:
+      'Great location right on the beach. The pool area was beautiful and the restaurant had excellent seafood. Only minor complaint was the WiFi was a bit spotty in the room, but overall a very enjoyable stay.',
     verified: true,
     categories: { cleanliness: 4, service: 4, location: 5, value: 4, amenities: 4, comfort: 4 },
     photos: [],
@@ -45,7 +55,8 @@ const myReviews = [
     date: 'Dec 22, 2025',
     property: 'Mountain Lodge Aspen',
     stayDate: 'Dec 18-22, 2025',
-    comment: 'Perfect winter getaway! The fireplace in the room was such a nice touch, and the ski-in/ski-out access was incredibly convenient. The hot chocolate service in the lobby every afternoon was delightful.',
+    comment:
+      'Perfect winter getaway! The fireplace in the room was such a nice touch, and the ski-in/ski-out access was incredibly convenient. The hot chocolate service in the lobby every afternoon was delightful.',
     verified: true,
     categories: { cleanliness: 5, service: 5, location: 5, value: 4, amenities: 5, comfort: 5 },
     photos: [],
@@ -63,9 +74,8 @@ export default function ReviewHistoryPage() {
 
   const avgRating = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
 
-  const filteredReviews = filter === 'all'
-    ? reviews
-    : reviews.filter(r => r.rating === parseInt(filter));
+  const filteredReviews =
+    filter === 'all' ? reviews : reviews.filter((r) => r.rating === parseInt(filter));
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -116,7 +126,7 @@ export default function ReviewHistoryPage() {
           { id: '5', label: '5 Stars' },
           { id: '4', label: '4 Stars' },
           { id: '3', label: '3 Stars' },
-        ].map(f => (
+        ].map((f) => (
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
@@ -134,7 +144,7 @@ export default function ReviewHistoryPage() {
 
       {/* Reviews */}
       <div className="space-y-4">
-        {filteredReviews.map(review => (
+        {filteredReviews.map((review) => (
           <ReviewCard key={review.id} review={review} />
         ))}
         {filteredReviews.length === 0 && (

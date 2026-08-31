@@ -17,11 +17,32 @@ interface NotificationState {
   markAllAsRead: () => void;
 }
 
-export const useNotificationStore = create<NotificationState>((set, get) => ({
+export const useNotificationStore = create<NotificationState>((set) => ({
   notifications: [
-    { id: '1', title: 'New Reservation', message: 'Booking #4023 confirmed', read: false, time: '2m ago', type: 'success' },
-    { id: '2', title: 'Night Audit', message: 'Audit completed successfully', read: false, time: '1h ago', type: 'info' },
-    { id: '3', title: 'Low Inventory', message: 'Deluxe rooms running low', read: true, time: '3h ago', type: 'warning' },
+    {
+      id: '1',
+      title: 'New Reservation',
+      message: 'Booking #4023 confirmed',
+      read: false,
+      time: '2m ago',
+      type: 'success',
+    },
+    {
+      id: '2',
+      title: 'Night Audit',
+      message: 'Audit completed successfully',
+      read: false,
+      time: '1h ago',
+      type: 'info',
+    },
+    {
+      id: '3',
+      title: 'Low Inventory',
+      message: 'Deluxe rooms running low',
+      read: true,
+      time: '3h ago',
+      type: 'warning',
+    },
   ],
   unreadCount: 2,
   addNotification: (notification) => {

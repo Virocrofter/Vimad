@@ -2,15 +2,52 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Calendar, Clock, MapPin, Bed, Users, CreditCard, ChevronRight,
-  ArrowLeft, CheckCircle2, XCircle, AlertTriangle, Info, Printer,
-  Download, Share2, Edit3, RotateCcw, FileText, Receipt, Hotel,
-  Star, Wifi, Car, Utensils, Dumbbell, Waves, Sparkles, Phone,
-  Mail, Navigation, QrCode, ClipboardList, Tag, ShieldCheck
+  Calendar,
+  Clock,
+  MapPin,
+  Bed,
+  Users,
+  CreditCard,
+  ChevronRight,
+  ArrowLeft,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Info,
+  Printer,
+  Download,
+  Share2,
+  Edit3,
+  RotateCcw,
+  FileText,
+  Receipt,
+  Hotel,
+  Star,
+  Wifi,
+  Car,
+  Utensils,
+  Dumbbell,
+  Waves,
+  Sparkles,
+  Phone,
+  Mail,
+  Navigation,
+  QrCode,
+  ClipboardList,
+  Tag,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
-import { guestStays, formatCurrency, formatDate, formatDateRange, getStayPhase, stayStatusMeta, getCancellationPolicy } from '../data';
+import {
+  guestStays,
+  formatCurrency,
+  formatDate,
+  formatDateRange,
+  getStayPhase,
+  stayStatusMeta,
+  getCancellationPolicy,
+} from '../data';
 import { GuestBookingCard, SectionHeader, InfoRow, EmptyState } from '../components';
 
 export default function GuestBookingPage() {
@@ -21,11 +58,11 @@ export default function GuestBookingPage() {
   const filteredStays = useMemo(() => {
     let result = [...guestStays];
     if (filter === 'upcoming') {
-      result = result.filter(s => ['confirmed', 'checked_in'].includes(s.status));
+      result = result.filter((s) => ['confirmed', 'checked_in'].includes(s.status));
     } else if (filter === 'past') {
-      result = result.filter(s => s.status === 'checked_out');
+      result = result.filter((s) => s.status === 'checked_out');
     } else if (filter === 'cancelled') {
-      result = result.filter(s => s.status === 'cancelled');
+      result = result.filter((s) => s.status === 'cancelled');
     }
     return result.sort((a, b) => new Date(b.dates.arrival) - new Date(a.dates.arrival));
   }, [filter]);
@@ -65,15 +102,18 @@ export default function GuestBookingPage() {
   };
 
   if (selectedStay) {
-    return <BookingDetail stay={selectedStay} onBack={() => setSelectedStay(null)} onAction={handleAction} />;
+    return (
+      <BookingDetail
+        stay={selectedStay}
+        onBack={() => setSelectedStay(null)}
+        onAction={handleAction}
+      />
+    );
   }
 
   return (
     <div className="space-y-6">
-      <SectionHeader
-        title="My Reservations"
-        subtitle="Manage your bookings and upcoming stays"
-      />
+      <SectionHeader title="My Reservations" subtitle="Manage your bookings and upcoming stays" />
 
       {/* Filters */}
       <div className="flex items-center gap-2">
@@ -102,11 +142,7 @@ export default function GuestBookingPage() {
       {filteredStays.length > 0 ? (
         <div className="space-y-4">
           {filteredStays.map((stay) => (
-            <div
-              key={stay.id}
-              onClick={() => setSelectedStay(stay)}
-              className="cursor-pointer"
-            >
+            <div key={stay.id} onClick={() => setSelectedStay(stay)} className="cursor-pointer">
               <GuestBookingCard stay={stay} onAction={handleAction} />
             </div>
           ))}
@@ -150,20 +186,29 @@ function BookingDetail({ stay, onBack, onAction }) {
       </div>
 
       {/* Status Banner */}
-      <div className={cn(
-        'rounded-xl border p-4 flex items-center gap-3',
-        statusMeta.bg, statusMeta.border
-      )}>
+      <div
+        className={cn(
+          'rounded-xl border p-4 flex items-center gap-3',
+          statusMeta.bg,
+          statusMeta.border
+        )}
+      >
         <div className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white/20')}>
-          {stay.status === 'confirmed' ? <CheckCircle2 className={cn('h-5 w-5', statusMeta.color)} /> :
-           stay.status === 'checked_in' ? <Hotel className={cn('h-5 w-5', statusMeta.color)} /> :
-           stay.status === 'checked_out' ? <CheckCircle2 className={cn('h-5 w-5', statusMeta.color)} /> :
-           <XCircle className={cn('h-5 w-5', statusMeta.color)} />}
+          {stay.status === 'confirmed' ? (
+            <CheckCircle2 className={cn('h-5 w-5', statusMeta.color)} />
+          ) : stay.status === 'checked_in' ? (
+            <Hotel className={cn('h-5 w-5', statusMeta.color)} />
+          ) : stay.status === 'checked_out' ? (
+            <CheckCircle2 className={cn('h-5 w-5', statusMeta.color)} />
+          ) : (
+            <XCircle className={cn('h-5 w-5', statusMeta.color)} />
+          )}
         </div>
         <div>
           <p className={cn('text-sm font-semibold', statusMeta.color)}>{statusMeta.label}</p>
           <p className="text-xs text-text-secondary">
-            {phase === 'pre-arrival' && `Check-in available ${stay.dates.arrivalTime} on ${formatDate(stay.dates.arrival)}`}
+            {phase === 'pre-arrival' &&
+              `Check-in available ${stay.dates.arrivalTime} on ${formatDate(stay.dates.arrival)}`}
             {phase === 'in-stay' && `Checked in since ${formatDate(stay.dates.arrival)}`}
             {phase === 'post-stay' && `Stay completed on ${formatDate(stay.dates.departure)}`}
           </p>
@@ -183,7 +228,8 @@ function BookingDetail({ stay, onBack, onAction }) {
             <h2 className="text-white font-semibold text-xl">{stay.property.name}</h2>
             <p className="text-white/80 text-xs flex items-center gap-1 mt-1">
               <MapPin className="h-3 w-3" />
-              {stay.property.address.street}, {stay.property.address.city}, {stay.property.address.state} {stay.property.address.zip}
+              {stay.property.address.street}, {stay.property.address.city},{' '}
+              {stay.property.address.state} {stay.property.address.zip}
             </p>
           </div>
         </div>
@@ -200,7 +246,10 @@ function BookingDetail({ stay, onBack, onAction }) {
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {stay.property.amenities.map((amenity) => (
-              <span key={amenity} className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary capitalize">
+              <span
+                key={amenity}
+                className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary capitalize"
+              >
                 {amenity === 'spa' && <Sparkles className="h-3 w-3" />}
                 {amenity === 'gym' && <Dumbbell className="h-3 w-3" />}
                 {amenity === 'pool' && <Waves className="h-3 w-3" />}
@@ -224,11 +273,15 @@ function BookingDetail({ stay, onBack, onAction }) {
           </div>
           <div>
             <p className="text-xs text-text-muted">Room Number</p>
-            <p className="text-sm font-medium text-text-primary">{stay.room.number || 'TBD at check-in'}</p>
+            <p className="text-sm font-medium text-text-primary">
+              {stay.room.number || 'TBD at check-in'}
+            </p>
           </div>
           <div>
             <p className="text-xs text-text-muted">Bed</p>
-            <p className="text-sm font-medium text-text-primary">{stay.room.bedType} · {stay.room.bedCount} {stay.room.bedCount > 1 ? 'beds' : 'bed'}</p>
+            <p className="text-sm font-medium text-text-primary">
+              {stay.room.bedType} · {stay.room.bedCount} {stay.room.bedCount > 1 ? 'beds' : 'bed'}
+            </p>
           </div>
           <div>
             <p className="text-xs text-text-muted">View</p>
@@ -245,7 +298,10 @@ function BookingDetail({ stay, onBack, onAction }) {
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {stay.room.features.map((feature) => (
-            <span key={feature} className="inline-flex items-center gap-1 rounded-full bg-secondary/5 border border-secondary/10 px-2 py-0.5 text-[10px] text-secondary capitalize">
+            <span
+              key={feature}
+              className="inline-flex items-center gap-1 rounded-full bg-secondary/5 border border-secondary/10 px-2 py-0.5 text-[10px] text-secondary capitalize"
+            >
               <CheckCircle2 className="h-3 w-3" />
               {feature.replace('-', ' ')}
             </span>
@@ -259,8 +315,15 @@ function BookingDetail({ stay, onBack, onAction }) {
         <div className="flex items-center gap-4">
           <div className="flex-1 text-center">
             <p className="text-xs text-text-muted">Check-in</p>
-            <p className="text-lg font-bold text-text-primary">{new Date(stay.dates.arrival).getDate()}</p>
-            <p className="text-xs text-text-secondary">{new Date(stay.dates.arrival).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+            <p className="text-lg font-bold text-text-primary">
+              {new Date(stay.dates.arrival).getDate()}
+            </p>
+            <p className="text-xs text-text-secondary">
+              {new Date(stay.dates.arrival).toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric',
+              })}
+            </p>
             <p className="text-xs text-text-muted mt-1">{stay.dates.arrivalTime}</p>
           </div>
           <div className="flex flex-col items-center">
@@ -270,8 +333,15 @@ function BookingDetail({ stay, onBack, onAction }) {
           </div>
           <div className="flex-1 text-center">
             <p className="text-xs text-text-muted">Check-out</p>
-            <p className="text-lg font-bold text-text-primary">{new Date(stay.dates.departure).getDate()}</p>
-            <p className="text-xs text-text-secondary">{new Date(stay.dates.departure).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+            <p className="text-lg font-bold text-text-primary">
+              {new Date(stay.dates.departure).getDate()}
+            </p>
+            <p className="text-xs text-text-secondary">
+              {new Date(stay.dates.departure).toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric',
+              })}
+            </p>
             <p className="text-xs text-text-muted mt-1">{stay.dates.departureTime}</p>
           </div>
         </div>
@@ -284,21 +354,32 @@ function BookingDetail({ stay, onBack, onAction }) {
           {stay.rate.breakdown.map((day) => (
             <div key={day.date} className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">{formatDate(day.date)}</span>
-              <span className="font-medium text-text-primary">{formatCurrency(day.rate, stay.rate.currency)}</span>
+              <span className="font-medium text-text-primary">
+                {formatCurrency(day.rate, stay.rate.currency)}
+              </span>
             </div>
           ))}
           <div className="border-t border-border pt-2 mt-2 space-y-1">
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Subtotal</span>
-              <span className="font-medium text-text-primary">{formatCurrency(stay.rate.total, stay.rate.currency)}</span>
+              <span className="font-medium text-text-primary">
+                {formatCurrency(stay.rate.total, stay.rate.currency)}
+              </span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Taxes & Fees</span>
-              <span className="font-medium text-text-primary">{formatCurrency(stay.rate.taxes + stay.rate.fees, stay.rate.currency)}</span>
+              <span className="font-medium text-text-primary">
+                {formatCurrency(stay.rate.taxes + stay.rate.fees, stay.rate.currency)}
+              </span>
             </div>
             <div className="flex items-center justify-between text-sm font-bold pt-1">
               <span className="text-text-primary">Total</span>
-              <span className="text-text-primary">{formatCurrency(stay.rate.total + stay.rate.taxes + stay.rate.fees, stay.rate.currency)}</span>
+              <span className="text-text-primary">
+                {formatCurrency(
+                  stay.rate.total + stay.rate.taxes + stay.rate.fees,
+                  stay.rate.currency
+                )}
+              </span>
             </div>
           </div>
         </div>
@@ -311,17 +392,26 @@ function BookingDetail({ stay, onBack, onAction }) {
             <Info className="h-4 w-4 text-info" />
             <h3 className="text-sm font-semibold text-text-primary">Cancellation Policy</h3>
           </div>
-          <div className={cn(
-            'rounded-lg p-3',
-            policy.type === 'free' ? 'bg-accent/5 border border-accent/10' :
-            policy.type === 'partial' ? 'bg-warning/5 border border-warning/10' :
-            'bg-danger/5 border border-danger/10'
-          )}>
-            <p className={cn('text-sm font-medium',
-              policy.type === 'free' ? 'text-accent' :
-              policy.type === 'partial' ? 'text-warning' :
-              'text-danger'
-            )}>
+          <div
+            className={cn(
+              'rounded-lg p-3',
+              policy.type === 'free'
+                ? 'bg-accent/5 border border-accent/10'
+                : policy.type === 'partial'
+                  ? 'bg-warning/5 border border-warning/10'
+                  : 'bg-danger/5 border border-danger/10'
+            )}
+          >
+            <p
+              className={cn(
+                'text-sm font-medium',
+                policy.type === 'free'
+                  ? 'text-accent'
+                  : policy.type === 'partial'
+                    ? 'text-warning'
+                    : 'text-danger'
+              )}
+            >
               {policy.label}
             </p>
             <p className="text-xs text-text-secondary mt-1">{policy.description}</p>
@@ -338,11 +428,7 @@ function BookingDetail({ stay, onBack, onAction }) {
       <div className="flex flex-col gap-2">
         {phase === 'pre-arrival' && stay.status === 'confirmed' && (
           <>
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={() => onAction('checkin', stay)}
-            >
+            <Button size="lg" className="w-full" onClick={() => onAction('checkin', stay)}>
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Start Check-In
             </Button>
@@ -351,7 +437,11 @@ function BookingDetail({ stay, onBack, onAction }) {
                 <Edit3 className="mr-2 h-4 w-4" />
                 Modify
               </Button>
-              <Button variant="outline" className="text-danger border-danger/30 hover:bg-danger/10" onClick={() => onAction('cancel', stay)}>
+              <Button
+                variant="outline"
+                className="text-danger border-danger/30 hover:bg-danger/10"
+                onClick={() => onAction('cancel', stay)}
+              >
                 <XCircle className="mr-2 h-4 w-4" />
                 Cancel
               </Button>

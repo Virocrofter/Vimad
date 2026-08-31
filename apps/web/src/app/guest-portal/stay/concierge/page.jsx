@@ -2,10 +2,31 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Navigation, Search, X, Star, Clock, Phone, MapPin,
-  ChevronRight, Filter, Heart, Share2, ExternalLink, Calendar,
-  Car, Ticket, UtensilsCrossed, Sparkles, Bike, Footprints,
-  Plane, Bus, Train, Ship, Info
+  ArrowLeft,
+  Navigation,
+  Search,
+  X,
+  Star,
+  Clock,
+  Phone,
+  MapPin,
+  ChevronRight,
+  Filter,
+  Heart,
+  Share2,
+  ExternalLink,
+  Calendar,
+  Car,
+  Ticket,
+  UtensilsCrossed,
+  Sparkles,
+  Bike,
+  Footprints,
+  Plane,
+  Bus,
+  Train,
+  Ship,
+  Info,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { conciergeServices } from '../../data';
@@ -29,21 +50,22 @@ export default function ConciergePage() {
   const filteredServices = useMemo(() => {
     let services = conciergeServices;
     if (activeFilter !== 'all') {
-      services = services.filter(s => s.category === activeFilter);
+      services = services.filter((s) => s.category === activeFilter);
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      services = services.filter(s =>
-        s.name.toLowerCase().includes(q) ||
-        s.description.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q)
+      services = services.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q)
       );
     }
     return services;
   }, [activeFilter, searchQuery]);
 
   const toggleFavorite = (id) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -112,7 +134,8 @@ export default function ConciergePage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        <span className="font-medium text-text-primary">{filteredServices.length}</span> services available
+        <span className="font-medium text-text-primary">{filteredServices.length}</span> services
+        available
       </p>
 
       {/* Services Grid */}
@@ -139,7 +162,10 @@ export default function ConciergePage() {
       {/* Booking Modal */}
       {selectedService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedService(null)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedService(null)}
+          />
           <div className="relative w-full max-w-lg max-h-[90vh] overflow-auto rounded-xl border border-border bg-background shadow-2xl">
             {/* Image Header */}
             <div className="relative h-48">
@@ -156,15 +182,17 @@ export default function ConciergePage() {
                 <X className="h-5 w-5" />
               </button>
               <div className="absolute bottom-4 left-4 right-4">
-                <span className={cn(
-                  'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase',
-                  {
-                    spa: 'bg-pink-500/20 text-pink-300',
-                    dining: 'bg-orange-500/20 text-orange-300',
-                    transport: 'bg-blue-500/20 text-blue-300',
-                    activities: 'bg-green-500/20 text-green-300',
-                  }[selectedService.category] || 'bg-secondary/20 text-secondary'
-                )}>
+                <span
+                  className={cn(
+                    'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase',
+                    {
+                      spa: 'bg-pink-500/20 text-pink-300',
+                      dining: 'bg-orange-500/20 text-orange-300',
+                      transport: 'bg-blue-500/20 text-blue-300',
+                      activities: 'bg-green-500/20 text-green-300',
+                    }[selectedService.category] || 'bg-secondary/20 text-secondary'
+                  )}
+                >
                   {selectedService.category}
                 </span>
                 <h2 className="mt-1 text-xl font-bold text-white">{selectedService.name}</h2>
@@ -210,7 +238,9 @@ export default function ConciergePage() {
                       : 'border-border bg-surface text-text-primary hover:bg-surface-elevated'
                   )}
                 >
-                  <Heart className={cn('h-4 w-4', favorites.has(selectedService.id) && 'fill-danger')} />
+                  <Heart
+                    className={cn('h-4 w-4', favorites.has(selectedService.id) && 'fill-danger')}
+                  />
                 </button>
               </div>
 
@@ -218,7 +248,9 @@ export default function ConciergePage() {
                 <div className="flex items-start gap-2">
                   <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
                   <p className="text-xs text-text-secondary">
-                    Mention you are a guest at {selectedService.name.includes('Hotel') ? 'Grand Hotel Boston' : 'our hotel'} for exclusive rates and priority reservations.
+                    Mention you are a guest at{' '}
+                    {selectedService.name.includes('Hotel') ? 'Grand Hotel Boston' : 'our hotel'}{' '}
+                    for exclusive rates and priority reservations.
                   </p>
                 </div>
               </div>
@@ -229,4 +261,3 @@ export default function ConciergePage() {
     </div>
   );
 }
-

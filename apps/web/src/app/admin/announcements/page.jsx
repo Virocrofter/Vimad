@@ -2,20 +2,45 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Megaphone, History, Wrench, Plus, Search, Filter, Pin,
-  Sparkles, AlertTriangle, Calendar, Clock, ChevronDown, ChevronUp,
-  Download, RefreshCw, BarChart3, Zap, FileText, Server
+  Megaphone,
+  History,
+  Wrench,
+  Plus,
+  Search,
+  Filter,
+  Pin,
+  Sparkles,
+  AlertTriangle,
+  Calendar,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  RefreshCw,
+  BarChart3,
+  Zap,
+  FileText,
+  Server,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  initialAnnouncements, initialChangelog, initialMaintenanceWindows,
-  announcementTypeMeta, priorityMeta, announcementStatusMeta,
-  formatRelativeTime
+  initialAnnouncements,
+  initialChangelog,
+  initialMaintenanceWindows,
+  announcementTypeMeta,
+  priorityMeta,
+  announcementStatusMeta,
+  formatRelativeTime,
 } from './data';
 import {
-  AnnouncementCard, ChangelogEntry, MaintenanceWindowCard,
-  StatCard, EmptyState, TypeBadge, StatusBadge
+  AnnouncementCard,
+  ChangelogEntry,
+  MaintenanceWindowCard,
+  StatCard,
+  EmptyState,
+  TypeBadge,
+  StatusBadge,
 } from './components';
 import AnnouncementModal from './AnnouncementModal';
 import MaintenanceModal from './MaintenanceModal';
@@ -62,7 +87,8 @@ export default function AnnouncementsPage() {
   /* ─── Filtered Announcements ─── */
   const filteredAnnouncements = useMemo(() => {
     let result = announcements.filter((a) => {
-      const matchesQuery = !annQuery ||
+      const matchesQuery =
+        !annQuery ||
         a.title.toLowerCase().includes(annQuery.toLowerCase()) ||
         a.content.toLowerCase().includes(annQuery.toLowerCase()) ||
         a.id.toLowerCase().includes(annQuery.toLowerCase());
@@ -82,18 +108,20 @@ export default function AnnouncementsPage() {
   /* ─── Filtered Changelog ─── */
   const filteredChangelog = useMemo(() => {
     if (!clQuery) return changelog;
-    return changelog.filter((c) =>
-      c.title.toLowerCase().includes(clQuery.toLowerCase()) ||
-      c.version.toLowerCase().includes(clQuery.toLowerCase()) ||
-      c.summary.toLowerCase().includes(clQuery.toLowerCase()) ||
-      c.changes.some(ch => ch.text.toLowerCase().includes(clQuery.toLowerCase()))
+    return changelog.filter(
+      (c) =>
+        c.title.toLowerCase().includes(clQuery.toLowerCase()) ||
+        c.version.toLowerCase().includes(clQuery.toLowerCase()) ||
+        c.summary.toLowerCase().includes(clQuery.toLowerCase()) ||
+        c.changes.some((ch) => ch.text.toLowerCase().includes(clQuery.toLowerCase()))
     );
   }, [changelog, clQuery]);
 
   /* ─── Filtered Maintenance ─── */
   const filteredMaintenance = useMemo(() => {
     let result = maintenanceWindows.filter((m) => {
-      const matchesQuery = !mwQuery ||
+      const matchesQuery =
+        !mwQuery ||
         m.title.toLowerCase().includes(mwQuery.toLowerCase()) ||
         m.description.toLowerCase().includes(mwQuery.toLowerCase()) ||
         m.id.toLowerCase().includes(mwQuery.toLowerCase());
@@ -115,33 +143,40 @@ export default function AnnouncementsPage() {
   }, [maintenanceWindows, mwQuery, mwStatusFilter]);
 
   /* ─── Stats ─── */
-  const annStats = useMemo(() => ({
-    total: announcements.length,
-    published: announcements.filter(a => a.status === 'published').length,
-    draft: announcements.filter(a => a.status === 'draft').length,
-    scheduled: announcements.filter(a => a.status === 'scheduled').length,
-    pinned: announcements.filter(a => a.pinned).length,
-    avgReadRate: announcements.filter(a => a.status === 'published').length > 0
-      ? Math.round(
-          announcements
-            .filter(a => a.status === 'published')
-            .reduce((s, a) => s + (a.readCount / a.totalRecipients) * 100, 0) /
-          announcements.filter(a => a.status === 'published').length
-        )
-      : 0,
-  }), [announcements]);
+  const annStats = useMemo(
+    () => ({
+      total: announcements.length,
+      published: announcements.filter((a) => a.status === 'published').length,
+      draft: announcements.filter((a) => a.status === 'draft').length,
+      scheduled: announcements.filter((a) => a.status === 'scheduled').length,
+      pinned: announcements.filter((a) => a.pinned).length,
+      avgReadRate:
+        announcements.filter((a) => a.status === 'published').length > 0
+          ? Math.round(
+              announcements
+                .filter((a) => a.status === 'published')
+                .reduce((s, a) => s + (a.readCount / a.totalRecipients) * 100, 0) /
+                announcements.filter((a) => a.status === 'published').length
+            )
+          : 0,
+    }),
+    [announcements]
+  );
 
-  const mwStats = useMemo(() => ({
-    total: maintenanceWindows.length,
-    scheduled: maintenanceWindows.filter(m => m.status === 'scheduled').length,
-    inProgress: maintenanceWindows.filter(m => m.status === 'in-progress').length,
-    completed: maintenanceWindows.filter(m => m.status === 'completed').length,
-  }), [maintenanceWindows]);
+  const mwStats = useMemo(
+    () => ({
+      total: maintenanceWindows.length,
+      scheduled: maintenanceWindows.filter((m) => m.status === 'scheduled').length,
+      inProgress: maintenanceWindows.filter((m) => m.status === 'in-progress').length,
+      completed: maintenanceWindows.filter((m) => m.status === 'completed').length,
+    }),
+    [maintenanceWindows]
+  );
 
   /* ─── Handlers ─── */
   const handleSaveAnnouncement = (payload) => {
-    setAnnouncements(prev => {
-      const idx = prev.findIndex(a => a.id === payload.id);
+    setAnnouncements((prev) => {
+      const idx = prev.findIndex((a) => a.id === payload.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = payload;
@@ -153,24 +188,24 @@ export default function AnnouncementsPage() {
   };
 
   const handleDeleteAnnouncement = (id) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id));
+    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
   };
 
   const handleTogglePin = (id) => {
-    setAnnouncements(prev => prev.map(a =>
-      a.id === id ? { ...a, pinned: !a.pinned } : a
-    ));
+    setAnnouncements((prev) => prev.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a)));
   };
 
   const handlePublish = (id) => {
-    setAnnouncements(prev => prev.map(a =>
-      a.id === id ? { ...a, status: 'published', publishedAt: new Date().toISOString() } : a
-    ));
+    setAnnouncements((prev) =>
+      prev.map((a) =>
+        a.id === id ? { ...a, status: 'published', publishedAt: new Date().toISOString() } : a
+      )
+    );
   };
 
   const handleSaveMaintenance = (payload) => {
-    setMaintenanceWindows(prev => {
-      const idx = prev.findIndex(m => m.id === payload.id);
+    setMaintenanceWindows((prev) => {
+      const idx = prev.findIndex((m) => m.id === payload.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = payload;
@@ -182,18 +217,23 @@ export default function AnnouncementsPage() {
   };
 
   const handleDeleteMaintenance = (id) => {
-    setMaintenanceWindows(prev => prev.filter(m => m.id !== id));
+    setMaintenanceWindows((prev) => prev.filter((m) => m.id !== id));
   };
 
   const handleCancelMaintenance = (id) => {
-    setMaintenanceWindows(prev => prev.map(m =>
-      m.id === id ? { ...m, status: 'cancelled' } : m
-    ));
+    setMaintenanceWindows((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status: 'cancelled' } : m))
+    );
   };
 
   /* ─── Tabs ─── */
   const tabs = [
-    { id: 'announcements', label: 'Announcements', icon: Megaphone, badge: annStats.draft + annStats.scheduled },
+    {
+      id: 'announcements',
+      label: 'Announcements',
+      icon: Megaphone,
+      badge: annStats.draft + annStats.scheduled,
+    },
     { id: 'changelog', label: 'Changelog', icon: History },
     { id: 'maintenance', label: 'Maintenance', icon: Wrench, badge: mwStats.inProgress },
   ];
@@ -213,12 +253,24 @@ export default function AnnouncementsPage() {
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
           {activeTab === 'announcements' && (
-            <Button size="sm" onClick={() => { setSelectedAnnouncement(null); setShowAnnModal(true); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSelectedAnnouncement(null);
+                setShowAnnModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> New Announcement
             </Button>
           )}
           {activeTab === 'maintenance' && (
-            <Button size="sm" onClick={() => { setSelectedMaintenance(null); setShowMwModal(true); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSelectedMaintenance(null);
+                setShowMwModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> Schedule Maintenance
             </Button>
           )}
@@ -237,7 +289,9 @@ export default function AnnouncementsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -260,11 +314,41 @@ export default function AnnouncementsPage() {
         <div className="space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-            <StatCard label="Total" value={annStats.total} icon={Megaphone} color="text-text-primary" subtext="All announcements" />
-            <StatCard label="Published" value={annStats.published} icon={Sparkles} color="text-accent" subtext="Live now" />
-            <StatCard label="Drafts" value={annStats.draft} icon={FileText} color="text-text-muted" subtext="Pending review" />
-            <StatCard label="Scheduled" value={annStats.scheduled} icon={Calendar} color="text-info" subtext="Auto-publish" />
-            <StatCard label="Avg Read Rate" value={`${annStats.avgReadRate}%`} icon={BarChart3} color="text-secondary" subtext="Of published" />
+            <StatCard
+              label="Total"
+              value={annStats.total}
+              icon={Megaphone}
+              color="text-text-primary"
+              subtext="All announcements"
+            />
+            <StatCard
+              label="Published"
+              value={annStats.published}
+              icon={Sparkles}
+              color="text-accent"
+              subtext="Live now"
+            />
+            <StatCard
+              label="Drafts"
+              value={annStats.draft}
+              icon={FileText}
+              color="text-text-muted"
+              subtext="Pending review"
+            />
+            <StatCard
+              label="Scheduled"
+              value={annStats.scheduled}
+              icon={Calendar}
+              color="text-info"
+              subtext="Auto-publish"
+            />
+            <StatCard
+              label="Avg Read Rate"
+              value={`${annStats.avgReadRate}%`}
+              icon={BarChart3}
+              color="text-secondary"
+              subtext="Of published"
+            />
           </div>
 
           {/* Filters */}
@@ -284,7 +368,9 @@ export default function AnnouncementsPage() {
                 onClick={() => setShowAnnFilters(!showAnnFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showAnnFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showAnnFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -341,7 +427,12 @@ export default function AnnouncementsPage() {
               </div>
               <div className="mt-3 flex justify-end">
                 <button
-                  onClick={() => { setAnnTypeFilter('all'); setAnnStatusFilter('all'); setAnnPriorityFilter('all'); setAnnQuery(''); }}
+                  onClick={() => {
+                    setAnnTypeFilter('all');
+                    setAnnStatusFilter('all');
+                    setAnnPriorityFilter('all');
+                    setAnnQuery('');
+                  }}
                   className="text-xs text-secondary hover:underline"
                 >
                   Reset all filters
@@ -352,7 +443,9 @@ export default function AnnouncementsPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredAnnouncements.length}</span> of {announcements.length} announcements
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredAnnouncements.length}</span> of{' '}
+            {announcements.length} announcements
           </p>
 
           {/* Announcements Grid */}
@@ -362,7 +455,10 @@ export default function AnnouncementsPage() {
                 <AnnouncementCard
                   key={announcement.id}
                   announcement={announcement}
-                  onEdit={(a) => { setSelectedAnnouncement(a); setShowAnnModal(true); }}
+                  onEdit={(a) => {
+                    setSelectedAnnouncement(a);
+                    setShowAnnModal(true);
+                  }}
                   onDelete={handleDeleteAnnouncement}
                   onTogglePin={handleTogglePin}
                   onPublish={handlePublish}
@@ -375,7 +471,13 @@ export default function AnnouncementsPage() {
               title="No announcements found"
               description="Try adjusting your filters or create a new announcement."
               action={
-                <Button size="sm" onClick={() => { setSelectedAnnouncement(null); setShowAnnModal(true); }}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setSelectedAnnouncement(null);
+                    setShowAnnModal(true);
+                  }}
+                >
                   <Plus className="mr-1.5 h-4 w-4" /> Create Announcement
                 </Button>
               }
@@ -391,10 +493,40 @@ export default function AnnouncementsPage() {
         <div className="space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label="Total Releases" value={changelog.length} icon={History} color="text-text-primary" subtext="All versions" />
-            <StatCard label="This Month" value={changelog.filter(c => c.date.startsWith('2026-08')).length} icon={Calendar} color="text-accent" subtext="August 2026" />
-            <StatCard label="Features" value={changelog.reduce((s, c) => s + c.changes.filter(ch => ch.type === 'feature').length, 0)} icon={Sparkles} color="text-secondary" subtext="Across all releases" />
-            <StatCard label="Fixes" value={changelog.reduce((s, c) => s + c.changes.filter(ch => ch.type === 'fix').length, 0)} icon={Zap} color="text-warning" subtext="Across all releases" />
+            <StatCard
+              label="Total Releases"
+              value={changelog.length}
+              icon={History}
+              color="text-text-primary"
+              subtext="All versions"
+            />
+            <StatCard
+              label="This Month"
+              value={changelog.filter((c) => c.date.startsWith('2026-08')).length}
+              icon={Calendar}
+              color="text-accent"
+              subtext="August 2026"
+            />
+            <StatCard
+              label="Features"
+              value={changelog.reduce(
+                (s, c) => s + c.changes.filter((ch) => ch.type === 'feature').length,
+                0
+              )}
+              icon={Sparkles}
+              color="text-secondary"
+              subtext="Across all releases"
+            />
+            <StatCard
+              label="Fixes"
+              value={changelog.reduce(
+                (s, c) => s + c.changes.filter((ch) => ch.type === 'fix').length,
+                0
+              )}
+              icon={Zap}
+              color="text-warning"
+              subtext="Across all releases"
+            />
           </div>
 
           {/* Search */}
@@ -411,7 +543,9 @@ export default function AnnouncementsPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredChangelog.length}</span> of {changelog.length} releases
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredChangelog.length}</span> of{' '}
+            {changelog.length} releases
           </p>
 
           {/* Changelog Timeline */}
@@ -421,8 +555,10 @@ export default function AnnouncementsPage() {
                 <ChangelogEntry
                   key={entry.id}
                   entry={entry}
-                  onEdit={(e) => { setSelectedChangelog(e); /* TODO: changelog edit modal */ }}
-                  onDelete={(id) => setChangelog(prev => prev.filter(c => c.id !== id))}
+                  onEdit={(e) => {
+                    setSelectedChangelog(e); /* TODO: changelog edit modal */
+                  }}
+                  onDelete={(id) => setChangelog((prev) => prev.filter((c) => c.id !== id))}
                 />
               ))}
             </div>
@@ -443,10 +579,34 @@ export default function AnnouncementsPage() {
         <div className="space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label="Scheduled" value={mwStats.scheduled} icon={Calendar} color="text-info" subtext="Upcoming" />
-            <StatCard label="In Progress" value={mwStats.inProgress} icon={Server} color="text-warning" subtext="Active now" />
-            <StatCard label="Completed" value={mwStats.completed} icon={Sparkles} color="text-accent" subtext="Past 30 days" />
-            <StatCard label="Total" value={mwStats.total} icon={Wrench} color="text-text-primary" subtext="All windows" />
+            <StatCard
+              label="Scheduled"
+              value={mwStats.scheduled}
+              icon={Calendar}
+              color="text-info"
+              subtext="Upcoming"
+            />
+            <StatCard
+              label="In Progress"
+              value={mwStats.inProgress}
+              icon={Server}
+              color="text-warning"
+              subtext="Active now"
+            />
+            <StatCard
+              label="Completed"
+              value={mwStats.completed}
+              icon={Sparkles}
+              color="text-accent"
+              subtext="Past 30 days"
+            />
+            <StatCard
+              label="Total"
+              value={mwStats.total}
+              icon={Wrench}
+              color="text-text-primary"
+              subtext="All windows"
+            />
           </div>
 
           {/* Filters */}
@@ -476,7 +636,9 @@ export default function AnnouncementsPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredMaintenance.length}</span> of {maintenanceWindows.length} windows
+            Showing{' '}
+            <span className="font-medium text-text-primary">{filteredMaintenance.length}</span> of{' '}
+            {maintenanceWindows.length} windows
           </p>
 
           {/* Maintenance Grid */}
@@ -486,7 +648,10 @@ export default function AnnouncementsPage() {
                 <MaintenanceWindowCard
                   key={mw.id}
                   window={mw}
-                  onEdit={(m) => { setSelectedMaintenance(m); setShowMwModal(true); }}
+                  onEdit={(m) => {
+                    setSelectedMaintenance(m);
+                    setShowMwModal(true);
+                  }}
                   onDelete={handleDeleteMaintenance}
                   onCancel={handleCancelMaintenance}
                 />
@@ -498,7 +663,13 @@ export default function AnnouncementsPage() {
               title="No maintenance windows found"
               description="Schedule maintenance to communicate downtime to tenants."
               action={
-                <Button size="sm" onClick={() => { setSelectedMaintenance(null); setShowMwModal(true); }}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setSelectedMaintenance(null);
+                    setShowMwModal(true);
+                  }}
+                >
                   <Plus className="mr-1.5 h-4 w-4" /> Schedule Maintenance
                 </Button>
               }
@@ -513,7 +684,10 @@ export default function AnnouncementsPage() {
       {showAnnModal && (
         <AnnouncementModal
           announcement={selectedAnnouncement}
-          onClose={() => { setShowAnnModal(false); setSelectedAnnouncement(null); }}
+          onClose={() => {
+            setShowAnnModal(false);
+            setSelectedAnnouncement(null);
+          }}
           onSave={handleSaveAnnouncement}
           tenants={mockTenants}
         />
@@ -522,7 +696,10 @@ export default function AnnouncementsPage() {
       {showMwModal && (
         <MaintenanceModal
           window={selectedMaintenance}
-          onClose={() => { setShowMwModal(false); setSelectedMaintenance(null); }}
+          onClose={() => {
+            setShowMwModal(false);
+            setSelectedMaintenance(null);
+          }}
           onSave={handleSaveMaintenance}
         />
       )}

@@ -1,9 +1,25 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  CreditCard, DollarSign, ArrowRightLeft, Receipt, Calculator,
-  X, Check, Printer, Download, Lock, User, BedDouble, Calendar,
-  ChevronDown, ChevronUp, AlertCircle, Plus, FileText, Eye
+  CreditCard,
+  DollarSign,
+  ArrowRightLeft,
+  Receipt,
+  Calculator,
+  X,
+  Check,
+  Printer,
+  Download,
+  Lock,
+  User,
+  BedDouble,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  Plus,
+  FileText,
+  Eye,
 } from 'lucide-react';
 
 import { cn } from '../../../lib/utils';
@@ -25,15 +41,78 @@ const mockReservation = {
 
 const initialTransactions = {
   1: [
-    { id: 1, date: '2026-08-12', description: 'Room Charge — Deluxe King (1/3)', code: '1000', charge: 189.00, payment: 0, postedBy: 'System', routing: 'guest' },
-    { id: 2, date: '2026-08-12', description: 'Resort Fee', code: '2000', charge: 35.00, payment: 0, postedBy: 'System', routing: 'guest' },
-    { id: 3, date: '2026-08-12', description: 'Payment — Visa •••• 4242', code: '5000', charge: 0, payment: 178.50, postedBy: 'Sarah J.', routing: 'guest' },
-    { id: 4, date: '2026-08-13', description: 'Room Charge — Deluxe King (2/3)', code: '1000', charge: 189.00, payment: 0, postedBy: 'System', routing: 'guest' },
-    { id: 5, date: '2026-08-13', description: 'Room Service — Dinner', code: '3000', charge: 67.00, payment: 0, postedBy: 'Mike C.', routing: 'guest' },
+    {
+      id: 1,
+      date: '2026-08-12',
+      description: 'Room Charge — Deluxe King (1/3)',
+      code: '1000',
+      charge: 189.0,
+      payment: 0,
+      postedBy: 'System',
+      routing: 'guest',
+    },
+    {
+      id: 2,
+      date: '2026-08-12',
+      description: 'Resort Fee',
+      code: '2000',
+      charge: 35.0,
+      payment: 0,
+      postedBy: 'System',
+      routing: 'guest',
+    },
+    {
+      id: 3,
+      date: '2026-08-12',
+      description: 'Payment — Visa •••• 4242',
+      code: '5000',
+      charge: 0,
+      payment: 178.5,
+      postedBy: 'Sarah J.',
+      routing: 'guest',
+    },
+    {
+      id: 4,
+      date: '2026-08-13',
+      description: 'Room Charge — Deluxe King (2/3)',
+      code: '1000',
+      charge: 189.0,
+      payment: 0,
+      postedBy: 'System',
+      routing: 'guest',
+    },
+    {
+      id: 5,
+      date: '2026-08-13',
+      description: 'Room Service — Dinner',
+      code: '3000',
+      charge: 67.0,
+      payment: 0,
+      postedBy: 'Mike C.',
+      routing: 'guest',
+    },
   ],
   2: [
-    { id: 6, date: '2026-08-12', description: 'Parking — Daily', code: '2100', charge: 25.00, payment: 0, postedBy: 'System', routing: 'company' },
-    { id: 7, date: '2026-08-13', description: 'Payment — Amex •••• 1001', code: '5000', charge: 0, payment: 25.00, postedBy: 'Sarah J.', routing: 'company' },
+    {
+      id: 6,
+      date: '2026-08-12',
+      description: 'Parking — Daily',
+      code: '2100',
+      charge: 25.0,
+      payment: 0,
+      postedBy: 'System',
+      routing: 'company',
+    },
+    {
+      id: 7,
+      date: '2026-08-13',
+      description: 'Payment — Amex •••• 1001',
+      code: '5000',
+      charge: 0,
+      payment: 25.0,
+      postedBy: 'Sarah J.',
+      routing: 'company',
+    },
   ],
   3: [],
   4: [],
@@ -75,7 +154,7 @@ function calculateProration(currentPlan, newPlan, billingInterval) {
   // Current plan pricing
   const currentPrice = billingInterval === 'annual' ? currentPlan.annualPrice : currentPlan.price;
   const currentDailyRate = currentPrice / daysInCycle;
-  
+
   // New plan pricing
   const newPrice = billingInterval === 'annual' ? newPlan.annualPrice : newPlan.price;
   const newDailyRate = newPrice / daysInCycle;
@@ -123,16 +202,17 @@ export default function BillingPage() {
     });
   }, [currentTransactions]);
 
-  const totalBalance = runningBalance.length > 0 ? runningBalance[runningBalance.length - 1].balance : 0;
+  const totalBalance =
+    runningBalance.length > 0 ? runningBalance[runningBalance.length - 1].balance : 0;
   const currentBalance = totalBalance;
   const totalCharges = currentTransactions.reduce((sum, t) => sum + t.charge, 0);
   const totalPayments = currentTransactions.reduce((sum, t) => sum + t.payment, 0);
 
   // Consolidated add transaction handler
   const handlePostTransaction = (tx) => {
-    setTransactions(prev => ({
+    setTransactions((prev) => ({
       ...prev,
-      [activeWindow]: [...(prev[activeWindow] || []), { ...tx, id: Date.now() }]
+      [activeWindow]: [...(prev[activeWindow] || []), { ...tx, id: Date.now() }],
     }));
   };
 
@@ -143,17 +223,23 @@ export default function BillingPage() {
         <div className="flex items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Folio & Billing</h1>
-            <p className="text-sm text-text-secondary">Reservation #{mockReservation.id} • {mockReservation.guest}</p>
+            <p className="text-sm text-text-secondary">
+              Reservation #{mockReservation.id} • {mockReservation.guest}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowReceipt(true)}>
             <Eye className="mr-1.5 h-4 w-4" /> Preview Receipt
           </Button>
-          <Button variant="outline" size="sm"><Printer className="mr-1.5 h-4 w-4" /> Print</Button>
-          <Button variant="outline" size="sm"><Download className="mr-1.5 h-4 w-4" /> Export</Button>
+          <Button variant="outline" size="sm">
+            <Printer className="mr-1.5 h-4 w-4" /> Print
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="mr-1.5 h-4 w-4" /> Export
+          </Button>
         </div>
-      </div>        
+      </div>
 
       {/* Action Bar */}
       <div className="flex flex-wrap items-center gap-3">
@@ -167,7 +253,12 @@ export default function BillingPage() {
           <ArrowRightLeft className="mr-1.5 h-4 w-4" /> Routing
         </Button>
         <div className="flex-1" />
-        <Button onClick={() => setShowShiftClose(true)} variant="outline" size="sm" className="text-danger border-danger/30 hover:bg-danger/10">
+        <Button
+          onClick={() => setShowShiftClose(true)}
+          variant="outline"
+          size="sm"
+          className="text-danger border-danger/30 hover:bg-danger/10"
+        >
           <Lock className="mr-1.5 h-4 w-4" /> Close Shift
         </Button>
       </div>
@@ -188,7 +279,12 @@ export default function BillingPage() {
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-xs text-text-muted uppercase tracking-wider">Balance Due</p>
-          <p className={cn('mt-1 text-xl font-bold font-mono', currentBalance > 0 ? 'text-danger' : 'text-accent')}>
+          <p
+            className={cn(
+              'mt-1 text-xl font-bold font-mono',
+              currentBalance > 0 ? 'text-danger' : 'text-accent'
+            )}
+          >
             {formatCurrency(Math.abs(currentBalance))}
           </p>
         </div>
@@ -203,14 +299,14 @@ export default function BillingPage() {
       {/* Folio Windows & Transaction Table */}
       <div className="rounded-xl border border-border bg-background shadow-sm">
         <div className="flex flex-wrap border-b border-border px-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(windowNum => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((windowNum) => (
             <button
               key={windowNum}
               onClick={() => setActiveWindow(windowNum)}
               className={cn(
                 'px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px',
-                activeWindow === windowNum 
-                  ? 'border-secondary text-secondary' 
+                activeWindow === windowNum
+                  ? 'border-secondary text-secondary'
                   : 'border-transparent text-text-muted hover:text-text-primary'
               )}
             >
@@ -223,12 +319,24 @@ export default function BillingPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Code</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Description</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Charge</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Payment</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Balance</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Code
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Description
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                  Charge
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                  Payment
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                  Balance
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -290,8 +398,8 @@ export default function BillingPage() {
           selectedIds={selectedTxIds}
           onClose={() => setShowRouting(false)}
           onRoute={(txId, target) => {
-            setTransactions(prev => {
-              const updatedWindow = prev[activeWindow].map(t => 
+            setTransactions((prev) => {
+              const updatedWindow = prev[activeWindow].map((t) =>
                 t.id === txId ? { ...t, routing: target } : t
               );
               return { ...prev, [activeWindow]: updatedWindow };
@@ -319,7 +427,6 @@ export default function BillingPage() {
   );
 }
 
-
 /* ─── Post Charge Modal ─── */
 function PostChargeModal({ onClose, onPost, transactionCodes }) {
   const [code, setCode] = useState('1000');
@@ -327,7 +434,7 @@ function PostChargeModal({ onClose, onPost, transactionCodes }) {
   const [description, setDescription] = useState('');
   const [routing, setRouting] = useState('guest');
 
-  const selectedCode = transactionCodes.find(c => c.code === code);
+  const selectedCode = transactionCodes.find((c) => c.code === code);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -346,27 +453,39 @@ function PostChargeModal({ onClose, onPost, transactionCodes }) {
       <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Post Charge</h3>
-          <button type="button" onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-surface text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Transaction Code</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Transaction Code
+            </label>
             <select
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {transactionCodes.filter(c => c.type === 'charge').map(c => (
-                <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
-              ))}
+              {transactionCodes
+                .filter((c) => c.type === 'charge')
+                .map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.name}
+                  </option>
+                ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Amount
+            </label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               <input
@@ -383,7 +502,9 @@ function PostChargeModal({ onClose, onPost, transactionCodes }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Description
+            </label>
             <input
               type="text"
               value={description}
@@ -394,9 +515,11 @@ function PostChargeModal({ onClose, onPost, transactionCodes }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Route To</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Route To
+            </label>
             <div className="grid grid-cols-2 gap-2">
-              {routingTargets.map(r => (
+              {routingTargets.map((r) => (
                 <button
                   key={r.key}
                   type="button"
@@ -416,7 +539,9 @@ function PostChargeModal({ onClose, onPost, transactionCodes }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> Post Charge
             </Button>
@@ -436,7 +561,7 @@ function PostPaymentModal({ onClose, onPost, transactionCodes }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const codeObj = transactionCodes.find(c => c.code === code);
+    const codeObj = transactionCodes.find((c) => c.code === code);
     onPost({
       date: new Date().toISOString().split('T')[0],
       description: `${codeObj?.name || 'Payment'}${reference ? ` — Ref: ${reference}` : ''}`,
@@ -452,27 +577,39 @@ function PostPaymentModal({ onClose, onPost, transactionCodes }) {
       <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Post Payment</h3>
-          <button type="button" onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-surface text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Payment Method</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Payment Method
+            </label>
             <select
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {transactionCodes.filter(c => c.type === 'payment').map(c => (
-                <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
-              ))}
+              {transactionCodes
+                .filter((c) => c.type === 'payment')
+                .map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.name}
+                  </option>
+                ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Amount
+            </label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               <input
@@ -489,7 +626,9 @@ function PostPaymentModal({ onClose, onPost, transactionCodes }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Reference / Card Last 4</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Reference / Card Last 4
+            </label>
             <input
               type="text"
               value={reference}
@@ -500,9 +639,11 @@ function PostPaymentModal({ onClose, onPost, transactionCodes }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Route To</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Route To
+            </label>
             <div className="grid grid-cols-2 gap-2">
-              {routingTargets.map(r => (
+              {routingTargets.map((r) => (
                 <button
                   key={r.key}
                   type="button"
@@ -522,7 +663,9 @@ function PostPaymentModal({ onClose, onPost, transactionCodes }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> Post Payment
             </Button>
@@ -542,22 +685,36 @@ function RoutingModal({ transactions, selectedIds, onClose, onRoute, routingTarg
       <div className="w-full max-w-2xl rounded-xl border border-border bg-background p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Routing Visualization</h3>
-          <button type="button" onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-surface text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="mb-4 rounded-lg border border-border bg-surface p-3">
           <div className="flex items-center gap-4">
-            {routingTargets.map(r => {
-              const count = transactions.filter(t => t.routing === r.key).length;
-              const total = transactions.filter(t => t.routing === r.key).reduce((s, t) => s + t.charge - t.payment, 0);
+            {routingTargets.map((r) => {
+              const count = transactions.filter((t) => t.routing === r.key).length;
+              const total = transactions
+                .filter((t) => t.routing === r.key)
+                .reduce((s, t) => s + t.charge - t.payment, 0);
               return (
-                <div key={r.key} className="flex flex-1 items-center gap-2 rounded-md bg-background px-3 py-2">
+                <div
+                  key={r.key}
+                  className="flex flex-1 items-center gap-2 rounded-md bg-background px-3 py-2"
+                >
                   <r.icon className={cn('h-4 w-4', r.color)} />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-text-secondary">{r.label}</p>
-                    <p className={cn('text-sm font-mono font-semibold truncate', total > 0 ? 'text-danger' : total < 0 ? 'text-accent' : 'text-text-primary')}>
+                    <p
+                      className={cn(
+                        'text-sm font-mono font-semibold truncate',
+                        total > 0 ? 'text-danger' : total < 0 ? 'text-accent' : 'text-text-primary'
+                      )}
+                    >
                       {count} items · ${Math.abs(total).toFixed(2)}
                     </p>
                   </div>
@@ -571,15 +728,23 @@ function RoutingModal({ transactions, selectedIds, onClose, onRoute, routingTarg
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-background border-b border-border">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">Description</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary uppercase">Amount</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">Current Route</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">New Route</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">
+                  Description
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary uppercase">
+                  Amount
+                </th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">
+                  Current Route
+                </th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">
+                  New Route
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {transactions.map(tx => {
-                const current = routingTargets.find(r => r.key === tx.routing);
+              {transactions.map((tx) => {
+                const current = routingTargets.find((r) => r.key === tx.routing);
                 return (
                   <tr key={tx.id} className="hover:bg-surface/50">
                     <td className="px-3 py-2 text-sm text-text-primary">{tx.description}</td>
@@ -597,13 +762,15 @@ function RoutingModal({ transactions, selectedIds, onClose, onRoute, routingTarg
                         value={targetMap[tx.id] || tx.routing || 'guest'}
                         onChange={(e) => {
                           const val = e.target.value;
-                          setTargetMap(prev => ({ ...prev, [tx.id]: val }));
+                          setTargetMap((prev) => ({ ...prev, [tx.id]: val }));
                           onRoute(tx.id, val);
                         }}
                         className="h-8 rounded-md border border-border bg-surface px-2 text-xs text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
-                        {routingTargets.map(r => (
-                          <option key={r.key} value={r.key}>{r.label}</option>
+                        {routingTargets.map((r) => (
+                          <option key={r.key} value={r.key}>
+                            {r.label}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -642,14 +809,19 @@ function ReceiptPreviewModal({ onClose, reservation, transactions }) {
               </div>
               <span className="text-sm font-semibold text-text-primary">Unified PMS</span>
             </div>
-            <button onClick={onClose} className="rounded-md p-1 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
           <div className="mt-3 text-center">
             <p className="text-xs text-text-muted uppercase tracking-wider">Guest Folio Receipt</p>
             <p className="text-lg font-bold text-text-primary">{reservation.guest}</p>
-            <p className="text-xs text-text-muted">Res #{reservation.id} • Room {reservation.room}</p>
+            <p className="text-xs text-text-muted">
+              Res #{reservation.id} • Room {reservation.room}
+            </p>
           </div>
         </div>
 
@@ -664,7 +836,9 @@ function ReceiptPreviewModal({ onClose, reservation, transactions }) {
             {transactions.map((tx) => (
               <div key={tx.id} className="flex justify-between text-sm">
                 <span className="text-text-secondary">{tx.description}</span>
-                <span className={cn('font-mono', tx.charge > 0 ? 'text-text-primary' : 'text-accent')}>
+                <span
+                  className={cn('font-mono', tx.charge > 0 ? 'text-text-primary' : 'text-accent')}
+                >
                   {tx.charge > 0 ? formatCurrency(tx.charge) : `-${formatCurrency(tx.payment)}`}
                 </span>
               </div>
@@ -674,11 +848,15 @@ function ReceiptPreviewModal({ onClose, reservation, transactions }) {
           <div className="border-t border-border pt-3 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-text-secondary">Total Charges</span>
-              <span className="font-mono font-medium text-text-primary">{formatCurrency(totalCharges)}</span>
+              <span className="font-mono font-medium text-text-primary">
+                {formatCurrency(totalCharges)}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-text-secondary">Total Payments</span>
-              <span className="font-mono font-medium text-accent">-{formatCurrency(totalPayments)}</span>
+              <span className="font-mono font-medium text-accent">
+                -{formatCurrency(totalPayments)}
+              </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-1">
               <span className="text-text-primary">Balance Due</span>
@@ -696,7 +874,9 @@ function ReceiptPreviewModal({ onClose, reservation, transactions }) {
 
         {/* Receipt Footer Actions */}
         <div className="border-t border-border bg-surface px-6 py-3 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Close
+          </Button>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="mr-1.5 h-3.5 w-3.5" /> Print
@@ -719,9 +899,11 @@ function ShiftCloseModal({ onClose, transactions }) {
   const [notes, setNotes] = useState('');
 
   const today = new Date().toISOString().split('T')[0];
-  const shiftTxns = transactions.filter(t => t.date === today);
-  const systemCash = shiftTxns.filter(t => t.code === '9002').reduce((s, t) => s + t.payment, 0);
-  const systemCard = shiftTxns.filter(t => ['9000', '9001', '9003'].includes(t.code)).reduce((s, t) => s + t.payment, 0);
+  const shiftTxns = transactions.filter((t) => t.date === today);
+  const systemCash = shiftTxns.filter((t) => t.code === '9002').reduce((s, t) => s + t.payment, 0);
+  const systemCard = shiftTxns
+    .filter((t) => ['9000', '9001', '9003'].includes(t.code))
+    .reduce((s, t) => s + t.payment, 0);
   const systemTotal = systemCash + systemCard;
 
   const cashDiff = (parseFloat(cashCount) || 0) - systemCash;
@@ -735,33 +917,46 @@ function ShiftCloseModal({ onClose, transactions }) {
             <Lock className="h-5 w-5 text-secondary" />
             <h3 className="text-lg font-bold text-text-primary">Cashier Shift Close</h3>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-surface text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Progress */}
         <div className="mb-6 flex items-center gap-2">
-          {[1, 2, 3].map(s => (
-            <div key={s} className={cn(
-              'h-2 flex-1 rounded-full transition-colors',
-              s <= step ? 'bg-secondary' : 'bg-border'
-            )} />
+          {[1, 2, 3].map((s) => (
+            <div
+              key={s}
+              className={cn(
+                'h-2 flex-1 rounded-full transition-colors',
+                s <= step ? 'bg-secondary' : 'bg-border'
+              )}
+            />
           ))}
         </div>
 
         {step === 1 && (
           <div className="space-y-4">
             <div className="rounded-lg border border-border bg-surface p-4">
-              <p className="text-xs text-text-muted uppercase tracking-wider mb-3">Shift Summary — {today}</p>
+              <p className="text-xs text-text-muted uppercase tracking-wider mb-3">
+                Shift Summary — {today}
+              </p>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-text-secondary">Cash Payments</span>
-                  <span className="font-mono font-medium text-text-primary">${systemCash.toFixed(2)}</span>
+                  <span className="font-mono font-medium text-text-primary">
+                    ${systemCash.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-text-secondary">Card Payments</span>
-                  <span className="font-mono font-medium text-text-primary">${systemCard.toFixed(2)}</span>
+                  <span className="font-mono font-medium text-text-primary">
+                    ${systemCard.toFixed(2)}
+                  </span>
                 </div>
                 <div className="border-t border-border pt-2 flex justify-between text-sm font-semibold">
                   <span className="text-text-primary">System Total</span>
@@ -777,12 +972,15 @@ function ShiftCloseModal({ onClose, transactions }) {
             <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 flex gap-2">
               <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
               <p className="text-xs text-text-secondary">
-                Closing a shift is irreversible. Ensure all payments are posted and folios are balanced before proceeding.
+                Closing a shift is irreversible. Ensure all payments are posted and folios are
+                balanced before proceeding.
               </p>
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
               <Button type="button" variant="secondary" onClick={() => setStep(2)}>
                 Begin Count <ArrowRightLeft className="ml-1.5 h-4 w-4" />
               </Button>
@@ -796,7 +994,9 @@ function ShiftCloseModal({ onClose, transactions }) {
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="h-4 w-4 text-accent" />
-                  <span className="text-xs font-medium text-text-secondary uppercase">Cash Drawer</span>
+                  <span className="text-xs font-medium text-text-secondary uppercase">
+                    Cash Drawer
+                  </span>
                 </div>
                 <p className="text-xs text-text-muted mb-1">System: ${systemCash.toFixed(2)}</p>
                 <div className="relative">
@@ -811,8 +1011,15 @@ function ShiftCloseModal({ onClose, transactions }) {
                   />
                 </div>
                 {cashCount && (
-                  <p className={cn('mt-1 text-xs font-mono', Math.abs(cashDiff) < 0.01 ? 'text-secondary' : 'text-danger')}>
-                    {Math.abs(cashDiff) < 0.01 ? '✓ Balanced' : `Diff: ${cashDiff > 0 ? '+' : ''}$${cashDiff.toFixed(2)}`}
+                  <p
+                    className={cn(
+                      'mt-1 text-xs font-mono',
+                      Math.abs(cashDiff) < 0.01 ? 'text-secondary' : 'text-danger'
+                    )}
+                  >
+                    {Math.abs(cashDiff) < 0.01
+                      ? '✓ Balanced'
+                      : `Diff: ${cashDiff > 0 ? '+' : ''}$${cashDiff.toFixed(2)}`}
                   </p>
                 )}
               </div>
@@ -820,7 +1027,9 @@ function ShiftCloseModal({ onClose, transactions }) {
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <CreditCard className="h-4 w-4 text-info" />
-                  <span className="text-xs font-medium text-text-secondary uppercase">Card Batch</span>
+                  <span className="text-xs font-medium text-text-secondary uppercase">
+                    Card Batch
+                  </span>
                 </div>
                 <p className="text-xs text-text-muted mb-1">System: ${systemCard.toFixed(2)}</p>
                 <div className="relative">
@@ -835,15 +1044,24 @@ function ShiftCloseModal({ onClose, transactions }) {
                   />
                 </div>
                 {cardCount && (
-                  <p className={cn('mt-1 text-xs font-mono', Math.abs(cardDiff) < 0.01 ? 'text-secondary' : 'text-danger')}>
-                    {Math.abs(cardDiff) < 0.01 ? '✓ Balanced' : `Diff: ${cardDiff > 0 ? '+' : ''}$${cardDiff.toFixed(2)}`}
+                  <p
+                    className={cn(
+                      'mt-1 text-xs font-mono',
+                      Math.abs(cardDiff) < 0.01 ? 'text-secondary' : 'text-danger'
+                    )}
+                  >
+                    {Math.abs(cardDiff) < 0.01
+                      ? '✓ Balanced'
+                      : `Diff: ${cardDiff > 0 ? '+' : ''}$${cardDiff.toFixed(2)}`}
                   </p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Shift Notes</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Shift Notes
+              </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -854,7 +1072,9 @@ function ShiftCloseModal({ onClose, transactions }) {
             </div>
 
             <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => setStep(1)}>Back</Button>
+              <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                Back
+              </Button>
               <Button type="button" variant="secondary" onClick={() => setStep(3)}>
                 Review & Close <Lock className="ml-1.5 h-4 w-4" />
               </Button>
@@ -868,7 +1088,8 @@ function ShiftCloseModal({ onClose, transactions }) {
               <Check className="mx-auto h-8 w-8 text-secondary mb-2" />
               <p className="text-sm font-medium text-text-primary">Ready to Close Shift</p>
               <p className="text-xs text-text-muted mt-1">
-                Cash: ${(parseFloat(cashCount) || 0).toFixed(2)} · Card: ${(parseFloat(cardCount) || 0).toFixed(2)}
+                Cash: ${(parseFloat(cashCount) || 0).toFixed(2)} · Card: $
+                {(parseFloat(cardCount) || 0).toFixed(2)}
               </p>
               {notes && (
                 <p className="mt-2 text-xs text-text-secondary italic border-t border-border pt-2">
@@ -878,7 +1099,9 @@ function ShiftCloseModal({ onClose, transactions }) {
             </div>
 
             <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => setStep(2)}>Back</Button>
+              <Button type="button" variant="outline" onClick={() => setStep(2)}>
+                Back
+              </Button>
               <Button
                 type="button"
                 variant="secondary"

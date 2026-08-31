@@ -70,7 +70,9 @@ export default function PlanDistribution({ data }) {
             ))}
             <div className="border-t border-border pt-2 flex items-center justify-between">
               <span className="text-xs text-text-muted">Total</span>
-              <span className="text-sm font-mono font-bold text-text-primary">{total.toLocaleString()}</span>
+              <span className="text-sm font-mono font-bold text-text-primary">
+                {total.toLocaleString()}
+              </span>
             </div>
           </div>
         </div>

@@ -1,8 +1,15 @@
 /* src/app/guest-portal/support/contact/page.jsx */
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Phone, Mail, MessageSquare, MapPin, Clock,
-  ExternalLink, Copy, Check
+  ChevronLeft,
+  Phone,
+  Mail,
+  MessageSquare,
+  MapPin,
+  Clock,
+  ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../../../lib/utils';
@@ -75,10 +82,7 @@ export default function ContactPage() {
         {contactMethods.map((method) => {
           const Icon = method.icon;
           return (
-            <div
-              key={method.label}
-              className="rounded-xl border border-border bg-surface p-5"
-            >
+            <div key={method.label} className="rounded-xl border border-border bg-surface p-5">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/10">
                   <Icon className="h-6 w-6 text-secondary" />
@@ -93,7 +97,11 @@ export default function ContactPage() {
                   <p className="text-xs text-text-muted mt-0.5">{method.description}</p>
                   <div className="mt-3 flex items-center gap-2">
                     <button
-                      onClick={() => method.internal ? navigate(method.action) : window.open(method.action, '_blank')}
+                      onClick={() =>
+                        method.internal
+                          ? navigate(method.action)
+                          : window.open(method.action, '_blank')
+                      }
                       className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white hover:bg-secondary/90 transition-colors"
                     >
                       {method.value}
@@ -103,7 +111,11 @@ export default function ContactPage() {
                       onClick={() => copyToClipboard(method.value, method.label)}
                       className="p-2 rounded-lg hover:bg-surface-elevated text-text-muted"
                     >
-                      {copied === method.label ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4" />}
+                      {copied === method.label ? (
+                        <Check className="h-4 w-4 text-accent" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -139,7 +151,9 @@ export default function ContactPage() {
           <div className="text-center">
             <MapPin className="h-8 w-8 text-secondary mx-auto mb-2" />
             <p className="text-xs text-text-muted">Interactive map</p>
-            <p className="text-[10px] text-text-muted">{hotelInfo.coordinates.lat}, {hotelInfo.coordinates.lng}</p>
+            <p className="text-[10px] text-text-muted">
+              {hotelInfo.coordinates.lat}, {hotelInfo.coordinates.lng}
+            </p>
           </div>
         </div>
       </div>

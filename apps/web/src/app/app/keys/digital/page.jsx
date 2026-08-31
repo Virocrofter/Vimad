@@ -2,13 +2,53 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  KeyRound, Smartphone, Nfc, Bluetooth, QrCode, Clock, Search,
-  Filter, Plus, X, MoreHorizontal, ArrowRightLeft, History,
-  User, DoorOpen, Lock, Unlock, Shield, TrendingUp, AlertCircle,
-  Calendar, MapPin, Tag, ChevronDown, ChevronUp, Download,
-  RefreshCw, Eye, Edit3, Trash2, Copy, Check, CheckCircle2,
-  XCircle, Send, RotateCcw, Battery, BatteryLow, BatteryMedium,
-  BatteryFull, Wifi, WifiOff, Ban, Play, Pause, Mail, MessageSquare
+  KeyRound,
+  Smartphone,
+  Nfc,
+  Bluetooth,
+  QrCode,
+  Clock,
+  Search,
+  Filter,
+  Plus,
+  X,
+  MoreHorizontal,
+  ArrowRightLeft,
+  History,
+  User,
+  DoorOpen,
+  Lock,
+  Unlock,
+  Shield,
+  TrendingUp,
+  AlertCircle,
+  Calendar,
+  MapPin,
+  Tag,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  RefreshCw,
+  Eye,
+  Edit3,
+  Trash2,
+  Copy,
+  Check,
+  CheckCircle2,
+  XCircle,
+  Send,
+  RotateCcw,
+  Battery,
+  BatteryLow,
+  BatteryMedium,
+  BatteryFull,
+  Wifi,
+  WifiOff,
+  Ban,
+  Play,
+  Pause,
+  Mail,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -42,7 +82,12 @@ const digitalKeys = [
     location: 'On-property',
     notes: 'Anniversary stay. Late checkout approved.',
     history: [
-      { action: 'issued', by: 'Sarah J.', time: '2026-08-12 15:30', note: 'Check-in — mobile key activated' },
+      {
+        action: 'issued',
+        by: 'Sarah J.',
+        time: '2026-08-12 15:30',
+        note: 'Check-in — mobile key activated',
+      },
       { action: 'used', by: 'System', time: '2026-08-12 15:35', note: 'First unlock — Room 204' },
       { action: 'used', by: 'System', time: '2026-08-15 08:45', note: 'Unlock — Room 204' },
     ],
@@ -73,7 +118,12 @@ const digitalKeys = [
     location: 'On-property',
     notes: 'Lifetime Platinum. VIP amenities.',
     history: [
-      { action: 'issued', by: 'Sarah J.', time: '2026-08-13 14:00', note: 'Check-in — Bluetooth key issued' },
+      {
+        action: 'issued',
+        by: 'Sarah J.',
+        time: '2026-08-13 14:00',
+        note: 'Check-in — Bluetooth key issued',
+      },
       { action: 'used', by: 'System', time: '2026-08-13 14:05', note: 'First unlock — Room 205' },
       { action: 'used', by: 'System', time: '2026-08-15 09:12', note: 'Unlock — Room 205' },
     ],
@@ -104,9 +154,19 @@ const digitalKeys = [
     location: 'Off-property',
     notes: 'Short stay. Key expired on checkout.',
     history: [
-      { action: 'issued', by: 'Mike C.', time: '2026-08-10 16:00', note: 'Check-in — NFC key issued' },
+      {
+        action: 'issued',
+        by: 'Mike C.',
+        time: '2026-08-10 16:00',
+        note: 'Check-in — NFC key issued',
+      },
       { action: 'used', by: 'System', time: '2026-08-10 16:05', note: 'First unlock — Room 302' },
-      { action: 'expired', by: 'System', time: '2026-08-12 11:00', note: 'Key expired — checkout time' },
+      {
+        action: 'expired',
+        by: 'System',
+        time: '2026-08-12 11:00',
+        note: 'Key expired — checkout time',
+      },
     ],
   },
   {
@@ -135,9 +195,19 @@ const digitalKeys = [
     location: 'Unknown',
     notes: 'No-show. Key revoked after 24h.',
     history: [
-      { action: 'issued', by: 'Sarah J.', time: '2026-08-10 15:00', note: 'Check-in — QR code key issued' },
+      {
+        action: 'issued',
+        by: 'Sarah J.',
+        time: '2026-08-10 15:00',
+        note: 'Check-in — QR code key issued',
+      },
       { action: 'used', by: 'System', time: '2026-08-10 15:05', note: 'First unlock — Room 118' },
-      { action: 'revoked', by: 'Sarah J.', time: '2026-08-11 15:00', note: 'No-show — key revoked after 24h' },
+      {
+        action: 'revoked',
+        by: 'Sarah J.',
+        time: '2026-08-11 15:00',
+        note: 'No-show — key revoked after 24h',
+      },
     ],
   },
   {
@@ -166,7 +236,12 @@ const digitalKeys = [
     location: 'Not activated',
     notes: 'Influencer partner. Room photo-ready.',
     history: [
-      { action: 'created', by: 'Manager', time: '2026-08-12 10:00', note: 'Key pre-issued — awaiting guest activation' },
+      {
+        action: 'created',
+        by: 'Manager',
+        time: '2026-08-12 10:00',
+        note: 'Key pre-issued — awaiting guest activation',
+      },
     ],
   },
   {
@@ -195,7 +270,12 @@ const digitalKeys = [
     location: 'On-property',
     notes: 'Waitlist upgrade. Early check-in.',
     history: [
-      { action: 'issued', by: 'Sarah J.', time: '2026-08-18 14:30', note: 'Check-in — Bluetooth key issued' },
+      {
+        action: 'issued',
+        by: 'Sarah J.',
+        time: '2026-08-18 14:30',
+        note: 'Check-in — Bluetooth key issued',
+      },
       { action: 'used', by: 'System', time: '2026-08-18 20:00', note: 'First unlock — Room 201' },
     ],
   },
@@ -225,7 +305,12 @@ const digitalKeys = [
     location: 'On-property',
     notes: 'Housekeeping master — Floor 1-3 access.',
     history: [
-      { action: 'issued', by: 'James L.', time: '2026-08-15 07:00', note: 'Shift start — master key activated' },
+      {
+        action: 'issued',
+        by: 'James L.',
+        time: '2026-08-15 07:00',
+        note: 'Shift start — master key activated',
+      },
       { action: 'used', by: 'System', time: '2026-08-15 07:05', note: 'Unlock — Room 101' },
       { action: 'used', by: 'System', time: '2026-08-15 14:30', note: 'Unlock — Room 305' },
     ],
@@ -256,7 +341,12 @@ const digitalKeys = [
     location: 'On-property',
     notes: 'Maintenance access — all service areas.',
     history: [
-      { action: 'issued', by: 'Manager', time: '2026-08-15 08:00', note: 'Shift start — service key activated' },
+      {
+        action: 'issued',
+        by: 'Manager',
+        time: '2026-08-15 08:00',
+        note: 'Shift start — service key activated',
+      },
       { action: 'used', by: 'System', time: '2026-08-15 11:00', note: 'Unlock — HVAC room' },
     ],
   },
@@ -279,21 +369,55 @@ function timeUntilExpiry(expiresAt) {
 function formatDateTime(dt) {
   if (!dt) return '—';
   const d = new Date(dt);
-  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 /* ─── Status & Protocol Metadata ─── */
 const statusMeta = {
-  active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', icon: CheckCircle2 },
-  expired: { label: 'Expired', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted', icon: Clock },
-  revoked: { label: 'Revoked', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: Ban },
-  pending: { label: 'Pending', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', icon: Clock },
-  suspended: { label: 'Suspended', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', icon: Pause },
+  active: {
+    label: 'Active',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: CheckCircle2,
+  },
+  expired: {
+    label: 'Expired',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+    icon: Clock,
+  },
+  revoked: {
+    label: 'Revoked',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: Ban,
+  },
+  pending: {
+    label: 'Pending',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: Clock,
+  },
+  suspended: {
+    label: 'Suspended',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: Pause,
+  },
 };
 
 const protocolMeta = {
   nfc: { label: 'NFC', icon: Nfc, class: 'bg-info/10 text-info border-info/20' },
-  bluetooth: { label: 'Bluetooth', icon: Bluetooth, class: 'bg-secondary/10 text-secondary border-secondary/20' },
+  bluetooth: {
+    label: 'Bluetooth',
+    icon: Bluetooth,
+    class: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
   qr: { label: 'QR Code', icon: QrCode, class: 'bg-warning/10 text-warning border-warning/20' },
 };
 
@@ -312,12 +436,26 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last week
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last week
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -329,7 +467,12 @@ function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.active;
   const Icon = meta.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -340,7 +483,12 @@ function ProtocolBadge({ protocol }) {
   const meta = protocolMeta[protocol] || protocolMeta.nfc;
   const Icon = meta.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <Icon className="h-3 w-3" /> {meta.label}
     </span>
   );
@@ -349,17 +497,28 @@ function ProtocolBadge({ protocol }) {
 function TypeBadge({ type }) {
   const meta = typeMeta[type] || typeMeta.mobile;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
 }
 
 function BatteryIndicator({ level }) {
-  if (level === null || level === undefined) return <span className="text-xs text-text-muted">—</span>;
+  if (level === null || level === undefined)
+    return <span className="text-xs text-text-muted">—</span>;
   const Icon = level <= 20 ? BatteryLow : level <= 50 ? BatteryMedium : BatteryFull;
   return (
-    <span className={cn('inline-flex items-center gap-1 text-xs font-medium', level <= 20 ? 'text-danger' : level <= 50 ? 'text-warning' : 'text-accent')}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 text-xs font-medium',
+        level <= 20 ? 'text-danger' : level <= 50 ? 'text-warning' : 'text-accent'
+      )}
+    >
       <Icon className="h-3.5 w-3.5" /> {level}%
     </span>
   );
@@ -408,7 +567,9 @@ function IssueKeyModal({ onClose, onIssue }) {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-text-primary">Issue Digital Key</h3>
-            <p className="text-xs text-text-muted">Create and send a new mobile key to a guest or staff member</p>
+            <p className="text-xs text-text-muted">
+              Create and send a new mobile key to a guest or staff member
+            </p>
           </div>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
             <X className="h-5 w-5" />
@@ -418,7 +579,9 @@ function IssueKeyModal({ onClose, onIssue }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Guest / Staff Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Guest / Staff Name
+              </label>
               <input
                 type="text"
                 required
@@ -429,7 +592,9 @@ function IssueKeyModal({ onClose, onIssue }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Room</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Room
+              </label>
               <input
                 type="text"
                 required
@@ -443,7 +608,9 @@ function IssueKeyModal({ onClose, onIssue }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Email</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Email
+              </label>
               <input
                 type="email"
                 required
@@ -454,7 +621,9 @@ function IssueKeyModal({ onClose, onIssue }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Phone</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Phone
+              </label>
               <input
                 type="tel"
                 value={form.phone}
@@ -467,7 +636,9 @@ function IssueKeyModal({ onClose, onIssue }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Key Type</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Key Type
+              </label>
               <select
                 value={form.keyType}
                 onChange={(e) => update('keyType', e.target.value)}
@@ -478,7 +649,9 @@ function IssueKeyModal({ onClose, onIssue }) {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Protocol</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Protocol
+              </label>
               <select
                 value={form.protocol}
                 onChange={(e) => update('protocol', e.target.value)}
@@ -492,7 +665,9 @@ function IssueKeyModal({ onClose, onIssue }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Expiry Date & Time</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Expiry Date & Time
+            </label>
             <input
               type="datetime-local"
               required
@@ -503,23 +678,48 @@ function IssueKeyModal({ onClose, onIssue }) {
           </div>
 
           <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">Security Options</p>
+            <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Security Options
+            </p>
             <label className="flex items-center justify-between text-sm text-text-primary cursor-pointer">
-              <span className="flex items-center gap-2"><Wifi className="h-4 w-4 text-text-muted" /> Offline Access</span>
-              <input type="checkbox" checked={form.offlineAccess} onChange={(e) => update('offlineAccess', e.target.checked)} className="h-4 w-4 rounded border-border text-secondary focus:ring-ring" />
+              <span className="flex items-center gap-2">
+                <Wifi className="h-4 w-4 text-text-muted" /> Offline Access
+              </span>
+              <input
+                type="checkbox"
+                checked={form.offlineAccess}
+                onChange={(e) => update('offlineAccess', e.target.checked)}
+                className="h-4 w-4 rounded border-border text-secondary focus:ring-ring"
+              />
             </label>
             <label className="flex items-center justify-between text-sm text-text-primary cursor-pointer">
-              <span className="flex items-center gap-2"><Lock className="h-4 w-4 text-text-muted" /> PIN Fallback</span>
-              <input type="checkbox" checked={form.pinFallback} onChange={(e) => update('pinFallback', e.target.checked)} className="h-4 w-4 rounded border-border text-secondary focus:ring-ring" />
+              <span className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-text-muted" /> PIN Fallback
+              </span>
+              <input
+                type="checkbox"
+                checked={form.pinFallback}
+                onChange={(e) => update('pinFallback', e.target.checked)}
+                className="h-4 w-4 rounded border-border text-secondary focus:ring-ring"
+              />
             </label>
             <label className="flex items-center justify-between text-sm text-text-primary cursor-pointer">
-              <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-text-muted" /> Require Biometrics</span>
-              <input type="checkbox" checked={form.biometricsRequired} onChange={(e) => update('biometricsRequired', e.target.checked)} className="h-4 w-4 rounded border-border text-secondary focus:ring-ring" />
+              <span className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-text-muted" /> Require Biometrics
+              </span>
+              <input
+                type="checkbox"
+                checked={form.biometricsRequired}
+                onChange={(e) => update('biometricsRequired', e.target.checked)}
+                className="h-4 w-4 rounded border-border text-secondary focus:ring-ring"
+              />
             </label>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Notes</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Notes
+            </label>
             <textarea
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
@@ -530,7 +730,9 @@ function IssueKeyModal({ onClose, onIssue }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Send className="mr-1.5 h-4 w-4" /> Issue & Send Key
             </Button>
@@ -572,26 +774,43 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-lg border',
-                keyItem.status === 'active' ? 'bg-accent/10 border-accent/30' :
-                keyItem.status === 'expired' ? 'bg-neutral/10 border-neutral/30' :
-                keyItem.status === 'revoked' ? 'bg-danger/10 border-danger/30' :
-                'bg-warning/10 border-warning/30'
-              )}>
-                <KeyRound className={cn('h-5 w-5',
-                  keyItem.status === 'active' ? 'text-accent' :
-                  keyItem.status === 'expired' ? 'text-text-muted' :
-                  keyItem.status === 'revoked' ? 'text-danger' :
-                  'text-warning'
-                )} />
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg border',
+                  keyItem.status === 'active'
+                    ? 'bg-accent/10 border-accent/30'
+                    : keyItem.status === 'expired'
+                      ? 'bg-neutral/10 border-neutral/30'
+                      : keyItem.status === 'revoked'
+                        ? 'bg-danger/10 border-danger/30'
+                        : 'bg-warning/10 border-warning/30'
+                )}
+              >
+                <KeyRound
+                  className={cn(
+                    'h-5 w-5',
+                    keyItem.status === 'active'
+                      ? 'text-accent'
+                      : keyItem.status === 'expired'
+                        ? 'text-text-muted'
+                        : keyItem.status === 'revoked'
+                          ? 'text-danger'
+                          : 'text-warning'
+                  )}
+                />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{keyItem.label}</h2>
-                <p className="text-xs text-text-muted">{keyItem.id} · <ProtocolBadge protocol={keyItem.protocol} /> · <TypeBadge type={keyItem.type} /></p>
+                <p className="text-xs text-text-muted">
+                  {keyItem.id} · <ProtocolBadge protocol={keyItem.protocol} /> ·{' '}
+                  <TypeBadge type={keyItem.type} />
+                </p>
               </div>
             </div>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -599,10 +818,12 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
           <div className="mt-3 flex items-center gap-2">
             <StatusBadge status={keyItem.status} />
             {expiryInfo && (
-              <span className={cn(
-                'text-xs font-medium',
-                expiryInfo.urgent ? 'text-danger' : 'text-text-muted'
-              )}>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  expiryInfo.urgent ? 'text-danger' : 'text-text-muted'
+                )}
+              >
                 {expiryInfo.text}
               </span>
             )}
@@ -619,7 +840,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -637,19 +860,30 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] text-text-muted uppercase tracking-wider">Use Count</p>
-                  <p className="mt-1 text-lg font-bold font-mono text-text-primary">{keyItem.useCount}</p>
+                  <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                    {keyItem.useCount}
+                  </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] text-text-muted uppercase tracking-wider">Last Used</p>
-                  <p className="mt-1 text-sm font-medium text-text-primary">{formatDateTime(keyItem.lastUsed)}</p>
+                  <p className="mt-1 text-sm font-medium text-text-primary">
+                    {formatDateTime(keyItem.lastUsed)}
+                  </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] text-text-muted uppercase tracking-wider">Issued</p>
-                  <p className="mt-1 text-sm font-medium text-text-primary">{formatDateTime(keyItem.issuedAt)}</p>
+                  <p className="mt-1 text-sm font-medium text-text-primary">
+                    {formatDateTime(keyItem.issuedAt)}
+                  </p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] text-text-muted uppercase tracking-wider">Expires</p>
-                  <p className={cn('mt-1 text-sm font-medium', expiryInfo?.urgent ? 'text-danger' : 'text-text-primary')}>
+                  <p
+                    className={cn(
+                      'mt-1 text-sm font-medium',
+                      expiryInfo?.urgent ? 'text-danger' : 'text-text-primary'
+                    )}
+                  >
                     {formatDateTime(keyItem.expiresAt)}
                   </p>
                 </div>
@@ -658,7 +892,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
               {/* Device Info */}
               {keyItem.deviceName && (
                 <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">Device Information</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                    Device Information
+                  </h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2 text-text-secondary">
                       <Smartphone className="h-4 w-4 text-text-muted" />
@@ -682,7 +918,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
 
               {/* Room Info */}
               <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">Access Details</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                  Access Details
+                </h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2 text-text-secondary">
                     <DoorOpen className="h-4 w-4 text-text-muted" />
@@ -705,12 +943,18 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
 
               {/* Security Features */}
               <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">Security Features</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                  Security Features
+                </h3>
                 <div className="space-y-2">
                   {[
                     { label: 'Offline Access', enabled: keyItem.offlineAccess, icon: Wifi },
                     { label: 'PIN Fallback', enabled: keyItem.pinFallback, icon: Lock },
-                    { label: 'Biometrics Required', enabled: keyItem.biometricsRequired, icon: Shield },
+                    {
+                      label: 'Biometrics Required',
+                      enabled: keyItem.biometricsRequired,
+                      icon: Shield,
+                    },
                   ].map((feat) => (
                     <div key={feat.label} className="flex items-center justify-between">
                       <span className="flex items-center gap-2 text-sm text-text-secondary">
@@ -743,7 +987,12 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                   <Button variant="outline" size="sm" onClick={handleExtend}>
                     <Calendar className="mr-1.5 h-4 w-4" /> Extend Expiry
                   </Button>
-                  <Button variant="outline" size="sm" className="text-danger border-danger/30 hover:bg-danger/10" onClick={() => setShowRevokeConfirm(true)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-danger border-danger/30 hover:bg-danger/10"
+                    onClick={() => setShowRevokeConfirm(true)}
+                  >
                     <Ban className="mr-1.5 h-4 w-4" /> Revoke Key
                   </Button>
                 </div>
@@ -754,7 +1003,12 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                   <Button variant="secondary" size="sm">
                     <Mail className="mr-1.5 h-4 w-4" /> Resend Activation Email
                   </Button>
-                  <Button variant="outline" size="sm" className="text-danger border-danger/30 hover:bg-danger/10" onClick={() => setShowRevokeConfirm(true)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-danger border-danger/30 hover:bg-danger/10"
+                    onClick={() => setShowRevokeConfirm(true)}
+                  >
                     <Ban className="mr-1.5 h-4 w-4" /> Cancel Key
                   </Button>
                 </div>
@@ -775,17 +1029,25 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
             <div className="space-y-3">
               {keyItem.history.map((entry, i) => (
                 <div key={i} className="flex gap-3 rounded-lg border border-border bg-surface p-3">
-                  <div className={cn(
-                    'mt-0.5 h-2 w-2 rounded-full shrink-0',
-                    entry.action === 'issued' || entry.action === 'created' ? 'bg-accent' :
-                    entry.action === 'used' ? 'bg-secondary' :
-                    entry.action === 'expired' ? 'bg-text-muted' :
-                    entry.action === 'revoked' ? 'bg-danger' :
-                    'bg-info'
-                  )} />
+                  <div
+                    className={cn(
+                      'mt-0.5 h-2 w-2 rounded-full shrink-0',
+                      entry.action === 'issued' || entry.action === 'created'
+                        ? 'bg-accent'
+                        : entry.action === 'used'
+                          ? 'bg-secondary'
+                          : entry.action === 'expired'
+                            ? 'bg-text-muted'
+                            : entry.action === 'revoked'
+                              ? 'bg-danger'
+                              : 'bg-info'
+                    )}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-text-primary capitalize">{entry.action.replace('_', ' ')}</p>
+                      <p className="text-sm font-medium text-text-primary capitalize">
+                        {entry.action.replace('_', ' ')}
+                      </p>
                       <span className="text-xs text-text-muted">{entry.time}</span>
                     </div>
                     <p className="text-xs text-text-secondary mt-0.5">{entry.note}</p>
@@ -794,7 +1056,9 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
                 </div>
               ))}
               {keyItem.history.length === 0 && (
-                <div className="text-center py-8 text-text-muted text-sm">No history available.</div>
+                <div className="text-center py-8 text-text-muted text-sm">
+                  No history available.
+                </div>
               )}
             </div>
           )}
@@ -804,7 +1068,10 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
       {/* Revoke Confirmation */}
       {showRevokeConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowRevokeConfirm(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowRevokeConfirm(false)}
+          />
           <div className="relative w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl">
             <div className="text-center space-y-3">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-danger/10">
@@ -812,11 +1079,22 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
               </div>
               <h3 className="text-lg font-bold text-text-primary">Revoke Key</h3>
               <p className="text-sm text-text-secondary">
-                This will immediately disable {keyItem.guest}'s access to Room {keyItem.room}. This action cannot be undone.
+                This will immediately disable {keyItem.guest}'s access to Room {keyItem.room}. This
+                action cannot be undone.
               </p>
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowRevokeConfirm(false)}>Cancel</Button>
-                <Button variant="secondary" className="flex-1 text-danger border-danger/30 hover:bg-danger/10" onClick={handleRevoke}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowRevokeConfirm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="flex-1 text-danger border-danger/30 hover:bg-danger/10"
+                  onClick={handleRevoke}
+                >
                   <Ban className="mr-1.5 h-4 w-4" /> Revoke
                 </Button>
               </div>
@@ -843,7 +1121,8 @@ export default function DigitalKeysPage() {
   /* ─── Computed Data ─── */
   const filteredKeys = useMemo(() => {
     return keys.filter((k) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         k.label.toLowerCase().includes(query.toLowerCase()) ||
         k.id.toLowerCase().includes(query.toLowerCase()) ||
         k.guest.toLowerCase().includes(query.toLowerCase()) ||
@@ -873,27 +1152,45 @@ export default function DigitalKeysPage() {
   };
 
   const handleUpdateStatus = (id, action) => {
-    setKeys((prev) => prev.map((k) => {
-      if (k.id !== id) return k;
-      if (action === 'revoked') {
-        return {
-          ...k,
-          status: 'revoked',
-          history: [...k.history, { action: 'revoked', by: 'You', time: new Date().toISOString(), note: 'Key manually revoked' }],
-        };
-      }
-      if (action === 'extended') {
-        const newExpiry = new Date(k.expiresAt);
-        newExpiry.setDate(newExpiry.getDate() + 1);
-        return {
-          ...k,
-          status: 'active',
-          expiresAt: newExpiry.toISOString(),
-          history: [...k.history, { action: 'extended', by: 'You', time: new Date().toISOString(), note: 'Expiry extended by 24 hours' }],
-        };
-      }
-      return k;
-    }));
+    setKeys((prev) =>
+      prev.map((k) => {
+        if (k.id !== id) return k;
+        if (action === 'revoked') {
+          return {
+            ...k,
+            status: 'revoked',
+            history: [
+              ...k.history,
+              {
+                action: 'revoked',
+                by: 'You',
+                time: new Date().toISOString(),
+                note: 'Key manually revoked',
+              },
+            ],
+          };
+        }
+        if (action === 'extended') {
+          const newExpiry = new Date(k.expiresAt);
+          newExpiry.setDate(newExpiry.getDate() + 1);
+          return {
+            ...k,
+            status: 'active',
+            expiresAt: newExpiry.toISOString(),
+            history: [
+              ...k.history,
+              {
+                action: 'extended',
+                by: 'You',
+                time: new Date().toISOString(),
+                note: 'Expiry extended by 24 hours',
+              },
+            ],
+          };
+        }
+        return k;
+      })
+    );
   };
 
   /* ─── Render ─── */
@@ -903,7 +1200,9 @@ export default function DigitalKeysPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Digital Keys</h1>
-          <p className="text-sm text-text-secondary">Mobile key issuance, NFC/Bluetooth access, and expiry management</p>
+          <p className="text-sm text-text-secondary">
+            Mobile key issuance, NFC/Bluetooth access, and expiry management
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -965,7 +1264,9 @@ export default function DigitalKeysPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -1015,7 +1316,12 @@ export default function DigitalKeysPage() {
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => { setStatusFilter('all'); setProtocolFilter('all'); setTypeFilter('all'); setQuery(''); }}
+                onClick={() => {
+                  setStatusFilter('all');
+                  setProtocolFilter('all');
+                  setTypeFilter('all');
+                  setQuery('');
+                }}
                 className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
               >
                 Reset Filters
@@ -1027,7 +1333,8 @@ export default function DigitalKeysPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredKeys.length}</span> of {keys.length} digital keys
+        Showing <span className="font-medium text-text-primary">{filteredKeys.length}</span> of{' '}
+        {keys.length} digital keys
       </p>
 
       {/* Keys Table */}
@@ -1036,13 +1343,27 @@ export default function DigitalKeysPage() {
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Key</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Protocol</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Guest / Staff</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Expiry</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Uses</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Device</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Key
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Protocol
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Guest / Staff
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Expiry
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Uses
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Device
+                </th>
                 <th className="px-4 py-3 w-16"></th>
               </tr>
             </thead>
@@ -1057,42 +1378,66 @@ export default function DigitalKeysPage() {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          'flex h-8 w-8 items-center justify-center rounded-lg border',
-                          keyItem.status === 'active' ? 'bg-accent/10 border-accent/30' :
-                          keyItem.status === 'pending' ? 'bg-warning/10 border-warning/30' :
-                          keyItem.status === 'expired' ? 'bg-neutral/10 border-neutral/30' :
-                          'bg-danger/10 border-danger/30'
-                        )}>
-                          <KeyRound className={cn('h-4 w-4',
-                            keyItem.status === 'active' ? 'text-accent' :
-                            keyItem.status === 'pending' ? 'text-warning' :
-                            keyItem.status === 'expired' ? 'text-text-muted' :
-                            'text-danger'
-                          )} />
+                        <div
+                          className={cn(
+                            'flex h-8 w-8 items-center justify-center rounded-lg border',
+                            keyItem.status === 'active'
+                              ? 'bg-accent/10 border-accent/30'
+                              : keyItem.status === 'pending'
+                                ? 'bg-warning/10 border-warning/30'
+                                : keyItem.status === 'expired'
+                                  ? 'bg-neutral/10 border-neutral/30'
+                                  : 'bg-danger/10 border-danger/30'
+                          )}
+                        >
+                          <KeyRound
+                            className={cn(
+                              'h-4 w-4',
+                              keyItem.status === 'active'
+                                ? 'text-accent'
+                                : keyItem.status === 'pending'
+                                  ? 'text-warning'
+                                  : keyItem.status === 'expired'
+                                    ? 'text-text-muted'
+                                    : 'text-danger'
+                            )}
+                          />
                         </div>
                         <div>
-                          <p className="font-medium text-text-primary group-hover:text-secondary transition-colors">{keyItem.label}</p>
+                          <p className="font-medium text-text-primary group-hover:text-secondary transition-colors">
+                            {keyItem.label}
+                          </p>
                           <p className="text-xs text-text-muted">{keyItem.id}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3"><ProtocolBadge protocol={keyItem.protocol} /></td>
-                    <td className="px-4 py-3"><StatusBadge status={keyItem.status} /></td>
+                    <td className="px-4 py-3">
+                      <ProtocolBadge protocol={keyItem.protocol} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={keyItem.status} />
+                    </td>
                     <td className="px-4 py-3">
                       <div className="text-text-secondary text-xs">{keyItem.guest}</div>
                       <div className="text-text-muted text-[10px]">{keyItem.email}</div>
                     </td>
                     <td className="px-4 py-3">
                       {expiryInfo ? (
-                        <span className={cn('text-xs font-medium', expiryInfo.urgent ? 'text-danger' : 'text-text-muted')}>
+                        <span
+                          className={cn(
+                            'text-xs font-medium',
+                            expiryInfo.urgent ? 'text-danger' : 'text-text-muted'
+                          )}
+                        >
                           {expiryInfo.text}
                         </span>
                       ) : (
                         <span className="text-xs text-text-muted">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-text-primary">{keyItem.useCount}</td>
+                    <td className="px-4 py-3 text-right font-mono text-text-primary">
+                      {keyItem.useCount}
+                    </td>
                     <td className="px-4 py-3">
                       {keyItem.deviceName ? (
                         <div className="text-xs text-text-secondary">
@@ -1100,7 +1445,9 @@ export default function DigitalKeysPage() {
                             <Smartphone className="h-3 w-3 text-text-muted" />
                             {keyItem.deviceName}
                           </div>
-                          <div className="text-text-muted text-[10px] mt-0.5"><BatteryIndicator level={keyItem.batteryLevel} /></div>
+                          <div className="text-text-muted text-[10px] mt-0.5">
+                            <BatteryIndicator level={keyItem.batteryLevel} />
+                          </div>
                         </div>
                       ) : (
                         <span className="text-xs text-text-muted">Not activated</span>
@@ -1131,10 +1478,7 @@ export default function DigitalKeysPage() {
 
       {/* ─── Modals ─── */}
       {showIssueModal && (
-        <IssueKeyModal
-          onClose={() => setShowIssueModal(false)}
-          onIssue={handleIssue}
-        />
+        <IssueKeyModal onClose={() => setShowIssueModal(false)} onIssue={handleIssue} />
       )}
 
       {selectedKey && (

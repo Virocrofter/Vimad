@@ -23,7 +23,7 @@ export default function NewBlockPage() {
     cutOffDate: '',
     blockType: 'courtesy',
     eventSpace: '',
-    notes: ''
+    notes: '',
   });
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
@@ -52,7 +52,9 @@ export default function NewBlockPage() {
 
   const field = (label, key, type = 'text', placeholder = '') => (
     <div>
-      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">{label}</label>
+      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+        {label}
+      </label>
       <input
         type={type}
         value={form[key]}
@@ -75,7 +77,9 @@ export default function NewBlockPage() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text-primary">New Group Block</h1>
-          <p className="text-sm text-text-secondary">Create a new group reservation or event block</p>
+          <p className="text-sm text-text-secondary">
+            Create a new group reservation or event block
+          </p>
         </div>
       </div>
 
@@ -93,7 +97,9 @@ export default function NewBlockPage() {
             {field('Email', 'email', 'email', 'contact@company.com')}
             {field('Phone', 'phone', 'tel', '+1 (555) 000-0000')}
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Block Type</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Block Type
+              </label>
               <select
                 value={form.blockType}
                 onChange={(e) => update('blockType', e.target.value)}
@@ -113,7 +119,9 @@ export default function NewBlockPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Notes</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Notes
+            </label>
             <textarea
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}

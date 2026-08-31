@@ -2,9 +2,22 @@
 import { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import {
-  Home, Calendar, KeyRound, UtensilsCrossed, CreditCard,
-  Crown, MessageSquare, User, Menu, X, ChevronRight,
-  Bell, LogOut, HelpCircle, Settings, Shield,
+  Home,
+  Calendar,
+  KeyRound,
+  UtensilsCrossed,
+  CreditCard,
+  Crown,
+  MessageSquare,
+  User,
+  Menu,
+  X,
+  ChevronRight,
+  Bell,
+  LogOut,
+  HelpCircle,
+  Settings,
+  Shield,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useGuestStore } from './store';
@@ -30,15 +43,17 @@ export default function GuestPortalLayout() {
   const { guest, logout, notifications, sidebarOpen, toggleSidebar } = useGuestStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className={cn(
-        'fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-surface transition-all duration-300 lg:flex',
-        sidebarOpen ? 'w-64' : 'w-16'
-      )}>
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-surface transition-all duration-300 lg:flex',
+          sidebarOpen ? 'w-64' : 'w-16'
+        )}
+      >
         {/* Logo */}
         <div className="flex h-16 items-center border-b border-border px-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
@@ -52,7 +67,8 @@ export default function GuestPortalLayout() {
         {/* Navigation */}
         <nav className="flex-1 overflow-auto py-4 px-2 space-y-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+            const isActive =
+              location.pathname === item.href || location.pathname.startsWith(item.href + '/');
             return (
               <NavLink
                 key={item.id}
@@ -116,7 +132,8 @@ export default function GuestPortalLayout() {
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface lg:hidden">
         <div className="flex items-center justify-around py-2">
           {navItems.slice(0, 5).map((item) => {
-            const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+            const isActive =
+              location.pathname === item.href || location.pathname.startsWith(item.href + '/');
             return (
               <a
                 key={item.id}
@@ -171,7 +188,10 @@ export default function GuestPortalLayout() {
                 </a>
               ))}
               <button
-                onClick={() => { logout(); setMobileMenuOpen(false); }}
+                onClick={() => {
+                  logout();
+                  setMobileMenuOpen(false);
+                }}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/5"
               >
                 <LogOut className="h-5 w-5" />
@@ -183,12 +203,14 @@ export default function GuestPortalLayout() {
       )}
 
       {/* Main Content */}
-      <main className={cn(
-        'flex-1 transition-all duration-300',
-        'lg:ml-16',
-        sidebarOpen && 'lg:ml-64',
-        'pb-20 lg:pb-0'
-      )}>
+      <main
+        className={cn(
+          'flex-1 transition-all duration-300',
+          'lg:ml-16',
+          sidebarOpen && 'lg:ml-64',
+          'pb-20 lg:pb-0'
+        )}
+      >
         {/* Top Bar */}
         <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md">
           <div className="flex h-16 items-center justify-between px-4 lg:px-6">
@@ -222,7 +244,8 @@ export default function GuestPortalLayout() {
                 className="flex items-center gap-2 rounded-lg border border-border bg-surface px-2 py-1.5 hover:bg-surface-elevated transition-colors"
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                  {guest?.firstName?.[0]}{guest?.lastName?.[0]}
+                  {guest?.firstName?.[0]}
+                  {guest?.lastName?.[0]}
                 </div>
                 <span className="hidden text-sm font-medium text-text-primary sm:block">
                   {guest?.firstName}

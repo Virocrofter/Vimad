@@ -1,7 +1,15 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Plug, CreditCard, Globe, Utensils, Lock,
-  BarChart3, Users, Zap, Check
+  ArrowRight,
+  Plug,
+  CreditCard,
+  Globe,
+  Utensils,
+  Lock,
+  BarChart3,
+  Users,
+  Zap,
+  Check,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -81,13 +89,20 @@ export default function IntegrationsPage() {
             Connect your entire <span className="text-secondary">tech stack</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            50+ pre-built integrations with the tools you already use. No middleware. No custom code.
+            50+ pre-built integrations with the tools you already use. No middleware. No custom
+            code.
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            <Link to="/demo" className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+            <Link
+              to="/demo"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+            >
               Request Demo <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
-            <Link to="/api-docs" className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated">
+            <Link
+              to="/api-docs"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
+            >
               View API Docs
             </Link>
           </div>
@@ -108,7 +123,10 @@ export default function IntegrationsPage() {
                 </div>
                 <div className="space-y-3">
                   {cat.integrations.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2.5">
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2.5"
+                    >
                       <div>
                         <p className="text-sm font-medium text-text-primary">{item.name}</p>
                         <p className="text-xs text-text-muted">{item.desc}</p>
@@ -131,9 +149,13 @@ export default function IntegrationsPage() {
           </div>
           <h2 className="mt-4 text-2xl font-bold text-text-primary">Need a custom integration?</h2>
           <p className="mt-2 text-text-secondary">
-            Our open REST API and webhook system let you build anything. Sandbox environment included.
+            Our open REST API and webhook system let you build anything. Sandbox environment
+            included.
           </p>
-          <Link to="/api-docs" className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90">
+          <Link
+            to="/api-docs"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
+          >
             Explore API Docs <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </div>

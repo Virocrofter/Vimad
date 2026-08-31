@@ -5,7 +5,8 @@ export const systemRoles = [
   {
     id: 'role-super-admin',
     name: 'Super Admin',
-    description: 'Full platform access. Can manage tenants, billing, system settings, and all admin functions.',
+    description:
+      'Full platform access. Can manage tenants, billing, system settings, and all admin functions.',
     type: 'system',
     isDefault: false,
     isLocked: true,
@@ -18,19 +19,30 @@ export const systemRoles = [
   {
     id: 'role-platform-admin',
     name: 'Platform Admin',
-    description: 'Manage tenants, feature flags, health monitoring, and platform-wide settings. No billing access.',
+    description:
+      'Manage tenants, feature flags, health monitoring, and platform-wide settings. No billing access.',
     type: 'system',
     isDefault: false,
     isLocked: true,
     userCount: 8,
     permissions: [
-      'tenant:read', 'tenant:create', 'tenant:update', 'tenant:delete', 'tenant:suspend',
-      'feature_flag:read', 'feature_flag:create', 'feature_flag:update', 'feature_flag:delete',
-      'health:read', 'health:alert:manage',
+      'tenant:read',
+      'tenant:create',
+      'tenant:update',
+      'tenant:delete',
+      'tenant:suspend',
+      'feature_flag:read',
+      'feature_flag:create',
+      'feature_flag:update',
+      'feature_flag:delete',
+      'health:read',
+      'health:alert:manage',
       'analytics:read',
       'audit:read',
-      'user:read', 'user:update',
-      'settings:read', 'settings:update',
+      'user:read',
+      'user:update',
+      'settings:read',
+      'settings:update',
     ],
     createdAt: '2025-01-01',
     updatedAt: '2026-08-10',
@@ -46,8 +58,12 @@ export const systemRoles = [
     userCount: 4,
     permissions: [
       'tenant:read',
-      'billing:read', 'billing:update', 'billing:refund', 'billing:invoice:manage',
-      'analytics:read', 'analytics:revenue',
+      'billing:read',
+      'billing:update',
+      'billing:refund',
+      'billing:invoice:manage',
+      'analytics:read',
+      'analytics:revenue',
       'report:read',
     ],
     createdAt: '2025-01-01',
@@ -57,14 +73,17 @@ export const systemRoles = [
   {
     id: 'role-support-agent',
     name: 'Support Agent',
-    description: 'View tenant details, respond to support tickets, and access read-only health data.',
+    description:
+      'View tenant details, respond to support tickets, and access read-only health data.',
     type: 'system',
     isDefault: false,
     isLocked: false,
     userCount: 12,
     permissions: [
       'tenant:read',
-      'support:read', 'support:update', 'support:escalate',
+      'support:read',
+      'support:update',
+      'support:escalate',
       'health:read',
       'user:read',
     ],
@@ -75,7 +94,8 @@ export const systemRoles = [
   {
     id: 'role-readonly',
     name: 'Read-Only',
-    description: 'View-only access to tenants, analytics, and health dashboards. Cannot modify anything.',
+    description:
+      'View-only access to tenants, analytics, and health dashboards. Cannot modify anything.',
     type: 'system',
     isDefault: true,
     isLocked: true,
@@ -105,10 +125,13 @@ export const customRoles = [
     isLocked: false,
     userCount: 5,
     permissions: [
-      'tenant:read', 'tenant:create', 'tenant:update',
+      'tenant:read',
+      'tenant:create',
+      'tenant:update',
       'tenant:onboarding:manage',
       'feature_flag:read',
-      'support:read', 'support:update',
+      'support:read',
+      'support:update',
       'analytics:read',
     ],
     createdAt: '2026-03-15',
@@ -118,15 +141,18 @@ export const customRoles = [
   {
     id: 'role-custom-security',
     name: 'Security Auditor',
-    description: 'Access to audit logs, security reports, and compliance dashboards. Read-only for most systems.',
+    description:
+      'Access to audit logs, security reports, and compliance dashboards. Read-only for most systems.',
     type: 'custom',
     isDefault: false,
     isLocked: false,
     userCount: 2,
     permissions: [
-      'audit:read', 'audit:export',
+      'audit:read',
+      'audit:export',
       'tenant:read',
-      'security:read', 'security:report',
+      'security:read',
+      'security:report',
       'user:read',
       'health:read',
     ],
@@ -144,11 +170,27 @@ export const permissionCategories = [
     description: 'Manage properties, subscriptions, and tenant lifecycle',
     permissions: [
       { key: 'tenant:read', label: 'View Tenants', description: 'View tenant list and details' },
-      { key: 'tenant:create', label: 'Create Tenants', description: 'Add new tenants to the platform' },
-      { key: 'tenant:update', label: 'Edit Tenants', description: 'Modify tenant settings and plans' },
+      {
+        key: 'tenant:create',
+        label: 'Create Tenants',
+        description: 'Add new tenants to the platform',
+      },
+      {
+        key: 'tenant:update',
+        label: 'Edit Tenants',
+        description: 'Modify tenant settings and plans',
+      },
       { key: 'tenant:delete', label: 'Delete Tenants', description: 'Permanently remove tenants' },
-      { key: 'tenant:suspend', label: 'Suspend/Reactivate', description: 'Pause or restore tenant access' },
-      { key: 'tenant:onboarding:manage', label: 'Onboarding', description: 'Manage onboarding workflows' },
+      {
+        key: 'tenant:suspend',
+        label: 'Suspend/Reactivate',
+        description: 'Pause or restore tenant access',
+      },
+      {
+        key: 'tenant:onboarding:manage',
+        label: 'Onboarding',
+        description: 'Manage onboarding workflows',
+      },
     ],
   },
   {
@@ -156,9 +198,17 @@ export const permissionCategories = [
     label: 'Feature Flags',
     description: 'Control feature rollouts and targeting',
     permissions: [
-      { key: 'feature_flag:read', label: 'View Flags', description: 'View feature flag configurations' },
+      {
+        key: 'feature_flag:read',
+        label: 'View Flags',
+        description: 'View feature flag configurations',
+      },
       { key: 'feature_flag:create', label: 'Create Flags', description: 'Add new feature flags' },
-      { key: 'feature_flag:update', label: 'Edit Flags', description: 'Modify rollout and targeting' },
+      {
+        key: 'feature_flag:update',
+        label: 'Edit Flags',
+        description: 'Modify rollout and targeting',
+      },
       { key: 'feature_flag:delete', label: 'Delete Flags', description: 'Remove feature flags' },
     ],
   },
@@ -170,7 +220,11 @@ export const permissionCategories = [
       { key: 'billing:read', label: 'View Billing', description: 'Access billing dashboards' },
       { key: 'billing:update', label: 'Edit Billing', description: 'Modify subscription details' },
       { key: 'billing:refund', label: 'Process Refunds', description: 'Issue refunds to tenants' },
-      { key: 'billing:invoice:manage', label: 'Manage Invoices', description: 'Create and edit invoices' },
+      {
+        key: 'billing:invoice:manage',
+        label: 'Manage Invoices',
+        description: 'Create and edit invoices',
+      },
     ],
   },
   {
@@ -187,8 +241,16 @@ export const permissionCategories = [
     label: 'Analytics',
     description: 'Platform-wide analytics and reporting',
     permissions: [
-      { key: 'analytics:read', label: 'View Analytics', description: 'Access analytics dashboards' },
-      { key: 'analytics:revenue', label: 'Revenue Reports', description: 'View revenue breakdowns' },
+      {
+        key: 'analytics:read',
+        label: 'View Analytics',
+        description: 'Access analytics dashboards',
+      },
+      {
+        key: 'analytics:revenue',
+        label: 'Revenue Reports',
+        description: 'View revenue breakdowns',
+      },
     ],
   },
   {
@@ -218,7 +280,11 @@ export const permissionCategories = [
     permissions: [
       { key: 'rbac:read', label: 'View RBAC', description: 'View roles and permissions' },
       { key: 'rbac:manage', label: 'Manage RBAC', description: 'Create and edit roles' },
-      { key: 'rbac:api_key:manage', label: 'Manage API Keys', description: 'Create and revoke API keys' },
+      {
+        key: 'rbac:api_key:manage',
+        label: 'Manage API Keys',
+        description: 'Create and revoke API keys',
+      },
       { key: 'rbac:sso:manage', label: 'Manage SSO', description: 'Configure SSO providers' },
     ],
   },
@@ -228,7 +294,11 @@ export const permissionCategories = [
     description: 'Global platform configuration',
     permissions: [
       { key: 'settings:read', label: 'View Settings', description: 'View platform settings' },
-      { key: 'settings:update', label: 'Edit Settings', description: 'Modify platform configuration' },
+      {
+        key: 'settings:update',
+        label: 'Edit Settings',
+        description: 'Modify platform configuration',
+      },
     ],
   },
   {
@@ -247,7 +317,11 @@ export const permissionCategories = [
     description: 'Security operations and incident response',
     permissions: [
       { key: 'security:read', label: 'View Security', description: 'Access security dashboards' },
-      { key: 'security:report', label: 'Security Reports', description: 'Generate security reports' },
+      {
+        key: 'security:report',
+        label: 'Security Reports',
+        description: 'Generate security reports',
+      },
     ],
   },
   {
@@ -430,31 +504,105 @@ export const ssoProviders = [
 
 /* ─── Admin Users (for assignment) ─── */
 export const adminUsers = [
-  { id: 'usr-001', name: 'Robert Chen', email: 'robert@unifiedpms.com', role: 'role-super-admin', status: 'active', lastActive: '2026-08-16 14:32' },
-  { id: 'usr-002', name: 'Sarah Jenkins', email: 'sarah@unifiedpms.com', role: 'role-platform-admin', status: 'active', lastActive: '2026-08-16 13:45' },
-  { id: 'usr-003', name: 'Mike Torres', email: 'mike@unifiedpms.com', role: 'role-billing-admin', status: 'active', lastActive: '2026-08-16 12:20' },
-  { id: 'usr-004', name: 'Lisa Wong', email: 'lisa@unifiedpms.com', role: 'role-custom-onboarding', status: 'active', lastActive: '2026-08-16 11:15' },
-  { id: 'usr-005', name: 'James Miller', email: 'james@unifiedpms.com', role: 'role-support-agent', status: 'active', lastActive: '2026-08-16 10:30' },
-  { id: 'usr-006', name: 'Maria Garcia', email: 'maria@unifiedpms.com', role: 'role-custom-security', status: 'active', lastActive: '2026-08-15 16:00' },
-  { id: 'usr-007', name: 'David Park', email: 'david@unifiedpms.com', role: 'role-readonly', status: 'active', lastActive: '2026-08-16 09:45' },
-  { id: 'usr-008', name: 'Amanda Wilson', email: 'amanda@unifiedpms.com', role: 'role-platform-admin', status: 'suspended', lastActive: '2026-08-10 14:00' },
+  {
+    id: 'usr-001',
+    name: 'Robert Chen',
+    email: 'robert@unifiedpms.com',
+    role: 'role-super-admin',
+    status: 'active',
+    lastActive: '2026-08-16 14:32',
+  },
+  {
+    id: 'usr-002',
+    name: 'Sarah Jenkins',
+    email: 'sarah@unifiedpms.com',
+    role: 'role-platform-admin',
+    status: 'active',
+    lastActive: '2026-08-16 13:45',
+  },
+  {
+    id: 'usr-003',
+    name: 'Mike Torres',
+    email: 'mike@unifiedpms.com',
+    role: 'role-billing-admin',
+    status: 'active',
+    lastActive: '2026-08-16 12:20',
+  },
+  {
+    id: 'usr-004',
+    name: 'Lisa Wong',
+    email: 'lisa@unifiedpms.com',
+    role: 'role-custom-onboarding',
+    status: 'active',
+    lastActive: '2026-08-16 11:15',
+  },
+  {
+    id: 'usr-005',
+    name: 'James Miller',
+    email: 'james@unifiedpms.com',
+    role: 'role-support-agent',
+    status: 'active',
+    lastActive: '2026-08-16 10:30',
+  },
+  {
+    id: 'usr-006',
+    name: 'Maria Garcia',
+    email: 'maria@unifiedpms.com',
+    role: 'role-custom-security',
+    status: 'active',
+    lastActive: '2026-08-15 16:00',
+  },
+  {
+    id: 'usr-007',
+    name: 'David Park',
+    email: 'david@unifiedpms.com',
+    role: 'role-readonly',
+    status: 'active',
+    lastActive: '2026-08-16 09:45',
+  },
+  {
+    id: 'usr-008',
+    name: 'Amanda Wilson',
+    email: 'amanda@unifiedpms.com',
+    role: 'role-platform-admin',
+    status: 'suspended',
+    lastActive: '2026-08-10 14:00',
+  },
 ];
 
 /* ─── Metadata ─── */
 export const roleTypeMeta = {
   system: { label: 'System', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
-  custom: { label: 'Custom', color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/20' },
+  custom: {
+    label: 'Custom',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    border: 'border-secondary/20',
+  },
 };
 
 export const apiKeyStatusMeta = {
   active: { label: 'Active', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-  revoked: { label: 'Revoked', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
-  expired: { label: 'Expired', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
+  revoked: {
+    label: 'Revoked',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+  },
+  expired: {
+    label: 'Expired',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
 };
 
 export const ssoProviderMeta = {
   google: { label: 'Google', icon: 'Globe', color: 'text-red-500', bg: 'bg-red-500/10' },
-  microsoft: { label: 'Microsoft', icon: 'Building2', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  microsoft: {
+    label: 'Microsoft',
+    icon: 'Building2',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+  },
   okta: { label: 'Okta', icon: 'Shield', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
   saml: { label: 'SAML 2.0', icon: 'KeyRound', color: 'text-amber-500', bg: 'bg-amber-500/10' },
 };
@@ -468,7 +616,7 @@ export const environmentMeta = {
 /* ─── Helpers ─── */
 export function getPermissionLabel(key) {
   for (const cat of permissionCategories) {
-    const perm = cat.permissions.find(p => p.key === key);
+    const perm = cat.permissions.find((p) => p.key === key);
     if (perm) return perm.label;
   }
   return key;
@@ -480,7 +628,11 @@ export function getPermissionCategory(key) {
 
 export function formatKeyDate(dateStr) {
   if (!dateStr) return 'Never';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 export function getKeyStatus(key) {

@@ -6,7 +6,8 @@ const variants = {
   primary: 'bg-secondary text-white hover:bg-secondary/90 border-transparent',
   secondary: 'bg-surface text-text-primary border-border hover:bg-surface-elevated',
   outline: 'bg-transparent text-text-primary border-border hover:bg-surface',
-  ghost: 'bg-transparent text-text-secondary hover:bg-surface-elevated hover:text-text-primary border-transparent',
+  ghost:
+    'bg-transparent text-text-secondary hover:bg-surface-elevated hover:text-text-primary border-transparent',
   danger: 'bg-danger text-white hover:bg-danger/90 border-transparent',
 };
 

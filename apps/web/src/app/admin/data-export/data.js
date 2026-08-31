@@ -2,21 +2,81 @@
 
 /* ─── Export Request Types ─── */
 export const exportTypes = [
-  { key: 'full', label: 'Full Tenant Export', desc: 'All data including reservations, guests, billing, and logs', icon: 'Database' },
-  { key: 'guests', label: 'Guest Registry', desc: 'PII, stay history, preferences, and loyalty data', icon: 'Users' },
-  { key: 'financial', label: 'Financial Records', desc: 'Invoices, payments, folios, and tax reports', icon: 'CreditCard' },
-  { key: 'operational', label: 'Operational Data', desc: 'Reservations, room assignments, and housekeeping logs', icon: 'Calendar' },
-  { key: 'communications', label: 'Communications', desc: 'Emails, SMS, notes, and support tickets', icon: 'MessageSquare' },
-  { key: 'analytics', label: 'Analytics & Reports', desc: 'Aggregated usage, performance, and custom reports', icon: 'BarChart3' },
+  {
+    key: 'full',
+    label: 'Full Tenant Export',
+    desc: 'All data including reservations, guests, billing, and logs',
+    icon: 'Database',
+  },
+  {
+    key: 'guests',
+    label: 'Guest Registry',
+    desc: 'PII, stay history, preferences, and loyalty data',
+    icon: 'Users',
+  },
+  {
+    key: 'financial',
+    label: 'Financial Records',
+    desc: 'Invoices, payments, folios, and tax reports',
+    icon: 'CreditCard',
+  },
+  {
+    key: 'operational',
+    label: 'Operational Data',
+    desc: 'Reservations, room assignments, and housekeeping logs',
+    icon: 'Calendar',
+  },
+  {
+    key: 'communications',
+    label: 'Communications',
+    desc: 'Emails, SMS, notes, and support tickets',
+    icon: 'MessageSquare',
+  },
+  {
+    key: 'analytics',
+    label: 'Analytics & Reports',
+    desc: 'Aggregated usage, performance, and custom reports',
+    icon: 'BarChart3',
+  },
 ];
 
 /* ─── Export Formats ─── */
 export const exportFormats = [
-  { key: 'json', label: 'JSON', ext: '.json', mime: 'application/json', desc: 'Machine-readable structured data' },
-  { key: 'csv', label: 'CSV', ext: '.csv', mime: 'text/csv', desc: 'Spreadsheet-compatible flat format' },
-  { key: 'xlsx', label: 'Excel', ext: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', desc: 'Multi-sheet workbook with formatting' },
-  { key: 'pdf', label: 'PDF Report', ext: '.pdf', mime: 'application/pdf', desc: 'Human-readable formatted document' },
-  { key: 'xml', label: 'XML', ext: '.xml', mime: 'application/xml', desc: 'Enterprise system integration format' },
+  {
+    key: 'json',
+    label: 'JSON',
+    ext: '.json',
+    mime: 'application/json',
+    desc: 'Machine-readable structured data',
+  },
+  {
+    key: 'csv',
+    label: 'CSV',
+    ext: '.csv',
+    mime: 'text/csv',
+    desc: 'Spreadsheet-compatible flat format',
+  },
+  {
+    key: 'xlsx',
+    label: 'Excel',
+    ext: '.xlsx',
+    mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    desc: 'Multi-sheet workbook with formatting',
+  },
+  {
+    key: 'pdf',
+    label: 'PDF Report',
+    ext: '.pdf',
+    mime: 'application/pdf',
+    desc: 'Human-readable formatted document',
+  },
+  {
+    key: 'xml',
+    label: 'XML',
+    ext: '.xml',
+    mime: 'application/xml',
+    desc: 'Enterprise system integration format',
+  },
 ];
 
 /* ─── Mock Export Jobs ─── */
@@ -421,42 +481,145 @@ export const initialAnonymizeJobs = [
 
 /* ─── Data Categories for GDPR ─── */
 export const dataCategories = [
-  { key: 'guest_pii', label: 'Guest PII', color: 'text-purple-500', bg: 'bg-purple-500/10', icon: 'Users' },
-  { key: 'financial', label: 'Financial', color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: 'CreditCard' },
-  { key: 'operational', label: 'Operational', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: 'Calendar' },
-  { key: 'communications', label: 'Communications', color: 'text-amber-500', bg: 'bg-amber-500/10', icon: 'MessageSquare' },
-  { key: 'analytics', label: 'Analytics', color: 'text-rose-500', bg: 'bg-rose-500/10', icon: 'BarChart3' },
-  { key: 'full_backup', label: 'Full Backup', color: 'text-neutral-500', bg: 'bg-neutral-500/10', icon: 'Database' },
+  {
+    key: 'guest_pii',
+    label: 'Guest PII',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    icon: 'Users',
+  },
+  {
+    key: 'financial',
+    label: 'Financial',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    icon: 'CreditCard',
+  },
+  {
+    key: 'operational',
+    label: 'Operational',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    icon: 'Calendar',
+  },
+  {
+    key: 'communications',
+    label: 'Communications',
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    icon: 'MessageSquare',
+  },
+  {
+    key: 'analytics',
+    label: 'Analytics',
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
+    icon: 'BarChart3',
+  },
+  {
+    key: 'full_backup',
+    label: 'Full Backup',
+    color: 'text-neutral-500',
+    bg: 'bg-neutral-500/10',
+    icon: 'Database',
+  },
 ];
 
 /* ─── Status Metadata ─── */
 export const exportStatusMeta = {
-  pending: { label: 'Pending', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
-  processing: { label: 'Processing', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20', iconColor: 'text-info' },
-  completed: { label: 'Completed', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', iconColor: 'text-accent' },
-  failed: { label: 'Failed', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
-  expired: { label: 'Expired', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border', iconColor: 'text-text-muted' },
+  pending: {
+    label: 'Pending',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    iconColor: 'text-warning',
+  },
+  processing: {
+    label: 'Processing',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+    iconColor: 'text-info',
+  },
+  completed: {
+    label: 'Completed',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    iconColor: 'text-accent',
+  },
+  failed: {
+    label: 'Failed',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
+  expired: {
+    label: 'Expired',
+    dot: 'bg-text-muted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    iconColor: 'text-text-muted',
+  },
 };
 
 export const erasureStatusMeta = {
-  pending_review: { label: 'Pending Review', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
-  approved: { label: 'Approved', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20', iconColor: 'text-info' },
-  in_progress: { label: 'In Progress', dot: 'bg-secondary', class: 'bg-secondary/10 text-secondary border-secondary/20', iconColor: 'text-secondary' },
-  completed: { label: 'Completed', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', iconColor: 'text-accent' },
-  on_hold: { label: 'On Hold', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
-  rejected: { label: 'Rejected', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border', iconColor: 'text-text-muted' },
+  pending_review: {
+    label: 'Pending Review',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    iconColor: 'text-warning',
+  },
+  approved: {
+    label: 'Approved',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+    iconColor: 'text-info',
+  },
+  in_progress: {
+    label: 'In Progress',
+    dot: 'bg-secondary',
+    class: 'bg-secondary/10 text-secondary border-secondary/20',
+    iconColor: 'text-secondary',
+  },
+  completed: {
+    label: 'Completed',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    iconColor: 'text-accent',
+  },
+  on_hold: {
+    label: 'On Hold',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
+  rejected: {
+    label: 'Rejected',
+    dot: 'bg-text-muted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    iconColor: 'text-text-muted',
+  },
 };
 
 export const priorityMeta = {
   high: { label: 'High', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  medium: { label: 'Medium', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+  medium: {
+    label: 'Medium',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
   low: { label: 'Low', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
 };
 
 export const anonymizeStatusMeta = {
-  pending: { label: 'Pending', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
+  pending: {
+    label: 'Pending',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
   running: { label: 'Running', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20' },
-  completed: { label: 'Completed', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
+  completed: {
+    label: 'Completed',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
   failed: { label: 'Failed', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
 };
 
@@ -481,7 +644,7 @@ export function formatFileSize(sizeStr) {
 }
 
 export function getCategoryMeta(key) {
-  return dataCategories.find(c => c.key === key) || dataCategories[0];
+  return dataCategories.find((c) => c.key === key) || dataCategories[0];
 }
 
 export function timeAgo(timestamp) {

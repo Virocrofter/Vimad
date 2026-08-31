@@ -50,10 +50,17 @@ export default function HelpCenterPage() {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState(null);
 
-  const allArticles = categories.flatMap((c) => c.articles.map((a) => ({ ...a, category: c.name })));
-  const filtered = query.length > 1
-    ? allArticles.filter((a) => a.title.toLowerCase().includes(query.toLowerCase()) || a.excerpt.toLowerCase().includes(query.toLowerCase()))
-    : [];
+  const allArticles = categories.flatMap((c) =>
+    c.articles.map((a) => ({ ...a, category: c.name }))
+  );
+  const filtered =
+    query.length > 1
+      ? allArticles.filter(
+          (a) =>
+            a.title.toLowerCase().includes(query.toLowerCase()) ||
+            a.excerpt.toLowerCase().includes(query.toLowerCase())
+        )
+      : [];
 
   return (
     <div className="bg-background">
@@ -78,7 +85,10 @@ export default function HelpCenterPage() {
             className="h-11 w-full rounded-md border border-border bg-surface pl-10 pr-10 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+            >
               <X className="h-4 w-4" />
             </button>
           )}
@@ -87,14 +97,21 @@ export default function HelpCenterPage() {
         {/* Search Results */}
         {query.length > 1 && (
           <div className="mt-6">
-            <p className="mb-3 text-sm text-text-muted">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</p>
+            <p className="mb-3 text-sm text-text-muted">
+              {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+            </p>
             {filtered.length > 0 ? (
               <div className="space-y-2">
                 {filtered.map((article, i) => (
-                  <button key={i} className="flex w-full items-center justify-between rounded-lg border border-border bg-surface p-4 text-left hover:bg-surface-elevated transition-colors">
+                  <button
+                    key={i}
+                    className="flex w-full items-center justify-between rounded-lg border border-border bg-surface p-4 text-left hover:bg-surface-elevated transition-colors"
+                  >
                     <div>
                       <p className="text-sm font-medium text-text-primary">{article.title}</p>
-                      <p className="text-xs text-text-muted">{article.category} · {article.excerpt}</p>
+                      <p className="text-xs text-text-muted">
+                        {article.category} · {article.excerpt}
+                      </p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-text-muted" />
                   </button>
@@ -102,8 +119,16 @@ export default function HelpCenterPage() {
               </div>
             ) : (
               <div className="rounded-lg border border-border bg-surface p-8 text-center">
-                <p className="text-sm text-text-secondary">No articles found for &ldquo;{query}&rdquo;.</p>
-                <p className="mt-1 text-xs text-text-muted">Try a different keyword or <Link to="/contact" className="text-secondary hover:underline">contact support</Link>.</p>
+                <p className="text-sm text-text-secondary">
+                  No articles found for &ldquo;{query}&rdquo;.
+                </p>
+                <p className="mt-1 text-xs text-text-muted">
+                  Try a different keyword or{' '}
+                  <Link to="/contact" className="text-secondary hover:underline">
+                    contact support
+                  </Link>
+                  .
+                </p>
               </div>
             )}
           </div>
@@ -120,7 +145,10 @@ export default function HelpCenterPage() {
                 </div>
                 <div className="mt-3 space-y-1">
                   {cat.articles.map((article) => (
-                    <button key={article.title} className="group flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm text-text-secondary hover:bg-background hover:text-text-primary transition-colors">
+                    <button
+                      key={article.title}
+                      className="group flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm text-text-secondary hover:bg-background hover:text-text-primary transition-colors"
+                    >
                       <span>{article.title}</span>
                       <ChevronRight className="h-3.5 w-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
@@ -134,12 +162,17 @@ export default function HelpCenterPage() {
         {/* Contact */}
         <div className="mt-12 rounded-xl border border-border bg-surface p-6 text-center">
           <h3 className="font-semibold text-text-primary">Still need help?</h3>
-          <p className="mt-1 text-sm text-text-secondary">Our support team is available 24/7 for Professional and Enterprise customers.</p>
+          <p className="mt-1 text-sm text-text-secondary">
+            Our support team is available 24/7 for Professional and Enterprise customers.
+          </p>
           <div className="mt-4 flex justify-center gap-3">
             <button className="inline-flex h-10 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90">
               <MessageCircle className="mr-1.5 h-4 w-4" /> Start Live Chat
             </button>
-            <Link to="/contact" className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-text-primary hover:bg-surface-elevated">
+            <Link
+              to="/contact"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-text-primary hover:bg-surface-elevated"
+            >
               Contact Support
             </Link>
           </div>

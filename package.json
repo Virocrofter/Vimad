@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "description": "Unified PMS — property management SaaS",
   "license": "UNLICENSED",
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -29,7 +30,9 @@
     "turbo": "^2.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,md,css}": ["prettier --write"]
+    "*.{js,jsx,ts,tsx,json,md,css}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "npm@10.8.2",
   "engines": {

@@ -98,8 +98,20 @@ export const onboardingTenants = [
     dropOffReason: 'confusion',
     assignedCSM: 'Sarah Johnson',
     interventions: [
-      { id: 'INT-001', type: 'email', sentAt: '2026-08-03 10:00:00', status: 'opened', subject: 'Let us help you connect your channels' },
-      { id: 'INT-002', type: 'call', scheduledAt: '2026-08-06 14:00:00', status: 'no_answer', notes: 'Left voicemail' },
+      {
+        id: 'INT-001',
+        type: 'email',
+        sentAt: '2026-08-03 10:00:00',
+        status: 'opened',
+        subject: 'Let us help you connect your channels',
+      },
+      {
+        id: 'INT-002',
+        type: 'call',
+        scheduledAt: '2026-08-06 14:00:00',
+        status: 'no_answer',
+        notes: 'Left voicemail',
+      },
     ],
     revenueAtRisk: 499,
     healthScore: 42,
@@ -130,7 +142,13 @@ export const onboardingTenants = [
     dropOffStage: null,
     assignedCSM: 'David Park',
     interventions: [
-      { id: 'INT-003', type: 'in_app', sentAt: '2026-08-12 09:00:00', status: 'clicked', subject: 'Try your first check-in' },
+      {
+        id: 'INT-003',
+        type: 'in_app',
+        sentAt: '2026-08-12 09:00:00',
+        status: 'clicked',
+        subject: 'Try your first check-in',
+      },
     ],
     revenueAtRisk: 199,
     healthScore: 78,
@@ -191,8 +209,20 @@ export const onboardingTenants = [
     dropOffStage: null,
     assignedCSM: 'David Park',
     interventions: [
-      { id: 'INT-004', type: 'email', sentAt: '2026-08-15 10:00:00', status: 'opened', subject: "You're almost there — complete billing" },
-      { id: 'INT-005', type: 'call', scheduledAt: '2026-08-17 11:00:00', status: 'scheduled', notes: 'Billing walkthrough' },
+      {
+        id: 'INT-004',
+        type: 'email',
+        sentAt: '2026-08-15 10:00:00',
+        status: 'opened',
+        subject: "You're almost there — complete billing",
+      },
+      {
+        id: 'INT-005',
+        type: 'call',
+        scheduledAt: '2026-08-17 11:00:00',
+        status: 'scheduled',
+        notes: 'Billing walkthrough',
+      },
     ],
     revenueAtRisk: 499,
     healthScore: 92,
@@ -224,7 +254,13 @@ export const onboardingTenants = [
     dropOffReason: 'time_constraints',
     assignedCSM: 'Mike Chen',
     interventions: [
-      { id: 'INT-006', type: 'email', sentAt: '2026-08-10 09:00:00', status: 'unopened', subject: 'Need help setting up your rooms?' },
+      {
+        id: 'INT-006',
+        type: 'email',
+        sentAt: '2026-08-10 09:00:00',
+        status: 'unopened',
+        subject: 'Need help setting up your rooms?',
+      },
     ],
     revenueAtRisk: 199,
     healthScore: 35,
@@ -285,7 +321,13 @@ export const onboardingTenants = [
     dropOffStage: null,
     assignedCSM: 'David Park',
     interventions: [
-      { id: 'INT-007', type: 'email', sentAt: '2026-08-04 10:00:00', status: 'clicked', subject: 'Ready to go live?' },
+      {
+        id: 'INT-007',
+        type: 'email',
+        sentAt: '2026-08-04 10:00:00',
+        status: 'clicked',
+        subject: 'Ready to go live?',
+      },
     ],
     revenueAtRisk: 0,
     healthScore: 100,
@@ -318,8 +360,20 @@ export const onboardingTenants = [
     dropOffReason: 'technical_issue',
     assignedCSM: 'Mike Chen',
     interventions: [
-      { id: 'INT-008', type: 'email', sentAt: '2026-08-08 09:00:00', status: 'opened', subject: 'Trouble with integrations? We can help' },
-      { id: 'INT-009', type: 'call', scheduledAt: '2026-08-10 15:00:00', status: 'completed', notes: 'Walked through Stripe connect' },
+      {
+        id: 'INT-008',
+        type: 'email',
+        sentAt: '2026-08-08 09:00:00',
+        status: 'opened',
+        subject: 'Trouble with integrations? We can help',
+      },
+      {
+        id: 'INT-009',
+        type: 'call',
+        scheduledAt: '2026-08-10 15:00:00',
+        status: 'completed',
+        notes: 'Walked through Stripe connect',
+      },
     ],
     revenueAtRisk: 199,
     healthScore: 55,
@@ -351,8 +405,20 @@ export const onboardingTenants = [
     dropOffReason: 'no_need',
     assignedCSM: 'Sarah Johnson',
     interventions: [
-      { id: 'INT-010', type: 'email', sentAt: '2026-08-08 10:00:00', status: 'unopened', subject: 'Import your existing reservations' },
-      { id: 'INT-011', type: 'in_app', sentAt: '2026-08-10 09:00:00', status: 'dismissed', subject: 'Create your first reservation' },
+      {
+        id: 'INT-010',
+        type: 'email',
+        sentAt: '2026-08-08 10:00:00',
+        status: 'unopened',
+        subject: 'Import your existing reservations',
+      },
+      {
+        id: 'INT-011',
+        type: 'in_app',
+        sentAt: '2026-08-10 09:00:00',
+        status: 'dismissed',
+        subject: 'Create your first reservation',
+      },
     ],
     revenueAtRisk: 499,
     healthScore: 50,
@@ -405,27 +471,121 @@ export const funnelMetrics = {
 /* ─── Stage-level Drop-off Data ─── */
 export const stageDropOffs = [
   { stage: 'signup', entered: 142, completed: 142, dropOff: 0, dropOffRate: 0.0, topReason: null },
-  { stage: 'property_setup', entered: 142, completed: 138, dropOff: 4, dropOffRate: 2.8, topReason: 'interruption' },
-  { stage: 'room_config', entered: 138, completed: 124, dropOff: 14, dropOffRate: 10.1, topReason: 'complexity' },
-  { stage: 'integrations', entered: 124, completed: 98, dropOff: 26, dropOffRate: 21.0, topReason: 'technical_issue' },
-  { stage: 'team_invite', entered: 98, completed: 72, dropOff: 26, dropOffRate: 26.5, topReason: 'solo_operator' },
-  { stage: 'first_reservation', entered: 72, completed: 65, dropOff: 7, dropOffRate: 9.7, topReason: 'no_need' },
-  { stage: 'first_checkin', entered: 65, completed: 58, dropOff: 7, dropOffRate: 10.8, topReason: 'no_guests' },
-  { stage: 'billing_setup', entered: 58, completed: 52, dropOff: 6, dropOffRate: 10.3, topReason: 'price_sensitivity' },
+  {
+    stage: 'property_setup',
+    entered: 142,
+    completed: 138,
+    dropOff: 4,
+    dropOffRate: 2.8,
+    topReason: 'interruption',
+  },
+  {
+    stage: 'room_config',
+    entered: 138,
+    completed: 124,
+    dropOff: 14,
+    dropOffRate: 10.1,
+    topReason: 'complexity',
+  },
+  {
+    stage: 'integrations',
+    entered: 124,
+    completed: 98,
+    dropOff: 26,
+    dropOffRate: 21.0,
+    topReason: 'technical_issue',
+  },
+  {
+    stage: 'team_invite',
+    entered: 98,
+    completed: 72,
+    dropOff: 26,
+    dropOffRate: 26.5,
+    topReason: 'solo_operator',
+  },
+  {
+    stage: 'first_reservation',
+    entered: 72,
+    completed: 65,
+    dropOff: 7,
+    dropOffRate: 9.7,
+    topReason: 'no_need',
+  },
+  {
+    stage: 'first_checkin',
+    entered: 65,
+    completed: 58,
+    dropOff: 7,
+    dropOffRate: 10.8,
+    topReason: 'no_guests',
+  },
+  {
+    stage: 'billing_setup',
+    entered: 58,
+    completed: 52,
+    dropOff: 6,
+    dropOffRate: 10.3,
+    topReason: 'price_sensitivity',
+  },
   { stage: 'converted', entered: 52, completed: 89, dropOff: 0, dropOffRate: 0.0, topReason: null },
 ];
 
 /* ─── Drop-off Reasons Metadata ─── */
 export const dropOffReasons = {
-  complexity: { label: 'Too Complex', description: 'User found the step confusing or overwhelming', color: 'text-warning', bg: 'bg-warning/10' },
-  technical_issue: { label: 'Technical Issue', description: 'Integration or setup error occurred', color: 'text-danger', bg: 'bg-danger/10' },
-  time_constraints: { label: 'No Time', description: 'User indicated they would return later', color: 'text-info', bg: 'bg-info/10' },
-  interruption: { label: 'Interrupted', description: 'Session ended unexpectedly', color: 'text-text-muted', bg: 'bg-neutral/10' },
-  no_need: { label: 'No Immediate Need', description: 'User does not need this feature now', color: 'text-text-muted', bg: 'bg-neutral/10' },
-  solo_operator: { label: 'Solo Operator', description: 'No team to invite', color: 'text-info', bg: 'bg-info/10' },
-  no_guests: { label: 'No Guests Yet', description: 'Property not yet open or no bookings', color: 'text-info', bg: 'bg-info/10' },
-  price_sensitivity: { label: 'Price Concern', description: 'User hesitated at pricing', color: 'text-warning', bg: 'bg-warning/10' },
-  confusion: { label: 'Confused', description: 'Unclear what to do next', color: 'text-warning', bg: 'bg-warning/10' },
+  complexity: {
+    label: 'Too Complex',
+    description: 'User found the step confusing or overwhelming',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+  },
+  technical_issue: {
+    label: 'Technical Issue',
+    description: 'Integration or setup error occurred',
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+  },
+  time_constraints: {
+    label: 'No Time',
+    description: 'User indicated they would return later',
+    color: 'text-info',
+    bg: 'bg-info/10',
+  },
+  interruption: {
+    label: 'Interrupted',
+    description: 'Session ended unexpectedly',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+  },
+  no_need: {
+    label: 'No Immediate Need',
+    description: 'User does not need this feature now',
+    color: 'text-text-muted',
+    bg: 'bg-neutral/10',
+  },
+  solo_operator: {
+    label: 'Solo Operator',
+    description: 'No team to invite',
+    color: 'text-info',
+    bg: 'bg-info/10',
+  },
+  no_guests: {
+    label: 'No Guests Yet',
+    description: 'Property not yet open or no bookings',
+    color: 'text-info',
+    bg: 'bg-info/10',
+  },
+  price_sensitivity: {
+    label: 'Price Concern',
+    description: 'User hesitated at pricing',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+  },
+  confusion: {
+    label: 'Confused',
+    description: 'Unclear what to do next',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+  },
 };
 
 /* ─── Intervention Types ─── */
@@ -433,9 +593,27 @@ export const interventionTypes = [
   { id: 'email', label: 'Email', icon: 'Mail', color: 'text-secondary', bg: 'bg-secondary/10' },
   { id: 'call', label: 'Phone Call', icon: 'Phone', color: 'text-accent', bg: 'bg-accent/10' },
   { id: 'in_app', label: 'In-App Guide', icon: 'Monitor', color: 'text-info', bg: 'bg-info/10' },
-  { id: 'demo', label: 'Live Demo', icon: 'Video', color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  { id: 'discount', label: 'Discount Offer', icon: 'Tag', color: 'text-warning', bg: 'bg-warning/10' },
-  { id: 'extend_trial', label: 'Extend Trial', icon: 'Clock', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  {
+    id: 'demo',
+    label: 'Live Demo',
+    icon: 'Video',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+  },
+  {
+    id: 'discount',
+    label: 'Discount Offer',
+    icon: 'Tag',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+  },
+  {
+    id: 'extend_trial',
+    label: 'Extend Trial',
+    icon: 'Clock',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+  },
 ];
 
 /* ─── CSM Team ─── */
@@ -489,8 +667,8 @@ export function getStageProgress(tenant, stageId) {
 }
 
 export function getOverallProgress(tenant) {
-  const stages = funnelStages.filter(s => !s.optional);
-  const completed = stages.filter(s => tenant.progress[s.id]?.completed).length;
+  const stages = funnelStages.filter((s) => !s.optional);
+  const completed = stages.filter((s) => tenant.progress[s.id]?.completed).length;
   return Math.round((completed / stages.length) * 100);
 }
 
@@ -516,11 +694,31 @@ export function getHealthScoreBg(score) {
 
 export function getStatusMeta(status) {
   const configs = {
-    active_trial: { label: 'Active Trial', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20' },
-    at_risk: { label: 'At Risk', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
-    trial_expired: { label: 'Trial Expired', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
-    converted: { label: 'Converted', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-    churned: { label: 'Churned', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border' },
+    active_trial: {
+      label: 'Active Trial',
+      dot: 'bg-info',
+      class: 'bg-info/10 text-info border-info/20',
+    },
+    at_risk: {
+      label: 'At Risk',
+      dot: 'bg-warning',
+      class: 'bg-warning/10 text-warning border-warning/20',
+    },
+    trial_expired: {
+      label: 'Trial Expired',
+      dot: 'bg-danger',
+      class: 'bg-danger/10 text-danger border-danger/20',
+    },
+    converted: {
+      label: 'Converted',
+      dot: 'bg-accent',
+      class: 'bg-accent/10 text-accent border-accent/20',
+    },
+    churned: {
+      label: 'Churned',
+      dot: 'bg-text-muted',
+      class: 'bg-neutral/10 text-text-muted border-border',
+    },
   };
   return configs[status] || configs.active_trial;
 }
@@ -528,13 +726,41 @@ export function getStatusMeta(status) {
 export function getInterventionStatusMeta(status) {
   const configs = {
     scheduled: { label: 'Scheduled', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20' },
-    sent: { label: 'Sent', dot: 'bg-secondary', class: 'bg-secondary/10 text-secondary border-secondary/20' },
-    opened: { label: 'Opened', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
-    clicked: { label: 'Clicked', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-    completed: { label: 'Completed', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-    no_answer: { label: 'No Answer', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
-    unopened: { label: 'Unopened', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border' },
-    dismissed: { label: 'Dismissed', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
+    sent: {
+      label: 'Sent',
+      dot: 'bg-secondary',
+      class: 'bg-secondary/10 text-secondary border-secondary/20',
+    },
+    opened: {
+      label: 'Opened',
+      dot: 'bg-warning',
+      class: 'bg-warning/10 text-warning border-warning/20',
+    },
+    clicked: {
+      label: 'Clicked',
+      dot: 'bg-accent',
+      class: 'bg-accent/10 text-accent border-accent/20',
+    },
+    completed: {
+      label: 'Completed',
+      dot: 'bg-accent',
+      class: 'bg-accent/10 text-accent border-accent/20',
+    },
+    no_answer: {
+      label: 'No Answer',
+      dot: 'bg-danger',
+      class: 'bg-danger/10 text-danger border-danger/20',
+    },
+    unopened: {
+      label: 'Unopened',
+      dot: 'bg-text-muted',
+      class: 'bg-neutral/10 text-text-muted border-border',
+    },
+    dismissed: {
+      label: 'Dismissed',
+      dot: 'bg-danger',
+      class: 'bg-danger/10 text-danger border-danger/20',
+    },
   };
   return configs[status] || configs.sent;
 }

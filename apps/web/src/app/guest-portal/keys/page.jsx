@@ -2,11 +2,38 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Key, Lock, Unlock, Smartphone, Battery, BatteryCharging,
-  Signal, SignalHigh, SignalMedium, SignalLow, Bluetooth, Wifi,
-  ChevronRight, Clock, MapPin, Shield, AlertTriangle, CheckCircle2,
-  XCircle, RefreshCw, QrCode, Nfc, CircleDot, Eye, EyeOff,
-  History, Calendar, ArrowUpRight, Zap, Power, PowerOff
+  ArrowLeft,
+  Key,
+  Lock,
+  Unlock,
+  Smartphone,
+  Battery,
+  BatteryCharging,
+  Signal,
+  SignalHigh,
+  SignalMedium,
+  SignalLow,
+  Bluetooth,
+  Wifi,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Shield,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  QrCode,
+  Nfc,
+  CircleDot,
+  Eye,
+  EyeOff,
+  History,
+  Calendar,
+  ArrowUpRight,
+  Zap,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { guestStays, timeAgo } from '../data';
@@ -51,14 +78,18 @@ export default function KeysPage() {
       </div>
 
       {/* Key Status Banner */}
-      <div className={cn(
-        'rounded-xl border p-4 flex items-center gap-3',
-        isActive ? 'border-accent/20 bg-accent/5' : 'border-warning/20 bg-warning/5'
-      )}>
-        <div className={cn(
-          'flex h-10 w-10 items-center justify-center rounded-full',
-          isActive ? 'bg-accent/10' : 'bg-warning/10'
-        )}>
+      <div
+        className={cn(
+          'rounded-xl border p-4 flex items-center gap-3',
+          isActive ? 'border-accent/20 bg-accent/5' : 'border-warning/20 bg-warning/5'
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-full',
+            isActive ? 'bg-accent/10' : 'bg-warning/10'
+          )}
+        >
           {isActive ? (
             <Shield className="h-5 w-5 text-accent" />
           ) : (
@@ -72,8 +103,7 @@ export default function KeysPage() {
           <p className="text-xs text-text-secondary">
             {isActive
               ? `Expires in ${expiresIn} hours · ${keyData.type} key`
-              : 'Contact front desk for assistance'
-            }
+              : 'Contact front desk for assistance'}
           </p>
         </div>
       </div>
@@ -110,11 +140,19 @@ export default function KeysPage() {
             )}
           </button>
 
-          <p className={cn(
-            'text-sm font-medium',
-            unlocked ? 'text-accent' : isActive ? 'text-secondary' : 'text-text-muted'
-          )}>
-            {unlocking ? 'Unlocking...' : unlocked ? 'Door Unlocked!' : isActive ? 'Tap to Unlock' : 'Key Not Active'}
+          <p
+            className={cn(
+              'text-sm font-medium',
+              unlocked ? 'text-accent' : isActive ? 'text-secondary' : 'text-text-muted'
+            )}
+          >
+            {unlocking
+              ? 'Unlocking...'
+              : unlocked
+                ? 'Door Unlocked!'
+                : isActive
+                  ? 'Tap to Unlock'
+                  : 'Key Not Active'}
           </p>
 
           {/* Key Details */}
@@ -153,14 +191,18 @@ export default function KeysPage() {
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-text-secondary">Expires</span>
-            <span className="text-text-primary">{new Date(keyData.expiresAt).toLocaleString()}</span>
+            <span className="text-text-primary">
+              {new Date(keyData.expiresAt).toLocaleString()}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-text-secondary">Status</span>
-            <span className={cn(
-              'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
-              isActive ? 'bg-accent/10 text-accent' : 'bg-warning/10 text-warning'
-            )}>
+            <span
+              className={cn(
+                'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
+                isActive ? 'bg-accent/10 text-accent' : 'bg-warning/10 text-warning'
+              )}
+            >
               {keyData.status}
             </span>
           </div>

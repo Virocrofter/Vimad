@@ -64,7 +64,9 @@ export default function GuestLoginPage() {
           onClick={() => setMethod('booking')}
           className={cn(
             'flex-1 rounded-md py-2 text-xs font-medium transition-colors',
-            method === 'booking' ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary'
+            method === 'booking'
+              ? 'bg-secondary text-white'
+              : 'text-text-secondary hover:text-text-primary'
           )}
         >
           Booking Reference
@@ -73,7 +75,9 @@ export default function GuestLoginPage() {
           onClick={() => setMethod('email')}
           className={cn(
             'flex-1 rounded-md py-2 text-xs font-medium transition-colors',
-            method === 'email' ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary'
+            method === 'email'
+              ? 'bg-secondary text-white'
+              : 'text-text-secondary hover:text-text-primary'
           )}
         >
           Email Sign In
@@ -85,7 +89,9 @@ export default function GuestLoginPage() {
         {method === 'booking' ? (
           <>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Booking Reference</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">
+                Booking Reference
+              </label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                 <input
@@ -98,7 +104,9 @@ export default function GuestLoginPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Last Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">
+                Last Name
+              </label>
               <input
                 type="text"
                 value={lastName}
@@ -136,9 +144,7 @@ export default function GuestLoginPage() {
           </>
         )}
 
-        {error && (
-          <p className="text-xs text-danger">{error}</p>
-        )}
+        {error && <p className="text-xs text-danger">{error}</p>}
 
         <Button type="submit" className="w-full" isLoading={isLoading}>
           {isLoading ? 'Signing in...' : 'Sign In'}
@@ -148,12 +154,20 @@ export default function GuestLoginPage() {
 
       {/* Help */}
       <div className="space-y-2 text-center">
-        <a href="/guest-portal/auth/register" className="inline-flex items-center gap-1 text-xs text-secondary hover:underline">
+        <a
+          href="/guest-portal/auth/register"
+          className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
+        >
           Create an account
         </a>
         <div className="flex items-center justify-center gap-1 text-xs text-text-muted">
           <HelpCircle className="h-3 w-3" />
-          <span>Need help? <a href="/guest-portal/support/contact" className="text-secondary hover:underline">Contact us</a></span>
+          <span>
+            Need help?{' '}
+            <a href="/guest-portal/support/contact" className="text-secondary hover:underline">
+              Contact us
+            </a>
+          </span>
         </div>
       </div>
     </div>

@@ -1,31 +1,80 @@
 /* src/app/admin/integrations/components.jsx */
 import { useState } from 'react';
 import {
-  CheckCircle2, XCircle, AlertTriangle, Clock, RefreshCw,
-  ExternalLink, Copy, Eye, EyeOff, Trash2, Play, Pause,
-  ChevronDown, ChevronUp, Zap, Shield, Activity, Globe,
-  MessageSquare, Mail, CreditCard, BarChart3, HardDrive,
-  Sparkles, Bell, Plane, HelpCircle, Settings, Key,
-  TrendingUp, TrendingDown, Minus, Wifi, WifiOff, Loader2,
-  Check, X, Plus, Search, Filter, Code, Terminal, Send,
-  ArrowRight, RotateCcw, Save, Edit3, MoreHorizontal,
-  FileJson, Webhook, Plug
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Clock,
+  RefreshCw,
+  ExternalLink,
+  Copy,
+  Eye,
+  EyeOff,
+  Trash2,
+  Play,
+  Pause,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  Shield,
+  Activity,
+  Globe,
+  MessageSquare,
+  Mail,
+  CreditCard,
+  BarChart3,
+  HardDrive,
+  Sparkles,
+  Bell,
+  Plane,
+  HelpCircle,
+  Settings,
+  Key,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Wifi,
+  WifiOff,
+  Loader2,
+  Check,
+  X,
+  Plus,
+  Search,
+  Filter,
+  Code,
+  Terminal,
+  Send,
+  ArrowRight,
+  RotateCcw,
+  Save,
+  Edit3,
+  MoreHorizontal,
+  FileJson,
+  Webhook,
+  Plug,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  statusMeta, healthMeta, webhookStatusMeta, methodMeta,
-  categoryMeta, formatNumber, timeAgo
+  statusMeta,
+  healthMeta,
+  webhookStatusMeta,
+  methodMeta,
+  categoryMeta,
+  formatNumber,
+  timeAgo,
 } from './data';
 
 /* ─── Status Badge ─── */
 export function IntegrationStatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.disconnected;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -35,9 +84,13 @@ export function IntegrationStatusBadge({ status }) {
 /* ─── Health Badge ─── */
 export function HealthBadge({ health }) {
   const meta = healthMeta[health] || healthMeta.unknown;
-  const Icon = {
-    CheckCircle2, AlertTriangle, XCircle, HelpCircle
-  }[meta.icon] || HelpCircle;
+  const Icon =
+    {
+      CheckCircle2,
+      AlertTriangle,
+      XCircle,
+      HelpCircle,
+    }[meta.icon] || HelpCircle;
 
   return (
     <span className={cn('inline-flex items-center gap-1 text-xs font-medium', meta.color)}>
@@ -51,10 +104,12 @@ export function HealthBadge({ health }) {
 export function WebhookStatusBadge({ status }) {
   const meta = webhookStatusMeta[status] || webhookStatusMeta.failed;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -65,10 +120,14 @@ export function WebhookStatusBadge({ status }) {
 export function MethodBadge({ method }) {
   const meta = methodMeta[method] || methodMeta.GET;
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-wider',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       {method}
     </span>
   );
@@ -78,10 +137,14 @@ export function MethodBadge({ method }) {
 export function CategoryBadge({ category }) {
   const meta = categoryMeta[category] || categoryMeta.payments;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
-      meta.bg, meta.color, 'border-current/20'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -115,15 +178,26 @@ export function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last period
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last period
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -139,13 +213,18 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
   const meta = categoryMeta[integration.category] || categoryMeta.payments;
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface transition-all hover:shadow-md',
-      integration.status === 'error' ? 'border-danger/30' :
-      integration.status === 'pending' ? 'border-warning/30' :
-      integration.status === 'connected' ? 'border-border hover:border-secondary/30' :
-      'border-border'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface transition-all hover:shadow-md',
+        integration.status === 'error'
+          ? 'border-danger/30'
+          : integration.status === 'pending'
+            ? 'border-warning/30'
+            : integration.status === 'connected'
+              ? 'border-border hover:border-secondary/30'
+              : 'border-border'
+      )}
+    >
       {/* Header */}
       <div className="p-5">
         <div className="flex items-start justify-between">
@@ -155,7 +234,12 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
             </div>
             <div>
               <h3 className="text-sm font-semibold text-text-primary">{integration.name}</h3>
-              <p className="text-[10px] text-text-muted">{integration.version} · {integration.connectedAt ? `Connected ${timeAgo(integration.connectedAt + ' 00:00:00')}` : 'Not connected'}</p>
+              <p className="text-[10px] text-text-muted">
+                {integration.version} ·{' '}
+                {integration.connectedAt
+                  ? `Connected ${timeAgo(integration.connectedAt + ' 00:00:00')}`
+                  : 'Not connected'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -166,44 +250,74 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
           </div>
         </div>
 
-        <p className="mt-3 text-xs text-text-secondary leading-relaxed">{integration.description}</p>
+        <p className="mt-3 text-xs text-text-secondary leading-relaxed">
+          {integration.description}
+        </p>
 
         {/* Features */}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {integration.features?.map((feature) => (
-            <span key={feature} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary">
+            <span
+              key={feature}
+              className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary"
+            >
               {feature}
             </span>
           ))}
         </div>
 
         {/* Quick Stats */}
-        {integration.status === 'connected' && integration.stats && Object.keys(integration.stats).length > 0 && (
-          <div className="mt-4 grid grid-cols-2 gap-3 rounded-lg border border-border bg-background p-3">
-            {Object.entries(integration.stats).slice(0, 4).map(([key, value]) => {
-              const labels = {
-                transactionsToday: 'Today', revenueToday: 'Revenue', successRate: 'Success',
-                avgProcessingTime: 'Avg Time', messagesToday: 'Messages', deliveredRate: 'Delivered',
-                failedRate: 'Failed', avgDeliveryTime: 'Avg Time', emailsToday: 'Emails',
-                openRate: 'Open Rate', clickRate: 'Click Rate', bounceRate: 'Bounce',
-                notificationsToday: 'Alerts', channelsConnected: 'Channels', responseTime: 'Response',
-                sessionsToday: 'Sessions', avgSessionDuration: 'Duration', conversionRate: 'Conversion',
-                requestsToday: 'Requests', avgLatency: 'Latency', tokensUsed: 'Tokens', costToday: 'Cost',
-                objectsStored: 'Objects', storageUsed: 'Storage', uploadsToday: 'Uploads', downloadBandwidth: 'Bandwidth',
-                lastError: 'Error', failedSyncs: 'Failed',
-              };
-              return (
-                <div key={key}>
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider">{labels[key] || key}</p>
-                  <p className="text-sm font-mono font-medium text-text-primary">
-                    {typeof value === 'number' ? formatNumber(value) : value}
-                    {key.includes('Rate') || key === 'successRate' ? '%' : ''}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {integration.status === 'connected' &&
+          integration.stats &&
+          Object.keys(integration.stats).length > 0 && (
+            <div className="mt-4 grid grid-cols-2 gap-3 rounded-lg border border-border bg-background p-3">
+              {Object.entries(integration.stats)
+                .slice(0, 4)
+                .map(([key, value]) => {
+                  const labels = {
+                    transactionsToday: 'Today',
+                    revenueToday: 'Revenue',
+                    successRate: 'Success',
+                    avgProcessingTime: 'Avg Time',
+                    messagesToday: 'Messages',
+                    deliveredRate: 'Delivered',
+                    failedRate: 'Failed',
+                    avgDeliveryTime: 'Avg Time',
+                    emailsToday: 'Emails',
+                    openRate: 'Open Rate',
+                    clickRate: 'Click Rate',
+                    bounceRate: 'Bounce',
+                    notificationsToday: 'Alerts',
+                    channelsConnected: 'Channels',
+                    responseTime: 'Response',
+                    sessionsToday: 'Sessions',
+                    avgSessionDuration: 'Duration',
+                    conversionRate: 'Conversion',
+                    requestsToday: 'Requests',
+                    avgLatency: 'Latency',
+                    tokensUsed: 'Tokens',
+                    costToday: 'Cost',
+                    objectsStored: 'Objects',
+                    storageUsed: 'Storage',
+                    uploadsToday: 'Uploads',
+                    downloadBandwidth: 'Bandwidth',
+                    lastError: 'Error',
+                    failedSyncs: 'Failed',
+                  };
+                  return (
+                    <div key={key}>
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                        {labels[key] || key}
+                      </p>
+                      <p className="text-sm font-mono font-medium text-text-primary">
+                        {typeof value === 'number' ? formatNumber(value) : value}
+                        {key.includes('Rate') || key === 'successRate' ? '%' : ''}
+                      </p>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
 
         {/* Error Alert */}
         {integration.status === 'error' && integration.stats?.lastError && (
@@ -223,7 +337,12 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
               <Button variant="outline" size="sm" onClick={() => onToggle?.(integration.id)}>
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Sync
               </Button>
-              <Button variant="ghost" size="sm" className="text-danger hover:bg-danger/10 ml-auto" onClick={() => onDisconnect?.(integration.id)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-danger hover:bg-danger/10 ml-auto"
+                onClick={() => onDisconnect?.(integration.id)}
+              >
                 <WifiOff className="mr-1.5 h-3.5 w-3.5" /> Disconnect
               </Button>
             </>
@@ -236,7 +355,12 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
               <Button size="sm" onClick={() => onConfigure?.(integration.id)}>
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Reconnect
               </Button>
-              <Button variant="ghost" size="sm" className="text-danger hover:bg-danger/10" onClick={() => onDisconnect?.(integration.id)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-danger hover:bg-danger/10"
+                onClick={() => onDisconnect?.(integration.id)}
+              >
                 <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remove
               </Button>
             </>
@@ -259,10 +383,14 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
       {/* Expanded Config */}
       {expanded && integration.status === 'connected' && (
         <div className="border-t border-border bg-background/50 p-5 space-y-3">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Configuration</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+            Configuration
+          </h4>
           {Object.entries(integration.config).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between gap-4">
-              <span className="text-xs text-text-secondary capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+              <span className="text-xs text-text-secondary capitalize">
+                {key.replace(/([A-Z])/g, ' $1').trim()}
+              </span>
               <div className="flex items-center gap-2">
                 <code className="rounded-md bg-surface border border-border px-2 py-1 text-xs font-mono text-text-primary">
                   {showSecret ? value : String(value).replace(/./g, '•').slice(0, 24)}
@@ -272,7 +400,11 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
                   className="text-text-muted hover:text-text-primary"
                   title={showSecret ? 'Hide' : 'Show'}
                 >
-                  {showSecret ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showSecret ? (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" />
+                  )}
                 </button>
                 <button
                   onClick={() => navigator.clipboard.writeText(String(value))}
@@ -294,10 +426,7 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
 export function WebhookRow({ webhook, expanded, onToggle, onTest, onPause, onDelete }) {
   return (
     <>
-      <tr
-        className="hover:bg-background/50 transition-colors cursor-pointer"
-        onClick={onToggle}
-      >
+      <tr className="hover:bg-background/50 transition-colors cursor-pointer" onClick={onToggle}>
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <button className="text-text-muted hover:text-text-primary">
@@ -315,7 +444,10 @@ export function WebhookRow({ webhook, expanded, onToggle, onTest, onPause, onDel
         <td className="px-4 py-3">
           <div className="flex flex-wrap gap-1">
             {webhook.events.map((evt) => (
-              <span key={evt} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+              <span
+                key={evt}
+                className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary"
+              >
                 {evt}
               </span>
             ))}
@@ -324,27 +456,38 @@ export function WebhookRow({ webhook, expanded, onToggle, onTest, onPause, onDel
         <td className="px-4 py-3 text-text-secondary text-xs font-mono truncate max-w-[200px]">
           {webhook.endpoint}
         </td>
-        <td className="px-4 py-3 text-text-secondary text-xs">
-          {timeAgo(webhook.lastTriggered)}
-        </td>
+        <td className="px-4 py-3 text-text-secondary text-xs">{timeAgo(webhook.lastTriggered)}</td>
         <td className="px-4 py-3 text-right">
           <div className="flex items-center justify-end gap-1">
             <button
-              onClick={(e) => { e.stopPropagation(); onTest?.(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTest?.();
+              }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
               title="Test"
             >
               <Send className="h-3.5 w-3.5" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); onPause?.(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPause?.();
+              }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
               title={webhook.status === 'active' ? 'Pause' : 'Resume'}
             >
-              {webhook.status === 'active' ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              {webhook.status === 'active' ? (
+                <Pause className="h-3.5 w-3.5" />
+              ) : (
+                <Play className="h-3.5 w-3.5" />
+              )}
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.();
+              }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
               title="Delete"
             >
@@ -359,30 +502,45 @@ export function WebhookRow({ webhook, expanded, onToggle, onTest, onPause, onDel
             <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider">Total Deliveries</p>
-                  <p className="font-mono font-medium text-text-primary">{formatNumber(webhook.totalDeliveries)}</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                    Total Deliveries
+                  </p>
+                  <p className="font-mono font-medium text-text-primary">
+                    {formatNumber(webhook.totalDeliveries)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] text-text-muted uppercase tracking-wider">Failed</p>
-                  <p className={cn('font-mono font-medium', webhook.failedDeliveries > 0 ? 'text-danger' : 'text-accent')}>
+                  <p
+                    className={cn(
+                      'font-mono font-medium',
+                      webhook.failedDeliveries > 0 ? 'text-danger' : 'text-accent'
+                    )}
+                  >
                     {webhook.failedDeliveries}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg Latency</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                    Avg Latency
+                  </p>
                   <p className="font-mono font-medium text-text-primary">{webhook.avgLatency}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider">Retry Policy</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                    Retry Policy
+                  </p>
                   <p className="text-text-secondary">
                     {webhook.retryPolicy.maxRetries} retries · {webhook.retryPolicy.backoff} backoff
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider">Signing Secret</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                    Signing Secret
+                  </p>
                   <div className="flex items-center gap-2">
                     <code className="rounded-md bg-background border border-border px-2 py-1 text-xs font-mono text-text-primary">
                       {webhook.secret}
@@ -399,7 +557,9 @@ export function WebhookRow({ webhook, expanded, onToggle, onTest, onPause, onDel
 
               {Object.keys(webhook.headers).length > 0 && (
                 <div>
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Custom Headers</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+                    Custom Headers
+                  </p>
                   <div className="space-y-1">
                     {Object.entries(webhook.headers).map(([k, v]) => (
                       <div key={k} className="flex items-center gap-2 text-xs">
@@ -415,7 +575,11 @@ export function WebhookRow({ webhook, expanded, onToggle, onTest, onPause, onDel
                 <Button size="sm" variant="outline" onClick={() => onTest?.()}>
                   <Send className="mr-1.5 h-3.5 w-3.5" /> Test Delivery
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(webhook.endpoint)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigator.clipboard.writeText(webhook.endpoint)}
+                >
                   <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy URL
                 </Button>
               </div>
@@ -440,7 +604,12 @@ export function EndpointCard({ endpoint, onTry }) {
         <MethodBadge method={endpoint.method} />
         <code className="text-sm font-mono text-text-primary">{endpoint.path}</code>
         <span className="text-xs text-text-muted ml-2">{endpoint.description}</span>
-        <ChevronDown className={cn('ml-auto h-4 w-4 text-text-muted transition-transform', expanded && 'rotate-180')} />
+        <ChevronDown
+          className={cn(
+            'ml-auto h-4 w-4 text-text-muted transition-transform',
+            expanded && 'rotate-180'
+          )}
+        />
       </div>
 
       {expanded && (
@@ -448,15 +617,21 @@ export function EndpointCard({ endpoint, onTry }) {
           {/* Parameters */}
           {endpoint.parameters.length > 0 && (
             <div>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">Parameters</h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+                Parameters
+              </h4>
               <div className="rounded-lg border border-border bg-surface overflow-hidden">
                 <table className="w-full text-xs">
                   <thead className="bg-background border-b border-border">
                     <tr>
                       <th className="px-3 py-2 text-left font-medium text-text-secondary">Name</th>
                       <th className="px-3 py-2 text-left font-medium text-text-secondary">Type</th>
-                      <th className="px-3 py-2 text-left font-medium text-text-secondary">Required</th>
-                      <th className="px-3 py-2 text-left font-medium text-text-secondary">Description</th>
+                      <th className="px-3 py-2 text-left font-medium text-text-secondary">
+                        Required
+                      </th>
+                      <th className="px-3 py-2 text-left font-medium text-text-secondary">
+                        Description
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -464,7 +639,9 @@ export function EndpointCard({ endpoint, onTry }) {
                       <tr key={param.name}>
                         <td className="px-3 py-2 font-mono text-text-primary">
                           {param.name}
-                          {param.in === 'path' && <span className="text-text-muted text-[10px]"> (path)</span>}
+                          {param.in === 'path' && (
+                            <span className="text-text-muted text-[10px]"> (path)</span>
+                          )}
                         </td>
                         <td className="px-3 py-2 text-text-secondary">{param.type}</td>
                         <td className="px-3 py-2">
@@ -485,7 +662,9 @@ export function EndpointCard({ endpoint, onTry }) {
 
           {/* Response Example */}
           <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">Response Example</h4>
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+              Response Example
+            </h4>
             <div className="rounded-lg border border-border bg-background p-3 overflow-x-auto">
               <pre className="text-xs font-mono text-text-secondary">
                 {JSON.stringify(endpoint.responseExample, null, 2)}
@@ -498,7 +677,13 @@ export function EndpointCard({ endpoint, onTry }) {
             <Button size="sm" onClick={() => onTry?.(endpoint)}>
               <Terminal className="mr-1.5 h-3.5 w-3.5" /> Try It
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(endpoint.responseExample, null, 2))}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                navigator.clipboard.writeText(JSON.stringify(endpoint.responseExample, null, 2))
+              }
+            >
               <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy Response
             </Button>
           </div>
@@ -543,7 +728,10 @@ export function ApiPlayground({ endpoint, onClose, onSend }) {
             <MethodBadge method={endpoint.method} />
             <code className="text-sm font-mono text-text-primary">{endpoint.path}</code>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -552,7 +740,9 @@ export function ApiPlayground({ endpoint, onClose, onSend }) {
           {/* Parameters Form */}
           {endpoint.parameters.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Parameters</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Parameters
+              </h3>
               {endpoint.parameters.map((param) => (
                 <div key={param.name}>
                   <label className="text-xs font-medium text-text-secondary">
@@ -580,9 +770,20 @@ export function ApiPlayground({ endpoint, onClose, onSend }) {
           {response && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Response</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Response
+                </h3>
                 <div className="flex items-center gap-3 text-xs">
-                  <span className={cn('font-mono font-medium', response.status < 300 ? 'text-accent' : response.status < 400 ? 'text-warning' : 'text-danger')}>
+                  <span
+                    className={cn(
+                      'font-mono font-medium',
+                      response.status < 300
+                        ? 'text-accent'
+                        : response.status < 400
+                          ? 'text-warning'
+                          : 'text-danger'
+                    )}
+                  >
                     {response.status} {response.status < 300 ? 'OK' : 'Error'}
                   </span>
                   <span className="text-text-muted">{response.latency}</span>
@@ -591,7 +792,9 @@ export function ApiPlayground({ endpoint, onClose, onSend }) {
 
               <div className="rounded-lg border border-border bg-background overflow-hidden">
                 <div className="border-b border-border bg-surface px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Headers</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                    Headers
+                  </p>
                 </div>
                 <div className="p-3 space-y-1">
                   {Object.entries(response.headers).map(([k, v]) => (
@@ -605,9 +808,13 @@ export function ApiPlayground({ endpoint, onClose, onSend }) {
 
               <div className="rounded-lg border border-border bg-background overflow-hidden">
                 <div className="border-b border-border bg-surface px-3 py-2 flex items-center justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Body</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                    Body
+                  </p>
                   <button
-                    onClick={() => navigator.clipboard.writeText(JSON.stringify(response.body, null, 2))}
+                    onClick={() =>
+                      navigator.clipboard.writeText(JSON.stringify(response.body, null, 2))
+                    }
                     className="text-text-muted hover:text-text-primary"
                   >
                     <Copy className="h-3.5 w-3.5" />
@@ -691,7 +898,9 @@ export function NewWebhookModal({ isOpen, onClose, onCreate, eventTypes }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Name</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Name
+            </label>
             <input
               type="text"
               required
@@ -703,7 +912,9 @@ export function NewWebhookModal({ isOpen, onClose, onCreate, eventTypes }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Endpoint URL</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Endpoint URL
+            </label>
             <input
               type="url"
               required
@@ -715,7 +926,9 @@ export function NewWebhookModal({ isOpen, onClose, onCreate, eventTypes }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Signing Secret (optional)</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Signing Secret (optional)
+            </label>
             <input
               type="text"
               value={form.secret}
@@ -726,11 +939,15 @@ export function NewWebhookModal({ isOpen, onClose, onCreate, eventTypes }) {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Events</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Events
+            </label>
             <div className="space-y-3 max-h-64 overflow-auto rounded-lg border border-border bg-surface p-3">
               {Object.entries(groupedEvents).map(([category, events]) => (
                 <div key={category}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{category}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">
+                    {category}
+                  </p>
                   <div className="space-y-1">
                     {events.map((evt) => (
                       <button
@@ -744,11 +961,17 @@ export function NewWebhookModal({ isOpen, onClose, onCreate, eventTypes }) {
                             : 'text-text-secondary hover:bg-background'
                         )}
                       >
-                        <div className={cn(
-                          'h-4 w-4 rounded border flex items-center justify-center transition-colors',
-                          form.events.includes(evt.value) ? 'bg-secondary border-secondary' : 'border-border'
-                        )}>
-                          {form.events.includes(evt.value) && <Check className="h-3 w-3 text-white" />}
+                        <div
+                          className={cn(
+                            'h-4 w-4 rounded border flex items-center justify-center transition-colors',
+                            form.events.includes(evt.value)
+                              ? 'bg-secondary border-secondary'
+                              : 'border-border'
+                          )}
+                        >
+                          {form.events.includes(evt.value) && (
+                            <Check className="h-3 w-3 text-white" />
+                          )}
                         </div>
                         {evt.label}
                       </button>
@@ -760,7 +983,9 @@ export function NewWebhookModal({ isOpen, onClose, onCreate, eventTypes }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit">
               <Plus className="mr-1.5 h-4 w-4" /> Create Webhook
             </Button>

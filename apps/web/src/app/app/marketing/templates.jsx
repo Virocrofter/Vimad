@@ -2,13 +2,44 @@
 import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LayoutTemplate, Type, Image as ImageIcon, MousePointerClick,
-  Columns, Minus, Star, ShoppingBag, Calendar, MapPin,
-  ChevronLeft, Eye, Monitor, Smartphone, Moon, Sun, Clock,
-  Plus, Trash2, Copy, Move, GripVertical, Settings,
-  Undo, Redo, Download, Save, Check, X, Palette,
-  AlignLeft, AlignCenter, AlignRight, Bold, Italic,
-  Link as LinkIcon, Upload, Layers
+  LayoutTemplate,
+  Type,
+  Image as ImageIcon,
+  MousePointerClick,
+  Columns,
+  Minus,
+  Star,
+  ShoppingBag,
+  Calendar,
+  MapPin,
+  ChevronLeft,
+  Eye,
+  Monitor,
+  Smartphone,
+  Moon,
+  Sun,
+  Clock,
+  Plus,
+  Trash2,
+  Copy,
+  Move,
+  GripVertical,
+  Settings,
+  Undo,
+  Redo,
+  Download,
+  Save,
+  Check,
+  X,
+  Palette,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Bold,
+  Italic,
+  Link as LinkIcon,
+  Upload,
+  Layers,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -92,8 +123,16 @@ const DEFAULT_BLOCKS = {
   },
   'two-col': {
     type: 'two-col',
-    left: { type: 'text', content: 'Left column content...', styles: { fontSize: '14px', color: '#475569', padding: '16px' } },
-    right: { type: 'text', content: 'Right column content...', styles: { fontSize: '14px', color: '#475569', padding: '16px' } },
+    left: {
+      type: 'text',
+      content: 'Left column content...',
+      styles: { fontSize: '14px', color: '#475569', padding: '16px' },
+    },
+    right: {
+      type: 'text',
+      content: 'Right column content...',
+      styles: { fontSize: '14px', color: '#475569', padding: '16px' },
+    },
     styles: { padding: '0', gap: '0' },
   },
   hero: {
@@ -148,11 +187,29 @@ const SAMPLE_TEMPLATES = [
     thumbnail: '🎉',
     blocks: [
       { ...DEFAULT_BLOCKS.header, content: 'Welcome to Grand Hotel!' },
-      { ...DEFAULT_BLOCKS.hero, headline: 'Your Journey Begins Here', subheadline: 'We\'re thrilled to have you. Here\'s everything you need to know.', buttonText: 'View Your Reservation' },
-      { ...DEFAULT_BLOCKS.text, content: 'Thank you for choosing Grand Hotel. We\'ve prepared a special welcome package for your arrival. Our concierge team is available 24/7 to make your stay unforgettable.' },
+      {
+        ...DEFAULT_BLOCKS.hero,
+        headline: 'Your Journey Begins Here',
+        subheadline: "We're thrilled to have you. Here's everything you need to know.",
+        buttonText: 'View Your Reservation',
+      },
+      {
+        ...DEFAULT_BLOCKS.text,
+        content:
+          "Thank you for choosing Grand Hotel. We've prepared a special welcome package for your arrival. Our concierge team is available 24/7 to make your stay unforgettable.",
+      },
       { ...DEFAULT_BLOCKS.button, content: 'Contact Concierge' },
       { ...DEFAULT_BLOCKS.divider },
-      { ...DEFAULT_BLOCKS.text, content: 'Need help? Reply to this email or call us at +1 (555) 123-4567.', styles: { ...DEFAULT_BLOCKS.text.styles, fontSize: '12px', color: '#94A3B8', align: 'center' } },
+      {
+        ...DEFAULT_BLOCKS.text,
+        content: 'Need help? Reply to this email or call us at +1 (555) 123-4567.',
+        styles: {
+          ...DEFAULT_BLOCKS.text.styles,
+          fontSize: '12px',
+          color: '#94A3B8',
+          align: 'center',
+        },
+      },
     ],
   },
   {
@@ -161,8 +218,29 @@ const SAMPLE_TEMPLATES = [
     thumbnail: '🏷️',
     blocks: [
       { ...DEFAULT_BLOCKS.header, content: 'Exclusive Offer Inside' },
-      { ...DEFAULT_BLOCKS.promo, title: 'Weekend Flash Sale', description: 'Book any weekend in August and save 40% on your stay. Plus complimentary breakfast.', code: 'FLASH40', expiry: 'Aug 31, 2026' },
-      { ...DEFAULT_BLOCKS.two_col, left: { type: 'image', src: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=280&h=200&fit=crop', alt: 'Room', styles: { padding: '0' } }, right: { type: 'text', content: 'Our newly renovated Deluxe King rooms feature premium bedding, city views, and smart room controls.', styles: { fontSize: '14px', color: '#475569', padding: '16px' } } },
+      {
+        ...DEFAULT_BLOCKS.promo,
+        title: 'Weekend Flash Sale',
+        description:
+          'Book any weekend in August and save 40% on your stay. Plus complimentary breakfast.',
+        code: 'FLASH40',
+        expiry: 'Aug 31, 2026',
+      },
+      {
+        ...DEFAULT_BLOCKS.two_col,
+        left: {
+          type: 'image',
+          src: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=280&h=200&fit=crop',
+          alt: 'Room',
+          styles: { padding: '0' },
+        },
+        right: {
+          type: 'text',
+          content:
+            'Our newly renovated Deluxe King rooms feature premium bedding, city views, and smart room controls.',
+          styles: { fontSize: '14px', color: '#475569', padding: '16px' },
+        },
+      },
       { ...DEFAULT_BLOCKS.button, content: 'Book Now — Limited Time' },
     ],
   },
@@ -172,9 +250,29 @@ const SAMPLE_TEMPLATES = [
     thumbnail: '📰',
     blocks: [
       { ...DEFAULT_BLOCKS.header, content: 'August Newsletter' },
-      { ...DEFAULT_BLOCKS.text, content: 'Discover what\'s new this month at our properties, from seasonal menus to exclusive events.' },
-      { ...DEFAULT_BLOCKS.event, title: 'Jazz by the Pool', date: 'Aug 15, 2026', time: '6:00 PM', location: 'Poolside Terrace', description: 'Live jazz performances every Saturday evening. Cocktails and tapas available.' },
-      { ...DEFAULT_BLOCKS.event, title: 'Chef\'s Table Experience', date: 'Aug 22, 2026', time: '7:30 PM', location: 'Main Restaurant', description: 'An intimate 8-course tasting menu with wine pairings. Only 12 seats available.' },
+      {
+        ...DEFAULT_BLOCKS.text,
+        content:
+          "Discover what's new this month at our properties, from seasonal menus to exclusive events.",
+      },
+      {
+        ...DEFAULT_BLOCKS.event,
+        title: 'Jazz by the Pool',
+        date: 'Aug 15, 2026',
+        time: '6:00 PM',
+        location: 'Poolside Terrace',
+        description:
+          'Live jazz performances every Saturday evening. Cocktails and tapas available.',
+      },
+      {
+        ...DEFAULT_BLOCKS.event,
+        title: "Chef's Table Experience",
+        date: 'Aug 22, 2026',
+        time: '7:30 PM',
+        location: 'Main Restaurant',
+        description:
+          'An intimate 8-course tasting menu with wine pairings. Only 12 seats available.',
+      },
       { ...DEFAULT_BLOCKS.button, content: 'View All Events' },
     ],
   },
@@ -202,14 +300,23 @@ function renderBlock(block, isSelected, isPreview, theme) {
   switch (block.type) {
     case 'header':
       return (
-        <div className={baseClasses} style={{ padding: block.styles.padding, backgroundColor: block.styles.backgroundColor, textAlign: block.styles.align }}>
-          <h1 style={{
-            fontSize: block.styles.fontSize,
-            fontWeight: block.styles.fontWeight,
-            color: isDark ? '#F8FAFC' : block.styles.color,
-            margin: 0,
-            lineHeight: 1.2,
-          }}>
+        <div
+          className={baseClasses}
+          style={{
+            padding: block.styles.padding,
+            backgroundColor: block.styles.backgroundColor,
+            textAlign: block.styles.align,
+          }}
+        >
+          <h1
+            style={{
+              fontSize: block.styles.fontSize,
+              fontWeight: block.styles.fontWeight,
+              color: isDark ? '#F8FAFC' : block.styles.color,
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
             {block.content}
           </h1>
         </div>
@@ -218,14 +325,16 @@ function renderBlock(block, isSelected, isPreview, theme) {
     case 'text':
       return (
         <div className={baseClasses} style={{ padding: block.styles.padding }}>
-          <p style={{
-            fontSize: block.styles.fontSize,
-            fontWeight: block.styles.fontWeight,
-            color: isDark ? '#CBD5E1' : block.styles.color,
-            textAlign: block.styles.align,
-            lineHeight: block.styles.lineHeight,
-            margin: 0,
-          }}>
+          <p
+            style={{
+              fontSize: block.styles.fontSize,
+              fontWeight: block.styles.fontWeight,
+              color: isDark ? '#CBD5E1' : block.styles.color,
+              textAlign: block.styles.align,
+              lineHeight: block.styles.lineHeight,
+              margin: 0,
+            }}
+          >
             {block.content}
           </p>
         </div>
@@ -233,7 +342,10 @@ function renderBlock(block, isSelected, isPreview, theme) {
 
     case 'image':
       return (
-        <div className={baseClasses} style={{ padding: block.styles.padding, textAlign: block.styles.align }}>
+        <div
+          className={baseClasses}
+          style={{ padding: block.styles.padding, textAlign: block.styles.align }}
+        >
           <img
             src={block.src}
             alt={block.alt}
@@ -249,7 +361,10 @@ function renderBlock(block, isSelected, isPreview, theme) {
 
     case 'button':
       return (
-        <div className={baseClasses} style={{ padding: block.styles.padding, textAlign: block.styles.align }}>
+        <div
+          className={baseClasses}
+          style={{ padding: block.styles.padding, textAlign: block.styles.align }}
+        >
           <a
             href={block.url}
             style={{
@@ -272,67 +387,72 @@ function renderBlock(block, isSelected, isPreview, theme) {
     case 'divider':
       return (
         <div className={baseClasses} style={{ padding: block.styles.padding }}>
-          <div style={{
-            height: block.styles.height,
-            backgroundColor: isDark ? '#475569' : block.styles.color,
-            width: '100%',
-          }} />
+          <div
+            style={{
+              height: block.styles.height,
+              backgroundColor: isDark ? '#475569' : block.styles.color,
+              width: '100%',
+            }}
+          />
         </div>
       );
 
     case 'spacer':
-      return (
-        <div className={baseClasses} style={{ height: block.styles.height }} />
-      );
+      return <div className={baseClasses} style={{ height: block.styles.height }} />;
 
     case 'two-col':
       return (
         <div className={baseClasses} style={{ padding: block.styles.padding }}>
           <div style={{ display: 'flex', gap: block.styles.gap || '16px' }}>
-            <div style={{ flex: 1 }}>
-              {renderBlock(block.left, false, isPreview, theme)}
-            </div>
-            <div style={{ flex: 1 }}>
-              {renderBlock(block.right, false, isPreview, theme)}
-            </div>
+            <div style={{ flex: 1 }}>{renderBlock(block.left, false, isPreview, theme)}</div>
+            <div style={{ flex: 1 }}>{renderBlock(block.right, false, isPreview, theme)}</div>
           </div>
         </div>
       );
 
     case 'hero':
       return (
-        <div className={baseClasses} style={{ position: 'relative', textAlign: block.styles.textAlign }}>
+        <div
+          className={baseClasses}
+          style={{ position: 'relative', textAlign: block.styles.textAlign }}
+        >
           <img
             src={block.imageSrc}
             alt="Hero"
             style={{ width: '100%', height: '250px', objectFit: 'cover', display: 'block' }}
           />
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: block.styles.overlayColor,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '32px',
-          }}>
-            <h2 style={{
-              color: block.styles.textColor,
-              fontSize: '28px',
-              fontWeight: 'bold',
-              margin: '0 0 12px 0',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-            }}>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: block.styles.overlayColor,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '32px',
+            }}
+          >
+            <h2
+              style={{
+                color: block.styles.textColor,
+                fontSize: '28px',
+                fontWeight: 'bold',
+                margin: '0 0 12px 0',
+                textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              }}
+            >
               {block.headline}
             </h2>
-            <p style={{
-              color: block.styles.textColor,
-              fontSize: '16px',
-              margin: '0 0 20px 0',
-              opacity: 0.9,
-              maxWidth: '400px',
-            }}>
+            <p
+              style={{
+                color: block.styles.textColor,
+                fontSize: '16px',
+                margin: '0 0 20px 0',
+                opacity: 0.9,
+                maxWidth: '400px',
+              }}
+            >
               {block.subheadline}
             </p>
             <a
@@ -355,31 +475,74 @@ function renderBlock(block, isSelected, isPreview, theme) {
 
     case 'promo':
       return (
-        <div className={baseClasses} style={{
-          padding: block.styles.padding,
-          backgroundColor: isDark ? '#1E293B' : block.styles.backgroundColor,
-          border: `${block.styles.borderWidth} solid ${isDark ? '#3B82F6' : block.styles.borderColor}`,
-          borderRadius: block.styles.borderRadius,
-        }}>
-          <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: isDark ? '#F8FAFC' : '#0F172A', margin: '0 0 8px 0' }}>
+        <div
+          className={baseClasses}
+          style={{
+            padding: block.styles.padding,
+            backgroundColor: isDark ? '#1E293B' : block.styles.backgroundColor,
+            border: `${block.styles.borderWidth} solid ${isDark ? '#3B82F6' : block.styles.borderColor}`,
+            borderRadius: block.styles.borderRadius,
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '22px',
+              fontWeight: 'bold',
+              color: isDark ? '#F8FAFC' : '#0F172A',
+              margin: '0 0 8px 0',
+            }}
+          >
             {block.title}
           </h3>
-          <p style={{ fontSize: '15px', color: isDark ? '#CBD5E1' : '#475569', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+          <p
+            style={{
+              fontSize: '15px',
+              color: isDark ? '#CBD5E1' : '#475569',
+              margin: '0 0 16px 0',
+              lineHeight: 1.5,
+            }}
+          >
             {block.description}
           </p>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
-            padding: '10px 16px',
-            borderRadius: '6px',
-            border: `1px dashed ${isDark ? '#3B82F6' : '#3B82F6'}`,
-          }}>
-            <span style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Code</span>
-            <span style={{ fontSize: '16px', fontWeight: 'bold', fontFamily: 'JetBrains Mono, monospace', color: '#3B82F6' }}>{block.code}</span>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+              padding: '10px 16px',
+              borderRadius: '6px',
+              border: `1px dashed ${isDark ? '#3B82F6' : '#3B82F6'}`,
+            }}
+          >
+            <span
+              style={{
+                fontSize: '12px',
+                color: isDark ? '#94A3B8' : '#64748B',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              Code
+            </span>
+            <span
+              style={{
+                fontSize: '16px',
+                fontWeight: 'bold',
+                fontFamily: 'JetBrains Mono, monospace',
+                color: '#3B82F6',
+              }}
+            >
+              {block.code}
+            </span>
           </div>
-          <p style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#94A3B8', margin: '12px 0 0 0' }}>
+          <p
+            style={{
+              fontSize: '12px',
+              color: isDark ? '#94A3B8' : '#94A3B8',
+              margin: '12px 0 0 0',
+            }}
+          >
             Expires {block.expiry}
           </p>
         </div>
@@ -387,27 +550,68 @@ function renderBlock(block, isSelected, isPreview, theme) {
 
     case 'event':
       return (
-        <div className={baseClasses} style={{
-          padding: block.styles.padding,
-          backgroundColor: isDark ? '#1E293B' : block.styles.backgroundColor,
-          border: `${block.styles.borderWidth} solid ${isDark ? '#A855F7' : block.styles.borderColor}`,
-          borderRadius: block.styles.borderRadius,
-        }}>
-          <h4 style={{ fontSize: '18px', fontWeight: '600', color: isDark ? '#F8FAFC' : '#0F172A', margin: '0 0 12px 0' }}>
+        <div
+          className={baseClasses}
+          style={{
+            padding: block.styles.padding,
+            backgroundColor: isDark ? '#1E293B' : block.styles.backgroundColor,
+            border: `${block.styles.borderWidth} solid ${isDark ? '#A855F7' : block.styles.borderColor}`,
+            borderRadius: block.styles.borderRadius,
+          }}
+        >
+          <h4
+            style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: isDark ? '#F8FAFC' : '#0F172A',
+              margin: '0 0 12px 0',
+            }}
+          >
             {block.title}
           </h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: isDark ? '#CBD5E1' : '#475569' }}>
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '13px',
+                color: isDark ? '#CBD5E1' : '#475569',
+              }}
+            >
               <Calendar className="h-3.5 w-3.5" style={{ display: 'inline' }} /> {block.date}
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: isDark ? '#CBD5E1' : '#475569' }}>
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '13px',
+                color: isDark ? '#CBD5E1' : '#475569',
+              }}
+            >
               <Clock className="h-3.5 w-3.5" style={{ display: 'inline' }} /> {block.time}
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: isDark ? '#CBD5E1' : '#475569' }}>
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '13px',
+                color: isDark ? '#CBD5E1' : '#475569',
+              }}
+            >
               <MapPin className="h-3.5 w-3.5" style={{ display: 'inline' }} /> {block.location}
             </span>
           </div>
-          <p style={{ fontSize: '14px', color: isDark ? '#94A3B8' : '#64748B', margin: 0, lineHeight: 1.5 }}>
+          <p
+            style={{
+              fontSize: '14px',
+              color: isDark ? '#94A3B8' : '#64748B',
+              margin: 0,
+              lineHeight: 1.5,
+            }}
+          >
             {block.description}
           </p>
         </div>
@@ -443,7 +647,7 @@ function PropertyInspector({ block, onChange }) {
   return (
     <div className="space-y-4 p-4">
       <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-        {BLOCK_TYPES.find(b => b.id === block.type)?.label || 'Block'} Properties
+        {BLOCK_TYPES.find((b) => b.id === block.type)?.label || 'Block'} Properties
       </h3>
 
       {/* Content fields */}
@@ -619,7 +823,11 @@ function PropertyInspector({ block, onChange }) {
             <div className="flex items-center gap-2">
               <input
                 type="color"
-                value={block.styles.backgroundColor === 'transparent' ? '#ffffff' : block.styles.backgroundColor}
+                value={
+                  block.styles.backgroundColor === 'transparent'
+                    ? '#ffffff'
+                    : block.styles.backgroundColor
+                }
                 onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
                 className="h-9 w-9 rounded-md border border-border cursor-pointer"
               />
@@ -687,14 +895,14 @@ export default function TemplateBuilderPage() {
 
   // Update block
   const updateBlock = (id, updatedBlock) => {
-    const newBlocks = blocks.map(b => b.id === id ? updatedBlock : b);
+    const newBlocks = blocks.map((b) => (b.id === id ? updatedBlock : b));
     setBlocks(newBlocks);
     pushHistory(newBlocks);
   };
 
   // Delete block
   const deleteBlock = (id) => {
-    const newBlocks = blocks.filter(b => b.id !== id);
+    const newBlocks = blocks.filter((b) => b.id !== id);
     setBlocks(newBlocks);
     setSelectedId(null);
     pushHistory(newBlocks);
@@ -702,10 +910,10 @@ export default function TemplateBuilderPage() {
 
   // Duplicate block
   const duplicateBlock = (id) => {
-    const block = blocks.find(b => b.id === id);
+    const block = blocks.find((b) => b.id === id);
     if (!block) return;
     const newBlock = { ...deepClone(block), id: generateId() };
-    const index = blocks.findIndex(b => b.id === id);
+    const index = blocks.findIndex((b) => b.id === id);
     const newBlocks = [...blocks.slice(0, index + 1), newBlock, ...blocks.slice(index + 1)];
     setBlocks(newBlocks);
     setSelectedId(newBlock.id);
@@ -748,7 +956,7 @@ export default function TemplateBuilderPage() {
 
   // Load template
   const loadTemplate = (template) => {
-    const newBlocks = deepClone(template.blocks).map(b => ({ ...b, id: generateId() }));
+    const newBlocks = deepClone(template.blocks).map((b) => ({ ...b, id: generateId() }));
     setBlocks(newBlocks);
     setTemplateName(template.name);
     setShowTemplates(false);
@@ -756,7 +964,7 @@ export default function TemplateBuilderPage() {
   };
 
   // Selected block
-  const selectedBlock = blocks.find(b => b.id === selectedId);
+  const selectedBlock = blocks.find((b) => b.id === selectedId);
 
   // Drag handlers
   const handleDragStart = (index) => {
@@ -828,10 +1036,18 @@ export default function TemplateBuilderPage() {
         <div className="flex items-center gap-2">
           {/* Undo/Redo */}
           <div className="flex items-center rounded-md border border-border bg-background p-0.5">
-            <button onClick={undo} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated" title="Undo">
+            <button
+              onClick={undo}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
+              title="Undo"
+            >
               <Undo className="h-3.5 w-3.5" />
             </button>
-            <button onClick={redo} className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated" title="Redo">
+            <button
+              onClick={redo}
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
+              title="Redo"
+            >
               <Redo className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -847,7 +1063,9 @@ export default function TemplateBuilderPage() {
               onClick={() => setPreviewMode('desktop')}
               className={cn(
                 'inline-flex h-7 w-7 items-center justify-center rounded transition-colors',
-                previewMode === 'desktop' ? 'bg-secondary text-white' : 'text-text-secondary hover:bg-surface-elevated'
+                previewMode === 'desktop'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-secondary hover:bg-surface-elevated'
               )}
               title="Desktop preview"
             >
@@ -857,7 +1075,9 @@ export default function TemplateBuilderPage() {
               onClick={() => setPreviewMode('mobile')}
               className={cn(
                 'inline-flex h-7 w-7 items-center justify-center rounded transition-colors',
-                previewMode === 'mobile' ? 'bg-secondary text-white' : 'text-text-secondary hover:bg-surface-elevated'
+                previewMode === 'mobile'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-secondary hover:bg-surface-elevated'
               )}
               title="Mobile preview"
             >
@@ -870,10 +1090,16 @@ export default function TemplateBuilderPage() {
             onClick={() => setPreviewTheme(previewTheme === 'light' ? 'dark' : 'light')}
             className={cn(
               'inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors',
-              previewTheme === 'dark' ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-background text-text-secondary'
+              previewTheme === 'dark'
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-background text-text-secondary'
             )}
           >
-            {previewTheme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+            {previewTheme === 'dark' ? (
+              <Moon className="h-3.5 w-3.5" />
+            ) : (
+              <Sun className="h-3.5 w-3.5" />
+            )}
             {previewTheme === 'dark' ? 'Dark' : 'Light'}
           </button>
 
@@ -891,9 +1117,11 @@ export default function TemplateBuilderPage() {
         {/* Left sidebar — Block palette */}
         <div className="w-56 border-r border-border bg-surface overflow-y-auto">
           <div className="p-3">
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2">Content</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2">
+              Content
+            </h3>
             <div className="space-y-1">
-              {BLOCK_TYPES.filter(b => b.category === 'content').map((blockType) => (
+              {BLOCK_TYPES.filter((b) => b.category === 'content').map((blockType) => (
                 <button
                   key={blockType.id}
                   onClick={() => addBlock(blockType.id)}
@@ -905,9 +1133,11 @@ export default function TemplateBuilderPage() {
               ))}
             </div>
 
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 mt-4">Layout</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 mt-4">
+              Layout
+            </h3>
             <div className="space-y-1">
-              {BLOCK_TYPES.filter(b => b.category === 'layout').map((blockType) => (
+              {BLOCK_TYPES.filter((b) => b.category === 'layout').map((blockType) => (
                 <button
                   key={blockType.id}
                   onClick={() => addBlock(blockType.id)}
@@ -919,9 +1149,11 @@ export default function TemplateBuilderPage() {
               ))}
             </div>
 
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 mt-4">Pre-built</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 mt-4">
+              Pre-built
+            </h3>
             <div className="space-y-1">
-              {BLOCK_TYPES.filter(b => b.category === 'prebuilt').map((blockType) => (
+              {BLOCK_TYPES.filter((b) => b.category === 'prebuilt').map((blockType) => (
                 <button
                   key={blockType.id}
                   onClick={() => addBlock(blockType.id)}
@@ -965,28 +1197,40 @@ export default function TemplateBuilderPage() {
                 {!selectedId && (
                   <div className="absolute right-2 top-2 z-10 hidden items-center gap-1 rounded-md border border-border bg-background p-0.5 shadow-sm group-hover:flex">
                     <button
-                      onClick={(e) => { e.stopPropagation(); moveBlock(index, index - 1); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveBlock(index, index - 1);
+                      }}
                       className="inline-flex h-6 w-6 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
                       title="Move up"
                     >
                       <ChevronLeft className="h-3 w-3 -rotate-90" />
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); moveBlock(index, index + 1); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveBlock(index, index + 1);
+                      }}
                       className="inline-flex h-6 w-6 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
                       title="Move down"
                     >
                       <ChevronLeft className="h-3 w-3 rotate-90" />
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        duplicateBlock(block.id);
+                      }}
                       className="inline-flex h-6 w-6 items-center justify-center rounded text-text-secondary hover:bg-surface-elevated"
                       title="Duplicate"
                     >
                       <Copy className="h-3 w-3" />
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteBlock(block.id);
+                      }}
                       className="inline-flex h-6 w-6 items-center justify-center rounded text-text-secondary hover:bg-danger/10 hover:text-danger"
                       title="Delete"
                     >
@@ -997,7 +1241,10 @@ export default function TemplateBuilderPage() {
 
                 {/* Drag handle when selected */}
                 {selectedId === block.id && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary cursor-move" title="Drag to reorder" />
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1 bg-secondary cursor-move"
+                    title="Drag to reorder"
+                  />
                 )}
 
                 {renderBlock(block, selectedId === block.id, false, previewTheme)}
@@ -1030,7 +1277,10 @@ export default function TemplateBuilderPage() {
           <div className="relative w-full max-w-2xl rounded-xl border border-border bg-surface p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-text-primary">Choose a Template</h2>
-              <button onClick={() => setShowTemplates(false)} className="text-text-muted hover:text-text-primary">
+              <button
+                onClick={() => setShowTemplates(false)}
+                className="text-text-muted hover:text-text-primary"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>

@@ -1,5 +1,5 @@
 import { Calendar, LayoutGrid } from 'lucide-react';
-import TapeChart  from '../../../components/room-plan/TapeChart';
+import TapeChart from '../../../components/room-plan/TapeChart';
 
 export default function RoomPlanPage() {
   return (

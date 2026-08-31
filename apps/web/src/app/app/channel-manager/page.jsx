@@ -1,11 +1,36 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Globe, Link2, Unlink, RefreshCw, CheckCircle2, AlertTriangle,
-  XCircle, Clock, Settings, Plus, Search, Filter, ChevronRight,
-  BedDouble, DollarSign, MapPin, Wifi, Zap, ExternalLink,
-  MoreHorizontal, Trash2, Edit3, X, Save, Play, Pause,
-  ArrowRightLeft, LayoutGrid, List, Download
+  Globe,
+  Link2,
+  Unlink,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  Settings,
+  Plus,
+  Search,
+  Filter,
+  ChevronRight,
+  BedDouble,
+  DollarSign,
+  MapPin,
+  Wifi,
+  Zap,
+  ExternalLink,
+  MoreHorizontal,
+  Trash2,
+  Edit3,
+  X,
+  Save,
+  Play,
+  Pause,
+  ArrowRightLeft,
+  LayoutGrid,
+  List,
+  Download,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -131,13 +156,62 @@ const otaConnections = [
 ];
 
 const syncLogs = [
-  { id: 1, time: '2026-08-12 11:58:02', channel: 'Expedia', action: 'Push inventory', status: 'success', details: 'Updated 4 room types, 14 date ranges' },
-  { id: 2, time: '2026-08-12 11:58:15', channel: 'Expedia', action: 'Pull reservations', status: 'success', details: '2 new bookings imported' },
-  { id: 3, time: '2026-08-12 11:45:00', channel: 'Booking.com', action: 'Push rates', status: 'success', details: 'Updated 12 rate plans' },
-  { id: 4, time: '2026-08-12 11:30:22', channel: 'Hotelbeds', action: 'Push inventory', status: 'warning', details: '1 room type blocked — OOO mismatch' },
-  { id: 5, time: '2026-08-12 11:15:45', channel: 'Airbnb', action: 'Auth refresh', status: 'error', details: 'Token expired (HTTP 401)' },
-  { id: 6, time: '2026-08-12 11:00:00', channel: 'Booking.com', action: 'Push inventory', status: 'success', details: 'Updated 4 room types, 14 date ranges' },
-  { id: 7, time: '2026-08-12 10:45:30', channel: 'Direct Website', action: 'Booking received', status: 'success', details: 'Reservation #4031 confirmed' },
+  {
+    id: 1,
+    time: '2026-08-12 11:58:02',
+    channel: 'Expedia',
+    action: 'Push inventory',
+    status: 'success',
+    details: 'Updated 4 room types, 14 date ranges',
+  },
+  {
+    id: 2,
+    time: '2026-08-12 11:58:15',
+    channel: 'Expedia',
+    action: 'Pull reservations',
+    status: 'success',
+    details: '2 new bookings imported',
+  },
+  {
+    id: 3,
+    time: '2026-08-12 11:45:00',
+    channel: 'Booking.com',
+    action: 'Push rates',
+    status: 'success',
+    details: 'Updated 12 rate plans',
+  },
+  {
+    id: 4,
+    time: '2026-08-12 11:30:22',
+    channel: 'Hotelbeds',
+    action: 'Push inventory',
+    status: 'warning',
+    details: '1 room type blocked — OOO mismatch',
+  },
+  {
+    id: 5,
+    time: '2026-08-12 11:15:45',
+    channel: 'Airbnb',
+    action: 'Auth refresh',
+    status: 'error',
+    details: 'Token expired (HTTP 401)',
+  },
+  {
+    id: 6,
+    time: '2026-08-12 11:00:00',
+    channel: 'Booking.com',
+    action: 'Push inventory',
+    status: 'success',
+    details: 'Updated 4 room types, 14 date ranges',
+  },
+  {
+    id: 7,
+    time: '2026-08-12 10:45:30',
+    channel: 'Direct Website',
+    action: 'Booking received',
+    status: 'success',
+    details: 'Reservation #4031 confirmed',
+  },
 ];
 
 const pmsRoomTypes = [
@@ -183,11 +257,36 @@ const otaRatePlanMappings = {
 
 /* ─── Status Helpers ─── */
 const statusMeta = {
-  connected: { label: 'Connected', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', icon: CheckCircle2 },
-  syncing: { label: 'Syncing', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', icon: RefreshCw },
-  error: { label: 'Error', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: AlertTriangle },
-  disconnected: { label: 'Disconnected', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted', icon: Unlink },
-  pending: { label: 'Pending', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', icon: Clock },
+  connected: {
+    label: 'Connected',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: CheckCircle2,
+  },
+  syncing: {
+    label: 'Syncing',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: RefreshCw,
+  },
+  error: {
+    label: 'Error',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: AlertTriangle,
+  },
+  disconnected: {
+    label: 'Disconnected',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+    icon: Unlink,
+  },
+  pending: {
+    label: 'Pending',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: Clock,
+  },
 };
 
 const logStatusMeta = {
@@ -206,7 +305,18 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
           <p className={cn('mt-1 text-2xl font-bold', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -217,29 +327,53 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
 function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
   const meta = statusMeta[connection.status];
   const StatusIcon = meta.icon;
-  const mappingPct = Math.round(((connection.mappedRoomTypes + connection.mappedRatePlans) / (connection.totalRoomTypes + connection.totalRatePlans)) * 100) || 0;
+  const mappingPct =
+    Math.round(
+      ((connection.mappedRoomTypes + connection.mappedRatePlans) /
+        (connection.totalRoomTypes + connection.totalRatePlans)) *
+        100
+    ) || 0;
 
   return (
-    <div className={cn(
-      'group rounded-xl border bg-surface p-5 transition-all hover:shadow-md',
-      connection.status === 'error' ? 'border-danger/30 hover:border-danger/50' :
-      connection.status === 'syncing' ? 'border-info/30 hover:border-info/50' :
-      connection.status === 'connected' ? 'border-border hover:border-secondary/50' :
-      'border-border hover:border-secondary/50'
-    )}>
+    <div
+      className={cn(
+        'group rounded-xl border bg-surface p-5 transition-all hover:shadow-md',
+        connection.status === 'error'
+          ? 'border-danger/30 hover:border-danger/50'
+          : connection.status === 'syncing'
+            ? 'border-info/30 hover:border-info/50'
+            : connection.status === 'connected'
+              ? 'border-border hover:border-secondary/50'
+              : 'border-border hover:border-secondary/50'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg text-white font-bold text-sm', connection.logoColor)}>
+          <div
+            className={cn(
+              'flex h-10 w-10 items-center justify-center rounded-lg text-white font-bold text-sm',
+              connection.logoColor
+            )}
+          >
             {connection.name[0]}
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{connection.name}</h3>
-            <p className="text-xs text-text-muted capitalize">{connection.type} • {connection.syncFrequency}</p>
+            <p className="text-xs text-text-muted capitalize">
+              {connection.type} • {connection.syncFrequency}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider', meta.class)}>
-            <StatusIcon className={cn('h-3 w-3', connection.status === 'syncing' && 'animate-spin')} />
+          <span
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+              meta.class
+            )}
+          >
+            <StatusIcon
+              className={cn('h-3 w-3', connection.status === 'syncing' && 'animate-spin')}
+            />
             {meta.label}
           </span>
           <button
@@ -259,7 +393,12 @@ function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
         </div>
         <div>
           <p className="text-text-muted">Next Sync</p>
-          <p className={cn('mt-0.5 font-medium', connection.status === 'error' ? 'text-danger' : 'text-text-primary')}>
+          <p
+            className={cn(
+              'mt-0.5 font-medium',
+              connection.status === 'error' ? 'text-danger' : 'text-text-primary'
+            )}
+          >
             {connection.nextSync}
           </p>
         </div>
@@ -276,18 +415,27 @@ function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
       <div className="mt-4">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs text-text-muted">Mapping Complete</span>
-          <span className={cn('text-xs font-bold', mappingPct === 100 ? 'text-accent' : mappingPct >= 50 ? 'text-warning' : 'text-danger')}>
+          <span
+            className={cn(
+              'text-xs font-bold',
+              mappingPct === 100 ? 'text-accent' : mappingPct >= 50 ? 'text-warning' : 'text-danger'
+            )}
+          >
             {mappingPct}%
           </span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
           <div
-            className={cn('h-full rounded-full transition-all', mappingPct === 100 ? 'bg-accent' : mappingPct >= 50 ? 'bg-warning' : 'bg-danger')}
+            className={cn(
+              'h-full rounded-full transition-all',
+              mappingPct === 100 ? 'bg-accent' : mappingPct >= 50 ? 'bg-warning' : 'bg-danger'
+            )}
             style={{ width: `${mappingPct}%` }}
           />
         </div>
         <p className="mt-1 text-[10px] text-text-muted">
-          {connection.mappedRoomTypes}/{connection.totalRoomTypes} room types • {connection.mappedRatePlans}/{connection.totalRatePlans} rate plans
+          {connection.mappedRoomTypes}/{connection.totalRoomTypes} room types •{' '}
+          {connection.mappedRatePlans}/{connection.totalRatePlans} rate plans
         </p>
       </div>
 
@@ -298,15 +446,20 @@ function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
           {connection.reservationsToday} bookings
         </div>
         <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-          <DollarSign className="h-3.5 w-3.5 text-text-muted" />
-          ${connection.revenueToday.toLocaleString()}
+          <DollarSign className="h-3.5 w-3.5 text-text-muted" />$
+          {connection.revenueToday.toLocaleString()}
         </div>
       </div>
 
       {/* Actions */}
       <div className="mt-3 flex items-center gap-2">
         {connection.status === 'disconnected' ? (
-          <Button size="sm" variant="secondary" className="flex-1" onClick={() => onConfigure(connection)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="flex-1"
+            onClick={() => onConfigure(connection)}
+          >
             <Link2 className="mr-1.5 h-3.5 w-3.5" /> Connect
           </Button>
         ) : (
@@ -318,10 +471,20 @@ function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
               onClick={() => onSync(connection)}
               disabled={connection.status === 'syncing'}
             >
-              <RefreshCw className={cn('mr-1.5 h-3.5 w-3.5', connection.status === 'syncing' && 'animate-spin')} />
+              <RefreshCw
+                className={cn(
+                  'mr-1.5 h-3.5 w-3.5',
+                  connection.status === 'syncing' && 'animate-spin'
+                )}
+              />
               {connection.status === 'syncing' ? 'Syncing...' : 'Sync Now'}
             </Button>
-            <Button size="sm" variant="outline" className="flex-1" onClick={() => onMap(connection)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onMap(connection)}
+            >
               <ArrowRightLeft className="mr-1.5 h-3.5 w-3.5" /> Map
             </Button>
           </>
@@ -333,10 +496,12 @@ function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
             connection.isActive ? 'bg-secondary' : 'bg-border'
           )}
         >
-          <span className={cn(
-            'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-            connection.isActive ? 'translate-x-[22px]' : 'translate-x-1'
-          )} />
+          <span
+            className={cn(
+              'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+              connection.isActive ? 'translate-x-[22px]' : 'translate-x-1'
+            )}
+          />
         </button>
       </div>
     </div>
@@ -359,14 +524,18 @@ export default function ChannelManagerPage() {
 
   const filteredConnections = useMemo(() => {
     return connections.filter((c) => {
-      const matchesQuery = c.name.toLowerCase().includes(query.toLowerCase()) || c.type.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery =
+        c.name.toLowerCase().includes(query.toLowerCase()) ||
+        c.type.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
   }, [connections, query, statusFilter]);
 
   const stats = useMemo(() => {
-    const connected = connections.filter((c) => c.status === 'connected' || c.status === 'syncing').length;
+    const connected = connections.filter(
+      (c) => c.status === 'connected' || c.status === 'syncing'
+    ).length;
     const errors = connections.filter((c) => c.status === 'error').length;
     const totalBookings = connections.reduce((s, c) => s + c.reservationsToday, 0);
     const totalRevenue = connections.reduce((s, c) => s + c.revenueToday, 0);
@@ -374,32 +543,42 @@ export default function ChannelManagerPage() {
   }, [connections]);
 
   const handleToggle = (id) => {
-    setConnections((prev) => prev.map((c) => {
-      if (c.id !== id) return c;
-      const nextActive = !c.isActive;
-      return {
-        ...c,
-        isActive: nextActive,
-        status: nextActive ? (c.status === 'disconnected' ? 'pending' : c.status) : 'disconnected',
-      };
-    }));
+    setConnections((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c;
+        const nextActive = !c.isActive;
+        return {
+          ...c,
+          isActive: nextActive,
+          status: nextActive
+            ? c.status === 'disconnected'
+              ? 'pending'
+              : c.status
+            : 'disconnected',
+        };
+      })
+    );
   };
 
   const handleSync = (connection) => {
-    setConnections((prev) => prev.map((c) => {
-      if (c.id !== connection.id) return c;
-      return { ...c, status: 'syncing', lastSync: 'In progress...' };
-    }));
-    setTimeout(() => {
-      setConnections((prev) => prev.map((c) => {
+    setConnections((prev) =>
+      prev.map((c) => {
         if (c.id !== connection.id) return c;
-        return {
-          ...c,
-          status: 'connected',
-          lastSync: new Date().toLocaleString(),
-          nextSync: 'Auto',
-        };
-      }));
+        return { ...c, status: 'syncing', lastSync: 'In progress...' };
+      })
+    );
+    setTimeout(() => {
+      setConnections((prev) =>
+        prev.map((c) => {
+          if (c.id !== connection.id) return c;
+          return {
+            ...c,
+            status: 'connected',
+            lastSync: new Date().toLocaleString(),
+            nextSync: 'Auto',
+          };
+        })
+      );
     }, 2500);
   };
 
@@ -420,7 +599,9 @@ export default function ChannelManagerPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Channel Manager</h1>
-          <p className="text-sm text-text-secondary">OTA connections, inventory mapping, and sync controls</p>
+          <p className="text-sm text-text-secondary">
+            OTA connections, inventory mapping, and sync controls
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -434,10 +615,34 @@ export default function ChannelManagerPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Active Channels" value={stats.connected} icon={Wifi} color="text-accent" subtext={`of ${connections.length} total`} />
-        <StatCard label="Errors" value={stats.errors} icon={AlertTriangle} color="text-danger" subtext="Require attention" />
-        <StatCard label="Today's Bookings" value={stats.totalBookings} icon={BedDouble} color="text-secondary" subtext="Across all channels" />
-        <StatCard label="Today's Revenue" value={`$${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} color="text-info" subtext="Channel-driven" />
+        <StatCard
+          label="Active Channels"
+          value={stats.connected}
+          icon={Wifi}
+          color="text-accent"
+          subtext={`of ${connections.length} total`}
+        />
+        <StatCard
+          label="Errors"
+          value={stats.errors}
+          icon={AlertTriangle}
+          color="text-danger"
+          subtext="Require attention"
+        />
+        <StatCard
+          label="Today's Bookings"
+          value={stats.totalBookings}
+          icon={BedDouble}
+          color="text-secondary"
+          subtext="Across all channels"
+        />
+        <StatCard
+          label="Today's Revenue"
+          value={`$${stats.totalRevenue.toLocaleString()}`}
+          icon={DollarSign}
+          color="text-info"
+          subtext="Channel-driven"
+        />
       </div>
 
       {/* Filters */}
@@ -467,13 +672,23 @@ export default function ChannelManagerPage() {
           <div className="flex rounded-md border border-border bg-surface p-0.5">
             <button
               onClick={() => setViewMode('grid')}
-              className={cn('inline-flex h-8 w-8 items-center justify-center rounded transition-colors', viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary')}
+              className={cn(
+                'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
+                viewMode === 'grid'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
+              )}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={cn('inline-flex h-8 w-8 items-center justify-center rounded transition-colors', viewMode === 'list' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary')}
+              className={cn(
+                'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
+                viewMode === 'list'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
+              )}
             >
               <List className="h-4 w-4" />
             </button>
@@ -522,12 +737,22 @@ export default function ChannelManagerPage() {
                 {filteredConnections.map((c) => {
                   const meta = statusMeta[c.status];
                   const StatusIcon = meta.icon;
-                  const mappingPct = Math.round(((c.mappedRoomTypes + c.mappedRatePlans) / (c.totalRoomTypes + c.totalRatePlans)) * 100) || 0;
+                  const mappingPct =
+                    Math.round(
+                      ((c.mappedRoomTypes + c.mappedRatePlans) /
+                        (c.totalRoomTypes + c.totalRatePlans)) *
+                        100
+                    ) || 0;
                   return (
                     <tr key={c.id} className="hover:bg-background/50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg text-white text-xs font-bold', c.logoColor)}>
+                          <div
+                            className={cn(
+                              'flex h-8 w-8 items-center justify-center rounded-lg text-white text-xs font-bold',
+                              c.logoColor
+                            )}
+                          >
                             {c.name[0]}
                           </div>
                           <div>
@@ -537,8 +762,15 @@ export default function ChannelManagerPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium', meta.class)}>
-                          <StatusIcon className={cn('h-3 w-3', c.status === 'syncing' && 'animate-spin')} />
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium',
+                            meta.class
+                          )}
+                        >
+                          <StatusIcon
+                            className={cn('h-3 w-3', c.status === 'syncing' && 'animate-spin')}
+                          />
                           {meta.label}
                         </span>
                       </td>
@@ -546,24 +778,53 @@ export default function ChannelManagerPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="h-1.5 w-16 rounded-full bg-border overflow-hidden">
-                            <div className={cn('h-full rounded-full', mappingPct === 100 ? 'bg-accent' : mappingPct >= 50 ? 'bg-warning' : 'bg-danger')} style={{ width: `${mappingPct}%` }} />
+                            <div
+                              className={cn(
+                                'h-full rounded-full',
+                                mappingPct === 100
+                                  ? 'bg-accent'
+                                  : mappingPct >= 50
+                                    ? 'bg-warning'
+                                    : 'bg-danger'
+                              )}
+                              style={{ width: `${mappingPct}%` }}
+                            />
                           </div>
                           <span className="text-xs text-text-muted">{mappingPct}%</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <p className="text-sm font-medium text-text-primary">{c.reservationsToday} <span className="text-text-muted text-xs">bkgs</span></p>
-                        <p className="text-xs text-text-muted">${c.revenueToday.toLocaleString()}</p>
+                        <p className="text-sm font-medium text-text-primary">
+                          {c.reservationsToday}{' '}
+                          <span className="text-text-muted text-xs">bkgs</span>
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          ${c.revenueToday.toLocaleString()}
+                        </p>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => handleSync(c)} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary" title="Sync">
-                            <RefreshCw className={cn('h-4 w-4', c.status === 'syncing' && 'animate-spin')} />
+                          <button
+                            onClick={() => handleSync(c)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                            title="Sync"
+                          >
+                            <RefreshCw
+                              className={cn('h-4 w-4', c.status === 'syncing' && 'animate-spin')}
+                            />
                           </button>
-                          <button onClick={() => openMapping(c)} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary" title="Map">
+                          <button
+                            onClick={() => openMapping(c)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                            title="Map"
+                          >
                             <ArrowRightLeft className="h-4 w-4" />
                           </button>
-                          <button onClick={() => openConfig(c)} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary" title="Settings">
+                          <button
+                            onClick={() => openConfig(c)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                            title="Settings"
+                          >
                             <Settings className="h-4 w-4" />
                           </button>
                         </div>
@@ -598,11 +859,21 @@ export default function ChannelManagerPage() {
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Time</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Channel</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Action</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Details</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Time
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Channel
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Action
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                  Details
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -616,7 +887,9 @@ export default function ChannelManagerPage() {
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1.5">
                         <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
-                        <span className={cn('text-xs font-medium capitalize', meta.text)}>{log.status}</span>
+                        <span className={cn('text-xs font-medium capitalize', meta.text)}>
+                          {log.status}
+                        </span>
                       </span>
                     </td>
                     <td className="px-4 py-3 text-text-secondary text-xs">{log.details}</td>
@@ -627,23 +900,38 @@ export default function ChannelManagerPage() {
           </table>
         </div>
       </div>
-            {/* ─── Mapping Modal ─── */}
+      {/* ─── Mapping Modal ─── */}
       {showMapping && selectedConnection && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMapping(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMapping(false)}
+          />
           <div className="relative w-full max-w-4xl rounded-xl border border-border bg-background shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
             {/* Header */}
             <div className="border-b border-border bg-surface px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg text-white font-bold', selectedConnection.logoColor)}>
+                <div
+                  className={cn(
+                    'flex h-9 w-9 items-center justify-center rounded-lg text-white font-bold',
+                    selectedConnection.logoColor
+                  )}
+                >
                   {selectedConnection.name[0]}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-text-primary">Map {selectedConnection.name}</h3>
-                  <p className="text-xs text-text-muted">Link OTA inventory to your PMS room types and rate plans</p>
+                  <h3 className="text-lg font-bold text-text-primary">
+                    Map {selectedConnection.name}
+                  </h3>
+                  <p className="text-xs text-text-muted">
+                    Link OTA inventory to your PMS room types and rate plans
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setShowMapping(false)} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={() => setShowMapping(false)}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -663,7 +951,9 @@ export default function ChannelManagerPage() {
                       onClick={() => setMappingTab(tab.id)}
                       className={cn(
                         'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                        active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                        active
+                          ? 'border-secondary text-secondary'
+                          : 'border-transparent text-text-secondary hover:text-text-primary'
                       )}
                     >
                       <Icon className="h-4 w-4" />
@@ -681,23 +971,35 @@ export default function ChannelManagerPage() {
                   <div className="rounded-lg border border-border bg-surface p-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-secondary" />
-                      <span className="text-sm font-medium text-text-primary">Room Type Mapping</span>
+                      <span className="text-sm font-medium text-text-primary">
+                        Room Type Mapping
+                      </span>
                     </div>
                     <span className="text-xs text-text-muted">
-                      {roomTypeMap[selectedConnection.id]?.filter(m => m.mapped).length || 0} of {pmsRoomTypes.length} mapped
+                      {roomTypeMap[selectedConnection.id]?.filter((m) => m.mapped).length || 0} of{' '}
+                      {pmsRoomTypes.length} mapped
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     {(roomTypeMap[selectedConnection.id] || []).map((mapping) => (
-                      <div key={mapping.otaRoomId} className={cn(
-                        'flex items-center gap-4 rounded-xl border p-4 transition-all',
-                        mapping.mapped ? 'border-accent/30 bg-accent/5' : 'border-border bg-surface'
-                      )}>
+                      <div
+                        key={mapping.otaRoomId}
+                        className={cn(
+                          'flex items-center gap-4 rounded-xl border p-4 transition-all',
+                          mapping.mapped
+                            ? 'border-accent/30 bg-accent/5'
+                            : 'border-border bg-surface'
+                        )}
+                      >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono text-text-muted bg-background px-1.5 py-0.5 rounded border border-border">{mapping.otaRoomId}</span>
-                            <span className="text-sm font-medium text-text-primary">{mapping.otaName}</span>
+                            <span className="text-xs font-mono text-text-muted bg-background px-1.5 py-0.5 rounded border border-border">
+                              {mapping.otaRoomId}
+                            </span>
+                            <span className="text-sm font-medium text-text-primary">
+                              {mapping.otaName}
+                            </span>
                           </div>
                         </div>
                         <ArrowRightLeft className="h-4 w-4 text-text-muted shrink-0" />
@@ -706,20 +1008,22 @@ export default function ChannelManagerPage() {
                             value={mapping.pmsRoomId || ''}
                             onChange={(e) => {
                               const val = e.target.value || null;
-                              setRoomTypeMap(prev => ({
+                              setRoomTypeMap((prev) => ({
                                 ...prev,
-                                [selectedConnection.id]: prev[selectedConnection.id].map(m =>
+                                [selectedConnection.id]: prev[selectedConnection.id].map((m) =>
                                   m.otaRoomId === mapping.otaRoomId
                                     ? { ...m, pmsRoomId: val, mapped: !!val }
                                     : m
-                                )
+                                ),
                               }));
                             }}
                             className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             <option value="">— Unmapped —</option>
-                            {pmsRoomTypes.map(rt => (
-                              <option key={rt.id} value={rt.id}>{rt.name}</option>
+                            {pmsRoomTypes.map((rt) => (
+                              <option key={rt.id} value={rt.id}>
+                                {rt.name}
+                              </option>
                             ))}
                           </select>
                         </div>
@@ -739,23 +1043,35 @@ export default function ChannelManagerPage() {
                   <div className="rounded-lg border border-border bg-surface p-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-secondary" />
-                      <span className="text-sm font-medium text-text-primary">Rate Plan Mapping</span>
+                      <span className="text-sm font-medium text-text-primary">
+                        Rate Plan Mapping
+                      </span>
                     </div>
                     <span className="text-xs text-text-muted">
-                      {ratePlanMap[selectedConnection.id]?.filter(m => m.mapped).length || 0} mapped
+                      {ratePlanMap[selectedConnection.id]?.filter((m) => m.mapped).length || 0}{' '}
+                      mapped
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     {(ratePlanMap[selectedConnection.id] || []).map((mapping) => (
-                      <div key={mapping.otaPlanId} className={cn(
-                        'flex items-center gap-4 rounded-xl border p-4 transition-all',
-                        mapping.mapped ? 'border-accent/30 bg-accent/5' : 'border-border bg-surface'
-                      )}>
+                      <div
+                        key={mapping.otaPlanId}
+                        className={cn(
+                          'flex items-center gap-4 rounded-xl border p-4 transition-all',
+                          mapping.mapped
+                            ? 'border-accent/30 bg-accent/5'
+                            : 'border-border bg-surface'
+                        )}
+                      >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono text-text-muted bg-background px-1.5 py-0.5 rounded border border-border">{mapping.otaPlanId}</span>
-                            <span className="text-sm font-medium text-text-primary">{mapping.otaName}</span>
+                            <span className="text-xs font-mono text-text-muted bg-background px-1.5 py-0.5 rounded border border-border">
+                              {mapping.otaPlanId}
+                            </span>
+                            <span className="text-sm font-medium text-text-primary">
+                              {mapping.otaName}
+                            </span>
                           </div>
                         </div>
                         <ArrowRightLeft className="h-4 w-4 text-text-muted shrink-0" />
@@ -764,13 +1080,13 @@ export default function ChannelManagerPage() {
                             value={mapping.pmsPlanId || ''}
                             onChange={(e) => {
                               const val = e.target.value || null;
-                              setRatePlanMap(prev => ({
+                              setRatePlanMap((prev) => ({
                                 ...prev,
-                                [selectedConnection.id]: prev[selectedConnection.id].map(m =>
+                                [selectedConnection.id]: prev[selectedConnection.id].map((m) =>
                                   m.otaPlanId === mapping.otaPlanId
                                     ? { ...m, pmsPlanId: val, mapped: !!val }
                                     : m
-                                )
+                                ),
                               }));
                             }}
                             className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -789,7 +1105,8 @@ export default function ChannelManagerPage() {
                         )}
                       </div>
                     ))}
-                    {(!ratePlanMap[selectedConnection.id] || ratePlanMap[selectedConnection.id].length === 0) && (
+                    {(!ratePlanMap[selectedConnection.id] ||
+                      ratePlanMap[selectedConnection.id].length === 0) && (
                       <div className="text-center py-12 text-text-muted text-sm">
                         No rate plans available for this channel.
                       </div>
@@ -815,16 +1132,29 @@ export default function ChannelManagerPage() {
       {/* ─── Configuration Drawer ─── */}
       {showConfig && selectedConnection && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowConfig(false)} />
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowConfig(false)}
+          />
           <div className="relative w-full max-w-md bg-background shadow-2xl overflow-auto animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg text-white font-bold text-xs', selectedConnection.logoColor)}>
+                <div
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-lg text-white font-bold text-xs',
+                    selectedConnection.logoColor
+                  )}
+                >
                   {selectedConnection.name[0]}
                 </div>
-                <h3 className="text-lg font-bold text-text-primary">{selectedConnection.name} Settings</h3>
+                <h3 className="text-lg font-bold text-text-primary">
+                  {selectedConnection.name} Settings
+                </h3>
               </div>
-              <button onClick={() => setShowConfig(false)} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={() => setShowConfig(false)}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -849,7 +1179,9 @@ export default function ChannelManagerPage() {
 
               {/* API Key */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">API Key</label>
+                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  API Key
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -865,7 +1197,9 @@ export default function ChannelManagerPage() {
 
               {/* Webhook URL */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Webhook URL</label>
+                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Webhook URL
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -881,7 +1215,9 @@ export default function ChannelManagerPage() {
 
               {/* Sync Frequency */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Sync Frequency</label>
+                <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Sync Frequency
+                </label>
                 <select
                   defaultValue={selectedConnection.syncFrequency}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -896,18 +1232,32 @@ export default function ChannelManagerPage() {
 
               {/* Inventory Push Settings */}
               <div className="space-y-3 rounded-lg border border-border bg-surface p-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Push Settings</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Push Settings
+                </h4>
                 <label className="flex items-center justify-between text-sm text-text-primary cursor-pointer">
                   <span>Auto-push inventory</span>
-                  <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border text-secondary focus:ring-ring" />
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    className="h-4 w-4 rounded border-border text-secondary focus:ring-ring"
+                  />
                 </label>
                 <label className="flex items-center justify-between text-sm text-text-primary cursor-pointer">
                   <span>Auto-push rates</span>
-                  <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border text-secondary focus:ring-ring" />
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    className="h-4 w-4 rounded border-border text-secondary focus:ring-ring"
+                  />
                 </label>
                 <label className="flex items-center justify-between text-sm text-text-primary cursor-pointer">
                   <span>Close on stop-sell</span>
-                  <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border text-secondary focus:ring-ring" />
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    className="h-4 w-4 rounded border-border text-secondary focus:ring-ring"
+                  />
                 </label>
               </div>
 
@@ -917,7 +1267,11 @@ export default function ChannelManagerPage() {
                   <RefreshCw className="mr-1.5 h-4 w-4" /> Test Connection
                 </Button>
                 {selectedConnection.status !== 'disconnected' ? (
-                  <Button variant="outline" className="w-full text-danger border-danger/30 hover:bg-danger/10" size="sm">
+                  <Button
+                    variant="outline"
+                    className="w-full text-danger border-danger/30 hover:bg-danger/10"
+                    size="sm"
+                  >
                     <Unlink className="mr-1.5 h-4 w-4" /> Disconnect Channel
                   </Button>
                 ) : (

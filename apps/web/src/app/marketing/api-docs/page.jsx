@@ -1,15 +1,33 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Copy, Check, Terminal, Code, Webhook, Key, BookOpen, ChevronRight } from 'lucide-react';
+import {
+  ArrowRight,
+  Copy,
+  Check,
+  Terminal,
+  Code,
+  Webhook,
+  Key,
+  BookOpen,
+  ChevronRight,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
 const endpoints = [
   {
     category: 'Reservations',
     items: [
-      { method: 'GET', path: '/v1/reservations', desc: 'List all reservations with filtering and pagination.' },
+      {
+        method: 'GET',
+        path: '/v1/reservations',
+        desc: 'List all reservations with filtering and pagination.',
+      },
       { method: 'POST', path: '/v1/reservations', desc: 'Create a new reservation.' },
-      { method: 'GET', path: '/v1/reservations/:id', desc: 'Retrieve a specific reservation by ID.' },
+      {
+        method: 'GET',
+        path: '/v1/reservations/:id',
+        desc: 'Retrieve a specific reservation by ID.',
+      },
       { method: 'PATCH', path: '/v1/reservations/:id', desc: 'Update reservation details.' },
     ],
   },
@@ -26,14 +44,22 @@ const endpoints = [
     items: [
       { method: 'GET', path: '/v1/rooms', desc: 'List rooms with status and housekeeping state.' },
       { method: 'GET', path: '/v1/inventory', desc: 'Availability grid for date range.' },
-      { method: 'PATCH', path: '/v1/rooms/:id/status', desc: 'Update room status (clean, dirty, inspected).' },
+      {
+        method: 'PATCH',
+        path: '/v1/rooms/:id/status',
+        desc: 'Update room status (clean, dirty, inspected).',
+      },
     ],
   },
   {
     category: 'Rates & Pricing',
     items: [
       { method: 'GET', path: '/v1/rates', desc: 'Retrieve rate plans and derived rates.' },
-      { method: 'POST', path: '/v1/rates/bulk-update', desc: 'Bulk update rates across date ranges.' },
+      {
+        method: 'POST',
+        path: '/v1/rates/bulk-update',
+        desc: 'Bulk update rates across date ranges.',
+      },
       { method: 'GET', path: '/v1/rates/competitors', desc: 'Competitor rate snapshot.' },
     ],
   },
@@ -88,7 +114,8 @@ export default function ApiDocsPage() {
               Build on the <span className="text-secondary">Unified PMS</span> platform
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              RESTful API, webhooks, and comprehensive SDKs. Integrate reservations, guest data, rates, and billing into your applications.
+              RESTful API, webhooks, and comprehensive SDKs. Integrate reservations, guest data,
+              rates, and billing into your applications.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -119,24 +146,40 @@ export default function ApiDocsPage() {
               </p>
               <div className="mt-6 space-y-4">
                 <div className="flex gap-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white">1</div>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white">
+                    1
+                  </div>
                   <div>
                     <p className="font-medium text-text-primary">Generate an API key</p>
-                    <p className="text-sm text-text-secondary">Go to Settings → Integrations → API Keys in your dashboard.</p>
+                    <p className="text-sm text-text-secondary">
+                      Go to Settings → Integrations → API Keys in your dashboard.
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white">2</div>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white">
+                    2
+                  </div>
                   <div>
                     <p className="font-medium text-text-primary">Include your key in headers</p>
-                    <p className="text-sm text-text-secondary">Pass <code className="rounded bg-background px-1.5 py-0.5 text-xs font-mono text-secondary">Authorization: Bearer {'{key}'}</code> with every request.</p>
+                    <p className="text-sm text-text-secondary">
+                      Pass{' '}
+                      <code className="rounded bg-background px-1.5 py-0.5 text-xs font-mono text-secondary">
+                        Authorization: Bearer {'{key}'}
+                      </code>{' '}
+                      with every request.
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white">3</div>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white">
+                    3
+                  </div>
                   <div>
                     <p className="font-medium text-text-primary">Start building</p>
-                    <p className="text-sm text-text-secondary">Use our sandbox environment for safe testing before going live.</p>
+                    <p className="text-sm text-text-secondary">
+                      Use our sandbox environment for safe testing before going live.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -151,7 +194,11 @@ export default function ApiDocsPage() {
                   onClick={copyCode}
                   className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary"
                 >
-                  {copied ? <Check className="h-3.5 w-3.5 text-accent" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-accent" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                   {copied ? 'Copied' : 'Copy'}
                 </button>
               </div>
@@ -168,10 +215,26 @@ export default function ApiDocsPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: Key, title: 'API Key Management', desc: 'Rotate, scope, and audit keys from your dashboard.' },
-              { icon: Webhook, title: 'Webhooks', desc: 'Subscribe to 40+ events with automatic retry logic.' },
-              { icon: Code, title: 'SDKs', desc: 'Official libraries for Node.js, Python, Ruby, and PHP.' },
-              { icon: BookOpen, title: 'OpenAPI Spec', desc: 'Download our Swagger spec for auto-generated clients.' },
+              {
+                icon: Key,
+                title: 'API Key Management',
+                desc: 'Rotate, scope, and audit keys from your dashboard.',
+              },
+              {
+                icon: Webhook,
+                title: 'Webhooks',
+                desc: 'Subscribe to 40+ events with automatic retry logic.',
+              },
+              {
+                icon: Code,
+                title: 'SDKs',
+                desc: 'Official libraries for Node.js, Python, Ruby, and PHP.',
+              },
+              {
+                icon: BookOpen,
+                title: 'OpenAPI Spec',
+                desc: 'Download our Swagger spec for auto-generated clients.',
+              },
             ].map((f) => (
               <div key={f.title} className="rounded-xl border border-border bg-surface p-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
@@ -190,7 +253,9 @@ export default function ApiDocsPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-text-primary">API Reference</h2>
-            <p className="mt-2 text-text-secondary">Core endpoints for building hospitality applications.</p>
+            <p className="mt-2 text-text-secondary">
+              Core endpoints for building hospitality applications.
+            </p>
           </div>
           <div className="space-y-8">
             {endpoints.map((group) => (
@@ -220,7 +285,12 @@ export default function ApiDocsPage() {
                       </span>
                       <code className="text-sm font-mono text-text-primary">{ep.path}</code>
                       <span className="text-xs text-text-secondary sm:ml-auto">{ep.desc}</span>
-                      <ChevronRight className={cn('hidden h-4 w-4 text-text-muted sm:block', activeEndpoint === ep.path && 'rotate-90')} />
+                      <ChevronRight
+                        className={cn(
+                          'hidden h-4 w-4 text-text-muted sm:block',
+                          activeEndpoint === ep.path && 'rotate-90'
+                        )}
+                      />
                     </button>
                   ))}
                 </div>

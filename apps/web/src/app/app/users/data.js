@@ -142,8 +142,8 @@ export const roles = [
     level: 100,
     color: 'bg-danger/10 text-danger border-danger/20',
     isSystem: true,
-    permissions: permissionModules.flatMap(m => m.permissions.map(p => p.key)),
-    departmentScopes: departments.map(d => d.id),
+    permissions: permissionModules.flatMap((m) => m.permissions.map((p) => p.key)),
+    departmentScopes: departments.map((d) => d.id),
   },
   {
     id: 'role-manager',
@@ -153,18 +153,48 @@ export const roles = [
     color: 'bg-warning/10 text-warning border-warning/20',
     isSystem: true,
     permissions: [
-      'reservations.view', 'reservations.create', 'reservations.edit', 'reservations.checkin', 'reservations.override',
-      'housekeeping.view', 'housekeeping.update', 'housekeeping.schedule', 'housekeeping.inspect', 'housekeeping.ooo',
-      'billing.view', 'billing.post', 'billing.payment', 'billing.refund', 'billing.adjust', 'billing.nightaudit',
-      'guests.view', 'guests.edit', 'guests.vip', 'guests.export',
-      'inventory.view', 'inventory.adjust', 'inventory.allocations', 'inventory.overbook',
-      'rates.view', 'rates.edit', 'rates.yield', 'rates.promotions',
-      'reports.view', 'reports.export', 'reports.financial', 'reports.audit',
-      'channel.view', 'channel.sync', 'channel.configure', 'channel.map',
-      'users.view', 'users.create', 'users.edit',
+      'reservations.view',
+      'reservations.create',
+      'reservations.edit',
+      'reservations.checkin',
+      'reservations.override',
+      'housekeeping.view',
+      'housekeeping.update',
+      'housekeeping.schedule',
+      'housekeeping.inspect',
+      'housekeeping.ooo',
+      'billing.view',
+      'billing.post',
+      'billing.payment',
+      'billing.refund',
+      'billing.adjust',
+      'billing.nightaudit',
+      'guests.view',
+      'guests.edit',
+      'guests.vip',
+      'guests.export',
+      'inventory.view',
+      'inventory.adjust',
+      'inventory.allocations',
+      'inventory.overbook',
+      'rates.view',
+      'rates.edit',
+      'rates.yield',
+      'rates.promotions',
+      'reports.view',
+      'reports.export',
+      'reports.financial',
+      'reports.audit',
+      'channel.view',
+      'channel.sync',
+      'channel.configure',
+      'channel.map',
+      'users.view',
+      'users.create',
+      'users.edit',
       'settings.view',
     ],
-    departmentScopes: departments.map(d => d.id),
+    departmentScopes: departments.map((d) => d.id),
   },
   {
     id: 'role-frontdesk',
@@ -174,10 +204,16 @@ export const roles = [
     color: 'bg-secondary/10 text-secondary border-secondary/20',
     isSystem: true,
     permissions: [
-      'reservations.view', 'reservations.create', 'reservations.edit', 'reservations.checkin',
+      'reservations.view',
+      'reservations.create',
+      'reservations.edit',
+      'reservations.checkin',
       'housekeeping.view',
-      'billing.view', 'billing.post', 'billing.payment',
-      'guests.view', 'guests.edit',
+      'billing.view',
+      'billing.post',
+      'billing.payment',
+      'guests.view',
+      'guests.edit',
       'inventory.view',
       'rates.view',
     ],
@@ -191,7 +227,10 @@ export const roles = [
     color: 'bg-accent/10 text-accent border-accent/20',
     isSystem: true,
     permissions: [
-      'housekeeping.view', 'housekeeping.update', 'housekeeping.schedule', 'housekeeping.inspect',
+      'housekeeping.view',
+      'housekeeping.update',
+      'housekeeping.schedule',
+      'housekeeping.inspect',
       'reservations.view',
     ],
     departmentScopes: ['housekeeping'],
@@ -204,11 +243,18 @@ export const roles = [
     color: 'bg-info/10 text-info border-info/20',
     isSystem: true,
     permissions: [
-      'reservations.view', 'reservations.create', 'reservations.edit',
-      'guests.view', 'guests.edit',
-      'rates.view', 'rates.edit', 'rates.promotions',
-      'inventory.view', 'inventory.allocations',
-      'reports.view', 'reports.export',
+      'reservations.view',
+      'reservations.create',
+      'reservations.edit',
+      'guests.view',
+      'guests.edit',
+      'rates.view',
+      'rates.edit',
+      'rates.promotions',
+      'inventory.view',
+      'inventory.allocations',
+      'reports.view',
+      'reports.export',
     ],
     departmentScopes: ['sales', 'front-desk'],
   },
@@ -220,8 +266,14 @@ export const roles = [
     color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
     isSystem: true,
     permissions: [
-      'billing.view', 'billing.post', 'billing.payment', 'billing.refund', 'billing.adjust',
-      'reports.view', 'reports.export', 'reports.financial',
+      'billing.view',
+      'billing.post',
+      'billing.payment',
+      'billing.refund',
+      'billing.adjust',
+      'reports.view',
+      'reports.export',
+      'reports.financial',
       'guests.view',
       'reservations.view',
     ],
@@ -235,9 +287,16 @@ export const roles = [
     color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
     isSystem: true,
     permissions: [
-      'reservations.view', 'reservations.create', 'reservations.edit', 'reservations.checkin',
-      'billing.view', 'billing.post', 'billing.payment', 'billing.nightaudit',
-      'housekeeping.view', 'housekeeping.update',
+      'reservations.view',
+      'reservations.create',
+      'reservations.edit',
+      'reservations.checkin',
+      'billing.view',
+      'billing.post',
+      'billing.payment',
+      'billing.nightaudit',
+      'housekeeping.view',
+      'housekeeping.update',
       'guests.view',
       'reports.view',
     ],
@@ -260,7 +319,7 @@ export const roles = [
       'reports.view',
       'channel.view',
     ],
-    departmentScopes: departments.map(d => d.id),
+    departmentScopes: departments.map((d) => d.id),
   },
 ];
 
@@ -430,7 +489,7 @@ export const initialUsers = [
   {
     id: 'USR-010',
     firstName: 'Michael',
-    lastName: 'O\'Brien',
+    lastName: "O'Brien",
     email: 'm.obrien@grandhotel.com',
     phone: '+1 555-0310',
     roleId: 'role-frontdesk',
@@ -860,22 +919,65 @@ export const complianceFrameworks = [
 /* ─── Metadata ─── */
 export const userStatusMeta = {
   active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  suspended: { label: 'Suspended', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  'on-leave': { label: 'On Leave', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  inactive: { label: 'Inactive', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  suspended: {
+    label: 'Suspended',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
+  'on-leave': {
+    label: 'On Leave',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  inactive: {
+    label: 'Inactive',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const auditSeverityMeta = {
-  info: { label: 'Info', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', icon: 'Info' },
-  warning: { label: 'Warning', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', icon: 'AlertTriangle' },
-  danger: { label: 'Critical', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: 'AlertOctagon' },
+  info: {
+    label: 'Info',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: 'Info',
+  },
+  warning: {
+    label: 'Warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: 'AlertTriangle',
+  },
+  danger: {
+    label: 'Critical',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: 'AlertOctagon',
+  },
 };
 
 export const complianceStatusMeta = {
-  compliant: { label: 'Compliant', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  'in-progress': { label: 'In Progress', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  'not-applicable': { label: 'N/A', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
-  noncompliant: { label: 'Non-Compliant', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
+  compliant: {
+    label: 'Compliant',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  'in-progress': {
+    label: 'In Progress',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  'not-applicable': {
+    label: 'N/A',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
+  noncompliant: {
+    label: 'Non-Compliant',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 /* src/app/app/users/data.js */
@@ -884,29 +986,131 @@ export const complianceStatusMeta = {
 
 /* ─── App Pages for Role-Based Access ─── */
 export const appPages = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', category: 'Core' },
-  { id: 'reservations', label: 'Reservations', icon: 'Calendar', path: '/app/reservations', category: 'Operations' },
-  { id: 'frontDesk', label: 'Front Desk', icon: 'Monitor', path: '/app/reservations/front-desk', category: 'Operations' },
-  { id: 'guests', label: 'Guests & CRM', icon: 'Users', path: '/app/guests', category: 'Operations' },
-  { id: 'groups', label: 'Groups & Blocks', icon: 'Briefcase', path: '/app/groups', category: 'Operations' },
-  { id: 'housekeeping', label: 'Housekeeping', icon: 'Sparkles', path: '/app/housekeeping', category: 'Operations' },
-  { id: 'inventory', label: 'Inventory', icon: 'Database', path: '/app/inventory', category: 'Operations' },
-  { id: 'rates', label: 'Rates & Pricing', icon: 'TrendingUp', path: '/app/rates', category: 'Revenue' },
-  { id: 'channelManager', label: 'Channel Manager', icon: 'Globe', path: '/app/channel-manager', category: 'Revenue' },
-  { id: 'billing', label: 'Folio & Billing', icon: 'CreditCard', path: '/app/billing', category: 'Finance' },
-  { id: 'ar', label: 'Accounts Receivable', icon: 'FileText', path: '/app/ar', category: 'Finance' },
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: 'LayoutDashboard',
+    path: '/app/dashboard',
+    category: 'Core',
+  },
+  {
+    id: 'reservations',
+    label: 'Reservations',
+    icon: 'Calendar',
+    path: '/app/reservations',
+    category: 'Operations',
+  },
+  {
+    id: 'frontDesk',
+    label: 'Front Desk',
+    icon: 'Monitor',
+    path: '/app/reservations/front-desk',
+    category: 'Operations',
+  },
+  {
+    id: 'guests',
+    label: 'Guests & CRM',
+    icon: 'Users',
+    path: '/app/guests',
+    category: 'Operations',
+  },
+  {
+    id: 'groups',
+    label: 'Groups & Blocks',
+    icon: 'Briefcase',
+    path: '/app/groups',
+    category: 'Operations',
+  },
+  {
+    id: 'housekeeping',
+    label: 'Housekeeping',
+    icon: 'Sparkles',
+    path: '/app/housekeeping',
+    category: 'Operations',
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
+    icon: 'Database',
+    path: '/app/inventory',
+    category: 'Operations',
+  },
+  {
+    id: 'rates',
+    label: 'Rates & Pricing',
+    icon: 'TrendingUp',
+    path: '/app/rates',
+    category: 'Revenue',
+  },
+  {
+    id: 'channelManager',
+    label: 'Channel Manager',
+    icon: 'Globe',
+    path: '/app/channel-manager',
+    category: 'Revenue',
+  },
+  {
+    id: 'billing',
+    label: 'Folio & Billing',
+    icon: 'CreditCard',
+    path: '/app/billing',
+    category: 'Finance',
+  },
+  {
+    id: 'ar',
+    label: 'Accounts Receivable',
+    icon: 'FileText',
+    path: '/app/ar',
+    category: 'Finance',
+  },
   { id: 'reports', label: 'Reports', icon: 'BarChart', path: '/app/reports', category: 'Finance' },
   { id: 'marketing', label: 'Marketing', icon: 'Mail', path: '/app/marketing', category: 'Growth' },
-  { id: 'loyalty', label: 'Loyalty & CRM', icon: 'Heart', path: '/app/loyalty', category: 'Growth' },
+  {
+    id: 'loyalty',
+    label: 'Loyalty & CRM',
+    icon: 'Heart',
+    path: '/app/loyalty',
+    category: 'Growth',
+  },
   { id: 'users', label: 'Users & Roles', icon: 'UserCog', path: '/app/users', category: 'Admin' },
   { id: 'settings', label: 'Settings', icon: 'Settings', path: '/app/settings', category: 'Admin' },
-  { id: 'auditTrail', label: 'Audit Trail', icon: 'Shield', path: '/app/audit-trail', category: 'Admin' },
+  {
+    id: 'auditTrail',
+    label: 'Audit Trail',
+    icon: 'Shield',
+    path: '/app/audit-trail',
+    category: 'Admin',
+  },
   { id: 'keys', label: 'Key Management', icon: 'Key', path: '/app/keys', category: 'Operations' },
   { id: 'parking', label: 'Parking', icon: 'Car', path: '/app/parking', category: 'Operations' },
-  { id: 'mealPlans', label: 'Meal Plans', icon: 'Utensils', path: '/app/meal-plans', category: 'Operations' },
-  { id: 'nightAudit', label: 'Night Audit', icon: 'Moon', path: '/app/night-audit', category: 'Operations' },
-  { id: 'roomPlan', label: 'Room Plan', icon: 'Grid3x3', path: '/app/room-plan', category: 'Operations' },
-  { id: 'salesCatering', label: 'Sales & Catering', icon: 'Wine', path: '/app/sales-catering', category: 'Revenue' },
+  {
+    id: 'mealPlans',
+    label: 'Meal Plans',
+    icon: 'Utensils',
+    path: '/app/meal-plans',
+    category: 'Operations',
+  },
+  {
+    id: 'nightAudit',
+    label: 'Night Audit',
+    icon: 'Moon',
+    path: '/app/night-audit',
+    category: 'Operations',
+  },
+  {
+    id: 'roomPlan',
+    label: 'Room Plan',
+    icon: 'Grid3x3',
+    path: '/app/room-plan',
+    category: 'Operations',
+  },
+  {
+    id: 'salesCatering',
+    label: 'Sales & Catering',
+    icon: 'Wine',
+    path: '/app/sales-catering',
+    category: 'Revenue',
+  },
   { id: 'vcc', label: 'Virtual Cards', icon: 'CreditCard', path: '/app/vcc', category: 'Finance' },
   { id: 'support', label: 'Support', icon: 'HelpCircle', path: '/app/support', category: 'Admin' },
 ];
@@ -919,9 +1123,9 @@ export const initialRoles = [
     description: 'Full system access. Can manage users, roles, settings, and all property data.',
     userCount: 2,
     isSystem: true,
-    permissions: { /* existing permissions */ },
+    permissions: {/* existing permissions */},
     // NEW: Page access - super admin sees everything
-    pageAccess: appPages.map(p => p.id), // all pages
+    pageAccess: appPages.map((p) => p.id), // all pages
   },
   {
     id: 'ROLE-002',
@@ -929,12 +1133,30 @@ export const initialRoles = [
     description: 'Property-level oversight. Can view all reports and approve overrides.',
     userCount: 1,
     isSystem: false,
-    permissions: { /* existing permissions */ },
+    permissions: {/* existing permissions */},
     // NEW: Page access
-    pageAccess: ['dashboard', 'reservations', 'frontDesk', 'guests', 'groups', 'housekeeping', 
-                 'inventory', 'rates', 'channelManager', 'billing', 'ar', 'reports', 
-                 'marketing', 'loyalty', 'users', 'settings', 'auditTrail', 'roomPlan', 
-                 'salesCatering', 'support'],
+    pageAccess: [
+      'dashboard',
+      'reservations',
+      'frontDesk',
+      'guests',
+      'groups',
+      'housekeeping',
+      'inventory',
+      'rates',
+      'channelManager',
+      'billing',
+      'ar',
+      'reports',
+      'marketing',
+      'loyalty',
+      'users',
+      'settings',
+      'auditTrail',
+      'roomPlan',
+      'salesCatering',
+      'support',
+    ],
   },
   {
     id: 'ROLE-003',
@@ -942,9 +1164,22 @@ export const initialRoles = [
     description: 'Manages front desk operations, reservations, and guest services.',
     userCount: 3,
     isSystem: false,
-    permissions: { /* existing permissions */ },
-    pageAccess: ['dashboard', 'reservations', 'frontDesk', 'guests', 'groups', 'housekeeping', 
-                 'inventory', 'billing', 'keys', 'parking', 'mealPlans', 'roomPlan', 'nightAudit'],
+    permissions: {/* existing permissions */},
+    pageAccess: [
+      'dashboard',
+      'reservations',
+      'frontDesk',
+      'guests',
+      'groups',
+      'housekeeping',
+      'inventory',
+      'billing',
+      'keys',
+      'parking',
+      'mealPlans',
+      'roomPlan',
+      'nightAudit',
+    ],
   },
   {
     id: 'ROLE-004',
@@ -952,9 +1187,18 @@ export const initialRoles = [
     description: 'Handles check-ins, check-outs, and basic reservation tasks.',
     userCount: 8,
     isSystem: false,
-    permissions: { /* existing permissions */ },
-    pageAccess: ['dashboard', 'reservations', 'frontDesk', 'guests', 'housekeeping', 
-                 'billing', 'keys', 'parking', 'roomPlan'],
+    permissions: {/* existing permissions */},
+    pageAccess: [
+      'dashboard',
+      'reservations',
+      'frontDesk',
+      'guests',
+      'housekeeping',
+      'billing',
+      'keys',
+      'parking',
+      'roomPlan',
+    ],
   },
   {
     id: 'ROLE-005',
@@ -962,9 +1206,18 @@ export const initialRoles = [
     description: 'Overnight operations including audit, billing reconciliation, and reports.',
     userCount: 2,
     isSystem: false,
-    permissions: { /* existing permissions */ },
-    pageAccess: ['dashboard', 'reservations', 'frontDesk', 'guests', 'billing', 'ar', 
-                 'reports', 'nightAudit', 'housekeeping'],
+    permissions: {/* existing permissions */},
+    pageAccess: [
+      'dashboard',
+      'reservations',
+      'frontDesk',
+      'guests',
+      'billing',
+      'ar',
+      'reports',
+      'nightAudit',
+      'housekeeping',
+    ],
   },
   {
     id: 'ROLE-006',
@@ -972,9 +1225,17 @@ export const initialRoles = [
     description: 'Manages pricing, rate plans, and channel distribution.',
     userCount: 1,
     isSystem: false,
-    permissions: { /* existing permissions */ },
-    pageAccess: ['dashboard', 'rates', 'channelManager', 'reports', 'inventory', 
-                 'groups', 'salesCatering', 'marketing'],
+    permissions: {/* existing permissions */},
+    pageAccess: [
+      'dashboard',
+      'rates',
+      'channelManager',
+      'reports',
+      'inventory',
+      'groups',
+      'salesCatering',
+      'marketing',
+    ],
   },
   {
     id: 'ROLE-007',
@@ -982,7 +1243,7 @@ export const initialRoles = [
     description: 'Manages room status, cleaning schedules, and maintenance requests.',
     userCount: 2,
     isSystem: false,
-    permissions: { /* existing permissions */ },
+    permissions: {/* existing permissions */},
     pageAccess: ['dashboard', 'housekeeping', 'inventory', 'reports'],
   },
   {
@@ -991,7 +1252,7 @@ export const initialRoles = [
     description: 'View-only access to reports and basic property data.',
     userCount: 0,
     isSystem: false,
-    permissions: { /* existing permissions */ },
+    permissions: {/* existing permissions */},
     pageAccess: ['dashboard', 'reports', 'guests', 'reservations'],
   },
 ];
@@ -1024,20 +1285,30 @@ export function timeAgo(dt) {
 
 export function getPermissionCategoryColor(category) {
   switch (category) {
-    case 'read': return 'bg-info/10 text-info border-info/20';
-    case 'write': return 'bg-secondary/10 text-secondary border-secondary/20';
-    case 'delete': return 'bg-danger/10 text-danger border-danger/20';
-    case 'admin': return 'bg-warning/10 text-warning border-warning/20';
-    default: return 'bg-neutral/10 text-text-muted border-border';
+    case 'read':
+      return 'bg-info/10 text-info border-info/20';
+    case 'write':
+      return 'bg-secondary/10 text-secondary border-secondary/20';
+    case 'delete':
+      return 'bg-danger/10 text-danger border-danger/20';
+    case 'admin':
+      return 'bg-warning/10 text-warning border-warning/20';
+    default:
+      return 'bg-neutral/10 text-text-muted border-border';
   }
 }
 
 export function getPermissionCategoryLabel(category) {
   switch (category) {
-    case 'read': return 'Read';
-    case 'write': return 'Write';
-    case 'delete': return 'Delete';
-    case 'admin': return 'Admin';
-    default: return category;
+    case 'read':
+      return 'Read';
+    case 'write':
+      return 'Write';
+    case 'delete':
+      return 'Delete';
+    case 'admin':
+      return 'Admin';
+    default:
+      return category;
   }
 }

@@ -1,8 +1,18 @@
 /* src/app/admin/reports/ReportLibrary.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Search, Clock, Plus, Star, Eye, BarChart3, ArrowLeft,
-  BedDouble, DollarSign, Users, TrendingUp, FileText
+  Search,
+  Clock,
+  Plus,
+  Star,
+  Eye,
+  BarChart3,
+  ArrowLeft,
+  BedDouble,
+  DollarSign,
+  Users,
+  TrendingUp,
+  FileText,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -22,7 +32,9 @@ export default function ReportLibrary({ onOpenBuilder }) {
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedReport, setSelectedReport] = useState(null);
-  const [favorites, setFavorites] = useState(() => new Set(libraryReports.filter((r) => r.favorite).map((r) => r.id)));
+  const [favorites, setFavorites] = useState(
+    () => new Set(libraryReports.filter((r) => r.favorite).map((r) => r.id))
+  );
   const [dateRange, setDateRange] = useState({ from: '2026-08-01', to: '2026-08-14' });
   const colors = useChartTheme();
 
@@ -30,7 +42,9 @@ export default function ReportLibrary({ onOpenBuilder }) {
 
   const filtered = useMemo(() => {
     return libraryReports.filter((r) => {
-      const matchesQuery = r.title.toLowerCase().includes(query.toLowerCase()) || r.description.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery =
+        r.title.toLowerCase().includes(query.toLowerCase()) ||
+        r.description.toLowerCase().includes(query.toLowerCase());
       const matchesCat = categoryFilter === 'all' || r.category === categoryFilter;
       return matchesQuery && matchesCat;
     });
@@ -55,7 +69,9 @@ export default function ReportLibrary({ onOpenBuilder }) {
   const exportCsv = () => {
     if (!reportData.length) return;
     const headers = columns.map((c) => c.label).join(',');
-    const rows = reportData.map((row) => columns.map((c) => (c.format ? c.format(row) : row[c.key])).join(','));
+    const rows = reportData.map((row) =>
+      columns.map((c) => (c.format ? c.format(row) : row[c.key])).join(',')
+    );
     const csv = [headers, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -87,7 +103,9 @@ export default function ReportLibrary({ onOpenBuilder }) {
             className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {categories.map((c) => (
-              <option key={c} value={c}>{c === 'all' ? 'All Categories' : c}</option>
+              <option key={c} value={c}>
+                {c === 'all' ? 'All Categories' : c}
+              </option>
             ))}
           </select>
         </div>
@@ -112,7 +130,10 @@ export default function ReportLibrary({ onOpenBuilder }) {
                 </div>
                 <button
                   onClick={() => toggleFavorite(report.id)}
-                  className={cn('rounded-md p-1 transition-colors', isFav ? 'text-warning' : 'text-text-muted hover:text-warning')}
+                  className={cn(
+                    'rounded-md p-1 transition-colors',
+                    isFav ? 'text-warning' : 'text-text-muted hover:text-warning'
+                  )}
                 >
                   <Star className={cn('h-4 w-4', isFav && 'fill-warning')} />
                 </button>
@@ -122,13 +143,20 @@ export default function ReportLibrary({ onOpenBuilder }) {
               </h3>
               <p className="mt-1 text-xs text-text-secondary line-clamp-2">{report.description}</p>
               <div className="mt-3 flex items-center gap-2 text-[10px] text-text-muted uppercase tracking-wider">
-                <span className="rounded-full bg-background px-2 py-0.5 border border-border">{report.category}</span>
+                <span className="rounded-full bg-background px-2 py-0.5 border border-border">
+                  {report.category}
+                </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" /> {report.lastRun}
                 </span>
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedReport(report)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setSelectedReport(report)}
+                >
                   <Eye className="mr-1.5 h-3.5 w-3.5" /> View
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
@@ -149,13 +177,19 @@ export default function ReportLibrary({ onOpenBuilder }) {
       {/* Report Detail Drawer */}
       {selectedReport && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedReport(null)} />
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setSelectedReport(null)}
+          />
           <div className="relative w-full max-w-4xl bg-background shadow-2xl overflow-auto animate-in slide-in-from-right duration-300">
             {/* Drawer Header */}
             <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setSelectedReport(null)} className="rounded-md p-1 hover:bg-surface-elevated text-text-muted">
+                  <button
+                    onClick={() => setSelectedReport(null)}
+                    className="rounded-md p-1 hover:bg-surface-elevated text-text-muted"
+                  >
                     <ArrowLeft className="h-5 w-5" />
                   </button>
                   <div>
@@ -163,7 +197,11 @@ export default function ReportLibrary({ onOpenBuilder }) {
                     <p className="text-xs text-text-muted">{selectedReport.description}</p>
                   </div>
                 </div>
-                <ExportToolbar onCsv={exportCsv} onPrint={() => window.print()} onPdf={() => window.print()} />
+                <ExportToolbar
+                  onCsv={exportCsv}
+                  onPrint={() => window.print()}
+                  onPdf={() => window.print()}
+                />
               </div>
 
               {/* Date Filter */}

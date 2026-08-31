@@ -12,7 +12,13 @@ const PROVIDER_TYPES = [
 
 const LOCAL_FIELDS = ['email', 'username', 'full_name', 'first_name', 'last_name', 'role'];
 
-export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, appDomain = 'https://app.example.com' }) {
+export default function SSOModal({
+  isOpen,
+  onClose,
+  ssoConfig = null,
+  onSave,
+  appDomain = 'https://app.example.com',
+}) {
   const isEditing = !!ssoConfig;
   const [formData, setFormData] = useState({
     providerType: 'google',
@@ -69,7 +75,8 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
     const newErrors = {};
     if (!formData.displayName.trim()) newErrors.displayName = 'Display name is required';
     if (!formData.clientId.trim()) newErrors.clientId = 'Client ID is required';
-    if (!isEditing && !formData.clientSecret.trim()) newErrors.clientSecret = 'Client Secret is required';
+    if (!isEditing && !formData.clientSecret.trim())
+      newErrors.clientSecret = 'Client Secret is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +90,9 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
   const updateMapping = (index, field, value) => {
     setFormData((prev) => ({
       ...prev,
-      attributeMapping: prev.attributeMapping.map((m, i) => (i === index ? { ...m, [field]: value } : m)),
+      attributeMapping: prev.attributeMapping.map((m, i) =>
+        i === index ? { ...m, [field]: value } : m
+      ),
     }));
   };
 
@@ -159,7 +168,9 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
                   >
                     {provider.icon}
                   </div>
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{provider.label}</span>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {provider.label}
+                  </span>
                 </button>
               ))}
             </div>
@@ -179,7 +190,9 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
                 errors.displayName ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
-            {errors.displayName && <p className="mt-1 text-xs text-red-500">{errors.displayName}</p>}
+            {errors.displayName && (
+              <p className="mt-1 text-xs text-red-500">{errors.displayName}</p>
+            )}
           </div>
 
           {/* Client ID & Secret */}
@@ -212,7 +225,9 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
                   errors.clientSecret ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
-              {errors.clientSecret && <p className="mt-1 text-xs text-red-500">{errors.clientSecret}</p>}
+              {errors.clientSecret && (
+                <p className="mt-1 text-xs text-red-500">{errors.clientSecret}</p>
+              )}
             </div>
           </div>
 
@@ -247,7 +262,11 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
                 onClick={copyRedirectUri}
                 className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
-                {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-600" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
@@ -256,7 +275,9 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
           {/* Attribute Mapping */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Attribute Mapping</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Attribute Mapping
+              </label>
               <button
                 type="button"
                 onClick={addMapping}
@@ -267,8 +288,12 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
             </div>
             <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="grid grid-cols-2 gap-4 bg-gray-50 px-4 py-2.5 dark:bg-gray-800/50">
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">SSO Attribute</span>
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Local Field</span>
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  SSO Attribute
+                </span>
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Local Field
+                </span>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
                 {formData.attributeMapping.map((mapping, idx) => (
@@ -311,8 +336,12 @@ export default function SSOModal({ isOpen, onClose, ssoConfig = null, onSave, ap
           {/* Enable Toggle */}
           <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
             <div>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Enable SSO</span>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Allow users to sign in via this provider.</p>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Enable SSO
+              </span>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Allow users to sign in via this provider.
+              </p>
             </div>
             <button
               type="button"

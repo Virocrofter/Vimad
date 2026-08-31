@@ -1,12 +1,48 @@
 /* src/app/admin/settings/components.jsx */
 import { useState, useRef, useCallback } from 'react';
 import {
-  Check, Copy, Eye, EyeOff, RefreshCw, Upload, X, Palette,
-  Mail, Bell, Shield, Gauge, Wrench, Paintbrush, AlertTriangle,
-  ChevronDown, ChevronUp, Save, Undo, Download, Trash2, Plus,
-  Minus, GripVertical, ExternalLink, Code, Monitor, Smartphone,
-  Globe, Clock, DollarSign, FileText, Lock, Key, Zap, Activity,
-  Server, Database, Cloud, MessageSquare, MessageCircle, Hash
+  Check,
+  Copy,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Upload,
+  X,
+  Palette,
+  Mail,
+  Bell,
+  Shield,
+  Gauge,
+  Wrench,
+  Paintbrush,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  Undo,
+  Download,
+  Trash2,
+  Plus,
+  Minus,
+  GripVertical,
+  ExternalLink,
+  Code,
+  Monitor,
+  Smartphone,
+  Globe,
+  Clock,
+  DollarSign,
+  FileText,
+  Lock,
+  Key,
+  Zap,
+  Activity,
+  Server,
+  Database,
+  Cloud,
+  MessageSquare,
+  MessageCircle,
+  Hash,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -135,7 +171,11 @@ export function NumberStepper({ value, onChange, min = 0, max = 99999, step = 1,
           onChange={(e) => onChange(Number(e.target.value))}
           className="h-8 w-20 rounded-md border border-border bg-background px-2 text-center text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
-        {unit && <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-text-muted">{unit}</span>}
+        {unit && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-text-muted">
+            {unit}
+          </span>
+        )}
       </div>
       <button
         type="button"
@@ -235,9 +275,12 @@ export function TagInput({ tags, onChange, placeholder }) {
     }
   }, [input, tags, onChange]);
 
-  const removeTag = useCallback((tag) => {
-    onChange(tags.filter((t) => t !== tag));
-  }, [tags, onChange]);
+  const removeTag = useCallback(
+    (tag) => {
+      onChange(tags.filter((t) => t !== tag));
+    },
+    [tags, onChange]
+  );
 
   return (
     <div className="w-full">
@@ -262,7 +305,10 @@ export function TagInput({ tags, onChange, placeholder }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') { e.preventDefault(); addTag(); }
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addTag();
+            }
             if (e.key === 'Backspace' && !input && tags.length) {
               removeTag(tags[tags.length - 1]);
             }
@@ -295,7 +341,9 @@ export function TemplateEditor({ template, onChange, onPreview }) {
     <div className="space-y-4">
       {/* Subject */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Subject Line</label>
+        <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+          Subject Line
+        </label>
         <input
           type="text"
           value={template.subject}
@@ -306,7 +354,9 @@ export function TemplateEditor({ template, onChange, onPreview }) {
 
       {/* Variables */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Available Variables</label>
+        <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+          Available Variables
+        </label>
         <div className="flex flex-wrap gap-1.5">
           {template.variables.map((v) => (
             <button
@@ -315,7 +365,8 @@ export function TemplateEditor({ template, onChange, onPreview }) {
               onClick={() => insertVariable(v)}
               className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs font-mono text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors"
             >
-              <Hash className="h-3 w-3" />{v}
+              <Hash className="h-3 w-3" />
+              {v}
             </button>
           ))}
         </div>
@@ -334,7 +385,9 @@ export function TemplateEditor({ template, onChange, onPreview }) {
               onClick={() => setMode(m.id)}
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                mode === m.id ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary'
+                mode === m.id
+                  ? 'bg-secondary text-white'
+                  : 'text-text-secondary hover:text-text-primary'
               )}
             >
               <m.icon className="h-3.5 w-3.5" /> {m.label}
@@ -346,7 +399,11 @@ export function TemplateEditor({ template, onChange, onPreview }) {
             onClick={copyToClipboard}
             className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-elevated"
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-accent" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-accent" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
             {copied ? 'Copied' : 'Copy'}
           </button>
           {onPreview && (
@@ -396,10 +453,14 @@ export function TemplateEditor({ template, onChange, onPreview }) {
       <div className="flex items-center gap-4 text-xs text-text-muted">
         <span>Last modified: {template.lastModified}</span>
         <span>by {template.modifiedBy}</span>
-        <span className={cn(
-          'inline-flex items-center gap-1 rounded-full border px-2 py-0.5',
-          template.enabled ? 'bg-accent/10 text-accent border-accent/20' : 'bg-neutral/10 text-text-muted border-border'
-        )}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5',
+            template.enabled
+              ? 'bg-accent/10 text-accent border-accent/20'
+              : 'bg-neutral/10 text-text-muted border-border'
+          )}
+        >
           {template.enabled ? 'Enabled' : 'Disabled'}
         </span>
       </div>
@@ -473,7 +534,9 @@ export function ChannelToggle({ channel, config, onChange }) {
         </div>
         <div>
           <p className="text-sm font-medium text-text-primary">{labels[channel]}</p>
-          {config.provider && <p className="text-[10px] text-text-muted capitalize">{config.provider}</p>}
+          {config.provider && (
+            <p className="text-[10px] text-text-muted capitalize">{config.provider}</p>
+          )}
         </div>
       </div>
       <Toggle checked={config.enabled} onChange={(v) => onChange({ ...config, enabled: v })} />
@@ -492,12 +555,18 @@ export function EventRow({ event, config, channels, onChange }) {
         className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-elevated/50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-text-primary capitalize">{event.replace(/-/g, ' ')}</span>
+          <span className="text-sm font-medium text-text-primary capitalize">
+            {event.replace(/-/g, ' ')}
+          </span>
           <span className="text-xs text-text-muted">
             {Object.values(config).filter(Boolean).length} channels
           </span>
         </div>
-        {expanded ? <ChevronUp className="h-4 w-4 text-text-muted" /> : <ChevronDown className="h-4 w-4 text-text-muted" />}
+        {expanded ? (
+          <ChevronUp className="h-4 w-4 text-text-muted" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-text-muted" />
+        )}
       </button>
       {expanded && (
         <div className="border-t border-border px-4 py-3">
@@ -534,13 +603,18 @@ export function FileUploadZone({ onUpload, accept, label }) {
 
   return (
     <div
-      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
       className={cn(
         'cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors',
-        dragOver ? 'border-secondary bg-secondary/5' : 'border-border bg-background hover:bg-surface-elevated'
+        dragOver
+          ? 'border-secondary bg-secondary/5'
+          : 'border-border bg-background hover:bg-surface-elevated'
       )}
     >
       <Upload className="mx-auto h-8 w-8 text-text-muted mb-2" />

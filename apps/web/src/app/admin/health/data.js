@@ -127,7 +127,8 @@ export const errorLogs = [
     service: 'Background Worker',
     severity: 'error',
     message: 'Failed to process payment reconciliation job — timeout after 30s',
-    stack: 'at processReconciliation (/app/worker/jobs/payment.js:142)\nat async Worker.run (/app/worker/queue.js:89)',
+    stack:
+      'at processReconciliation (/app/worker/jobs/payment.js:142)\nat async Worker.run (/app/worker/queue.js:89)',
     count: 12,
     firstSeen: '2026-08-16 13:45:00',
     status: 'open',
@@ -163,7 +164,8 @@ export const errorLogs = [
     service: 'Auth Service',
     severity: 'error',
     message: 'JWT token validation failed — invalid signature',
-    stack: 'at verifyToken (/app/auth/jwt.js:67)\nat async authenticate (/app/auth/middleware.js:23)',
+    stack:
+      'at verifyToken (/app/auth/jwt.js:67)\nat async authenticate (/app/auth/middleware.js:23)',
     count: 8,
     firstSeen: '2026-08-16 13:30:00',
     status: 'open',
@@ -199,7 +201,8 @@ export const errorLogs = [
     service: 'Background Worker',
     severity: 'critical',
     message: 'Queue consumer crashed — out of memory (heap limit exceeded)',
-    stack: 'at processLargeBatch (/app/worker/batch.js:234)\nat async Consumer.handle (/app/worker/consumer.js:56)',
+    stack:
+      'at processLargeBatch (/app/worker/batch.js:234)\nat async Consumer.handle (/app/worker/consumer.js:56)',
     count: 2,
     firstSeen: '2026-08-16 13:45:00',
     status: 'open',
@@ -223,7 +226,8 @@ export const errorLogs = [
     service: 'API Gateway',
     severity: 'error',
     message: 'Unhandled exception in webhook handler — null reference',
-    stack: 'at handleWebhook (/app/api/webhooks.js:89)\nat async routeHandler (/app/api/routes.js:156)',
+    stack:
+      'at handleWebhook (/app/api/webhooks.js:89)\nat async routeHandler (/app/api/routes.js:156)',
     count: 1,
     firstSeen: '2026-08-15 22:14:00',
     status: 'resolved',
@@ -359,17 +363,57 @@ export const incidentHistory = [
 
 /* ─── Metadata ─── */
 export const severityMeta = {
-  critical: { label: 'Critical', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
-  error: { label: 'Error', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
-  warning: { label: 'Warning', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
-  info: { label: 'Info', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20', iconColor: 'text-info' },
+  critical: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
+  error: {
+    label: 'Error',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
+  warning: {
+    label: 'Warning',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    iconColor: 'text-warning',
+  },
+  info: {
+    label: 'Info',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+    iconColor: 'text-info',
+  },
 };
 
 export const serviceStatusMeta = {
-  operational: { label: 'Operational', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', iconColor: 'text-accent' },
-  degraded: { label: 'Degraded', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
-  critical: { label: 'Critical', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
-  maintenance: { label: 'Maintenance', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20', iconColor: 'text-info' },
+  operational: {
+    label: 'Operational',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    iconColor: 'text-accent',
+  },
+  degraded: {
+    label: 'Degraded',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    iconColor: 'text-warning',
+  },
+  critical: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    iconColor: 'text-danger',
+  },
+  maintenance: {
+    label: 'Maintenance',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+    iconColor: 'text-info',
+  },
 };
 
 export const errorStatusMeta = {
@@ -380,8 +424,16 @@ export const errorStatusMeta = {
 };
 
 export const incidentSeverityMeta = {
-  critical: { label: 'Critical', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  warning: { label: 'Warning', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+  critical: {
+    label: 'Critical',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
+  warning: {
+    label: 'Warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
   info: { label: 'Info', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
 };
 
@@ -392,20 +444,20 @@ export const dbMetrics = {
     idle: 58,
     max: 500,
     waiting: 3,
-    history: [/* hourly data */]
+    history: [/* hourly data */],
   },
   queryPerformance: {
-    avgLatency: 8,      // ms
+    avgLatency: 8, // ms
     p95Latency: 22,
     p99Latency: 65,
-    slowQueries: 3,     // >5s
+    slowQueries: 3, // >5s
     deadlocks: 0,
   },
   replication: {
-    lag: 12,            // ms
+    lag: 12, // ms
     replicaStatus: 'streaming',
     lastCheckpoint: '2026-08-16 14:20:00',
-  }
+  },
 };
 
 // ─── Infrastructure Metrics ───
@@ -416,19 +468,19 @@ export const infrastructureMetrics = {
     loadAverage: [0.52, 0.48, 0.45],
   },
   memory: {
-    used: 58,           // %
-    total: 64,          // GB
+    used: 58, // %
+    total: 64, // GB
     breakdown: {
       app: 28,
       cache: 18,
       system: 8,
       free: 10,
-    }
+    },
   },
   disk: {
     readIops: 245,
     writeIops: 189,
-    readThroughput: 12.5,   // MB/s
+    readThroughput: 12.5, // MB/s
     writeThroughput: 8.2,
     utilization: 68,
   },
@@ -437,7 +489,7 @@ export const infrastructureMetrics = {
     txMbps: 38.7,
     packetsDropped: 0,
     errors: 0,
-  }
+  },
 };
 
 // ─── Alert Rules ───

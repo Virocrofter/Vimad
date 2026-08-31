@@ -1,23 +1,45 @@
 /* src/app/admin/reports/ReportBuilder.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Filter, List, BarChart, LineChart as LineChartIcon, PieChart,
-  Download, Printer, Save
+  Filter,
+  List,
+  BarChart,
+  LineChart as LineChartIcon,
+  PieChart,
+  Download,
+  Printer,
+  Save,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
-  BarChart as ReBarChart, Bar, PieChart as RePieChart,
-  Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer
+  BarChart as ReBarChart,
+  Bar,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts';
 import { builderFields, builderMockData } from './data';
 import { useChartTheme, ThemeTooltip } from './components';
 
 export default function ReportBuilder() {
-  const [selectedFields, setSelectedFields] = useState(new Set(['guestName', 'arrival', 'departure', 'roomType', 'status', 'rate']));
-  const [filters, setFilters] = useState({ status: 'all', roomType: 'all', source: 'all', from: '', to: '' });
+  const [selectedFields, setSelectedFields] = useState(
+    new Set(['guestName', 'arrival', 'departure', 'roomType', 'status', 'rate'])
+  );
+  const [filters, setFilters] = useState({
+    status: 'all',
+    roomType: 'all',
+    source: 'all',
+    from: '',
+    to: '',
+  });
   const [groupBy, setGroupBy] = useState('none');
   const [chartType, setChartType] = useState('table');
   const [reportName, setReportName] = useState('');
@@ -62,7 +84,14 @@ export default function ReportBuilder() {
 
   const exportCsv = () => {
     const dataToExport = groupBy === 'none' ? filteredData : groupedData;
-    const cols = groupBy === 'none' ? activeFields : [{ key: 'label', label: groupBy }, { key: 'count', label: 'Count' }, { key: 'revenue', label: 'Revenue' }];
+    const cols =
+      groupBy === 'none'
+        ? activeFields
+        : [
+            { key: 'label', label: groupBy },
+            { key: 'count', label: 'Count' },
+            { key: 'revenue', label: 'Revenue' },
+          ];
     const headers = cols.map((c) => c.label).join(',');
     const rows = dataToExport.map((row) => cols.map((c) => row[c.key]).join(','));
     const csv = [headers, ...rows].join('\n');
@@ -82,14 +111,21 @@ export default function ReportBuilder() {
       {/* Sidebar */}
       <div className="lg:col-span-3 space-y-6">
         <div className="rounded-xl border border-border bg-surface p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Fields</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+            Fields
+          </h3>
           <div className="space-y-4 max-h-[60vh] overflow-auto pr-1">
             {builderFields.map((cat) => (
               <div key={cat.category}>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">{cat.category}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">
+                  {cat.category}
+                </p>
                 <div className="space-y-1">
                   {cat.fields.map((f) => (
-                    <label key={f.key} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-text-primary hover:bg-background cursor-pointer">
+                    <label
+                      key={f.key}
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-text-primary hover:bg-background cursor-pointer"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedFields.has(f.key)}
@@ -112,7 +148,9 @@ export default function ReportBuilder() {
         <div className="rounded-xl border border-border bg-surface p-4">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="h-4 w-4 text-secondary" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Filters</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Filters
+            </h3>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
@@ -177,7 +215,9 @@ export default function ReportBuilder() {
         {/* Preview */}
         <div className="rounded-xl border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Preview</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Preview
+            </h3>
             <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5">
               {[
                 { key: 'table', icon: List },
@@ -190,7 +230,9 @@ export default function ReportBuilder() {
                   onClick={() => setChartType(t.key)}
                   className={cn(
                     'inline-flex h-7 w-7 items-center justify-center rounded transition-colors',
-                    chartType === t.key ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                    chartType === t.key
+                      ? 'bg-secondary text-white'
+                      : 'text-text-muted hover:text-text-primary'
                   )}
                 >
                   <t.icon className="h-3.5 w-3.5" />
@@ -205,7 +247,12 @@ export default function ReportBuilder() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     {activeFields.map((f) => (
-                      <th key={f.key} className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase">{f.label}</th>
+                      <th
+                        key={f.key}
+                        className="px-3 py-2 text-left text-xs font-medium text-text-secondary uppercase"
+                      >
+                        {f.label}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -213,12 +260,21 @@ export default function ReportBuilder() {
                   {filteredData.map((row, i) => (
                     <tr key={i} className="hover:bg-background/50">
                       {activeFields.map((f) => (
-                        <td key={f.key} className="px-3 py-2 text-text-primary whitespace-nowrap">{row[f.key]}</td>
+                        <td key={f.key} className="px-3 py-2 text-text-primary whitespace-nowrap">
+                          {row[f.key]}
+                        </td>
                       ))}
                     </tr>
                   ))}
                   {filteredData.length === 0 && (
-                    <tr><td colSpan={activeFields.length} className="px-3 py-8 text-center text-text-muted">No data matches filters.</td></tr>
+                    <tr>
+                      <td
+                        colSpan={activeFields.length}
+                        className="px-3 py-8 text-center text-text-muted"
+                      >
+                        No data matches filters.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -230,9 +286,29 @@ export default function ReportBuilder() {
               {chartType === 'pie' ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <RePieChart>
-                    <Pie data={previewChartData} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={90} label>
+                    <Pie
+                      data={previewChartData}
+                      dataKey="count"
+                      nameKey="label"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      label
+                    >
                       {previewChartData.map((_, i) => (
-                        <Cell key={i} fill={[colors.secondary, colors.accent, colors.warning, colors.info, colors.danger, colors.neutral][i % 6]} />
+                        <Cell
+                          key={i}
+                          fill={
+                            [
+                              colors.secondary,
+                              colors.accent,
+                              colors.warning,
+                              colors.info,
+                              colors.danger,
+                              colors.neutral,
+                            ][i % 6]
+                          }
+                        />
                       ))}
                     </Pie>
                     <Tooltip content={<ThemeTooltip isDark={colors.primary === '#F8FAFC'} />} />
@@ -259,7 +335,9 @@ export default function ReportBuilder() {
       {/* Right Sidebar */}
       <div className="lg:col-span-3 space-y-4">
         <div className="rounded-xl border border-border bg-surface p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Save Report</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+            Save Report
+          </h3>
           <Input
             placeholder="Report name..."
             value={reportName}
@@ -272,7 +350,9 @@ export default function ReportBuilder() {
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Export</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+            Export
+          </h3>
           <div className="space-y-2">
             <Button variant="outline" className="w-full" size="sm" onClick={exportCsv}>
               <Download className="mr-1.5 h-3.5 w-3.5" /> Download CSV
@@ -284,7 +364,9 @@ export default function ReportBuilder() {
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">Summary</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+            Summary
+          </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-text-secondary">
               <span>Rows</span>

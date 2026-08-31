@@ -13,14 +13,70 @@ export const revenueOverview = {
 };
 
 export const mrrHistory = [
-  { month: 'Jan 2026', mrr: 198000, newMrr: 42000, expansionMrr: 15000, contractionMrr: 8000, churnedMrr: 12000 },
-  { month: 'Feb 2026', mrr: 215000, newMrr: 38000, expansionMrr: 18000, contractionMrr: 6000, churnedMrr: 14000 },
-  { month: 'Mar 2026', mrr: 232000, newMrr: 45000, expansionMrr: 22000, contractionMrr: 9000, churnedMrr: 11000 },
-  { month: 'Apr 2026', mrr: 248000, newMrr: 35000, expansionMrr: 20000, contractionMrr: 7000, churnedMrr: 9000 },
-  { month: 'May 2026', mrr: 258000, newMrr: 28000, expansionMrr: 16000, contractionMrr: 5000, churnedMrr: 13000 },
-  { month: 'Jun 2026', mrr: 265000, newMrr: 32000, expansionMrr: 14000, contractionMrr: 8000, churnedMrr: 7000 },
-  { month: 'Jul 2026', mrr: 271200, newMrr: 25000, expansionMrr: 18000, contractionMrr: 6000, churnedMrr: 9000 },
-  { month: 'Aug 2026', mrr: 284750, newMrr: 30000, expansionMrr: 21000, contractionMrr: 4000, churnedMrr: 8000 },
+  {
+    month: 'Jan 2026',
+    mrr: 198000,
+    newMrr: 42000,
+    expansionMrr: 15000,
+    contractionMrr: 8000,
+    churnedMrr: 12000,
+  },
+  {
+    month: 'Feb 2026',
+    mrr: 215000,
+    newMrr: 38000,
+    expansionMrr: 18000,
+    contractionMrr: 6000,
+    churnedMrr: 14000,
+  },
+  {
+    month: 'Mar 2026',
+    mrr: 232000,
+    newMrr: 45000,
+    expansionMrr: 22000,
+    contractionMrr: 9000,
+    churnedMrr: 11000,
+  },
+  {
+    month: 'Apr 2026',
+    mrr: 248000,
+    newMrr: 35000,
+    expansionMrr: 20000,
+    contractionMrr: 7000,
+    churnedMrr: 9000,
+  },
+  {
+    month: 'May 2026',
+    mrr: 258000,
+    newMrr: 28000,
+    expansionMrr: 16000,
+    contractionMrr: 5000,
+    churnedMrr: 13000,
+  },
+  {
+    month: 'Jun 2026',
+    mrr: 265000,
+    newMrr: 32000,
+    expansionMrr: 14000,
+    contractionMrr: 8000,
+    churnedMrr: 7000,
+  },
+  {
+    month: 'Jul 2026',
+    mrr: 271200,
+    newMrr: 25000,
+    expansionMrr: 18000,
+    contractionMrr: 6000,
+    churnedMrr: 9000,
+  },
+  {
+    month: 'Aug 2026',
+    mrr: 284750,
+    newMrr: 30000,
+    expansionMrr: 21000,
+    contractionMrr: 4000,
+    churnedMrr: 8000,
+  },
 ];
 
 export const arrHistory = [
@@ -60,25 +116,94 @@ export const churnHistory = [
 
 /* ─── Cohort Retention ─── */
 export const cohortData = [
-  { cohort: 'Jan 2025', size: 45, months: [100, 95.6, 91.1, 88.9, 86.7, 84.4, 82.2, 80.0, 80.0, 77.8, 77.8, 75.6] },
-  { cohort: 'Feb 2025', size: 38, months: [100, 94.7, 89.5, 86.8, 84.2, 81.6, 78.9, 78.9, 76.3, 76.3, 73.7, null] },
-  { cohort: 'Mar 2025', size: 52, months: [100, 96.2, 92.3, 90.4, 86.5, 84.6, 82.7, 80.8, 78.8, 76.9, null, null] },
-  { cohort: 'Apr 2025', size: 41, months: [100, 95.1, 90.2, 87.8, 85.4, 82.9, 80.5, 78.0, 75.6, null, null, null] },
-  { cohort: 'May 2025', size: 48, months: [100, 93.8, 89.6, 85.4, 83.3, 81.3, 79.2, 77.1, null, null, null, null] },
-  { cohort: 'Jun 2025', size: 55, months: [100, 94.5, 90.9, 87.3, 85.5, 83.6, 81.8, null, null, null, null, null] },
-  { cohort: 'Jul 2025', size: 42, months: [100, 95.2, 92.9, 88.1, 85.7, 83.3, null, null, null, null, null, null] },
-  { cohort: 'Aug 2025', size: 50, months: [100, 96.0, 92.0, 88.0, 86.0, null, null, null, null, null, null, null] },
-  { cohort: 'Sep 2025', size: 44, months: [100, 93.2, 88.6, 84.1, null, null, null, null, null, null, null, null] },
-  { cohort: 'Oct 2025', size: 39, months: [100, 94.9, 89.7, null, null, null, null, null, null, null, null, null] },
-  { cohort: 'Nov 2025', size: 46, months: [100, 93.5, null, null, null, null, null, null, null, null, null, null] },
-  { cohort: 'Dec 2025', size: 51, months: [100, null, null, null, null, null, null, null, null, null, null, null] },
+  {
+    cohort: 'Jan 2025',
+    size: 45,
+    months: [100, 95.6, 91.1, 88.9, 86.7, 84.4, 82.2, 80.0, 80.0, 77.8, 77.8, 75.6],
+  },
+  {
+    cohort: 'Feb 2025',
+    size: 38,
+    months: [100, 94.7, 89.5, 86.8, 84.2, 81.6, 78.9, 78.9, 76.3, 76.3, 73.7, null],
+  },
+  {
+    cohort: 'Mar 2025',
+    size: 52,
+    months: [100, 96.2, 92.3, 90.4, 86.5, 84.6, 82.7, 80.8, 78.8, 76.9, null, null],
+  },
+  {
+    cohort: 'Apr 2025',
+    size: 41,
+    months: [100, 95.1, 90.2, 87.8, 85.4, 82.9, 80.5, 78.0, 75.6, null, null, null],
+  },
+  {
+    cohort: 'May 2025',
+    size: 48,
+    months: [100, 93.8, 89.6, 85.4, 83.3, 81.3, 79.2, 77.1, null, null, null, null],
+  },
+  {
+    cohort: 'Jun 2025',
+    size: 55,
+    months: [100, 94.5, 90.9, 87.3, 85.5, 83.6, 81.8, null, null, null, null, null],
+  },
+  {
+    cohort: 'Jul 2025',
+    size: 42,
+    months: [100, 95.2, 92.9, 88.1, 85.7, 83.3, null, null, null, null, null, null],
+  },
+  {
+    cohort: 'Aug 2025',
+    size: 50,
+    months: [100, 96.0, 92.0, 88.0, 86.0, null, null, null, null, null, null, null],
+  },
+  {
+    cohort: 'Sep 2025',
+    size: 44,
+    months: [100, 93.2, 88.6, 84.1, null, null, null, null, null, null, null, null],
+  },
+  {
+    cohort: 'Oct 2025',
+    size: 39,
+    months: [100, 94.9, 89.7, null, null, null, null, null, null, null, null, null],
+  },
+  {
+    cohort: 'Nov 2025',
+    size: 46,
+    months: [100, 93.5, null, null, null, null, null, null, null, null, null, null],
+  },
+  {
+    cohort: 'Dec 2025',
+    size: 51,
+    months: [100, null, null, null, null, null, null, null, null, null, null, null],
+  },
 ];
 
 /* ─── LTV by Segment ─── */
 export const ltvData = [
-  { segment: 'Enterprise', avgLtv: 48500, cac: 8200, ltvCacRatio: 5.9, avgLifetimeMonths: 48, monthlyRevenue: 1010 },
-  { segment: 'Professional', avgLtv: 14200, cac: 2800, ltvCacRatio: 5.1, avgLifetimeMonths: 36, monthlyRevenue: 395 },
-  { segment: 'Starter', avgLtv: 3600, cac: 650, ltvCacRatio: 5.5, avgLifetimeMonths: 24, monthlyRevenue: 150 },
+  {
+    segment: 'Enterprise',
+    avgLtv: 48500,
+    cac: 8200,
+    ltvCacRatio: 5.9,
+    avgLifetimeMonths: 48,
+    monthlyRevenue: 1010,
+  },
+  {
+    segment: 'Professional',
+    avgLtv: 14200,
+    cac: 2800,
+    ltvCacRatio: 5.1,
+    avgLifetimeMonths: 36,
+    monthlyRevenue: 395,
+  },
+  {
+    segment: 'Starter',
+    avgLtv: 3600,
+    cac: 650,
+    ltvCacRatio: 5.5,
+    avgLifetimeMonths: 24,
+    monthlyRevenue: 150,
+  },
 ];
 
 export const ltvTrend = [
@@ -96,11 +221,46 @@ export const revenueRecognition = {
   unbilledRevenue: 89000,
   contractLiabilities: 312000,
   performanceObligations: [
-    { id: 'PO-001', customer: 'Grand Hotel Boston', amount: 59880, period: 'Jan 2026 - Dec 2026', recognized: 39920, remaining: 19960 },
-    { id: 'PO-002', customer: 'Seaside Resort Miami', amount: 5988, period: 'Jun 2026 - May 2027', recognized: 2495, remaining: 3493 },
-    { id: 'PO-003', customer: 'Urban Hotel NYC', amount: 5988, period: 'Apr 2026 - Mar 2027', recognized: 3992, remaining: 1996 },
-    { id: 'PO-004', customer: 'Coastal Inn San Diego', amount: 2388, period: 'Sep 2025 - Aug 2026', recognized: 1990, remaining: 398 },
-    { id: 'PO-005', customer: 'Lakeside Resort Tahoe', amount: 0, period: 'Pending contract start', recognized: 0, remaining: 0 },
+    {
+      id: 'PO-001',
+      customer: 'Grand Hotel Boston',
+      amount: 59880,
+      period: 'Jan 2026 - Dec 2026',
+      recognized: 39920,
+      remaining: 19960,
+    },
+    {
+      id: 'PO-002',
+      customer: 'Seaside Resort Miami',
+      amount: 5988,
+      period: 'Jun 2026 - May 2027',
+      recognized: 2495,
+      remaining: 3493,
+    },
+    {
+      id: 'PO-003',
+      customer: 'Urban Hotel NYC',
+      amount: 5988,
+      period: 'Apr 2026 - Mar 2027',
+      recognized: 3992,
+      remaining: 1996,
+    },
+    {
+      id: 'PO-004',
+      customer: 'Coastal Inn San Diego',
+      amount: 2388,
+      period: 'Sep 2025 - Aug 2026',
+      recognized: 1990,
+      remaining: 398,
+    },
+    {
+      id: 'PO-005',
+      customer: 'Lakeside Resort Tahoe',
+      amount: 0,
+      period: 'Pending contract start',
+      recognized: 0,
+      remaining: 0,
+    },
   ],
 };
 
@@ -208,11 +368,20 @@ export const planDistribution = [
 
 /* ─── Helpers ─── */
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 export function formatCompactCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(amount);
 }
 
 export function formatPercent(value, decimals = 1) {
@@ -229,13 +398,34 @@ export function getMrrChangeTrend(current, previous) {
 }
 
 export const gatewayStatusMeta = {
-  healthy: { label: 'Healthy', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-  degraded: { label: 'Degraded', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
-  critical: { label: 'Critical', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
+  healthy: {
+    label: 'Healthy',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  degraded: {
+    label: 'Degraded',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
+  critical: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+  },
 };
 
 export const cohortColorScale = [
-  'bg-emerald-500', 'bg-emerald-400', 'bg-emerald-300', 'bg-emerald-200',
-  'bg-teal-300', 'bg-teal-200', 'bg-cyan-300', 'bg-cyan-200',
-  'bg-sky-300', 'bg-sky-200', 'bg-blue-300', 'bg-blue-200',
+  'bg-emerald-500',
+  'bg-emerald-400',
+  'bg-emerald-300',
+  'bg-emerald-200',
+  'bg-teal-300',
+  'bg-teal-200',
+  'bg-cyan-300',
+  'bg-cyan-200',
+  'bg-sky-300',
+  'bg-sky-200',
+  'bg-blue-300',
+  'bg-blue-200',
 ];

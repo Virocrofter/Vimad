@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Smartphone, QrCode, Key, CreditCard, Bell, Shield,
-  Clock, Check, User, MessageSquare, MapPin
+  ArrowRight,
+  Smartphone,
+  QrCode,
+  Key,
+  CreditCard,
+  Bell,
+  Shield,
+  Clock,
+  Check,
+  User,
+  MessageSquare,
+  MapPin,
 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 
@@ -40,9 +50,21 @@ const steps = [
 
 const benefits = [
   { icon: Clock, title: 'Reduce Check-In Time', desc: 'From 8 minutes to 30 seconds per guest.' },
-  { icon: Shield, title: 'Health & Safety', desc: 'Minimize physical contact and shared surfaces.' },
-  { icon: User, title: 'Staff Efficiency', desc: 'Front desk focuses on hospitality, not paperwork.' },
-  { icon: MessageSquare, title: 'Guest Satisfaction', desc: '4.9★ average rating from contactless users.' },
+  {
+    icon: Shield,
+    title: 'Health & Safety',
+    desc: 'Minimize physical contact and shared surfaces.',
+  },
+  {
+    icon: User,
+    title: 'Staff Efficiency',
+    desc: 'Front desk focuses on hospitality, not paperwork.',
+  },
+  {
+    icon: MessageSquare,
+    title: 'Guest Satisfaction',
+    desc: '4.9★ average rating from contactless users.',
+  },
 ];
 
 export default function ContactlessCheckinPage() {
@@ -60,7 +82,8 @@ export default function ContactlessCheckinPage() {
               Contactless Check-In <span className="text-secondary">Guests Love</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Let guests check themselves in from their phone. Reduce front desk queues, improve safety, and deliver a modern arrival experience.
+              Let guests check themselves in from their phone. Reduce front desk queues, improve
+              safety, and deliver a modern arrival experience.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -89,7 +112,10 @@ export default function ContactlessCheckinPage() {
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map((s, i) => (
-              <div key={s.title} className="relative rounded-xl border border-border bg-background p-6">
+              <div
+                key={s.title}
+                className="relative rounded-xl border border-border bg-background p-6"
+              >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-sm font-bold text-white absolute -top-4 left-6">
                   {i + 1}
                 </div>
@@ -109,9 +135,12 @@ export default function ContactlessCheckinPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-text-primary">Why hotels are going contactless</h2>
+              <h2 className="text-3xl font-bold text-text-primary">
+                Why hotels are going contactless
+              </h2>
               <p className="mt-4 text-text-secondary leading-relaxed">
-                The pandemic changed guest expectations forever. Today's travelers expect the same convenience from their hotel that they get from their airline.
+                The pandemic changed guest expectations forever. Today's travelers expect the same
+                convenience from their hotel that they get from their airline.
               </p>
               <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {benefits.map((b) => (
@@ -143,14 +172,19 @@ export default function ContactlessCheckinPage() {
                   { label: 'Registration Card Signed', status: 'done' },
                   { label: 'Room Ready Alert', status: 'done' },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded-lg bg-background border border-border px-4 py-2.5">
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between rounded-lg bg-background border border-border px-4 py-2.5"
+                  >
                     <span className="text-sm text-text-secondary">{item.label}</span>
                     <Check className="h-4 w-4 text-accent" />
                   </div>
                 ))}
               </div>
               <div className="rounded-lg bg-accent/5 border border-accent/20 p-3 text-center">
-                <p className="text-sm font-medium text-accent">Guest arrived and unlocked room 402</p>
+                <p className="text-sm font-medium text-accent">
+                  Guest arrived and unlocked room 402
+                </p>
                 <p className="text-xs text-text-muted mt-0.5">No front desk interaction required</p>
               </div>
             </div>
@@ -161,7 +195,9 @@ export default function ContactlessCheckinPage() {
       {/* CTA */}
       <section className="border-t border-border bg-surface py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold text-text-primary">Ready to eliminate front desk queues?</h2>
+          <h2 className="text-3xl font-bold text-text-primary">
+            Ready to eliminate front desk queues?
+          </h2>
           <p className="mt-4 text-text-secondary">
             Contactless check-in is included in every plan. Set it up in under 10 minutes.
           </p>

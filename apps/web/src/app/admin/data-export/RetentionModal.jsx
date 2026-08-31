@@ -9,7 +9,11 @@ const actionOptions = [
   { key: 'delete', label: 'Delete', desc: 'Permanently remove data after retention period' },
   { key: 'anonymize', label: 'Anonymize', desc: 'Pseudonymize PII but preserve aggregates' },
   { key: 'archive', label: 'Archive', desc: 'Move to cold storage with restricted access' },
-  { key: 'archive_then_delete', label: 'Archive then Delete', desc: 'Archive for 1 year, then permanently delete' },
+  {
+    key: 'archive_then_delete',
+    label: 'Archive then Delete',
+    desc: 'Archive for 1 year, then permanently delete',
+  },
 ];
 
 const scopeOptions = [
@@ -50,16 +54,16 @@ export default function RetentionModal({ policy, onClose, onSave }) {
     }
   }, [policy]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const toggleException = (ex) => {
     const current = form.exceptions;
-    update('exceptions', current.includes(ex) ? current.filter(e => e !== ex) : [...current, ex]);
+    update('exceptions', current.includes(ex) ? current.filter((e) => e !== ex) : [...current, ex]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 800));
     onSave({
       ...form,
       id: policy?.id || `POL-${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}`,
@@ -98,10 +102,15 @@ export default function RetentionModal({ policy, onClose, onSave }) {
               <h3 className="text-lg font-bold text-text-primary">
                 {isEditing ? 'Edit Retention Policy' : 'New Retention Policy'}
               </h3>
-              <p className="text-xs text-text-muted">{isEditing ? policy.id : 'Configure automated data lifecycle'}</p>
+              <p className="text-xs text-text-muted">
+                {isEditing ? policy.id : 'Configure automated data lifecycle'}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -110,7 +119,9 @@ export default function RetentionModal({ policy, onClose, onSave }) {
           {/* Basic Info */}
           <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Policy Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Policy Name
+              </label>
               <input
                 type="text"
                 required
@@ -121,7 +132,9 @@ export default function RetentionModal({ policy, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Description
+              </label>
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
@@ -135,26 +148,34 @@ export default function RetentionModal({ policy, onClose, onSave }) {
           {/* Category & Scope */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Data Category</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Data Category
+              </label>
               <select
                 value={form.category}
                 onChange={(e) => update('category', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {dataCategories.map(c => (
-                  <option key={c.key} value={c.key}>{c.label}</option>
+                {dataCategories.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Scope</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Scope
+              </label>
               <select
                 value={form.scope}
                 onChange={(e) => update('scope', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {scopeOptions.map(s => (
-                  <option key={s.key} value={s.key}>{s.label}</option>
+                {scopeOptions.map((s) => (
+                  <option key={s.key} value={s.key}>
+                    {s.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -162,7 +183,9 @@ export default function RetentionModal({ policy, onClose, onSave }) {
 
           {/* Retention Period */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Retention Period</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Retention Period
+            </h4>
             <div className="flex items-center gap-3">
               <input
                 type="number"
@@ -181,7 +204,14 @@ export default function RetentionModal({ policy, onClose, onSave }) {
                 <option value="years">Years</option>
               </select>
               <span className="text-xs text-text-muted ml-auto">
-                ≈ {formatDuration(form.retentionUnit === 'days' ? form.retentionPeriod : form.retentionUnit === 'months' ? form.retentionPeriod * 30 : form.retentionPeriod * 365)}
+                ≈{' '}
+                {formatDuration(
+                  form.retentionUnit === 'days'
+                    ? form.retentionPeriod
+                    : form.retentionUnit === 'months'
+                      ? form.retentionPeriod * 30
+                      : form.retentionPeriod * 365
+                )}
               </span>
             </div>
 
@@ -191,7 +221,10 @@ export default function RetentionModal({ policy, onClose, onSave }) {
                 <button
                   key={days}
                   type="button"
-                  onClick={() => { update('retentionPeriod', days); update('retentionUnit', 'days'); }}
+                  onClick={() => {
+                    update('retentionPeriod', days);
+                    update('retentionUnit', 'days');
+                  }}
                   className={cn(
                     'rounded-md border px-2.5 py-1 text-[10px] font-medium transition-colors',
                     form.retentionPeriod === days && form.retentionUnit === 'days'
@@ -207,7 +240,9 @@ export default function RetentionModal({ policy, onClose, onSave }) {
 
           {/* Action */}
           <div>
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">After Retention Expires</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
+              After Retention Expires
+            </label>
             <div className="grid grid-cols-2 gap-3">
               {actionOptions.map((a) => (
                 <button
@@ -221,7 +256,12 @@ export default function RetentionModal({ policy, onClose, onSave }) {
                       : 'border-border bg-surface hover:bg-surface-elevated'
                   )}
                 >
-                  <span className={cn('text-sm font-medium', form.action === a.key ? 'text-secondary' : 'text-text-primary')}>
+                  <span
+                    className={cn(
+                      'text-sm font-medium',
+                      form.action === a.key ? 'text-secondary' : 'text-text-primary'
+                    )}
+                  >
                     {a.label}
                   </span>
                   <span className="text-xs text-text-muted">{a.desc}</span>
@@ -232,8 +272,12 @@ export default function RetentionModal({ policy, onClose, onSave }) {
 
           {/* Exceptions */}
           <div>
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">Exceptions</label>
-            <p className="text-xs text-text-muted mb-2">Data matching these conditions will be preserved beyond retention</p>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
+              Exceptions
+            </label>
+            <p className="text-xs text-text-muted mb-2">
+              Data matching these conditions will be preserved beyond retention
+            </p>
             <div className="flex flex-wrap gap-2">
               {availableExceptions.map((ex) => (
                 <button
@@ -248,7 +292,7 @@ export default function RetentionModal({ policy, onClose, onSave }) {
                   )}
                 >
                   {form.exceptions.includes(ex) && <Check className="h-3 w-3" />}
-                  {ex.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase())}
+                  {ex.replace(/_/g, ' ').replace(/\\b\\w/g, (l) => l.toUpperCase())}
                 </button>
               ))}
             </div>
@@ -258,7 +302,11 @@ export default function RetentionModal({ policy, onClose, onSave }) {
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
             <div>
               <p className="text-sm font-medium text-text-primary">Policy Active</p>
-              <p className="text-xs text-text-muted">{form.active ? 'Policy is enforced automatically' : 'Policy is disabled and will not run'}</p>
+              <p className="text-xs text-text-muted">
+                {form.active
+                  ? 'Policy is enforced automatically'
+                  : 'Policy is disabled and will not run'}
+              </p>
             </div>
             <button
               type="button"
@@ -268,21 +316,30 @@ export default function RetentionModal({ policy, onClose, onSave }) {
                 form.active ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.active ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.active ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary" disabled={isSubmitting}>
               {isSubmitting ? (
-                <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Saving...</>
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Saving...
+                </>
               ) : (
-                <><Save className="mr-1.5 h-4 w-4" /> {isEditing ? 'Update Policy' : 'Create Policy'}</>
+                <>
+                  <Save className="mr-1.5 h-4 w-4" />{' '}
+                  {isEditing ? 'Update Policy' : 'Create Policy'}
+                </>
               )}
             </Button>
           </div>

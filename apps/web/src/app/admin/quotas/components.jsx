@@ -1,26 +1,56 @@
 /* src/app/admin/quotas/components.jsx */
 import { useState } from 'react';
 import {
-  Zap, HardDrive, BedDouble, Users, Tag, Building2, Globe,
-  AlertTriangle, CheckCircle2, XCircle, Clock, TrendingUp,
-  TrendingDown, Minus, Shield, Gauge, DollarSign, Ban,
-  ChevronDown, ChevronUp, Info, Activity, BarChart3
+  Zap,
+  HardDrive,
+  BedDouble,
+  Users,
+  Tag,
+  Building2,
+  Globe,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Shield,
+  Gauge,
+  DollarSign,
+  Ban,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Activity,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
-  resourceMeta, actionMeta, scopeMeta, periodMeta,
-  overageStatusMeta, getUsagePercent, getUsageColor, getUsageBarColor,
-  formatNumber, formatCurrency
+  resourceMeta,
+  actionMeta,
+  scopeMeta,
+  periodMeta,
+  overageStatusMeta,
+  getUsagePercent,
+  getUsageColor,
+  getUsageBarColor,
+  formatNumber,
+  formatCurrency,
 } from './data';
 
 /* ─── Resource Badge ─── */
 export function ResourceBadge({ resource }) {
   const meta = resourceMeta[resource] || resourceMeta.api_calls;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, 'border-current/20'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -30,11 +60,18 @@ export function ResourceBadge({ resource }) {
 export function ScopeBadge({ scope, target }) {
   const meta = scopeMeta[scope] || scopeMeta.plan;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
-      meta.color.replace('text-', 'bg-').replace('warning', 'warning/10').replace('accent', 'accent/10').replace('secondary', 'secondary/10'),
-      meta.color, 'border-current/20'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.color
+          .replace('text-', 'bg-')
+          .replace('warning', 'warning/10')
+          .replace('accent', 'accent/10')
+          .replace('secondary', 'secondary/10'),
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
       {target && <span className="opacity-70">· {target}</span>}
     </span>
@@ -45,7 +82,12 @@ export function ScopeBadge({ scope, target }) {
 export function ActionBadge({ action }) {
   const meta = actionMeta[action] || actionMeta.notify;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -56,7 +98,12 @@ export function ActionBadge({ action }) {
 export function OverageStatusBadge({ status }) {
   const meta = overageStatusMeta[status] || overageStatusMeta.projected;
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -73,15 +120,26 @@ export function QuotaStatCard({ label, value, subtext, icon: Icon, color, trend 
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -95,18 +153,29 @@ export function QuotaRuleCard({ rule, onEdit, onToggle, onDelete }) {
   const action = actionMeta[rule.action] || actionMeta.notify;
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
-      rule.enabled ? 'border-border hover:border-secondary/30' : 'border-border opacity-60'
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-surface p-4 transition-all hover:shadow-md',
+        rule.enabled ? 'border-border hover:border-secondary/30' : 'border-border opacity-60'
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', resourceMeta[rule.resource]?.bg || 'bg-secondary/10')}>
-            <Zap className={cn('h-4 w-4', resourceMeta[rule.resource]?.color || 'text-secondary')} />
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              resourceMeta[rule.resource]?.bg || 'bg-secondary/10'
+            )}
+          >
+            <Zap
+              className={cn('h-4 w-4', resourceMeta[rule.resource]?.color || 'text-secondary')}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{rule.name}</h3>
-            <p className="text-[10px] text-text-muted">{rule.id} · {rule.description}</p>
+            <p className="text-[10px] text-text-muted">
+              {rule.id} · {rule.description}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -124,7 +193,10 @@ export function QuotaRuleCard({ rule, onEdit, onToggle, onDelete }) {
         <div className="rounded-lg border border-border bg-background p-2.5">
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Limit</p>
           <p className="text-sm font-mono font-medium text-text-primary">
-            {formatNumber(rule.limit)} <span className="text-[10px] text-text-muted">{rule.unit}/{periodMeta[rule.period]?.short || rule.period}</span>
+            {formatNumber(rule.limit)}{' '}
+            <span className="text-[10px] text-text-muted">
+              {rule.unit}/{periodMeta[rule.period]?.short || rule.period}
+            </span>
           </p>
         </div>
         <div className="rounded-lg border border-border bg-background p-2.5">
@@ -146,7 +218,9 @@ export function QuotaRuleCard({ rule, onEdit, onToggle, onDelete }) {
             <DollarSign className="h-3.5 w-3.5 text-accent" />
             <span className="text-xs text-accent font-medium">Overage enabled</span>
           </div>
-          <span className="text-xs font-mono text-text-secondary">{formatCurrency(rule.overageRate)}/{rule.unit} · cap {formatCurrency(rule.overageCap)}</span>
+          <span className="text-xs font-mono text-text-secondary">
+            {formatCurrency(rule.overageRate)}/{rule.unit} · cap {formatCurrency(rule.overageCap)}
+          </span>
         </div>
       )}
 
@@ -168,7 +242,9 @@ export function QuotaRuleCard({ rule, onEdit, onToggle, onDelete }) {
             </div>
             <div>
               <span className="text-text-muted">Period:</span>{' '}
-              <span className="text-text-primary">{periodMeta[rule.period]?.label || rule.period}</span>
+              <span className="text-text-primary">
+                {periodMeta[rule.period]?.label || rule.period}
+              </span>
             </div>
             {rule.throttleRate && (
               <div>
@@ -190,16 +266,28 @@ export function QuotaRuleCard({ rule, onEdit, onToggle, onDelete }) {
           onClick={() => onToggle(rule.id)}
           className={cn(
             'flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors',
-            rule.enabled ? 'text-accent hover:bg-accent/10' : 'text-text-muted hover:bg-surface-elevated'
+            rule.enabled
+              ? 'text-accent hover:bg-accent/10'
+              : 'text-text-muted hover:bg-surface-elevated'
           )}
         >
-          {rule.enabled ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+          {rule.enabled ? (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          ) : (
+            <XCircle className="h-3.5 w-3.5" />
+          )}
           {rule.enabled ? 'Enabled' : 'Disabled'}
         </button>
-        <button onClick={() => onEdit(rule)} className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-secondary hover:bg-secondary/10 transition-colors">
+        <button
+          onClick={() => onEdit(rule)}
+          className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-secondary hover:bg-secondary/10 transition-colors"
+        >
           <Activity className="h-3.5 w-3.5" /> Edit
         </button>
-        <button onClick={() => onDelete(rule.id)} className="ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 transition-colors">
+        <button
+          onClick={() => onDelete(rule.id)}
+          className="ml-auto flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 transition-colors"
+        >
           <Ban className="h-3.5 w-3.5" /> Delete
         </button>
       </div>
@@ -217,7 +305,10 @@ export function TenantUsageRow({ usage, expanded, onToggle }) {
   return (
     <>
       <tr
-        className={cn('hover:bg-background/50 transition-colors cursor-pointer', pct >= 100 && 'bg-danger/5')}
+        className={cn(
+          'hover:bg-background/50 transition-colors cursor-pointer',
+          pct >= 100 && 'bg-danger/5'
+        )}
         onClick={onToggle}
       >
         <td className="px-4 py-3">
@@ -230,25 +321,38 @@ export function TenantUsageRow({ usage, expanded, onToggle }) {
         </td>
         <td className="px-4 py-3 text-sm font-medium text-text-primary">{usage.tenantName}</td>
         <td className="px-4 py-3">
-          <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
-            usage.plan === 'Enterprise' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' :
-            usage.plan === 'Professional' ? 'bg-secondary/10 text-secondary border-secondary/20' :
-            'bg-info/10 text-info border-info/20'
-          )}>
+          <span
+            className={cn(
+              'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
+              usage.plan === 'Enterprise'
+                ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                : usage.plan === 'Professional'
+                  ? 'bg-secondary/10 text-secondary border-secondary/20'
+                  : 'bg-info/10 text-info border-info/20'
+            )}
+          >
             {usage.plan}
           </span>
         </td>
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
             <div className="h-2 w-20 rounded-full bg-border overflow-hidden">
-              <div className={cn('h-full rounded-full transition-all', barColor)} style={{ width: `${Math.min(100, pct || 0)}%` }} />
+              <div
+                className={cn('h-full rounded-full transition-all', barColor)}
+                style={{ width: `${Math.min(100, pct || 0)}%` }}
+              />
             </div>
             <span className={cn('text-xs font-mono font-medium', colorClass)}>{pct}%</span>
           </div>
         </td>
         <td className="px-4 py-3 text-sm font-mono text-text-primary">
-          {typeof usage.used === 'number' && usage.used % 1 !== 0 ? usage.used.toFixed(1) : usage.used}
-          <span className="text-text-muted text-xs"> / {formatNumber(usage.limit)} {usage.unit}</span>
+          {typeof usage.used === 'number' && usage.used % 1 !== 0
+            ? usage.used.toFixed(1)
+            : usage.used}
+          <span className="text-text-muted text-xs">
+            {' '}
+            / {formatNumber(usage.limit)} {usage.unit}
+          </span>
         </td>
         <td className="px-4 py-3">
           {pct >= 100 ? (
@@ -278,13 +382,15 @@ export function TenantUsageRow({ usage, expanded, onToggle }) {
                 <div>
                   <p className="text-xs text-text-muted">Remaining</p>
                   <p className={cn('font-mono font-medium', colorClass)}>
-                    {Math.max(0, usage.limit - usage.used).toFixed(usage.used % 1 !== 0 ? 1 : 0)} {usage.unit}
+                    {Math.max(0, usage.limit - usage.used).toFixed(usage.used % 1 !== 0 ? 1 : 0)}{' '}
+                    {usage.unit}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-text-muted">Overage (if any)</p>
                   <p className="font-mono text-text-primary">
-                    {usage.used > usage.limit ? (usage.used - usage.limit).toFixed(1) : 0} {usage.unit}
+                    {usage.used > usage.limit ? (usage.used - usage.limit).toFixed(1) : 0}{' '}
+                    {usage.unit}
                   </p>
                 </div>
                 <div>
@@ -323,13 +429,16 @@ export function OverageHistoryRow({ entry }) {
       </td>
       <td className="px-4 py-3 text-sm text-text-secondary">{entry.period}</td>
       <td className="px-4 py-3 text-sm font-mono text-text-primary">
-        {entry.excess} {entry.resource === 'storage' ? 'GB' : entry.resource === 'users' ? 'seats' : 'calls'}
+        {entry.excess}{' '}
+        {entry.resource === 'storage' ? 'GB' : entry.resource === 'users' ? 'seats' : 'calls'}
       </td>
-      <td className="px-4 py-3 text-sm font-mono text-text-primary">{formatCurrency(entry.rate)}</td>
-      <td className="px-4 py-3 text-sm font-mono font-medium text-text-primary">{formatCurrency(entry.charge)}</td>
-      <td className="px-4 py-3 text-sm text-text-muted">
-        {entry.invoiceId || '—'}
+      <td className="px-4 py-3 text-sm font-mono text-text-primary">
+        {formatCurrency(entry.rate)}
       </td>
+      <td className="px-4 py-3 text-sm font-mono font-medium text-text-primary">
+        {formatCurrency(entry.charge)}
+      </td>
+      <td className="px-4 py-3 text-sm text-text-muted">{entry.invoiceId || '—'}</td>
     </tr>
   );
 }
@@ -337,7 +446,9 @@ export function OverageHistoryRow({ entry }) {
 /* ─── Throttle Event Row ─── */
 export function ThrottleEventRow({ event }) {
   return (
-    <tr className={cn('hover:bg-background/50 transition-colors', !event.resolved && 'bg-warning/5')}>
+    <tr
+      className={cn('hover:bg-background/50 transition-colors', !event.resolved && 'bg-warning/5')}
+    >
       <td className="px-4 py-3">
         <ResourceBadge resource={event.resource} />
       </td>

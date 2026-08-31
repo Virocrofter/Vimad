@@ -327,13 +327,23 @@ export const apiEndpoints = [
     description: 'List all tenants with pagination and filters',
     parameters: [
       { name: 'page', type: 'integer', required: false, default: 1, description: 'Page number' },
-      { name: 'limit', type: 'integer', required: false, default: 20, description: 'Items per page' },
-      { name: 'status', type: 'string', required: false, default: null, description: 'Filter by status' },
+      {
+        name: 'limit',
+        type: 'integer',
+        required: false,
+        default: 20,
+        description: 'Items per page',
+      },
+      {
+        name: 'status',
+        type: 'string',
+        required: false,
+        default: null,
+        description: 'Filter by status',
+      },
     ],
     responseExample: {
-      data: [
-        { id: 'TNT-001', name: 'Grand Hotel Boston', status: 'active', plan: 'Enterprise' },
-      ],
+      data: [{ id: 'TNT-001', name: 'Grand Hotel Boston', status: 'active', plan: 'Enterprise' }],
       meta: { page: 1, limit: 20, total: 8, totalPages: 1 },
     },
   },
@@ -363,15 +373,18 @@ export const apiEndpoints = [
     category: 'reservations',
     description: 'List reservations with filtering',
     parameters: [
-      { name: 'checkInFrom', type: 'date', required: false, description: 'Filter by check-in date' },
+      {
+        name: 'checkInFrom',
+        type: 'date',
+        required: false,
+        description: 'Filter by check-in date',
+      },
       { name: 'checkInTo', type: 'date', required: false, description: 'Filter by check-in date' },
       { name: 'status', type: 'string', required: false, description: 'Reservation status' },
       { name: 'roomId', type: 'string', required: false, description: 'Filter by room' },
     ],
     responseExample: {
-      data: [
-        { id: 'r1', guest: 'John Smith', roomId: '102', status: 'checked_in' },
-      ],
+      data: [{ id: 'r1', guest: 'John Smith', roomId: '102', status: 'checked_in' }],
       meta: { page: 1, limit: 20, total: 142 },
     },
   },
@@ -407,9 +420,7 @@ export const apiEndpoints = [
       { name: 'type', type: 'string', required: false, description: 'Room type' },
     ],
     responseExample: {
-      data: [
-        { id: '101', floor: 1, type: 'Standard King', status: 'clean', available: true },
-      ],
+      data: [{ id: '101', floor: 1, type: 'Standard King', status: 'clean', available: true }],
       meta: { page: 1, limit: 50, total: 13 },
     },
   },
@@ -482,10 +493,30 @@ export const eventTypes = [
 
 /* ─── Metadata ─── */
 export const categoryMeta = {
-  payments: { label: 'Payments', color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: 'CreditCard' },
-  communications: { label: 'Communications', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: 'MessageSquare' },
-  analytics: { label: 'Analytics', color: 'text-purple-500', bg: 'bg-purple-500/10', icon: 'BarChart3' },
-  notifications: { label: 'Notifications', color: 'text-pink-500', bg: 'bg-pink-500/10', icon: 'Bell' },
+  payments: {
+    label: 'Payments',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    icon: 'CreditCard',
+  },
+  communications: {
+    label: 'Communications',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    icon: 'MessageSquare',
+  },
+  analytics: {
+    label: 'Analytics',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    icon: 'BarChart3',
+  },
+  notifications: {
+    label: 'Notifications',
+    color: 'text-pink-500',
+    bg: 'bg-pink-500/10',
+    icon: 'Bell',
+  },
   ota: { label: 'OTA / Channels', color: 'text-orange-500', bg: 'bg-orange-500/10', icon: 'Globe' },
   ai: { label: 'AI / ML', color: 'text-violet-500', bg: 'bg-violet-500/10', icon: 'Sparkles' },
   storage: { label: 'Storage', color: 'text-amber-500', bg: 'bg-amber-500/10', icon: 'HardDrive' },
@@ -493,10 +524,22 @@ export const categoryMeta = {
 };
 
 export const statusMeta = {
-  connected: { label: 'Connected', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-  disconnected: { label: 'Disconnected', dot: 'bg-text-muted', class: 'bg-neutral/10 text-text-muted border-border' },
+  connected: {
+    label: 'Connected',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  disconnected: {
+    label: 'Disconnected',
+    dot: 'bg-text-muted',
+    class: 'bg-neutral/10 text-text-muted border-border',
+  },
   error: { label: 'Error', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
-  pending: { label: 'Pending Setup', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
+  pending: {
+    label: 'Pending Setup',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
 };
 
 export const healthMeta = {
@@ -508,7 +551,11 @@ export const healthMeta = {
 
 export const webhookStatusMeta = {
   active: { label: 'Active', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20' },
-  paused: { label: 'Paused', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20' },
+  paused: {
+    label: 'Paused',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
   failed: { label: 'Failed', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20' },
 };
 

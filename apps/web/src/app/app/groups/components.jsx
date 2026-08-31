@@ -6,7 +6,12 @@ import { statusMeta, blockTypeMeta } from './data';
 export function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.prospect;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -15,7 +20,12 @@ export function StatusBadge({ status }) {
 export function BlockTypeBadge({ type }) {
   const meta = blockTypeMeta[type] || blockTypeMeta.courtesy;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -27,7 +37,10 @@ export function PickupBar({ picked, blocked }) {
     <div className="flex items-center gap-2">
       <div className="h-2 flex-1 max-w-24 rounded-full bg-border overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all', pct >= 80 ? 'bg-accent' : pct >= 50 ? 'bg-secondary' : 'bg-warning')}
+          className={cn(
+            'h-full rounded-full transition-all',
+            pct >= 80 ? 'bg-accent' : pct >= 50 ? 'bg-secondary' : 'bg-warning'
+          )}
           style={{ width: `${pct}%` }}
         />
       </div>

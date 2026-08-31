@@ -2,13 +2,46 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FileText, DollarSign, Building2, Search, Filter, Download,
-  Plus, X, Check, ChevronDown, ChevronUp, Calendar, Clock,
-  AlertTriangle, TrendingUp, TrendingDown, Minus, Eye,
-  Printer, Mail, Phone, MapPin, CreditCard, Receipt,
-  ArrowRightLeft, MoreHorizontal, Edit3, Trash2, Send,
-  BarChart3, PieChart, Activity, Users, Wallet, Landmark,
-  CheckCircle2, XCircle, AlertCircle, Info, Layers
+  FileText,
+  DollarSign,
+  Building2,
+  Search,
+  Filter,
+  Download,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Eye,
+  Printer,
+  Mail,
+  Phone,
+  MapPin,
+  CreditCard,
+  Receipt,
+  ArrowRightLeft,
+  MoreHorizontal,
+  Edit3,
+  Trash2,
+  Send,
+  BarChart3,
+  PieChart,
+  Activity,
+  Users,
+  Wallet,
+  Landmark,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Info,
+  Layers,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -104,28 +137,199 @@ const corporateAccounts = [
 ];
 
 const invoices = [
-  { id: 'INV-2026-0812-001', accountId: 'CORP-001', date: '2026-08-12', dueDate: '2026-09-11', amount: 8500, paid: 0, status: 'open', description: 'Group block — TechConf 2026 (45 rooms × 3 nights)' },
-  { id: 'INV-2026-0801-001', accountId: 'CORP-001', date: '2026-08-01', dueDate: '2026-08-31', amount: 12400, paid: 0, status: 'open', description: 'Monthly corporate lodging — July 2026' },
-  { id: 'INV-2026-0715-001', accountId: 'CORP-001', date: '2026-07-15', dueDate: '2026-08-14', amount: 7550, paid: 7550, status: 'paid', description: 'Q3 Sales Meeting (25 rooms × 2 nights)' },
-  { id: 'INV-2026-0810-001', accountId: 'CORP-002', date: '2026-08-10', dueDate: '2026-09-09', amount: 15200, paid: 0, status: 'open', description: 'Regional Sales Kickoff (60 rooms × 4 nights)' },
-  { id: 'INV-2026-0720-001', accountId: 'CORP-002', date: '2026-07-20', dueDate: '2026-08-19', amount: 18900, paid: 5000, status: 'partial', description: 'Pharma Conference (80 rooms × 3 nights)' },
-  { id: 'INV-2026-0800-001', accountId: 'CORP-002', date: '2026-08-05', dueDate: '2026-09-04', amount: 8000, paid: 0, status: 'open', description: 'Executive retreat — August 2026' },
-  { id: 'INV-2026-0815-001', accountId: 'CORP-003', date: '2026-08-15', dueDate: '2026-08-30', amount: 4500, paid: 0, status: 'open', description: 'DevSummit team lodging (12 rooms × 3 nights)' },
-  { id: 'INV-2026-0805-001', accountId: 'CORP-003', date: '2026-08-05', dueDate: '2026-08-20', amount: 4250, paid: 0, status: 'overdue', description: 'July developer meetup (10 rooms × 3 nights)' },
-  { id: 'INV-2026-0720-002', accountId: 'CORP-004', date: '2026-07-20', dueDate: '2026-08-04', amount: 3200, paid: 0, status: 'overdue', description: 'Youth Soccer Tournament (20 rooms × 2 nights)' },
-  { id: 'INV-2026-0812-002', accountId: 'CORP-005', date: '2026-08-12', dueDate: '2026-09-11', amount: 6500, paid: 6500, status: 'paid', description: 'Corporate training event (15 rooms × 2 nights)' },
-  { id: 'INV-2026-0801-002', accountId: 'CORP-001', date: '2026-08-01', dueDate: '2026-08-31', amount: 3400, paid: 0, status: 'open', description: 'Catering — Executive lunch series' },
-  { id: 'INV-2026-0710-001', accountId: 'CORP-002', date: '2026-07-10', dueDate: '2026-08-09', amount: 11200, paid: 11200, status: 'paid', description: 'Monthly corporate lodging — June 2026' },
-  { id: 'INV-2026-0818-001', accountId: 'CORP-003', date: '2026-08-18', dueDate: '2026-09-02', amount: 2800, paid: 0, status: 'open', description: 'Board meeting — August 18-19' },
-  { id: 'INV-2026-0808-001', accountId: 'CORP-001', date: '2026-08-08', dueDate: '2026-09-07', amount: 5600, paid: 0, status: 'open', description: 'Event space rental — Grand Ballroom' },
+  {
+    id: 'INV-2026-0812-001',
+    accountId: 'CORP-001',
+    date: '2026-08-12',
+    dueDate: '2026-09-11',
+    amount: 8500,
+    paid: 0,
+    status: 'open',
+    description: 'Group block — TechConf 2026 (45 rooms × 3 nights)',
+  },
+  {
+    id: 'INV-2026-0801-001',
+    accountId: 'CORP-001',
+    date: '2026-08-01',
+    dueDate: '2026-08-31',
+    amount: 12400,
+    paid: 0,
+    status: 'open',
+    description: 'Monthly corporate lodging — July 2026',
+  },
+  {
+    id: 'INV-2026-0715-001',
+    accountId: 'CORP-001',
+    date: '2026-07-15',
+    dueDate: '2026-08-14',
+    amount: 7550,
+    paid: 7550,
+    status: 'paid',
+    description: 'Q3 Sales Meeting (25 rooms × 2 nights)',
+  },
+  {
+    id: 'INV-2026-0810-001',
+    accountId: 'CORP-002',
+    date: '2026-08-10',
+    dueDate: '2026-09-09',
+    amount: 15200,
+    paid: 0,
+    status: 'open',
+    description: 'Regional Sales Kickoff (60 rooms × 4 nights)',
+  },
+  {
+    id: 'INV-2026-0720-001',
+    accountId: 'CORP-002',
+    date: '2026-07-20',
+    dueDate: '2026-08-19',
+    amount: 18900,
+    paid: 5000,
+    status: 'partial',
+    description: 'Pharma Conference (80 rooms × 3 nights)',
+  },
+  {
+    id: 'INV-2026-0800-001',
+    accountId: 'CORP-002',
+    date: '2026-08-05',
+    dueDate: '2026-09-04',
+    amount: 8000,
+    paid: 0,
+    status: 'open',
+    description: 'Executive retreat — August 2026',
+  },
+  {
+    id: 'INV-2026-0815-001',
+    accountId: 'CORP-003',
+    date: '2026-08-15',
+    dueDate: '2026-08-30',
+    amount: 4500,
+    paid: 0,
+    status: 'open',
+    description: 'DevSummit team lodging (12 rooms × 3 nights)',
+  },
+  {
+    id: 'INV-2026-0805-001',
+    accountId: 'CORP-003',
+    date: '2026-08-05',
+    dueDate: '2026-08-20',
+    amount: 4250,
+    paid: 0,
+    status: 'overdue',
+    description: 'July developer meetup (10 rooms × 3 nights)',
+  },
+  {
+    id: 'INV-2026-0720-002',
+    accountId: 'CORP-004',
+    date: '2026-07-20',
+    dueDate: '2026-08-04',
+    amount: 3200,
+    paid: 0,
+    status: 'overdue',
+    description: 'Youth Soccer Tournament (20 rooms × 2 nights)',
+  },
+  {
+    id: 'INV-2026-0812-002',
+    accountId: 'CORP-005',
+    date: '2026-08-12',
+    dueDate: '2026-09-11',
+    amount: 6500,
+    paid: 6500,
+    status: 'paid',
+    description: 'Corporate training event (15 rooms × 2 nights)',
+  },
+  {
+    id: 'INV-2026-0801-002',
+    accountId: 'CORP-001',
+    date: '2026-08-01',
+    dueDate: '2026-08-31',
+    amount: 3400,
+    paid: 0,
+    status: 'open',
+    description: 'Catering — Executive lunch series',
+  },
+  {
+    id: 'INV-2026-0710-001',
+    accountId: 'CORP-002',
+    date: '2026-07-10',
+    dueDate: '2026-08-09',
+    amount: 11200,
+    paid: 11200,
+    status: 'paid',
+    description: 'Monthly corporate lodging — June 2026',
+  },
+  {
+    id: 'INV-2026-0818-001',
+    accountId: 'CORP-003',
+    date: '2026-08-18',
+    dueDate: '2026-09-02',
+    amount: 2800,
+    paid: 0,
+    status: 'open',
+    description: 'Board meeting — August 18-19',
+  },
+  {
+    id: 'INV-2026-0808-001',
+    accountId: 'CORP-001',
+    date: '2026-08-08',
+    dueDate: '2026-09-07',
+    amount: 5600,
+    paid: 0,
+    status: 'open',
+    description: 'Event space rental — Grand Ballroom',
+  },
 ];
 
 const payments = [
-  { id: 'PAY-2026-0812-001', accountId: 'CORP-005', invoiceId: 'INV-2026-0812-002', date: '2026-08-12', amount: 6500, method: 'Wire Transfer', reference: 'WF-88721', postedBy: 'Sarah J.' },
-  { id: 'PAY-2026-0801-001', accountId: 'CORP-002', invoiceId: 'INV-2026-0710-001', date: '2026-08-01', amount: 11200, method: 'ACH', reference: 'ACH-44291', postedBy: 'Mike C.' },
-  { id: 'PAY-2026-0725-001', accountId: 'CORP-002', invoiceId: 'INV-2026-0720-001', date: '2026-07-25', amount: 5000, method: 'Check', reference: 'CHK-11203', postedBy: 'Sarah J.' },
-  { id: 'PAY-2026-0715-001', accountId: 'CORP-001', invoiceId: 'INV-2026-0715-001', date: '2026-07-15', amount: 7550, method: 'ACH', reference: 'ACH-33812', postedBy: 'Mike C.' },
-  { id: 'PAY-2026-0810-001', accountId: 'CORP-003', invoiceId: 'INV-2026-0715-002', date: '2026-08-10', amount: 2500, method: 'Credit Card', reference: 'CC-****4242', postedBy: 'Sarah J.' },
+  {
+    id: 'PAY-2026-0812-001',
+    accountId: 'CORP-005',
+    invoiceId: 'INV-2026-0812-002',
+    date: '2026-08-12',
+    amount: 6500,
+    method: 'Wire Transfer',
+    reference: 'WF-88721',
+    postedBy: 'Sarah J.',
+  },
+  {
+    id: 'PAY-2026-0801-001',
+    accountId: 'CORP-002',
+    invoiceId: 'INV-2026-0710-001',
+    date: '2026-08-01',
+    amount: 11200,
+    method: 'ACH',
+    reference: 'ACH-44291',
+    postedBy: 'Mike C.',
+  },
+  {
+    id: 'PAY-2026-0725-001',
+    accountId: 'CORP-002',
+    invoiceId: 'INV-2026-0720-001',
+    date: '2026-07-25',
+    amount: 5000,
+    method: 'Check',
+    reference: 'CHK-11203',
+    postedBy: 'Sarah J.',
+  },
+  {
+    id: 'PAY-2026-0715-001',
+    accountId: 'CORP-001',
+    invoiceId: 'INV-2026-0715-001',
+    date: '2026-07-15',
+    amount: 7550,
+    method: 'ACH',
+    reference: 'ACH-33812',
+    postedBy: 'Mike C.',
+  },
+  {
+    id: 'PAY-2026-0810-001',
+    accountId: 'CORP-003',
+    invoiceId: 'INV-2026-0715-002',
+    date: '2026-08-10',
+    amount: 2500,
+    method: 'Credit Card',
+    reference: 'CC-****4242',
+    postedBy: 'Sarah J.',
+  },
 ];
 
 /* ─── Helpers ─── */
@@ -153,9 +357,21 @@ function getAgingBucket(dueDate, status) {
 const statusMeta = {
   open: { label: 'Open', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
   paid: { label: 'Paid', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  partial: { label: 'Partial', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  overdue: { label: 'Overdue', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  void: { label: 'Void', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  partial: {
+    label: 'Partial',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  overdue: {
+    label: 'Overdue',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
+  void: {
+    label: 'Void',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 const accountStatusMeta = {
@@ -182,12 +398,26 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -198,7 +428,12 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.open;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -208,7 +443,12 @@ function StatusBadge({ status }) {
 function AccountStatusBadge({ status }) {
   const meta = accountStatusMeta[status] || accountStatusMeta.active;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -217,12 +457,13 @@ function AccountStatusBadge({ status }) {
 /* ─── Aging Report Chart ─── */
 function AgingChart({ data }) {
   const total = Object.values(data).reduce((a, b) => a + b, 0);
-  if (total === 0) return (
-    <div className="rounded-xl border border-border bg-surface p-8 text-center">
-      <BarChart3 className="mx-auto h-10 w-10 text-text-muted mb-3" />
-      <p className="text-text-muted">No outstanding receivables</p>
-    </div>
-  );
+  if (total === 0)
+    return (
+      <div className="rounded-xl border border-border bg-surface p-8 text-center">
+        <BarChart3 className="mx-auto h-10 w-10 text-text-muted mb-3" />
+        <p className="text-text-muted">No outstanding receivables</p>
+      </div>
+    );
 
   return (
     <div className="rounded-xl border border-border bg-surface p-6">
@@ -232,7 +473,12 @@ function AgingChart({ data }) {
           { key: 'current', label: 'Current (0-30 days)', color: 'text-accent', bar: 'bg-accent' },
           { key: '1-30', label: '1-30 Days Past Due', color: 'text-info', bar: 'bg-info' },
           { key: '31-60', label: '31-60 Days Past Due', color: 'text-warning', bar: 'bg-warning' },
-          { key: '61-90', label: '61-90 Days Past Due', color: 'text-orange-500', bar: 'bg-orange-500' },
+          {
+            key: '61-90',
+            label: '61-90 Days Past Due',
+            color: 'text-orange-500',
+            bar: 'bg-orange-500',
+          },
           { key: '90+', label: '90+ Days Past Due', color: 'text-danger', bar: 'bg-danger' },
         ].map((bucket) => {
           const amount = data[bucket.key] || 0;
@@ -246,7 +492,10 @@ function AgingChart({ data }) {
                 </span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-border overflow-hidden">
-                <div className={cn('h-full rounded-full transition-all', bucket.bar)} style={{ width: `${pct}%` }} />
+                <div
+                  className={cn('h-full rounded-full transition-all', bucket.bar)}
+                  style={{ width: `${pct}%` }}
+                />
               </div>
             </div>
           );
@@ -255,7 +504,9 @@ function AgingChart({ data }) {
       <div className="mt-4 pt-4 border-t border-border">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-text-primary">Total Outstanding</span>
-          <span className="text-lg font-bold font-mono text-text-primary">{formatCurrency(total)}</span>
+          <span className="text-lg font-bold font-mono text-text-primary">
+            {formatCurrency(total)}
+          </span>
         </div>
       </div>
     </div>
@@ -290,7 +541,10 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge status={invoice.status} />
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -301,15 +555,24 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
           <div className="grid grid-cols-3 gap-4">
             <div className="rounded-lg border border-border bg-surface p-3 text-center">
               <p className="text-xs text-text-muted uppercase tracking-wider">Invoice Amount</p>
-              <p className="mt-1 text-lg font-bold font-mono text-text-primary">{formatCurrency(invoice.amount)}</p>
+              <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                {formatCurrency(invoice.amount)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-surface p-3 text-center">
               <p className="text-xs text-text-muted uppercase tracking-wider">Paid</p>
-              <p className="mt-1 text-lg font-bold font-mono text-accent">{formatCurrency(invoice.paid)}</p>
+              <p className="mt-1 text-lg font-bold font-mono text-accent">
+                {formatCurrency(invoice.paid)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-surface p-3 text-center">
               <p className="text-xs text-text-muted uppercase tracking-wider">Balance</p>
-              <p className={cn('mt-1 text-lg font-bold font-mono', balance > 0 ? 'text-danger' : 'text-accent')}>
+              <p
+                className={cn(
+                  'mt-1 text-lg font-bold font-mono',
+                  balance > 0 ? 'text-danger' : 'text-accent'
+                )}
+              >
                 {formatCurrency(balance)}
               </p>
             </div>
@@ -317,7 +580,9 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
 
           {/* Invoice Details */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Invoice Details</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Invoice Details
+            </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2 text-text-secondary">
                 <Calendar className="h-4 w-4 text-text-muted" />
@@ -341,25 +606,38 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
 
           {/* Account Info */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Bill To</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Bill To
+            </h4>
             <p className="text-sm font-medium text-text-primary">{account.name}</p>
             <p className="text-xs text-text-secondary">{account.contact}</p>
             <div className="space-y-1 text-xs text-text-secondary">
-              <div className="flex items-center gap-2"><Mail className="h-3 w-3" /> {account.email}</div>
-              <div className="flex items-center gap-2"><Phone className="h-3 w-3" /> {account.phone}</div>
-              <div className="flex items-center gap-2"><MapPin className="h-3 w-3" /> {account.address}</div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-3 w-3" /> {account.email}
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-3 w-3" /> {account.phone}
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-3 w-3" /> {account.address}
+              </div>
             </div>
           </div>
 
           {/* Payment Form */}
           {showPaymentForm ? (
-            <form onSubmit={handlePayment} className="rounded-xl border border-border bg-surface p-4 space-y-4">
+            <form
+              onSubmit={handlePayment}
+              className="rounded-xl border border-border bg-surface p-4 space-y-4"
+            >
               <h4 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-secondary" /> Post Payment
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Amount
+                  </label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                     <input
@@ -374,7 +652,9 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Method</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Method
+                  </label>
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
@@ -388,7 +668,9 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Reference #</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Reference #
+                </label>
                 <input
                   type="text"
                   value={reference}
@@ -398,24 +680,33 @@ function InvoiceDetailModal({ invoice, account, onClose, onPostPayment }) {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setShowPaymentForm(false)}>Cancel</Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPaymentForm(false)}
+                >
+                  Cancel
+                </Button>
                 <Button type="submit" variant="secondary" size="sm">
                   <Check className="mr-1.5 h-4 w-4" /> Post Payment
                 </Button>
               </div>
             </form>
-          ) : balance > 0 && (
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={() => setShowPaymentForm(true)}>
-                <DollarSign className="mr-1.5 h-4 w-4" /> Post Payment
-              </Button>
-              <Button variant="outline" size="sm">
-                <Mail className="mr-1.5 h-4 w-4" /> Send Reminder
-              </Button>
-              <Button variant="outline" size="sm">
-                <Printer className="mr-1.5 h-4 w-4" /> Print
-              </Button>
-            </div>
+          ) : (
+            balance > 0 && (
+              <div className="flex items-center gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setShowPaymentForm(true)}>
+                  <DollarSign className="mr-1.5 h-4 w-4" /> Post Payment
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Mail className="mr-1.5 h-4 w-4" /> Send Reminder
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Printer className="mr-1.5 h-4 w-4" /> Print
+                </Button>
+              </div>
+            )
           )}
         </div>
       </div>
@@ -445,12 +736,17 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{account.name}</h2>
-                <p className="text-xs text-text-muted">{account.id} · {account.taxId}</p>
+                <p className="text-xs text-text-muted">
+                  {account.id} · {account.taxId}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <AccountStatusBadge status={account.status} />
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -462,13 +758,20 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Current Balance</p>
-              <p className={cn('mt-1 text-2xl font-bold font-mono', account.currentBalance > 0 ? 'text-danger' : 'text-accent')}>
+              <p
+                className={cn(
+                  'mt-1 text-2xl font-bold font-mono',
+                  account.currentBalance > 0 ? 'text-danger' : 'text-accent'
+                )}
+              >
                 {formatCurrency(account.currentBalance)}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Credit Limit</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-text-primary">{formatCurrency(account.creditLimit)}</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+                {formatCurrency(account.creditLimit)}
+              </p>
             </div>
           </div>
 
@@ -476,13 +779,29 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
           <div className="rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-text-primary">Credit Utilization</span>
-              <span className={cn('text-sm font-bold font-mono', creditUtilization > 80 ? 'text-danger' : creditUtilization > 50 ? 'text-warning' : 'text-accent')}>
+              <span
+                className={cn(
+                  'text-sm font-bold font-mono',
+                  creditUtilization > 80
+                    ? 'text-danger'
+                    : creditUtilization > 50
+                      ? 'text-warning'
+                      : 'text-accent'
+                )}
+              >
                 {creditUtilization.toFixed(1)}%
               </span>
             </div>
             <div className="h-2.5 w-full rounded-full bg-border overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all', creditUtilization > 80 ? 'bg-danger' : creditUtilization > 50 ? 'bg-warning' : 'bg-accent')}
+                className={cn(
+                  'h-full rounded-full transition-all',
+                  creditUtilization > 80
+                    ? 'bg-danger'
+                    : creditUtilization > 50
+                      ? 'bg-warning'
+                      : 'bg-accent'
+                )}
                 style={{ width: `${Math.min(100, creditUtilization)}%` }}
               />
             </div>
@@ -493,12 +812,22 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
 
           {/* Contact Info */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Contact Information</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Contact Information
+            </h4>
             <div className="grid grid-cols-1 gap-2 text-sm">
-              <div className="flex items-center gap-2 text-text-secondary"><User className="h-4 w-4 text-text-muted" /> {account.contact}</div>
-              <div className="flex items-center gap-2 text-text-secondary"><Mail className="h-4 w-4 text-text-muted" /> {account.email}</div>
-              <div className="flex items-center gap-2 text-text-secondary"><Phone className="h-4 w-4 text-text-muted" /> {account.phone}</div>
-              <div className="flex items-center gap-2 text-text-secondary"><MapPin className="h-4 w-4 text-text-muted" /> {account.address}</div>
+              <div className="flex items-center gap-2 text-text-secondary">
+                <User className="h-4 w-4 text-text-muted" /> {account.contact}
+              </div>
+              <div className="flex items-center gap-2 text-text-secondary">
+                <Mail className="h-4 w-4 text-text-muted" /> {account.email}
+              </div>
+              <div className="flex items-center gap-2 text-text-secondary">
+                <Phone className="h-4 w-4 text-text-muted" /> {account.phone}
+              </div>
+              <div className="flex items-center gap-2 text-text-secondary">
+                <MapPin className="h-4 w-4 text-text-muted" /> {account.address}
+              </div>
             </div>
           </div>
 
@@ -506,25 +835,33 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-border bg-surface p-3">
               <p className="text-[10px] text-text-muted uppercase tracking-wider">Total Invoiced</p>
-              <p className="mt-1 text-lg font-bold font-mono text-text-primary">{formatCurrency(account.totalInvoiced)}</p>
+              <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                {formatCurrency(account.totalInvoiced)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-surface p-3">
               <p className="text-[10px] text-text-muted uppercase tracking-wider">Total Paid</p>
-              <p className="mt-1 text-lg font-bold font-mono text-accent">{formatCurrency(account.totalPaid)}</p>
+              <p className="mt-1 text-lg font-bold font-mono text-accent">
+                {formatCurrency(account.totalPaid)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-surface p-3">
               <p className="text-[10px] text-text-muted uppercase tracking-wider">Payment Terms</p>
               <p className="mt-1 text-lg font-bold text-text-primary">{account.paymentTerms}</p>
             </div>
             <div className="rounded-lg border border-border bg-surface p-3">
-              <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg. Days to Pay</p>
+              <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                Avg. Days to Pay
+              </p>
               <p className="mt-1 text-lg font-bold text-text-primary">{account.avgDaysToPay}</p>
             </div>
           </div>
 
           {/* Open Invoices */}
           <div>
-            <h4 className="text-sm font-semibold text-text-primary mb-3">Open Invoices ({openInvoices.length})</h4>
+            <h4 className="text-sm font-semibold text-text-primary mb-3">
+              Open Invoices ({openInvoices.length})
+            </h4>
             <div className="space-y-2">
               {openInvoices.map((inv) => (
                 <button
@@ -537,7 +874,9 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
                       <span className="text-xs font-mono text-text-muted">{inv.id}</span>
                       <StatusBadge status={inv.status} />
                     </div>
-                    <span className="text-sm font-bold font-mono text-text-primary">{formatCurrency(inv.amount - inv.paid)}</span>
+                    <span className="text-sm font-bold font-mono text-text-primary">
+                      {formatCurrency(inv.amount - inv.paid)}
+                    </span>
                   </div>
                   <p className="mt-1 text-xs text-text-secondary truncate">{inv.description}</p>
                   <div className="mt-1 flex items-center gap-3 text-[10px] text-text-muted">
@@ -557,13 +896,17 @@ function AccountDetailDrawer({ account, invoices, onClose, onPostPayment }) {
           {/* Paid Invoices */}
           {paidInvoices.length > 0 && (
             <div>
-              <h4 className="text-sm font-semibold text-text-primary mb-3">Paid Invoices ({paidInvoices.length})</h4>
+              <h4 className="text-sm font-semibold text-text-primary mb-3">
+                Paid Invoices ({paidInvoices.length})
+              </h4>
               <div className="space-y-2 opacity-60">
                 {paidInvoices.map((inv) => (
                   <div key={inv.id} className="rounded-lg border border-border bg-surface p-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-mono text-text-muted">{inv.id}</span>
-                      <span className="text-sm font-bold font-mono text-accent">{formatCurrency(inv.amount)}</span>
+                      <span className="text-sm font-bold font-mono text-accent">
+                        {formatCurrency(inv.amount)}
+                      </span>
                     </div>
                     <p className="mt-1 text-xs text-text-secondary truncate">{inv.description}</p>
                   </div>
@@ -617,21 +960,31 @@ function NewInvoiceModal({ accounts, onClose, onCreate }) {
       <div className="relative w-full max-w-lg rounded-xl border border-border bg-background p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Create Invoice</h3>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
+            <X className="h-5 w-5" />
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Corporate Account</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Corporate Account
+            </label>
             <select
               value={form.accountId}
               onChange={(e) => setForm({ ...form, accountId: e.target.value })}
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Amount
+            </label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               <input
@@ -646,7 +999,9 @@ function NewInvoiceModal({ accounts, onClose, onCreate }) {
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Due Date</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Due Date
+            </label>
             <input
               type="date"
               required
@@ -656,7 +1011,9 @@ function NewInvoiceModal({ accounts, onClose, onCreate }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Description
+            </label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -666,7 +1023,9 @@ function NewInvoiceModal({ accounts, onClose, onCreate }) {
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Plus className="mr-1.5 h-4 w-4" /> Create Invoice
             </Button>
@@ -692,27 +1051,36 @@ export default function AccountsReceivablePage() {
   const [showFilters, setShowFilters] = useState(false);
 
   /* ─── Computed Data ─── */
-  const totalOutstanding = useMemo(() =>
-    invoiceList.filter((inv) => inv.status !== 'paid').reduce((s, inv) => s + (inv.amount - inv.paid), 0),
-  [invoiceList]);
+  const totalOutstanding = useMemo(
+    () =>
+      invoiceList
+        .filter((inv) => inv.status !== 'paid')
+        .reduce((s, inv) => s + (inv.amount - inv.paid), 0),
+    [invoiceList]
+  );
 
-  const totalOverdue = useMemo(() =>
-    invoiceList.filter((inv) => inv.status === 'overdue').reduce((s, inv) => s + inv.amount, 0),
-  [invoiceList]);
+  const totalOverdue = useMemo(
+    () =>
+      invoiceList.filter((inv) => inv.status === 'overdue').reduce((s, inv) => s + inv.amount, 0),
+    [invoiceList]
+  );
 
   const agingData = useMemo(() => {
     const buckets = { current: 0, '1-30': 0, '31-60': 0, '61-90': 0, '90+': 0 };
-    invoiceList.filter((inv) => inv.status !== 'paid').forEach((inv) => {
-      const bucket = getAgingBucket(inv.dueDate, inv.status);
-      const balance = inv.amount - inv.paid;
-      buckets[bucket] += balance;
-    });
+    invoiceList
+      .filter((inv) => inv.status !== 'paid')
+      .forEach((inv) => {
+        const bucket = getAgingBucket(inv.dueDate, inv.status);
+        const balance = inv.amount - inv.paid;
+        buckets[bucket] += balance;
+      });
     return buckets;
   }, [invoiceList]);
 
   const filteredInvoices = useMemo(() => {
     let result = invoiceList.filter((inv) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         inv.id.toLowerCase().includes(query.toLowerCase()) ||
         inv.description.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
@@ -723,7 +1091,8 @@ export default function AccountsReceivablePage() {
 
   const filteredAccounts = useMemo(() => {
     return accounts.filter((a) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         a.name.toLowerCase().includes(query.toLowerCase()) ||
         a.id.toLowerCase().includes(query.toLowerCase()) ||
         a.contact.toLowerCase().includes(query.toLowerCase());
@@ -733,42 +1102,59 @@ export default function AccountsReceivablePage() {
 
   /* ─── Handlers ─── */
   const handlePostPayment = (invoiceId, amount, method, reference) => {
-    setInvoiceList((prev) => prev.map((inv) => {
-      if (inv.id !== invoiceId) return inv;
-      const newPaid = inv.paid + amount;
-      let newStatus = inv.status;
-      if (newPaid >= inv.amount) newStatus = 'paid';
-      else if (newPaid > 0) newStatus = 'partial';
-      return { ...inv, paid: newPaid, status: newStatus };
-    }));
+    setInvoiceList((prev) =>
+      prev.map((inv) => {
+        if (inv.id !== invoiceId) return inv;
+        const newPaid = inv.paid + amount;
+        let newStatus = inv.status;
+        if (newPaid >= inv.amount) newStatus = 'paid';
+        else if (newPaid > 0) newStatus = 'partial';
+        return { ...inv, paid: newPaid, status: newStatus };
+      })
+    );
 
     // Update account balance
     const invoice = invoiceList.find((inv) => inv.id === invoiceId);
     if (invoice) {
-      setAccounts((prev) => prev.map((acc) => {
-        if (acc.id !== invoice.accountId) return acc;
-        return { ...acc, currentBalance: Math.max(0, acc.currentBalance - amount), totalPaid: acc.totalPaid + amount };
-      }));
+      setAccounts((prev) =>
+        prev.map((acc) => {
+          if (acc.id !== invoice.accountId) return acc;
+          return {
+            ...acc,
+            currentBalance: Math.max(0, acc.currentBalance - amount),
+            totalPaid: acc.totalPaid + amount,
+          };
+        })
+      );
     }
 
-    setPaymentList((prev) => [...prev, {
-      id: `PAY-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}-001`,
-      accountId: invoice?.accountId,
-      invoiceId,
-      date: new Date().toISOString().split('T')[0],
-      amount,
-      method,
-      reference,
-      postedBy: 'You',
-    }]);
+    setPaymentList((prev) => [
+      ...prev,
+      {
+        id: `PAY-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}-001`,
+        accountId: invoice?.accountId,
+        invoiceId,
+        date: new Date().toISOString().split('T')[0],
+        amount,
+        method,
+        reference,
+        postedBy: 'You',
+      },
+    ]);
   };
 
   const handleCreateInvoice = (newInvoice) => {
     setInvoiceList((prev) => [newInvoice, ...prev]);
-    setAccounts((prev) => prev.map((acc) => {
-      if (acc.id !== newInvoice.accountId) return acc;
-      return { ...acc, currentBalance: acc.currentBalance + newInvoice.amount, totalInvoiced: acc.totalInvoiced + newInvoice.amount };
-    }));
+    setAccounts((prev) =>
+      prev.map((acc) => {
+        if (acc.id !== newInvoice.accountId) return acc;
+        return {
+          ...acc,
+          currentBalance: acc.currentBalance + newInvoice.amount,
+          totalInvoiced: acc.totalInvoiced + newInvoice.amount,
+        };
+      })
+    );
   };
 
   /* ─── Render ─── */
@@ -778,7 +1164,9 @@ export default function AccountsReceivablePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Accounts Receivable</h1>
-          <p className="text-sm text-text-secondary">Aging reports, invoice tracking, and corporate accounts</p>
+          <p className="text-sm text-text-secondary">
+            Aging reports, invoice tracking, and corporate accounts
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -838,7 +1226,9 @@ export default function AccountsReceivablePage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" /> {tab.label}
@@ -882,7 +1272,11 @@ export default function AccountsReceivablePage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-text-secondary">Paid (This Month)</span>
                   <span className="font-bold font-mono text-accent">
-                    {invoiceList.filter((inv) => inv.status === 'paid' && inv.date.startsWith('2026-08')).length}
+                    {
+                      invoiceList.filter(
+                        (inv) => inv.status === 'paid' && inv.date.startsWith('2026-08')
+                      ).length
+                    }
                   </span>
                 </div>
                 <div className="border-t border-border pt-3 flex items-center justify-between text-sm">
@@ -918,7 +1312,9 @@ export default function AccountsReceivablePage() {
                         <p className="text-sm font-medium text-text-primary">{account.name}</p>
                         <p className="text-xs text-text-muted">{account.paymentTerms}</p>
                       </div>
-                      <span className="text-sm font-bold font-mono text-danger">{formatCurrency(account.currentBalance)}</span>
+                      <span className="text-sm font-bold font-mono text-danger">
+                        {formatCurrency(account.currentBalance)}
+                      </span>
                     </button>
                   ))}
               </div>
@@ -966,13 +1362,27 @@ export default function AccountsReceivablePage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Invoice</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Account</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Due Date</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Balance</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Invoice
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Account
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Due Date
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Balance
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
                   </tr>
                 </thead>
@@ -988,19 +1398,29 @@ export default function AccountsReceivablePage() {
                             <FileText className="h-4 w-4 text-text-muted" />
                             <span className="font-mono text-xs text-text-primary">{inv.id}</span>
                           </div>
-                          <p className="mt-0.5 text-xs text-text-muted truncate max-w-[200px]">{inv.description}</p>
+                          <p className="mt-0.5 text-xs text-text-muted truncate max-w-[200px]">
+                            {inv.description}
+                          </p>
                         </td>
                         <td className="px-4 py-3 text-text-secondary">{account?.name}</td>
                         <td className="px-4 py-3 text-text-secondary text-xs">{inv.date}</td>
                         <td className="px-4 py-3">
                           <div className="text-text-secondary text-xs">{inv.dueDate}</div>
                           {overdue > 0 && (
-                            <div className="text-[10px] text-danger font-medium">{overdue} days overdue</div>
+                            <div className="text-[10px] text-danger font-medium">
+                              {overdue} days overdue
+                            </div>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{formatCurrency(inv.amount)}</td>
-                        <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">{formatCurrency(balance)}</td>
-                        <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {formatCurrency(inv.amount)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
+                          {formatCurrency(balance)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge status={inv.status} />
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
@@ -1012,7 +1432,9 @@ export default function AccountsReceivablePage() {
                             </button>
                             {balance > 0 && (
                               <button
-                                onClick={() => { setSelectedInvoice(inv); }}
+                                onClick={() => {
+                                  setSelectedInvoice(inv);
+                                }}
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                                 title="Post Payment"
                               >
@@ -1058,7 +1480,9 @@ export default function AccountsReceivablePage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredAccounts.map((account) => {
               const creditUtilization = (account.currentBalance / account.creditLimit) * 100;
-              const accountInvoices = invoiceList.filter((inv) => inv.accountId === account.id && inv.status !== 'paid');
+              const accountInvoices = invoiceList.filter(
+                (inv) => inv.accountId === account.id && inv.status !== 'paid'
+              );
               return (
                 <div
                   key={account.id}
@@ -1081,17 +1505,26 @@ export default function AccountsReceivablePage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-text-muted">Current Balance</span>
-                      <span className={cn('text-sm font-bold font-mono', account.currentBalance > 0 ? 'text-danger' : 'text-accent')}>
+                      <span
+                        className={cn(
+                          'text-sm font-bold font-mono',
+                          account.currentBalance > 0 ? 'text-danger' : 'text-accent'
+                        )}
+                      >
                         {formatCurrency(account.currentBalance)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-text-muted">Credit Limit</span>
-                      <span className="text-sm font-mono text-text-primary">{formatCurrency(account.creditLimit)}</span>
+                      <span className="text-sm font-mono text-text-primary">
+                        {formatCurrency(account.creditLimit)}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-text-muted">Open Invoices</span>
-                      <span className="text-sm font-bold text-text-primary">{accountInvoices.length}</span>
+                      <span className="text-sm font-bold text-text-primary">
+                        {accountInvoices.length}
+                      </span>
                     </div>
                   </div>
 
@@ -1099,11 +1532,20 @@ export default function AccountsReceivablePage() {
                   <div className="mt-3">
                     <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
                       <div
-                        className={cn('h-full rounded-full transition-all', creditUtilization > 80 ? 'bg-danger' : creditUtilization > 50 ? 'bg-warning' : 'bg-accent')}
+                        className={cn(
+                          'h-full rounded-full transition-all',
+                          creditUtilization > 80
+                            ? 'bg-danger'
+                            : creditUtilization > 50
+                              ? 'bg-warning'
+                              : 'bg-accent'
+                        )}
                         style={{ width: `${Math.min(100, creditUtilization)}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-[10px] text-text-muted">{creditUtilization.toFixed(1)}% utilized</p>
+                    <p className="mt-1 text-[10px] text-text-muted">
+                      {creditUtilization.toFixed(1)}% utilized
+                    </p>
                   </div>
 
                   <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-text-secondary">

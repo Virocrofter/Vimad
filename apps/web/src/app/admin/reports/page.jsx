@@ -3,34 +3,158 @@
 
 import { useState, useMemo } from 'react';
 import {
-  FileText, Download, Calendar, CheckCircle2, Clock, AlertTriangle,
-  Shield, ShieldCheck, XCircle, ChevronDown, ChevronUp, MoreHorizontal,
-  Copy, Check, Eye, Trash2, Edit3, Sparkles, BarChart3, TrendingUp,
-  TrendingDown, Users, DollarSign, CreditCard, ArrowUpRight, Filter,
-  Search, RefreshCw, Plus, Mail, Send, Printer, FileSpreadsheet,
-  FileJson, FileCode, Layers, PieChart, Activity, Target, Zap,
-  Globe, Building2, Tag, Hash, Link2, ExternalLink, Lock, Unlock,
-  Settings, Bell, History, RotateCcw, Save, X, Loader2, MapPin,
-  Server, Database, HardDrive, Cloud, Wifi, WifiOff, ArrowRight,
-  ArrowUp, ArrowDown, Minus, Percent, Flag, Ban, Play, Pause,
-  LayoutDashboard, LayoutList, LayoutGrid, Table, List, ListFilter,
-  ListOrdered, ListChecks, ListTree, ListCollapse, ListStart,
-  ListEnd, ListVideo, ListMusic, ListPlus, ListMinus, ListX,
-  ListRestart, ListTodo, ListOrderedIcon, AlignLeft, AlignCenter,
-  AlignRight, AlignJustify, AlignStartHorizontal, AlignEndHorizontal,
-  AlignStartVertical, AlignEndVertical, AlignHorizontalDistributeStart,
-  AlignHorizontalDistributeCenter, AlignHorizontalDistributeEnd,
-  AlignVerticalDistributeStart, AlignVerticalDistributeCenter,
-  AlignVerticalDistributeEnd, Space, SpaceIcon, StretchHorizontal,
-  StretchVertical, Move, MoveHorizontal, MoveVertical, MoveDiagonal,
-  Maximize, Minimize, Maximize2, Minimize2, Expand, Shrink,
-  Fullscreen, PanelLeft, PanelRight, PanelTop, PanelBottom,
-  PanelLeftClose, PanelRightClose, PanelTopClose, PanelBottomClose,
-  PanelLeftOpen, PanelRightOpen, PanelTopOpen, PanelBottomOpen,
-  Sidebar, SidebarClose, SidebarOpen, SidebarIcon, LayoutTemplate,
-  LayoutPanelLeft, LayoutPanelTop, LayoutGridIcon, Rows3, Columns3,
-  Grid2x2, Grid3x3, Grip, GripHorizontal, GripVertical, GripIcon,
-  PanelTopDashed, PanelBottomDashed, PanelLeftDashed, PanelRightDashed
+  FileText,
+  Download,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  Shield,
+  ShieldCheck,
+  XCircle,
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  Copy,
+  Check,
+  Eye,
+  Trash2,
+  Edit3,
+  Sparkles,
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  DollarSign,
+  CreditCard,
+  ArrowUpRight,
+  Filter,
+  Search,
+  RefreshCw,
+  Plus,
+  Mail,
+  Send,
+  Printer,
+  FileSpreadsheet,
+  FileJson,
+  FileCode,
+  Layers,
+  PieChart,
+  Activity,
+  Target,
+  Zap,
+  Globe,
+  Building2,
+  Tag,
+  Hash,
+  Link2,
+  ExternalLink,
+  Lock,
+  Unlock,
+  Settings,
+  Bell,
+  History,
+  RotateCcw,
+  Save,
+  X,
+  Loader2,
+  MapPin,
+  Server,
+  Database,
+  HardDrive,
+  Cloud,
+  Wifi,
+  WifiOff,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  Percent,
+  Flag,
+  Ban,
+  Play,
+  Pause,
+  LayoutDashboard,
+  LayoutList,
+  LayoutGrid,
+  Table,
+  List,
+  ListFilter,
+  ListOrdered,
+  ListChecks,
+  ListTree,
+  ListCollapse,
+  ListStart,
+  ListEnd,
+  ListVideo,
+  ListMusic,
+  ListPlus,
+  ListMinus,
+  ListX,
+  ListRestart,
+  ListTodo,
+  ListOrderedIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  AlignStartHorizontal,
+  AlignEndHorizontal,
+  AlignStartVertical,
+  AlignEndVertical,
+  AlignHorizontalDistributeStart,
+  AlignHorizontalDistributeCenter,
+  AlignHorizontalDistributeEnd,
+  AlignVerticalDistributeStart,
+  AlignVerticalDistributeCenter,
+  AlignVerticalDistributeEnd,
+  Space,
+  SpaceIcon,
+  StretchHorizontal,
+  StretchVertical,
+  Move,
+  MoveHorizontal,
+  MoveVertical,
+  MoveDiagonal,
+  Maximize,
+  Minimize,
+  Maximize2,
+  Minimize2,
+  Expand,
+  Shrink,
+  Fullscreen,
+  PanelLeft,
+  PanelRight,
+  PanelTop,
+  PanelBottom,
+  PanelLeftClose,
+  PanelRightClose,
+  PanelTopClose,
+  PanelBottomClose,
+  PanelLeftOpen,
+  PanelRightOpen,
+  PanelTopOpen,
+  PanelBottomOpen,
+  Sidebar,
+  SidebarClose,
+  SidebarOpen,
+  SidebarIcon,
+  LayoutTemplate,
+  LayoutPanelLeft,
+  LayoutPanelTop,
+  LayoutGridIcon,
+  Rows3,
+  Columns3,
+  Grid2x2,
+  Grid3x3,
+  Grip,
+  GripHorizontal,
+  GripVertical,
+  GripIcon,
+  PanelTopDashed,
+  PanelBottomDashed,
+  PanelLeftDashed,
+  PanelRightDashed,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -111,7 +235,8 @@ export default function ReportsPage() {
   /* ─── Derived Data ─── */
   const filteredReports = useMemo(() => {
     return complianceReports.filter((r) => {
-      const matchesSearch = !searchQuery ||
+      const matchesSearch =
+        !searchQuery ||
         r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.id.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFramework = selectedFramework === 'all' || r.framework === selectedFramework;
@@ -122,7 +247,8 @@ export default function ReportsPage() {
 
   const filteredRules = useMemo(() => {
     return complianceRules.filter((r) => {
-      const matchesSearch = !searchQuery ||
+      const matchesSearch =
+        !searchQuery ||
         r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.id.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFramework = selectedFramework === 'all' || r.framework === selectedFramework;
@@ -132,7 +258,8 @@ export default function ReportsPage() {
 
   const filteredMigrations = useMemo(() => {
     return migrationJobs.filter((j) => {
-      const matchesSearch = !searchQuery ||
+      const matchesSearch =
+        !searchQuery ||
         j.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         j.id.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSearch;
@@ -141,7 +268,8 @@ export default function ReportsPage() {
 
   const filteredSchedules = useMemo(() => {
     return reportSchedules.filter((s) => {
-      const matchesSearch = !searchQuery ||
+      const matchesSearch =
+        !searchQuery ||
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.id.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSearch;
@@ -217,7 +345,9 @@ export default function ReportsPage() {
   /* ─── Stats ─── */
   const totalReports = complianceReports.length;
   const completeReports = complianceReports.filter((r) => r.status === 'complete').length;
-  const pendingReports = complianceReports.filter((r) => r.status === 'pending' || r.status === 'generating').length;
+  const pendingReports = complianceReports.filter(
+    (r) => r.status === 'pending' || r.status === 'generating'
+  ).length;
   const failedReports = complianceReports.filter((r) => r.status === 'failed').length;
   const activeRegions = regions.filter((r) => r.status === 'active').length;
   const totalTenants = regions.reduce((sum, r) => sum + (r.tenantCount || 0), 0);
@@ -298,7 +428,9 @@ export default function ReportsPage() {
               >
                 <option value="all">All Frameworks</option>
                 {complianceFrameworks.map((fw) => (
-                  <option key={fw.id} value={fw.id}>{fw.label}</option>
+                  <option key={fw.id} value={fw.id}>
+                    {fw.label}
+                  </option>
                 ))}
               </select>
             )}
@@ -326,7 +458,6 @@ export default function ReportsPage() {
           CONTENT
           ═══════════════════════════════════════════ */}
       <div className="mx-auto max-w-7xl px-6 pb-12">
-
         {/* ─── OVERVIEW TAB ─── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
@@ -366,7 +497,9 @@ export default function ReportsPage() {
 
             {/* Frameworks */}
             <div>
-              <h2 className="text-sm font-semibold text-text-primary mb-3">Compliance Frameworks</h2>
+              <h2 className="text-sm font-semibold text-text-primary mb-3">
+                Compliance Frameworks
+              </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {complianceFrameworks.map((fw) => {
                   const fwReports = complianceReports.filter((r) => r.framework === fw.id);
@@ -375,7 +508,10 @@ export default function ReportsPage() {
                     <div
                       key={fw.id}
                       className="rounded-xl border border-border bg-surface p-4 hover:shadow-md transition-all cursor-pointer"
-                      onClick={() => { setSelectedFramework(fw.id); setActiveTab('compliance'); }}
+                      onClick={() => {
+                        setSelectedFramework(fw.id);
+                        setActiveTab('compliance');
+                      }}
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -446,11 +582,21 @@ export default function ReportsPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-background border-b border-border">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Rule</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Framework</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Severity</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Category</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Auto-Fix</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                          Rule
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                          Framework
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                          Severity
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                          Category
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                          Auto-Fix
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -474,12 +620,21 @@ export default function ReportsPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3">
-                              <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', severity.bg, severity.color, severity.border)}>
+                              <span
+                                className={cn(
+                                  'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                                  severity.bg,
+                                  severity.color,
+                                  severity.border
+                                )}
+                              >
                                 <span className={cn('h-1.5 w-1.5 rounded-full', severity.dot)} />
                                 {severity.label}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-xs text-text-secondary capitalize">{rule.category.replace('_', ' ')}</td>
+                            <td className="px-4 py-3 text-xs text-text-secondary capitalize">
+                              {rule.category.replace('_', ' ')}
+                            </td>
                             <td className="px-4 py-3">
                               {rule.autoFix ? (
                                 <span className="inline-flex items-center gap-1 text-xs text-emerald-500">
@@ -583,7 +738,12 @@ export default function ReportsPage() {
                       height={40}
                       color={region.latencyMs > 100 ? 'text-warning' : 'text-accent'}
                     />
-                    <p className={cn('mt-1 text-xs font-mono font-medium', region.latencyMs > 100 ? 'text-warning' : 'text-accent')}>
+                    <p
+                      className={cn(
+                        'mt-1 text-xs font-mono font-medium',
+                        region.latencyMs > 100 ? 'text-warning' : 'text-accent'
+                      )}
+                    >
                       {region.latencyMs}ms
                     </p>
                   </div>
@@ -733,7 +893,9 @@ export default function ReportsPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-text-primary">{tpl.name}</p>
-                        <p className="text-[10px] text-text-muted uppercase">{tpl.category} · {tpl.format}</p>
+                        <p className="text-[10px] text-text-muted uppercase">
+                          {tpl.category} · {tpl.format}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -750,10 +912,14 @@ export default function ReportsPage() {
               {/* Builder Form */}
               <div className="lg:col-span-1 space-y-4">
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="text-sm font-semibold text-text-primary mb-4">Report Configuration</h3>
+                  <h3 className="text-sm font-semibold text-text-primary mb-4">
+                    Report Configuration
+                  </h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Report Name</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Report Name
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Q3 Security Audit"
@@ -761,24 +927,34 @@ export default function ReportsPage() {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Framework</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Framework
+                      </label>
                       <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         <option value="">Select framework...</option>
                         {complianceFrameworks.map((fw) => (
-                          <option key={fw.id} value={fw.id}>{fw.label}</option>
+                          <option key={fw.id} value={fw.id}>
+                            {fw.label}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Format</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Format
+                      </label>
                       <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         {exportFormats.map((fmt) => (
-                          <option key={fmt.id} value={fmt.id}>{fmt.label}</option>
+                          <option key={fmt.id} value={fmt.id}>
+                            {fmt.label}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Period</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Period
+                      </label>
                       <div className="grid grid-cols-2 gap-2">
                         <input
                           type="date"
@@ -791,7 +967,9 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Columns</label>
+                      <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        Columns
+                      </label>
                       <div className="space-y-1">
                         {builderColumns.map((col, idx) => (
                           <div key={col.key} className="flex items-center gap-2">
@@ -806,7 +984,9 @@ export default function ReportsPage() {
                               className="flex-1 h-8 rounded-md border border-border bg-surface px-2 text-xs text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             />
                             <button
-                              onClick={() => setBuilderColumns(builderColumns.filter((_, i) => i !== idx))}
+                              onClick={() =>
+                                setBuilderColumns(builderColumns.filter((_, i) => i !== idx))
+                              }
                               className="rounded-md p-1 text-text-muted hover:text-rose-500"
                             >
                               <X className="h-3.5 w-3.5" />
@@ -817,7 +997,12 @@ export default function ReportsPage() {
                           variant="outline"
                           size="sm"
                           className="w-full mt-1"
-                          onClick={() => setBuilderColumns([...builderColumns, { key: `col_${builderColumns.length}`, label: 'New Column' }])}
+                          onClick={() =>
+                            setBuilderColumns([
+                              ...builderColumns,
+                              { key: `col_${builderColumns.length}`, label: 'New Column' },
+                            ])
+                          }
                         >
                           <Plus className="mr-1 h-3 w-3" /> Add Column
                         </Button>
@@ -849,7 +1034,10 @@ export default function ReportsPage() {
       {migrationModalOpen && (
         <MigrationModal
           job={editingMigration}
-          onClose={() => { setMigrationModalOpen(false); setEditingMigration(null); }}
+          onClose={() => {
+            setMigrationModalOpen(false);
+            setEditingMigration(null);
+          }}
           onSave={handleSaveMigration}
           tenants={[
             { id: 'TEN-001', name: 'Acme Corp', plan: 'Enterprise', storageGB: 450, mrr: 2500 },
@@ -862,7 +1050,10 @@ export default function ReportsPage() {
       {regionDrawerOpen && selectedRegion && (
         <RegionDetailDrawer
           region={selectedRegion}
-          onClose={() => { setRegionDrawerOpen(false); setSelectedRegion(null); }}
+          onClose={() => {
+            setRegionDrawerOpen(false);
+            setSelectedRegion(null);
+          }}
         />
       )}
     </div>

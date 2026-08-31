@@ -1,18 +1,25 @@
 /* src/app/admin/billing/components.jsx */
 import { cn } from '../../../lib/utils';
 import {
-  subscriptionStatusMeta, invoiceStatusMeta, creditNoteStatusMeta,
-  dunningStatusMeta, failureReasonMeta, formatCurrency, formatDate
+  subscriptionStatusMeta,
+  invoiceStatusMeta,
+  creditNoteStatusMeta,
+  dunningStatusMeta,
+  failureReasonMeta,
+  formatCurrency,
+  formatDate,
 } from './data';
 
 /* ─── Subscription Status Badge ─── */
 export function SubscriptionStatusBadge({ status }) {
   const meta = subscriptionStatusMeta[status] || subscriptionStatusMeta.active;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -23,10 +30,12 @@ export function SubscriptionStatusBadge({ status }) {
 export function InvoiceStatusBadge({ status }) {
   const meta = invoiceStatusMeta[status] || invoiceStatusMeta.pending;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -37,10 +46,12 @@ export function InvoiceStatusBadge({ status }) {
 export function CreditNoteStatusBadge({ status }) {
   const meta = creditNoteStatusMeta[status] || creditNoteStatusMeta.open;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -51,10 +62,12 @@ export function CreditNoteStatusBadge({ status }) {
 export function DunningStatusBadge({ status }) {
   const meta = dunningStatusMeta[status] || dunningStatusMeta.in_progress;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -69,25 +82,32 @@ export function BillingStatCard({ label, value, subtext, icon: Icon, color, tren
         <div>
           <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{label}</p>
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>
-            {prefix}{value}
+            {prefix}
+            {value}
           </p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-')
-            .replace('danger', 'danger/10')
-            .replace('accent', 'accent/10')
-            .replace('warning', 'warning/10')
-            .replace('info', 'info/10')
-            .replace('secondary', 'secondary/10')
-            .replace('purple-500', 'purple-500/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+              .replace('purple-500', 'purple-500/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -98,7 +118,9 @@ export function BillingStatCard({ label, value, subtext, icon: Icon, color, tren
 /* ─── MRR Movement Bar ─── */
 export function MrrMovementBar({ data }) {
   const max = Math.max(
-    ...data.map(d => Math.abs(d.new) + Math.abs(d.expansion) + Math.abs(d.contraction) + Math.abs(d.churn))
+    ...data.map(
+      (d) => Math.abs(d.new) + Math.abs(d.expansion) + Math.abs(d.contraction) + Math.abs(d.churn)
+    )
   );
 
   return (
@@ -114,7 +136,9 @@ export function MrrMovementBar({ data }) {
           <div key={month.month} className="space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="text-text-secondary font-medium">{month.month}</span>
-              <span className="font-mono font-medium text-text-primary">{formatCurrency(month.mrr)}</span>
+              <span className="font-mono font-medium text-text-primary">
+                {formatCurrency(month.mrr)}
+              </span>
             </div>
             <div className="flex h-2 w-full rounded-full overflow-hidden">
               <div className="h-full bg-accent" style={{ width: `${newWidth}%` }} />
@@ -123,10 +147,22 @@ export function MrrMovementBar({ data }) {
               <div className="h-full bg-danger" style={{ width: `${churnWidth}%` }} />
             </div>
             <div className="flex gap-3 text-[10px] text-text-muted">
-              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-accent" />+{formatCurrency(month.new)} new</span>
-              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-secondary" />+{formatCurrency(month.expansion)} expansion</span>
-              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-warning" />-{formatCurrency(month.contraction)} contraction</span>
-              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-danger" />-{formatCurrency(month.churn)} churn</span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" />+{formatCurrency(month.new)}{' '}
+                new
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-secondary" />+
+                {formatCurrency(month.expansion)} expansion
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" />-
+                {formatCurrency(month.contraction)} contraction
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-danger" />-
+                {formatCurrency(month.churn)} churn
+              </span>
             </div>
           </div>
         );
@@ -149,7 +185,7 @@ export function PlanDistributionChart({ data }) {
   });
 
   function polarToCartesian(cx, cy, r, angleDeg) {
-    const angleRad = (angleDeg - 90) * Math.PI / 180;
+    const angleRad = ((angleDeg - 90) * Math.PI) / 180;
     return { x: cx + r * Math.cos(angleRad), y: cy + r * Math.sin(angleRad) };
   }
 
@@ -173,8 +209,12 @@ export function PlanDistributionChart({ data }) {
           />
         ))}
         <circle cx="50" cy="50" r="28" fill="var(--surface)" />
-        <text x="50" y="48" textAnchor="middle" className="text-[10px] fill-text-muted font-medium">Total</text>
-        <text x="50" y="60" textAnchor="middle" className="text-[11px] fill-text-primary font-bold">{formatCurrency(total)}</text>
+        <text x="50" y="48" textAnchor="middle" className="text-[10px] fill-text-muted font-medium">
+          Total
+        </text>
+        <text x="50" y="60" textAnchor="middle" className="text-[11px] fill-text-primary font-bold">
+          {formatCurrency(total)}
+        </text>
       </svg>
       <div className="space-y-2">
         {segments.map((seg, i) => (
@@ -196,15 +236,21 @@ export function InvoiceMiniCard({ invoice }) {
     <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3 hover:bg-surface-elevated/50 transition-colors">
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/10">
-          <span className="text-xs font-mono font-bold text-secondary">{invoice.id.split('-').pop()}</span>
+          <span className="text-xs font-mono font-bold text-secondary">
+            {invoice.id.split('-').pop()}
+          </span>
         </div>
         <div>
           <p className="text-sm font-medium text-text-primary">{invoice.tenantName}</p>
-          <p className="text-[10px] text-text-muted">{invoice.id} · {formatDate(invoice.periodStart)} — {formatDate(invoice.periodEnd)}</p>
+          <p className="text-[10px] text-text-muted">
+            {invoice.id} · {formatDate(invoice.periodStart)} — {formatDate(invoice.periodEnd)}
+          </p>
         </div>
       </div>
       <div className="text-right">
-        <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(invoice.amount)}</p>
+        <p className="text-sm font-mono font-medium text-text-primary">
+          {formatCurrency(invoice.amount)}
+        </p>
         <InvoiceStatusBadge status={invoice.status} />
       </div>
     </div>
@@ -221,11 +267,15 @@ export function SubscriptionMiniCard({ subscription }) {
         </div>
         <div>
           <p className="text-sm font-medium text-text-primary">{subscription.tenantName}</p>
-          <p className="text-[10px] text-text-muted">{subscription.plan} · {subscription.billingCycle} · {subscription.seats} seats</p>
+          <p className="text-[10px] text-text-muted">
+            {subscription.plan} · {subscription.billingCycle} · {subscription.seats} seats
+          </p>
         </div>
       </div>
       <div className="text-right">
-        <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(subscription.amount)}</p>
+        <p className="text-sm font-mono font-medium text-text-primary">
+          {formatCurrency(subscription.amount)}
+        </p>
         <SubscriptionStatusBadge status={subscription.status} />
       </div>
     </div>
@@ -241,18 +291,26 @@ export function DunningTimeline({ actions }) {
           {i < actions.length - 1 && (
             <div className="absolute left-[5px] top-3 bottom-0 w-px bg-border" />
           )}
-          <div className={cn(
-            'mt-0.5 h-2.5 w-2.5 rounded-full shrink-0 border-2',
-            action.status === 'success' ? 'bg-accent border-accent' :
-            action.status === 'failed' ? 'bg-danger border-danger' :
-            action.status === 'sent' ? 'bg-info border-info' :
-            action.status === 'cancelled' ? 'bg-text-muted border-text-muted' :
-            'bg-warning border-warning'
-          )} />
+          <div
+            className={cn(
+              'mt-0.5 h-2.5 w-2.5 rounded-full shrink-0 border-2',
+              action.status === 'success'
+                ? 'bg-accent border-accent'
+                : action.status === 'failed'
+                  ? 'bg-danger border-danger'
+                  : action.status === 'sent'
+                    ? 'bg-info border-info'
+                    : action.status === 'cancelled'
+                      ? 'bg-text-muted border-text-muted'
+                      : 'bg-warning border-warning'
+            )}
+          />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-text-primary">{action.action}</p>
             {action.reason && (
-              <p className="text-[10px] text-danger">{failureReasonMeta[action.reason] || action.reason}</p>
+              <p className="text-[10px] text-danger">
+                {failureReasonMeta[action.reason] || action.reason}
+              </p>
             )}
             <p className="text-[10px] text-text-muted">{new Date(action.date).toLocaleString()}</p>
           </div>
@@ -269,7 +327,9 @@ export function ProrationDisplay({ calculation }) {
 
   return (
     <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Proration Calculation</h4>
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+        Proration Calculation
+      </h4>
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
           <p className="text-xs text-text-muted">Days Remaining</p>
@@ -277,12 +337,20 @@ export function ProrationDisplay({ calculation }) {
         </div>
         <div>
           <p className="text-xs text-text-muted">New Monthly Total</p>
-          <p className="font-mono font-medium text-text-primary">{formatCurrency(newTotalMonthly)}</p>
+          <p className="font-mono font-medium text-text-primary">
+            {formatCurrency(newTotalMonthly)}
+          </p>
         </div>
         <div>
           <p className="text-xs text-text-muted">Proration Charge</p>
-          <p className={cn('font-mono font-medium', prorationAmount >= 0 ? 'text-danger' : 'text-accent')}>
-            {prorationAmount >= 0 ? '+' : ''}{formatCurrency(prorationAmount)}
+          <p
+            className={cn(
+              'font-mono font-medium',
+              prorationAmount >= 0 ? 'text-danger' : 'text-accent'
+            )}
+          >
+            {prorationAmount >= 0 ? '+' : ''}
+            {formatCurrency(prorationAmount)}
           </p>
         </div>
         <div>
@@ -295,8 +363,8 @@ export function ProrationDisplay({ calculation }) {
           {prorationAmount > 0
             ? `Customer will be charged ${formatCurrency(prorationAmount)} immediately for the remaining ${daysRemaining} days.`
             : creditApplied > 0
-            ? `Customer will receive a credit of ${formatCurrency(creditApplied)} applied to their next invoice.`
-            : 'No proration adjustment needed.'}
+              ? `Customer will receive a credit of ${formatCurrency(creditApplied)} applied to their next invoice.`
+              : 'No proration adjustment needed.'}
         </p>
       </div>
     </div>

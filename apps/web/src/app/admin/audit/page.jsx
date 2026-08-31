@@ -2,25 +2,74 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, ShieldCheck, ShieldAlert, Search, Filter, Download,
-  FileDown, AlertTriangle, CheckCircle2, Clock, Activity,
-  Zap, TrendingUp, TrendingDown, Eye, EyeOff, Flag, Ban,
-  RotateCcw, ChevronDown, ChevronUp, Hash, Link2, BarChart3,
-  Fingerprint, Lock, Unlock, X, Check, Calendar, Tag,
-  Server, HardDrive, Database, KeyRound, Users, CreditCard,
-  Settings, Building2, Globe, FileText, History, Sparkles
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
+  Search,
+  Filter,
+  Download,
+  FileDown,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Activity,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  EyeOff,
+  Flag,
+  Ban,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  Hash,
+  Link2,
+  BarChart3,
+  Fingerprint,
+  Lock,
+  Unlock,
+  X,
+  Check,
+  Calendar,
+  Tag,
+  Server,
+  HardDrive,
+  Database,
+  KeyRound,
+  Users,
+  CreditCard,
+  Settings,
+  Building2,
+  Globe,
+  FileText,
+  History,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  initialAuditLogs, initialAnomalies, complianceReports,
-  severityMeta, statusMeta, actionCategories, timeAgo,
-  formatDateTime, generateChainHash, verifyLogIntegrity
+  initialAuditLogs,
+  initialAnomalies,
+  complianceReports,
+  severityMeta,
+  statusMeta,
+  actionCategories,
+  timeAgo,
+  formatDateTime,
+  generateChainHash,
+  verifyLogIntegrity,
 } from './data';
 import {
-  SeverityBadge, StatusBadge, CategoryBadge, TamperProofBadge,
-  AuditLogRow, AnomalyCard, ComplianceExportModal,
-  AuditStatCard, ChainVerificationVisual
+  SeverityBadge,
+  StatusBadge,
+  CategoryBadge,
+  TamperProofBadge,
+  AuditLogRow,
+  AnomalyCard,
+  ComplianceExportModal,
+  AuditStatCard,
+  ChainVerificationVisual,
 } from './components';
 
 /* ─── Main Audit Page ─── */
@@ -50,7 +99,8 @@ export default function AuditTrailPage() {
       // Exclude shadow sessions (tamper-proof requirement)
       if (log.shadowSession) return false;
 
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         log.id.toLowerCase().includes(query.toLowerCase()) ||
         log.action.label.toLowerCase().includes(query.toLowerCase()) ||
         log.action.description.toLowerCase().includes(query.toLowerCase()) ||
@@ -65,13 +115,23 @@ export default function AuditTrailPage() {
 
       let matchesDate = true;
       if (dateFrom) {
-        matchesDate = matchesDate && new Date(log.timestamp.replace(' ', 'T')) >= new Date(dateFrom);
+        matchesDate =
+          matchesDate && new Date(log.timestamp.replace(' ', 'T')) >= new Date(dateFrom);
       }
       if (dateTo) {
-        matchesDate = matchesDate && new Date(log.timestamp.replace(' ', 'T')) <= new Date(dateTo + 'T23:59:59');
+        matchesDate =
+          matchesDate &&
+          new Date(log.timestamp.replace(' ', 'T')) <= new Date(dateTo + 'T23:59:59');
       }
 
-      return matchesQuery && matchesSeverity && matchesCategory && matchesStatus && matchesActor && matchesDate;
+      return (
+        matchesQuery &&
+        matchesSeverity &&
+        matchesCategory &&
+        matchesStatus &&
+        matchesActor &&
+        matchesDate
+      );
     });
 
     result.sort((a, b) => {
@@ -95,17 +155,27 @@ export default function AuditTrailPage() {
     });
 
     return result;
-  }, [logs, query, severityFilter, categoryFilter, statusFilter, actorFilter, dateFrom, dateTo, sortConfig]);
+  }, [
+    logs,
+    query,
+    severityFilter,
+    categoryFilter,
+    statusFilter,
+    actorFilter,
+    dateFrom,
+    dateTo,
+    sortConfig,
+  ]);
 
   /* ─── Computed: Stats ─── */
   const stats = useMemo(() => {
-    const nonShadow = logs.filter(l => !l.shadowSession);
+    const nonShadow = logs.filter((l) => !l.shadowSession);
     return {
       total: nonShadow.length,
-      critical: nonShadow.filter(l => l.severity === 'critical').length,
-      flagged: nonShadow.filter(l => l.status === 'flagged').length,
-      verified: nonShadow.filter(l => l.status === 'verified').length,
-      activeAnomalies: anomalies.filter(a => a.status === 'active').length,
+      critical: nonShadow.filter((l) => l.severity === 'critical').length,
+      flagged: nonShadow.filter((l) => l.status === 'flagged').length,
+      verified: nonShadow.filter((l) => l.status === 'verified').length,
+      activeAnomalies: anomalies.filter((a) => a.status === 'active').length,
       chainValid: nonShadow.every((log, idx) => {
         if (idx === 0) return true;
         return log.tamperProof.previousHash === nonShadow[idx - 1].tamperProof.hash;
@@ -116,7 +186,7 @@ export default function AuditTrailPage() {
   /* ─── Computed: Unique Actors ─── */
   const uniqueActors = useMemo(() => {
     const actors = {};
-    logs.forEach(l => {
+    logs.forEach((l) => {
       if (!actors[l.actor.id]) {
         actors[l.actor.id] = l.actor;
       }
@@ -126,7 +196,7 @@ export default function AuditTrailPage() {
 
   /* ─── Handlers ─── */
   const toggleLog = (id) => {
-    setExpandedLogs(prev => {
+    setExpandedLogs((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -135,16 +205,18 @@ export default function AuditTrailPage() {
   };
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
   };
 
   const handleFlag = (log) => {
-    setLogs(prev => prev.map(l =>
-      l.id === log.id ? { ...l, status: l.status === 'flagged' ? 'verified' : 'flagged' } : l
-    ));
+    setLogs((prev) =>
+      prev.map((l) =>
+        l.id === log.id ? { ...l, status: l.status === 'flagged' ? 'verified' : 'flagged' } : l
+      )
+    );
   };
 
   const handleExport = (config) => {
@@ -153,15 +225,15 @@ export default function AuditTrailPage() {
   };
 
   const handleInvestigate = (anomaly) => {
-    setAnomalies(prev => prev.map(a =>
-      a.id === anomaly.id ? { ...a, status: 'investigating' } : a
-    ));
+    setAnomalies((prev) =>
+      prev.map((a) => (a.id === anomaly.id ? { ...a, status: 'investigating' } : a))
+    );
   };
 
   const handleDismiss = (anomaly) => {
-    setAnomalies(prev => prev.map(a =>
-      a.id === anomaly.id ? { ...a, status: 'resolved' } : a
-    ));
+    setAnomalies((prev) =>
+      prev.map((a) => (a.id === anomaly.id ? { ...a, status: 'resolved' } : a))
+    );
   };
 
   const handleRefresh = () => {
@@ -180,8 +252,18 @@ export default function AuditTrailPage() {
 
   /* ─── Tabs ─── */
   const tabs = [
-    { id: 'logs', label: 'Audit Logs', icon: FileText, badge: stats.flagged > 0 ? stats.flagged : undefined },
-    { id: 'anomalies', label: 'Anomalies', icon: AlertTriangle, badge: stats.activeAnomalies > 0 ? stats.activeAnomalies : undefined },
+    {
+      id: 'logs',
+      label: 'Audit Logs',
+      icon: FileText,
+      badge: stats.flagged > 0 ? stats.flagged : undefined,
+    },
+    {
+      id: 'anomalies',
+      label: 'Anomalies',
+      icon: AlertTriangle,
+      badge: stats.activeAnomalies > 0 ? stats.activeAnomalies : undefined,
+    },
     { id: 'compliance', label: 'Compliance', icon: ShieldCheck },
     { id: 'chain', label: 'Chain Verify', icon: Link2 },
   ];
@@ -210,16 +292,20 @@ export default function AuditTrailPage() {
       </div>
 
       {/* Integrity Status Banner */}
-      <div className={cn(
-        'rounded-xl border p-4 flex items-center gap-4',
-        stats.chainValid
-          ? 'border-emerald-500/20 bg-emerald-500/5'
-          : 'border-rose-500/20 bg-rose-500/5'
-      )}>
-        <div className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-full',
-          stats.chainValid ? 'bg-emerald-500/10' : 'bg-rose-500/10'
-        )}>
+      <div
+        className={cn(
+          'rounded-xl border p-4 flex items-center gap-4',
+          stats.chainValid
+            ? 'border-emerald-500/20 bg-emerald-500/5'
+            : 'border-rose-500/20 bg-rose-500/5'
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-12 w-12 items-center justify-center rounded-full',
+            stats.chainValid ? 'bg-emerald-500/10' : 'bg-rose-500/10'
+          )}
+        >
           {stats.chainValid ? (
             <ShieldCheck className="h-6 w-6 text-emerald-500" />
           ) : (
@@ -227,7 +313,12 @@ export default function AuditTrailPage() {
           )}
         </div>
         <div className="flex-1">
-          <p className={cn('text-lg font-bold', stats.chainValid ? 'text-emerald-500' : 'text-rose-500')}>
+          <p
+            className={cn(
+              'text-lg font-bold',
+              stats.chainValid ? 'text-emerald-500' : 'text-rose-500'
+            )}
+          >
             {stats.chainValid ? 'Audit Chain Integrity Verified' : 'Audit Chain Compromised'}
           </p>
           <p className="text-xs text-text-secondary">
@@ -299,7 +390,9 @@ export default function AuditTrailPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -335,7 +428,9 @@ export default function AuditTrailPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -356,7 +451,9 @@ export default function AuditTrailPage() {
                   >
                     <option value="all">All Severities</option>
                     {Object.entries(severityMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -369,7 +466,9 @@ export default function AuditTrailPage() {
                   >
                     <option value="all">All Categories</option>
                     {Object.entries(actionCategories).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -382,7 +481,9 @@ export default function AuditTrailPage() {
                   >
                     <option value="all">All Statuses</option>
                     {Object.entries(statusMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -394,8 +495,10 @@ export default function AuditTrailPage() {
                     className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
                   >
                     <option value="all">All Actors</option>
-                    {uniqueActors.map(actor => (
-                      <option key={actor.id} value={actor.id}>{actor.name}</option>
+                    {uniqueActors.map((actor) => (
+                      <option key={actor.id} value={actor.id}>
+                        {actor.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -419,10 +522,7 @@ export default function AuditTrailPage() {
                 </div>
               </div>
               <div className="mt-3 flex justify-end">
-                <button
-                  onClick={resetFilters}
-                  className="text-xs text-secondary hover:underline"
-                >
+                <button onClick={resetFilters} className="text-xs text-secondary hover:underline">
                   Reset all filters
                 </button>
               </div>
@@ -431,8 +531,14 @@ export default function AuditTrailPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredLogs.length}</span> of {stats.total} audit entries
-            {stats.total < logs.length && <span className="text-text-muted"> ({logs.length - stats.total} shadow sessions excluded)</span>}
+            Showing <span className="font-medium text-text-primary">{filteredLogs.length}</span> of{' '}
+            {stats.total} audit entries
+            {stats.total < logs.length && (
+              <span className="text-text-muted">
+                {' '}
+                ({logs.length - stats.total} shadow sessions excluded)
+              </span>
+            )}
           </p>
 
           {/* Audit Table */}
@@ -454,17 +560,25 @@ export default function AuditTrailPage() {
                     ].map((col) => (
                       <th
                         key={col.key}
-                        onClick={() => ['severity', 'timestamp', 'actor'].includes(col.key) ? handleSort(col.key) : null}
+                        onClick={() =>
+                          ['severity', 'timestamp', 'actor'].includes(col.key)
+                            ? handleSort(col.key)
+                            : null
+                        }
                         className={cn(
                           'px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider',
-                          ['severity', 'timestamp', 'actor'].includes(col.key) && 'cursor-pointer hover:text-text-primary select-none'
+                          ['severity', 'timestamp', 'actor'].includes(col.key) &&
+                            'cursor-pointer hover:text-text-primary select-none'
                         )}
                       >
                         <div className="flex items-center gap-1">
                           {col.label}
-                          {sortConfig.key === col.key && (
-                            sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                          )}
+                          {sortConfig.key === col.key &&
+                            (sortConfig.dir === 'asc' ? (
+                              <ChevronUp className="h-3 w-3" />
+                            ) : (
+                              <ChevronDown className="h-3 w-3" />
+                            ))}
                         </div>
                       </th>
                     ))}
@@ -487,7 +601,9 @@ export default function AuditTrailPage() {
                       <td colSpan={10} className="px-4 py-12 text-center text-text-muted">
                         <Shield className="mx-auto h-10 w-10 mb-3" />
                         <p>No audit entries match your filters.</p>
-                        <p className="text-xs mt-1">Shadow sessions are always excluded from this view.</p>
+                        <p className="text-xs mt-1">
+                          Shadow sessions are always excluded from this view.
+                        </p>
                       </td>
                     </tr>
                   )}
@@ -505,28 +621,28 @@ export default function AuditTrailPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <AuditStatCard
               label="Active"
-              value={anomalies.filter(a => a.status === 'active').length}
+              value={anomalies.filter((a) => a.status === 'active').length}
               icon={AlertTriangle}
               color="text-rose-500"
               subtext="Require action"
             />
             <AuditStatCard
               label="Investigating"
-              value={anomalies.filter(a => a.status === 'investigating').length}
+              value={anomalies.filter((a) => a.status === 'investigating').length}
               icon={Search}
               color="text-amber-500"
               subtext="In progress"
             />
             <AuditStatCard
               label="Resolved"
-              value={anomalies.filter(a => a.status === 'resolved').length}
+              value={anomalies.filter((a) => a.status === 'resolved').length}
               icon={CheckCircle2}
               color="text-emerald-500"
               subtext="This period"
             />
             <AuditStatCard
               label="Avg Confidence"
-              value={`${Math.round(anomalies.reduce((s, a) => s + a.confidence, 0) / anomalies.length * 100)}%`}
+              value={`${Math.round((anomalies.reduce((s, a) => s + a.confidence, 0) / anomalies.length) * 100)}%`}
               icon={Sparkles}
               color="text-blue-500"
               subtext="ML detection accuracy"
@@ -553,7 +669,7 @@ export default function AuditTrailPage() {
           {/* Compliance Frameworks */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {complianceFrameworks.map((framework) => {
-              const report = complianceReports.find(r => r.framework === framework.id);
+              const report = complianceReports.find((r) => r.framework === framework.id);
               const isCompliant = !!report && report.status === 'complete';
 
               return (
@@ -563,10 +679,12 @@ export default function AuditTrailPage() {
                       <h3 className="text-lg font-bold text-text-primary">{framework.label}</h3>
                       <p className="text-xs text-text-muted mt-0.5">{framework.description}</p>
                     </div>
-                    <div className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-full',
-                      isCompliant ? 'bg-emerald-500/10' : 'bg-amber-500/10'
-                    )}>
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-full',
+                        isCompliant ? 'bg-emerald-500/10' : 'bg-amber-500/10'
+                      )}
+                    >
                       {isCompliant ? (
                         <ShieldCheck className="h-5 w-5 text-emerald-500" />
                       ) : (
@@ -587,7 +705,9 @@ export default function AuditTrailPage() {
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-text-muted">Records</span>
-                        <span className="font-mono text-text-primary">{report.recordCount.toLocaleString()}</span>
+                        <span className="font-mono text-text-primary">
+                          {report.recordCount.toLocaleString()}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-text-muted">Generated By</span>
@@ -597,7 +717,12 @@ export default function AuditTrailPage() {
                         <Button size="sm" variant="outline" className="flex-1">
                           <Download className="mr-1.5 h-3.5 w-3.5" /> Download
                         </Button>
-                        <Button size="sm" variant="outline" className="flex-1" onClick={() => setShowExportModal(true)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => setShowExportModal(true)}
+                        >
                           <FileDown className="mr-1.5 h-3.5 w-3.5" /> New Report
                         </Button>
                       </div>
@@ -605,7 +730,11 @@ export default function AuditTrailPage() {
                   ) : (
                     <div className="mt-4">
                       <p className="text-sm text-text-muted">No compliance report generated yet.</p>
-                      <Button size="sm" className="mt-2 w-full" onClick={() => setShowExportModal(true)}>
+                      <Button
+                        size="sm"
+                        className="mt-2 w-full"
+                        onClick={() => setShowExportModal(true)}
+                      >
                         <FileDown className="mr-1.5 h-3.5 w-3.5" /> Generate First Report
                       </Button>
                     </div>
@@ -624,18 +753,30 @@ export default function AuditTrailPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Report ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Framework</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Period</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Generated</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Records</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Report ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Framework
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Period
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Generated
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Records
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase">
+                      Status
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {complianceReports.map((report) => {
-                    const fw = complianceFrameworks.find(f => f.id === report.framework);
+                    const fw = complianceFrameworks.find((f) => f.id === report.framework);
                     return (
                       <tr key={report.id} className="hover:bg-background/50 transition-colors">
                         <td className="px-4 py-3 font-mono text-xs text-text-muted">{report.id}</td>
@@ -646,7 +787,9 @@ export default function AuditTrailPage() {
                         <td className="px-4 py-3 text-text-secondary text-xs">
                           {timeAgo(report.generatedAt)} by {report.generatedBy}
                         </td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{report.recordCount.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {report.recordCount.toLocaleString()}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500">
                             <CheckCircle2 className="h-3 w-3" /> Complete
@@ -672,39 +815,58 @@ export default function AuditTrailPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <ChainVerificationVisual logs={logs.filter(l => !l.shadowSession)} />
+              <ChainVerificationVisual logs={logs.filter((l) => !l.shadowSession)} />
             </div>
             <div className="space-y-4">
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-sm font-semibold text-text-primary mb-4">Verification Summary</h3>
+                <h3 className="text-sm font-semibold text-text-primary mb-4">
+                  Verification Summary
+                </h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Total Entries</span>
-                    <span className="text-sm font-mono font-medium text-text-primary">{stats.total}</span>
+                    <span className="text-sm font-mono font-medium text-text-primary">
+                      {stats.total}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Valid Hashes</span>
-                    <span className="text-sm font-mono font-medium text-emerald-500">{stats.total}</span>
+                    <span className="text-sm font-mono font-medium text-emerald-500">
+                      {stats.total}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Chain Linked</span>
-                    <span className="text-sm font-mono font-medium text-emerald-500">{stats.total - 1}</span>
+                    <span className="text-sm font-mono font-medium text-emerald-500">
+                      {stats.total - 1}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Shadow Excluded</span>
-                    <span className="text-sm font-mono font-medium text-amber-500">{logs.filter(l => l.shadowSession).length}</span>
+                    <span className="text-sm font-mono font-medium text-amber-500">
+                      {logs.filter((l) => l.shadowSession).length}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Signatures Valid</span>
-                    <span className="text-sm font-mono font-medium text-emerald-500">{stats.total}</span>
+                    <span className="text-sm font-mono font-medium text-emerald-500">
+                      {stats.total}
+                    </span>
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-border">
-                  <div className={cn(
-                    'rounded-lg p-3 text-center',
-                    stats.chainValid ? 'bg-emerald-500/10' : 'bg-rose-500/10'
-                  )}>
-                    <p className={cn('text-sm font-bold', stats.chainValid ? 'text-emerald-500' : 'text-rose-500')}>
+                  <div
+                    className={cn(
+                      'rounded-lg p-3 text-center',
+                      stats.chainValid ? 'bg-emerald-500/10' : 'bg-rose-500/10'
+                    )}
+                  >
+                    <p
+                      className={cn(
+                        'text-sm font-bold',
+                        stats.chainValid ? 'text-emerald-500' : 'text-rose-500'
+                      )}
+                    >
                       {stats.chainValid ? '✓ Chain Verified' : '✗ Chain Broken'}
                     </p>
                     <p className="text-xs text-text-muted mt-0.5">
@@ -717,7 +879,9 @@ export default function AuditTrailPage() {
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-sm font-semibold text-text-primary mb-3">Cryptographic Details</h3>
+                <h3 className="text-sm font-semibold text-text-primary mb-3">
+                  Cryptographic Details
+                </h3>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-text-muted">Hash Algorithm</span>

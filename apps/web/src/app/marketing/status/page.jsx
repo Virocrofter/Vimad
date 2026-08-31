@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, AlertCircle, Clock, Activity, Wifi, Database, Cloud, Server } from 'lucide-react';
+import {
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Activity,
+  Wifi,
+  Database,
+  Cloud,
+  Server,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
 const services = [
@@ -13,9 +22,32 @@ const services = [
 ];
 
 const incidents = [
-  { id: 1, date: '2026-08-10', title: 'Degraded Channel Manager Sync', status: 'resolved', duration: '12 min', description: 'Slower than normal sync speeds with Booking.com and Expedia. Root cause: rate limit threshold adjustment.' },
-  { id: 2, date: '2026-07-28', title: 'Scheduled Maintenance', status: 'resolved', duration: '45 min', description: 'Database cluster upgrade to PostgreSQL 16. No data loss. Maintenance window: 02:00-02:45 UTC.' },
-  { id: 3, date: '2026-07-15', title: 'API Latency Spike', status: 'resolved', duration: '8 min', description: 'Elevated p99 latency on reservation endpoints. Auto-scaling resolved the issue.' },
+  {
+    id: 1,
+    date: '2026-08-10',
+    title: 'Degraded Channel Manager Sync',
+    status: 'resolved',
+    duration: '12 min',
+    description:
+      'Slower than normal sync speeds with Booking.com and Expedia. Root cause: rate limit threshold adjustment.',
+  },
+  {
+    id: 2,
+    date: '2026-07-28',
+    title: 'Scheduled Maintenance',
+    status: 'resolved',
+    duration: '45 min',
+    description:
+      'Database cluster upgrade to PostgreSQL 16. No data loss. Maintenance window: 02:00-02:45 UTC.',
+  },
+  {
+    id: 3,
+    date: '2026-07-15',
+    title: 'API Latency Spike',
+    status: 'resolved',
+    duration: '8 min',
+    description: 'Elevated p99 latency on reservation endpoints. Auto-scaling resolved the issue.',
+  },
 ];
 
 export default function StatusPage() {
@@ -43,12 +75,21 @@ export default function StatusPage() {
         </div>
 
         {/* Overall Status */}
-        <div className={cn(
-          'mb-8 flex items-center justify-center gap-3 rounded-xl border p-6',
-          allOperational ? 'border-accent/20 bg-accent/5' : 'border-warning/20 bg-warning/5'
-        )}>
-          <div className={cn('h-3 w-3 animate-pulse rounded-full', allOperational ? 'bg-accent' : 'bg-warning')} />
-          <span className={cn('text-lg font-semibold', allOperational ? 'text-accent' : 'text-warning')}>
+        <div
+          className={cn(
+            'mb-8 flex items-center justify-center gap-3 rounded-xl border p-6',
+            allOperational ? 'border-accent/20 bg-accent/5' : 'border-warning/20 bg-warning/5'
+          )}
+        >
+          <div
+            className={cn(
+              'h-3 w-3 animate-pulse rounded-full',
+              allOperational ? 'bg-accent' : 'bg-warning'
+            )}
+          />
+          <span
+            className={cn('text-lg font-semibold', allOperational ? 'text-accent' : 'text-warning')}
+          >
             {allOperational ? 'All Systems Operational' : 'Partial Service Disruption'}
           </span>
         </div>
@@ -56,7 +97,10 @@ export default function StatusPage() {
         {/* Services Grid */}
         <div className="grid gap-4 sm:grid-cols-2">
           {services.map((service) => (
-            <div key={service.name} className="flex items-center justify-between rounded-lg border border-border bg-surface p-4">
+            <div
+              key={service.name}
+              className="flex items-center justify-between rounded-lg border border-border bg-surface p-4"
+            >
               <div className="flex items-center gap-3">
                 <service.icon className="h-5 w-5 text-text-muted" />
                 <div>
@@ -64,11 +108,19 @@ export default function StatusPage() {
                   <p className="text-xs text-text-muted">{service.uptime} uptime (30d)</p>
                 </div>
               </div>
-              <span className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
-                service.status === 'operational' ? 'bg-accent/10 text-accent' : 'bg-warning/10 text-warning'
-              )}>
-                {service.status === 'operational' ? <CheckCircle className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                  service.status === 'operational'
+                    ? 'bg-accent/10 text-accent'
+                    : 'bg-warning/10 text-warning'
+                )}
+              >
+                {service.status === 'operational' ? (
+                  <CheckCircle className="h-3 w-3" />
+                ) : (
+                  <AlertCircle className="h-3 w-3" />
+                )}
                 {service.status === 'operational' ? 'Operational' : 'Degraded'}
               </span>
             </div>
@@ -90,20 +142,26 @@ export default function StatusPage() {
                     {incident.status}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-text-muted">{incident.date} · Duration: {incident.duration}</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  {incident.date} · Duration: {incident.duration}
+                </p>
                 <p className="mt-2 text-sm text-text-secondary">{incident.description}</p>
               </div>
             ))}
           </div>
           {incidents.length === 0 && (
-            <p className="py-8 text-center text-sm text-text-muted">No incidents reported in the last 90 days.</p>
+            <p className="py-8 text-center text-sm text-text-muted">
+              No incidents reported in the last 90 days.
+            </p>
           )}
         </div>
 
         {/* Subscribe */}
         <div className="mt-10 rounded-xl border border-border bg-surface p-6 text-center">
           <h3 className="font-semibold text-text-primary">Subscribe to Status Updates</h3>
-          <p className="mt-1 text-sm text-text-secondary">Get notified via email or Slack when incidents occur.</p>
+          <p className="mt-1 text-sm text-text-secondary">
+            Get notified via email or Slack when incidents occur.
+          </p>
           <div className="mt-4 flex justify-center gap-3">
             <button className="inline-flex h-10 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90">
               Email Alerts

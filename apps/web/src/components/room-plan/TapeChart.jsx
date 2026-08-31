@@ -1,11 +1,42 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, addDays, differenceInDays, startOfDay, isSameDay, parseISO, subDays } from 'date-fns';
 import {
-  ChevronLeft, ChevronRight, Plus, X, Edit3, Save, User, Calendar,
-  DollarSign, BedDouble, Phone, Mail, MessageSquare, CreditCard,
-  LogIn, LogOut, Eye, Trash2, Check, Filter, Move, ArrowLeftRight,
-  GripVertical, Layers, CheckSquare, Square, XCircle
+  format,
+  addDays,
+  differenceInDays,
+  startOfDay,
+  isSameDay,
+  parseISO,
+  subDays,
+} from 'date-fns';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  X,
+  Edit3,
+  Save,
+  User,
+  Calendar,
+  DollarSign,
+  BedDouble,
+  Phone,
+  Mail,
+  MessageSquare,
+  CreditCard,
+  LogIn,
+  LogOut,
+  Eye,
+  Trash2,
+  Check,
+  Filter,
+  Move,
+  ArrowLeftRight,
+  GripVertical,
+  Layers,
+  CheckSquare,
+  Square,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
@@ -38,22 +69,130 @@ const ROOMS = [
 ];
 
 const STATUS_META = {
-  confirmed: { label: 'Confirmed', color: 'bg-accent', text: 'text-accent', border: 'border-accent/30', bgSoft: 'bg-accent/10' },
-  checked_in: { label: 'Checked In', color: 'bg-secondary', text: 'text-secondary', border: 'border-secondary/30', bgSoft: 'bg-secondary/10' },
-  checked_out: { label: 'Checked Out', color: 'bg-neutral', text: 'text-text-muted', border: 'border-border', bgSoft: 'bg-surface' },
-  no_show: { label: 'No-Show', color: 'bg-danger', text: 'text-danger', border: 'border-danger/30', bgSoft: 'bg-danger/10' },
-  cancelled: { label: 'Cancelled', color: 'bg-danger', text: 'text-danger', border: 'border-danger/30', bgSoft: 'bg-danger/10' },
+  confirmed: {
+    label: 'Confirmed',
+    color: 'bg-accent',
+    text: 'text-accent',
+    border: 'border-accent/30',
+    bgSoft: 'bg-accent/10',
+  },
+  checked_in: {
+    label: 'Checked In',
+    color: 'bg-secondary',
+    text: 'text-secondary',
+    border: 'border-secondary/30',
+    bgSoft: 'bg-secondary/10',
+  },
+  checked_out: {
+    label: 'Checked Out',
+    color: 'bg-neutral',
+    text: 'text-text-muted',
+    border: 'border-border',
+    bgSoft: 'bg-surface',
+  },
+  no_show: {
+    label: 'No-Show',
+    color: 'bg-danger',
+    text: 'text-danger',
+    border: 'border-danger/30',
+    bgSoft: 'bg-danger/10',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    color: 'bg-danger',
+    text: 'text-danger',
+    border: 'border-danger/30',
+    bgSoft: 'bg-danger/10',
+  },
 };
 
 const generateMockReservations = () => {
   const today = startOfDay(new Date());
   return [
-    { id: 'r1', guest: 'John Smith', roomId: '102', startDate: format(today, 'yyyy-MM-dd'), endDate: format(addDays(today, 3), 'yyyy-MM-dd'), status: 'checked_in', rate: 189, adults: 2, children: 0, phone: '+1 555-0101', email: 'john@email.com', balance: 45.50 },
-    { id: 'r2', guest: 'Sarah Johnson', roomId: '204', startDate: format(addDays(today, -1), 'yyyy-MM-dd'), endDate: format(addDays(today, 2), 'yyyy-MM-dd'), status: 'confirmed', rate: 189, adults: 2, children: 1, phone: '+1 555-0102', email: 'sarah@email.com', balance: 0 },
-    { id: 'r3', guest: 'Michael Brown', roomId: '301', startDate: format(addDays(today, 2), 'yyyy-MM-dd'), endDate: format(addDays(today, 5), 'yyyy-MM-dd'), status: 'confirmed', rate: 145, adults: 1, children: 0, phone: '+1 555-0103', email: 'mbrown@email.com', balance: 435 },
-    { id: 'r4', guest: 'Emily Davis', roomId: '105', startDate: format(addDays(today, 1), 'yyyy-MM-dd'), endDate: format(addDays(today, 4), 'yyyy-MM-dd'), status: 'confirmed', rate: 320, adults: 2, children: 0, phone: '+1 555-0104', email: 'emily@email.com', balance: 960 },
-    { id: 'r5', guest: 'Robert Chen', roomId: '202', startDate: format(addDays(today, -2), 'yyyy-MM-dd'), endDate: format(today, 'yyyy-MM-dd'), status: 'checked_out', rate: 145, adults: 2, children: 0, phone: '+1 555-0105', email: 'robert@email.com', balance: 0 },
-    { id: 'r6', guest: 'Lisa Wong', roomId: '104', startDate: format(addDays(today, 4), 'yyyy-MM-dd'), endDate: format(addDays(today, 7), 'yyyy-MM-dd'), status: 'confirmed', rate: 189, adults: 2, children: 0, phone: '+1 555-0106', email: 'lisa@email.com', balance: 567 },
+    {
+      id: 'r1',
+      guest: 'John Smith',
+      roomId: '102',
+      startDate: format(today, 'yyyy-MM-dd'),
+      endDate: format(addDays(today, 3), 'yyyy-MM-dd'),
+      status: 'checked_in',
+      rate: 189,
+      adults: 2,
+      children: 0,
+      phone: '+1 555-0101',
+      email: 'john@email.com',
+      balance: 45.5,
+    },
+    {
+      id: 'r2',
+      guest: 'Sarah Johnson',
+      roomId: '204',
+      startDate: format(addDays(today, -1), 'yyyy-MM-dd'),
+      endDate: format(addDays(today, 2), 'yyyy-MM-dd'),
+      status: 'confirmed',
+      rate: 189,
+      adults: 2,
+      children: 1,
+      phone: '+1 555-0102',
+      email: 'sarah@email.com',
+      balance: 0,
+    },
+    {
+      id: 'r3',
+      guest: 'Michael Brown',
+      roomId: '301',
+      startDate: format(addDays(today, 2), 'yyyy-MM-dd'),
+      endDate: format(addDays(today, 5), 'yyyy-MM-dd'),
+      status: 'confirmed',
+      rate: 145,
+      adults: 1,
+      children: 0,
+      phone: '+1 555-0103',
+      email: 'mbrown@email.com',
+      balance: 435,
+    },
+    {
+      id: 'r4',
+      guest: 'Emily Davis',
+      roomId: '105',
+      startDate: format(addDays(today, 1), 'yyyy-MM-dd'),
+      endDate: format(addDays(today, 4), 'yyyy-MM-dd'),
+      status: 'confirmed',
+      rate: 320,
+      adults: 2,
+      children: 0,
+      phone: '+1 555-0104',
+      email: 'emily@email.com',
+      balance: 960,
+    },
+    {
+      id: 'r5',
+      guest: 'Robert Chen',
+      roomId: '202',
+      startDate: format(addDays(today, -2), 'yyyy-MM-dd'),
+      endDate: format(today, 'yyyy-MM-dd'),
+      status: 'checked_out',
+      rate: 145,
+      adults: 2,
+      children: 0,
+      phone: '+1 555-0105',
+      email: 'robert@email.com',
+      balance: 0,
+    },
+    {
+      id: 'r6',
+      guest: 'Lisa Wong',
+      roomId: '104',
+      startDate: format(addDays(today, 4), 'yyyy-MM-dd'),
+      endDate: format(addDays(today, 7), 'yyyy-MM-dd'),
+      status: 'confirmed',
+      rate: 189,
+      adults: 2,
+      children: 0,
+      phone: '+1 555-0106',
+      email: 'lisa@email.com',
+      balance: 567,
+    },
   ];
 };
 
@@ -112,7 +251,14 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
             <h2 className="text-lg font-semibold text-text-primary">
               {isEditing ? 'Edit Reservation' : reservation.id.toUpperCase()}
             </h2>
-            <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.bgSoft, meta.text, meta.border)}>
+            <span
+              className={cn(
+                'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+                meta.bgSoft,
+                meta.text,
+                meta.border
+              )}
+            >
               {meta.label}
             </span>
           </div>
@@ -141,7 +287,12 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
           <div className="rounded-xl border border-border bg-background p-4 space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 text-sm font-bold text-secondary">
-                {reservation.guest.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                {reservation.guest
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 {isEditing ? (
@@ -153,7 +304,9 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
                 ) : (
                   <h3 className="font-semibold text-text-primary truncate">{reservation.guest}</h3>
                 )}
-                <p className="text-xs text-text-muted">{nights} nights · {room?.type}</p>
+                <p className="text-xs text-text-muted">
+                  {nights} nights · {room?.type}
+                </p>
               </div>
             </div>
 
@@ -171,7 +324,9 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
 
           {/* Stay Details */}
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Stay Details</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Stay Details
+            </h4>
             <div className="rounded-xl border border-border bg-background p-4 space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -214,8 +369,10 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
                       onChange={(e) => setEditData({ ...editData, roomId: e.target.value })}
                       className="mt-1 h-8 w-full rounded-md border border-border bg-surface px-2 text-sm text-text-primary"
                     >
-                      {ROOMS.map(r => (
-                        <option key={r.id} value={r.id}>{r.id} — {r.type}</option>
+                      {ROOMS.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.id} — {r.type}
+                        </option>
                       ))}
                     </select>
                   ) : (
@@ -236,8 +393,7 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
                     />
                   ) : (
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <DollarSign className="h-3.5 w-3.5 text-secondary" />
-                      ${reservation.rate}/night
+                      <DollarSign className="h-3.5 w-3.5 text-secondary" />${reservation.rate}/night
                     </p>
                   )}
                 </div>
@@ -252,7 +408,9 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
                     className="mt-1 h-8 w-full rounded-md border border-border bg-surface px-2 text-sm text-text-primary"
                   >
                     {Object.entries(STATUS_META).map(([key, val]) => (
-                      <option key={key} value={key}>{val.label}</option>
+                      <option key={key} value={key}>
+                        {val.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -263,7 +421,9 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
           {/* Folio Preview (View Mode Only) */}
           {!isEditing && (
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Folio Preview</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Folio Preview
+              </h4>
               <div className="rounded-xl border border-border bg-background p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-text-secondary">Room Charges</span>
@@ -279,7 +439,12 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
                 </div>
                 <div className="flex justify-between text-sm pt-1">
                   <span className="text-text-secondary">Balance</span>
-                  <span className={cn('font-mono font-medium', reservation.balance > 0 ? 'text-danger' : 'text-accent')}>
+                  <span
+                    className={cn(
+                      'font-mono font-medium',
+                      reservation.balance > 0 ? 'text-danger' : 'text-accent'
+                    )}
+                  >
                     ${reservation.balance.toFixed(2)}
                   </span>
                 </div>
@@ -314,7 +479,14 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
         <div className="border-t border-border p-4">
           {isEditing ? (
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => { setEditData({ ...reservation }); setIsEditing(false); }}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setEditData({ ...reservation });
+                  setIsEditing(false);
+                }}
+              >
                 Cancel
               </Button>
               <Button className="flex-1" onClick={handleSave}>
@@ -322,7 +494,13 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
               </Button>
             </div>
           ) : (
-            <Button variant="outline" className="w-full" onClick={() => { /* Wire to /app/reservations/:id */ }}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                /* Wire to /app/reservations/:id */
+              }}
+            >
               <Eye className="mr-1.5 h-4 w-4" /> Open Full Details
             </Button>
           )}
@@ -335,21 +513,34 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
 /* ─── Quick Create Modal ─── */
 function QuickCreateModal({ isOpen, onClose, onCreate, defaultRoomId, defaultDate }) {
   const [data, setData] = useState({
-    guest: '', email: '', phone: '',
+    guest: '',
+    email: '',
+    phone: '',
     roomId: defaultRoomId || ROOMS[0].id,
     startDate: defaultDate || format(new Date(), 'yyyy-MM-dd'),
     endDate: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
-    rate: 189, adults: '2', children: '0', status: 'confirmed',
+    rate: 189,
+    adults: '2',
+    children: '0',
+    status: 'confirmed',
   });
 
   useEffect(() => {
     if (isOpen) {
       setData({
-        guest: '', email: '', phone: '',
+        guest: '',
+        email: '',
+        phone: '',
         roomId: defaultRoomId || ROOMS[0].id,
         startDate: defaultDate || format(new Date(), 'yyyy-MM-dd'),
-        endDate: format(addDays(parseISO(defaultDate || format(new Date(), 'yyyy-MM-dd')), 1), 'yyyy-MM-dd'),
-        rate: 189, adults: '2', children: '0', status: 'confirmed',
+        endDate: format(
+          addDays(parseISO(defaultDate || format(new Date(), 'yyyy-MM-dd')), 1),
+          'yyyy-MM-dd'
+        ),
+        rate: 189,
+        adults: '2',
+        children: '0',
+        status: 'confirmed',
       });
     }
   }, [isOpen, defaultRoomId, defaultDate]);
@@ -382,53 +573,106 @@ function QuickCreateModal({ isOpen, onClose, onCreate, defaultRoomId, defaultDat
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Guest Name" placeholder="John Doe" required value={data.guest} onChange={(e) => setData({ ...data, guest: e.target.value })} />
-            <Input label="Email" type="email" placeholder="john@email.com" value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
+            <Input
+              label="Guest Name"
+              placeholder="John Doe"
+              required
+              value={data.guest}
+              onChange={(e) => setData({ ...data, guest: e.target.value })}
+            />
+            <Input
+              label="Email"
+              type="email"
+              placeholder="john@email.com"
+              value={data.email}
+              onChange={(e) => setData({ ...data, email: e.target.value })}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-text-primary">Room</label>
-              <select value={data.roomId} onChange={(e) => setData({ ...data, roomId: e.target.value })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary">
-                {ROOMS.map(r => <option key={r.id} value={r.id}>{r.id} — {r.type}</option>)}
+              <select
+                value={data.roomId}
+                onChange={(e) => setData({ ...data, roomId: e.target.value })}
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+              >
+                {ROOMS.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.id} — {r.type}
+                  </option>
+                ))}
               </select>
             </div>
-            <Input label="Rate ($)" type="number" value={data.rate} onChange={(e) => setData({ ...data, rate: e.target.value })} />
+            <Input
+              label="Rate ($)"
+              type="number"
+              value={data.rate}
+              onChange={(e) => setData({ ...data, rate: e.target.value })}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-text-primary">Arrival</label>
-              <input type="date" required value={data.startDate}
+              <input
+                type="date"
+                required
+                value={data.startDate}
                 onChange={(e) => setData({ ...data, startDate: e.target.value })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary" />
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+              />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-text-primary">Departure</label>
-              <input type="date" required value={data.endDate}
+              <input
+                type="date"
+                required
+                value={data.endDate}
                 onChange={(e) => setData({ ...data, endDate: e.target.value })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary" />
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            <Input label="Adults" type="number" min="1" value={data.adults} onChange={(e) => setData({ ...data, adults: e.target.value })} />
-            <Input label="Children" type="number" min="0" value={data.children} onChange={(e) => setData({ ...data, children: e.target.value })} />
+            <Input
+              label="Adults"
+              type="number"
+              min="1"
+              value={data.adults}
+              onChange={(e) => setData({ ...data, adults: e.target.value })}
+            />
+            <Input
+              label="Children"
+              type="number"
+              min="0"
+              value={data.children}
+              onChange={(e) => setData({ ...data, children: e.target.value })}
+            />
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-text-primary">Status</label>
-              <select value={data.status} onChange={(e) => setData({ ...data, status: e.target.value })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary">
+              <select
+                value={data.status}
+                onChange={(e) => setData({ ...data, status: e.target.value })}
+                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+              >
                 {Object.entries(STATUS_META).map(([key, val]) => (
-                  <option key={key} value={key}>{val.label}</option>
+                  <option key={key} value={key}>
+                    {val.label}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
           <div className="pt-2 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit"><Plus className="mr-1.5 h-4 w-4" /> Create Reservation</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              <Plus className="mr-1.5 h-4 w-4" /> Create Reservation
+            </Button>
           </div>
         </form>
       </div>
@@ -440,28 +684,48 @@ function QuickCreateModal({ isOpen, onClose, onCreate, defaultRoomId, defaultDat
 function ContextMenu({ menu, onClose, onQuickCreate, onEdit, onDelete }) {
   if (!menu.visible) return null;
   return (
-    <div className="fixed z-50 w-48 rounded-lg border border-border bg-surface shadow-lg py-1" style={{ top: menu.y, left: menu.x }}>
+    <div
+      className="fixed z-50 w-48 rounded-lg border border-border bg-surface shadow-lg py-1"
+      style={{ top: menu.y, left: menu.x }}
+    >
       {menu.type === 'cell' && (
         <>
-          <button onClick={() => { onQuickCreate(menu.roomId, menu.date); onClose(); }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-elevated">
+          <button
+            onClick={() => {
+              onQuickCreate(menu.roomId, menu.date);
+              onClose();
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-elevated"
+          >
             <Plus className="h-4 w-4 text-secondary" /> New Reservation
           </button>
           <div className="my-1 border-t border-border" />
-          <button onClick={() => onClose()}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-elevated">
+          <button
+            onClick={() => onClose()}
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-elevated"
+          >
             <BedDouble className="h-4 w-4 text-warning" /> Block Room
           </button>
         </>
       )}
       {menu.type === 'reservation' && (
         <>
-          <button onClick={() => { onEdit(menu.reservation); onClose(); }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-elevated">
+          <button
+            onClick={() => {
+              onEdit(menu.reservation);
+              onClose();
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-elevated"
+          >
             <Edit3 className="h-4 w-4 text-secondary" /> Edit / View
           </button>
-          <button onClick={() => { onDelete(menu.reservation); onClose(); }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger/5">
+          <button
+            onClick={() => {
+              onDelete(menu.reservation);
+              onClose();
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger/5"
+          >
             <Trash2 className="h-4 w-4" /> Cancel Reservation
           </button>
         </>
@@ -494,7 +758,11 @@ function FilterBar({ filters, onChange, roomTypes, floors, activeCount, totalCou
           className="h-7 rounded-md border border-border bg-surface px-2 text-xs text-text-primary"
         >
           <option value="all">All Floors</option>
-          {floors.map(f => <option key={f} value={f}>Floor {f}</option>)}
+          {floors.map((f) => (
+            <option key={f} value={f}>
+              Floor {f}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -507,7 +775,11 @@ function FilterBar({ filters, onChange, roomTypes, floors, activeCount, totalCou
           className="h-7 rounded-md border border-border bg-surface px-2 text-xs text-text-primary"
         >
           <option value="all">All Types</option>
-          {roomTypes.map(t => <option key={t} value={t}>{t}</option>)}
+          {roomTypes.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -521,13 +793,16 @@ function FilterBar({ filters, onChange, roomTypes, floors, activeCount, totalCou
         >
           <option value="all">All Statuses</option>
           {Object.entries(STATUS_META).map(([key, val]) => (
-            <option key={key} value={key}>{val.label}</option>
+            <option key={key} value={key}>
+              {val.label}
+            </option>
           ))}
         </select>
       </div>
 
       <div className="ml-auto text-xs text-text-muted">
-        Showing <span className="font-medium text-text-primary">{activeCount}</span> of {totalCount} rooms
+        Showing <span className="font-medium text-text-primary">{activeCount}</span> of {totalCount}{' '}
+        rooms
       </div>
     </div>
   );
@@ -537,16 +812,18 @@ function FilterBar({ filters, onChange, roomTypes, floors, activeCount, totalCou
 function BulkActionBar({ selectedIds, reservations, onClear, onDelete, onChangeStatus }) {
   if (selectedIds.length === 0) return null;
 
-  const selectedReservations = reservations.filter(r => selectedIds.includes(r.id));
-  const hasCheckedIn = selectedReservations.some(r => r.status === 'checked_in');
-  const hasConfirmed = selectedReservations.some(r => r.status === 'confirmed');
+  const selectedReservations = reservations.filter((r) => selectedIds.includes(r.id));
+  const hasCheckedIn = selectedReservations.some((r) => r.status === 'checked_in');
+  const hasConfirmed = selectedReservations.some((r) => r.status === 'confirmed');
 
   return (
     <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2">
       <div className="flex items-center gap-3 rounded-full border border-border bg-surface px-5 py-2.5 shadow-xl">
         <div className="flex items-center gap-2 pr-3 border-r border-border">
           <CheckSquare className="h-4 w-4 text-secondary" />
-          <span className="text-sm font-medium text-text-primary">{selectedIds.length} selected</span>
+          <span className="text-sm font-medium text-text-primary">
+            {selectedIds.length} selected
+          </span>
         </div>
 
         {hasConfirmed && (
@@ -607,7 +884,13 @@ export default function TapeChart() {
 
   /* ── Batch 2: Context Menu State ── */
   const [contextMenu, setContextMenu] = useState({
-    visible: false, x: 0, y: 0, type: null, reservation: null, roomId: null, date: null
+    visible: false,
+    x: 0,
+    y: 0,
+    type: null,
+    reservation: null,
+    roomId: null,
+    date: null,
   });
 
   /* ── Batch 3: Drawer & Quick-Create State ── */
@@ -629,12 +912,12 @@ export default function TapeChart() {
   /* ── Batch 4: Drag State ── */
   const [dragState, setDragState] = useState(null);
 
-  const days = VIEW_MODES.find(v => v.id === viewMode)?.days || 7;
+  const days = VIEW_MODES.find((v) => v.id === viewMode)?.days || 7;
   const dates = useMemo(() => getDatesForRange(startDate, days), [startDate, days]);
 
   /* ── Derived: Filtered Rooms ── */
   const filteredRooms = useMemo(() => {
-    return ROOMS.filter(room => {
+    return ROOMS.filter((room) => {
       if (filters.floor !== 'all' && String(room.floor) !== filters.floor) return false;
       if (filters.type !== 'all' && room.type !== filters.type) return false;
       return true;
@@ -644,15 +927,15 @@ export default function TapeChart() {
   /* ── Derived: Filtered Reservations for Display ── */
   const visibleReservations = useMemo(() => {
     if (filters.status === 'all') return reservations;
-    return reservations.filter(r => r.status === filters.status);
+    return reservations.filter((r) => r.status === filters.status);
   }, [reservations, filters.status]);
 
-  const roomTypes = useMemo(() => [...new Set(ROOMS.map(r => r.type))], []);
-  const floors = useMemo(() => [...new Set(ROOMS.map(r => r.floor))].sort((a, b) => a - b), []);
+  const roomTypes = useMemo(() => [...new Set(ROOMS.map((r) => r.type))], []);
+  const floors = useMemo(() => [...new Set(ROOMS.map((r) => r.floor))].sort((a, b) => a - b), []);
 
   /* ── Global click to close context menu ── */
   useEffect(() => {
-    const handleClick = () => setContextMenu(m => ({ ...m, visible: false }));
+    const handleClick = () => setContextMenu((m) => ({ ...m, visible: false }));
     window.addEventListener('click', handleClick);
     return () => window.removeEventListener('click', handleClick);
   }, []);
@@ -674,7 +957,14 @@ export default function TapeChart() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!resizeState) return;
-      const { reservation, edge, startX, cellWidth, startDate: origStart, endDate: origEnd } = resizeState;
+      const {
+        reservation,
+        edge,
+        startX,
+        cellWidth,
+        startDate: origStart,
+        endDate: origEnd,
+      } = resizeState;
 
       const deltaPixels = e.clientX - startX;
       const deltaDays = Math.round(deltaPixels / cellWidth);
@@ -698,24 +988,31 @@ export default function TapeChart() {
         }
       }
 
-      setReservations(prev => prev.map(r =>
-        r.id === reservation.id ? { ...r, startDate: newStart, endDate: newEnd } : r
-      ));
+      setReservations((prev) =>
+        prev.map((r) =>
+          r.id === reservation.id ? { ...r, startDate: newStart, endDate: newEnd } : r
+        )
+      );
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [resizeState]);
 
   /* ── Navigation ── */
-  const handlePrev = () => setStartDate(d => addDays(d, -days));
-  const handleNext = () => setStartDate(d => addDays(d, days));
+  const handlePrev = () => setStartDate((d) => addDays(d, -days));
+  const handleNext = () => setStartDate((d) => addDays(d, days));
   const handleToday = () => setStartDate(startOfDay(new Date()));
 
   /* ── Reservation Lookup ── */
-  const getReservationForRoomAndDate = useCallback((roomId, date) => {
-    const d = format(date, 'yyyy-MM-dd');
-    return visibleReservations.find(r => r.roomId === roomId && d >= r.startDate && d < r.endDate);
-  }, [visibleReservations]);
+  const getReservationForRoomAndDate = useCallback(
+    (roomId, date) => {
+      const d = format(date, 'yyyy-MM-dd');
+      return visibleReservations.find(
+        (r) => r.roomId === roomId && d >= r.startDate && d < r.endDate
+      );
+    },
+    [visibleReservations]
+  );
 
   /* ── Batch 2: Right-Click Handler ── */
   const handleCellContextMenu = (e, roomId, date) => {
@@ -724,13 +1021,22 @@ export default function TapeChart() {
     const existing = getReservationForRoomAndDate(roomId, date);
     if (existing) {
       setContextMenu({
-        visible: true, x: e.clientX, y: e.clientY,
-        type: 'reservation', reservation: existing, roomId, date
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        type: 'reservation',
+        reservation: existing,
+        roomId,
+        date,
       });
     } else {
       setContextMenu({
-        visible: true, x: e.clientX, y: e.clientY,
-        type: 'cell', roomId, date: format(date, 'yyyy-MM-dd')
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        type: 'cell',
+        roomId,
+        date: format(date, 'yyyy-MM-dd'),
       });
     }
   };
@@ -753,9 +1059,9 @@ export default function TapeChart() {
 
   /* ── Batch 4: Multi-Select ── */
   const handleShiftSelect = (id) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       if (prev.includes(id)) {
-        return prev.filter(sid => sid !== id);
+        return prev.filter((sid) => sid !== id);
       }
       return [...prev, id];
     });
@@ -768,7 +1074,7 @@ export default function TapeChart() {
       return;
     }
     // Find all visible reservation IDs in order
-    const allIds = visibleReservations.map(r => r.id);
+    const allIds = visibleReservations.map((r) => r.id);
     const startIdx = allIds.indexOf(lastSelectedId);
     const endIdx = allIds.indexOf(id);
     if (startIdx === -1 || endIdx === -1) {
@@ -777,7 +1083,7 @@ export default function TapeChart() {
     }
     const [min, max] = [Math.min(startIdx, endIdx), Math.max(startIdx, endIdx)];
     const rangeIds = allIds.slice(min, max + 1);
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const newSet = new Set([...prev, ...rangeIds]);
       return Array.from(newSet);
     });
@@ -790,14 +1096,12 @@ export default function TapeChart() {
   };
 
   const handleBulkDelete = () => {
-    setReservations(prev => prev.filter(r => !selectedIds.includes(r.id)));
+    setReservations((prev) => prev.filter((r) => !selectedIds.includes(r.id)));
     clearSelection();
   };
 
   const handleBulkChangeStatus = (status) => {
-    setReservations(prev => prev.map(r =>
-      selectedIds.includes(r.id) ? { ...r, status } : r
-    ));
+    setReservations((prev) => prev.map((r) => (selectedIds.includes(r.id) ? { ...r, status } : r)));
     clearSelection();
   };
 
@@ -827,11 +1131,14 @@ export default function TapeChart() {
 
   /* ── Batch 4: Drag-to-Move Handlers ── */
   const handleDragStart = (e, reservation) => {
-    e.dataTransfer.setData('application/json', JSON.stringify({
-      reservationId: reservation.id,
-      startDate: reservation.startDate,
-      endDate: reservation.endDate,
-    }));
+    e.dataTransfer.setData(
+      'application/json',
+      JSON.stringify({
+        reservationId: reservation.id,
+        startDate: reservation.startDate,
+        endDate: reservation.endDate,
+      })
+    );
     e.dataTransfer.effectAllowed = 'move';
     setDragState({ reservationId: reservation.id });
   };
@@ -855,17 +1162,19 @@ export default function TapeChart() {
     const newStart = format(targetDate, 'yyyy-MM-dd');
     const newEnd = format(addDays(targetDate, nights), 'yyyy-MM-dd');
 
-    setReservations(prev => prev.map(r =>
-      r.id === reservationId
-        ? { ...r, roomId: targetRoomId, startDate: newStart, endDate: newEnd }
-        : r
-    ));
+    setReservations((prev) =>
+      prev.map((r) =>
+        r.id === reservationId
+          ? { ...r, roomId: targetRoomId, startDate: newStart, endDate: newEnd }
+          : r
+      )
+    );
     setDragState(null);
   };
 
   /* ── Batch 3: Save Inline Edit ── */
   const handleSaveReservation = (updated) => {
-    setReservations(prev => prev.map(r => r.id === updated.id ? updated : r));
+    setReservations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
     setSelectedReservation(updated);
   };
 
@@ -876,12 +1185,12 @@ export default function TapeChart() {
   };
 
   const handleCreateReservation = (newRes) => {
-    setReservations(prev => [...prev, newRes]);
+    setReservations((prev) => [...prev, newRes]);
   };
 
   /* ── Batch 3: Delete ── */
   const handleDeleteReservation = (res) => {
-    setReservations(prev => prev.filter(r => r.id !== res.id));
+    setReservations((prev) => prev.filter((r) => r.id !== res.id));
     if (selectedReservation?.id === res.id) {
       setDrawerOpen(false);
       setSelectedReservation(null);
@@ -906,25 +1215,38 @@ export default function TapeChart() {
       <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border border-border bg-background p-1">
-            {VIEW_MODES.map(mode => (
-              <button key={mode.id} onClick={() => setViewMode(mode.id)}
-                className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                  viewMode === mode.id ? 'bg-secondary text-white' : 'text-text-secondary hover:text-text-primary')}>
+            {VIEW_MODES.map((mode) => (
+              <button
+                key={mode.id}
+                onClick={() => setViewMode(mode.id)}
+                className={cn(
+                  'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                  viewMode === mode.id
+                    ? 'bg-secondary text-white'
+                    : 'text-text-secondary hover:text-text-primary'
+                )}
+              >
                 {mode.label}
               </button>
             ))}
           </div>
           <div className="h-6 w-px bg-border mx-1" />
-          <button onClick={handlePrev}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-surface-elevated">
+          <button
+            onClick={handlePrev}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-surface-elevated"
+          >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <button onClick={handleToday}
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-surface-elevated">
+          <button
+            onClick={handleToday}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-surface-elevated"
+          >
             Today
           </button>
-          <button onClick={handleNext}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-surface-elevated">
+          <button
+            onClick={handleNext}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-surface-elevated"
+          >
             <ChevronRight className="h-4 w-4" />
           </button>
           <span className="text-sm font-medium text-text-primary ml-2">
@@ -957,28 +1279,41 @@ export default function TapeChart() {
       <div className="flex-1 overflow-auto" ref={gridRef}>
         <div className="min-w-max">
           {/* Date Header */}
-          <div className="sticky top-0 z-10 grid border-b border-border bg-surface"
-            style={{ gridTemplateColumns: `80px repeat(${days}, minmax(100px, 1fr))` }}>
+          <div
+            className="sticky top-0 z-10 grid border-b border-border bg-surface"
+            style={{ gridTemplateColumns: `80px repeat(${days}, minmax(100px, 1fr))` }}
+          >
             <div className="border-r border-border px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center">
               Room
             </div>
             {dates.map((date, idx) => (
-              <div key={date.toISOString()} data-cell-idx={idx} className={cn(
-                'border-r border-border px-2 py-2 text-center text-xs font-medium',
-                isSameDay(date, new Date()) ? 'bg-secondary/5 text-secondary' : 'text-text-secondary')}
+              <div
+                key={date.toISOString()}
+                data-cell-idx={idx}
+                className={cn(
+                  'border-r border-border px-2 py-2 text-center text-xs font-medium',
+                  isSameDay(date, new Date())
+                    ? 'bg-secondary/5 text-secondary'
+                    : 'text-text-secondary'
+                )}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, null, date)}
               >
                 <div>{format(date, 'EEE')}</div>
-                <div className={cn('text-sm', isSameDay(date, new Date()) && 'font-bold')}>{format(date, 'dd')}</div>
+                <div className={cn('text-sm', isSameDay(date, new Date()) && 'font-bold')}>
+                  {format(date, 'dd')}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Room Rows */}
-          {filteredRooms.map(room => (
-            <div key={room.id} className="grid border-b border-border hover:bg-surface/50 transition-colors"
-              style={{ gridTemplateColumns: `80px repeat(${days}, minmax(100px, 1fr))` }}>
+          {filteredRooms.map((room) => (
+            <div
+              key={room.id}
+              className="grid border-b border-border hover:bg-surface/50 transition-colors"
+              style={{ gridTemplateColumns: `80px repeat(${days}, minmax(100px, 1fr))` }}
+            >
               {/* Room Label */}
               <div className="border-r border-border bg-surface px-3 py-3 flex flex-col justify-center">
                 <span className="text-sm font-bold text-text-primary">{room.id}</span>
@@ -994,7 +1329,8 @@ export default function TapeChart() {
                 const isDragging = dragState?.reservationId === reservation?.id;
 
                 return (
-                  <div key={date.toISOString()}
+                  <div
+                    key={date.toISOString()}
                     data-cell-idx={idx}
                     onContextMenu={(e) => handleCellContextMenu(e, room.id, date)}
                     onDragOver={handleDragOver}
@@ -1004,14 +1340,18 @@ export default function TapeChart() {
                       isToday && !reservation && 'bg-secondary/5',
                       !reservation && 'hover:bg-surface-elevated/50',
                       isDragging && 'bg-secondary/10'
-                    )}>
+                    )}
+                  >
                     {reservation && isStart && (
                       <div
                         draggable
                         onDragStart={(e) => handleDragStart(e, reservation)}
                         onDragEnd={handleDragEnd}
                         onClick={(e) => handleReservationClick(reservation, e)}
-                        onContextMenu={(e) => { e.stopPropagation(); handleCellContextMenu(e, room.id, date); }}
+                        onContextMenu={(e) => {
+                          e.stopPropagation();
+                          handleCellContextMenu(e, room.id, date);
+                        }}
                         className={cn(
                           'absolute inset-y-1 left-1 rounded-md border px-2 py-1 text-left shadow-sm transition-all hover:shadow-md hover:brightness-95 z-10 group cursor-pointer',
                           STATUS_META[reservation.status]?.bgSoft,
@@ -1020,7 +1360,8 @@ export default function TapeChart() {
                         )}
                         style={{
                           width: `calc(${getNights(reservation.startDate, reservation.endDate) * 100}% + ${(getNights(reservation.startDate, reservation.endDate) - 1) * 1}px)`,
-                        }}>
+                        }}
+                      >
                         {/* Drag Handle */}
                         <div className="absolute left-0 top-0 bottom-0 w-4 flex items-center justify-center opacity-0 group-hover:opacity-50 cursor-move">
                           <GripVertical className="h-3 w-3 text-text-muted" />
@@ -1041,15 +1382,27 @@ export default function TapeChart() {
                         />
 
                         <div className="flex items-center gap-1.5 overflow-hidden pl-3">
-                          <div className={cn('h-2 w-2 rounded-full shrink-0', STATUS_META[reservation.status]?.color)} />
-                          <span className="truncate text-xs font-medium text-text-primary">{reservation.guest}</span>
+                          <div
+                            className={cn(
+                              'h-2 w-2 rounded-full shrink-0',
+                              STATUS_META[reservation.status]?.color
+                            )}
+                          />
+                          <span className="truncate text-xs font-medium text-text-primary">
+                            {reservation.guest}
+                          </span>
                         </div>
-                        <div className="text-[10px] text-text-muted truncate pl-3">${reservation.rate}</div>
+                        <div className="text-[10px] text-text-muted truncate pl-3">
+                          ${reservation.rate}
+                        </div>
 
                         {/* Multi-select checkbox on hover */}
                         <div
                           className="absolute right-1 top-1 opacity-0 group-hover:opacity-100"
-                          onClick={(e) => { e.stopPropagation(); handleShiftSelect(reservation.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShiftSelect(reservation.id);
+                          }}
                         >
                           {isSelected ? (
                             <CheckSquare className="h-3.5 w-3.5 text-secondary" />
@@ -1070,7 +1423,7 @@ export default function TapeChart() {
       {/* Batch 2: Context Menu */}
       <ContextMenu
         menu={contextMenu}
-        onClose={() => setContextMenu(m => ({ ...m, visible: false }))}
+        onClose={() => setContextMenu((m) => ({ ...m, visible: false }))}
         onQuickCreate={handleQuickCreate}
         onEdit={handleReservationClick}
         onDelete={handleDeleteReservation}
@@ -1079,7 +1432,7 @@ export default function TapeChart() {
       {/* Batch 3: Detail Drawer */}
       <ReservationDrawer
         reservation={selectedReservation}
-        room={selectedReservation ? ROOMS.find(r => r.id === selectedReservation.roomId) : null}
+        room={selectedReservation ? ROOMS.find((r) => r.id === selectedReservation.roomId) : null}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         onSave={handleSaveReservation}

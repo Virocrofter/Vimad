@@ -2,9 +2,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  MessageSquare, Send, Paperclip, Phone, Bell, ChevronLeft,
-  Clock, CheckCheck, MoreVertical, Image, Mic, Smile,
-  Shield, User, Headphones
+  MessageSquare,
+  Send,
+  Paperclip,
+  Phone,
+  Bell,
+  ChevronLeft,
+  Clock,
+  CheckCheck,
+  MoreVertical,
+  Image,
+  Mic,
+  Smile,
+  Shield,
+  User,
+  Headphones,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useGuestStore } from '../store';
@@ -42,7 +54,7 @@ export default function MessagesPage() {
       attachments: [],
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     addMessage(newMessage);
     setInput('');
 
@@ -59,7 +71,7 @@ export default function MessagesPage() {
         status: 'delivered',
         attachments: [],
       };
-      setMessages(prev => [...prev, autoReply]);
+      setMessages((prev) => [...prev, autoReply]);
     }, 3000);
   };
 
@@ -72,7 +84,9 @@ export default function MessagesPage() {
 
   const groupedMessages = messages.reduce((groups, msg) => {
     const date = new Date(msg.timestamp).toLocaleDateString('en-US', {
-      weekday: 'long', month: 'short', day: 'numeric'
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
     });
     if (!groups[date]) groups[date] = [];
     groups[date].push(msg);
@@ -138,7 +152,7 @@ export default function MessagesPage() {
             {msgs.map((msg, idx) => {
               const isGuest = msg.sender === 'guest';
               const showAvatar = idx === 0 || msgs[idx - 1].sender !== msg.sender;
-              const staffMember = isGuest ? null : staff.find(s => s.id === msg.staffId);
+              const staffMember = isGuest ? null : staff.find((s) => s.id === msg.staffId);
 
               return (
                 <div
@@ -150,49 +164,62 @@ export default function MessagesPage() {
                 >
                   {!isGuest && showAvatar && (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                      {staffMember?.name.split(' ').map(n => n[0]).join('')}
+                      {staffMember?.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
                     </div>
                   )}
                   {!isGuest && !showAvatar && <div className="w-8 shrink-0" />}
 
-                  <div className={cn(
-                    'space-y-1',
-                    isGuest ? 'items-end' : 'items-start'
-                  )}>
+                  <div className={cn('space-y-1', isGuest ? 'items-end' : 'items-start')}>
                     {!isGuest && showAvatar && (
                       <p className="text-[10px] text-text-muted ml-1">{staffMember?.name}</p>
                     )}
-                    <div className={cn(
-                      'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-                      isGuest
-                        ? 'bg-secondary text-white rounded-br-md'
-                        : 'bg-surface-elevated border border-border text-text-primary rounded-bl-md'
-                    )}>
+                    <div
+                      className={cn(
+                        'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                        isGuest
+                          ? 'bg-secondary text-white rounded-br-md'
+                          : 'bg-surface-elevated border border-border text-text-primary rounded-bl-md'
+                      )}
+                    >
                       {msg.text}
                       {msg.attachments?.length > 0 && (
                         <div className="mt-2 space-y-1">
-                          {msg.attachments.map(att => (
-                            <div key={att.id} className={cn(
-                              'flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
-                              isGuest ? 'bg-white/10' : 'bg-background'
-                            )}>
-                              {att.type === 'image' ? <Image className="h-4 w-4" /> : <Paperclip className="h-4 w-4" />}
+                          {msg.attachments.map((att) => (
+                            <div
+                              key={att.id}
+                              className={cn(
+                                'flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
+                                isGuest ? 'bg-white/10' : 'bg-background'
+                              )}
+                            >
+                              {att.type === 'image' ? (
+                                <Image className="h-4 w-4" />
+                              ) : (
+                                <Paperclip className="h-4 w-4" />
+                              )}
                               <span className="truncate">{att.name}</span>
                             </div>
                           ))}
                         </div>
                       )}
                     </div>
-                    <div className={cn(
-                      'flex items-center gap-1 text-[10px] text-text-muted',
-                      isGuest ? 'justify-end mr-1' : 'ml-1'
-                    )}>
+                    <div
+                      className={cn(
+                        'flex items-center gap-1 text-[10px] text-text-muted',
+                        isGuest ? 'justify-end mr-1' : 'ml-1'
+                      )}
+                    >
                       <span>{formatMessageTime(msg.timestamp)}</span>
                       {isGuest && (
-                        <CheckCheck className={cn(
-                          'h-3 w-3',
-                          msg.status === 'read' ? 'text-accent' : 'text-text-muted'
-                        )} />
+                        <CheckCheck
+                          className={cn(
+                            'h-3 w-3',
+                            msg.status === 'read' ? 'text-accent' : 'text-text-muted'
+                          )}
+                        />
                       )}
                     </div>
                   </div>
@@ -209,9 +236,18 @@ export default function MessagesPage() {
             </div>
             <div className="bg-surface-elevated border border-border rounded-2xl rounded-bl-md px-4 py-3">
               <div className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-text-muted animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="h-2 w-2 rounded-full bg-text-muted animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="h-2 w-2 rounded-full bg-text-muted animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span
+                  className="h-2 w-2 rounded-full bg-text-muted animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <span
+                  className="h-2 w-2 rounded-full bg-text-muted animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <span
+                  className="h-2 w-2 rounded-full bg-text-muted animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             </div>
           </div>

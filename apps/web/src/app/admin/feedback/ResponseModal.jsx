@@ -69,10 +69,15 @@ export default function ResponseModal({ response, onClose, onSend }) {
             </div>
             <div>
               <h3 className="text-lg font-bold text-text-primary">Reply to Feedback</h3>
-              <p className="text-xs text-text-muted">{response.id} · {response.tenantName}</p>
+              <p className="text-xs text-text-muted">
+                {response.id} · {response.tenantName}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -97,7 +102,9 @@ export default function ResponseModal({ response, onClose, onSend }) {
 
           {/* Templates */}
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Quick Templates</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Quick Templates
+            </label>
             <div className="flex flex-wrap gap-2">
               {responseTemplates.map((t) => (
                 <button
@@ -119,7 +126,9 @@ export default function ResponseModal({ response, onClose, onSend }) {
 
           {/* Response Text */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Your Response</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Your Response
+            </label>
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -132,7 +141,9 @@ export default function ResponseModal({ response, onClose, onSend }) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button onClick={handleSend} disabled={!text.trim()}>
               <Send className="mr-1.5 h-4 w-4" /> Send Response
             </Button>

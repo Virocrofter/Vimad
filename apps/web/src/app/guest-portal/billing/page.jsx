@@ -2,14 +2,36 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Receipt, CreditCard, Download, ArrowRight, ChevronDown, ChevronUp,
-  Hotel, UtensilsCrossed, Sparkles, ConciergeBell, AlertCircle,
-  CheckCircle2, Clock, TrendingUp, TrendingDown, Minus, FileText,
-  Split, Users, Plus
+  Receipt,
+  CreditCard,
+  Download,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  Hotel,
+  UtensilsCrossed,
+  Sparkles,
+  ConciergeBell,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  FileText,
+  Split,
+  Users,
+  Plus,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
-import { guestStay, formatCurrency, formatDate, getCategoryTotal, folioCategoryMeta } from '../data';
+import {
+  guestStay,
+  formatCurrency,
+  formatDate,
+  getCategoryTotal,
+  folioCategoryMeta,
+} from '../data';
 
 const categoryIcons = {
   room: Hotel,
@@ -26,7 +48,7 @@ export default function BillingPage() {
 
   const categories = useMemo(() => {
     const cats = {};
-    folio.charges.forEach(c => {
+    folio.charges.forEach((c) => {
       if (!cats[c.category]) cats[c.category] = [];
       cats[c.category].push(c);
     });
@@ -34,11 +56,13 @@ export default function BillingPage() {
   }, [folio.charges]);
 
   const categoryTotals = useMemo(() => {
-    return Object.entries(categories).map(([cat, items]) => ({
-      category: cat,
-      total: items.reduce((s, i) => s + i.amount, 0),
-      count: items.length,
-    })).sort((a, b) => b.total - a.total);
+    return Object.entries(categories)
+      .map(([cat, items]) => ({
+        category: cat,
+        total: items.reduce((s, i) => s + i.amount, 0),
+        count: items.length,
+      }))
+      .sort((a, b) => b.total - a.total);
   }, [categories]);
 
   const handlePayBalance = () => setShowPaymentModal(true);
@@ -50,14 +74,23 @@ export default function BillingPage() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Billing & Folio</h1>
           <p className="text-sm text-text-secondary">
-            {property.name} · Room {guestStay.room.number} · {formatDate(dates.arrival)} – {formatDate(dates.departure)}
+            {property.name} · Room {guestStay.room.number} · {formatDate(dates.arrival)} –{' '}
+            {formatDate(dates.departure)}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/guest-portal/billing/invoice')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/guest-portal/billing/invoice')}
+          >
             <FileText className="mr-1.5 h-4 w-4" /> Invoices
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/guest-portal/billing/split')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/guest-portal/billing/split')}
+          >
             <Users className="mr-1.5 h-4 w-4" /> Split Bill
           </Button>
         </div>
@@ -68,11 +101,15 @@ export default function BillingPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Balance */}
           <div className="text-center lg:text-left">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Current Balance</p>
-            <p className={cn(
-              'mt-1 text-4xl font-bold font-mono',
-              folio.balance > 0 ? 'text-danger' : 'text-accent'
-            )}>
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Current Balance
+            </p>
+            <p
+              className={cn(
+                'mt-1 text-4xl font-bold font-mono',
+                folio.balance > 0 ? 'text-danger' : 'text-accent'
+              )}
+            >
               {formatCurrency(folio.balance)}
             </p>
             <p className="mt-1 text-xs text-text-muted">
@@ -89,26 +126,36 @@ export default function BillingPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs text-text-muted">Total Charges</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatCurrency(folio.total)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {formatCurrency(folio.total)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs text-text-muted">Amount Paid</p>
-              <p className="mt-1 text-xl font-bold font-mono text-accent">{formatCurrency(folio.paid)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-accent">
+                {formatCurrency(folio.paid)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs text-text-muted">Room Rate ({guestStay.dates.nights} nights)</p>
-              <p className="mt-1 text-lg font-bold font-mono text-text-primary">{formatCurrency(rate.total)}</p>
+              <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                {formatCurrency(rate.total)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-background p-4">
               <p className="text-xs text-text-muted">Taxes & Fees</p>
-              <p className="mt-1 text-lg font-bold font-mono text-text-primary">{formatCurrency(rate.taxes + rate.fees)}</p>
+              <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                {formatCurrency(rate.taxes + rate.fees)}
+              </p>
             </div>
           </div>
 
           {/* Payment Method */}
           <div className="rounded-lg border border-border bg-background p-4">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">Payment Methods</p>
-            {folio.payments.map(p => (
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">
+              Payment Methods
+            </p>
+            {folio.payments.map((p) => (
               <div key={p.id} className="flex items-center gap-3 py-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
                   <CheckCircle2 className="h-4 w-4 text-accent" />
@@ -117,7 +164,9 @@ export default function BillingPage() {
                   <p className="text-sm font-medium text-text-primary">{p.method}</p>
                   <p className="text-xs text-text-muted">{formatDate(p.date)}</p>
                 </div>
-                <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(p.amount)}</p>
+                <p className="text-sm font-mono font-medium text-text-primary">
+                  {formatCurrency(p.amount)}
+                </p>
               </div>
             ))}
             {folio.balance > 0 && (
@@ -129,7 +178,9 @@ export default function BillingPage() {
                   <p className="text-sm font-medium text-danger">Balance Due</p>
                   <p className="text-xs text-text-muted">Due at checkout</p>
                 </div>
-                <p className="text-sm font-mono font-bold text-danger">{formatCurrency(folio.balance)}</p>
+                <p className="text-sm font-mono font-bold text-danger">
+                  {formatCurrency(folio.balance)}
+                </p>
               </div>
             )}
           </div>
@@ -147,7 +198,9 @@ export default function BillingPage() {
               onClick={() => setExpandedCategory(expandedCategory === category ? null : category)}
               className={cn(
                 'rounded-xl border bg-surface p-4 text-left transition-all hover:shadow-md',
-                expandedCategory === category ? 'border-secondary/30 ring-1 ring-secondary/10' : 'border-border'
+                expandedCategory === category
+                  ? 'border-secondary/30 ring-1 ring-secondary/10'
+                  : 'border-border'
               )}
             >
               <div className="flex items-center gap-2">
@@ -156,10 +209,14 @@ export default function BillingPage() {
                 </div>
                 <div>
                   <p className="text-xs text-text-muted">{meta.label}</p>
-                  <p className={cn('text-lg font-bold font-mono', meta.color)}>{formatCurrency(total)}</p>
+                  <p className={cn('text-lg font-bold font-mono', meta.color)}>
+                    {formatCurrency(total)}
+                  </p>
                 </div>
               </div>
-              <p className="mt-1 text-[10px] text-text-muted">{count} charge{count !== 1 ? 's' : ''}</p>
+              <p className="mt-1 text-[10px] text-text-muted">
+                {count} charge{count !== 1 ? 's' : ''}
+              </p>
             </button>
           );
         })}
@@ -177,19 +234,33 @@ export default function BillingPage() {
           {folio.charges.map((charge) => {
             const meta = folioCategoryMeta[charge.category] || folioCategoryMeta.services;
             return (
-              <div key={charge.id} className="flex items-center gap-4 px-6 py-4 hover:bg-background/50 transition-colors">
-                <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', meta.bg)}>
+              <div
+                key={charge.id}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-background/50 transition-colors"
+              >
+                <div
+                  className={cn(
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                    meta.bg
+                  )}
+                >
                   <span className="text-lg">{meta.icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text-primary">{charge.description}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className={cn('text-[10px] font-medium uppercase tracking-wider', meta.color)}>{meta.label}</span>
+                    <span
+                      className={cn('text-[10px] font-medium uppercase tracking-wider', meta.color)}
+                    >
+                      {meta.label}
+                    </span>
                     <span className="text-[10px] text-text-muted">·</span>
                     <span className="text-[10px] text-text-muted">{formatDate(charge.date)}</span>
                   </div>
                 </div>
-                <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(charge.amount)}</p>
+                <p className="text-sm font-mono font-medium text-text-primary">
+                  {formatCurrency(charge.amount)}
+                </p>
               </div>
             );
           })}
@@ -197,7 +268,9 @@ export default function BillingPage() {
         <div className="border-t border-border bg-background px-6 py-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-text-primary">Subtotal</span>
-            <span className="text-lg font-bold font-mono text-text-primary">{formatCurrency(folio.total)}</span>
+            <span className="text-lg font-bold font-mono text-text-primary">
+              {formatCurrency(folio.total)}
+            </span>
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-sm text-text-muted">Amount Paid</span>
@@ -205,7 +278,12 @@ export default function BillingPage() {
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
             <span className="text-sm font-bold text-text-primary">Balance Due</span>
-            <span className={cn('text-xl font-bold font-mono', folio.balance > 0 ? 'text-danger' : 'text-accent')}>
+            <span
+              className={cn(
+                'text-xl font-bold font-mono',
+                folio.balance > 0 ? 'text-danger' : 'text-accent'
+              )}
+            >
               {formatCurrency(folio.balance)}
             </span>
           </div>
@@ -269,14 +347,16 @@ export default function BillingPage() {
 
 /* ─── Payment Modal ─── */
 function PaymentModal({ balance, paymentMethods, onClose }) {
-  const [selectedMethod, setSelectedMethod] = useState(paymentMethods.find(m => m.isDefault)?.id || '');
+  const [selectedMethod, setSelectedMethod] = useState(
+    paymentMethods.find((m) => m.isDefault)?.id || ''
+  );
   const [amount, setAmount] = useState(balance.toString());
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const handlePay = async () => {
     setProcessing(true);
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 2000));
     setProcessing(false);
     setSuccess(true);
     setTimeout(() => onClose(), 2000);
@@ -294,7 +374,10 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
       <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl">
         <div className="border-b border-border px-6 py-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Make Payment</h3>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <Minus className="h-5 w-5" />
           </button>
         </div>
@@ -311,7 +394,9 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
           <div className="p-6 space-y-5">
             {/* Amount */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Amount</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Amount
+              </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">$</span>
                 <input
@@ -326,7 +411,9 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
 
             {/* Payment Method */}
             <div className="space-y-2">
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Payment Method</label>
+              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Payment Method
+              </label>
               {paymentMethods.map((pm) => (
                 <button
                   key={pm.id}
@@ -338,10 +425,12 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
                       : 'border-border bg-surface hover:bg-surface-elevated'
                   )}
                 >
-                  <div className={cn(
-                    'h-4 w-4 rounded-full border flex items-center justify-center',
-                    selectedMethod === pm.id ? 'border-secondary bg-secondary' : 'border-border'
-                  )}>
+                  <div
+                    className={cn(
+                      'h-4 w-4 rounded-full border flex items-center justify-center',
+                      selectedMethod === pm.id ? 'border-secondary bg-secondary' : 'border-border'
+                    )}
+                  >
                     {selectedMethod === pm.id && <div className="h-2 w-2 rounded-full bg-white" />}
                   </div>
                   <div className="flex-1">
@@ -351,7 +440,9 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
                     <p className="text-xs text-text-muted">Expires {pm.expiry}</p>
                   </div>
                   {pm.isDefault && (
-                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">Default</span>
+                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
+                      Default
+                    </span>
                   )}
                 </button>
               ))}
@@ -361,7 +452,9 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
             <div className="rounded-lg border border-border bg-surface p-3 space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-text-muted">Payment amount</span>
-                <span className="font-mono font-medium text-text-primary">{formatCurrency(parseFloat(amount) || 0)}</span>
+                <span className="font-mono font-medium text-text-primary">
+                  {formatCurrency(parseFloat(amount) || 0)}
+                </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-text-muted">Processing fee</span>
@@ -369,15 +462,26 @@ function PaymentModal({ balance, paymentMethods, onClose }) {
               </div>
               <div className="pt-1 border-t border-border flex items-center justify-between">
                 <span className="text-sm font-medium text-text-primary">Total</span>
-                <span className="text-lg font-bold font-mono text-text-primary">{formatCurrency(parseFloat(amount) || 0)}</span>
+                <span className="text-lg font-bold font-mono text-text-primary">
+                  {formatCurrency(parseFloat(amount) || 0)}
+                </span>
               </div>
             </div>
 
-            <Button className="w-full" onClick={handlePay} disabled={processing || !selectedMethod || parseFloat(amount) <= 0}>
+            <Button
+              className="w-full"
+              onClick={handlePay}
+              disabled={processing || !selectedMethod || parseFloat(amount) <= 0}
+            >
               {processing ? (
-                <><Clock className="mr-1.5 h-4 w-4 animate-spin" /> Processing...</>
+                <>
+                  <Clock className="mr-1.5 h-4 w-4 animate-spin" /> Processing...
+                </>
               ) : (
-                <><CreditCard className="mr-1.5 h-4 w-4" /> Pay {formatCurrency(parseFloat(amount) || 0)}</>
+                <>
+                  <CreditCard className="mr-1.5 h-4 w-4" /> Pay{' '}
+                  {formatCurrency(parseFloat(amount) || 0)}
+                </>
               )}
             </Button>
           </div>

@@ -2,11 +2,34 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Activity, Cpu, MemoryStick, Timer, Flame, Search,
-  Filter, ChevronDown, ChevronUp, BarChart3, ArrowUpRight,
-  ArrowDownRight, Minus, Zap, AlertTriangle, CheckCircle2,
-  XCircle, Clock, Download, RefreshCw, Layers, Server,
-  Database, Globe, Wifi, HardDrive, FileCode, Package
+  Activity,
+  Cpu,
+  MemoryStick,
+  Timer,
+  Flame,
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Zap,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Download,
+  RefreshCw,
+  Layers,
+  Server,
+  Database,
+  Globe,
+  Wifi,
+  HardDrive,
+  FileCode,
+  Package,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -34,14 +57,30 @@ const profilerRuns = [
     spans: [
       { name: 'auth.middleware', time: 45, type: 'middleware', depth: 0 },
       { name: 'cache.check', time: 12, type: 'cache', depth: 1 },
-      { name: 'db.query: reservations', time: 890, type: 'db', depth: 1, query: 'SELECT * FROM reservations WHERE check_in > $1 ORDER BY check_in LIMIT 50' },
-      { name: 'db.query: guests', time: 245, type: 'db', depth: 1, query: 'SELECT * FROM guests WHERE id IN (...)' },
+      {
+        name: 'db.query: reservations',
+        time: 890,
+        type: 'db',
+        depth: 1,
+        query: 'SELECT * FROM reservations WHERE check_in > $1 ORDER BY check_in LIMIT 50',
+      },
+      {
+        name: 'db.query: guests',
+        time: 245,
+        type: 'db',
+        depth: 1,
+        query: 'SELECT * FROM guests WHERE id IN (...)',
+      },
       { name: 'serialize', time: 340, type: 'compute', depth: 1 },
       { name: 'external: stripe', time: 340, type: 'external', depth: 1 },
       { name: 'response.send', time: 12, type: 'io', depth: 0 },
     ],
     slowQueries: [
-      { query: 'SELECT * FROM reservations WHERE check_in > $1 ORDER BY check_in LIMIT 50', time: 890, rows: 12400 },
+      {
+        query: 'SELECT * FROM reservations WHERE check_in > $1 ORDER BY check_in LIMIT 50',
+        time: 890,
+        rows: 12400,
+      },
     ],
     memoryBreakdown: [
       { name: 'Heap Used', value: 38.4, total: 64 },
@@ -103,7 +142,14 @@ const profilerRuns = [
     spans: [
       { name: 'auth.middleware', time: 38, type: 'middleware', depth: 0 },
       { name: 'validate.body', time: 12, type: 'compute', depth: 0 },
-      { name: 'db.query: revenue_agg', time: 2100, type: 'db', depth: 1, query: "SELECT date_trunc('day', created_at), SUM(amount) FROM payments WHERE created_at > $1 GROUP BY 1" },
+      {
+        name: 'db.query: revenue_agg',
+        time: 2100,
+        type: 'db',
+        depth: 1,
+        query:
+          "SELECT date_trunc('day', created_at), SUM(amount) FROM payments WHERE created_at > $1 GROUP BY 1",
+      },
       { name: 'db.query: reservations', time: 890, type: 'db', depth: 1 },
       { name: 'db.query: refunds', time: 210, type: 'db', depth: 1 },
       { name: 'compute.aggregations', time: 340, type: 'compute', depth: 1 },
@@ -112,8 +158,17 @@ const profilerRuns = [
       { name: 'response.send', time: 18, type: 'io', depth: 0 },
     ],
     slowQueries: [
-      { query: "SELECT date_trunc('day', created_at), SUM(amount) FROM payments WHERE created_at > $1 GROUP BY 1", time: 2100, rows: 89000 },
-      { query: "SELECT * FROM reservations WHERE property_id = $1 AND check_in BETWEEN $2 AND $3", time: 890, rows: 4200 },
+      {
+        query:
+          "SELECT date_trunc('day', created_at), SUM(amount) FROM payments WHERE created_at > $1 GROUP BY 1",
+        time: 2100,
+        rows: 89000,
+      },
+      {
+        query: 'SELECT * FROM reservations WHERE property_id = $1 AND check_in BETWEEN $2 AND $3',
+        time: 890,
+        rows: 4200,
+      },
     ],
     memoryBreakdown: [
       { name: 'Heap Used', value: 112.4, total: 128 },
@@ -181,8 +236,16 @@ const profilerRuns = [
       { name: 'response.send', time: 8, type: 'io', depth: 0 },
     ],
     slowQueries: [
-      { query: 'INSERT INTO reservations (...) VALUES (...), (...), ... 5000 rows', time: 6200, rows: 5000 },
-      { query: 'UPDATE search_index SET ... WHERE reservation_id IN (...)', time: 1800, rows: 5000 },
+      {
+        query: 'INSERT INTO reservations (...) VALUES (...), (...), ... 5000 rows',
+        time: 6200,
+        rows: 5000,
+      },
+      {
+        query: 'UPDATE search_index SET ... WHERE reservation_id IN (...)',
+        time: 1800,
+        rows: 5000,
+      },
     ],
     memoryBreakdown: [
       { name: 'Heap Used', value: 480.0, total: 512 },
@@ -264,15 +327,26 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs avg
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs avg
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -282,7 +356,7 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
 
 /* ─── Span Tree ─── */
 function SpanTree({ spans, totalTime }) {
-  const maxTime = Math.max(...spans.map(s => s.time));
+  const maxTime = Math.max(...spans.map((s) => s.time));
 
   return (
     <div className="space-y-1">
@@ -299,16 +373,16 @@ function SpanTree({ spans, totalTime }) {
             style={{ paddingLeft: `${12 + indent}px` }}
           >
             {/* Bar */}
-            <div className="absolute left-0 top-0 bottom-0 rounded-md bg-current opacity-5 transition-opacity group-hover:opacity-10"
-              style={{ width: `${barWidth}%`, color: 'inherit' }} />
+            <div
+              className="absolute left-0 top-0 bottom-0 rounded-md bg-current opacity-5 transition-opacity group-hover:opacity-10"
+              style={{ width: `${barWidth}%`, color: 'inherit' }}
+            />
 
             {/* Type indicator */}
             <div className={cn('h-2 w-2 rounded-full shrink-0', meta.color)} />
 
             {/* Name */}
-            <span className="text-sm text-text-primary flex-1 min-w-0 truncate">
-              {span.name}
-            </span>
+            <span className="text-sm text-text-primary flex-1 min-w-0 truncate">{span.name}</span>
 
             {/* Query preview */}
             {span.query && (
@@ -336,10 +410,10 @@ function SpanTree({ spans, totalTime }) {
 /* ─── Flame Graph (Simple) ─── */
 function FlameGraph({ spans, totalTime }) {
   const rows = [];
-  const maxDepth = Math.max(...spans.map(s => s.depth));
+  const maxDepth = Math.max(...spans.map((s) => s.depth));
 
   for (let d = 0; d <= maxDepth; d++) {
-    const rowSpans = spans.filter(s => s.depth === d);
+    const rowSpans = spans.filter((s) => s.depth === d);
     if (rowSpans.length === 0) continue;
 
     let currentX = 0;
@@ -446,7 +520,12 @@ function DetailDrawer({ run, onClose }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', getStatusBg(run.status))}>
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg',
+                  getStatusBg(run.status)
+                )}
+              >
                 <Server className="h-5 w-5" />
               </div>
               <div>
@@ -462,7 +541,10 @@ function DetailDrawer({ run, onClose }) {
                 </div>
               </div>
             </div>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <XCircle className="h-5 w-5" />
             </button>
           </div>
@@ -478,7 +560,9 @@ function DetailDrawer({ run, onClose }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -493,12 +577,18 @@ function DetailDrawer({ run, onClose }) {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Total Time</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatDuration(run.totalTime)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {formatDuration(run.totalTime)}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">DB Time</p>
-              <p className="mt-1 text-xl font-bold font-mono text-secondary">{formatDuration(run.dbTime)}</p>
-              <p className="text-xs text-text-muted">{((run.dbTime / run.totalTime) * 100).toFixed(1)}% of total</p>
+              <p className="mt-1 text-xl font-bold font-mono text-secondary">
+                {formatDuration(run.dbTime)}
+              </p>
+              <p className="text-xs text-text-muted">
+                {((run.dbTime / run.totalTime) * 100).toFixed(1)}% of total
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Queries</p>
@@ -507,7 +597,9 @@ function DetailDrawer({ run, onClose }) {
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Memory Peak</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{run.memoryPeak}MB</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {run.memoryPeak}MB
+              </p>
               <p className="text-xs text-text-muted">CPU {run.cpuPercent}%</p>
             </div>
           </div>
@@ -549,12 +641,18 @@ function DetailDrawer({ run, onClose }) {
                   <div key={i} className="rounded-xl border border-border bg-surface p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-mono text-text-muted">Query #{i + 1}</span>
-                      <span className="text-xs font-mono font-medium text-danger">{formatDuration(sq.time)}</span>
+                      <span className="text-xs font-mono font-medium text-danger">
+                        {formatDuration(sq.time)}
+                      </span>
                     </div>
                     <div className="rounded-md bg-background border border-border p-3">
-                      <code className="text-xs font-mono text-text-primary whitespace-pre-wrap">{sq.query}</code>
+                      <code className="text-xs font-mono text-text-primary whitespace-pre-wrap">
+                        {sq.query}
+                      </code>
                     </div>
-                    <p className="text-xs text-text-muted">{sq.rows.toLocaleString()} rows affected</p>
+                    <p className="text-xs text-text-muted">
+                      {sq.rows.toLocaleString()} rows affected
+                    </p>
                   </div>
                 ))
               )}
@@ -596,12 +694,13 @@ export default function ProfilerPage() {
 
   const filteredRuns = useMemo(() => {
     let result = runs.filter((r) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         r.route.toLowerCase().includes(query.toLowerCase()) ||
         r.id.toLowerCase().includes(query.toLowerCase());
       const matchesMethod = methodFilter === 'all' || r.method === methodFilter;
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'error' ? r.status >= 400 : r.status < 400);
+      const matchesStatus =
+        statusFilter === 'all' || (statusFilter === 'error' ? r.status >= 400 : r.status < 400);
       return matchesQuery && matchesMethod && matchesStatus;
     });
 
@@ -614,17 +713,20 @@ export default function ProfilerPage() {
     return result;
   }, [runs, query, methodFilter, statusFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: runs.length,
-    avgDuration: Math.round(runs.reduce((s, r) => s + r.totalTime, 0) / runs.length),
-    avgDbTime: Math.round(runs.reduce((s, r) => s + r.dbTime, 0) / runs.length),
-    totalQueries: runs.reduce((s, r) => s + r.queries, 0),
-    errors: runs.filter(r => r.status >= 400).length,
-    maxMemory: Math.max(...runs.map(r => r.memoryPeak)),
-  }), [runs]);
+  const stats = useMemo(
+    () => ({
+      total: runs.length,
+      avgDuration: Math.round(runs.reduce((s, r) => s + r.totalTime, 0) / runs.length),
+      avgDbTime: Math.round(runs.reduce((s, r) => s + r.dbTime, 0) / runs.length),
+      totalQueries: runs.reduce((s, r) => s + r.queries, 0),
+      errors: runs.filter((r) => r.status >= 400).length,
+      maxMemory: Math.max(...runs.map((r) => r.memoryPeak)),
+    }),
+    [runs]
+  );
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'desc' ? 'asc' : 'desc',
     }));
@@ -697,7 +799,9 @@ export default function ProfilerPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -739,7 +843,11 @@ export default function ProfilerPage() {
           </div>
           <div className="mt-3 flex justify-end">
             <button
-              onClick={() => { setMethodFilter('all'); setStatusFilter('all'); setQuery(''); }}
+              onClick={() => {
+                setMethodFilter('all');
+                setStatusFilter('all');
+                setQuery('');
+              }}
               className="text-xs text-secondary hover:underline"
             >
               Reset all filters
@@ -750,7 +858,8 @@ export default function ProfilerPage() {
 
       {/* Results */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredRuns.length}</span> of {runs.length} traces
+        Showing <span className="font-medium text-text-primary">{filteredRuns.length}</span> of{' '}
+        {runs.length} traces
       </p>
 
       {/* Table */}
@@ -775,13 +884,18 @@ export default function ProfilerPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -798,20 +912,38 @@ export default function ProfilerPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-mono font-medium text-text-secondary">{run.method}</span>
+                    <span className="text-xs font-mono font-medium text-text-secondary">
+                      {run.method}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', getStatusBg(run.status))}>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium',
+                        getStatusBg(run.status)
+                      )}
+                    >
                       {run.status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn('text-sm font-mono font-medium', run.totalTime > 3000 ? 'text-danger' : run.totalTime > 1000 ? 'text-warning' : 'text-accent')}>
+                    <span
+                      className={cn(
+                        'text-sm font-mono font-medium',
+                        run.totalTime > 3000
+                          ? 'text-danger'
+                          : run.totalTime > 1000
+                            ? 'text-warning'
+                            : 'text-accent'
+                      )}
+                    >
                       {formatDuration(run.totalTime)}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-sm font-mono text-text-secondary">{formatDuration(run.dbTime)}</span>
+                    <span className="text-sm font-mono text-text-secondary">
+                      {formatDuration(run.dbTime)}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -822,10 +954,19 @@ export default function ProfilerPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-sm font-mono text-text-secondary">{run.memoryPeak}MB</span>
+                    <span className="text-sm font-mono text-text-secondary">
+                      {run.memoryPeak}MB
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedRun(run); }}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRun(run);
+                      }}
+                    >
                       <Activity className="mr-1.5 h-3.5 w-3.5" /> View
                     </Button>
                   </td>
@@ -845,9 +986,7 @@ export default function ProfilerPage() {
       </div>
 
       {/* Detail Drawer */}
-      {selectedRun && (
-        <DetailDrawer run={selectedRun} onClose={() => setSelectedRun(null)} />
-      )}
+      {selectedRun && <DetailDrawer run={selectedRun} onClose={() => setSelectedRun(null)} />}
     </div>
   );
 }

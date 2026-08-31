@@ -1,11 +1,31 @@
 /* src/app/admin/demo-access/components.jsx */
 import { useState } from 'react';
 import {
-  CheckCircle2, XCircle, Clock, Lock, TrendingUp, Zap,
-  Users, BedDouble, DollarSign, Calendar, Activity,
-  Mail, Phone, Globe, Building2, Star, AlertTriangle,
-  ChevronDown, ChevronUp, BarChart3, Percent, Timer,
-  MousePointerClick, ArrowUpRight, ArrowDownRight
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Lock,
+  TrendingUp,
+  Zap,
+  Users,
+  BedDouble,
+  DollarSign,
+  Calendar,
+  Activity,
+  Mail,
+  Phone,
+  Globe,
+  Building2,
+  Star,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  Percent,
+  Timer,
+  MousePointerClick,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { demoStatusMeta, tierConfig, formatCurrency, getUsagePercent } from './data';
@@ -14,10 +34,12 @@ import { demoStatusMeta, tierConfig, formatCurrency, getUsagePercent } from './d
 export function DemoStatusBadge({ status }) {
   const meta = demoStatusMeta[status] || demoStatusMeta.active;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.class
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -28,10 +50,14 @@ export function DemoStatusBadge({ status }) {
 export function TierBadge({ tier }) {
   const meta = tierConfig[tier] || tierConfig.Starter;
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, 'border-current/20'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -47,21 +73,27 @@ export function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}>
-              {trend >= 0 ? '+' : ''}{trend}% vs last month
+            <p
+              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last month
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-')
-            .replace('danger', 'danger/10')
-            .replace('accent', 'accent/10')
-            .replace('warning', 'warning/10')
-            .replace('info', 'info/10')
-            .replace('secondary', 'secondary/10')
-            .replace('purple-500', 'purple-500/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+              .replace('purple-500', 'purple-500/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -80,12 +112,16 @@ export function MiniUsageBar({ used, total, label, unit = '' }) {
       <div className="flex items-center justify-between text-[10px]">
         <span className="text-text-muted">{label}</span>
         <span className={cn('font-mono font-medium', colorClass)}>
-          {used}{unit} / {typeof total === 'string' ? total : `${total}${unit}`}
+          {used}
+          {unit} / {typeof total === 'string' ? total : `${total}${unit}`}
         </span>
       </div>
       {pct !== null && (
         <div className="h-1 w-full rounded-full bg-border overflow-hidden">
-          <div className={cn('h-full rounded-full transition-all', barColor)} style={{ width: `${pct}%` }} />
+          <div
+            className={cn('h-full rounded-full transition-all', barColor)}
+            style={{ width: `${pct}%` }}
+          />
         </div>
       )}
     </div>
@@ -97,17 +133,23 @@ export function DaysRemainingBadge({ days, total }) {
   const pct = Math.round((days / total) * 100);
   let color = 'text-accent';
   let bg = 'bg-accent/10';
-  if (days <= 3) { color = 'text-danger'; bg = 'bg-danger/10'; }
-  else if (days <= 7) { color = 'text-warning'; bg = 'bg-warning/10'; }
+  if (days <= 3) {
+    color = 'text-danger';
+    bg = 'bg-danger/10';
+  } else if (days <= 7) {
+    color = 'text-warning';
+    bg = 'bg-warning/10';
+  }
 
   return (
     <div className="flex items-center gap-2">
       <div className="h-2 w-16 rounded-full bg-border overflow-hidden">
-        <div className={cn('h-full rounded-full transition-all', color.replace('text-', 'bg-'))} style={{ width: `${pct}%` }} />
+        <div
+          className={cn('h-full rounded-full transition-all', color.replace('text-', 'bg-'))}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <span className={cn('text-xs font-mono font-medium', color)}>
-        {days}d left
-      </span>
+      <span className={cn('text-xs font-mono font-medium', color)}>{days}d left</span>
     </div>
   );
 }
@@ -125,10 +167,12 @@ export function FeatureTag({ feature, active }) {
     'white-label-portal': 'White Label',
   };
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-      active ? 'bg-secondary/10 text-secondary' : 'bg-border text-text-muted'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+        active ? 'bg-secondary/10 text-secondary' : 'bg-border text-text-muted'
+      )}
+    >
       {labels[feature] || feature}
     </span>
   );
@@ -146,7 +190,10 @@ export function ConversionFunnel({ data }) {
             <span className="w-24 text-xs text-text-secondary text-right">{stage.label}</span>
             <div className="flex-1 h-6 rounded-md bg-border overflow-hidden relative">
               <div
-                className={cn('h-full rounded-md transition-all flex items-center px-2', stage.color)}
+                className={cn(
+                  'h-full rounded-md transition-all flex items-center px-2',
+                  stage.color
+                )}
                 style={{ width: `${pct}%`, opacity: 0.85 }}
               >
                 <span className="text-xs font-medium text-white">{stage.count}</span>
@@ -172,10 +219,15 @@ export function SourceBreakdown({ sources }) {
           <div key={src.source} className="flex items-center gap-3">
             <span className="w-20 text-xs text-text-secondary capitalize">{src.source}</span>
             <div className="flex-1 h-4 rounded-full bg-border overflow-hidden">
-              <div className="h-full rounded-full bg-secondary/70 transition-all" style={{ width: `${pct}%` }} />
+              <div
+                className="h-full rounded-full bg-secondary/70 transition-all"
+                style={{ width: `${pct}%` }}
+              />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-text-primary w-6 text-right">{src.count}</span>
+              <span className="text-xs font-mono text-text-primary w-6 text-right">
+                {src.count}
+              </span>
               <span className="text-[10px] text-text-muted">({convRate}% conv)</span>
             </div>
           </div>
@@ -204,9 +256,14 @@ export function FeaturePopularityChart({ features }) {
         };
         return (
           <div key={f.feature} className="flex items-center gap-3">
-            <span className="w-32 text-xs text-text-secondary truncate">{labels[f.feature] || f.feature}</span>
+            <span className="w-32 text-xs text-text-secondary truncate">
+              {labels[f.feature] || f.feature}
+            </span>
             <div className="flex-1 h-3 rounded-full bg-border overflow-hidden">
-              <div className="h-full rounded-full bg-accent/80 transition-all" style={{ width: `${pct}%` }} />
+              <div
+                className="h-full rounded-full bg-accent/80 transition-all"
+                style={{ width: `${pct}%` }}
+              />
             </div>
             <span className="text-xs font-mono text-text-muted w-8 text-right">{f.usage}%</span>
           </div>
@@ -217,7 +274,15 @@ export function FeaturePopularityChart({ features }) {
 }
 
 /* ─── Demo Detail Drawer ─── */
-export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, onUnlock, onSendReminder }) {
+export function DemoDetailDrawer({
+  demo,
+  onClose,
+  onExtend,
+  onConvert,
+  onLock,
+  onUnlock,
+  onSendReminder,
+}) {
   const [extendDays, setExtendDays] = useState(7);
   const [showExtend, setShowExtend] = useState(false);
   const [showConvert, setShowConvert] = useState(false);
@@ -238,7 +303,12 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
     { label: 'Rooms Configured', used: demo.roomsConfigured, total: tier.rooms, unit: '' },
     { label: 'Users Invited', used: demo.usersInvited, total: tier.users, unit: '' },
     { label: 'Reservations', used: demo.reservationsCreated, total: '—', unit: '' },
-    { label: 'Revenue Simulated', used: formatCurrency(demo.revenueSimulated), total: '—', unit: '' },
+    {
+      label: 'Revenue Simulated',
+      used: formatCurrency(demo.revenueSimulated),
+      total: '—',
+      unit: '',
+    },
   ];
 
   return (
@@ -254,12 +324,17 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
               </div>
               <div>
                 <h2 className="text-lg font-bold text-text-primary">{demo.tenantName}</h2>
-                <p className="text-xs text-text-muted">{demo.id} · {demo.subdomain}.unifiedpms.com</p>
+                <p className="text-xs text-text-muted">
+                  {demo.id} · {demo.subdomain}.unifiedpms.com
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <DemoStatusBadge status={demo.status} />
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <XCircle className="h-5 w-5" />
               </button>
             </div>
@@ -276,7 +351,9 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -292,11 +369,18 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
             <div className="space-y-6">
               {/* Contact Info */}
               <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Contact Information</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Contact Information
+                </h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="flex items-center gap-3 text-sm text-text-primary">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                      {demo.contactName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                      {demo.contactName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase()}
                     </div>
                     <span>{demo.contactName}</span>
                   </div>
@@ -317,15 +401,21 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
 
               {/* Trial Info */}
               <div className="rounded-xl border border-border bg-surface p-5 space-y-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Trial Details</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Trial Details
+                </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-text-muted">Tier</span>
-                    <div className="mt-1"><TierBadge tier={demo.tier} /></div>
+                    <div className="mt-1">
+                      <TierBadge tier={demo.tier} />
+                    </div>
                   </div>
                   <div>
                     <span className="text-text-muted">Status</span>
-                    <div className="mt-1"><DemoStatusBadge status={demo.status} /></div>
+                    <div className="mt-1">
+                      <DemoStatusBadge status={demo.status} />
+                    </div>
                   </div>
                   <div>
                     <span className="text-text-muted">Started</span>
@@ -333,13 +423,20 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
                   </div>
                   <div>
                     <span className="text-text-muted">Expires</span>
-                    <p className={cn('mt-1 font-medium', demo.daysRemaining <= 3 ? 'text-danger' : 'text-text-primary')}>
+                    <p
+                      className={cn(
+                        'mt-1 font-medium',
+                        demo.daysRemaining <= 3 ? 'text-danger' : 'text-text-primary'
+                      )}
+                    >
                       {demo.expiresAt}
                     </p>
                   </div>
                   <div>
                     <span className="text-text-muted">Days Remaining</span>
-                    <div className="mt-1"><DaysRemainingBadge days={demo.daysRemaining} total={demo.totalDays} /></div>
+                    <div className="mt-1">
+                      <DaysRemainingBadge days={demo.daysRemaining} total={demo.totalDays} />
+                    </div>
                   </div>
                   <div>
                     <span className="text-text-muted">Source</span>
@@ -350,7 +447,9 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
 
               {/* Features Used */}
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Features Explored</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Features Explored
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {Object.keys(tierConfig[demo.tier]?.features || []).map((_, idx) => {
                     const feature = tierConfig[demo.tier].features[idx];
@@ -363,7 +462,9 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
               {/* Notes */}
               {demo.notes && (
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">Notes</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+                    Notes
+                  </h3>
                   <p className="text-sm text-text-secondary">{demo.notes}</p>
                 </div>
               )}
@@ -391,7 +492,10 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
                         />
                         <span className="text-xs text-text-muted">days</span>
                         <button
-                          onClick={() => { onExtend(demo.id, extendDays); setShowExtend(false); }}
+                          onClick={() => {
+                            onExtend(demo.id, extendDays);
+                            setShowExtend(false);
+                          }}
                           className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-white hover:bg-secondary/90"
                         >
                           Extend
@@ -424,7 +528,10 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
                           <option value="Enterprise">Enterprise ($999/mo)</option>
                         </select>
                         <button
-                          onClick={() => { onConvert(demo.id, convertPlan); setShowConvert(false); }}
+                          onClick={() => {
+                            onConvert(demo.id, convertPlan);
+                            setShowConvert(false);
+                          }}
                           className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/90"
                         >
                           Convert
@@ -479,19 +586,29 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 {usageMetrics.slice(0, 2).map((m) => (
-                  <MiniUsageBar key={m.label} used={m.used} total={m.total} label={m.label} unit={m.unit} />
+                  <MiniUsageBar
+                    key={m.label}
+                    used={m.used}
+                    total={m.total}
+                    label={m.label}
+                    unit={m.unit}
+                  />
                 ))}
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">Engagement Metrics</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Engagement Metrics
+                </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-lg border border-border bg-background p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <MousePointerClick className="h-4 w-4 text-secondary" />
                       <span className="text-xs text-text-muted">Total Sessions</span>
                     </div>
-                    <p className="text-xl font-bold font-mono text-text-primary">{demo.sessionsCount}</p>
+                    <p className="text-xl font-bold font-mono text-text-primary">
+                      {demo.sessionsCount}
+                    </p>
                   </div>
                   <div className="rounded-lg border border-border bg-background p-4">
                     <div className="flex items-center gap-2 mb-1">
@@ -505,37 +622,75 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
                       <BedDouble className="h-4 w-4 text-secondary" />
                       <span className="text-xs text-text-muted">Reservations</span>
                     </div>
-                    <p className="text-xl font-bold font-mono text-text-primary">{demo.reservationsCreated}</p>
+                    <p className="text-xl font-bold font-mono text-text-primary">
+                      {demo.reservationsCreated}
+                    </p>
                   </div>
                   <div className="rounded-lg border border-border bg-background p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <DollarSign className="h-4 w-4 text-secondary" />
                       <span className="text-xs text-text-muted">Revenue Simulated</span>
                     </div>
-                    <p className="text-xl font-bold font-mono text-text-primary">{formatCurrency(demo.revenueSimulated)}</p>
+                    <p className="text-xl font-bold font-mono text-text-primary">
+                      {formatCurrency(demo.revenueSimulated)}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Onboarding Progress</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Onboarding Progress
+                </h3>
                 <div className="flex items-center gap-2">
                   {['started', 'onboarded', 'active_usage', 'converted'].map((step, idx) => {
                     const isActive = demo.onboardingStep === step;
-                    const isPast = ['started', 'onboarded', 'active_usage', 'converted'].indexOf(demo.onboardingStep) >= idx;
-                    const labels = { started: 'Started', onboarded: 'Onboarded', active_usage: 'Active', converted: 'Converted' };
+                    const isPast =
+                      ['started', 'onboarded', 'active_usage', 'converted'].indexOf(
+                        demo.onboardingStep
+                      ) >= idx;
+                    const labels = {
+                      started: 'Started',
+                      onboarded: 'Onboarded',
+                      active_usage: 'Active',
+                      converted: 'Converted',
+                    };
                     return (
                       <div key={step} className="flex items-center gap-2 flex-1">
-                        <div className={cn(
-                          'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold',
-                          isPast ? 'bg-secondary text-white' : 'bg-border text-text-muted'
-                        )}>
+                        <div
+                          className={cn(
+                            'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold',
+                            isPast ? 'bg-secondary text-white' : 'bg-border text-text-muted'
+                          )}
+                        >
                           {isPast ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                         </div>
-                        <span className={cn('text-xs font-medium', isActive ? 'text-secondary' : isPast ? 'text-text-secondary' : 'text-text-muted')}>
+                        <span
+                          className={cn(
+                            'text-xs font-medium',
+                            isActive
+                              ? 'text-secondary'
+                              : isPast
+                                ? 'text-text-secondary'
+                                : 'text-text-muted'
+                          )}
+                        >
                           {labels[step]}
                         </span>
-                        {idx < 3 && <div className={cn('flex-1 h-0.5', isPast && idx < ['started', 'onboarded', 'active_usage', 'converted'].indexOf(demo.onboardingStep) ? 'bg-secondary' : 'bg-border')} />}
+                        {idx < 3 && (
+                          <div
+                            className={cn(
+                              'flex-1 h-0.5',
+                              isPast &&
+                                idx <
+                                  ['started', 'onboarded', 'active_usage', 'converted'].indexOf(
+                                    demo.onboardingStep
+                                  )
+                                ? 'bg-secondary'
+                                : 'bg-border'
+                            )}
+                          />
+                        )}
                       </div>
                     );
                   })}
@@ -548,22 +703,43 @@ export function DemoDetailDrawer({ demo, onClose, onExtend, onConvert, onLock, o
           {activeTab === 'activity' && (
             <div className="space-y-3">
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Activity Timeline</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Activity Timeline
+                </h3>
                 <div className="space-y-3">
                   {[
                     { date: demo.lastActive, action: 'Last platform activity', type: 'info' },
                     { date: demo.createdAt, action: 'Demo account created', type: 'success' },
-                    demo.convertedAt && { date: demo.convertedAt, action: `Converted to ${demo.convertedPlan}`, type: 'success' },
-                    demo.reminderSent && { date: demo.expiresAt, action: 'Expiry reminder sent', type: 'warning' },
-                  ].filter(Boolean).map((item, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className={cn('mt-1 h-2 w-2 rounded-full shrink-0', item.type === 'success' ? 'bg-accent' : item.type === 'warning' ? 'bg-warning' : 'bg-info')} />
-                      <div>
-                        <p className="text-sm text-text-primary">{item.action}</p>
-                        <p className="text-xs text-text-muted">{item.date}</p>
+                    demo.convertedAt && {
+                      date: demo.convertedAt,
+                      action: `Converted to ${demo.convertedPlan}`,
+                      type: 'success',
+                    },
+                    demo.reminderSent && {
+                      date: demo.expiresAt,
+                      action: 'Expiry reminder sent',
+                      type: 'warning',
+                    },
+                  ]
+                    .filter(Boolean)
+                    .map((item, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div
+                          className={cn(
+                            'mt-1 h-2 w-2 rounded-full shrink-0',
+                            item.type === 'success'
+                              ? 'bg-accent'
+                              : item.type === 'warning'
+                                ? 'bg-warning'
+                                : 'bg-info'
+                          )}
+                        />
+                        <div>
+                          <p className="text-sm text-text-primary">{item.action}</p>
+                          <p className="text-xs text-text-muted">{item.date}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </div>
@@ -643,16 +819,23 @@ export function NewDemoModal({ onClose, onCreate }) {
               <p className="text-xs text-text-muted">Create a new trial account</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <XCircle className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Property Name</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Property Name
+            </label>
             <input
-              type="text" required value={form.tenantName}
+              type="text"
+              required
+              value={form.tenantName}
               onChange={(e) => update('tenantName', e.target.value)}
               placeholder="e.g. Sunset Beach Resort"
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -660,11 +843,17 @@ export function NewDemoModal({ onClose, onCreate }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Subdomain</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Subdomain
+            </label>
             <div className="flex items-center">
               <input
-                type="text" required value={form.subdomain}
-                onChange={(e) => update('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                type="text"
+                required
+                value={form.subdomain}
+                onChange={(e) =>
+                  update('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                }
                 placeholder="sunsetbeach"
                 className="h-10 flex-1 rounded-l-md border border-border bg-surface px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
@@ -676,18 +865,26 @@ export function NewDemoModal({ onClose, onCreate }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Contact Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Contact Name
+              </label>
               <input
-                type="text" required value={form.contactName}
+                type="text"
+                required
+                value={form.contactName}
                 onChange={(e) => update('contactName', e.target.value)}
                 placeholder="Full name"
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Contact Email</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Contact Email
+              </label>
               <input
-                type="email" required value={form.contactEmail}
+                type="email"
+                required
+                value={form.contactEmail}
                 onChange={(e) => update('contactEmail', e.target.value)}
                 placeholder="email@company.com"
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -697,16 +894,21 @@ export function NewDemoModal({ onClose, onCreate }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Phone</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Phone
+              </label>
               <input
-                type="tel" value={form.contactPhone}
+                type="tel"
+                value={form.contactPhone}
                 onChange={(e) => update('contactPhone', e.target.value)}
                 placeholder="+1 (555) 000-0000"
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Region</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Region
+              </label>
               <select
                 value={form.region}
                 onChange={(e) => update('region', e.target.value)}
@@ -722,7 +924,9 @@ export function NewDemoModal({ onClose, onCreate }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tier</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Tier
+            </label>
             <div className="grid grid-cols-3 gap-2">
               {['Starter', 'Professional', 'Enterprise'].map((t) => (
                 <button
@@ -744,15 +948,22 @@ export function NewDemoModal({ onClose, onCreate }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Duration (days)</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Duration (days)
+              </label>
               <input
-                type="number" min="1" max="90" value={form.duration}
+                type="number"
+                min="1"
+                max="90"
+                value={form.duration}
                 onChange={(e) => update('duration', parseInt(e.target.value) || 30)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Source</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Source
+              </label>
               <select
                 value={form.source}
                 onChange={(e) => update('source', e.target.value)}
@@ -781,7 +992,9 @@ export function NewDemoModal({ onClose, onCreate }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Notes</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Notes
+            </label>
             <textarea
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
@@ -792,10 +1005,17 @@ export function NewDemoModal({ onClose, onCreate }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated">
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated"
+            >
               Cancel
             </button>
-            <button type="submit" className="h-10 rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90">
+            <button
+              type="submit"
+              className="h-10 rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90"
+            >
               <Zap className="inline mr-1.5 h-4 w-4" /> Grant Access
             </button>
           </div>

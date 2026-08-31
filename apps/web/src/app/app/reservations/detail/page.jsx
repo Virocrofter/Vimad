@@ -4,9 +4,26 @@ import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import {
-  ArrowLeft, Calendar, User, BedDouble, DollarSign, Clock,
-  MessageSquare, FileText, History, CreditCard, Check, LogIn,
-  LogOut, Printer, Edit3, Phone, Mail, MapPin, Star, Send
+  ArrowLeft,
+  Calendar,
+  User,
+  BedDouble,
+  DollarSign,
+  Clock,
+  MessageSquare,
+  FileText,
+  History,
+  CreditCard,
+  Check,
+  LogIn,
+  LogOut,
+  Printer,
+  Edit3,
+  Phone,
+  Mail,
+  MapPin,
+  Star,
+  Send,
 } from 'lucide-react';
 
 /* ─── Mock Data ─── */
@@ -24,7 +41,7 @@ const mockReservation = {
   status: 'checked_in',
   rate: 189,
   tax: 28.35,
-  balance: 45.50,
+  balance: 45.5,
   source: 'Direct',
   adults: 2,
   children: 0,
@@ -35,18 +52,77 @@ const mockReservation = {
 };
 
 const folioTransactions = [
-  { id: 1, date: '2026-08-12', description: 'Room Charge — Deluxe King (1/3 nights)', charge: 189.00, payment: 0, type: 'charge' },
-  { id: 2, date: '2026-08-12', description: 'Resort Fee', charge: 35.00, payment: 0, type: 'charge' },
-  { id: 3, date: '2026-08-12', description: 'Payment — Visa •••• 4242', charge: 0, payment: 178.50, type: 'payment' },
-  { id: 4, date: '2026-08-13', description: 'Room Charge — Deluxe King (2/3 nights)', charge: 189.00, payment: 0, type: 'charge' },
-  { id: 5, date: '2026-08-13', description: 'Room Service — Dinner', charge: 67.00, payment: 0, type: 'charge' },
+  {
+    id: 1,
+    date: '2026-08-12',
+    description: 'Room Charge — Deluxe King (1/3 nights)',
+    charge: 189.0,
+    payment: 0,
+    type: 'charge',
+  },
+  {
+    id: 2,
+    date: '2026-08-12',
+    description: 'Resort Fee',
+    charge: 35.0,
+    payment: 0,
+    type: 'charge',
+  },
+  {
+    id: 3,
+    date: '2026-08-12',
+    description: 'Payment — Visa •••• 4242',
+    charge: 0,
+    payment: 178.5,
+    type: 'payment',
+  },
+  {
+    id: 4,
+    date: '2026-08-13',
+    description: 'Room Charge — Deluxe King (2/3 nights)',
+    charge: 189.0,
+    payment: 0,
+    type: 'charge',
+  },
+  {
+    id: 5,
+    date: '2026-08-13',
+    description: 'Room Service — Dinner',
+    charge: 67.0,
+    payment: 0,
+    type: 'charge',
+  },
 ];
 
 const historyEvents = [
-  { id: 1, time: '2026-08-01T10:30:00Z', user: 'System', action: 'Reservation created', detail: 'Source: Direct • Confirmation: UNF-8X2K9M' },
-  { id: 2, time: '2026-08-10T09:15:00Z', user: 'Sarah Johnson', action: 'Pre-checkin email sent', detail: 'Guest prompted for arrival time' },
-  { id: 3, time: '2026-08-12T14:15:00Z', user: 'Sarah Johnson', action: 'Guest checked in', detail: 'Room 204 assigned • Key cards: 2' },
-  { id: 4, time: '2026-08-13T08:45:00Z', user: 'System', action: 'Night audit posted', detail: 'Room charge $189.00 posted to folio' },
+  {
+    id: 1,
+    time: '2026-08-01T10:30:00Z',
+    user: 'System',
+    action: 'Reservation created',
+    detail: 'Source: Direct • Confirmation: UNF-8X2K9M',
+  },
+  {
+    id: 2,
+    time: '2026-08-10T09:15:00Z',
+    user: 'Sarah Johnson',
+    action: 'Pre-checkin email sent',
+    detail: 'Guest prompted for arrival time',
+  },
+  {
+    id: 3,
+    time: '2026-08-12T14:15:00Z',
+    user: 'Sarah Johnson',
+    action: 'Guest checked in',
+    detail: 'Room 204 assigned • Key cards: 2',
+  },
+  {
+    id: 4,
+    time: '2026-08-13T08:45:00Z',
+    user: 'System',
+    action: 'Night audit posted',
+    detail: 'Room charge $189.00 posted to folio',
+  },
 ];
 
 const stayHistory = [
@@ -73,7 +149,12 @@ const tabs = [
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.confirmed;
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', meta.class)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.class
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -104,8 +185,18 @@ export default function ReservationDetailPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [notes, setNotes] = useState([
-    { id: 1, author: 'Sarah Johnson', time: '2026-08-12T09:00:00Z', content: 'Guest prefers extra pillows. VIP status noted.' },
-    { id: 2, author: 'Mike Chen', time: '2026-08-13T11:30:00Z', content: 'Called guest about late checkout request. Approved until 1 PM.' },
+    {
+      id: 1,
+      author: 'Sarah Johnson',
+      time: '2026-08-12T09:00:00Z',
+      content: 'Guest prefers extra pillows. VIP status noted.',
+    },
+    {
+      id: 2,
+      author: 'Mike Chen',
+      time: '2026-08-13T11:30:00Z',
+      content: 'Called guest about late checkout request. Approved until 1 PM.',
+    },
   ]);
   const [newNote, setNewNote] = useState('');
 
@@ -127,7 +218,9 @@ export default function ReservationDetailPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-6">
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Stay Information</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Stay Information
+                </h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Arrival</label>
@@ -143,49 +236,70 @@ export default function ReservationDetailPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Nights</label>
-                    <p className="text-sm font-medium text-text-primary">{mockReservation.nights}</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {mockReservation.nights}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Guests</label>
-                    <p className="text-sm font-medium text-text-primary">{mockReservation.adults} Adults {mockReservation.children > 0 && `• ${mockReservation.children} Children`}</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {mockReservation.adults} Adults{' '}
+                      {mockReservation.children > 0 && `• ${mockReservation.children} Children`}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Room</label>
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <BedDouble className="h-4 w-4 text-secondary" /> {mockReservation.room} — {mockReservation.roomType}
+                      <BedDouble className="h-4 w-4 text-secondary" /> {mockReservation.room} —{' '}
+                      {mockReservation.roomType}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Rate</label>
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-secondary" /> ${mockReservation.rate}/night
+                      <DollarSign className="h-4 w-4 text-secondary" /> ${mockReservation.rate}
+                      /night
                     </p>
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-border">
                   <label className="text-xs text-text-muted">Special Requests</label>
-                  <p className="mt-1 text-sm text-text-secondary">{mockReservation.specialRequests}</p>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    {mockReservation.specialRequests}
+                  </p>
                 </div>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Booking Details</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Booking Details
+                </h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Confirmation #</label>
-                    <p className="text-sm font-mono font-medium text-text-primary">{mockReservation.confirmationCode}</p>
+                    <p className="text-sm font-mono font-medium text-text-primary">
+                      {mockReservation.confirmationCode}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Source</label>
-                    <p className="text-sm font-medium text-text-primary">{mockReservation.source}</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {mockReservation.source}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Created</label>
-                    <p className="text-sm text-text-secondary">{new Date(mockReservation.createdAt).toLocaleString()}</p>
+                    <p className="text-sm text-text-secondary">
+                      {new Date(mockReservation.createdAt).toLocaleString()}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Checked In</label>
-                    <p className="text-sm text-text-secondary">{mockReservation.checkedInAt ? new Date(mockReservation.checkedInAt).toLocaleString() : '—'}</p>
+                    <p className="text-sm text-text-secondary">
+                      {mockReservation.checkedInAt
+                        ? new Date(mockReservation.checkedInAt).toLocaleString()
+                        : '—'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -193,7 +307,9 @@ export default function ReservationDetailPage() {
 
             <div className="space-y-6">
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Quick Actions</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Quick Actions
+                </h3>
                 <div className="space-y-2">
                   <Button className="w-full" size="sm">
                     <Edit3 className="mr-1.5 h-4 w-4" /> Edit Reservation
@@ -215,8 +331,15 @@ export default function ReservationDetailPage() {
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Balance</h3>
-                <p className={cn('text-3xl font-bold', folioBalance > 0 ? 'text-danger' : 'text-accent')}>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Balance
+                </h3>
+                <p
+                  className={cn(
+                    'text-3xl font-bold',
+                    folioBalance > 0 ? 'text-danger' : 'text-accent'
+                  )}
+                >
                   ${folioBalance.toFixed(2)}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
@@ -233,8 +356,12 @@ export default function ReservationDetailPage() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-text-primary">Folio Window 1</h3>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm"><Printer className="mr-1.5 h-4 w-4" /> Print</Button>
-                <Button variant="outline" size="sm"><DollarSign className="mr-1.5 h-4 w-4" /> Post Charge</Button>
+                <Button variant="outline" size="sm">
+                  <Printer className="mr-1.5 h-4 w-4" /> Print
+                </Button>
+                <Button variant="outline" size="sm">
+                  <DollarSign className="mr-1.5 h-4 w-4" /> Post Charge
+                </Button>
               </div>
             </div>
             <div className="rounded-xl border border-border bg-surface overflow-hidden">
@@ -242,9 +369,15 @@ export default function ReservationDetailPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">Date</th>
-                    <th className="px-4 py-3 text-left font-medium text-text-secondary">Description</th>
-                    <th className="px-4 py-3 text-right font-medium text-text-secondary">Charges</th>
-                    <th className="px-4 py-3 text-right font-medium text-text-secondary">Payments</th>
+                    <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                      Description
+                    </th>
+                    <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                      Charges
+                    </th>
+                    <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                      Payments
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -252,14 +385,22 @@ export default function ReservationDetailPage() {
                     <tr key={t.id} className="hover:bg-background/50 transition-colors">
                       <td className="px-4 py-3 text-text-secondary">{t.date}</td>
                       <td className="px-4 py-3 text-text-primary">{t.description}</td>
-                      <td className="px-4 py-3 text-right font-mono text-text-primary">{t.charge > 0 ? `$${t.charge.toFixed(2)}` : '—'}</td>
-                      <td className="px-4 py-3 text-right font-mono text-accent">{t.payment > 0 ? `$${t.payment.toFixed(2)}` : '—'}</td>
+                      <td className="px-4 py-3 text-right font-mono text-text-primary">
+                        {t.charge > 0 ? `$${t.charge.toFixed(2)}` : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-accent">
+                        {t.payment > 0 ? `$${t.payment.toFixed(2)}` : '—'}
+                      </td>
                     </tr>
                   ))}
                   <tr className="bg-background font-semibold">
-                    <td className="px-4 py-3 text-text-primary" colSpan={2}>Balance</td>
+                    <td className="px-4 py-3 text-text-primary" colSpan={2}>
+                      Balance
+                    </td>
                     <td className="px-4 py-3 text-right font-mono text-text-primary" colSpan={2}>
-                      <span className={folioBalance > 0 ? 'text-danger' : 'text-accent'}>${folioBalance.toFixed(2)}</span>
+                      <span className={folioBalance > 0 ? 'text-danger' : 'text-accent'}>
+                        ${folioBalance.toFixed(2)}
+                      </span>
                     </td>
                   </tr>
                 </tbody>
@@ -274,9 +415,16 @@ export default function ReservationDetailPage() {
             <div className="lg:col-span-1">
               <div className="rounded-xl border border-border bg-surface p-6 text-center">
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 text-2xl font-bold text-secondary">
-                  {mockReservation.guest.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  {mockReservation.guest
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-text-primary">{mockReservation.guest}</h3>
+                <h3 className="mt-4 text-lg font-semibold text-text-primary">
+                  {mockReservation.guest}
+                </h3>
                 <p className="text-sm text-text-secondary">Returning Guest • VIP</p>
                 <div className="mt-4 flex justify-center gap-1">
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -287,7 +435,9 @@ export default function ReservationDetailPage() {
             </div>
             <div className="lg:col-span-2 space-y-6">
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Contact Information</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Contact Information
+                </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm text-text-primary">
                     <Mail className="h-4 w-4 text-text-muted" /> {mockReservation.email}
@@ -301,15 +451,24 @@ export default function ReservationDetailPage() {
                 </div>
               </div>
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Stay History</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                  Stay History
+                </h3>
                 <div className="space-y-3">
                   {stayHistory.map((stay, i) => (
-                    <div key={i} className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3"
+                    >
                       <div>
-                        <p className="text-sm font-medium text-text-primary">{stay.nights} nights • Room {stay.room}</p>
+                        <p className="text-sm font-medium text-text-primary">
+                          {stay.nights} nights • Room {stay.room}
+                        </p>
                         <p className="text-xs text-text-muted">{stay.date}</p>
                       </div>
-                      <span className="text-sm font-mono font-medium text-text-primary">${stay.revenue}</span>
+                      <span className="text-sm font-mono font-medium text-text-primary">
+                        ${stay.revenue}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -321,10 +480,16 @@ export default function ReservationDetailPage() {
       case 'history':
         return (
           <div className="rounded-xl border border-border bg-surface p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-6">Activity Timeline</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-6">
+              Activity Timeline
+            </h3>
             <div>
               {historyEvents.map((event, i) => (
-                <TimelineItem key={event.id} event={event} isLast={i === historyEvents.length - 1} />
+                <TimelineItem
+                  key={event.id}
+                  event={event}
+                  isLast={i === historyEvents.length - 1}
+                />
               ))}
             </div>
           </div>
@@ -334,7 +499,9 @@ export default function ReservationDetailPage() {
         return (
           <div className="space-y-6">
             <div className="rounded-xl border border-border bg-surface p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">Add Note</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                Add Note
+              </h3>
               <div className="flex gap-3">
                 <textarea
                   value={newNote}
@@ -354,7 +521,9 @@ export default function ReservationDetailPage() {
                 <div key={note.id} className="rounded-xl border border-border bg-surface p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-text-primary">{note.author}</span>
-                    <span className="text-xs text-text-muted">{new Date(note.time).toLocaleString()}</span>
+                    <span className="text-xs text-text-muted">
+                      {new Date(note.time).toLocaleString()}
+                    </span>
                   </div>
                   <p className="text-sm text-text-secondary">{note.content}</p>
                 </div>
@@ -384,17 +553,27 @@ export default function ReservationDetailPage() {
               <h1 className="text-2xl font-bold text-text-primary">Reservation #{id}</h1>
               <StatusBadge status={mockReservation.status} />
             </div>
-            <p className="text-sm text-text-secondary">{mockReservation.guest} • {mockReservation.roomType}</p>
+            <p className="text-sm text-text-secondary">
+              {mockReservation.guest} • {mockReservation.roomType}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm"><Printer className="mr-1.5 h-4 w-4" /> Print</Button>
-          <Button variant="outline" size="sm"><Edit3 className="mr-1.5 h-4 w-4" /> Edit</Button>
+          <Button variant="outline" size="sm">
+            <Printer className="mr-1.5 h-4 w-4" /> Print
+          </Button>
+          <Button variant="outline" size="sm">
+            <Edit3 className="mr-1.5 h-4 w-4" /> Edit
+          </Button>
           {mockReservation.status === 'confirmed' && (
-            <Button size="sm"><LogIn className="mr-1.5 h-4 w-4" /> Check In</Button>
+            <Button size="sm">
+              <LogIn className="mr-1.5 h-4 w-4" /> Check In
+            </Button>
           )}
           {mockReservation.status === 'checked_in' && (
-            <Button size="sm"><LogOut className="mr-1.5 h-4 w-4" /> Check Out</Button>
+            <Button size="sm">
+              <LogOut className="mr-1.5 h-4 w-4" /> Check Out
+            </Button>
           )}
         </div>
       </div>

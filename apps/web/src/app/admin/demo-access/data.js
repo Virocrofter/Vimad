@@ -38,7 +38,16 @@ export const tierConfig = {
     users: 25,
     storage: 500,
     apiCalls: 500000,
-    features: ['channel-manager', 'booking-engine', 'guest-portal', 'crm-loyalty', 'marketing-automation', 'ai-revenue', 'advanced-analytics', 'white-label-portal'],
+    features: [
+      'channel-manager',
+      'booking-engine',
+      'guest-portal',
+      'crm-loyalty',
+      'marketing-automation',
+      'ai-revenue',
+      'advanced-analytics',
+      'white-label-portal',
+    ],
     price: 999,
   },
 };
@@ -135,7 +144,13 @@ export const initialDemos = [
     revenueSimulated: 52300,
     lastActive: '2026-08-16 11:05',
     sessionsCount: 89,
-    featuresUsed: ['booking-engine', 'guest-portal', 'channel-manager', 'crm-loyalty', 'marketing-automation'],
+    featuresUsed: [
+      'booking-engine',
+      'guest-portal',
+      'channel-manager',
+      'crm-loyalty',
+      'marketing-automation',
+    ],
     onboardingStep: 'active_usage',
     notes: 'High engagement. Multi-property interest.',
     autoLockEnabled: true,
@@ -178,7 +193,7 @@ export const initialDemos = [
     id: 'DEMO-004',
     tenantName: 'Harbor View Inn',
     subdomain: 'harborview',
-    contactName: 'Thomas O\'Brien',
+    contactName: "Thomas O'Brien",
     contactEmail: 'tom@harborview.com',
     contactPhone: '+1 555-0204',
     tier: 'Professional',
@@ -222,7 +237,14 @@ export const initialDemos = [
     revenueSimulated: 15600,
     lastActive: '2026-08-16 18:30',
     sessionsCount: 28,
-    featuresUsed: ['booking-engine', 'guest-portal', 'channel-manager', 'crm-loyalty', 'marketing-automation', 'ai-revenue'],
+    featuresUsed: [
+      'booking-engine',
+      'guest-portal',
+      'channel-manager',
+      'crm-loyalty',
+      'marketing-automation',
+      'ai-revenue',
+    ],
     onboardingStep: 'onboarded',
     notes: 'Enterprise prospect. Wants white-label portal.',
     autoLockEnabled: true,
@@ -309,7 +331,15 @@ export const initialDemos = [
     revenueSimulated: 78400,
     lastActive: '2026-08-16 12:15',
     sessionsCount: 95,
-    featuresUsed: ['booking-engine', 'guest-portal', 'channel-manager', 'crm-loyalty', 'marketing-automation', 'ai-revenue', 'advanced-analytics'],
+    featuresUsed: [
+      'booking-engine',
+      'guest-portal',
+      'channel-manager',
+      'crm-loyalty',
+      'marketing-automation',
+      'ai-revenue',
+      'advanced-analytics',
+    ],
     onboardingStep: 'active_usage',
     notes: 'High-value prospect. Needs custom contract.',
     autoLockEnabled: true,
@@ -390,12 +420,20 @@ export function getDemoStatus(demo) {
 }
 
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 export function formatDate(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 export function getDaysUntil(dateStr) {

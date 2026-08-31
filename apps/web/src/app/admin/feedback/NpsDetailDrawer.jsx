@@ -1,13 +1,35 @@
 /* src/app/admin/feedback/NpsDetailDrawer.jsx */
 import { useState } from 'react';
 import {
-  X, Star, MessageSquare, Send, Building2, User, Mail, Phone,
-  Calendar, Tag, Hash, ThumbsUp, ThumbsDown, AlertTriangle,
-  CheckCircle2, Clock, TrendingUp, TrendingDown, Minus
+  X,
+  Star,
+  MessageSquare,
+  Send,
+  Building2,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Tag,
+  Hash,
+  ThumbsUp,
+  ThumbsDown,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
-import { SentimentBadge, NpsScoreBadge, CategoryBadge, KeywordTag, ResponseCard } from './components';
+import {
+  SentimentBadge,
+  NpsScoreBadge,
+  CategoryBadge,
+  KeywordTag,
+  ResponseCard,
+} from './components';
 import { sentimentMeta } from './data';
 
 export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkToFeature }) {
@@ -17,7 +39,12 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
   if (!response) return null;
 
   const meta = sentimentMeta[response.sentiment];
-  const SentimentIcon = response.sentiment === 'positive' ? ThumbsUp : response.sentiment === 'negative' ? ThumbsDown : Minus;
+  const SentimentIcon =
+    response.sentiment === 'positive'
+      ? ThumbsUp
+      : response.sentiment === 'negative'
+        ? ThumbsDown
+        : Minus;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -27,7 +54,12 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', meta.bgSoft || 'bg-surface')}>
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg',
+                  meta.bgSoft || 'bg-surface'
+                )}
+              >
                 <SentimentIcon className={cn('h-5 w-5', meta.iconColor || 'text-text-muted')} />
               </div>
               <div>
@@ -37,7 +69,10 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
             </div>
             <div className="flex items-center gap-2">
               <NpsScoreBadge score={response.score} />
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -60,7 +95,12 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
             <div className="border-t border-border pt-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                  {response.user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  {response.user.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-text-primary">{response.user.name}</p>
@@ -80,8 +120,26 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
             <div className="rounded-lg border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Score</p>
               <div className="mt-1 flex items-center gap-2">
-                <Star className={cn('h-5 w-5', response.score >= 9 ? 'text-accent' : response.score >= 7 ? 'text-secondary' : 'text-danger')} />
-                <span className={cn('text-2xl font-bold font-mono', response.score >= 9 ? 'text-accent' : response.score >= 7 ? 'text-secondary' : 'text-danger')}>
+                <Star
+                  className={cn(
+                    'h-5 w-5',
+                    response.score >= 9
+                      ? 'text-accent'
+                      : response.score >= 7
+                        ? 'text-secondary'
+                        : 'text-danger'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'text-2xl font-bold font-mono',
+                    response.score >= 9
+                      ? 'text-accent'
+                      : response.score >= 7
+                        ? 'text-secondary'
+                        : 'text-danger'
+                  )}
+                >
                   {response.score}/10
                 </span>
               </div>
@@ -91,7 +149,9 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
               <div className="mt-1">
                 <SentimentBadge sentiment={response.sentiment} />
               </div>
-              <p className="mt-1 text-xs text-text-muted">Score: {response.sentimentScore.toFixed(2)}</p>
+              <p className="mt-1 text-xs text-text-muted">
+                Score: {response.sentimentScore.toFixed(2)}
+              </p>
             </div>
             <div className="rounded-lg border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Category</p>
@@ -101,7 +161,9 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
             </div>
             <div className="rounded-lg border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Touchpoint</p>
-              <p className="mt-1 text-sm font-medium text-text-primary capitalize">{response.touchpoint.replace('-', ' ')}</p>
+              <p className="mt-1 text-sm font-medium text-text-primary capitalize">
+                {response.touchpoint.replace('-', ' ')}
+              </p>
             </div>
           </div>
 
@@ -138,9 +200,7 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
           )}
 
           {/* Existing Response */}
-          {response.responded && response.response && (
-            <ResponseCard response={response.response} />
-          )}
+          {response.responded && response.response && <ResponseCard response={response.response} />}
 
           {/* Reply Section */}
           {!response.responded && (
@@ -164,10 +224,24 @@ export default function NpsDetailDrawer({ response, onClose, onRespond, onLinkTo
                     className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
                   />
                   <div className="flex items-center justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { setShowReply(false); setReplyText(''); }}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowReply(false);
+                        setReplyText('');
+                      }}
+                    >
                       Cancel
                     </Button>
-                    <Button size="sm" onClick={() => { onRespond(response.id, replyText); setShowReply(false); setReplyText(''); }}>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        onRespond(response.id, replyText);
+                        setShowReply(false);
+                        setReplyText('');
+                      }}
+                    >
                       <Send className="mr-1.5 h-4 w-4" /> Send Response
                     </Button>
                   </div>

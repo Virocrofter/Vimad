@@ -25,12 +25,7 @@ const storageTargets = [
   { id: 's3-eu-west', label: 'S3 EU-West (Standard-IA)', region: 'eu-west-1' },
 ];
 
-const databases = [
-  'postgres-main',
-  'postgres-analytics',
-  'elasticsearch',
-  'redis-cache',
-];
+const databases = ['postgres-main', 'postgres-analytics', 'elasticsearch', 'redis-cache'];
 
 const targets = [
   { id: 'db-primary', label: 'Primary Database' },
@@ -77,11 +72,11 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
     }
   }, [schedule]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const toggleDatabase = (db) => {
     const current = form.databases;
-    update('databases', current.includes(db) ? current.filter(d => d !== db) : [...current, db]);
+    update('databases', current.includes(db) ? current.filter((d) => d !== db) : [...current, db]);
   };
 
   const handleSubmit = (e) => {
@@ -119,7 +114,10 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -128,7 +126,9 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Schedule Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Schedule Name
+              </label>
               <input
                 type="text"
                 required
@@ -141,23 +141,35 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Backup Type</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Backup Type
+                </label>
                 <select
                   value={form.type}
                   onChange={(e) => update('type', e.target.value)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {backupTypes.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  {backupTypes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Target</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Target
+                </label>
                 <select
                   value={form.target}
                   onChange={(e) => update('target', e.target.value)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {targets.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  {targets.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -165,7 +177,9 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
 
           {/* Databases */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Databases to Backup</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Databases to Backup
+            </label>
             <div className="flex flex-wrap gap-2">
               {databases.map((db) => (
                 <button
@@ -188,16 +202,24 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
 
           {/* Schedule */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Schedule Configuration</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Schedule Configuration
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Frequency</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Frequency
+                </label>
                 <select
                   value={form.frequency}
                   onChange={(e) => update('frequency', e.target.value)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {frequencies.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+                  {frequencies.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               {showTimeField && (
@@ -214,7 +236,9 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Timezone</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Timezone
+                </label>
                 <select
                   value={form.timezone}
                   onChange={(e) => update('timezone', e.target.value)}
@@ -230,7 +254,9 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Retention (days)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Retention (days)
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -245,20 +271,30 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
 
           {/* Storage */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Storage & Encryption</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Storage & Encryption
+            </h4>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Storage Target</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">
+                Storage Target
+              </label>
               <select
                 value={form.storage}
                 onChange={(e) => update('storage', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {storageTargets.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                {storageTargets.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Encryption</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Encryption
+                </label>
                 <select
                   value={form.encryption}
                   onChange={(e) => update('encryption', e.target.value)}
@@ -270,7 +306,9 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Compression</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Compression
+                </label>
                 <select
                   value={form.compression || ''}
                   onChange={(e) => update('compression', e.target.value || null)}
@@ -290,7 +328,9 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
             <div>
               <p className="text-sm font-medium text-text-primary">Enable Schedule</p>
               <p className="text-xs text-text-muted">
-                {form.enabled ? 'Schedule is active and will run automatically' : 'Schedule is disabled'}
+                {form.enabled
+                  ? 'Schedule is active and will run automatically'
+                  : 'Schedule is disabled'}
               </p>
             </div>
             <button
@@ -301,16 +341,20 @@ export default function ScheduleModal({ schedule, onClose, onSave }) {
                 form.enabled ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.enabled ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.enabled ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Schedule'}
             </Button>

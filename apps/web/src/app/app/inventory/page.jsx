@@ -1,11 +1,34 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Grid3X3, BedDouble, AlertTriangle, Wrench, CheckCircle2,
-  Search, Calendar, ChevronLeft, ChevronRight, Plus, Minus,
-  Settings, ArrowUpDown, Filter, Download, RefreshCw,
-  Lock, Unlock, Eye, X, Save, History, TrendingUp,
-  DoorOpen, Ban, Info, MoreHorizontal, Edit3
+  Grid3X3,
+  BedDouble,
+  AlertTriangle,
+  Wrench,
+  CheckCircle2,
+  Search,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Minus,
+  Settings,
+  ArrowUpDown,
+  Filter,
+  Download,
+  RefreshCw,
+  Lock,
+  Unlock,
+  Eye,
+  X,
+  Save,
+  History,
+  TrendingUp,
+  DoorOpen,
+  Ban,
+  Info,
+  MoreHorizontal,
+  Edit3,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -61,26 +84,115 @@ const generateInventoryData = (dates, rooms) => {
 };
 
 const initialAdjustments = [
-  { id: 1, date: '2026-08-12', roomType: 'Deluxe King', type: 'ooo', rooms: 1, reason: 'HVAC Repair', user: 'Mike C.', time: '08:30 AM' },
-  { id: 2, date: '2026-08-12', roomType: 'Standard Twin', type: 'allocation', rooms: 5, reason: 'TechConf 2026 group block', user: 'Sarah J.', time: '09:15 AM' },
-  { id: 3, date: '2026-08-13', roomType: 'Executive Suite', type: 'ooo', rooms: 1, reason: 'Deep cleaning', user: 'Maria G.', time: '07:00 AM' },
-  { id: 4, date: '2026-08-14', roomType: 'Standard Queen', type: 'release', rooms: 2, reason: 'Maintenance completed', user: 'James L.', time: '10:45 AM' },
+  {
+    id: 1,
+    date: '2026-08-12',
+    roomType: 'Deluxe King',
+    type: 'ooo',
+    rooms: 1,
+    reason: 'HVAC Repair',
+    user: 'Mike C.',
+    time: '08:30 AM',
+  },
+  {
+    id: 2,
+    date: '2026-08-12',
+    roomType: 'Standard Twin',
+    type: 'allocation',
+    rooms: 5,
+    reason: 'TechConf 2026 group block',
+    user: 'Sarah J.',
+    time: '09:15 AM',
+  },
+  {
+    id: 3,
+    date: '2026-08-13',
+    roomType: 'Executive Suite',
+    type: 'ooo',
+    rooms: 1,
+    reason: 'Deep cleaning',
+    user: 'Maria G.',
+    time: '07:00 AM',
+  },
+  {
+    id: 4,
+    date: '2026-08-14',
+    roomType: 'Standard Queen',
+    type: 'release',
+    rooms: 2,
+    reason: 'Maintenance completed',
+    user: 'James L.',
+    time: '10:45 AM',
+  },
 ];
 
 const allocations = [
-  { id: 'ALLOC-1', name: 'TechConf 2026', roomType: 'Standard Twin', rooms: 5, pickedUp: 2, from: '2026-09-15', to: '2026-09-18' },
-  { id: 'ALLOC-2', name: 'Smith Wedding', roomType: 'Deluxe King', rooms: 8, pickedUp: 6, from: '2026-08-20', to: '2026-08-22' },
-  { id: 'ALLOC-3', name: 'OTA-Expedia', roomType: 'Standard Queen', rooms: 4, pickedUp: 1, from: '2026-08-12', to: '2026-08-19' },
+  {
+    id: 'ALLOC-1',
+    name: 'TechConf 2026',
+    roomType: 'Standard Twin',
+    rooms: 5,
+    pickedUp: 2,
+    from: '2026-09-15',
+    to: '2026-09-18',
+  },
+  {
+    id: 'ALLOC-2',
+    name: 'Smith Wedding',
+    roomType: 'Deluxe King',
+    rooms: 8,
+    pickedUp: 6,
+    from: '2026-08-20',
+    to: '2026-08-22',
+  },
+  {
+    id: 'ALLOC-3',
+    name: 'OTA-Expedia',
+    roomType: 'Standard Queen',
+    rooms: 4,
+    pickedUp: 1,
+    from: '2026-08-12',
+    to: '2026-08-19',
+  },
 ];
 
 /* ─── Status Helpers ─── */
 function getAvailabilityStatus(available, total, ooo, sellable) {
   const effective = available;
-  if (sellable < 0) return { label: 'Overbooked', class: 'bg-danger/15 text-danger border-danger/30', dot: 'bg-danger', severity: 'danger' };
-  if (effective <= 0) return { label: 'Sold Out', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted', severity: 'neutral' };
-  if (effective <= total * 0.1) return { label: 'Critical', class: 'bg-warning/15 text-warning border-warning/30', dot: 'bg-warning', severity: 'warning' };
-  if (effective <= total * 0.3) return { label: 'Low', class: 'bg-info/15 text-info border-info/30', dot: 'bg-info', severity: 'info' };
-  return { label: 'Available', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', severity: 'success' };
+  if (sellable < 0)
+    return {
+      label: 'Overbooked',
+      class: 'bg-danger/15 text-danger border-danger/30',
+      dot: 'bg-danger',
+      severity: 'danger',
+    };
+  if (effective <= 0)
+    return {
+      label: 'Sold Out',
+      class: 'bg-neutral/10 text-text-muted border-border',
+      dot: 'bg-text-muted',
+      severity: 'neutral',
+    };
+  if (effective <= total * 0.1)
+    return {
+      label: 'Critical',
+      class: 'bg-warning/15 text-warning border-warning/30',
+      dot: 'bg-warning',
+      severity: 'warning',
+    };
+  if (effective <= total * 0.3)
+    return {
+      label: 'Low',
+      class: 'bg-info/15 text-info border-info/30',
+      dot: 'bg-info',
+      severity: 'info',
+    };
+  return {
+    label: 'Available',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    severity: 'success',
+  };
 }
 
 function getSellableColor(sellable, limit) {
@@ -101,12 +213,26 @@ function StatCard({ label, value, subtext, icon: Icon, color, trend }) {
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend && (
-            <p className={cn('mt-1 text-xs font-medium', trend > 0 ? 'text-accent' : 'text-danger')}>
-              {trend > 0 ? '+' : ''}{trend}% vs last week
+            <p
+              className={cn('mt-1 text-xs font-medium', trend > 0 ? 'text-accent' : 'text-danger')}
+            >
+              {trend > 0 ? '+' : ''}
+              {trend}% vs last week
             </p>
           )}
         </div>
-        <div className={cn('rounded-lg p-2.5', color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10'))}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -151,19 +277,27 @@ function AdjustmentModal({ isOpen, onClose, roomType, dateStr, currentData, onSa
             <span className="font-medium text-text-primary">{roomType.name}</span> · {dateStr}
           </p>
           <p className="text-xs text-text-muted mt-1">
-            Total: {currentData.total} · Booked: {currentData.booked} · OOO: {currentData.ooo} · Available: {currentData.available}
+            Total: {currentData.total} · Booked: {currentData.booked} · OOO: {currentData.ooo} ·
+            Available: {currentData.available}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Adjustment Type</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Adjustment Type
+            </label>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { key: 'ooo', label: 'Out of Order', icon: Wrench, color: 'text-warning' },
                 { key: 'allocation', label: 'Allocation', icon: Lock, color: 'text-info' },
                 { key: 'release', label: 'Release', icon: Unlock, color: 'text-accent' },
-                { key: 'inventory', label: 'Inventory +/-', icon: ArrowUpDown, color: 'text-secondary' },
+                {
+                  key: 'inventory',
+                  label: 'Inventory +/-',
+                  icon: ArrowUpDown,
+                  color: 'text-secondary',
+                },
               ].map((opt) => (
                 <button
                   key={opt.key}
@@ -184,7 +318,9 @@ function AdjustmentModal({ isOpen, onClose, roomType, dateStr, currentData, onSa
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Rooms</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Rooms
+            </label>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -211,7 +347,9 @@ function AdjustmentModal({ isOpen, onClose, roomType, dateStr, currentData, onSa
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Reason / Note</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Reason / Note
+            </label>
             <input
               type="text"
               value={reason}
@@ -222,7 +360,9 @@ function AdjustmentModal({ isOpen, onClose, roomType, dateStr, currentData, onSa
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Save className="mr-1.5 h-4 w-4" /> Save Adjustment
             </Button>
@@ -248,7 +388,10 @@ function CellDetailDrawer({ roomType, dateStr, data, onClose, onAdjust }) {
               <h3 className="text-lg font-bold text-text-primary">{roomType.name}</h3>
               <p className="text-sm text-text-muted">{dateStr}</p>
             </div>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -262,19 +405,45 @@ function CellDetailDrawer({ roomType, dateStr, data, onClose, onAdjust }) {
               <span className="text-sm font-semibold">{status.label}</span>
             </div>
             <p className="mt-1 text-xs text-text-secondary">
-              Sellable inventory: <span className={cn('font-mono font-bold', getSellableColor(data.sellable, roomType.overbookingLimit))}>{data.sellable}</span> / {roomType.overbookingLimit} limit
+              Sellable inventory:{' '}
+              <span
+                className={cn(
+                  'font-mono font-bold',
+                  getSellableColor(data.sellable, roomType.overbookingLimit)
+                )}
+              >
+                {data.sellable}
+              </span>{' '}
+              / {roomType.overbookingLimit} limit
             </p>
           </div>
 
           {/* Breakdown */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Inventory Breakdown</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Inventory Breakdown
+            </h4>
             {[
-              { label: 'Total Physical Rooms', value: data.total, icon: BedDouble, color: 'text-text-primary' },
-              { label: 'Booked / Occupied', value: data.booked, icon: Lock, color: 'text-secondary' },
+              {
+                label: 'Total Physical Rooms',
+                value: data.total,
+                icon: BedDouble,
+                color: 'text-text-primary',
+              },
+              {
+                label: 'Booked / Occupied',
+                value: data.booked,
+                icon: Lock,
+                color: 'text-secondary',
+              },
               { label: 'Out of Order', value: data.ooo, icon: Wrench, color: 'text-warning' },
               { label: 'Held / Allocations', value: data.held, icon: Ban, color: 'text-info' },
-              { label: 'Available', value: data.available, icon: CheckCircle2, color: 'text-accent' },
+              {
+                label: 'Available',
+                value: data.available,
+                icon: CheckCircle2,
+                color: 'text-accent',
+              },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-text-secondary">
@@ -286,7 +455,9 @@ function CellDetailDrawer({ roomType, dateStr, data, onClose, onAdjust }) {
             ))}
             <div className="border-t border-border pt-2 flex items-center justify-between">
               <span className="text-sm font-medium text-text-primary">Overbooking Limit</span>
-              <span className="text-sm font-mono font-bold text-text-primary">{roomType.overbookingLimit}</span>
+              <span className="text-sm font-mono font-bold text-text-primary">
+                {roomType.overbookingLimit}
+              </span>
             </div>
           </div>
 
@@ -336,9 +507,8 @@ export default function InventoryPage() {
     setInventoryData(generateInventoryData(dates, roomTypes));
   }, [dateOffset]);
 
-  const filteredRoomTypes = filterRoomType === 'all'
-    ? roomTypes
-    : roomTypes.filter((r) => r.id === filterRoomType);
+  const filteredRoomTypes =
+    filterRoomType === 'all' ? roomTypes : roomTypes.filter((r) => r.id === filterRoomType);
 
   /* Stats */
   const stats = useMemo(() => {
@@ -366,7 +536,8 @@ export default function InventoryPage() {
       totalOoo,
       totalOverbooked,
       totalSellable,
-      occupancy: totalRooms > 0 ? Math.round(((totalRooms - totalAvailable) / totalRooms) * 100) : 0,
+      occupancy:
+        totalRooms > 0 ? Math.round(((totalRooms - totalAvailable) / totalRooms) * 100) : 0,
     };
   }, [inventoryData, dateStrs]);
 
@@ -403,7 +574,9 @@ export default function InventoryPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Inventory Management</h1>
-          <p className="text-sm text-text-secondary">Availability, allocations, and room status controls</p>
+          <p className="text-sm text-text-secondary">
+            Availability, allocations, and room status controls
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -417,12 +590,37 @@ export default function InventoryPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Total Rooms" value={stats.totalRooms} icon={BedDouble} color="text-text-primary" />
-        <StatCard label="Available" value={stats.totalAvailable} icon={DoorOpen} color="text-accent" />
-        <StatCard label="Sellable" value={stats.totalSellable} icon={TrendingUp} color="text-secondary" />
-        <StatCard label="Occupancy" value={`${stats.occupancy}%`} icon={Grid3X3} color="text-info" />
+        <StatCard
+          label="Total Rooms"
+          value={stats.totalRooms}
+          icon={BedDouble}
+          color="text-text-primary"
+        />
+        <StatCard
+          label="Available"
+          value={stats.totalAvailable}
+          icon={DoorOpen}
+          color="text-accent"
+        />
+        <StatCard
+          label="Sellable"
+          value={stats.totalSellable}
+          icon={TrendingUp}
+          color="text-secondary"
+        />
+        <StatCard
+          label="Occupancy"
+          value={`${stats.occupancy}%`}
+          icon={Grid3X3}
+          color="text-info"
+        />
         <StatCard label="OOO" value={stats.totalOoo} icon={Wrench} color="text-warning" />
-        <StatCard label="Overbooked" value={stats.totalOverbooked} icon={AlertTriangle} color="text-danger" />
+        <StatCard
+          label="Overbooked"
+          value={stats.totalOverbooked}
+          icon={AlertTriangle}
+          color="text-danger"
+        />
       </div>
 
       {/* Tabs */}
@@ -504,7 +702,9 @@ export default function InventoryPage() {
               >
                 <option value="all">All Types</option>
                 {roomTypes.map((rt) => (
-                  <option key={rt.id} value={rt.id}>{rt.name}</option>
+                  <option key={rt.id} value={rt.id}>
+                    {rt.name}
+                  </option>
                 ))}
               </select>
               <button
@@ -550,14 +750,29 @@ export default function InventoryPage() {
                           key={formatDate(date)}
                           className={cn(
                             'px-2 py-2 text-center text-xs font-medium min-w-[80px]',
-                            isToday ? 'bg-secondary/5 text-secondary' : isWeekend ? 'text-warning bg-warning/5' : 'text-text-secondary'
+                            isToday
+                              ? 'bg-secondary/5 text-secondary'
+                              : isWeekend
+                                ? 'text-warning bg-warning/5'
+                                : 'text-text-secondary'
                           )}
                         >
                           <div>{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                          <div className={cn('font-mono', isToday ? 'text-secondary font-bold' : isWeekend && 'text-warning font-semibold')}>
+                          <div
+                            className={cn(
+                              'font-mono',
+                              isToday
+                                ? 'text-secondary font-bold'
+                                : isWeekend && 'text-warning font-semibold'
+                            )}
+                          >
                             {date.getDate()}
                           </div>
-                          {isToday && <div className="text-[9px] uppercase tracking-wider text-secondary mt-0.5">Today</div>}
+                          {isToday && (
+                            <div className="text-[9px] uppercase tracking-wider text-secondary mt-0.5">
+                              Today
+                            </div>
+                          )}
                         </th>
                       );
                     })}
@@ -571,15 +786,27 @@ export default function InventoryPage() {
                           <BedDouble className="h-4 w-4 text-secondary" />
                           <div>
                             <p className="text-sm font-medium text-text-primary">{room.name}</p>
-                            <p className="text-[10px] text-text-muted">{room.total} total · OB {room.overbookingLimit}</p>
+                            <p className="text-[10px] text-text-muted">
+                              {room.total} total · OB {room.overbookingLimit}
+                            </p>
                           </div>
                         </div>
                       </td>
                       {dateStrs.map((dateStr) => {
                         const data = inventoryData[dateStr]?.[room.id];
-                        if (!data) return <td key={dateStr} className="px-2 py-2 text-center text-text-muted">—</td>;
+                        if (!data)
+                          return (
+                            <td key={dateStr} className="px-2 py-2 text-center text-text-muted">
+                              —
+                            </td>
+                          );
 
-                        const status = getAvailabilityStatus(data.available, data.total, data.ooo, data.sellable);
+                        const status = getAvailabilityStatus(
+                          data.available,
+                          data.total,
+                          data.ooo,
+                          data.sellable
+                        );
                         const isOverbooked = data.sellable < 0;
                         const isLow = data.sellable >= 0 && data.available <= data.total * 0.1;
 
@@ -594,10 +821,12 @@ export default function InventoryPage() {
                             >
                               <div className="flex items-center justify-center gap-1.5">
                                 <span className={cn('h-1.5 w-1.5 rounded-full', status.dot)} />
-                                <span className={cn(
-                                  'text-lg font-bold font-mono',
-                                  isOverbooked ? 'text-danger' : 'text-text-primary'
-                                )}>
+                                <span
+                                  className={cn(
+                                    'text-lg font-bold font-mono',
+                                    isOverbooked ? 'text-danger' : 'text-text-primary'
+                                  )}
+                                >
                                   {data.sellable}
                                 </span>
                               </div>
@@ -654,13 +883,23 @@ export default function InventoryPage() {
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-text-secondary">Overbooked days</span>
-                      <span className={cn('font-bold font-mono', overbookedDays > 0 ? 'text-danger' : 'text-accent')}>
+                      <span
+                        className={cn(
+                          'font-bold font-mono',
+                          overbookedDays > 0 ? 'text-danger' : 'text-accent'
+                        )}
+                      >
                         {overbookedDays}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-text-secondary">Low inventory days</span>
-                      <span className={cn('font-bold font-mono', lowDays > 0 ? 'text-warning' : 'text-accent')}>
+                      <span
+                        className={cn(
+                          'font-bold font-mono',
+                          lowDays > 0 ? 'text-warning' : 'text-accent'
+                        )}
+                      >
                         {lowDays}
                       </span>
                     </div>
@@ -682,7 +921,9 @@ export default function InventoryPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-text-primary">Room Allocations</h3>
-              <p className="text-xs text-text-muted">Group blocks, OTA allotments, and held inventory</p>
+              <p className="text-xs text-text-muted">
+                Group blocks, OTA allotments, and held inventory
+              </p>
             </div>
             <Button size="sm">
               <Plus className="mr-1.5 h-4 w-4" /> New Allocation
@@ -694,18 +935,27 @@ export default function InventoryPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-text-secondary">Allocation</th>
-                    <th className="px-4 py-3 text-left font-medium text-text-secondary">Room Type</th>
+                    <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                      Allocation
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                      Room Type
+                    </th>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">Dates</th>
-                    <th className="px-4 py-3 text-right font-medium text-text-secondary">Blocked</th>
-                    <th className="px-4 py-3 text-right font-medium text-text-secondary">Picked Up</th>
+                    <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                      Blocked
+                    </th>
+                    <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                      Picked Up
+                    </th>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">Status</th>
                     <th className="px-4 py-3 w-16"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {allocations.map((alloc) => {
-                    const pct = alloc.rooms > 0 ? Math.round((alloc.pickedUp / alloc.rooms) * 100) : 0;
+                    const pct =
+                      alloc.rooms > 0 ? Math.round((alloc.pickedUp / alloc.rooms) * 100) : 0;
                     return (
                       <tr key={alloc.id} className="hover:bg-background/50 transition-colors">
                         <td className="px-4 py-3">
@@ -723,13 +973,24 @@ export default function InventoryPage() {
                         <td className="px-4 py-3 text-text-secondary text-xs">
                           {alloc.from} → {alloc.to}
                         </td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{alloc.rooms}</td>
-                        <td className="px-4 py-3 text-right font-mono text-text-primary">{alloc.pickedUp}</td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {alloc.rooms}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {alloc.pickedUp}
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-16 rounded-full bg-border overflow-hidden">
                               <div
-                                className={cn('h-full rounded-full transition-all', pct >= 80 ? 'bg-accent' : pct >= 50 ? 'bg-secondary' : 'bg-warning')}
+                                className={cn(
+                                  'h-full rounded-full transition-all',
+                                  pct >= 80
+                                    ? 'bg-accent'
+                                    : pct >= 50
+                                      ? 'bg-secondary'
+                                      : 'bg-warning'
+                                )}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -757,7 +1018,9 @@ export default function InventoryPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-text-primary">Adjustment History</h3>
-              <p className="text-xs text-text-muted">Recent inventory changes and maintenance events</p>
+              <p className="text-xs text-text-muted">
+                Recent inventory changes and maintenance events
+              </p>
             </div>
             <Button variant="outline" size="sm">
               <Download className="mr-1.5 h-4 w-4" /> Export Log
@@ -771,7 +1034,9 @@ export default function InventoryPage() {
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">Time</th>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">Type</th>
-                    <th className="px-4 py-3 text-left font-medium text-text-secondary">Room Type</th>
+                    <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                      Room Type
+                    </th>
                     <th className="px-4 py-3 text-right font-medium text-text-secondary">Rooms</th>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">Reason</th>
                     <th className="px-4 py-3 text-left font-medium text-text-secondary">User</th>
@@ -780,11 +1045,31 @@ export default function InventoryPage() {
                 <tbody className="divide-y divide-border">
                   {adjustments.map((adj) => {
                     const typeMeta = {
-                      ooo: { label: 'Out of Order', class: 'bg-warning/10 text-warning border-warning/20', icon: Wrench },
-                      allocation: { label: 'Allocation', class: 'bg-info/10 text-info border-info/20', icon: Lock },
-                      release: { label: 'Release', class: 'bg-accent/10 text-accent border-accent/20', icon: Unlock },
-                      inventory: { label: 'Inventory', class: 'bg-secondary/10 text-secondary border-secondary/20', icon: ArrowUpDown },
-                    }[adj.type] || { label: adj.type, class: 'bg-neutral/10 text-text-muted border-border', icon: Info };
+                      ooo: {
+                        label: 'Out of Order',
+                        class: 'bg-warning/10 text-warning border-warning/20',
+                        icon: Wrench,
+                      },
+                      allocation: {
+                        label: 'Allocation',
+                        class: 'bg-info/10 text-info border-info/20',
+                        icon: Lock,
+                      },
+                      release: {
+                        label: 'Release',
+                        class: 'bg-accent/10 text-accent border-accent/20',
+                        icon: Unlock,
+                      },
+                      inventory: {
+                        label: 'Inventory',
+                        class: 'bg-secondary/10 text-secondary border-secondary/20',
+                        icon: ArrowUpDown,
+                      },
+                    }[adj.type] || {
+                      label: adj.type,
+                      class: 'bg-neutral/10 text-text-muted border-border',
+                      icon: Info,
+                    };
 
                     return (
                       <tr key={adj.id} className="hover:bg-background/50 transition-colors">
@@ -793,16 +1078,26 @@ export default function InventoryPage() {
                           <div className="text-text-muted">{adj.time}</div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium', typeMeta.class)}>
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
+                              typeMeta.class
+                            )}
+                          >
                             <typeMeta.icon className="h-3 w-3" />
                             {typeMeta.label}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-text-primary">{adj.roomType}</td>
                         <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
-                          {adj.type === 'release' || adj.type === 'inventory' && adj.rooms < 0 ? '' : '+'}{adj.rooms}
+                          {adj.type === 'release' || (adj.type === 'inventory' && adj.rooms < 0)
+                            ? ''
+                            : '+'}
+                          {adj.rooms}
                         </td>
-                        <td className="px-4 py-3 text-text-secondary text-xs max-w-xs truncate">{adj.reason}</td>
+                        <td className="px-4 py-3 text-text-secondary text-xs max-w-xs truncate">
+                          {adj.reason}
+                        </td>
                         <td className="px-4 py-3 text-text-secondary text-xs">{adj.user}</td>
                       </tr>
                     );

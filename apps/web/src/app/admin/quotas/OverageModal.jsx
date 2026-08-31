@@ -36,10 +36,10 @@ export default function OverageModal({ entry, onClose, onSave }) {
   }, [entry]);
 
   const update = (key, value) => {
-    setForm(prev => {
+    setForm((prev) => {
       const next = { ...prev, [key]: value };
       if (key === 'excess' || key === 'rate') {
-        next.charge = (next.excess * next.rate);
+        next.charge = next.excess * next.rate;
       }
       return next;
     });
@@ -69,10 +69,15 @@ export default function OverageModal({ entry, onClose, onSave }) {
               <h3 className="text-lg font-bold text-text-primary">
                 {isEditing ? 'Edit Overage Entry' : 'Record Overage Charge'}
               </h3>
-              <p className="text-xs text-text-muted">{isEditing ? entry.id : 'Manual overage billing adjustment'}</p>
+              <p className="text-xs text-text-muted">
+                {isEditing ? entry.id : 'Manual overage billing adjustment'}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -82,14 +87,18 @@ export default function OverageModal({ entry, onClose, onSave }) {
           {form.status === 'disputed' && (
             <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
-              <p className="text-xs text-warning">This overage is under dispute. Review before making changes.</p>
+              <p className="text-xs text-warning">
+                This overage is under dispute. Review before making changes.
+              </p>
             </div>
           )}
 
           {/* Tenant & Period */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Tenant ID</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Tenant ID
+              </label>
               <input
                 type="text"
                 required
@@ -99,7 +108,9 @@ export default function OverageModal({ entry, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Billing Period</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Billing Period
+              </label>
               <input
                 type="text"
                 required
@@ -113,7 +124,9 @@ export default function OverageModal({ entry, onClose, onSave }) {
 
           {/* Resource */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Resource</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Resource
+            </label>
             <select
               value={form.resource}
               onChange={(e) => update('resource', e.target.value)}
@@ -130,11 +143,15 @@ export default function OverageModal({ entry, onClose, onSave }) {
           <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Calculator className="h-4 w-4 text-secondary" />
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Charge Calculation</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Charge Calculation
+              </h4>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Excess Amount</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Excess Amount
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -146,7 +163,9 @@ export default function OverageModal({ entry, onClose, onSave }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Rate per Unit ($)</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Rate per Unit ($)
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -163,13 +182,17 @@ export default function OverageModal({ entry, onClose, onSave }) {
                 <Receipt className="h-4 w-4 text-accent" />
                 <span className="text-sm font-medium text-accent">Total Charge</span>
               </div>
-              <span className="text-lg font-bold font-mono text-accent">{formatCurrency(form.charge)}</span>
+              <span className="text-lg font-bold font-mono text-accent">
+                {formatCurrency(form.charge)}
+              </span>
             </div>
           </div>
 
           {/* Status */}
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Status</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Status
+            </label>
             <div className="grid grid-cols-4 gap-2">
               {['projected', 'billed', 'waived', 'disputed'].map((status) => (
                 <button
@@ -179,10 +202,13 @@ export default function OverageModal({ entry, onClose, onSave }) {
                   className={cn(
                     'rounded-lg border px-3 py-2 text-xs font-medium transition-colors capitalize',
                     form.status === status
-                      ? status === 'billed' ? 'bg-accent/10 text-accent border-accent/30' :
-                        status === 'projected' ? 'bg-info/10 text-info border-info/30' :
-                        status === 'waived' ? 'bg-neutral/10 text-text-muted border-border' :
-                        'bg-warning/10 text-warning border-warning/30'
+                      ? status === 'billed'
+                        ? 'bg-accent/10 text-accent border-accent/30'
+                        : status === 'projected'
+                          ? 'bg-info/10 text-info border-info/30'
+                          : status === 'waived'
+                            ? 'bg-neutral/10 text-text-muted border-border'
+                            : 'bg-warning/10 text-warning border-warning/30'
                       : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                   )}
                 >
@@ -195,7 +221,9 @@ export default function OverageModal({ entry, onClose, onSave }) {
           {/* Waive Reason */}
           {form.status === 'waived' && (
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Waive Reason</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Waive Reason
+              </label>
               <textarea
                 value={form.waiveReason}
                 onChange={(e) => update('waiveReason', e.target.value)}
@@ -208,7 +236,9 @@ export default function OverageModal({ entry, onClose, onSave }) {
 
           {/* Notes */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Internal Notes</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Internal Notes
+            </label>
             <textarea
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
@@ -220,7 +250,9 @@ export default function OverageModal({ entry, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Update Entry' : 'Record Charge'}
             </Button>

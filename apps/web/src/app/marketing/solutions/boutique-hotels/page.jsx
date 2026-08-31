@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Gem, Palette, Users, Wifi, Shield, Star, Heart,
-  Coffee, Sparkles, MessageCircle, TrendingUp
+  ArrowRight,
+  Gem,
+  Palette,
+  Users,
+  Wifi,
+  Shield,
+  Star,
+  Heart,
+  Coffee,
+  Sparkles,
+  MessageCircle,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 
@@ -57,10 +67,12 @@ export default function BoutiqueHotelsPage() {
               For 50-200 Room Properties
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-6xl">
-              Built for <span className="text-secondary">Boutique Hotels</span> That Care About Every Detail
+              Built for <span className="text-secondary">Boutique Hotels</span> That Care About
+              Every Detail
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Independent hotels and boutique properties need a PMS that matches their passion for hospitality — not a generic enterprise tool designed for 1,000-room chains.
+              Independent hotels and boutique properties need a PMS that matches their passion for
+              hospitality — not a generic enterprise tool designed for 1,000-room chains.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -98,14 +110,20 @@ export default function BoutiqueHotelsPage() {
       <section className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
-            <h2 className="text-3xl font-bold text-text-primary sm:text-4xl">Tools that feel like an extension of your team</h2>
+            <h2 className="text-3xl font-bold text-text-primary sm:text-4xl">
+              Tools that feel like an extension of your team
+            </h2>
             <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-              Every feature is designed to help boutique hotels deliver personalized, memorable stays.
+              Every feature is designed to help boutique hotels deliver personalized, memorable
+              stays.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
-              <div key={f.title} className="group rounded-xl border border-border bg-surface p-6 transition-all hover:border-secondary/50 hover:shadow-lg">
+              <div
+                key={f.title}
+                className="group rounded-xl border border-border bg-surface p-6 transition-all hover:border-secondary/50 hover:shadow-lg"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
                   <f.icon className="h-6 w-6 text-secondary" />
                 </div>
@@ -121,14 +139,19 @@ export default function BoutiqueHotelsPage() {
       <section className="border-y border-border bg-surface py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <div className="flex justify-center gap-1 mb-4">
-            {[1,2,3,4,5].map(i => <Star key={i} className="h-5 w-5 fill-warning text-warning" />)}
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className="h-5 w-5 fill-warning text-warning" />
+            ))}
           </div>
           <blockquote className="text-xl font-medium text-text-primary leading-relaxed">
-            "We switched from a generic chain PMS and immediately saw a 23% increase in direct bookings. The guest portal lets us sell experiences we never thought to offer before."
+            "We switched from a generic chain PMS and immediately saw a 23% increase in direct
+            bookings. The guest portal lets us sell experiences we never thought to offer before."
           </blockquote>
           <div className="mt-6">
             <p className="font-semibold text-text-primary">Sarah Chen</p>
-            <p className="text-sm text-text-muted">General Manager, Seaside Resort & Spa · 87 rooms</p>
+            <p className="text-sm text-text-muted">
+              General Manager, Seaside Resort & Spa · 87 rooms
+            </p>
           </div>
         </div>
       </section>
@@ -136,9 +159,12 @@ export default function BoutiqueHotelsPage() {
       {/* CTA */}
       <section className="bg-background py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold text-text-primary">Your boutique hotel deserves better software</h2>
+          <h2 className="text-3xl font-bold text-text-primary">
+            Your boutique hotel deserves better software
+          </h2>
           <p className="mt-4 text-text-secondary">
-            Join 200+ independent hotels already using Unified PMS to deliver Hilton-level guest experiences.
+            Join 200+ independent hotels already using Unified PMS to deliver Hilton-level guest
+            experiences.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link

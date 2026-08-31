@@ -2,11 +2,43 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Filter, Star, Crown, Gem, User, Users, Mail, Phone, MapPin,
-  Calendar, BedDouble, DollarSign, Clock, ChevronRight, MoreHorizontal,
-  Heart, Utensils, Wifi, Coffee, Snowflake, Sun, Moon, X,
-  Check, Plus, Edit3, Trash2, MessageSquare, TrendingUp,
-  Shield, Award, ArrowUpDown, LayoutGrid, List, Download, Globe
+  Search,
+  Filter,
+  Star,
+  Crown,
+  Gem,
+  User,
+  Users,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  BedDouble,
+  DollarSign,
+  Clock,
+  ChevronRight,
+  MoreHorizontal,
+  Heart,
+  Utensils,
+  Wifi,
+  Coffee,
+  Snowflake,
+  Sun,
+  Moon,
+  X,
+  Check,
+  Plus,
+  Edit3,
+  Trash2,
+  MessageSquare,
+  TrendingUp,
+  Shield,
+  Award,
+  ArrowUpDown,
+  LayoutGrid,
+  List,
+  Download,
+  Globe,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -43,14 +75,64 @@ const mockGuests = [
       language: 'English',
     },
     notes: [
-      { id: 1, author: 'Sarah J.', date: '2026-08-10', content: 'Celebrating anniversary. Arrange champagne in room.' },
-      { id: 2, author: 'Mike C.', date: '2026-07-22', content: 'Complained about AC noise in 312. Avoid assigning that room.' },
+      {
+        id: 1,
+        author: 'Sarah J.',
+        date: '2026-08-10',
+        content: 'Celebrating anniversary. Arrange champagne in room.',
+      },
+      {
+        id: 2,
+        author: 'Mike C.',
+        date: '2026-07-22',
+        content: 'Complained about AC noise in 312. Avoid assigning that room.',
+      },
     ],
     stays: [
-      { id: 'R-4021', arrival: '2026-08-12', departure: '2026-08-15', nights: 3, room: '204', roomType: 'Deluxe King', rate: 189, revenue: 567, status: 'checked_in' },
-      { id: 'R-3890', arrival: '2026-03-15', departure: '2026-03-18', nights: 3, room: '312', roomType: 'Deluxe King', rate: 189, revenue: 567, status: 'completed' },
-      { id: 'R-3542', arrival: '2025-11-22', departure: '2025-11-26', nights: 4, room: '204', roomType: 'Deluxe King', rate: 179, revenue: 716, status: 'completed' },
-      { id: 'R-3101', arrival: '2025-08-10', departure: '2025-08-12', nights: 2, room: '105', roomType: 'Suite', rate: 320, revenue: 640, status: 'completed' },
+      {
+        id: 'R-4021',
+        arrival: '2026-08-12',
+        departure: '2026-08-15',
+        nights: 3,
+        room: '204',
+        roomType: 'Deluxe King',
+        rate: 189,
+        revenue: 567,
+        status: 'checked_in',
+      },
+      {
+        id: 'R-3890',
+        arrival: '2026-03-15',
+        departure: '2026-03-18',
+        nights: 3,
+        room: '312',
+        roomType: 'Deluxe King',
+        rate: 189,
+        revenue: 567,
+        status: 'completed',
+      },
+      {
+        id: 'R-3542',
+        arrival: '2025-11-22',
+        departure: '2025-11-26',
+        nights: 4,
+        room: '204',
+        roomType: 'Deluxe King',
+        rate: 179,
+        revenue: 716,
+        status: 'completed',
+      },
+      {
+        id: 'R-3101',
+        arrival: '2025-08-10',
+        departure: '2025-08-12',
+        nights: 2,
+        room: '105',
+        roomType: 'Suite',
+        rate: 320,
+        revenue: 640,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -81,11 +163,36 @@ const mockGuests = [
       language: 'English',
     },
     notes: [
-      { id: 3, author: 'Sarah J.', date: '2026-08-11', content: 'Business traveler. Always requests early check-in.' },
+      {
+        id: 3,
+        author: 'Sarah J.',
+        date: '2026-08-11',
+        content: 'Business traveler. Always requests early check-in.',
+      },
     ],
     stays: [
-      { id: 'R-4022', arrival: '2026-08-11', departure: '2026-08-14', nights: 3, room: '312', roomType: 'Standard Twin', rate: 145, revenue: 435, status: 'checked_out' },
-      { id: 'R-3650', arrival: '2026-01-10', departure: '2026-01-14', nights: 4, room: '215', roomType: 'Standard Twin', rate: 145, revenue: 580, status: 'completed' },
+      {
+        id: 'R-4022',
+        arrival: '2026-08-11',
+        departure: '2026-08-14',
+        nights: 3,
+        room: '312',
+        roomType: 'Standard Twin',
+        rate: 145,
+        revenue: 435,
+        status: 'checked_out',
+      },
+      {
+        id: 'R-3650',
+        arrival: '2026-01-10',
+        departure: '2026-01-14',
+        nights: 4,
+        room: '215',
+        roomType: 'Standard Twin',
+        rate: 145,
+        revenue: 580,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -117,11 +224,36 @@ const mockGuests = [
       language: 'English',
     },
     notes: [
-      { id: 4, author: 'Front Desk', date: '2026-08-01', content: 'VIP arrival next week. Confirm airport pickup.' },
+      {
+        id: 4,
+        author: 'Front Desk',
+        date: '2026-08-01',
+        content: 'VIP arrival next week. Confirm airport pickup.',
+      },
     ],
     stays: [
-      { id: 'R-4023', arrival: '2026-08-15', departure: '2026-08-20', nights: 5, room: '105', roomType: 'Suite', rate: 320, revenue: 1600, status: 'confirmed' },
-      { id: 'R-3780', arrival: '2026-04-05', departure: '2026-04-10', nights: 5, room: '105', roomType: 'Suite', rate: 310, revenue: 1550, status: 'completed' },
+      {
+        id: 'R-4023',
+        arrival: '2026-08-15',
+        departure: '2026-08-20',
+        nights: 5,
+        room: '105',
+        roomType: 'Suite',
+        rate: 320,
+        revenue: 1600,
+        status: 'confirmed',
+      },
+      {
+        id: 'R-3780',
+        arrival: '2026-04-05',
+        departure: '2026-04-10',
+        nights: 5,
+        room: '105',
+        roomType: 'Suite',
+        rate: 310,
+        revenue: 1550,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -153,7 +285,17 @@ const mockGuests = [
     },
     notes: [],
     stays: [
-      { id: 'R-4024', arrival: '2026-08-12', departure: '2026-08-13', nights: 1, room: '401', roomType: 'Deluxe King', rate: 189, revenue: 189, status: 'confirmed' },
+      {
+        id: 'R-4024',
+        arrival: '2026-08-12',
+        departure: '2026-08-13',
+        nights: 1,
+        room: '401',
+        roomType: 'Deluxe King',
+        rate: 189,
+        revenue: 189,
+        status: 'confirmed',
+      },
     ],
   },
   {
@@ -185,7 +327,17 @@ const mockGuests = [
     },
     notes: [],
     stays: [
-      { id: 'R-4025', arrival: '2026-08-10', departure: '2026-08-12', nights: 2, room: '118', roomType: 'Standard Queen', rate: 135, revenue: 270, status: 'no_show' },
+      {
+        id: 'R-4025',
+        arrival: '2026-08-10',
+        departure: '2026-08-12',
+        nights: 2,
+        room: '118',
+        roomType: 'Standard Queen',
+        rate: 135,
+        revenue: 270,
+        status: 'no_show',
+      },
     ],
   },
   {
@@ -217,11 +369,36 @@ const mockGuests = [
       language: 'English',
     },
     notes: [
-      { id: 5, author: 'Manager', date: '2026-08-05', content: 'Social media influencer. Ensure room is photo-ready.' },
+      {
+        id: 5,
+        author: 'Manager',
+        date: '2026-08-05',
+        content: 'Social media influencer. Ensure room is photo-ready.',
+      },
     ],
     stays: [
-      { id: 'R-4026', arrival: '2026-08-12', departure: '2026-08-16', nights: 4, room: '310', roomType: 'Deluxe King', rate: 189, revenue: 756, status: 'cancelled' },
-      { id: 'R-3400', arrival: '2026-02-14', departure: '2026-02-18', nights: 4, room: '310', roomType: 'Deluxe King', rate: 189, revenue: 756, status: 'completed' },
+      {
+        id: 'R-4026',
+        arrival: '2026-08-12',
+        departure: '2026-08-16',
+        nights: 4,
+        room: '310',
+        roomType: 'Deluxe King',
+        rate: 189,
+        revenue: 756,
+        status: 'cancelled',
+      },
+      {
+        id: 'R-3400',
+        arrival: '2026-02-14',
+        departure: '2026-02-18',
+        nights: 4,
+        room: '310',
+        roomType: 'Deluxe King',
+        rate: 189,
+        revenue: 756,
+        status: 'completed',
+      },
     ],
   },
   {
@@ -253,7 +430,17 @@ const mockGuests = [
     },
     notes: [],
     stays: [
-      { id: 'R-4027', arrival: '2026-08-18', departure: '2026-08-22', nights: 4, room: null, roomType: 'Standard Twin', rate: 145, revenue: 580, status: 'waitlist' },
+      {
+        id: 'R-4027',
+        arrival: '2026-08-18',
+        departure: '2026-08-22',
+        nights: 4,
+        room: null,
+        roomType: 'Standard Twin',
+        rate: 145,
+        revenue: 580,
+        status: 'waitlist',
+      },
     ],
   },
   {
@@ -285,23 +472,94 @@ const mockGuests = [
       language: 'English',
     },
     notes: [
-      { id: 6, author: 'GM', date: '2026-08-01', content: 'Lifetime Platinum member. Spouse allergic to down pillows — always hypoallergenic.' },
-      { id: 7, author: 'Housekeeping', date: '2026-07-15', content: 'Prefers extra water bottles and no decorative pillows.' },
+      {
+        id: 6,
+        author: 'GM',
+        date: '2026-08-01',
+        content:
+          'Lifetime Platinum member. Spouse allergic to down pillows — always hypoallergenic.',
+      },
+      {
+        id: 7,
+        author: 'Housekeeping',
+        date: '2026-07-15',
+        content: 'Prefers extra water bottles and no decorative pillows.',
+      },
     ],
     stays: [
-      { id: 'R-4028', arrival: '2026-08-13', departure: '2026-08-15', nights: 2, room: '205', roomType: 'Suite', rate: 320, revenue: 640, status: 'checked_in' },
-      { id: 'R-3900', arrival: '2026-05-01', departure: '2026-05-07', nights: 6, room: '205', roomType: 'Suite', rate: 320, revenue: 1920, status: 'completed' },
-      { id: 'R-3600', arrival: '2026-02-10', departure: '2026-02-14', nights: 4, room: '205', roomType: 'Suite', rate: 310, revenue: 1240, status: 'completed' },
+      {
+        id: 'R-4028',
+        arrival: '2026-08-13',
+        departure: '2026-08-15',
+        nights: 2,
+        room: '205',
+        roomType: 'Suite',
+        rate: 320,
+        revenue: 640,
+        status: 'checked_in',
+      },
+      {
+        id: 'R-3900',
+        arrival: '2026-05-01',
+        departure: '2026-05-07',
+        nights: 6,
+        room: '205',
+        roomType: 'Suite',
+        rate: 320,
+        revenue: 1920,
+        status: 'completed',
+      },
+      {
+        id: 'R-3600',
+        arrival: '2026-02-10',
+        departure: '2026-02-14',
+        nights: 4,
+        room: '205',
+        roomType: 'Suite',
+        rate: 310,
+        revenue: 1240,
+        status: 'completed',
+      },
     ],
   },
 ];
 
 const tierMeta = {
-  platinum: { label: 'Platinum', icon: Crown, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  gold: { label: 'Gold', icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  silver: { label: 'Silver', icon: Award, color: 'text-slate-400', bg: 'bg-slate-400/10', border: 'border-slate-400/20' },
-  bronze: { label: 'Bronze', icon: Gem, color: 'text-orange-600', bg: 'bg-orange-600/10', border: 'border-orange-600/20' },
-  none: { label: 'Member', icon: User, color: 'text-text-muted', bg: 'bg-surface-elevated', border: 'border-border' },
+  platinum: {
+    label: 'Platinum',
+    icon: Crown,
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+  },
+  gold: {
+    label: 'Gold',
+    icon: Star,
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+  },
+  silver: {
+    label: 'Silver',
+    icon: Award,
+    color: 'text-slate-400',
+    bg: 'bg-slate-400/10',
+    border: 'border-slate-400/20',
+  },
+  bronze: {
+    label: 'Bronze',
+    icon: Gem,
+    color: 'text-orange-600',
+    bg: 'bg-orange-600/10',
+    border: 'border-orange-600/20',
+  },
+  none: {
+    label: 'Member',
+    icon: User,
+    color: 'text-text-muted',
+    bg: 'bg-surface-elevated',
+    border: 'border-border',
+  },
 };
 
 const stayStatusMeta = {
@@ -324,10 +582,12 @@ function GuestAvatar({ guest, size = 'md' }) {
     xl: 'h-20 w-20 text-2xl',
   };
   return (
-    <div className={cn(
-      'flex items-center justify-center rounded-full font-bold text-secondary bg-secondary/10',
-      sizeClasses[size]
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-center rounded-full font-bold text-secondary bg-secondary/10',
+        sizeClasses[size]
+      )}
+    >
       {initials}
     </div>
   );
@@ -337,10 +597,14 @@ function LoyaltyBadge({ tier }) {
   const meta = tierMeta[tier] || tierMeta.none;
   const Icon = meta.icon;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <Icon className="h-3 w-3" /> {meta.label}
     </span>
   );
@@ -348,10 +612,14 @@ function LoyaltyBadge({ tier }) {
 
 function PreferenceChip({ icon: Icon, label, active = true }) {
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium',
-      active ? 'border-border bg-surface text-text-secondary' : 'border-border/50 bg-background text-text-muted opacity-60'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium',
+        active
+          ? 'border-border bg-surface text-text-secondary'
+          : 'border-border/50 bg-background text-text-muted opacity-60'
+      )}
+    >
       {Icon && <Icon className="h-3 w-3" />}
       {label}
     </span>
@@ -385,7 +653,12 @@ function GuestDetailDrawer({ guest, onClose }) {
   const addNote = () => {
     if (!newNote.trim()) return;
     setNotes([
-      { id: Date.now(), author: 'You', date: new Date().toISOString().split('T')[0], content: newNote.trim() },
+      {
+        id: Date.now(),
+        author: 'You',
+        date: new Date().toISOString().split('T')[0],
+        content: newNote.trim(),
+      },
       ...notes,
     ]);
     setNewNote('');
@@ -411,7 +684,9 @@ function GuestDetailDrawer({ guest, onClose }) {
               <GuestAvatar guest={guest} size="lg" />
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-text-primary">{guest.firstName} {guest.lastName}</h2>
+                  <h2 className="text-lg font-bold text-text-primary">
+                    {guest.firstName} {guest.lastName}
+                  </h2>
                   {guest.vipStatus && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 border border-warning/20 px-2 py-0.5 text-[10px] font-bold uppercase text-warning">
                       <Star className="h-3 w-3 fill-warning" /> VIP
@@ -428,7 +703,10 @@ function GuestDetailDrawer({ guest, onClose }) {
               <Button variant="outline" size="sm">
                 <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit
               </Button>
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -445,7 +723,9 @@ function GuestDetailDrawer({ guest, onClose }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors -mb-px',
-                    active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                    active
+                      ? 'border-secondary text-secondary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" /> {tab.label}
@@ -463,17 +743,26 @@ function GuestDetailDrawer({ guest, onClose }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Lifetime Value</p>
-                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">${guest.lifetimeValue.toLocaleString()}</p>
+                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+                    ${guest.lifetimeValue.toLocaleString()}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-border bg-surface p-4">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Stays</p>
-                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">{guest.totalStays} <span className="text-sm font-normal text-text-muted">({guest.totalNights} nights)</span></p>
+                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+                    {guest.totalStays}{' '}
+                    <span className="text-sm font-normal text-text-muted">
+                      ({guest.totalNights} nights)
+                    </span>
+                  </p>
                 </div>
               </div>
 
               {/* Contact Info */}
               <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">Contact Information</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                  Contact Information
+                </h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="flex items-center gap-3 text-sm text-text-primary">
                     <Mail className="h-4 w-4 text-text-muted" />
@@ -501,22 +790,43 @@ function GuestDetailDrawer({ guest, onClose }) {
               {/* Recent Stays Preview */}
               <div className="rounded-xl border border-border bg-surface p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">Recent Stays</h3>
-                  <button onClick={() => setActiveTab('stays')} className="text-xs text-secondary hover:underline">View All</button>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                    Recent Stays
+                  </h3>
+                  <button
+                    onClick={() => setActiveTab('stays')}
+                    className="text-xs text-secondary hover:underline"
+                  >
+                    View All
+                  </button>
                 </div>
                 <div className="space-y-2">
                   {guest.stays.slice(0, 3).map((stay) => (
-                    <div key={stay.id} className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5">
+                    <div
+                      key={stay.id}
+                      className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5"
+                    >
                       <div className="flex items-center gap-3">
                         <BedDouble className="h-4 w-4 text-text-muted" />
                         <div>
-                          <p className="text-sm font-medium text-text-primary">Room {stay.room || 'TBA'} — {stay.roomType}</p>
-                          <p className="text-xs text-text-muted">{stay.arrival} → {stay.departure} · {stay.nights} nights</p>
+                          <p className="text-sm font-medium text-text-primary">
+                            Room {stay.room || 'TBA'} — {stay.roomType}
+                          </p>
+                          <p className="text-xs text-text-muted">
+                            {stay.arrival} → {stay.departure} · {stay.nights} nights
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-mono font-medium text-text-primary">${stay.revenue}</p>
-                        <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', stayStatusMeta[stay.status].class)}>
+                        <p className="text-sm font-mono font-medium text-text-primary">
+                          ${stay.revenue}
+                        </p>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                            stayStatusMeta[stay.status].class
+                          )}
+                        >
                           {stayStatusMeta[stay.status].label}
                         </span>
                       </div>
@@ -544,15 +854,21 @@ function GuestDetailDrawer({ guest, onClose }) {
               <div className="rounded-xl border border-border bg-surface p-4 flex items-center justify-between">
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Revenue</p>
-                  <p className="text-xl font-bold font-mono text-text-primary">${totalRevenue.toLocaleString()}</p>
+                  <p className="text-xl font-bold font-mono text-text-primary">
+                    ${totalRevenue.toLocaleString()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Avg. per Stay</p>
-                  <p className="text-xl font-bold font-mono text-text-primary">${Math.round(totalRevenue / guest.stays.length).toLocaleString()}</p>
+                  <p className="text-xl font-bold font-mono text-text-primary">
+                    ${Math.round(totalRevenue / guest.stays.length).toLocaleString()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Nights</p>
-                  <p className="text-xl font-bold font-mono text-text-primary">{guest.totalNights}</p>
+                  <p className="text-xl font-bold font-mono text-text-primary">
+                    {guest.totalNights}
+                  </p>
                 </div>
               </div>
 
@@ -561,12 +877,21 @@ function GuestDetailDrawer({ guest, onClose }) {
                   <div key={stay.id} className="rounded-xl border border-border bg-surface p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <span className="rounded-lg bg-secondary/10 px-2 py-1 text-xs font-mono font-medium text-secondary">{stay.id}</span>
-                        <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', stayStatusMeta[stay.status].class)}>
+                        <span className="rounded-lg bg-secondary/10 px-2 py-1 text-xs font-mono font-medium text-secondary">
+                          {stay.id}
+                        </span>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+                            stayStatusMeta[stay.status].class
+                          )}
+                        >
                           {stayStatusMeta[stay.status].label}
                         </span>
                       </div>
-                      <span className="text-sm font-mono font-bold text-text-primary">${stay.revenue}</span>
+                      <span className="text-sm font-mono font-bold text-text-primary">
+                        ${stay.revenue}
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="flex items-center gap-2 text-text-secondary">
@@ -582,8 +907,7 @@ function GuestDetailDrawer({ guest, onClose }) {
                         {stay.nights} nights
                       </div>
                       <div className="flex items-center gap-2 text-text-secondary">
-                        <DollarSign className="h-3.5 w-3.5 text-text-muted" />
-                        ${stay.rate}/night
+                        <DollarSign className="h-3.5 w-3.5 text-text-muted" />${stay.rate}/night
                       </div>
                     </div>
                   </div>
@@ -597,17 +921,30 @@ function GuestDetailDrawer({ guest, onClose }) {
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">Room Preferences</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">
+                    Room Preferences
+                  </h3>
                   <div className="space-y-2">
-                    <PreferenceChip icon={BedDouble} label={`${guest.preferences.roomType} • ${guest.preferences.bedType}`} />
+                    <PreferenceChip
+                      icon={BedDouble}
+                      label={`${guest.preferences.roomType} • ${guest.preferences.bedType}`}
+                    />
                     <PreferenceChip icon={ArrowUpDown} label={`${guest.preferences.floor} Floor`} />
-                    <PreferenceChip icon={guest.preferences.temperature > '68' ? Sun : Snowflake} label={`${guest.preferences.temperature}`} />
-                    <PreferenceChip icon={Coffee} label={guest.preferences.pillowType + ' Pillows'} />
+                    <PreferenceChip
+                      icon={guest.preferences.temperature > '68' ? Sun : Snowflake}
+                      label={`${guest.preferences.temperature}`}
+                    />
+                    <PreferenceChip
+                      icon={Coffee}
+                      label={guest.preferences.pillowType + ' Pillows'}
+                    />
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">Dietary & Health</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">
+                    Dietary & Health
+                  </h3>
                   <div className="space-y-2">
                     {guest.preferences.dietary.length > 0 ? (
                       guest.preferences.dietary.map((d) => (
@@ -625,7 +962,9 @@ function GuestDetailDrawer({ guest, onClose }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">Accessibility</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">
+                    Accessibility
+                  </h3>
                   <div className="space-y-2">
                     {guest.preferences.accessibility.length > 0 ? (
                       guest.preferences.accessibility.map((a) => (
@@ -638,7 +977,9 @@ function GuestDetailDrawer({ guest, onClose }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">Communication</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">
+                    Communication
+                  </h3>
                   <div className="space-y-2">
                     <PreferenceChip icon={Mail} label={guest.preferences.communication} />
                     <PreferenceChip icon={Globe} label={guest.preferences.language} />
@@ -647,7 +988,9 @@ function GuestDetailDrawer({ guest, onClose }) {
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">Requested Amenities</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Requested Amenities
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {guest.preferences.amenities.map((a) => (
                     <PreferenceChip key={a} icon={Check} label={a} />
@@ -661,7 +1004,9 @@ function GuestDetailDrawer({ guest, onClose }) {
           {activeTab === 'notes' && (
             <div className="space-y-4">
               <div className="rounded-xl border border-border bg-surface p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">Add Note</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Add Note
+                </h3>
                 <div className="flex gap-3">
                   <textarea
                     value={newNote}
@@ -728,22 +1073,27 @@ export default function GuestsPage() {
     });
 
     result.sort((a, b) => {
-      if (sortBy === 'name') return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+      if (sortBy === 'name')
+        return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
       if (sortBy === 'ltv') return b.lifetimeValue - a.lifetimeValue;
       if (sortBy === 'stays') return b.totalStays - a.totalStays;
-      if (sortBy === 'recent') return new Date(b.stays[0]?.arrival || 0) - new Date(a.stays[0]?.arrival || 0);
+      if (sortBy === 'recent')
+        return new Date(b.stays[0]?.arrival || 0) - new Date(a.stays[0]?.arrival || 0);
       return 0;
     });
 
     return result;
   }, [query, tierFilter, vipFilter, sortBy]);
 
-  const stats = useMemo(() => ({
-    total: mockGuests.length,
-    vip: mockGuests.filter((g) => g.vipStatus).length,
-    returning: mockGuests.filter((g) => g.totalStays > 1).length,
-    avgLTV: Math.round(mockGuests.reduce((s, g) => s + g.lifetimeValue, 0) / mockGuests.length),
-  }), []);
+  const stats = useMemo(
+    () => ({
+      total: mockGuests.length,
+      vip: mockGuests.filter((g) => g.vipStatus).length,
+      returning: mockGuests.filter((g) => g.totalStays > 1).length,
+      avgLTV: Math.round(mockGuests.reduce((s, g) => s + g.lifetimeValue, 0) / mockGuests.length),
+    }),
+    []
+  );
 
   return (
     <div className="space-y-6">
@@ -751,7 +1101,9 @@ export default function GuestsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Guests & CRM</h1>
-          <p className="text-sm text-text-secondary">Manage guest profiles, preferences, and stay history</p>
+          <p className="text-sm text-text-secondary">
+            Manage guest profiles, preferences, and stay history
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -768,7 +1120,12 @@ export default function GuestsPage() {
         <StatCard label="Total Guests" value={stats.total} icon={Users} color="bg-secondary" />
         <StatCard label="VIP Guests" value={stats.vip} icon={Crown} color="bg-warning" />
         <StatCard label="Returning" value={stats.returning} icon={TrendingUp} color="bg-accent" />
-        <StatCard label="Avg. LTV" value={`$${stats.avgLTV.toLocaleString()}`} icon={DollarSign} color="bg-info" />
+        <StatCard
+          label="Avg. LTV"
+          value={`$${stats.avgLTV.toLocaleString()}`}
+          icon={DollarSign}
+          color="bg-info"
+        />
       </div>
 
       {/* Search & Filters */}
@@ -788,7 +1145,9 @@ export default function GuestsPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -808,7 +1167,9 @@ export default function GuestsPage() {
               onClick={() => setViewMode('grid')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'grid' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'grid'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -817,7 +1178,9 @@ export default function GuestsPage() {
               onClick={() => setViewMode('table')}
               className={cn(
                 'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'table' ? 'bg-secondary text-white' : 'text-text-muted hover:text-text-primary'
+                viewMode === 'table'
+                  ? 'bg-secondary text-white'
+                  : 'text-text-muted hover:text-text-primary'
               )}
             >
               <List className="h-4 w-4" />
@@ -859,7 +1222,11 @@ export default function GuestsPage() {
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => { setTierFilter('all'); setVipFilter('all'); setQuery(''); }}
+                onClick={() => {
+                  setTierFilter('all');
+                  setVipFilter('all');
+                  setQuery('');
+                }}
                 className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
               >
                 Reset Filters
@@ -871,7 +1238,8 @@ export default function GuestsPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredGuests.length}</span> of {mockGuests.length} guests
+        Showing <span className="font-medium text-text-primary">{filteredGuests.length}</span> of{' '}
+        {mockGuests.length} guests
       </p>
 
       {/* Grid View */}
@@ -918,7 +1286,9 @@ export default function GuestsPage() {
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-text-muted">LTV</p>
-                  <p className="text-sm font-bold font-mono text-text-primary">${guest.lifetimeValue.toLocaleString()}</p>
+                  <p className="text-sm font-bold font-mono text-text-primary">
+                    ${guest.lifetimeValue.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
@@ -968,7 +1338,9 @@ export default function GuestsPage() {
                         <div>
                           <p className="font-medium text-text-primary flex items-center gap-1.5">
                             {guest.firstName} {guest.lastName}
-                            {guest.vipStatus && <Star className="h-3 w-3 fill-warning text-warning" />}
+                            {guest.vipStatus && (
+                              <Star className="h-3 w-3 fill-warning text-warning" />
+                            )}
                           </p>
                           <p className="text-xs text-text-muted">{guest.id}</p>
                         </div>
@@ -981,8 +1353,12 @@ export default function GuestsPage() {
                     <td className="px-4 py-3">
                       <LoyaltyBadge tier={guest.loyaltyTier} />
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-text-primary">{guest.totalStays}</td>
-                    <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">${guest.lifetimeValue.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-mono text-text-primary">
+                      {guest.totalStays}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
+                      ${guest.lifetimeValue.toLocaleString()}
+                    </td>
                     <td className="px-4 py-3 text-text-secondary text-xs">
                       {guest.stays[0]?.arrival || '—'}
                     </td>
@@ -1006,10 +1382,7 @@ export default function GuestsPage() {
 
       {/* Detail Drawer */}
       {selectedGuest && (
-        <GuestDetailDrawer
-          guest={selectedGuest}
-          onClose={() => setSelectedGuest(null)}
-        />
+        <GuestDetailDrawer guest={selectedGuest} onClose={() => setSelectedGuest(null)} />
       )}
     </div>
   );

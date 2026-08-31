@@ -2,28 +2,66 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Shield, Users, Key, Globe, Plus, Search, Filter, BarChart3,
-  Activity, Lock, Unlock, Zap, CheckCircle2, AlertTriangle,
-  ChevronRight, RefreshCw, Trash2, Edit3, Eye, ArrowLeft,
-  SlidersHorizontal, Download, ChevronDown, ChevronUp
+  Shield,
+  Users,
+  Key,
+  Globe,
+  Plus,
+  Search,
+  Filter,
+  BarChart3,
+  Activity,
+  Lock,
+  Unlock,
+  Zap,
+  CheckCircle2,
+  AlertTriangle,
+  ChevronRight,
+  RefreshCw,
+  Trash2,
+  Edit3,
+  Eye,
+  ArrowLeft,
+  SlidersHorizontal,
+  Download,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import {
-  systemRoles, customRoles, apiKeys, ssoProviders, adminUsers,
-  permissionCategories, roleTypeMeta, apiKeyStatusMeta, environmentMeta,
-  getKeyStatus, getPermissionLabel
+  systemRoles,
+  customRoles,
+  apiKeys,
+  ssoProviders,
+  adminUsers,
+  permissionCategories,
+  roleTypeMeta,
+  apiKeyStatusMeta,
+  environmentMeta,
+  getKeyStatus,
+  getPermissionLabel,
 } from './data';
 import {
-  RoleCard, RoleTypeBadge, PermissionMatrixRow, ApiKeyRow,
-  SSOCard, RbacStatCard, UserAssignmentRow
+  RoleCard,
+  RoleTypeBadge,
+  PermissionMatrixRow,
+  ApiKeyRow,
+  SSOCard,
+  RbacStatCard,
+  UserAssignmentRow,
 } from './components';
 import RoleModal from './RoleModal';
 import ApiKeyModal from './ApiKeyModal';
 import SSOModal from './SSOModal';
 
 const tabs = [
-  { id: 'roles', label: 'Roles', icon: Shield, count: () => systemRoles.length + customRoles.length },
+  {
+    id: 'roles',
+    label: 'Roles',
+    icon: Shield,
+    count: () => systemRoles.length + customRoles.length,
+  },
   { id: 'api-keys', label: 'API Keys', icon: Key, count: () => apiKeys.length },
   { id: 'sso', label: 'SSO', icon: Globe, count: () => ssoProviders.length },
   { id: 'users', label: 'Users', icon: Users, count: () => adminUsers.length },
@@ -46,18 +84,46 @@ export default function AdminRbacPage() {
 
   // Stats
   const stats = useMemo(() => {
-    const activeKeys = keys.filter(k => getKeyStatus(k) === 'active').length;
-    const revokedKeys = keys.filter(k => getKeyStatus(k) === 'revoked').length;
-    const expiredKeys = keys.filter(k => getKeyStatus(k) === 'expired').length;
-    const activeSSO = ssos.filter(s => s.status === 'active').length;
+    const activeKeys = keys.filter((k) => getKeyStatus(k) === 'active').length;
+    const revokedKeys = keys.filter((k) => getKeyStatus(k) === 'revoked').length;
+    const expiredKeys = keys.filter((k) => getKeyStatus(k) === 'expired').length;
+    const activeSSO = ssos.filter((s) => s.status === 'active').length;
     const totalUsers = users.length;
-    const activeUsers = users.filter(u => u.status === 'active').length;
+    const activeUsers = users.filter((u) => u.status === 'active').length;
 
     return [
-      { label: 'Total Roles', value: roles.length, subtext: `${roles.filter(r => r.type === 'custom').length} custom`, icon: Shield, color: 'text-secondary', trend: 12 },
-      { label: 'Active API Keys', value: activeKeys, subtext: `${revokedKeys} revoked · ${expiredKeys} expired`, icon: Key, color: 'text-accent', trend: 8 },
-      { label: 'SSO Providers', value: activeSSO, subtext: `${ssos.length - activeSSO} inactive`, icon: Globe, color: 'text-info', trend: 0 },
-      { label: 'Admin Users', value: totalUsers, subtext: `${activeUsers} active`, icon: Users, color: 'text-warning', trend: -2 },
+      {
+        label: 'Total Roles',
+        value: roles.length,
+        subtext: `${roles.filter((r) => r.type === 'custom').length} custom`,
+        icon: Shield,
+        color: 'text-secondary',
+        trend: 12,
+      },
+      {
+        label: 'Active API Keys',
+        value: activeKeys,
+        subtext: `${revokedKeys} revoked · ${expiredKeys} expired`,
+        icon: Key,
+        color: 'text-accent',
+        trend: 8,
+      },
+      {
+        label: 'SSO Providers',
+        value: activeSSO,
+        subtext: `${ssos.length - activeSSO} inactive`,
+        icon: Globe,
+        color: 'text-info',
+        trend: 0,
+      },
+      {
+        label: 'Admin Users',
+        value: totalUsers,
+        subtext: `${activeUsers} active`,
+        icon: Users,
+        color: 'text-warning',
+        trend: -2,
+      },
     ];
   }, [roles, keys, ssos, users]);
 
@@ -65,31 +131,37 @@ export default function AdminRbacPage() {
   const filteredRoles = useMemo(() => {
     if (!search) return roles;
     const q = search.toLowerCase();
-    return roles.filter(r => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q));
+    return roles.filter(
+      (r) => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q)
+    );
   }, [roles, search]);
 
   const filteredKeys = useMemo(() => {
     if (!search) return keys;
     const q = search.toLowerCase();
-    return keys.filter(k => k.name.toLowerCase().includes(q) || k.id.toLowerCase().includes(q));
+    return keys.filter((k) => k.name.toLowerCase().includes(q) || k.id.toLowerCase().includes(q));
   }, [keys, search]);
 
   const filteredSSOs = useMemo(() => {
     if (!search) return ssos;
     const q = search.toLowerCase();
-    return ssos.filter(s => s.name.toLowerCase().includes(q) || s.provider.toLowerCase().includes(q));
+    return ssos.filter(
+      (s) => s.name.toLowerCase().includes(q) || s.provider.toLowerCase().includes(q)
+    );
   }, [ssos, search]);
 
   const filteredUsers = useMemo(() => {
     if (!search) return users;
     const q = search.toLowerCase();
-    return users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+    return users.filter(
+      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
   }, [users, search]);
 
   // Actions
   const handleSaveRole = (role) => {
-    setRoles(prev => {
-      const idx = prev.findIndex(r => r.id === role.id);
+    setRoles((prev) => {
+      const idx = prev.findIndex((r) => r.id === role.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = role;
@@ -104,18 +176,24 @@ export default function AdminRbacPage() {
   const handleDeleteRole = (role) => {
     if (role.isLocked) return;
     if (confirm(`Delete role "${role.name}"? This will affect ${role.userCount} users.`)) {
-      setRoles(prev => prev.filter(r => r.id !== role.id));
+      setRoles((prev) => prev.filter((r) => r.id !== role.id));
     }
   };
 
   const handleSaveKey = (key) => {
-    setKeys(prev => [...prev, key]);
+    setKeys((prev) => [...prev, key]);
     setShowApiKeyModal(false);
   };
 
   const handleRevokeKey = (key) => {
     if (confirm(`Revoke API key "${key.name}"? This cannot be undone.`)) {
-      setKeys(prev => prev.map(k => k.id === key.id ? { ...k, status: 'revoked', revokedAt: new Date().toISOString(), revokedBy: 'You' } : k));
+      setKeys((prev) =>
+        prev.map((k) =>
+          k.id === key.id
+            ? { ...k, status: 'revoked', revokedAt: new Date().toISOString(), revokedBy: 'You' }
+            : k
+        )
+      );
     }
   };
 
@@ -123,52 +201,75 @@ export default function AdminRbacPage() {
     if (confirm(`Regenerate API key "${key.name}"? The old key will be invalidated immediately.`)) {
       const prefix = key.environment === 'production' ? 'pk_live_' : 'pk_test_';
       const random = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      setKeys(prev => prev.map(k => k.id === key.id ? {
-        ...k,
-        keyFull: `${prefix}${random}`,
-        keyPrefix: `${prefix}${random.slice(0, 12)}...`,
-        createdAt: new Date().toISOString().split('T')[0],
-        usageCount: 0,
-        lastUsedAt: null,
-      } : k));
+      setKeys((prev) =>
+        prev.map((k) =>
+          k.id === key.id
+            ? {
+                ...k,
+                keyFull: `${prefix}${random}`,
+                keyPrefix: `${prefix}${random.slice(0, 12)}...`,
+                createdAt: new Date().toISOString().split('T')[0],
+                usageCount: 0,
+                lastUsedAt: null,
+              }
+            : k
+        )
+      );
     }
   };
 
   const handleToggleSSO = (provider) => {
-    setSSOs(prev => prev.map(s => s.id === provider.id ? { ...s, status: s.status === 'active' ? 'inactive' : 'active' } : s));
+    setSSOs((prev) =>
+      prev.map((s) =>
+        s.id === provider.id ? { ...s, status: s.status === 'active' ? 'inactive' : 'active' } : s
+      )
+    );
   };
 
   const handleSaveSSO = (sso) => {
-    setSSOs(prev => {
-      const idx = prev.findIndex(s => s.id === sso.id);
+    setSSOs((prev) => {
+      const idx = prev.findIndex((s) => s.id === sso.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = { ...next[idx], ...sso, updatedAt: new Date().toISOString().split('T')[0] };
         return next;
       }
-      return [...prev, { ...sso, id: `sso-${Date.now().toString(36)}`, createdAt: new Date().toISOString().split('T')[0], userCount: 0, syncErrors: 0 }];
+      return [
+        ...prev,
+        {
+          ...sso,
+          id: `sso-${Date.now().toString(36)}`,
+          createdAt: new Date().toISOString().split('T')[0],
+          userCount: 0,
+          syncErrors: 0,
+        },
+      ];
     });
     setShowSSOModal(false);
     setEditingSSO(null);
   };
 
   const handleDeleteSSO = (provider) => {
-    if (confirm(`Delete SSO provider "${provider.name}"? Users will no longer be able to sign in via this provider.`)) {
-      setSSOs(prev => prev.filter(s => s.id !== provider.id));
+    if (
+      confirm(
+        `Delete SSO provider "${provider.name}"? Users will no longer be able to sign in via this provider.`
+      )
+    ) {
+      setSSOs((prev) => prev.filter((s) => s.id !== provider.id));
     }
   };
 
   const handleUserRoleChange = (userId, newRole) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
   };
 
   const handleSyncSSO = (provider) => {
     alert(`Syncing ${provider.name}... (mock)`);
   };
 
-  const activeTabConfig = tabs.find(t => t.id === activeTab);
+  const activeTabConfig = tabs.find((t) => t.id === activeTab);
   const ActiveIcon = activeTabConfig?.icon || Shield;
 
   return (
@@ -184,7 +285,9 @@ export default function AdminRbacPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Access Control</h1>
-            <p className="text-sm text-text-secondary">Roles, API keys, SSO, and user permissions</p>
+            <p className="text-sm text-text-secondary">
+              Roles, API keys, SSO, and user permissions
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -212,17 +315,17 @@ export default function AdminRbacPage() {
               onClick={() => setActiveTab(tab.id)}
               className={cn(
                 'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-                isActive
-                  ? 'text-secondary'
-                  : 'text-text-muted hover:text-text-primary'
+                isActive ? 'text-secondary' : 'text-text-muted hover:text-text-primary'
               )}
             >
               <TabIcon className="h-4 w-4" />
               {tab.label}
-              <span className={cn(
-                'rounded-full px-2 py-0.5 text-[10px] font-medium',
-                isActive ? 'bg-secondary/10 text-secondary' : 'bg-border text-text-muted'
-              )}>
+              <span
+                className={cn(
+                  'rounded-full px-2 py-0.5 text-[10px] font-medium',
+                  isActive ? 'bg-secondary/10 text-secondary' : 'bg-border text-text-muted'
+                )}
+              >
                 {tab.count()}
               </span>
               {isActive && (
@@ -247,7 +350,12 @@ export default function AdminRbacPage() {
         </div>
         <div className="flex items-center gap-2">
           {activeTab === 'roles' && (
-            <Button onClick={() => { setEditingRole(null); setShowRoleModal(true); }}>
+            <Button
+              onClick={() => {
+                setEditingRole(null);
+                setShowRoleModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> Create Role
             </Button>
           )}
@@ -257,7 +365,12 @@ export default function AdminRbacPage() {
             </Button>
           )}
           {activeTab === 'sso' && (
-            <Button onClick={() => { setEditingSSO(null); setShowSSOModal(true); }}>
+            <Button
+              onClick={() => {
+                setEditingSSO(null);
+                setShowSSOModal(true);
+              }}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> Add SSO
             </Button>
           )}
@@ -273,15 +386,20 @@ export default function AdminRbacPage() {
               <Lock className="h-4 w-4 text-info" /> System Roles
             </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredRoles.filter(r => r.type === 'system').map((role) => (
-                <RoleCard
-                  key={role.id}
-                  role={role}
-                  onEdit={(r) => { setEditingRole(r); setShowRoleModal(true); }}
-                  onDelete={handleDeleteRole}
-                  onAssign={(r) => setActiveTab('users')}
-                />
-              ))}
+              {filteredRoles
+                .filter((r) => r.type === 'system')
+                .map((role) => (
+                  <RoleCard
+                    key={role.id}
+                    role={role}
+                    onEdit={(r) => {
+                      setEditingRole(r);
+                      setShowRoleModal(true);
+                    }}
+                    onDelete={handleDeleteRole}
+                    onAssign={(r) => setActiveTab('users')}
+                  />
+                ))}
             </div>
           </div>
 
@@ -291,15 +409,20 @@ export default function AdminRbacPage() {
               <SlidersHorizontal className="h-4 w-4 text-secondary" /> Custom Roles
             </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredRoles.filter(r => r.type === 'custom').map((role) => (
-                <RoleCard
-                  key={role.id}
-                  role={role}
-                  onEdit={(r) => { setEditingRole(r); setShowRoleModal(true); }}
-                  onDelete={handleDeleteRole}
-                  onAssign={(r) => setActiveTab('users')}
-                />
-              ))}
+              {filteredRoles
+                .filter((r) => r.type === 'custom')
+                .map((role) => (
+                  <RoleCard
+                    key={role.id}
+                    role={role}
+                    onEdit={(r) => {
+                      setEditingRole(r);
+                      setShowRoleModal(true);
+                    }}
+                    onDelete={handleDeleteRole}
+                    onAssign={(r) => setActiveTab('users')}
+                  />
+                ))}
             </div>
           </div>
 
@@ -309,7 +432,9 @@ export default function AdminRbacPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <Shield className="h-4 w-4 text-secondary" /> Permission Reference
               </h3>
-              <span className="text-xs text-text-muted">{permissionCategories.length} categories</span>
+              <span className="text-xs text-text-muted">
+                {permissionCategories.length} categories
+              </span>
             </div>
             <div className="p-4 space-y-2">
               {permissionCategories.map((cat) => (
@@ -333,14 +458,30 @@ export default function AdminRbacPage() {
             <table className="w-full text-sm">
               <thead className="bg-background border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Key</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Scopes</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Usage</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Last Used</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Expires</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Key
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Scopes
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Usage
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Last Used
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Expires
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -350,7 +491,9 @@ export default function AdminRbacPage() {
                     apiKey={key}
                     onRevoke={handleRevokeKey}
                     onRegenerate={handleRegenerateKey}
-                    onView={(k) => alert(`Key: ${k.name}\\nFull: ${k.keyFull}\\nScopes: ${k.scopes.join(', ')}`)}
+                    onView={(k) =>
+                      alert(`Key: ${k.name}\\nFull: ${k.keyFull}\\nScopes: ${k.scopes.join(', ')}`)
+                    }
                   />
                 ))}
               </tbody>
@@ -372,7 +515,10 @@ export default function AdminRbacPage() {
             <SSOCard
               key={provider.id}
               provider={provider}
-              onEdit={(p) => { setEditingSSO(p); setShowSSOModal(true); }}
+              onEdit={(p) => {
+                setEditingSSO(p);
+                setShowSSOModal(true);
+              }}
               onToggle={handleToggleSSO}
               onSync={handleSyncSSO}
               onDelete={handleDeleteSSO}
@@ -388,10 +534,18 @@ export default function AdminRbacPage() {
             <table className="w-full text-sm">
               <thead className="bg-background border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">User</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Role</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Last Active</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Last Active
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -419,20 +573,23 @@ export default function AdminRbacPage() {
       {showRoleModal && (
         <RoleModal
           role={editingRole}
-          onClose={() => { setShowRoleModal(false); setEditingRole(null); }}
+          onClose={() => {
+            setShowRoleModal(false);
+            setEditingRole(null);
+          }}
           onSave={handleSaveRole}
         />
       )}
       {showApiKeyModal && (
-        <ApiKeyModal
-          onClose={() => setShowApiKeyModal(false)}
-          onSave={handleSaveKey}
-        />
+        <ApiKeyModal onClose={() => setShowApiKeyModal(false)} onSave={handleSaveKey} />
       )}
       {showSSOModal && (
         <SSOModal
           isOpen={showSSOModal}
-          onClose={() => { setShowSSOModal(false); setEditingSSO(null); }}
+          onClose={() => {
+            setShowSSOModal(false);
+            setEditingSSO(null);
+          }}
           ssoConfig={editingSSO}
           onSave={handleSaveSSO}
         />

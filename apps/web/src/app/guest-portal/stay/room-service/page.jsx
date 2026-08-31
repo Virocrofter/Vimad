@@ -2,9 +2,23 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, ShoppingCart, Coffee, UtensilsCrossed, Wine, Sparkles,
-  Search, X, Plus, Minus, CheckCircle2, Clock, ChevronRight,
-  Filter, Star, AlertTriangle, Info
+  ArrowLeft,
+  ShoppingCart,
+  Coffee,
+  UtensilsCrossed,
+  Wine,
+  Sparkles,
+  Search,
+  X,
+  Plus,
+  Minus,
+  CheckCircle2,
+  Clock,
+  ChevronRight,
+  Filter,
+  Star,
+  AlertTriangle,
+  Info,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useGuestStore } from '../../store';
@@ -19,25 +33,37 @@ export default function RoomServicePage() {
   const [showCart, setShowCart] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
 
-  const { cart, addToCart, removeFromCart, updateCartQty, clearCart, addOrder, getCartTotal, getCartCount } = useGuestStore();
+  const {
+    cart,
+    addToCart,
+    removeFromCart,
+    updateCartQty,
+    clearCart,
+    addOrder,
+    getCartTotal,
+    getCartCount,
+  } = useGuestStore();
 
   const categories = roomServiceMenu.categories;
 
   const allItems = useMemo(() => {
-    return categories.flatMap(cat => cat.items.map(item => ({ ...item, categoryId: cat.id, categoryName: cat.name })));
+    return categories.flatMap((cat) =>
+      cat.items.map((item) => ({ ...item, categoryId: cat.id, categoryName: cat.name }))
+    );
   }, [categories]);
 
   const filteredItems = useMemo(() => {
     let items = activeCategory
-      ? categories.find(c => c.id === activeCategory)?.items || []
+      ? categories.find((c) => c.id === activeCategory)?.items || []
       : allItems;
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      items = items.filter(item =>
-        item.name.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
-        item.dietary.some(d => d.toLowerCase().includes(q))
+      items = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.dietary.some((d) => d.toLowerCase().includes(q))
       );
     }
     return items;
@@ -45,7 +71,9 @@ export default function RoomServicePage() {
 
   const cartQtyMap = useMemo(() => {
     const map = {};
-    cart.forEach(item => { map[item.id] = item.qty; });
+    cart.forEach((item) => {
+      map[item.id] = item.qty;
+    });
     return map;
   }, [cart]);
 
@@ -67,7 +95,7 @@ export default function RoomServicePage() {
       type: 'room_service',
       status: 'pending',
       orderedAt: new Date().toISOString(),
-      items: cart.map(item => ({ name: item.name, qty: item.qty, price: item.price })),
+      items: cart.map((item) => ({ name: item.name, qty: item.qty, price: item.price })),
       total: getCartTotal(),
     };
     addOrder(newOrder);
@@ -110,7 +138,9 @@ export default function RoomServicePage() {
           <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
           <div>
             <p className="text-sm font-medium text-text-primary">Order Placed!</p>
-            <p className="text-xs text-text-secondary">Your order is being prepared and will be delivered to Room 204.</p>
+            <p className="text-xs text-text-secondary">
+              Your order is being prepared and will be delivered to Room 204.
+            </p>
           </div>
         </div>
       )}
@@ -145,7 +175,9 @@ export default function RoomServicePage() {
                 key={category.id}
                 category={category}
                 isAvailable={available}
-                onSelect={() => setActiveCategory(activeCategory === category.id ? null : category.id)}
+                onSelect={() =>
+                  setActiveCategory(activeCategory === category.id ? null : category.id)
+                }
               />
             );
           })}
@@ -157,15 +189,17 @@ export default function RoomServicePage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-text-primary">
             {activeCategory
-              ? categories.find(c => c.id === activeCategory)?.name
+              ? categories.find((c) => c.id === activeCategory)?.name
               : searchQuery
                 ? `Search Results (${filteredItems.length})`
-                : 'All Items'
-            }
+                : 'All Items'}
           </h2>
           {(activeCategory || searchQuery) && (
             <button
-              onClick={() => { setActiveCategory(null); setSearchQuery(''); }}
+              onClick={() => {
+                setActiveCategory(null);
+                setSearchQuery('');
+              }}
               className="text-xs text-secondary hover:underline"
             >
               Clear
@@ -196,7 +230,10 @@ export default function RoomServicePage() {
       {/* Cart Drawer (Mobile) / Sidebar (Desktop) */}
       {showCart && (
         <div className="fixed inset-0 z-50 sm:relative sm:inset-auto">
-          <div className="absolute inset-0 bg-black/50 sm:hidden" onClick={() => setShowCart(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 sm:hidden"
+            onClick={() => setShowCart(false)}
+          />
           <div className="absolute bottom-0 left-0 right-0 sm:static sm:w-full rounded-t-xl sm:rounded-xl border border-border bg-background shadow-2xl sm:shadow-none max-h-[80vh] sm:max-h-none overflow-auto">
             <div className="sticky top-0 bg-background z-10 border-b border-border p-4 flex items-center justify-between sm:hidden">
               <h3 className="text-sm font-semibold text-text-primary">Your Order</h3>

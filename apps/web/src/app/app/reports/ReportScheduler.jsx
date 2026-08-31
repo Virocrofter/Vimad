@@ -1,8 +1,6 @@
 /* src/app/admin/reports/ReportScheduler.jsx */
 import { useState } from 'react';
-import {
-  Plus, Clock, Calendar, FileText, Mail, Play, Edit3, Trash2, X, Save
-} from 'lucide-react';
+import { Plus, Clock, Calendar, FileText, Mail, Play, Edit3, Trash2, X, Save } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { libraryReports, frequencyMeta, formatMeta, initialSchedules } from './data';
@@ -22,7 +20,14 @@ export default function ReportScheduler() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ reportId: '', frequency: 'daily', time: '08:00', format: 'pdf', recipients: '', active: true });
+    setForm({
+      reportId: '',
+      frequency: 'daily',
+      time: '08:00',
+      format: 'pdf',
+      recipients: '',
+      active: true,
+    });
     setShowModal(true);
   };
 
@@ -43,7 +48,10 @@ export default function ReportScheduler() {
     const report = libraryReports.find((r) => r.id === form.reportId);
     if (!report) return;
 
-    const recipientList = form.recipients.split(',').map((e) => e.trim()).filter(Boolean);
+    const recipientList = form.recipients
+      .split(',')
+      .map((e) => e.trim())
+      .filter(Boolean);
     const newSchedule = {
       id: editing ? editing.id : `S${Date.now()}`,
       reportId: form.reportId,
@@ -66,7 +74,11 @@ export default function ReportScheduler() {
 
   const toggleActive = (id) => {
     setSchedules((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, active: !s.active, nextRun: !s.active ? `2026-08-13 ${s.time}` : '—' } : s))
+      prev.map((s) =>
+        s.id === id
+          ? { ...s, active: !s.active, nextRun: !s.active ? `2026-08-13 ${s.time}` : '—' }
+          : s
+      )
     );
   };
 
@@ -76,11 +88,7 @@ export default function ReportScheduler() {
 
   const handleRunNow = (schedule) => {
     setSchedules((prev) =>
-      prev.map((s) =>
-        s.id === schedule.id
-          ? { ...s, lastRun: new Date().toLocaleString() }
-          : s
-      )
+      prev.map((s) => (s.id === schedule.id ? { ...s, lastRun: new Date().toLocaleString() } : s))
     );
   };
 
@@ -135,16 +143,26 @@ export default function ReportScheduler() {
                         {frequencyMeta[schedule.frequency]?.label || schedule.frequency}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-text-primary font-mono text-xs">{schedule.time}</td>
+                    <td className="px-4 py-3 text-text-primary font-mono text-xs">
+                      {schedule.time}
+                    </td>
                     <td className="px-4 py-3">
-                      <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', fmt.class)}>
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium',
+                          fmt.class
+                        )}
+                      >
                         {fmt.label}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {schedule.recipients.map((email) => (
-                          <span key={email} className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-text-secondary border border-border">
+                          <span
+                            key={email}
+                            className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-text-secondary border border-border"
+                          >
                             <Mail className="h-3 w-3" />
                             {email}
                           </span>
@@ -202,7 +220,10 @@ export default function ReportScheduler() {
                   <td colSpan={9} className="px-4 py-12 text-center text-text-muted">
                     <Clock className="mx-auto h-10 w-10 mb-3" />
                     <p>No scheduled reports yet.</p>
-                    <button onClick={openNew} className="mt-2 text-sm text-secondary hover:underline">
+                    <button
+                      onClick={openNew}
+                      className="mt-2 text-sm text-secondary hover:underline"
+                    >
                       Create your first schedule
                     </button>
                   </td>
@@ -222,7 +243,10 @@ export default function ReportScheduler() {
               <h3 className="text-lg font-semibold text-text-primary">
                 {editing ? 'Edit Schedule' : 'New Scheduled Report'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-primary">
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-text-muted hover:text-text-primary"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -237,7 +261,9 @@ export default function ReportScheduler() {
                 >
                   <option value="">Select a report...</option>
                   {libraryReports.map((r) => (
-                    <option key={r.id} value={r.id}>{r.title}</option>
+                    <option key={r.id} value={r.id}>
+                      {r.title}
+                    </option>
                   ))}
                 </select>
               </div>

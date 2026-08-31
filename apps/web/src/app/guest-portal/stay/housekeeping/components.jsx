@@ -1,7 +1,5 @@
 /* src/app/guest-portal/stay/housekeeping/components.jsx */
-import {
-  Sparkles, Droplets, Bath, BedDouble, Trash2, Bed, ChevronRight
-} from 'lucide-react';
+import { Sparkles, Droplets, Bath, BedDouble, Trash2, Bed, ChevronRight } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
 /* ─── Housekeeping Service Card ─── */
@@ -25,10 +23,12 @@ export function HousekeepingServiceCard({ service, onRequest, isDnd }) {
         isDnd && 'opacity-50 cursor-not-allowed'
       )}
     >
-      <div className={cn(
-        'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-        isDnd ? 'bg-border' : 'bg-secondary/10'
-      )}>
+      <div
+        className={cn(
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+          isDnd ? 'bg-border' : 'bg-secondary/10'
+        )}
+      >
         <Icon className={cn('h-5 w-5', isDnd ? 'text-text-muted' : 'text-secondary')} />
       </div>
       <div className="flex-1 min-w-0">

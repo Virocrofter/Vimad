@@ -1,9 +1,24 @@
 /* src/app/guest-portal/status/announcements/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  ArrowLeft, Megaphone, Filter, Search, Sparkles, Wrench,
-  AlertTriangle, Info, Calendar, Clock, ChevronDown, ChevronUp,
-  ExternalLink, Pin, Bell, BellOff, CheckCircle2, X,
+  ArrowLeft,
+  Megaphone,
+  Filter,
+  Search,
+  Sparkles,
+  Wrench,
+  AlertTriangle,
+  Info,
+  Calendar,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Pin,
+  Bell,
+  BellOff,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -18,15 +33,40 @@ export default function PublicAnnouncementsPage() {
   const [subscribed, setSubscribed] = useState(false);
 
   const typeConfig = {
-    feature: { label: 'Feature', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', icon: Sparkles },
-    maintenance: { label: 'Maintenance', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', icon: Wrench },
-    alert: { label: 'Alert', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', icon: AlertTriangle },
-    update: { label: 'Update', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', icon: Info },
+    feature: {
+      label: 'Feature',
+      color: 'text-accent',
+      bg: 'bg-accent/10',
+      border: 'border-accent/20',
+      icon: Sparkles,
+    },
+    maintenance: {
+      label: 'Maintenance',
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+      border: 'border-warning/20',
+      icon: Wrench,
+    },
+    alert: {
+      label: 'Alert',
+      color: 'text-danger',
+      bg: 'bg-danger/10',
+      border: 'border-danger/20',
+      icon: AlertTriangle,
+    },
+    update: {
+      label: 'Update',
+      color: 'text-info',
+      bg: 'bg-info/10',
+      border: 'border-info/20',
+      icon: Info,
+    },
   };
 
   const filtered = useMemo(() => {
-    let result = guestAnnouncements.filter(a => {
-      const matchesQuery = !query ||
+    let result = guestAnnouncements.filter((a) => {
+      const matchesQuery =
+        !query ||
         a.title.toLowerCase().includes(query.toLowerCase()) ||
         a.content.toLowerCase().includes(query.toLowerCase());
       const matchesType = typeFilter === 'all' || a.type === typeFilter;
@@ -47,12 +87,21 @@ export default function PublicAnnouncementsPage() {
     return result;
   }, [query, typeFilter, sortBy]);
 
-  const stats = useMemo(() => ({
-    total: guestAnnouncements.filter(a => a.status === 'published' && new Date(a.expiresAt) > new Date()).length,
-    feature: guestAnnouncements.filter(a => a.type === 'feature' && a.status === 'published').length,
-    maintenance: guestAnnouncements.filter(a => a.type === 'maintenance' && a.status === 'published').length,
-    alert: guestAnnouncements.filter(a => a.type === 'alert' && a.status === 'published').length,
-  }), []);
+  const stats = useMemo(
+    () => ({
+      total: guestAnnouncements.filter(
+        (a) => a.status === 'published' && new Date(a.expiresAt) > new Date()
+      ).length,
+      feature: guestAnnouncements.filter((a) => a.type === 'feature' && a.status === 'published')
+        .length,
+      maintenance: guestAnnouncements.filter(
+        (a) => a.type === 'maintenance' && a.status === 'published'
+      ).length,
+      alert: guestAnnouncements.filter((a) => a.type === 'alert' && a.status === 'published')
+        .length,
+    }),
+    []
+  );
 
   return (
     <div className="space-y-6">
@@ -67,7 +116,9 @@ export default function PublicAnnouncementsPage() {
           </a>
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Announcements</h1>
-            <p className="text-sm text-text-secondary">Stay informed about hotel news and updates</p>
+            <p className="text-sm text-text-secondary">
+              Stay informed about hotel news and updates
+            </p>
           </div>
         </div>
         <Button
@@ -76,7 +127,11 @@ export default function PublicAnnouncementsPage() {
           onClick={() => setSubscribed(!subscribed)}
           className={subscribed ? 'border-accent text-accent' : ''}
         >
-          {subscribed ? <BellOff className="mr-1.5 h-4 w-4" /> : <Bell className="mr-1.5 h-4 w-4" />}
+          {subscribed ? (
+            <BellOff className="mr-1.5 h-4 w-4" />
+          ) : (
+            <Bell className="mr-1.5 h-4 w-4" />
+          )}
           {subscribed ? 'Subscribed' : 'Get Updates'}
         </Button>
       </div>
@@ -139,7 +194,8 @@ export default function PublicAnnouncementsPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filtered.length}</span> of {stats.total} active announcements
+        Showing <span className="font-medium text-text-primary">{filtered.length}</span> of{' '}
+        {stats.total} active announcements
       </p>
 
       {/* Announcements */}
@@ -170,8 +226,12 @@ export default function PublicAnnouncementsPage() {
           variant={subscribed ? 'outline' : 'secondary'}
           onClick={() => setSubscribed(!subscribed)}
         >
-          {subscribed ? <CheckCircle2 className="mr-1.5 h-4 w-4" /> : <Bell className="mr-1.5 h-4 w-4" />}
-          {subscribed ? 'You\'re Subscribed' : 'Subscribe to Updates'}
+          {subscribed ? (
+            <CheckCircle2 className="mr-1.5 h-4 w-4" />
+          ) : (
+            <Bell className="mr-1.5 h-4 w-4" />
+          )}
+          {subscribed ? "You're Subscribed" : 'Subscribe to Updates'}
         </Button>
       </div>
     </div>

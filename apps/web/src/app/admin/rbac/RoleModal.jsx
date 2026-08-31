@@ -26,20 +26,20 @@ export default function RoleModal({ role, onClose, onSave }) {
     }
   }, [role]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const togglePermission = (key) => {
     if (form.permissions.includes('*')) return; // wildcard blocks individual toggles
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       permissions: prev.permissions.includes(key)
-        ? prev.permissions.filter(p => p !== key)
+        ? prev.permissions.filter((p) => p !== key)
         : [...prev.permissions, key],
     }));
   };
 
   const toggleWildcard = () => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       permissions: prev.permissions.includes('*') ? [] : ['*'],
     }));
@@ -60,8 +60,10 @@ export default function RoleModal({ role, onClose, onSave }) {
     onClose();
   };
 
-  const allPermissions = permissionCategories.flatMap(c => c.permissions.map(p => p.key));
-  const grantedCount = form.permissions.includes('*') ? allPermissions.length : form.permissions.length;
+  const allPermissions = permissionCategories.flatMap((c) => c.permissions.map((p) => p.key));
+  const grantedCount = form.permissions.includes('*')
+    ? allPermissions.length
+    : form.permissions.length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -74,11 +76,16 @@ export default function RoleModal({ role, onClose, onSave }) {
               <Shield className="h-5 w-5 text-secondary" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-text-primary">{isEditing ? 'Edit Role' : 'Create Custom Role'}</h3>
+              <h3 className="text-lg font-bold text-text-primary">
+                {isEditing ? 'Edit Role' : 'Create Custom Role'}
+              </h3>
               <p className="text-xs text-text-muted">{grantedCount} permissions granted</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -87,7 +94,9 @@ export default function RoleModal({ role, onClose, onSave }) {
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Role Name</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Role Name
+              </label>
               <input
                 type="text"
                 required
@@ -98,7 +107,9 @@ export default function RoleModal({ role, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Description
+              </label>
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
@@ -113,7 +124,9 @@ export default function RoleModal({ role, onClose, onSave }) {
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
             <div>
               <p className="text-sm font-medium text-text-primary">Full Access (Wildcard)</p>
-              <p className="text-xs text-text-muted">Grants all permissions across all categories</p>
+              <p className="text-xs text-text-muted">
+                Grants all permissions across all categories
+              </p>
             </div>
             <button
               type="button"
@@ -123,16 +136,20 @@ export default function RoleModal({ role, onClose, onSave }) {
                 form.permissions.includes('*') ? 'bg-danger' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.permissions.includes('*') ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.permissions.includes('*') ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Permission Matrix */}
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Permission Matrix</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Permission Matrix
+            </h4>
             {permissionCategories.map((category) => (
               <PermissionMatrixRow
                 key={category.key}
@@ -148,7 +165,9 @@ export default function RoleModal({ role, onClose, onSave }) {
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
             <div>
               <p className="text-sm font-medium text-text-primary">Default Role for New Users</p>
-              <p className="text-xs text-text-muted">Automatically assign this role to new admin sign-ups</p>
+              <p className="text-xs text-text-muted">
+                Automatically assign this role to new admin sign-ups
+              </p>
             </div>
             <button
               type="button"
@@ -158,16 +177,20 @@ export default function RoleModal({ role, onClose, onSave }) {
                 form.isDefault ? 'bg-accent' : 'bg-border'
               )}
             >
-              <span className={cn(
-                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                form.isDefault ? 'translate-x-6' : 'translate-x-1'
-              )} />
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                  form.isDefault ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
             </button>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Role'}
             </Button>

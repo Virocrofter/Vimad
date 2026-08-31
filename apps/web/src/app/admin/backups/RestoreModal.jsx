@@ -1,6 +1,15 @@
 /* src/app/admin/backups/RestoreModal.jsx */
 import { useState } from 'react';
-import { X, Database, Server, AlertTriangle, CheckCircle2, Clock, HardDrive, ArrowRight } from 'lucide-react';
+import {
+  X,
+  Database,
+  Server,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  HardDrive,
+  ArrowRight,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { RestorePointStatusBadge, CopyableId, RegionBadge } from './components';
@@ -20,12 +29,12 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
 
   if (!restorePoint) return null;
 
-  const target = restoreTargets.find(t => t.id === selectedTarget);
+  const target = restoreTargets.find((t) => t.id === selectedTarget);
   const canProceed = step === 1 ? selectedTarget : confirmName === restorePoint.id;
 
   const handleRestore = async () => {
     setIsRestoring(true);
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 2000));
     onRestore(restorePoint.id, selectedTarget);
     setIsRestoring(false);
     onClose();
@@ -46,7 +55,10 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
               <p className="text-xs text-text-muted">{restorePoint.id}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -54,15 +66,30 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
         {/* Step indicator */}
         <div className="px-6 pt-4">
           <div className="flex items-center gap-2">
-            <div className={cn('flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold', step >= 1 ? 'bg-secondary text-white' : 'bg-border text-text-muted')}>
+            <div
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
+                step >= 1 ? 'bg-secondary text-white' : 'bg-border text-text-muted'
+              )}
+            >
               1
             </div>
             <div className={cn('h-0.5 flex-1', step >= 2 ? 'bg-secondary' : 'bg-border')} />
-            <div className={cn('flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold', step >= 2 ? 'bg-secondary text-white' : 'bg-border text-text-muted')}>
+            <div
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
+                step >= 2 ? 'bg-secondary text-white' : 'bg-border text-text-muted'
+              )}
+            >
               2
             </div>
             <div className={cn('h-0.5 flex-1', step >= 3 ? 'bg-secondary' : 'bg-border')} />
-            <div className={cn('flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold', step >= 3 ? 'bg-secondary text-white' : 'bg-border text-text-muted')}>
+            <div
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
+                step >= 3 ? 'bg-secondary text-white' : 'bg-border text-text-muted'
+              )}
+            >
               3
             </div>
           </div>
@@ -104,8 +131,11 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
               <div className="pt-1">
                 <span className="text-xs text-text-muted">Databases</span>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {restorePoint.databases.map(db => (
-                    <span key={db} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary font-mono">
+                  {restorePoint.databases.map((db) => (
+                    <span
+                      key={db}
+                      className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] text-text-secondary font-mono"
+                    >
                       {db}
                     </span>
                   ))}
@@ -117,7 +147,9 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
           {/* Step 1: Select Target */}
           {step === 1 && (
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Select Restore Target</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Select Restore Target
+              </h4>
               <div className="space-y-2">
                 {restoreTargets.map((t) => (
                   <button
@@ -129,22 +161,36 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
                       selectedTarget === t.id
                         ? 'border-secondary bg-secondary/5'
                         : t.status === 'available'
-                        ? 'border-border bg-surface hover:border-secondary/30'
-                        : 'border-border bg-neutral/5 opacity-50 cursor-not-allowed'
+                          ? 'border-border bg-surface hover:border-secondary/30'
+                          : 'border-border bg-neutral/5 opacity-50 cursor-not-allowed'
                     )}
                   >
-                    <div className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-lg',
-                      selectedTarget === t.id ? 'bg-secondary/10' : 'bg-neutral/10'
-                    )}>
-                      <Server className={cn('h-4 w-4', selectedTarget === t.id ? 'text-secondary' : 'text-text-muted')} />
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 items-center justify-center rounded-lg',
+                        selectedTarget === t.id ? 'bg-secondary/10' : 'bg-neutral/10'
+                      )}
+                    >
+                      <Server
+                        className={cn(
+                          'h-4 w-4',
+                          selectedTarget === t.id ? 'text-secondary' : 'text-text-muted'
+                        )}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn('text-sm font-medium', selectedTarget === t.id ? 'text-secondary' : 'text-text-primary')}>
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          selectedTarget === t.id ? 'text-secondary' : 'text-text-primary'
+                        )}
+                      >
                         {t.label}
                       </p>
                       <p className="text-xs text-text-muted">
-                        {t.type === 'staging' ? 'Isolated staging environment' : 'Production DR site'}
+                        {t.type === 'staging'
+                          ? 'Isolated staging environment'
+                          : 'Production DR site'}
                       </p>
                     </div>
                     {t.status !== 'available' && (
@@ -168,8 +214,8 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
                   <div>
                     <p className="text-sm font-medium text-warning">Destructive Action</p>
                     <p className="text-xs text-text-secondary mt-1">
-                      Restoring to <strong>{target.label}</strong> will overwrite existing data on that environment.
-                      Any data created after this restore point will be lost.
+                      Restoring to <strong>{target.label}</strong> will overwrite existing data on
+                      that environment. Any data created after this restore point will be lost.
                     </p>
                   </div>
                 </div>
@@ -177,7 +223,8 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
 
               <div className="space-y-2">
                 <label className="text-xs font-medium text-text-secondary">
-                  Type the restore point ID to confirm: <span className="font-mono text-text-primary">{restorePoint.id}</span>
+                  Type the restore point ID to confirm:{' '}
+                  <span className="font-mono text-text-primary">{restorePoint.id}</span>
                 </label>
                 <input
                   type="text"
@@ -227,7 +274,10 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
               </div>
               <div className="mx-auto max-w-xs">
                 <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                  <div className="h-full rounded-full bg-secondary animate-pulse" style={{ width: '60%' }} />
+                  <div
+                    className="h-full rounded-full bg-secondary animate-pulse"
+                    style={{ width: '60%' }}
+                  />
                 </div>
                 <p className="text-xs text-text-muted mt-2">Downloading and decrypting backup...</p>
               </div>
@@ -248,7 +298,12 @@ export default function RestoreModal({ restorePoint, onClose, onRestore }) {
                 Next <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             ) : (
-              <Button type="button" onClick={handleRestore} disabled={!canProceed || isRestoring} isLoading={isRestoring}>
+              <Button
+                type="button"
+                onClick={handleRestore}
+                disabled={!canProceed || isRestoring}
+                isLoading={isRestoring}
+              >
                 <HardDrive className="mr-1.5 h-4 w-4" /> Start Restore
               </Button>
             )}

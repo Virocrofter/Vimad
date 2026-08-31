@@ -1,10 +1,36 @@
 /* src/app/admin/security/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Shield, ShieldAlert, ShieldCheck, Lock, Unlock, Globe, Eye, EyeOff,
-  Search, Filter, RefreshCw, Download, MapPin, AlertTriangle, CheckCircle2,
-  Clock, Activity, Zap, Users, KeyRound, Server, ChevronDown, ChevronUp,
-  Ban, Check, X, Fingerprint, Wifi, WifiOff, Siren
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Lock,
+  Unlock,
+  Globe,
+  Eye,
+  EyeOff,
+  Search,
+  Filter,
+  RefreshCw,
+  Download,
+  MapPin,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Activity,
+  Zap,
+  Users,
+  KeyRound,
+  Server,
+  ChevronDown,
+  ChevronUp,
+  Ban,
+  Check,
+  X,
+  Fingerprint,
+  Wifi,
+  WifiOff,
+  Siren,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -21,7 +47,7 @@ import {
   threatLevelMeta,
   activityTypeMeta,
   timeAgo,
-  formatNumber
+  formatNumber,
 } from './data';
 
 import {
@@ -36,7 +62,7 @@ import {
   TwoFAPolicyCard,
   IPAllowlistCard,
   SimpleWorldMap,
-  PasswordPolicyDisplay
+  PasswordPolicyDisplay,
 } from './components';
 
 /* ─── Main Security Page ─── */
@@ -70,7 +96,8 @@ export default function SecurityPage() {
   /* ─── Filtered Failed Logins ─── */
   const filteredLogins = useMemo(() => {
     return failedLogins.filter((entry) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         entry.ip.includes(query) ||
         entry.location.toLowerCase().includes(query.toLowerCase()) ||
         entry.country.toLowerCase().includes(query.toLowerCase());
@@ -83,7 +110,8 @@ export default function SecurityPage() {
   /* ─── Filtered Suspicious Activity ─── */
   const filteredActivity = useMemo(() => {
     return suspiciousActivity.filter((entry) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         entry.title.toLowerCase().includes(query.toLowerCase()) ||
         entry.description.toLowerCase().includes(query.toLowerCase()) ||
         entry.user.toLowerCase().includes(query.toLowerCase()) ||
@@ -98,24 +126,23 @@ export default function SecurityPage() {
   /* ─── Computed: 2FA Stats ─── */
   const twoFAStats = useMemo(() => {
     const total = twoFAPolicies.length;
-    const enforced = twoFAPolicies.filter(p => p.enforced).length;
-    const avgCompliance = total > 0
-      ? Math.round(twoFAPolicies.reduce((s, p) => s + p.complianceRate, 0) / total)
-      : 0;
+    const enforced = twoFAPolicies.filter((p) => p.enforced).length;
+    const avgCompliance =
+      total > 0 ? Math.round(twoFAPolicies.reduce((s, p) => s + p.complianceRate, 0) / total) : 0;
     return { total, enforced, avgCompliance };
   }, []);
 
   /* ─── Computed: IP Allowlist Stats ─── */
   const ipStats = useMemo(() => {
     const total = ipAllowlists.length;
-    const active = ipAllowlists.filter(a => a.status === 'active').length;
+    const active = ipAllowlists.filter((a) => a.status === 'active').length;
     const totalHits = ipAllowlists.reduce((s, a) => s + (a.hitCount || 0), 0);
     return { total, active, totalHits };
   }, []);
 
   /* ─── Handlers ─── */
   const toggleLogin = (id) => {
-    setExpandedLogins(prev => {
+    setExpandedLogins((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -124,7 +151,7 @@ export default function SecurityPage() {
   };
 
   const toggleActivity = (id) => {
-    setExpandedActivity(prev => {
+    setExpandedActivity((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -181,8 +208,18 @@ export default function SecurityPage() {
   /* ─── Tabs ─── */
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Shield },
-    { id: 'failed-logins', label: 'Failed Logins', icon: Lock, badge: failedLogins.filter(l => l.status === 'active').length },
-    { id: 'suspicious', label: 'Suspicious Activity', icon: AlertTriangle, badge: suspiciousActivity.filter(a => a.status === 'open').length },
+    {
+      id: 'failed-logins',
+      label: 'Failed Logins',
+      icon: Lock,
+      badge: failedLogins.filter((l) => l.status === 'active').length,
+    },
+    {
+      id: 'suspicious',
+      label: 'Suspicious Activity',
+      icon: AlertTriangle,
+      badge: suspiciousActivity.filter((a) => a.status === 'open').length,
+    },
     { id: 'access-control', label: 'Access Control', icon: KeyRound },
     { id: 'breach-sim', label: 'Breach Scenarios', icon: Siren },
   ];
@@ -190,14 +227,14 @@ export default function SecurityPage() {
   /* ─── Map Markers ─── */
   const mapMarkers = useMemo(() => {
     return failedLogins
-      .filter(e => e.lat && e.lng)
-      .map(e => ({
+      .filter((e) => e.lat && e.lng)
+      .map((e) => ({
         id: e.id,
         lat: e.lat,
         lng: e.lng,
         label: e.location,
         severity: e.risk,
-        value: e.attempts
+        value: e.attempts,
       }));
   }, []);
 
@@ -225,42 +262,66 @@ export default function SecurityPage() {
       </div>
 
       {/* Threat Level Banner */}
-      <div className={cn(
-        'rounded-xl border p-4 flex items-center gap-4',
-        stats.threatLevel === 'critical' ? 'border-danger/20 bg-danger/5' :
-        stats.threatLevel === 'high' ? 'border-warning/20 bg-warning/5' :
-        stats.threatLevel === 'elevated' ? 'border-info/20 bg-info/5' :
-        'border-accent/20 bg-accent/5'
-      )}>
-        <div className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-full',
-          stats.threatLevel === 'critical' ? 'bg-danger/10' :
-          stats.threatLevel === 'high' ? 'bg-warning/10' :
-          stats.threatLevel === 'elevated' ? 'bg-info/10' :
-          'bg-accent/10'
-        )}>
+      <div
+        className={cn(
+          'rounded-xl border p-4 flex items-center gap-4',
+          stats.threatLevel === 'critical'
+            ? 'border-danger/20 bg-danger/5'
+            : stats.threatLevel === 'high'
+              ? 'border-warning/20 bg-warning/5'
+              : stats.threatLevel === 'elevated'
+                ? 'border-info/20 bg-info/5'
+                : 'border-accent/20 bg-accent/5'
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-12 w-12 items-center justify-center rounded-full',
+            stats.threatLevel === 'critical'
+              ? 'bg-danger/10'
+              : stats.threatLevel === 'high'
+                ? 'bg-warning/10'
+                : stats.threatLevel === 'elevated'
+                  ? 'bg-info/10'
+                  : 'bg-accent/10'
+          )}
+        >
           {stats.threatLevel === 'normal' ? (
             <ShieldCheck className="h-6 w-6 text-accent" />
           ) : (
-            <ShieldAlert className={cn('h-6 w-6',
-              stats.threatLevel === 'critical' ? 'text-danger' :
-              stats.threatLevel === 'high' ? 'text-warning' :
-              'text-info'
-            )} />
+            <ShieldAlert
+              className={cn(
+                'h-6 w-6',
+                stats.threatLevel === 'critical'
+                  ? 'text-danger'
+                  : stats.threatLevel === 'high'
+                    ? 'text-warning'
+                    : 'text-info'
+              )}
+            />
           )}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <p className={cn('text-lg font-bold',
-              stats.threatLevel === 'critical' ? 'text-danger' :
-              stats.threatLevel === 'high' ? 'text-warning' :
-              stats.threatLevel === 'elevated' ? 'text-info' :
-              'text-accent'
-            )}>
-              {stats.threatLevel === 'normal' ? 'All Systems Secure' :
-               stats.threatLevel === 'elevated' ? 'Elevated Threat Level' :
-               stats.threatLevel === 'high' ? 'High Threat Detected' :
-               'Critical Security Alert'}
+            <p
+              className={cn(
+                'text-lg font-bold',
+                stats.threatLevel === 'critical'
+                  ? 'text-danger'
+                  : stats.threatLevel === 'high'
+                    ? 'text-warning'
+                    : stats.threatLevel === 'elevated'
+                      ? 'text-info'
+                      : 'text-accent'
+              )}
+            >
+              {stats.threatLevel === 'normal'
+                ? 'All Systems Secure'
+                : stats.threatLevel === 'elevated'
+                  ? 'Elevated Threat Level'
+                  : stats.threatLevel === 'high'
+                    ? 'High Threat Detected'
+                    : 'Critical Security Alert'}
             </p>
             <ThreatLevelIndicator level={stats.threatLevel} />
           </div>
@@ -304,7 +365,13 @@ export default function SecurityPage() {
           label="Password Health"
           value={`${stats.passwordScore}/100`}
           icon={Shield}
-          color={stats.passwordScore >= 80 ? 'text-accent' : stats.passwordScore >= 60 ? 'text-warning' : 'text-danger'}
+          color={
+            stats.passwordScore >= 80
+              ? 'text-accent'
+              : stats.passwordScore >= 60
+                ? 'text-warning'
+                : 'text-danger'
+          }
           subtext="Platform-wide score"
         />
         <SecurityStatCard
@@ -328,7 +395,9 @@ export default function SecurityPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -375,13 +444,20 @@ export default function SecurityPage() {
                     <div key={policy.id} className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-text-primary">{policy.name}</p>
-                        <p className="text-xs text-text-muted">{policy.scope} · {policy.target}</p>
+                        <p className="text-xs text-text-muted">
+                          {policy.scope} · {policy.target}
+                        </p>
                       </div>
-                      <span className={cn(
-                        'text-xs font-mono font-medium',
-                        policy.complianceRate >= 95 ? 'text-accent' :
-                        policy.complianceRate >= 80 ? 'text-warning' : 'text-danger'
-                      )}>
+                      <span
+                        className={cn(
+                          'text-xs font-mono font-medium',
+                          policy.complianceRate >= 95
+                            ? 'text-accent'
+                            : policy.complianceRate >= 80
+                              ? 'text-warning'
+                              : 'text-danger'
+                        )}
+                      >
                         {policy.complianceRate}%
                       </span>
                     </div>
@@ -403,16 +479,20 @@ export default function SecurityPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-text-secondary">Active Rules</span>
-                    <span className="font-mono font-medium text-text-primary">{ipStats.active}</span>
+                    <span className="font-mono font-medium text-text-primary">
+                      {ipStats.active}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-text-secondary">Total Hits (24h)</span>
-                    <span className="font-mono font-medium text-accent">{formatNumber(ipStats.totalHits)}</span>
+                    <span className="font-mono font-medium text-accent">
+                      {formatNumber(ipStats.totalHits)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-text-secondary">Coverage</span>
                     <span className="font-mono font-medium text-text-primary">
-                      {ipAllowlists.filter(a => a.type === 'tenant').length} tenants
+                      {ipAllowlists.filter((a) => a.type === 'tenant').length} tenants
                     </span>
                   </div>
                 </div>
@@ -432,13 +512,19 @@ export default function SecurityPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <Lock className="h-4 w-4 text-secondary" /> Top Failed Login Attempts
               </h3>
-              <button onClick={() => setActiveTab('failed-logins')} className="text-xs text-secondary hover:underline">
+              <button
+                onClick={() => setActiveTab('failed-logins')}
+                className="text-xs text-secondary hover:underline"
+              >
                 View all →
               </button>
             </div>
             <div className="space-y-2">
               {failedLogins.slice(0, 5).map((entry) => (
-                <div key={entry.id} className="flex items-center gap-4 p-3 rounded-lg border border-border bg-background hover:bg-surface-elevated/50 transition-colors">
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-4 p-3 rounded-lg border border-border bg-background hover:bg-surface-elevated/50 transition-colors"
+                >
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-danger/10">
                     <Lock className="h-4 w-4 text-danger" />
                   </div>
@@ -454,7 +540,9 @@ export default function SecurityPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-text-secondary">{timeAgo(entry.lastAttempt)}</p>
-                    <p className="text-[10px] text-text-muted">{entry.userAgents?.[0]?.slice(0, 30)}...</p>
+                    <p className="text-[10px] text-text-muted">
+                      {entry.userAgents?.[0]?.slice(0, 30)}...
+                    </p>
                   </div>
                 </div>
               ))}
@@ -467,24 +555,39 @@ export default function SecurityPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-secondary" /> Recent Suspicious Activity
               </h3>
-              <button onClick={() => setActiveTab('suspicious')} className="text-xs text-secondary hover:underline">
+              <button
+                onClick={() => setActiveTab('suspicious')}
+                className="text-xs text-secondary hover:underline"
+              >
                 View all →
               </button>
             </div>
             <div className="space-y-2">
               {suspiciousActivity.slice(0, 4).map((entry) => (
-                <div key={entry.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background hover:bg-surface-elevated/50 transition-colors">
-                  <div className={cn(
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                    entry.severity === 'critical' ? 'bg-danger/10' :
-                    entry.severity === 'high' ? 'bg-warning/10' :
-                    'bg-info/10'
-                  )}>
-                    <Activity className={cn('h-4 w-4',
-                      entry.severity === 'critical' ? 'text-danger' :
-                      entry.severity === 'high' ? 'text-warning' :
-                      'text-info'
-                    )} />
+                <div
+                  key={entry.id}
+                  className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background hover:bg-surface-elevated/50 transition-colors"
+                >
+                  <div
+                    className={cn(
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                      entry.severity === 'critical'
+                        ? 'bg-danger/10'
+                        : entry.severity === 'high'
+                          ? 'bg-warning/10'
+                          : 'bg-info/10'
+                    )}
+                  >
+                    <Activity
+                      className={cn(
+                        'h-4 w-4',
+                        entry.severity === 'critical'
+                          ? 'text-danger'
+                          : entry.severity === 'high'
+                            ? 'text-warning'
+                            : 'text-info'
+                      )}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -527,7 +630,9 @@ export default function SecurityPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -548,7 +653,9 @@ export default function SecurityPage() {
                   >
                     <option value="all">All Severities</option>
                     {Object.entries(threatSeverityMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -561,7 +668,9 @@ export default function SecurityPage() {
                   >
                     <option value="all">All Statuses</option>
                     {Object.entries(alertStatusMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -576,7 +685,8 @@ export default function SecurityPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredLogins.length}</span> of {failedLogins.length} failed login entries
+            Showing <span className="font-medium text-text-primary">{filteredLogins.length}</span>{' '}
+            of {failedLogins.length} failed login entries
           </p>
 
           {/* Failed Logins Table */}
@@ -586,12 +696,24 @@ export default function SecurityPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">IP Address</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Location</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Attempts</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Last Attempt</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Risk</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      IP Address
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Attempts
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Last Attempt
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Risk
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
                   </tr>
                 </thead>
@@ -642,7 +764,9 @@ export default function SecurityPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  showFilters
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                 )}
               >
                 <Filter className="h-4 w-4" /> Filters
@@ -663,7 +787,9 @@ export default function SecurityPage() {
                   >
                     <option value="all">All Severities</option>
                     {Object.entries(threatSeverityMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -676,7 +802,9 @@ export default function SecurityPage() {
                   >
                     <option value="all">All Types</option>
                     {Object.entries(activityTypeMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -689,7 +817,9 @@ export default function SecurityPage() {
                   >
                     <option value="all">All Statuses</option>
                     {Object.entries(alertStatusMeta).map(([key, meta]) => (
-                      <option key={key} value={key}>{meta.label}</option>
+                      <option key={key} value={key}>
+                        {meta.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -704,7 +834,8 @@ export default function SecurityPage() {
 
           {/* Results Count */}
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredActivity.length}</span> of {suspiciousActivity.length} activity entries
+            Showing <span className="font-medium text-text-primary">{filteredActivity.length}</span>{' '}
+            of {suspiciousActivity.length} activity entries
           </p>
 
           {/* Activity Table */}
@@ -714,11 +845,21 @@ export default function SecurityPage() {
                 <thead className="bg-background border-b border-border">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Alert</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">User / IP</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Severity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Alert
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      User / IP
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Severity
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
                   </tr>
                 </thead>
@@ -757,7 +898,8 @@ export default function SecurityPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                <Fingerprint className="h-5 w-5 text-secondary" /> Two-Factor Authentication Policies
+                <Fingerprint className="h-5 w-5 text-secondary" /> Two-Factor Authentication
+                Policies
               </h3>
               <span className="text-xs text-text-muted">
                 {twoFAStats.enforced} enforced · {twoFAStats.avgCompliance}% avg compliance
@@ -827,7 +969,9 @@ export default function SecurityPage() {
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                 <Siren className="h-4 w-4 text-secondary" /> Breach Scenario Library
               </h3>
-              <p className="text-xs text-text-muted">{breachScenarios.length} scenarios available</p>
+              <p className="text-xs text-text-muted">
+                {breachScenarios.length} scenarios available
+              </p>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {breachScenarios.map((scenario) => (
@@ -835,24 +979,35 @@ export default function SecurityPage() {
                   key={scenario.id}
                   className={cn(
                     'rounded-xl border p-4 transition-all hover:shadow-md',
-                    scenario.severity === 'critical' ? 'border-danger/20 hover:border-danger/40' :
-                    scenario.severity === 'high' ? 'border-warning/20 hover:border-warning/40' :
-                    'border-border hover:border-secondary/30'
+                    scenario.severity === 'critical'
+                      ? 'border-danger/20 hover:border-danger/40'
+                      : scenario.severity === 'high'
+                        ? 'border-warning/20 hover:border-warning/40'
+                        : 'border-border hover:border-secondary/30'
                   )}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
-                      <div className={cn(
-                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                        scenario.severity === 'critical' ? 'bg-danger/10' :
-                        scenario.severity === 'high' ? 'bg-warning/10' :
-                        'bg-info/10'
-                      )}>
-                        <Zap className={cn('h-5 w-5',
-                          scenario.severity === 'critical' ? 'text-danger' :
-                          scenario.severity === 'high' ? 'text-warning' :
-                          'text-info'
-                        )} />
+                      <div
+                        className={cn(
+                          'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                          scenario.severity === 'critical'
+                            ? 'bg-danger/10'
+                            : scenario.severity === 'high'
+                              ? 'bg-warning/10'
+                              : 'bg-info/10'
+                        )}
+                      >
+                        <Zap
+                          className={cn(
+                            'h-5 w-5',
+                            scenario.severity === 'critical'
+                              ? 'text-danger'
+                              : scenario.severity === 'high'
+                                ? 'text-warning'
+                                : 'text-info'
+                          )}
+                        />
                       </div>
                       <div>
                         <h4 className="text-sm font-semibold text-text-primary">{scenario.name}</h4>
@@ -871,15 +1026,22 @@ export default function SecurityPage() {
                     </div>
                     <div className="rounded-lg border border-border bg-background p-2">
                       <p className="text-text-muted">Est. Impact</p>
-                      <p className="font-mono font-medium text-text-primary">{scenario.estimatedImpact}</p>
+                      <p className="font-mono font-medium text-text-primary">
+                        {scenario.estimatedImpact}
+                      </p>
                     </div>
                   </div>
 
                   <div className="mt-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">Targets</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
+                      Targets
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {scenario.targets.map((target) => (
-                        <span key={target} className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary">
+                        <span
+                          key={target}
+                          className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary"
+                        >
                           {target}
                         </span>
                       ))}
@@ -888,11 +1050,17 @@ export default function SecurityPage() {
 
                   <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                     <div className="flex items-center gap-3 text-xs">
-                      <span className={cn(
-                        'flex items-center gap-1',
-                        scenario.blocked ? 'text-accent' : 'text-text-muted'
-                      )}>
-                        {scenario.blocked ? <CheckCircle2 className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                      <span
+                        className={cn(
+                          'flex items-center gap-1',
+                          scenario.blocked ? 'text-accent' : 'text-text-muted'
+                        )}
+                      >
+                        {scenario.blocked ? (
+                          <CheckCircle2 className="h-3 w-3" />
+                        ) : (
+                          <X className="h-3 w-3" />
+                        )}
                         {scenario.blocked ? 'Blocked' : 'Not Blocked'}
                       </span>
                       <span className="text-text-muted">

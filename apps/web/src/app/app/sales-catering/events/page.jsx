@@ -2,12 +2,48 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  FileText, Calendar, Clock, Users, MapPin, Utensils, Wine, Coffee,
-  Mic, Projector, Music, Camera, Wifi, Printer, Flower2, Gift,
-  Check, X, Edit3, Printer as PrinterIcon, Download, Mail, Phone,
-  ChevronLeft, AlertTriangle, CheckCircle2, Clock as ClockIcon,
-  Plus, Trash2, Save, Send, Eye, Ban, ArrowUpDown, MoreHorizontal,
-  Tag, DollarSign, Receipt, Building2, User, Briefcase, Sparkles
+  FileText,
+  Calendar,
+  Clock,
+  Users,
+  MapPin,
+  Utensils,
+  Wine,
+  Coffee,
+  Mic,
+  Projector,
+  Music,
+  Camera,
+  Wifi,
+  Printer,
+  Flower2,
+  Gift,
+  Check,
+  X,
+  Edit3,
+  Printer as PrinterIcon,
+  Download,
+  Mail,
+  Phone,
+  ChevronLeft,
+  AlertTriangle,
+  CheckCircle2,
+  Clock as ClockIcon,
+  Plus,
+  Trash2,
+  Save,
+  Send,
+  Eye,
+  Ban,
+  ArrowUpDown,
+  MoreHorizontal,
+  Tag,
+  DollarSign,
+  Receipt,
+  Building2,
+  User,
+  Briefcase,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -61,25 +97,25 @@ const eventData = {
       {
         category: "Passed Hors d'Oeuvres",
         items: [
-          { name: 'Ahi Tuna Tartare on Crispy Wonton', qty: 120, portion: 'each', price: 4.50 },
+          { name: 'Ahi Tuna Tartare on Crispy Wonton', qty: 120, portion: 'each', price: 4.5 },
           { name: 'Mini Beef Wellington', qty: 120, portion: 'each', price: 5.25 },
           { name: 'Caprese Skewers with Balsamic Glaze', qty: 120, portion: 'each', price: 3.75 },
-          { name: 'Truffle Arancini', qty: 120, portion: 'each', price: 4.00 },
+          { name: 'Truffle Arancini', qty: 120, portion: 'each', price: 4.0 },
         ],
       },
       {
         category: 'Stationed Displays',
         items: [
-          { name: 'Artisan Charcuterie & Cheese Board', qty: 4, portion: 'display', price: 185.00 },
-          { name: 'Mediterranean Mezze Station', qty: 2, portion: 'display', price: 145.00 },
-          { name: 'Sushi & Sashimi Bar', qty: 1, portion: 'chef-station', price: 450.00 },
+          { name: 'Artisan Charcuterie & Cheese Board', qty: 4, portion: 'display', price: 185.0 },
+          { name: 'Mediterranean Mezze Station', qty: 2, portion: 'display', price: 145.0 },
+          { name: 'Sushi & Sashimi Bar', qty: 1, portion: 'chef-station', price: 450.0 },
         ],
       },
       {
         category: 'Dessert',
         items: [
-          { name: 'Assorted Macarons', qty: 120, portion: 'each', price: 2.50 },
-          { name: 'Chocolate Fondue Station', qty: 1, portion: 'station', price: 220.00 },
+          { name: 'Assorted Macarons', qty: 120, portion: 'each', price: 2.5 },
+          { name: 'Chocolate Fondue Station', qty: 1, portion: 'station', price: 220.0 },
         ],
       },
     ],
@@ -89,31 +125,40 @@ const eventData = {
     serviceStyle: 'Open Bar — Premium',
     notes: 'Signature cocktail: "TechTonic" (gin, elderflower, cucumber)',
     packages: [
-      { name: 'Premium Open Bar (3 hrs)', qty: 120, price: 28.00 },
-      { name: 'Champagne Toast', qty: 120, price: 12.00 },
-      { name: 'Specialty Coffee & Tea Station', qty: 1, price: 350.00 },
+      { name: 'Premium Open Bar (3 hrs)', qty: 120, price: 28.0 },
+      { name: 'Champagne Toast', qty: 120, price: 12.0 },
+      { name: 'Specialty Coffee & Tea Station', qty: 1, price: 350.0 },
     ],
   },
 
   resources: [
-    { category: 'AV & Technology', items: [
-      { name: 'Wireless Microphone (Handheld)', qty: 2, price: 45.00 },
-      { name: 'Projector & Screen (120")', qty: 1, price: 185.00 },
-      { name: 'LED Uplighting — Ballroom', qty: 16, price: 25.00 },
-      { name: 'Wi-Fi Upgrade (500 Mbps)', qty: 1, price: 150.00 },
-    ]},
-    { category: 'Furniture & Décor', items: [
-      { name: 'Highboy Tables (30")', qty: 15, price: 18.00 },
-      { name: 'Bar Stools', qty: 30, price: 8.00 },
-      { name: 'Linen — Black Velvet', qty: 15, price: 22.00 },
-      { name: 'Floral Centerpieces (High)', qty: 8, price: 85.00 },
-    ]},
-    { category: 'Service Staff', items: [
-      { name: 'Bartender', qty: 3, price: 185.00 },
-      { name: 'Server / Passer', qty: 6, price: 155.00 },
-      { name: 'Event Captain', qty: 1, price: 250.00 },
-      { name: 'Security', qty: 2, price: 125.00 },
-    ]},
+    {
+      category: 'AV & Technology',
+      items: [
+        { name: 'Wireless Microphone (Handheld)', qty: 2, price: 45.0 },
+        { name: 'Projector & Screen (120")', qty: 1, price: 185.0 },
+        { name: 'LED Uplighting — Ballroom', qty: 16, price: 25.0 },
+        { name: 'Wi-Fi Upgrade (500 Mbps)', qty: 1, price: 150.0 },
+      ],
+    },
+    {
+      category: 'Furniture & Décor',
+      items: [
+        { name: 'Highboy Tables (30")', qty: 15, price: 18.0 },
+        { name: 'Bar Stools', qty: 30, price: 8.0 },
+        { name: 'Linen — Black Velvet', qty: 15, price: 22.0 },
+        { name: 'Floral Centerpieces (High)', qty: 8, price: 85.0 },
+      ],
+    },
+    {
+      category: 'Service Staff',
+      items: [
+        { name: 'Bartender', qty: 3, price: 185.0 },
+        { name: 'Server / Passer', qty: 6, price: 155.0 },
+        { name: 'Event Captain', qty: 1, price: 250.0 },
+        { name: 'Security', qty: 2, price: 125.0 },
+      ],
+    },
   ],
 
   roomSetup: {
@@ -128,47 +173,157 @@ const eventData = {
   },
 
   timeline: [
-    { time: '4:00 PM', department: 'Setup', task: 'Room flip from afternoon session', owner: 'Banquet', status: 'pending' },
-    { time: '4:30 PM', department: 'AV', task: 'Sound check & lighting preset', owner: 'Tech Team', status: 'pending' },
-    { time: '5:00 PM', department: 'F&B', task: 'Final food prep & plating', owner: 'Kitchen', status: 'pending' },
-    { time: '5:30 PM', department: 'Banquet', task: 'Bar setup & stock', owner: 'F&B', status: 'pending' },
-    { time: '5:45 PM', department: 'Front Office', task: 'Registration table ready', owner: 'Events', status: 'pending' },
-    { time: '6:00 PM', department: 'All', task: 'Doors open / Guest arrival', owner: 'Captain', status: 'pending' },
-    { time: '6:30 PM', department: 'AV', task: 'Welcome remarks — MC mic check', owner: 'Tech Team', status: 'pending' },
-    { time: '7:00 PM', department: 'F&B', task: 'Passed service begins', owner: 'Kitchen', status: 'pending' },
-    { time: '8:00 PM', department: 'F&B', task: 'Champagne toast', owner: 'Captain', status: 'pending' },
-    { time: '9:00 PM', department: 'All', task: 'Last call / Event conclusion', owner: 'Captain', status: 'pending' },
-    { time: '9:30 PM', department: 'Banquet', task: 'Breakdown & clearing', owner: 'Banquet', status: 'pending' },
-    { time: '10:30 PM', department: 'All', task: 'Room reset complete', owner: 'Banquet', status: 'pending' },
+    {
+      time: '4:00 PM',
+      department: 'Setup',
+      task: 'Room flip from afternoon session',
+      owner: 'Banquet',
+      status: 'pending',
+    },
+    {
+      time: '4:30 PM',
+      department: 'AV',
+      task: 'Sound check & lighting preset',
+      owner: 'Tech Team',
+      status: 'pending',
+    },
+    {
+      time: '5:00 PM',
+      department: 'F&B',
+      task: 'Final food prep & plating',
+      owner: 'Kitchen',
+      status: 'pending',
+    },
+    {
+      time: '5:30 PM',
+      department: 'Banquet',
+      task: 'Bar setup & stock',
+      owner: 'F&B',
+      status: 'pending',
+    },
+    {
+      time: '5:45 PM',
+      department: 'Front Office',
+      task: 'Registration table ready',
+      owner: 'Events',
+      status: 'pending',
+    },
+    {
+      time: '6:00 PM',
+      department: 'All',
+      task: 'Doors open / Guest arrival',
+      owner: 'Captain',
+      status: 'pending',
+    },
+    {
+      time: '6:30 PM',
+      department: 'AV',
+      task: 'Welcome remarks — MC mic check',
+      owner: 'Tech Team',
+      status: 'pending',
+    },
+    {
+      time: '7:00 PM',
+      department: 'F&B',
+      task: 'Passed service begins',
+      owner: 'Kitchen',
+      status: 'pending',
+    },
+    {
+      time: '8:00 PM',
+      department: 'F&B',
+      task: 'Champagne toast',
+      owner: 'Captain',
+      status: 'pending',
+    },
+    {
+      time: '9:00 PM',
+      department: 'All',
+      task: 'Last call / Event conclusion',
+      owner: 'Captain',
+      status: 'pending',
+    },
+    {
+      time: '9:30 PM',
+      department: 'Banquet',
+      task: 'Breakdown & clearing',
+      owner: 'Banquet',
+      status: 'pending',
+    },
+    {
+      time: '10:30 PM',
+      department: 'All',
+      task: 'Room reset complete',
+      owner: 'Banquet',
+      status: 'pending',
+    },
   ],
 
   notes: {
     internal: [
-      { id: 1, author: 'Sarah W.', date: '2026-08-10', content: 'Client requested extra power strips near registration. Housekeeping to place 4 strips.' },
-      { id: 2, author: 'Mike C.', date: '2026-08-12', content: 'VIP guest list updated — 12 C-suite attendees. Ensure mezzanine is prepped early.' },
+      {
+        id: 1,
+        author: 'Sarah W.',
+        date: '2026-08-10',
+        content:
+          'Client requested extra power strips near registration. Housekeeping to place 4 strips.',
+      },
+      {
+        id: 2,
+        author: 'Mike C.',
+        date: '2026-08-12',
+        content:
+          'VIP guest list updated — 12 C-suite attendees. Ensure mezzanine is prepped early.',
+      },
     ],
     external: [
-      { id: 3, author: 'Sarah W.', date: '2026-08-05', content: 'Please confirm final guest count 72 hours prior to event. Menu pricing based on 110 guaranteed.' },
+      {
+        id: 3,
+        author: 'Sarah W.',
+        date: '2026-08-05',
+        content:
+          'Please confirm final guest count 72 hours prior to event. Menu pricing based on 110 guaranteed.',
+      },
     ],
   },
 
   charges: {
-    foodTotal: 2845.00,
-    beverageTotal: 3710.00,
-    rentalTotal: 1620.00,
-    laborTotal: 2345.00,
-    serviceCharge: 1052.00,
-    tax: 952.80,
-    subtotal: 11572.80,
-    grandTotal: 12525.60,
+    foodTotal: 2845.0,
+    beverageTotal: 3710.0,
+    rentalTotal: 1620.0,
+    laborTotal: 2345.0,
+    serviceCharge: 1052.0,
+    tax: 952.8,
+    subtotal: 11572.8,
+    grandTotal: 12525.6,
   },
 };
 
 const statusMeta = {
-  confirmed: { label: 'Confirmed', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent', icon: CheckCircle2 },
-  tentative: { label: 'Tentative', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', icon: ClockIcon },
-  cancelled: { label: 'Cancelled', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', icon: Ban },
-  completed: { label: 'Completed', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', icon: Check },
+  confirmed: {
+    label: 'Confirmed',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+    icon: CheckCircle2,
+  },
+  tentative: {
+    label: 'Tentative',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: ClockIcon,
+  },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+    icon: Ban,
+  },
+  completed: {
+    label: 'Completed',
+    class: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: Check,
+  },
 };
 
 const timelineStatusMeta = {
@@ -216,7 +371,9 @@ function TimelineItem({ item, index, onToggle }) {
           onClick={() => onToggle(index)}
           className={cn(
             'h-3 w-3 rounded-full border-2 transition-colors',
-            item.status === 'completed' ? 'bg-accent border-accent' : 'border-border bg-background hover:border-secondary'
+            item.status === 'completed'
+              ? 'bg-accent border-accent'
+              : 'border-border bg-background hover:border-secondary'
           )}
         />
         {index < 11 && <div className="w-px h-full min-h-[28px] bg-border mt-1" />}
@@ -256,11 +413,18 @@ export default function BEOEventPage() {
   const StatusIcon = meta.icon;
 
   const toggleTimeline = (index) => {
-    setTimeline((prev) => prev.map((t, i) => {
-      if (i !== index) return t;
-      const next = { pending: 'completed', completed: 'pending', in_progress: 'completed', issue: 'pending' };
-      return { ...t, status: next[t.status] || 'pending' };
-    }));
+    setTimeline((prev) =>
+      prev.map((t, i) => {
+        if (i !== index) return t;
+        const next = {
+          pending: 'completed',
+          completed: 'pending',
+          in_progress: 'completed',
+          issue: 'pending',
+        };
+        return { ...t, status: next[t.status] || 'pending' };
+      })
+    );
   };
 
   const completedCount = timeline.filter((t) => t.status === 'completed').length;
@@ -288,11 +452,18 @@ export default function BEOEventPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-text-primary">{event.eventName}</h1>
-              <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider', meta.class)}>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider',
+                  meta.class
+                )}
+              >
                 <StatusIcon className={cn('h-3 w-3', meta.dot.replace('bg-', 'text-'))} />
                 {meta.label}
               </span>
-              <span className="text-xs text-text-muted font-mono">{event.id} · v{event.version}</span>
+              <span className="text-xs text-text-muted font-mono">
+                {event.id} · v{event.version}
+              </span>
             </div>
             <p className="text-sm text-text-secondary mt-0.5">
               {event.date} · {event.startTime} — {event.endTime} · {event.functionSpace}
@@ -313,7 +484,10 @@ export default function BEOEventPage() {
 
         {/* Quick Stats Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-          <StatPill label="Guest Count" value={`${event.guestCount} (${event.guaranteedCount} guar.)`} />
+          <StatPill
+            label="Guest Count"
+            value={`${event.guestCount} (${event.guaranteedCount} guar.)`}
+          />
           <StatPill label="Function Space" value={event.functionSpace} color="text-secondary" />
           <StatPill label="Setup Style" value={event.setupStyle} />
           <StatPill label="Event Type" value={event.eventType} />
@@ -334,7 +508,9 @@ export default function BEOEventPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors -mb-px',
-                  active ? 'border-secondary text-secondary' : 'border-transparent text-text-secondary hover:text-text-primary'
+                  active
+                    ? 'border-secondary text-secondary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" /> {tab.label}
@@ -359,7 +535,9 @@ export default function BEOEventPage() {
                   </div>
                   <div>
                     <p className="text-[10px] text-text-muted uppercase tracking-wider">Contact</p>
-                    <p className="text-sm text-text-primary">{event.client.contactName} · {event.client.contactTitle}</p>
+                    <p className="text-sm text-text-primary">
+                      {event.client.contactName} · {event.client.contactTitle}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-text-secondary">
                     <Mail className="h-3.5 w-3.5 text-text-muted" />
@@ -376,17 +554,29 @@ export default function BEOEventPage() {
                     <p className="text-sm font-mono text-text-primary">{event.booking.blockId}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-text-muted uppercase tracking-wider">Sales Manager</p>
+                    <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                      Sales Manager
+                    </p>
                     <p className="text-sm text-text-primary">{event.booking.salesManager}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-text-muted uppercase tracking-wider">Contract</p>
-                    <p className="text-sm font-mono text-text-primary">{event.booking.contractNumber}</p>
+                    <p className="text-sm font-mono text-text-primary">
+                      {event.booking.contractNumber}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-text-muted uppercase tracking-wider">Deposit:</span>
-                    <span className={cn('text-xs font-bold', event.booking.depositPaid ? 'text-accent' : 'text-danger')}>
-                      {event.booking.depositPaid ? 'Paid' : 'Pending'} · {formatCurrency(event.booking.deposit)}
+                    <span className="text-[10px] text-text-muted uppercase tracking-wider">
+                      Deposit:
+                    </span>
+                    <span
+                      className={cn(
+                        'text-xs font-bold',
+                        event.booking.depositPaid ? 'text-accent' : 'text-danger'
+                      )}
+                    >
+                      {event.booking.depositPaid ? 'Paid' : 'Pending'} ·{' '}
+                      {formatCurrency(event.booking.deposit)}
                     </span>
                   </div>
                 </div>
@@ -394,21 +584,51 @@ export default function BEOEventPage() {
             </SectionCard>
 
             {/* Room Setup */}
-            <SectionCard title="Room Setup & Layout" icon={MapPin} action={
-              <Button variant="ghost" size="sm"><Eye className="mr-1.5 h-3.5 w-3.5" /> View Diagram</Button>
-            }>
+            <SectionCard
+              title="Room Setup & Layout"
+              icon={MapPin}
+              action={
+                <Button variant="ghost" size="sm">
+                  <Eye className="mr-1.5 h-3.5 w-3.5" /> View Diagram
+                </Button>
+              }
+            >
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[
                   { label: 'Setup Style', value: event.roomSetup.setupStyle },
                   { label: 'Entrance', value: event.roomSetup.entrance },
-                  { label: 'Coat Check', value: event.roomSetup.coatCheck ? 'Yes' : 'No', color: event.roomSetup.coatCheck ? 'text-accent' : 'text-text-muted' },
-                  { label: 'Registration', value: event.roomSetup.registrationTable ? 'Yes' : 'No', color: event.roomSetup.registrationTable ? 'text-accent' : 'text-text-muted' },
+                  {
+                    label: 'Coat Check',
+                    value: event.roomSetup.coatCheck ? 'Yes' : 'No',
+                    color: event.roomSetup.coatCheck ? 'text-accent' : 'text-text-muted',
+                  },
+                  {
+                    label: 'Registration',
+                    value: event.roomSetup.registrationTable ? 'Yes' : 'No',
+                    color: event.roomSetup.registrationTable ? 'text-accent' : 'text-text-muted',
+                  },
                   { label: 'VIP Area', value: event.roomSetup.vipArea },
-                  { label: 'Dance Floor', value: event.roomSetup.danceFloor ? 'Yes' : 'No', color: event.roomSetup.danceFloor ? 'text-accent' : 'text-text-muted' },
+                  {
+                    label: 'Dance Floor',
+                    value: event.roomSetup.danceFloor ? 'Yes' : 'No',
+                    color: event.roomSetup.danceFloor ? 'text-accent' : 'text-text-muted',
+                  },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-lg border border-border bg-background px-3 py-2">
-                    <p className="text-[10px] text-text-muted uppercase tracking-wider">{item.label}</p>
-                    <p className={cn('text-sm font-medium mt-0.5', item.color || 'text-text-primary')}>{item.value}</p>
+                  <div
+                    key={item.label}
+                    className="rounded-lg border border-border bg-background px-3 py-2"
+                  >
+                    <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                      {item.label}
+                    </p>
+                    <p
+                      className={cn(
+                        'text-sm font-medium mt-0.5',
+                        item.color || 'text-text-primary'
+                      )}
+                    >
+                      {item.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -421,17 +641,30 @@ export default function BEOEventPage() {
             </SectionCard>
 
             {/* Notes */}
-            <SectionCard title="Notes" icon={FileText} action={
-              <Button variant="ghost" size="sm"><Plus className="mr-1.5 h-3.5 w-3.5" /> Add Note</Button>
-            }>
+            <SectionCard
+              title="Notes"
+              icon={FileText}
+              action={
+                <Button variant="ghost" size="sm">
+                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Note
+                </Button>
+              }
+            >
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Internal Notes</h4>
+                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+                    Internal Notes
+                  </h4>
                   <div className="space-y-2">
                     {event.notes.internal.map((note) => (
-                      <div key={note.id} className="rounded-lg border border-border bg-background p-3">
+                      <div
+                        key={note.id}
+                        className="rounded-lg border border-border bg-background p-3"
+                      >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium text-text-primary">{note.author}</span>
+                          <span className="text-xs font-medium text-text-primary">
+                            {note.author}
+                          </span>
                           <span className="text-[10px] text-text-muted">{note.date}</span>
                         </div>
                         <p className="text-sm text-text-secondary">{note.content}</p>
@@ -440,12 +673,19 @@ export default function BEOEventPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">External / Client Notes</h4>
+                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+                    External / Client Notes
+                  </h4>
                   <div className="space-y-2">
                     {event.notes.external.map((note) => (
-                      <div key={note.id} className="rounded-lg border border-accent/20 bg-accent/5 p-3">
+                      <div
+                        key={note.id}
+                        className="rounded-lg border border-accent/20 bg-accent/5 p-3"
+                      >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium text-text-primary">{note.author}</span>
+                          <span className="text-xs font-medium text-text-primary">
+                            {note.author}
+                          </span>
                           <span className="text-[10px] text-text-muted">{note.date}</span>
                         </div>
                         <p className="text-sm text-text-secondary">{note.content}</p>
@@ -464,10 +704,15 @@ export default function BEOEventPage() {
               <h3 className="text-sm font-semibold text-text-primary mb-3">Event Progress</h3>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-text-muted">Setup Tasks</span>
-                <span className="text-xs font-bold text-text-primary">{completedCount}/{timeline.length}</span>
+                <span className="text-xs font-bold text-text-primary">
+                  {completedCount}/{timeline.length}
+                </span>
               </div>
               <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                <div className="h-full rounded-full bg-secondary transition-all" style={{ width: `${progress}%` }} />
+                <div
+                  className="h-full rounded-full bg-secondary transition-all"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
               <p className="mt-2 text-xs text-text-muted">{progress}% complete</p>
             </div>
@@ -484,7 +729,11 @@ export default function BEOEventPage() {
               <Button variant="outline" size="sm" className="w-full justify-start">
                 <Receipt className="mr-2 h-4 w-4" /> Preview Invoice
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start text-danger border-danger/30 hover:bg-danger/10">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start text-danger border-danger/30 hover:bg-danger/10"
+              >
                 <Ban className="mr-2 h-4 w-4" /> Cancel Event
               </Button>
             </div>
@@ -537,32 +786,58 @@ export default function BEOEventPage() {
           </div>
 
           {/* Food Menu */}
-          <SectionCard title="Food Menu" icon={Utensils} action={
-            <span className="text-sm font-bold font-mono text-text-primary">{formatCurrency(event.charges.foodTotal)}</span>
-          }>
+          <SectionCard
+            title="Food Menu"
+            icon={Utensils}
+            action={
+              <span className="text-sm font-bold font-mono text-text-primary">
+                {formatCurrency(event.charges.foodTotal)}
+              </span>
+            }
+          >
             <div className="space-y-5">
               {event.menu.courses.map((course) => (
                 <div key={course.category}>
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">{course.category}</h4>
+                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+                    {course.category}
+                  </h4>
                   <div className="rounded-lg border border-border overflow-hidden">
                     <table className="w-full text-sm">
                       <thead className="bg-background border-b border-border">
                         <tr>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary">Item</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Qty</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Unit</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Price</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Total</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary">
+                            Item
+                          </th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                            Qty
+                          </th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                            Unit
+                          </th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                            Price
+                          </th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                            Total
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
                         {course.items.map((item, i) => (
                           <tr key={i} className="hover:bg-background/50">
                             <td className="px-3 py-2 text-text-primary">{item.name}</td>
-                            <td className="px-3 py-2 text-right font-mono text-text-primary">{item.qty}</td>
-                            <td className="px-3 py-2 text-right text-text-secondary text-xs">{item.portion}</td>
-                            <td className="px-3 py-2 text-right font-mono text-text-secondary">{formatCurrency(item.price)}</td>
-                            <td className="px-3 py-2 text-right font-mono font-medium text-text-primary">{formatCurrency(item.qty * item.price)}</td>
+                            <td className="px-3 py-2 text-right font-mono text-text-primary">
+                              {item.qty}
+                            </td>
+                            <td className="px-3 py-2 text-right text-text-secondary text-xs">
+                              {item.portion}
+                            </td>
+                            <td className="px-3 py-2 text-right font-mono text-text-secondary">
+                              {formatCurrency(item.price)}
+                            </td>
+                            <td className="px-3 py-2 text-right font-mono font-medium text-text-primary">
+                              {formatCurrency(item.qty * item.price)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -574,9 +849,15 @@ export default function BEOEventPage() {
           </SectionCard>
 
           {/* Beverage */}
-          <SectionCard title="Beverage Service" icon={Wine} action={
-            <span className="text-sm font-bold font-mono text-text-primary">{formatCurrency(event.charges.beverageTotal)}</span>
-          }>
+          <SectionCard
+            title="Beverage Service"
+            icon={Wine}
+            action={
+              <span className="text-sm font-bold font-mono text-text-primary">
+                {formatCurrency(event.charges.beverageTotal)}
+              </span>
+            }
+          >
             <div className="mb-3 rounded-lg border border-info/20 bg-info/5 p-3 flex gap-2">
               <Sparkles className="h-4 w-4 text-info shrink-0 mt-0.5" />
               <p className="text-sm text-text-secondary">{event.beverage.notes}</p>
@@ -585,19 +866,33 @@ export default function BEOEventPage() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary">Package</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Qty</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Price</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Total</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary">
+                      Package
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                      Qty
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                      Price
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                      Total
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {event.beverage.packages.map((pkg, i) => (
                     <tr key={i} className="hover:bg-background/50">
                       <td className="px-3 py-2 text-text-primary">{pkg.name}</td>
-                      <td className="px-3 py-2 text-right font-mono text-text-primary">{pkg.qty}</td>
-                      <td className="px-3 py-2 text-right font-mono text-text-secondary">{formatCurrency(pkg.price)}</td>
-                      <td className="px-3 py-2 text-right font-mono font-medium text-text-primary">{formatCurrency(pkg.qty * pkg.price)}</td>
+                      <td className="px-3 py-2 text-right font-mono text-text-primary">
+                        {pkg.qty}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono text-text-secondary">
+                        {formatCurrency(pkg.price)}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono font-medium text-text-primary">
+                        {formatCurrency(pkg.qty * pkg.price)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -611,33 +906,59 @@ export default function BEOEventPage() {
       {activeTab === 'resources' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-text-primary">Resources, Equipment & Setup</h3>
-            <span className="text-sm font-bold font-mono text-text-primary">{formatCurrency(event.charges.rentalTotal + event.charges.laborTotal)}</span>
+            <h3 className="text-lg font-semibold text-text-primary">
+              Resources, Equipment & Setup
+            </h3>
+            <span className="text-sm font-bold font-mono text-text-primary">
+              {formatCurrency(event.charges.rentalTotal + event.charges.laborTotal)}
+            </span>
           </div>
 
           {event.resources.map((section) => (
-            <SectionCard key={section.category} title={section.category} icon={
-              section.category.includes('AV') ? Mic :
-              section.category.includes('Furniture') ? Flower2 :
-              section.category.includes('Staff') ? User : Briefcase
-            }>
+            <SectionCard
+              key={section.category}
+              title={section.category}
+              icon={
+                section.category.includes('AV')
+                  ? Mic
+                  : section.category.includes('Furniture')
+                    ? Flower2
+                    : section.category.includes('Staff')
+                      ? User
+                      : Briefcase
+              }
+            >
               <div className="rounded-lg border border-border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-background border-b border-border">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary">Item</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Qty</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Price</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">Total</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-text-secondary">
+                        Item
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                        Qty
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                        Price
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-text-secondary">
+                        Total
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {section.items.map((item, i) => (
                       <tr key={i} className="hover:bg-background/50">
                         <td className="px-3 py-2 text-text-primary">{item.name}</td>
-                        <td className="px-3 py-2 text-right font-mono text-text-primary">{item.qty}</td>
-                        <td className="px-3 py-2 text-right font-mono text-text-secondary">{formatCurrency(item.price)}</td>
-                        <td className="px-3 py-2 text-right font-mono font-medium text-text-primary">{formatCurrency(item.qty * item.price)}</td>
+                        <td className="px-3 py-2 text-right font-mono text-text-primary">
+                          {item.qty}
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono text-text-secondary">
+                          {formatCurrency(item.price)}
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono font-medium text-text-primary">
+                          {formatCurrency(item.qty * item.price)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -652,14 +973,23 @@ export default function BEOEventPage() {
       {activeTab === 'timeline' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <SectionCard title="Event Timeline & Run Sheet" icon={Clock} action={
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-text-muted">{completedCount} of {timeline.length} done</span>
-                <div className="h-2 w-20 rounded-full bg-border overflow-hidden">
-                  <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${progress}%` }} />
+            <SectionCard
+              title="Event Timeline & Run Sheet"
+              icon={Clock}
+              action={
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-text-muted">
+                    {completedCount} of {timeline.length} done
+                  </span>
+                  <div className="h-2 w-20 rounded-full bg-border overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-accent transition-all"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            }>
+              }
+            >
               <div className="space-y-1">
                 {timeline.map((item, index) => (
                   <TimelineItem key={index} item={item} index={index} onToggle={toggleTimeline} />
@@ -710,22 +1040,33 @@ export default function BEOEventPage() {
                   { label: 'Equipment & Rentals', value: event.charges.rentalTotal },
                   { label: 'Labor & Staffing', value: event.charges.laborTotal },
                 ].map((line) => (
-                  <div key={line.label} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div
+                    key={line.label}
+                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                  >
                     <span className="text-sm text-text-secondary">{line.label}</span>
-                    <span className="text-sm font-mono font-medium text-text-primary">{formatCurrency(line.value)}</span>
+                    <span className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(line.value)}
+                    </span>
                   </div>
                 ))}
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Service Charge (18%)</span>
-                  <span className="text-sm font-mono text-text-primary">{formatCurrency(event.charges.serviceCharge)}</span>
+                  <span className="text-sm font-mono text-text-primary">
+                    {formatCurrency(event.charges.serviceCharge)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <span className="text-sm text-text-secondary">Tax (8.25%)</span>
-                  <span className="text-sm font-mono text-text-primary">{formatCurrency(event.charges.tax)}</span>
+                  <span className="text-sm font-mono text-text-primary">
+                    {formatCurrency(event.charges.tax)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-base font-bold text-text-primary">Grand Total</span>
-                  <span className="text-xl font-bold font-mono text-secondary">{formatCurrency(event.charges.grandTotal)}</span>
+                  <span className="text-xl font-bold font-mono text-secondary">
+                    {formatCurrency(event.charges.grandTotal)}
+                  </span>
                 </div>
               </div>
             </SectionCard>
@@ -735,11 +1076,20 @@ export default function BEOEventPage() {
                 <div className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2">
                   <div>
                     <p className="text-sm font-medium text-text-primary">Deposit</p>
-                    <p className="text-xs text-text-muted">Due on signing · {event.booking.contractDate}</p>
+                    <p className="text-xs text-text-muted">
+                      Due on signing · {event.booking.contractDate}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(event.booking.deposit)}</p>
-                    <span className={cn('text-xs font-bold', event.booking.depositPaid ? 'text-accent' : 'text-danger')}>
+                    <p className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(event.booking.deposit)}
+                    </p>
+                    <span
+                      className={cn(
+                        'text-xs font-bold',
+                        event.booking.depositPaid ? 'text-accent' : 'text-danger'
+                      )}
+                    >
                       {event.booking.depositPaid ? 'Paid' : 'Pending'}
                     </span>
                   </div>
@@ -747,9 +1097,13 @@ export default function BEOEventPage() {
                 <div className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2">
                   <div>
                     <p className="text-sm font-medium text-text-primary">Final Payment</p>
-                    <p className="text-xs text-text-muted">Due {event.booking.paymentTerms} after event</p>
+                    <p className="text-xs text-text-muted">
+                      Due {event.booking.paymentTerms} after event
+                    </p>
                   </div>
-                  <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(event.charges.grandTotal - event.booking.deposit)}</p>
+                  <p className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(event.charges.grandTotal - event.booking.deposit)}
+                  </p>
                 </div>
               </div>
             </SectionCard>
@@ -770,10 +1124,15 @@ export default function BEOEventPage() {
                     <div key={item.label}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-text-secondary">{item.label}</span>
-                        <span className="text-xs font-mono font-medium text-text-primary">{pct.toFixed(1)}%</span>
+                        <span className="text-xs font-mono font-medium text-text-primary">
+                          {pct.toFixed(1)}%
+                        </span>
                       </div>
                       <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
-                        <div className={cn('h-full rounded-full', item.color)} style={{ width: `${pct}%` }} />
+                        <div
+                          className={cn('h-full rounded-full', item.color)}
+                          style={{ width: `${pct}%` }}
+                        />
                       </div>
                     </div>
                   );
@@ -792,11 +1151,15 @@ export default function BEOEventPage() {
               <div className="mt-3 pt-3 border-t border-border space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="text-text-secondary">Food per guest</span>
-                  <span className="font-mono text-text-primary">{formatCurrency(event.charges.foodTotal / event.guestCount)}</span>
+                  <span className="font-mono text-text-primary">
+                    {formatCurrency(event.charges.foodTotal / event.guestCount)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-text-secondary">Beverage per guest</span>
-                  <span className="font-mono text-text-primary">{formatCurrency(event.charges.beverageTotal / event.guestCount)}</span>
+                  <span className="font-mono text-text-primary">
+                    {formatCurrency(event.charges.beverageTotal / event.guestCount)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -807,21 +1170,42 @@ export default function BEOEventPage() {
       {/* ─── Print Options Modal ─── */}
       {showPrintOptions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowPrintOptions(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowPrintOptions(false)}
+          />
           <div className="relative w-full max-w-lg rounded-xl border border-border bg-background shadow-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-text-primary">Print BEO Options</h3>
-              <button onClick={() => setShowPrintOptions(false)} className="rounded-md p-1 hover:bg-surface text-text-muted">
+              <button
+                onClick={() => setShowPrintOptions(false)}
+                className="rounded-md p-1 hover:bg-surface text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-3">
               {[
-                { label: 'Full BEO (All Sections)', desc: 'Complete document with menu, resources, timeline, and charges' },
-                { label: 'Kitchen Copy (F&B Only)', desc: 'Menu, dietary notes, and service timing for culinary team' },
-                { label: 'Banquet Copy (Setup Only)', desc: 'Room setup, timeline, and staffing notes' },
-                { label: 'Client Copy (External Notes)', desc: 'Sanitized version with external notes only' },
-                { label: 'AV / Tech Copy', desc: 'Equipment list, setup timing, and technical requirements' },
+                {
+                  label: 'Full BEO (All Sections)',
+                  desc: 'Complete document with menu, resources, timeline, and charges',
+                },
+                {
+                  label: 'Kitchen Copy (F&B Only)',
+                  desc: 'Menu, dietary notes, and service timing for culinary team',
+                },
+                {
+                  label: 'Banquet Copy (Setup Only)',
+                  desc: 'Room setup, timeline, and staffing notes',
+                },
+                {
+                  label: 'Client Copy (External Notes)',
+                  desc: 'Sanitized version with external notes only',
+                },
+                {
+                  label: 'AV / Tech Copy',
+                  desc: 'Equipment list, setup timing, and technical requirements',
+                },
               ].map((opt) => (
                 <button
                   key={opt.label}
@@ -833,7 +1217,9 @@ export default function BEOEventPage() {
               ))}
             </div>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowPrintOptions(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowPrintOptions(false)}>
+                Cancel
+              </Button>
               <Button variant="secondary">
                 <PrinterIcon className="mr-1.5 h-4 w-4" /> Print Selected
               </Button>

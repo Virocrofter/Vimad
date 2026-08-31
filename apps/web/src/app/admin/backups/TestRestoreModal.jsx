@@ -1,6 +1,18 @@
 /* src/app/admin/backups/TestRestoreModal.jsx */
 import { useState } from 'react';
-import { X, Play, CheckCircle2, XCircle, AlertTriangle, Clock, Database, Server, Terminal, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  X,
+  Play,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Clock,
+  Database,
+  Server,
+  Terminal,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { TestStatusBadge, TestResultRow, LogEntry, IssueAlert, CopyableId } from './components';
@@ -25,20 +37,33 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
           {/* Header */}
           <div className="sticky top-0 z-10 border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-lg',
-                testRun.status === 'success' ? 'bg-accent/10' : testRun.status === 'warning' ? 'bg-warning/10' : 'bg-danger/10'
-              )}>
-                {testRun.status === 'success' ? <CheckCircle2 className="h-5 w-5 text-accent" /> :
-                 testRun.status === 'warning' ? <AlertTriangle className="h-5 w-5 text-warning" /> :
-                 <XCircle className="h-5 w-5 text-danger" />}
+              <div
+                className={cn(
+                  'flex h-9 w-9 items-center justify-center rounded-lg',
+                  testRun.status === 'success'
+                    ? 'bg-accent/10'
+                    : testRun.status === 'warning'
+                      ? 'bg-warning/10'
+                      : 'bg-danger/10'
+                )}
+              >
+                {testRun.status === 'success' ? (
+                  <CheckCircle2 className="h-5 w-5 text-accent" />
+                ) : testRun.status === 'warning' ? (
+                  <AlertTriangle className="h-5 w-5 text-warning" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-danger" />
+                )}
               </div>
               <div>
                 <h3 className="text-lg font-bold text-text-primary">Test Restore Result</h3>
                 <p className="text-xs text-text-muted">{testRun.id}</p>
               </div>
             </div>
-            <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -54,30 +79,48 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
               </div>
               <div className="rounded-xl border border-border bg-surface p-4">
                 <p className="text-xs text-text-muted uppercase tracking-wider">Duration</p>
-                <p className="mt-1 text-lg font-bold font-mono text-text-primary">{testRun.duration}</p>
+                <p className="mt-1 text-lg font-bold font-mono text-text-primary">
+                  {testRun.duration}
+                </p>
               </div>
               <div className="rounded-xl border border-border bg-surface p-4">
                 <p className="text-xs text-text-muted uppercase tracking-wider">RTO Achieved</p>
-                <p className={cn('mt-1 text-lg font-bold font-mono',
-                  testRun.rtoAchieved && parseFloat(testRun.rtoAchieved) <= parseFloat(testRun.rtoTarget) ? 'text-accent' : 'text-danger'
-                )}>
+                <p
+                  className={cn(
+                    'mt-1 text-lg font-bold font-mono',
+                    testRun.rtoAchieved &&
+                      parseFloat(testRun.rtoAchieved) <= parseFloat(testRun.rtoTarget)
+                      ? 'text-accent'
+                      : 'text-danger'
+                  )}
+                >
                   {testRun.rtoAchieved || '—'}
                 </p>
                 <p className="text-[10px] text-text-muted">Target: {testRun.rtoTarget}</p>
               </div>
               <div className="rounded-xl border border-border bg-surface p-4">
                 <p className="text-xs text-text-muted uppercase tracking-wider">RPO Achieved</p>
-                <p className="mt-1 text-lg font-bold font-mono text-accent">{testRun.rpoAchieved || '—'}</p>
+                <p className="mt-1 text-lg font-bold font-mono text-accent">
+                  {testRun.rpoAchieved || '—'}
+                </p>
                 <p className="text-[10px] text-text-muted">Target: {testRun.rpoTarget}</p>
               </div>
             </div>
 
             {/* Test Results */}
             <div className="rounded-xl border border-border bg-surface p-4 space-y-1">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Validation Results</h4>
-              <TestResultRow label="Database Validation" status={testRun.databaseValidated ? 'passed' : 'failed'} />
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                Validation Results
+              </h4>
+              <TestResultRow
+                label="Database Validation"
+                status={testRun.databaseValidated ? 'passed' : 'failed'}
+              />
               <TestResultRow label="Data Integrity Check" status={testRun.dataIntegrity} />
-              <TestResultRow label="Row Count Match" status={testRun.rowCountMatch ? 'passed' : 'failed'} />
+              <TestResultRow
+                label="Row Count Match"
+                status={testRun.rowCountMatch ? 'passed' : 'failed'}
+              />
               <TestResultRow label="Index Rebuild" status={testRun.indexRebuild} />
               <TestResultRow label="Application Smoke Test" status={testRun.appSmokeTest} />
             </div>
@@ -85,9 +128,16 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
             {/* Issues */}
             {testRun.issues.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Issues Found</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Issues Found
+                </h4>
                 {testRun.issues.map((issue, i) => (
-                  <IssueAlert key={i} severity={issue.severity} message={issue.message} component={issue.component} />
+                  <IssueAlert
+                    key={i}
+                    severity={issue.severity}
+                    message={issue.message}
+                    component={issue.component}
+                  />
                 ))}
               </div>
             )}
@@ -103,7 +153,11 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
                   <span className="text-sm font-medium text-text-primary">Execution Logs</span>
                   <span className="text-xs text-text-muted">({testRun.logs.length} entries)</span>
                 </div>
-                {showLogs ? <ChevronUp className="h-4 w-4 text-text-muted" /> : <ChevronDown className="h-4 w-4 text-text-muted" />}
+                {showLogs ? (
+                  <ChevronUp className="h-4 w-4 text-text-muted" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-text-muted" />
+                )}
               </button>
               {showLogs && (
                 <div className="mt-2 rounded-xl border border-border bg-background p-4 space-y-0.5">
@@ -124,7 +178,7 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
 
   const handleStart = async () => {
     setIsStarting(true);
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
     onStartTest(restorePoint.id, selectedEnv);
     setIsStarting(false);
     onClose();
@@ -145,7 +199,10 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
               <p className="text-xs text-text-muted">Validate backup integrity</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -169,7 +226,9 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
 
           {/* Target Environment */}
           <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">Test Environment</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Test Environment
+            </label>
             <div className="space-y-2">
               {testEnvironments.map((env) => (
                 <button
@@ -181,18 +240,30 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
                     selectedEnv === env.id
                       ? 'border-secondary bg-secondary/5'
                       : env.status === 'available'
-                      ? 'border-border bg-surface hover:border-secondary/30'
-                      : 'border-border bg-neutral/5 opacity-50 cursor-not-allowed'
+                        ? 'border-border bg-surface hover:border-secondary/30'
+                        : 'border-border bg-neutral/5 opacity-50 cursor-not-allowed'
                   )}
                 >
-                  <div className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-lg',
-                    selectedEnv === env.id ? 'bg-secondary/10' : 'bg-neutral/10'
-                  )}>
-                    <Server className={cn('h-4 w-4', selectedEnv === env.id ? 'text-secondary' : 'text-text-muted')} />
+                  <div
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-lg',
+                      selectedEnv === env.id ? 'bg-secondary/10' : 'bg-neutral/10'
+                    )}
+                  >
+                    <Server
+                      className={cn(
+                        'h-4 w-4',
+                        selectedEnv === env.id ? 'text-secondary' : 'text-text-muted'
+                      )}
+                    />
                   </div>
                   <div className="flex-1">
-                    <p className={cn('text-sm font-medium', selectedEnv === env.id ? 'text-secondary' : 'text-text-primary')}>
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        selectedEnv === env.id ? 'text-secondary' : 'text-text-primary'
+                      )}
+                    >
                       {env.label}
                     </p>
                     <p className="text-xs text-text-muted">Isolated test environment</p>
@@ -205,7 +276,9 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
 
           {/* What will happen */}
           <div className="rounded-lg border border-info/20 bg-info/5 p-4">
-            <h4 className="text-xs font-semibold text-info mb-2">What happens during a test restore?</h4>
+            <h4 className="text-xs font-semibold text-info mb-2">
+              What happens during a test restore?
+            </h4>
             <ul className="space-y-1.5 text-xs text-text-secondary">
               <li className="flex items-start gap-2">
                 <Database className="h-3.5 w-3.5 text-info shrink-0 mt-0.5" />
@@ -229,8 +302,15 @@ export default function TestRestoreModal({ testRun, restorePoint, onClose, onSta
 
         {/* Footer */}
         <div className="border-t border-border p-4 flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="button" onClick={handleStart} disabled={!selectedEnv || isStarting} isLoading={isStarting}>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleStart}
+            disabled={!selectedEnv || isStarting}
+            isLoading={isStarting}
+          >
             <Play className="mr-1.5 h-4 w-4" /> Start Test Restore
           </Button>
         </div>

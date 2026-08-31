@@ -2,10 +2,30 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, KeyRound, Smartphone, CheckCircle2, AlertTriangle,
-  Loader2, QrCode, Wifi, Bluetooth, Battery, ShieldCheck, Info,
-  ChevronRight, RotateCcw, Lock, Unlock, DoorOpen, MapPin,
-  Clock, Calendar, Bell, BellOff, Settings, HelpCircle
+  ArrowLeft,
+  KeyRound,
+  Smartphone,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  QrCode,
+  Wifi,
+  Bluetooth,
+  Battery,
+  ShieldCheck,
+  Info,
+  ChevronRight,
+  RotateCcw,
+  Lock,
+  Unlock,
+  DoorOpen,
+  MapPin,
+  Clock,
+  Calendar,
+  Bell,
+  BellOff,
+  Settings,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -16,9 +36,9 @@ export default function GuestDigitalKeySetupPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const stayId = searchParams.get('stay');
-  
-  const stay = guestStays.find(s => s.id === stayId);
-  
+
+  const stay = guestStays.find((s) => s.id === stayId);
+
   const [step, setStep] = useState(1); // 1: setup, 2: activating, 3: active, 4: error
   const [progress, setProgress] = useState(0);
   const [notifications, setNotifications] = useState(true);
@@ -28,7 +48,7 @@ export default function GuestDigitalKeySetupPage() {
   useEffect(() => {
     if (step === 2) {
       const interval = setInterval(() => {
-        setProgress(prev => {
+        setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
             setStep(3);
@@ -46,7 +66,11 @@ export default function GuestDigitalKeySetupPage() {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <AlertTriangle className="h-10 w-10 text-warning mb-3" />
         <p className="text-sm text-text-muted">Reservation not found</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate('/guest-portal/booking')}>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => navigate('/guest-portal/booking')}
+        >
           Back to Reservations
         </Button>
       </div>
@@ -85,7 +109,9 @@ export default function GuestDigitalKeySetupPage() {
         </button>
         <div>
           <h1 className="text-lg font-semibold text-text-primary">Digital Key Setup</h1>
-          <p className="text-xs text-text-muted">{stay.property.name} · Room {stay.room.number || 'TBD'}</p>
+          <p className="text-xs text-text-muted">
+            {stay.property.name} · Room {stay.room.number || 'TBD'}
+          </p>
         </div>
       </div>
 
@@ -136,7 +162,7 @@ export default function GuestDigitalKeySetupPage() {
           {/* Settings */}
           <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
             <h3 className="text-sm font-semibold text-text-primary">Key Settings</h3>
-            
+
             <label className="flex items-center justify-between cursor-pointer">
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-text-muted" />
@@ -149,14 +175,18 @@ export default function GuestDigitalKeySetupPage() {
                   onChange={(e) => setNotifications(e.target.checked)}
                   className="peer sr-only"
                 />
-                <span className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  notifications ? 'translate-x-6' : 'translate-x-1'
-                )} />
-                <div className={cn(
-                  'absolute inset-0 rounded-full transition-colors',
-                  notifications ? 'bg-secondary' : 'bg-border'
-                )} />
+                <span
+                  className={cn(
+                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                    notifications ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
+                <div
+                  className={cn(
+                    'absolute inset-0 rounded-full transition-colors',
+                    notifications ? 'bg-secondary' : 'bg-border'
+                  )}
+                />
               </div>
             </label>
 
@@ -172,14 +202,18 @@ export default function GuestDigitalKeySetupPage() {
                   onChange={(e) => setBiometric(e.target.checked)}
                   className="peer sr-only"
                 />
-                <span className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  biometric ? 'translate-x-6' : 'translate-x-1'
-                )} />
-                <div className={cn(
-                  'absolute inset-0 rounded-full transition-colors',
-                  biometric ? 'bg-secondary' : 'bg-border'
-                )} />
+                <span
+                  className={cn(
+                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                    biometric ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
+                <div
+                  className={cn(
+                    'absolute inset-0 rounded-full transition-colors',
+                    biometric ? 'bg-secondary' : 'bg-border'
+                  )}
+                />
               </div>
             </label>
 
@@ -195,14 +229,18 @@ export default function GuestDigitalKeySetupPage() {
                   onChange={(e) => setDeviceBound(e.target.checked)}
                   className="peer sr-only"
                 />
-                <span className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  deviceBound ? 'translate-x-6' : 'translate-x-1'
-                )} />
-                <div className={cn(
-                  'absolute inset-0 rounded-full transition-colors',
-                  deviceBound ? 'bg-secondary' : 'bg-border'
-                )} />
+                <span
+                  className={cn(
+                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                    deviceBound ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
+                <div
+                  className={cn(
+                    'absolute inset-0 rounded-full transition-colors',
+                    deviceBound ? 'bg-secondary' : 'bg-border'
+                  )}
+                />
               </div>
             </label>
           </div>
@@ -211,7 +249,10 @@ export default function GuestDigitalKeySetupPage() {
           <div className="rounded-lg border border-info/20 bg-info/5 p-3 flex items-start gap-2">
             <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
             <div className="text-xs text-text-secondary space-y-1">
-              <p>Your digital key is encrypted and tied to this device. Keep Bluetooth and location services enabled for the best experience.</p>
+              <p>
+                Your digital key is encrypted and tied to this device. Keep Bluetooth and location
+                services enabled for the best experience.
+              </p>
               <p>If you lose your device, contact the front desk immediately to revoke the key.</p>
             </div>
           </div>
@@ -232,7 +273,7 @@ export default function GuestDigitalKeySetupPage() {
             <h3 className="text-lg font-semibold text-text-primary">Activating Your Key...</h3>
             <p className="text-sm text-text-muted mt-1">Please keep your device nearby</p>
           </div>
-          
+
           <div className="max-w-xs mx-auto">
             <div className="h-2 w-full rounded-full bg-border overflow-hidden">
               <div

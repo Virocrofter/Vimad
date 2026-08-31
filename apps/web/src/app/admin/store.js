@@ -5,17 +5,12 @@ import { initialTenants } from './data';
 export const useTenantStore = create((set, get) => ({
   tenants: initialTenants,
 
-  addTenant: (newTenant) =>
-    set((state) => ({ tenants: [newTenant, ...state.tenants] })),
+  addTenant: (newTenant) => set((state) => ({ tenants: [newTenant, ...state.tenants] })),
 
   updateTenant: (id, updater) =>
     set((state) => ({
       tenants: state.tenants.map((t) =>
-        t.id === id
-          ? typeof updater === 'function'
-            ? updater(t)
-            : { ...t, ...updater }
-          : t
+        t.id === id ? (typeof updater === 'function' ? updater(t) : { ...t, ...updater }) : t
       ),
     })),
 
@@ -26,20 +21,15 @@ export const useTenantStore = create((set, get) => ({
 
   getTenantById: (id) => get().tenants.find((t) => t.id === id),
 
-  getTenantBySubdomain: (subdomain) =>
-    get().tenants.find((t) => t.subdomain === subdomain),
+  getTenantBySubdomain: (subdomain) => get().tenants.find((t) => t.subdomain === subdomain),
 
   setTenantStatus: (id, status) =>
     set((state) => ({
-      tenants: state.tenants.map((t) =>
-        t.id === id ? { ...t, status } : t
-      ),
+      tenants: state.tenants.map((t) => (t.id === id ? { ...t, status } : t)),
     })),
 
   setBillingStatus: (id, billingStatus) =>
     set((state) => ({
-      tenants: state.tenants.map((t) =>
-        t.id === id ? { ...t, billingStatus } : t
-      ),
+      tenants: state.tenants.map((t) => (t.id === id ? { ...t, billingStatus } : t)),
     })),
 }));

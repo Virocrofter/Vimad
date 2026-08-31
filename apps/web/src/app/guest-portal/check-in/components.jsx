@@ -1,9 +1,24 @@
 /* src/app/guest-portal/check-in/components.jsx */
 import { useState, useRef } from 'react';
 import {
-  Upload, Camera, CheckCircle2, XCircle, Loader2, FileCheck,
-  AlertTriangle, Scan, ShieldCheck, Eye, EyeOff, RotateCcw,
-  ChevronRight, ChevronLeft, ZoomIn, ZoomOut, Crop, Trash2
+  Upload,
+  Camera,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  FileCheck,
+  AlertTriangle,
+  Scan,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  ChevronRight,
+  ChevronLeft,
+  ZoomIn,
+  ZoomOut,
+  Crop,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
@@ -113,13 +128,18 @@ export function IDUpload({ onUpload, onVerify, verified = false, uploading = fal
   return (
     <div className="space-y-3">
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
           'rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors',
-          dragOver ? 'border-secondary bg-secondary/5' : 'border-border bg-background hover:bg-surface-elevated'
+          dragOver
+            ? 'border-secondary bg-secondary/5'
+            : 'border-border bg-background hover:bg-surface-elevated'
         )}
       >
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 mb-3">
@@ -165,7 +185,9 @@ export function IDUpload({ onUpload, onVerify, verified = false, uploading = fal
           <ShieldCheck className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
           <div>
             <p className="text-xs font-medium text-text-primary">Secure Upload</p>
-            <p className="text-[10px] text-text-muted">Your ID is encrypted and stored securely. It will be deleted after your stay.</p>
+            <p className="text-[10px] text-text-muted">
+              Your ID is encrypted and stored securely. It will be deleted after your stay.
+            </p>
           </div>
         </div>
       </div>
@@ -178,7 +200,9 @@ export function VehicleForm({ value, onChange }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="text-xs text-text-muted uppercase tracking-wider mb-1 block">License Plate</label>
+        <label className="text-xs text-text-muted uppercase tracking-wider mb-1 block">
+          License Plate
+        </label>
         <input
           type="text"
           value={value.plate || ''}
@@ -189,7 +213,9 @@ export function VehicleForm({ value, onChange }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs text-text-muted uppercase tracking-wider mb-1 block">Make</label>
+          <label className="text-xs text-text-muted uppercase tracking-wider mb-1 block">
+            Make
+          </label>
           <input
             type="text"
             value={value.make || ''}
@@ -199,7 +225,9 @@ export function VehicleForm({ value, onChange }) {
           />
         </div>
         <div>
-          <label className="text-xs text-text-muted uppercase tracking-wider mb-1 block">Model</label>
+          <label className="text-xs text-text-muted uppercase tracking-wider mb-1 block">
+            Model
+          </label>
           <input
             type="text"
             value={value.model || ''}
@@ -241,14 +269,18 @@ export function PreferenceToggle({ label, description, checked, onChange, icon: 
           onChange={(e) => onChange?.(e.target.checked)}
           className="peer sr-only"
         />
-        <span className={cn(
-          'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-          checked ? 'translate-x-6' : 'translate-x-1'
-        )} />
-        <div className={cn(
-          'absolute inset-0 rounded-full transition-colors',
-          checked ? 'bg-secondary' : 'bg-border'
-        )} />
+        <span
+          className={cn(
+            'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+            checked ? 'translate-x-6' : 'translate-x-1'
+          )}
+        />
+        <div
+          className={cn(
+            'absolute inset-0 rounded-full transition-colors',
+            checked ? 'bg-secondary' : 'bg-border'
+          )}
+        />
       </div>
     </label>
   );
@@ -260,17 +292,24 @@ export function CheckInProgress({ steps, currentStep }) {
     <div className="flex items-center gap-1">
       {steps.map((step, idx) => (
         <div key={idx} className="flex items-center gap-1">
-          <div className={cn(
-            'flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold transition-colors',
-            idx < currentStep ? 'bg-accent text-white' :
-            idx === currentStep ? 'bg-secondary text-white' :
-            'bg-border text-text-muted'
-          )}>
+          <div
+            className={cn(
+              'flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold transition-colors',
+              idx < currentStep
+                ? 'bg-accent text-white'
+                : idx === currentStep
+                  ? 'bg-secondary text-white'
+                  : 'bg-border text-text-muted'
+            )}
+          >
             {idx < currentStep ? <CheckCircle2 className="h-3.5 w-3.5" /> : idx + 1}
           </div>
-          <span className={cn('text-[10px] font-medium hidden sm:inline',
-            idx <= currentStep ? 'text-text-primary' : 'text-text-muted'
-          )}>
+          <span
+            className={cn(
+              'text-[10px] font-medium hidden sm:inline',
+              idx <= currentStep ? 'text-text-primary' : 'text-text-muted'
+            )}
+          >
             {step}
           </span>
           {idx < steps.length - 1 && (
@@ -285,7 +324,12 @@ export function CheckInProgress({ steps, currentStep }) {
 /* ─── Verification Badge ─── */
 export function VerificationBadge({ status, text }) {
   const configs = {
-    verified: { icon: ShieldCheck, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
+    verified: {
+      icon: ShieldCheck,
+      color: 'text-accent',
+      bg: 'bg-accent/10',
+      border: 'border-accent/20',
+    },
     pending: { icon: Loader2, color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
     failed: { icon: XCircle, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
   };
@@ -293,10 +337,14 @@ export function VerificationBadge({ status, text }) {
   const Icon = config.icon;
 
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      config.bg, config.color, config.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        config.bg,
+        config.color,
+        config.border
+      )}
+    >
       <Icon className={cn('h-3.5 w-3.5', status === 'pending' && 'animate-spin')} />
       {text || status.charAt(0).toUpperCase() + status.slice(1)}
     </span>

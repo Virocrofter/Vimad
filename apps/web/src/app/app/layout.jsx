@@ -14,7 +14,7 @@ export default function AppLayout() {
     if (path.includes('dashboard')) return 'Command Center';
     if (path.includes('reservations')) return 'Reservations';
     if (path.includes('front-desk')) return 'Front Desk';
-    if (path.includes('room-plan')) return 'Room Plan'; 
+    if (path.includes('room-plan')) return 'Room Plan';
     if (path.includes('billing')) return 'Billing';
     if (path.includes('reports')) return 'Reports';
     if (path.includes('guests')) return 'Guests';
@@ -41,17 +41,11 @@ export default function AppLayout() {
           sidebarCollapsed ? 'w-16' : 'w-64'
         )}
       >
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          onCollapseChange={setSidebarCollapsed}
-        />
+        <Sidebar collapsed={sidebarCollapsed} onCollapseChange={setSidebarCollapsed} />
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar
-          title={getTitle()}
-          onMenuClick={() => setMobileSidebarOpen(true)}
-        />
+        <Topbar title={getTitle()} onMenuClick={() => setMobileSidebarOpen(true)} />
         <main className="flex-1 overflow-auto p-4 lg:p-8">
           <Outlet />
         </main>

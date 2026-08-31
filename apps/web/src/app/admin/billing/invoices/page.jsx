@@ -1,10 +1,28 @@
 /* src/app/admin/billing/invoices/page.jsx */
 import { useState, useMemo } from 'react';
 import {
-  Search, Filter, Plus, X, Check, ChevronDown, ChevronUp,
-  Download, Send, Eye, FileText, Printer, Trash2, Copy,
-  DollarSign, Receipt, AlertTriangle, CheckCircle2, Clock,
-  Calendar, Mail, CreditCard
+  Search,
+  Filter,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  Send,
+  Eye,
+  FileText,
+  Printer,
+  Trash2,
+  Copy,
+  DollarSign,
+  Receipt,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Calendar,
+  Mail,
+  CreditCard,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -35,7 +53,10 @@ function InvoiceDrawer({ invoice, onClose }) {
             </div>
             <div className="flex items-center gap-2">
               <InvoiceStatusBadge status={invoice.status} />
-              <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+              <button
+                onClick={onClose}
+                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -47,15 +68,21 @@ function InvoiceDrawer({ invoice, onClose }) {
           <div className="grid grid-cols-3 gap-4">
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Amount</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatCurrency(invoice.amount)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {formatCurrency(invoice.amount)}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Subtotal</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatCurrency(invoice.subtotal)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {formatCurrency(invoice.subtotal)}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <p className="text-xs text-text-muted uppercase tracking-wider">Tax</p>
-              <p className="mt-1 text-xl font-bold font-mono text-text-primary">{formatCurrency(invoice.tax)}</p>
+              <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+                {formatCurrency(invoice.tax)}
+              </p>
             </div>
           </div>
 
@@ -65,12 +92,19 @@ function InvoiceDrawer({ invoice, onClose }) {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-text-muted" />
                 <span className="text-text-muted">Period:</span>
-                <span className="text-text-primary">{formatDate(invoice.periodStart)} — {formatDate(invoice.periodEnd)}</span>
+                <span className="text-text-primary">
+                  {formatDate(invoice.periodStart)} — {formatDate(invoice.periodEnd)}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-text-muted" />
                 <span className="text-text-muted">Due Date:</span>
-                <span className={cn('text-text-primary', invoice.status === 'overdue' && 'text-danger font-medium')}>
+                <span
+                  className={cn(
+                    'text-text-primary',
+                    invoice.status === 'overdue' && 'text-danger font-medium'
+                  )}
+                >
                   {formatDate(invoice.dueDate)}
                 </span>
               </div>
@@ -94,31 +128,53 @@ function InvoiceDrawer({ invoice, onClose }) {
             <table className="w-full text-sm">
               <thead className="bg-background border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">Description</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Qty</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Unit Price</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                    Qty
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                    Unit Price
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                    Amount
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {invoice.lineItems.map((item, i) => (
                   <tr key={i} className="hover:bg-background/50">
                     <td className="px-4 py-3 text-text-primary">{item.description}</td>
-                    <td className="px-4 py-3 text-right font-mono text-text-secondary">{item.quantity}</td>
-                    <td className="px-4 py-3 text-right font-mono text-text-secondary">{formatCurrency(item.unitPrice)}</td>
-                    <td className={cn(
-                      'px-4 py-3 text-right font-mono font-medium',
-                      item.amount < 0 ? 'text-accent' : 'text-text-primary'
-                    )}>
-                      {item.amount < 0 ? '-' : ''}{formatCurrency(Math.abs(item.amount))}
+                    <td className="px-4 py-3 text-right font-mono text-text-secondary">
+                      {item.quantity}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-text-secondary">
+                      {formatCurrency(item.unitPrice)}
+                    </td>
+                    <td
+                      className={cn(
+                        'px-4 py-3 text-right font-mono font-medium',
+                        item.amount < 0 ? 'text-accent' : 'text-text-primary'
+                      )}
+                    >
+                      {item.amount < 0 ? '-' : ''}
+                      {formatCurrency(Math.abs(item.amount))}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot className="bg-background border-t border-border">
                 <tr>
-                  <td colSpan={3} className="px-4 py-3 text-right text-sm font-medium text-text-secondary">Total</td>
-                  <td className="px-4 py-3 text-right text-sm font-bold font-mono text-text-primary">{formatCurrency(invoice.amount)}</td>
+                  <td
+                    colSpan={3}
+                    className="px-4 py-3 text-right text-sm font-medium text-text-secondary"
+                  >
+                    Total
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm font-bold font-mono text-text-primary">
+                    {formatCurrency(invoice.amount)}
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -133,16 +189,28 @@ function InvoiceDrawer({ invoice, onClose }) {
               <Download className="mr-1.5 h-3.5 w-3.5" /> Download PDF
             </Button>
             {invoice.status === 'draft' && (
-              <Button variant="outline" size="sm" className="text-accent border-accent/30 hover:bg-accent/10">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-accent border-accent/30 hover:bg-accent/10"
+              >
                 <Send className="mr-1.5 h-3.5 w-3.5" /> Send Invoice
               </Button>
             )}
             {invoice.status === 'overdue' && (
-              <Button variant="outline" size="sm" className="text-warning border-warning/30 hover:bg-warning/10">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-warning border-warning/30 hover:bg-warning/10"
+              >
                 <Mail className="mr-1.5 h-3.5 w-3.5" /> Send Reminder
               </Button>
             )}
-            <Button variant="outline" size="sm" className="ml-auto text-danger border-danger/30 hover:bg-danger/10">
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto text-danger border-danger/30 hover:bg-danger/10"
+            >
               <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Void
             </Button>
           </div>
@@ -163,7 +231,8 @@ export default function InvoicesPage() {
 
   const filteredInvoices = useMemo(() => {
     let result = invList.filter((inv) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         inv.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         inv.id.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
@@ -185,18 +254,21 @@ export default function InvoicesPage() {
     return result;
   }, [invList, query, statusFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: invList.reduce((s, i) => s + i.amount, 0),
-    paid: invList.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0),
-    pending: invList.filter(i => i.status === 'pending').reduce((s, i) => s + i.amount, 0),
-    overdue: invList.filter(i => i.status === 'overdue').reduce((s, i) => s + i.amount, 0),
-    count: invList.length,
-    paidCount: invList.filter(i => i.status === 'paid').length,
-    overdueCount: invList.filter(i => i.status === 'overdue').length,
-  }), [invList]);
+  const stats = useMemo(
+    () => ({
+      total: invList.reduce((s, i) => s + i.amount, 0),
+      paid: invList.filter((i) => i.status === 'paid').reduce((s, i) => s + i.amount, 0),
+      pending: invList.filter((i) => i.status === 'pending').reduce((s, i) => s + i.amount, 0),
+      overdue: invList.filter((i) => i.status === 'overdue').reduce((s, i) => s + i.amount, 0),
+      count: invList.length,
+      paidCount: invList.filter((i) => i.status === 'paid').length,
+      overdueCount: invList.filter((i) => i.status === 'overdue').length,
+    }),
+    [invList]
+  );
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
@@ -208,7 +280,9 @@ export default function InvoicesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Invoices</h1>
-          <p className="text-sm text-text-secondary">Generate, track, and manage all tenant invoices</p>
+          <p className="text-sm text-text-secondary">
+            Generate, track, and manage all tenant invoices
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -224,21 +298,29 @@ export default function InvoicesPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Invoiced</p>
-          <p className="mt-1 text-2xl font-bold font-mono text-text-primary">{formatCurrency(stats.total)}</p>
+          <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+            {formatCurrency(stats.total)}
+          </p>
           <p className="text-xs text-text-muted">{stats.count} invoices</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-xs text-text-muted uppercase tracking-wider">Collected</p>
-          <p className="mt-1 text-2xl font-bold font-mono text-accent">{formatCurrency(stats.paid)}</p>
+          <p className="mt-1 text-2xl font-bold font-mono text-accent">
+            {formatCurrency(stats.paid)}
+          </p>
           <p className="text-xs text-text-muted">{stats.paidCount} paid</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-xs text-text-muted uppercase tracking-wider">Pending</p>
-          <p className="mt-1 text-2xl font-bold font-mono text-warning">{formatCurrency(stats.pending)}</p>
+          <p className="mt-1 text-2xl font-bold font-mono text-warning">
+            {formatCurrency(stats.pending)}
+          </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-xs text-text-muted uppercase tracking-wider">Overdue</p>
-          <p className="mt-1 text-2xl font-bold font-mono text-danger">{formatCurrency(stats.overdue)}</p>
+          <p className="mt-1 text-2xl font-bold font-mono text-danger">
+            {formatCurrency(stats.overdue)}
+          </p>
           <p className="text-xs text-text-muted">{stats.overdueCount} invoices</p>
         </div>
       </div>
@@ -260,7 +342,9 @@ export default function InvoicesPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -290,7 +374,10 @@ export default function InvoicesPage() {
           </div>
           <div className="mt-3 flex justify-end">
             <button
-              onClick={() => { setStatusFilter('all'); setQuery(''); }}
+              onClick={() => {
+                setStatusFilter('all');
+                setQuery('');
+              }}
               className="text-xs text-secondary hover:underline"
             >
               Reset all filters
@@ -301,7 +388,8 @@ export default function InvoicesPage() {
 
       {/* Results */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredInvoices.length}</span> of {invList.length} invoices
+        Showing <span className="font-medium text-text-primary">{filteredInvoices.length}</span> of{' '}
+        {invList.length} invoices
       </p>
 
       {/* Table */}
@@ -327,9 +415,12 @@ export default function InvoicesPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -351,7 +442,9 @@ export default function InvoicesPage() {
                       <FileText className="h-4 w-4 text-text-muted" />
                       <div>
                         <p className="text-sm font-medium text-text-primary font-mono">{inv.id}</p>
-                        <p className="text-[10px] text-text-muted">{formatDate(inv.periodStart)} — {formatDate(inv.periodEnd)}</p>
+                        <p className="text-[10px] text-text-muted">
+                          {formatDate(inv.periodStart)} — {formatDate(inv.periodEnd)}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -360,11 +453,18 @@ export default function InvoicesPage() {
                     <InvoiceStatusBadge status={inv.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(inv.amount)}</p>
+                    <p className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(inv.amount)}
+                    </p>
                     <p className="text-[10px] text-text-muted">Tax: {formatCurrency(inv.tax)}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className={cn('text-xs', inv.status === 'overdue' ? 'text-danger font-medium' : 'text-text-secondary')}>
+                    <p
+                      className={cn(
+                        'text-xs',
+                        inv.status === 'overdue' ? 'text-danger font-medium' : 'text-text-secondary'
+                      )}
+                    >
                       {formatDate(inv.dueDate)}
                     </p>
                     {inv.paidDate && (
@@ -374,7 +474,10 @@ export default function InvoicesPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedInvoice(inv); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedInvoice(inv);
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title="View Details"
                       >
@@ -406,10 +509,7 @@ export default function InvoicesPage() {
 
       {/* Drawer */}
       {selectedInvoice && (
-        <InvoiceDrawer
-          invoice={selectedInvoice}
-          onClose={() => setSelectedInvoice(null)}
-        />
+        <InvoiceDrawer invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} />
       )}
     </div>
   );

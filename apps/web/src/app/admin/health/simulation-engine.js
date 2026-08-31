@@ -268,7 +268,7 @@ export class ServiceSimulator {
   }
 
   _resolveIncident() {
-    const active = this.incidents.find(i => !i.resolvedAt);
+    const active = this.incidents.find((i) => !i.resolvedAt);
     if (active) {
       active.resolvedAt = new Date().toISOString();
       const start = new Date(active.startedAt);
@@ -337,7 +337,7 @@ export class SimulationOrchestrator {
       { id: 'svc-notify', name: 'Notification Service', baseLatency: 55, baseThroughput: 900 },
     ];
 
-    configs.forEach(cfg => {
+    configs.forEach((cfg) => {
       this.services.set(cfg.id, new ServiceSimulator(cfg));
     });
   }
@@ -390,7 +390,10 @@ export class SimulationOrchestrator {
 
   setGlobalStress(level) {
     this.globalStress = Math.max(0, Math.min(2, level));
-    this._logEvent('warning', `Global stress level set to ${(this.globalStress * 100).toFixed(0)}%`);
+    this._logEvent(
+      'warning',
+      `Global stress level set to ${(this.globalStress * 100).toFixed(0)}%`
+    );
   }
 
   triggerSpike() {
@@ -466,11 +469,17 @@ export class SimulationOrchestrator {
 
   _generateSyntheticErrors(results) {
     // Occasionally generate errors for degraded/critical services
-    Object.values(results.services).forEach(svc => {
+    Object.values(results.services).forEach((svc) => {
       if (svc.status !== 'operational' && Math.random() > 0.7) {
         const errorTypes = [
-          { severity: svc.status === 'critical' ? 'critical' : 'warning', message: `Elevated latency on ${svc.name}: ${svc.latency.current}ms` },
-          { severity: 'warning', message: `High error rate detected on ${svc.name}: ${svc.errorRate}%` },
+          {
+            severity: svc.status === 'critical' ? 'critical' : 'warning',
+            message: `Elevated latency on ${svc.name}: ${svc.latency.current}ms`,
+          },
+          {
+            severity: 'warning',
+            message: `High error rate detected on ${svc.name}: ${svc.errorRate}%`,
+          },
           { severity: 'error', message: `Connection timeout on ${svc.name}` },
           { severity: 'warning', message: `Memory pressure on ${svc.name}: ${svc.memory}%` },
         ];
@@ -499,7 +508,7 @@ export class SimulationOrchestrator {
 
   getEvents(filter = null) {
     if (!filter) return [...this.eventLog];
-    return this.eventLog.filter(e => {
+    return this.eventLog.filter((e) => {
       if (filter.severity && e.severity !== filter.severity) return false;
       if (filter.service && e.service !== filter.service) return false;
       if (filter.since && new Date(e.timestamp) < new Date(filter.since)) return false;
@@ -525,19 +534,27 @@ export class SimulationOrchestrator {
   getSystemOverview() {
     const snapshots = this.getAllSnapshots();
     const services = Object.values(snapshots);
-    const operational = services.filter(s => s.status === 'operational').length;
-    const degraded = services.filter(s => s.status === 'degraded').length;
-    const critical = services.filter(s => s.status === 'critical').length;
+    const operational = services.filter((s) => s.status === 'operational').length;
+    const degraded = services.filter((s) => s.status === 'degraded').length;
+    const critical = services.filter((s) => s.status === 'critical').length;
 
-    const avgLatency = services.reduce((s, svc) => s + (svc.metrics.latency?.value || 0), 0) / services.length;
-    const totalThroughput = services.reduce((s, svc) => s + (svc.metrics.throughput?.value || 0), 0);
-    const avgErrorRate = services.reduce((s, svc) => s + (svc.metrics.errorRate?.value || 0), 0) / services.length;
+    const avgLatency =
+      services.reduce((s, svc) => s + (svc.metrics.latency?.value || 0), 0) / services.length;
+    const totalThroughput = services.reduce(
+      (s, svc) => s + (svc.metrics.throughput?.value || 0),
+      0
+    );
+    const avgErrorRate =
+      services.reduce((s, svc) => s + (svc.metrics.errorRate?.value || 0), 0) / services.length;
 
     return {
       status: critical > 0 ? 'critical' : degraded > 0 ? 'degraded' : 'healthy',
       timestamp: new Date().toISOString(),
       uptime: {
-        current: (services.reduce((s, svc) => s + parseFloat(svc.uptime), 0) / services.length).toFixed(2) + '%',
+        current:
+          (services.reduce((s, svc) => s + parseFloat(svc.uptime), 0) / services.length).toFixed(
+            2
+          ) + '%',
       },
       services: { operational, degraded, critical, total: services.length },
       metrics: {
@@ -561,8 +578,12 @@ export class SimulationOrchestrator {
   }
 
   _notifyListeners(data) {
-    this.listeners.forEach(cb => {
-      try { cb(data); } catch (e) { console.error('Simulation listener error:', e); }
+    this.listeners.forEach((cb) => {
+      try {
+        cb(data);
+      } catch (e) {
+        console.error('Simulation listener error:', e);
+      }
     });
   }
 
@@ -622,8 +643,8 @@ export function generateTrafficVizData(history, buckets = 20) {
     result.push({
       index: i / bucketSize,
       avg: Math.round(avg * 100) / 100,
-      min: Math.min(...slice.map(p => p.value)),
-      max: Math.max(...slice.map(p => p.value)),
+      min: Math.min(...slice.map((p) => p.value)),
+      max: Math.max(...slice.map((p) => p.value)),
       count: slice.length,
     });
   }

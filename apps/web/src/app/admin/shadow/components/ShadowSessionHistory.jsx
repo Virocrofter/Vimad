@@ -1,8 +1,20 @@
 /* src/app/admin/shadow/components/ShadowSessionHistory.jsx */
 import { useState, useMemo } from 'react';
 import {
-  History, Eye, Zap, Ghost, Clock, ChevronDown, ChevronUp,
-  User, Shield, X, Trash2, Download, Search, Filter
+  History,
+  Eye,
+  Zap,
+  Ghost,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Shield,
+  X,
+  Trash2,
+  Download,
+  Search,
+  Filter,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -18,7 +30,7 @@ export function ShadowSessionHistory() {
   const [expandedId, setExpandedId] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('endTime'); // 'endTime' | 'duration' | 'targetUser'
-  
+
   const sessionHistory = useShadowStore((s) => s.sessionHistory);
   const clearHistory = useShadowStore((s) => s.clearHistory);
 
@@ -50,7 +62,8 @@ export function ShadowSessionHistory() {
     result.sort((a, b) => {
       if (sortBy === 'endTime') return new Date(b.endTime) - new Date(a.endTime);
       if (sortBy === 'duration') return (b.duration || 0) - (a.duration || 0);
-      if (sortBy === 'targetUser') return (a.shadowUser?.name || '').localeCompare(b.shadowUser?.name || '');
+      if (sortBy === 'targetUser')
+        return (a.shadowUser?.name || '').localeCompare(b.shadowUser?.name || '');
       return 0;
     });
 
@@ -88,7 +101,12 @@ export function ShadowSessionHistory() {
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-1.5 h-3.5 w-3.5" /> Export
           </Button>
-          <Button variant="outline" size="sm" className="text-danger border-danger/30 hover:bg-danger/10" onClick={clearHistory}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-danger border-danger/30 hover:bg-danger/10"
+            onClick={clearHistory}
+          >
             <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Clear
           </Button>
         </div>
@@ -124,7 +142,7 @@ export function ShadowSessionHistory() {
         {filtered.map((session) => {
           const isExpanded = expandedId === session.id;
           const shadowMeta = roleConfig[session.shadowUser?.role] || roleConfig.readonly;
-          
+
           return (
             <div
               key={session.id}
@@ -135,16 +153,32 @@ export function ShadowSessionHistory() {
                 onClick={() => toggleExpand(session.id)}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-background/50 transition-colors"
               >
-                {isExpanded ? <ChevronUp className="h-4 w-4 text-text-muted shrink-0" /> : <ChevronDown className="h-4 w-4 text-text-muted shrink-0" />}
-                
-                <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', shadowMeta.bg)}>
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-text-muted shrink-0" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-text-muted shrink-0" />
+                )}
+
+                <div
+                  className={cn(
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+                    shadowMeta.bg
+                  )}
+                >
                   <Eye className={cn('h-4 w-4', shadowMeta.color)} />
                 </div>
-                
+
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-text-primary">{session.shadowUser?.name}</span>
-                    <span className={cn('text-[10px] font-medium uppercase tracking-wider', shadowMeta.color)}>
+                    <span className="text-sm font-semibold text-text-primary">
+                      {session.shadowUser?.name}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium uppercase tracking-wider',
+                        shadowMeta.color
+                      )}
+                    >
                       {shadowMeta.label}
                     </span>
                     {session.stealth && (
@@ -169,10 +203,12 @@ export function ShadowSessionHistory() {
                     <span>By {session.originalUser?.name}</span>
                   </div>
                 </div>
-                
+
                 <div className="text-right shrink-0">
                   <p className="text-xs text-text-muted">{session.endTime?.split(' ')[0]}</p>
-                  <p className="text-[10px] text-text-muted">{session.endTime?.split(' ')[1]?.slice(0, 5)}</p>
+                  <p className="text-[10px] text-text-muted">
+                    {session.endTime?.split(' ')[1]?.slice(0, 5)}
+                  </p>
                 </div>
               </button>
 
@@ -182,25 +218,44 @@ export function ShadowSessionHistory() {
                   {/* User Details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="rounded-lg border border-border bg-background p-3">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">Target User</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+                        Target User
+                      </p>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                          {session.shadowUser?.avatar || session.shadowUser?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          {session.shadowUser?.avatar ||
+                            session.shadowUser?.name
+                              ?.split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .slice(0, 2)
+                              .toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-text-primary">{session.shadowUser?.name}</p>
+                          <p className="text-sm font-medium text-text-primary">
+                            {session.shadowUser?.name}
+                          </p>
                           <p className="text-xs text-text-muted">{session.shadowUser?.email}</p>
                         </div>
                       </div>
                     </div>
                     <div className="rounded-lg border border-border bg-background p-3">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">Shadow Admin</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+                        Shadow Admin
+                      </p>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500/10 text-xs font-bold text-purple-500">
-                          {session.originalUser?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          {session.originalUser?.name
+                            ?.split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .slice(0, 2)
+                            .toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-text-primary">{session.originalUser?.name}</p>
+                          <p className="text-sm font-medium text-text-primary">
+                            {session.originalUser?.name}
+                          </p>
                           <p className="text-xs text-text-muted">{session.originalUser?.email}</p>
                         </div>
                       </div>
@@ -209,7 +264,9 @@ export function ShadowSessionHistory() {
 
                   {/* Timeline */}
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">Session Timeline</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+                      Session Timeline
+                    </p>
                     <div className="space-y-2">
                       {session.actionsTaken?.map((action, idx) => (
                         <div key={idx} className="flex items-start gap-3">
@@ -219,13 +276,17 @@ export function ShadowSessionHistory() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-text-primary">{action.action}</p>
                             {action.details && (
-                              <p className="text-xs text-text-muted font-mono">{JSON.stringify(action.details)}</p>
+                              <p className="text-xs text-text-muted font-mono">
+                                {JSON.stringify(action.details)}
+                              </p>
                             )}
                             <p className="text-[10px] text-text-muted">{action.timestamp}</p>
                           </div>
                         </div>
                       )) || (
-                        <p className="text-xs text-text-muted italic">No detailed actions recorded</p>
+                        <p className="text-xs text-text-muted italic">
+                          No detailed actions recorded
+                        </p>
                       )}
                     </div>
                   </div>

@@ -2,9 +2,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Bed, Sparkles, Clock, CheckCircle2, AlertCircle,
-  Plus, Minus, Send, Calendar, Loader2, Droplets, Shirt,
-  Moon, Star, Wrench, MessageSquare, ChevronRight
+  ArrowLeft,
+  Bed,
+  Sparkles,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Minus,
+  Send,
+  Calendar,
+  Loader2,
+  Droplets,
+  Shirt,
+  Moon,
+  Star,
+  Wrench,
+  MessageSquare,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useGuestStore } from '../../store';
@@ -14,7 +29,8 @@ import { HousekeepingServiceCard } from './components';
 export default function HousekeepingPage() {
   const navigate = useNavigate();
   const stay = guestStays[0];
-  const { dndEnabled, toggleDnd, addRequest, requests, cleaningSchedule, setCleaningSchedule } = useGuestStore();
+  const { dndEnabled, toggleDnd, addRequest, requests, cleaningSchedule, setCleaningSchedule } =
+    useGuestStore();
   const [selectedService, setSelectedService] = useState(null);
   const [scheduleModal, setScheduleModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -73,7 +89,9 @@ export default function HousekeepingPage() {
         </button>
         <div className="flex-1">
           <h1 className="text-xl font-bold text-text-primary">Housekeeping</h1>
-          <p className="text-xs text-text-muted">Room 204 · Request services or schedule cleaning</p>
+          <p className="text-xs text-text-muted">
+            Room 204 · Request services or schedule cleaning
+          </p>
         </div>
       </div>
 
@@ -83,7 +101,9 @@ export default function HousekeepingPage() {
           <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
           <div>
             <p className="text-sm font-medium text-text-primary">Request Submitted!</p>
-            <p className="text-xs text-text-secondary">Our team will attend to your request shortly.</p>
+            <p className="text-xs text-text-secondary">
+              Our team will attend to your request shortly.
+            </p>
           </div>
         </div>
       )}
@@ -92,10 +112,12 @@ export default function HousekeepingPage() {
       <div className="rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              'flex h-10 w-10 items-center justify-center rounded-full',
-              dndEnabled ? 'bg-danger/10' : 'bg-accent/10'
-            )}>
+            <div
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-full',
+                dndEnabled ? 'bg-danger/10' : 'bg-accent/10'
+              )}
+            >
               {dndEnabled ? (
                 <EyeOff className="h-5 w-5 text-danger" />
               ) : (
@@ -107,8 +129,7 @@ export default function HousekeepingPage() {
               <p className="text-xs text-text-muted">
                 {dndEnabled
                   ? 'Housekeeping will skip your room today'
-                  : 'Your room is available for service'
-                }
+                  : 'Your room is available for service'}
               </p>
             </div>
           </div>
@@ -119,10 +140,12 @@ export default function HousekeepingPage() {
               dndEnabled ? 'bg-danger' : 'bg-border'
             )}
           >
-            <span className={cn(
-              'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-              dndEnabled ? 'translate-x-6' : 'translate-x-1'
-            )} />
+            <span
+              className={cn(
+                'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                dndEnabled ? 'translate-x-6' : 'translate-x-1'
+              )}
+            />
           </button>
         </div>
       </div>
@@ -139,8 +162,7 @@ export default function HousekeepingPage() {
               <p className="text-xs text-text-muted">
                 {cleaningSchedule
                   ? `Scheduled for ${cleaningSchedule}`
-                  : 'Select a preferred time slot'
-                }
+                  : 'Select a preferred time slot'}
               </p>
             </div>
           </div>
@@ -175,7 +197,10 @@ export default function HousekeepingPage() {
       {/* Service Request Modal */}
       {selectedService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedService(null)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedService(null)}
+          />
           <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
@@ -183,7 +208,9 @@ export default function HousekeepingPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-text-primary">{selectedService.label}</h3>
-                <p className="text-xs text-text-muted">Estimated time: {selectedService.estimatedTime}</p>
+                <p className="text-xs text-text-muted">
+                  Estimated time: {selectedService.estimatedTime}
+                </p>
               </div>
             </div>
             <p className="text-sm text-text-secondary">
@@ -192,7 +219,8 @@ export default function HousekeepingPage() {
             <div className="flex items-center gap-2 rounded-lg bg-warning/5 border border-warning/20 p-3">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
               <p className="text-xs text-text-secondary">
-                Please ensure you are not in the room or have secured valuables if requesting full cleaning.
+                Please ensure you are not in the room or have secured valuables if requesting full
+                cleaning.
               </p>
             </div>
             <div className="flex gap-2">
@@ -243,7 +271,9 @@ export default function HousekeepingPage() {
           <div className="text-center py-8 rounded-xl border border-border bg-surface">
             <Sparkles className="mx-auto h-10 w-10 text-text-muted mb-3" />
             <p className="text-sm text-text-muted">No requests yet</p>
-            <p className="text-xs text-text-secondary mt-1">Select a service above to get started</p>
+            <p className="text-xs text-text-secondary mt-1">
+              Select a service above to get started
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -256,10 +286,16 @@ export default function HousekeepingPage() {
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <div className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-full',
-                    req.status === 'completed' ? 'bg-accent/10' : req.status === 'in-progress' ? 'bg-info/10' : 'bg-warning/10'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-full',
+                      req.status === 'completed'
+                        ? 'bg-accent/10'
+                        : req.status === 'in-progress'
+                          ? 'bg-info/10'
+                          : 'bg-warning/10'
+                    )}
+                  >
                     {req.status === 'completed' ? (
                       <CheckCircle2 className="h-4 w-4 text-accent" />
                     ) : req.status === 'in-progress' ? (
@@ -269,21 +305,26 @@ export default function HousekeepingPage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-text-primary">{req.description || req.type}</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {req.description || req.type}
+                    </p>
                     <p className="text-xs text-text-muted">
                       {req.status === 'completed' && req.completedAt
                         ? `Completed ${timeAgo(req.completedAt)}`
-                        : `Requested ${timeAgo(req.createdAt)}`
-                      }
+                        : `Requested ${timeAgo(req.createdAt)}`}
                     </p>
                   </div>
                 </div>
-                <span className={cn(
-                  'rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize',
-                  req.status === 'completed' ? 'bg-accent/10 text-accent' :
-                  req.status === 'in-progress' ? 'bg-info/10 text-info' :
-                  'bg-warning/10 text-warning'
-                )}>
+                <span
+                  className={cn(
+                    'rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize',
+                    req.status === 'completed'
+                      ? 'bg-accent/10 text-accent'
+                      : req.status === 'in-progress'
+                        ? 'bg-info/10 text-info'
+                        : 'bg-warning/10 text-warning'
+                  )}
+                >
                   {req.status}
                 </span>
               </div>

@@ -2,8 +2,19 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Calendar, Clock, Bed, ChevronRight, CheckCircle2,
-  AlertTriangle, Info, Save, XCircle, Minus, Plus, Loader2
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Bed,
+  ChevronRight,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  Save,
+  XCircle,
+  Minus,
+  Plus,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -13,9 +24,9 @@ export default function GuestBookingModifyPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const stayId = searchParams.get('stay');
-  
-  const stay = guestStays.find(s => s.id === stayId);
-  
+
+  const stay = guestStays.find((s) => s.id === stayId);
+
   const [arrival, setArrival] = useState('');
   const [departure, setDeparture] = useState('');
   const [guests, setGuests] = useState(2);
@@ -37,20 +48,27 @@ export default function GuestBookingModifyPage() {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <AlertTriangle className="h-10 w-10 text-warning mb-3" />
         <p className="text-sm text-text-muted">Reservation not found</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate('/guest-portal/booking')}>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => navigate('/guest-portal/booking')}
+        >
           Back to Reservations
         </Button>
       </div>
     );
   }
 
-  const nights = Math.max(1, Math.ceil((new Date(departure) - new Date(arrival)) / (1000 * 60 * 60 * 24)));
+  const nights = Math.max(
+    1,
+    Math.ceil((new Date(departure) - new Date(arrival)) / (1000 * 60 * 60 * 24))
+  );
   const newTotal = nights * stay.rate.nightly;
   const diff = newTotal - stay.rate.total;
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
     setIsSaving(false);
     setShowConfirm(true);
   };
@@ -62,7 +80,7 @@ export default function GuestBookingModifyPage() {
     { id: 'Penthouse', name: 'Penthouse', price: 599, sqft: 1200 },
   ];
 
-  const selectedRoom = roomTypes.find(r => r.id === roomType) || roomTypes[0];
+  const selectedRoom = roomTypes.find((r) => r.id === roomType) || roomTypes[0];
   const estimatedTotal = nights * selectedRoom.price;
   const estimatedDiff = estimatedTotal - stay.rate.total;
 
@@ -84,11 +102,15 @@ export default function GuestBookingModifyPage() {
 
       {/* Current Summary */}
       <div className="rounded-xl border border-border bg-surface p-4">
-        <h3 className="text-xs text-text-muted uppercase tracking-wider mb-3">Current Reservation</h3>
+        <h3 className="text-xs text-text-muted uppercase tracking-wider mb-3">
+          Current Reservation
+        </h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-text-muted text-xs">Dates</p>
-            <p className="text-text-primary font-medium">{formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)}</p>
+            <p className="text-text-primary font-medium">
+              {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)}
+            </p>
           </div>
           <div>
             <p className="text-text-muted text-xs">Room</p>
@@ -100,7 +122,9 @@ export default function GuestBookingModifyPage() {
           </div>
           <div>
             <p className="text-text-muted text-xs">Total</p>
-            <p className="text-text-primary font-medium">{formatCurrency(stay.rate.total + stay.rate.taxes + stay.rate.fees)}</p>
+            <p className="text-text-primary font-medium">
+              {formatCurrency(stay.rate.total + stay.rate.taxes + stay.rate.fees)}
+            </p>
           </div>
         </div>
       </div>
@@ -131,7 +155,9 @@ export default function GuestBookingModifyPage() {
           </div>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-text-secondary">{nights} night{nights !== 1 ? 's' : ''}</span>
+          <span className="text-text-secondary">
+            {nights} night{nights !== 1 ? 's' : ''}
+          </span>
           <span className="text-text-primary font-medium">{formatCurrency(estimatedTotal)}</span>
         </div>
       </div>
@@ -152,13 +178,21 @@ export default function GuestBookingModifyPage() {
               )}
             >
               <div>
-                <p className={cn('text-sm font-medium', roomType === room.id ? 'text-secondary' : 'text-text-primary')}>
+                <p
+                  className={cn(
+                    'text-sm font-medium',
+                    roomType === room.id ? 'text-secondary' : 'text-text-primary'
+                  )}
+                >
                   {room.name}
                 </p>
                 <p className="text-xs text-text-muted">{room.sqft} sq ft</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-text-primary">{formatCurrency(room.price)}<span className="text-xs text-text-muted">/night</span></p>
+                <p className="text-sm font-medium text-text-primary">
+                  {formatCurrency(room.price)}
+                  <span className="text-xs text-text-muted">/night</span>
+                </p>
               </div>
             </button>
           ))}
@@ -191,12 +225,16 @@ export default function GuestBookingModifyPage() {
       </div>
 
       {/* Price Summary */}
-      <div className={cn(
-        'rounded-xl border p-4',
-        estimatedDiff > 0 ? 'border-warning/30 bg-warning/5' :
-        estimatedDiff < 0 ? 'border-accent/30 bg-accent/5' :
-        'border-border bg-surface'
-      )}>
+      <div
+        className={cn(
+          'rounded-xl border p-4',
+          estimatedDiff > 0
+            ? 'border-warning/30 bg-warning/5'
+            : estimatedDiff < 0
+              ? 'border-accent/30 bg-accent/5'
+              : 'border-border bg-surface'
+        )}
+      >
         <h3 className="text-sm font-semibold text-text-primary mb-3">Price Summary</h3>
         <div className="space-y-2 text-sm">
           <div className="flex items-center justify-between">
@@ -208,18 +246,30 @@ export default function GuestBookingModifyPage() {
             <span className="text-text-primary">{formatCurrency(estimatedTotal)}</span>
           </div>
           <div className="border-t border-border pt-2 flex items-center justify-between font-medium">
-            <span className={cn(
-              estimatedDiff > 0 ? 'text-warning' :
-              estimatedDiff < 0 ? 'text-accent' :
-              'text-text-primary'
-            )}>
-              {estimatedDiff > 0 ? 'Additional charge' : estimatedDiff < 0 ? 'Refund due' : 'No change'}
+            <span
+              className={cn(
+                estimatedDiff > 0
+                  ? 'text-warning'
+                  : estimatedDiff < 0
+                    ? 'text-accent'
+                    : 'text-text-primary'
+              )}
+            >
+              {estimatedDiff > 0
+                ? 'Additional charge'
+                : estimatedDiff < 0
+                  ? 'Refund due'
+                  : 'No change'}
             </span>
-            <span className={cn(
-              estimatedDiff > 0 ? 'text-warning' :
-              estimatedDiff < 0 ? 'text-accent' :
-              'text-text-primary'
-            )}>
+            <span
+              className={cn(
+                estimatedDiff > 0
+                  ? 'text-warning'
+                  : estimatedDiff < 0
+                    ? 'text-accent'
+                    : 'text-text-primary'
+              )}
+            >
               {estimatedDiff !== 0 && formatCurrency(Math.abs(estimatedDiff))}
             </span>
           </div>
@@ -230,19 +280,29 @@ export default function GuestBookingModifyPage() {
       <div className="rounded-lg border border-info/20 bg-info/5 p-3 flex items-start gap-2">
         <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
         <p className="text-xs text-text-secondary">
-          Modifications are subject to availability. Rate changes may apply. You'll receive a confirmation email once the modification is processed.
+          Modifications are subject to availability. Rate changes may apply. You'll receive a
+          confirmation email once the modification is processed.
         </p>
       </div>
 
       {/* Actions */}
       <div className="flex gap-2">
-        <Button variant="outline" className="flex-1" onClick={() => navigate('/guest-portal/booking')}>
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => navigate('/guest-portal/booking')}
+        >
           Cancel
         </Button>
         <Button
           className="flex-1"
           onClick={handleSave}
-          disabled={isSaving || (arrival === stay.dates.arrival && departure === stay.dates.departure && roomType === stay.room.type)}
+          disabled={
+            isSaving ||
+            (arrival === stay.dates.arrival &&
+              departure === stay.dates.departure &&
+              roomType === stay.room.type)
+          }
         >
           {isSaving ? (
             <>
@@ -261,7 +321,10 @@ export default function GuestBookingModifyPage() {
       {/* Success Modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowConfirm(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowConfirm(false)}
+          />
           <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl p-6 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 mb-4">
               <CheckCircle2 className="h-8 w-8 text-accent" />
@@ -272,7 +335,9 @@ export default function GuestBookingModifyPage() {
             </p>
             <div className="rounded-lg border border-border bg-surface p-3 text-left mb-4">
               <p className="text-xs text-text-muted">New total</p>
-              <p className="text-lg font-bold text-text-primary">{formatCurrency(estimatedTotal + stay.rate.taxes + stay.rate.fees)}</p>
+              <p className="text-lg font-bold text-text-primary">
+                {formatCurrency(estimatedTotal + stay.rate.taxes + stay.rate.fees)}
+              </p>
             </div>
             <Button className="w-full" onClick={() => navigate('/guest-portal/booking')}>
               Back to Reservations

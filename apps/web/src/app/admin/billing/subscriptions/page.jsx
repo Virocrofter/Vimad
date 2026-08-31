@@ -2,10 +2,28 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Filter, Plus, X, Check, ChevronDown, ChevronUp,
-  Users, DollarSign, Calendar, ArrowRightLeft, Building2,
-  Edit3, Pause, Play, Ban, Trash2, RefreshCw, Download,
-  Info, AlertTriangle, CreditCard
+  Search,
+  Filter,
+  Plus,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  DollarSign,
+  Calendar,
+  ArrowRightLeft,
+  Building2,
+  Edit3,
+  Pause,
+  Play,
+  Ban,
+  Trash2,
+  RefreshCw,
+  Download,
+  Info,
+  AlertTriangle,
+  CreditCard,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -22,12 +40,18 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
   const proration = useMemo(() => {
     if (!subscription) return null;
     const daysRemaining = subscription.nextBillingDate
-      ? Math.max(0, Math.ceil((new Date(subscription.nextBillingDate) - new Date()) / (1000 * 60 * 60 * 24)))
+      ? Math.max(
+          0,
+          Math.ceil((new Date(subscription.nextBillingDate) - new Date()) / (1000 * 60 * 60 * 24))
+        )
       : 30;
     return calculateProration(
-      subscription.plan, newPlan,
-      subscription.seats, newSeats,
-      subscription.billingCycle, daysRemaining
+      subscription.plan,
+      newPlan,
+      subscription.seats,
+      newSeats,
+      subscription.billingCycle,
+      daysRemaining
     );
   }, [subscription, newPlan, newSeats]);
 
@@ -47,7 +71,10 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
               <p className="text-xs text-text-muted">{subscription.tenantName}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -56,13 +83,19 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
           {/* Current Plan */}
           <div className="rounded-lg border border-border bg-surface p-3">
             <p className="text-xs text-text-muted uppercase tracking-wider">Current Plan</p>
-            <p className="text-sm font-medium text-text-primary">{subscription.plan} · {subscription.seats} seats · {subscription.billingCycle}</p>
-            <p className="text-sm font-mono text-text-primary">{formatCurrency(subscription.amount)}/mo</p>
+            <p className="text-sm font-medium text-text-primary">
+              {subscription.plan} · {subscription.seats} seats · {subscription.billingCycle}
+            </p>
+            <p className="text-sm font-mono text-text-primary">
+              {formatCurrency(subscription.amount)}/mo
+            </p>
           </div>
 
           {/* New Plan Selection */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">New Plan</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              New Plan
+            </label>
             <div className="grid grid-cols-3 gap-2">
               {Object.entries(planConfig).map(([plan, config]) => (
                 <button
@@ -84,7 +117,9 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
 
           {/* Seats */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Seats</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Seats
+            </label>
             <input
               type="number"
               min="1"
@@ -101,7 +136,9 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
 
           {/* Billing Cycle */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Billing Cycle</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Billing Cycle
+            </label>
             <div className="flex gap-2">
               {['monthly', 'annual'].map((cycle) => (
                 <button
@@ -125,8 +162,15 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={() => { onSave({ plan: newPlan, seats: newSeats, billingCycle: newCycle }); onClose(); }}>
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                onSave({ plan: newPlan, seats: newSeats, billingCycle: newCycle });
+                onClose();
+              }}
+            >
               <Check className="mr-1.5 h-4 w-4" /> Apply Change
             </Button>
           </div>
@@ -157,12 +201,17 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-text-primary">{subscription.tenantName}</h2>
-                  <p className="text-xs text-text-muted">{subscription.id} · {subscription.tenantId}</p>
+                  <p className="text-xs text-text-muted">
+                    {subscription.id} · {subscription.tenantId}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <SubscriptionStatusBadge status={subscription.status} />
-                <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+                <button
+                  onClick={onClose}
+                  className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -176,11 +225,17 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Current Plan</p>
                   <p className="text-lg font-bold text-text-primary">{subscription.plan}</p>
-                  <p className="text-sm text-text-muted">{subscription.billingCycle} billing · {subscription.seats} seats</p>
+                  <p className="text-sm text-text-muted">
+                    {subscription.billingCycle} billing · {subscription.seats} seats
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold font-mono text-text-primary">{formatCurrency(subscription.amount)}</p>
-                  <p className="text-xs text-text-muted">per {subscription.billingCycle === 'annual' ? 'year' : 'month'}</p>
+                  <p className="text-2xl font-bold font-mono text-text-primary">
+                    {formatCurrency(subscription.amount)}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    per {subscription.billingCycle === 'annual' ? 'year' : 'month'}
+                  </p>
                 </div>
               </div>
 
@@ -188,7 +243,9 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div className="rounded-lg bg-background border border-border p-3">
                     <p className="text-xs text-text-muted">Base Price</p>
-                    <p className="font-mono font-medium text-text-primary">{formatCurrency(plan.basePrice)}</p>
+                    <p className="font-mono font-medium text-text-primary">
+                      {formatCurrency(plan.basePrice)}
+                    </p>
                   </div>
                   <div className="rounded-lg bg-background border border-border p-3">
                     <p className="text-xs text-text-muted">Included Seats</p>
@@ -196,7 +253,9 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                   </div>
                   <div className="rounded-lg bg-background border border-border p-3">
                     <p className="text-xs text-text-muted">Extra Seat</p>
-                    <p className="font-mono font-medium text-text-primary">{formatCurrency(plan.extraSeatPrice)}</p>
+                    <p className="font-mono font-medium text-text-primary">
+                      {formatCurrency(plan.extraSeatPrice)}
+                    </p>
                   </div>
                 </div>
               )}
@@ -205,12 +264,19 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
             {/* Add-ons */}
             {subscription.addOns.length > 0 && (
               <div className="rounded-xl border border-border bg-surface p-5">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">Add-ons</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Add-ons
+                </h4>
                 <div className="space-y-2">
                   {subscription.addOns.map((addon, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                    >
                       <span className="text-sm text-text-primary">{addon.name}</span>
-                      <span className="text-sm font-mono text-text-primary">{formatCurrency(addon.amount)} × {addon.quantity}</span>
+                      <span className="text-sm font-mono text-text-primary">
+                        {formatCurrency(addon.amount)} × {addon.quantity}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -228,21 +294,48 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                   {subscription.discount.type === 'percentage'
                     ? `${subscription.discount.value}% off`
                     : `${formatCurrency(subscription.discount.value)} off`}
-                  {' — '}{subscription.discount.reason}
+                  {' — '}
+                  {subscription.discount.reason}
                 </p>
               </div>
             )}
 
             {/* Billing Details */}
             <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Billing Details</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Billing Details
+              </h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-text-muted">Payment Method:</span> <span className="text-text-primary">{subscription.paymentMethod || '—'}</span></div>
-                <div><span className="text-text-muted">Billing Email:</span> <span className="text-text-primary">{subscription.billingEmail}</span></div>
-                <div><span className="text-text-muted">Tax Rate:</span> <span className="text-text-primary">{subscription.taxRate}% ({subscription.taxRegion})</span></div>
-                <div><span className="text-text-muted">Auto-Renew:</span> <span className={subscription.autoRenew ? 'text-accent' : 'text-danger'}>{subscription.autoRenew ? 'Enabled' : 'Disabled'}</span></div>
-                <div><span className="text-text-muted">Started:</span> <span className="text-text-primary">{formatDate(subscription.startDate)}</span></div>
-                <div><span className="text-text-muted">Next Billing:</span> <span className="text-text-primary">{formatDate(subscription.nextBillingDate)}</span></div>
+                <div>
+                  <span className="text-text-muted">Payment Method:</span>{' '}
+                  <span className="text-text-primary">{subscription.paymentMethod || '—'}</span>
+                </div>
+                <div>
+                  <span className="text-text-muted">Billing Email:</span>{' '}
+                  <span className="text-text-primary">{subscription.billingEmail}</span>
+                </div>
+                <div>
+                  <span className="text-text-muted">Tax Rate:</span>{' '}
+                  <span className="text-text-primary">
+                    {subscription.taxRate}% ({subscription.taxRegion})
+                  </span>
+                </div>
+                <div>
+                  <span className="text-text-muted">Auto-Renew:</span>{' '}
+                  <span className={subscription.autoRenew ? 'text-accent' : 'text-danger'}>
+                    {subscription.autoRenew ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-text-muted">Started:</span>{' '}
+                  <span className="text-text-primary">{formatDate(subscription.startDate)}</span>
+                </div>
+                <div>
+                  <span className="text-text-muted">Next Billing:</span>{' '}
+                  <span className="text-text-primary">
+                    {formatDate(subscription.nextBillingDate)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -252,16 +345,25 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                 <ArrowRightLeft className="mr-1.5 h-3.5 w-3.5" /> Change Plan
               </Button>
               {subscription.status === 'active' && (
-                <Button variant="outline" className="text-warning border-warning/30 hover:bg-warning/10">
+                <Button
+                  variant="outline"
+                  className="text-warning border-warning/30 hover:bg-warning/10"
+                >
                   <Pause className="mr-1.5 h-3.5 w-3.5" /> Pause
                 </Button>
               )}
               {subscription.status === 'paused' && (
-                <Button variant="outline" className="text-accent border-accent/30 hover:bg-accent/10">
+                <Button
+                  variant="outline"
+                  className="text-accent border-accent/30 hover:bg-accent/10"
+                >
                   <Play className="mr-1.5 h-3.5 w-3.5" /> Resume
                 </Button>
               )}
-              <Button variant="outline" className="text-danger border-danger/30 hover:bg-danger/10 ml-auto">
+              <Button
+                variant="outline"
+                className="text-danger border-danger/30 hover:bg-danger/10 ml-auto"
+              >
                 <Ban className="mr-1.5 h-3.5 w-3.5" /> Cancel
               </Button>
             </div>
@@ -293,7 +395,8 @@ export default function SubscriptionsPage() {
 
   const filteredSubs = useMemo(() => {
     let result = subs.filter((s) => {
-      const matchesQuery = !query ||
+      const matchesQuery =
+        !query ||
         s.tenantName.toLowerCase().includes(query.toLowerCase()) ||
         s.id.toLowerCase().includes(query.toLowerCase()) ||
         s.tenantId.toLowerCase().includes(query.toLowerCase());
@@ -322,23 +425,26 @@ export default function SubscriptionsPage() {
     return result;
   }, [subs, query, statusFilter, planFilter, sortConfig]);
 
-  const stats = useMemo(() => ({
-    total: subs.length,
-    active: subs.filter(s => s.status === 'active').length,
-    trial: subs.filter(s => s.status === 'trial').length,
-    pastDue: subs.filter(s => s.status === 'past_due').length,
-    totalMrr: subs.filter(s => s.status === 'active').reduce((s, sub) => s + sub.amount, 0),
-  }), [subs]);
+  const stats = useMemo(
+    () => ({
+      total: subs.length,
+      active: subs.filter((s) => s.status === 'active').length,
+      trial: subs.filter((s) => s.status === 'trial').length,
+      pastDue: subs.filter((s) => s.status === 'past_due').length,
+      totalMrr: subs.filter((s) => s.status === 'active').reduce((s, sub) => s + sub.amount, 0),
+    }),
+    [subs]
+  );
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
   };
 
   const handleUpdate = (id, updates) => {
-    setSubs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+    setSubs((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
   };
 
   return (
@@ -347,7 +453,9 @@ export default function SubscriptionsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Subscriptions</h1>
-          <p className="text-sm text-text-secondary">Manage tenant subscriptions, plans, and billing cycles</p>
+          <p className="text-sm text-text-secondary">
+            Manage tenant subscriptions, plans, and billing cycles
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -375,7 +483,9 @@ export default function SubscriptionsPage() {
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total MRR</p>
-          <p className="mt-1 text-2xl font-bold font-mono text-secondary">{formatCurrency(stats.totalMrr)}</p>
+          <p className="mt-1 text-2xl font-bold font-mono text-secondary">
+            {formatCurrency(stats.totalMrr)}
+          </p>
         </div>
       </div>
 
@@ -396,7 +506,9 @@ export default function SubscriptionsPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters ? 'border-secondary bg-secondary/10 text-secondary' : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+              showFilters
+                ? 'border-secondary bg-secondary/10 text-secondary'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
             <Filter className="h-4 w-4" /> Filters
@@ -439,7 +551,11 @@ export default function SubscriptionsPage() {
           </div>
           <div className="mt-3 flex justify-end">
             <button
-              onClick={() => { setStatusFilter('all'); setPlanFilter('all'); setQuery(''); }}
+              onClick={() => {
+                setStatusFilter('all');
+                setPlanFilter('all');
+                setQuery('');
+              }}
               className="text-xs text-secondary hover:underline"
             >
               Reset all filters
@@ -450,7 +566,8 @@ export default function SubscriptionsPage() {
 
       {/* Results */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredSubs.length}</span> of {subs.length} subscriptions
+        Showing <span className="font-medium text-text-primary">{filteredSubs.length}</span> of{' '}
+        {subs.length} subscriptions
       </p>
 
       {/* Table */}
@@ -476,9 +593,12 @@ export default function SubscriptionsPage() {
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
-                        sortConfig.dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortConfig.key === col.key &&
+                        (sortConfig.dir === 'asc' ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -503,14 +623,20 @@ export default function SubscriptionsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-xs font-medium text-text-primary">{sub.plan}</span>
-                    <p className="text-[10px] text-text-muted">{sub.seats} seats · {sub.billingCycle}</p>
+                    <p className="text-[10px] text-text-muted">
+                      {sub.seats} seats · {sub.billingCycle}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
                     <SubscriptionStatusBadge status={sub.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">{formatCurrency(sub.amount)}</p>
-                    <p className="text-[10px] text-text-muted">per {sub.billingCycle === 'annual' ? 'year' : 'month'}</p>
+                    <p className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(sub.amount)}
+                    </p>
+                    <p className="text-[10px] text-text-muted">
+                      per {sub.billingCycle === 'annual' ? 'year' : 'month'}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
                     <p className="text-xs text-text-secondary">{formatDate(sub.nextBillingDate)}</p>
@@ -518,7 +644,10 @@ export default function SubscriptionsPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedSub(sub); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSub(sub);
+                        }}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         title="View Details"
                       >

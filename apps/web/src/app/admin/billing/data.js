@@ -72,9 +72,7 @@ export const subscriptions = [
     nextBillingDate: '2026-08-20',
     amount: 499,
     seats: 12,
-    addOns: [
-      { name: 'Channel Manager Premium', amount: 99, quantity: 1 },
-    ],
+    addOns: [{ name: 'Channel Manager Premium', amount: 99, quantity: 1 }],
     discount: null,
     prorationEnabled: true,
     autoRenew: true,
@@ -137,9 +135,7 @@ export const subscriptions = [
     nextBillingDate: '2026-09-05',
     amount: 199,
     seats: 3,
-    addOns: [
-      { name: 'Guest Portal Pro', amount: 49, quantity: 1 },
-    ],
+    addOns: [{ name: 'Guest Portal Pro', amount: 49, quantity: 1 }],
     discount: { type: 'fixed', value: 200, reason: 'Annual prepay' },
     prorationEnabled: true,
     autoRenew: true,
@@ -267,16 +263,16 @@ export const invoices = [
     id: 'INV-2026-0812-003',
     subscriptionId: 'SUB-004',
     tenantName: 'Downtown Suites Chicago',
-    amount: 219.40,
+    amount: 219.4,
     subtotal: 199,
-    tax: 20.40,
+    tax: 20.4,
     status: 'overdue',
     dueDate: '2026-08-12',
     paidDate: null,
     paymentMethod: 'Visa •••• 4242',
     lineItems: [
       { description: 'Starter Plan (4 seats)', quantity: 1, unitPrice: 199, amount: 199 },
-      { description: 'Tax (IL 10.25%)', quantity: 1, unitPrice: 20.40, amount: 20.40 },
+      { description: 'Tax (IL 10.25%)', quantity: 1, unitPrice: 20.4, amount: 20.4 },
     ],
     periodStart: '2026-07-12',
     periodEnd: '2026-08-12',
@@ -332,16 +328,16 @@ export const invoices = [
     id: 'INV-2026-0712-006',
     subscriptionId: 'SUB-004',
     tenantName: 'Downtown Suites Chicago',
-    amount: 219.40,
+    amount: 219.4,
     subtotal: 199,
-    tax: 20.40,
+    tax: 20.4,
     status: 'failed',
     dueDate: '2026-07-12',
     paidDate: null,
     paymentMethod: 'Visa •••• 4242',
     lineItems: [
       { description: 'Starter Plan (4 seats)', quantity: 1, unitPrice: 199, amount: 199 },
-      { description: 'Tax (IL 10.25%)', quantity: 1, unitPrice: 20.40, amount: 20.40 },
+      { description: 'Tax (IL 10.25%)', quantity: 1, unitPrice: 20.4, amount: 20.4 },
     ],
     periodStart: '2026-06-12',
     periodEnd: '2026-07-12',
@@ -363,7 +359,12 @@ export const creditNotes = [
     appliedAt: '2026-08-14',
     remainingBalance: 0,
     lineItems: [
-      { description: 'AI Revenue Manager — 3 days outage', quantity: 1, unitPrice: 500, amount: 500 },
+      {
+        description: 'AI Revenue Manager — 3 days outage',
+        quantity: 1,
+        unitPrice: 500,
+        amount: 500,
+      },
     ],
   },
   {
@@ -390,9 +391,7 @@ export const creditNotes = [
     createdAt: '2026-08-15',
     appliedAt: null,
     remainingBalance: 200,
-    lineItems: [
-      { description: 'Goodwill credit', quantity: 1, unitPrice: 200, amount: 200 },
-    ],
+    lineItems: [{ description: 'Goodwill credit', quantity: 1, unitPrice: 200, amount: 200 }],
   },
   {
     id: 'CN-2026-004',
@@ -417,7 +416,7 @@ export const dunningCases = [
     subscriptionId: 'SUB-004',
     tenantName: 'Downtown Suites Chicago',
     invoiceId: 'INV-2026-0812-003',
-    amount: 219.40,
+    amount: 219.4,
     status: 'in_progress',
     stage: 3,
     maxStages: 4,
@@ -430,9 +429,24 @@ export const dunningCases = [
     escalationDate: '2026-08-20',
     actions: [
       { date: '2026-08-12T00:00:00Z', action: 'Invoice created', status: 'success' },
-      { date: '2026-08-12T09:30:00Z', action: 'Payment attempt #1', status: 'failed', reason: 'insufficient_funds' },
-      { date: '2026-08-13T09:30:00Z', action: 'Payment attempt #2', status: 'failed', reason: 'insufficient_funds' },
-      { date: '2026-08-14T09:30:00Z', action: 'Payment attempt #3', status: 'failed', reason: 'insufficient_funds' },
+      {
+        date: '2026-08-12T09:30:00Z',
+        action: 'Payment attempt #1',
+        status: 'failed',
+        reason: 'insufficient_funds',
+      },
+      {
+        date: '2026-08-13T09:30:00Z',
+        action: 'Payment attempt #2',
+        status: 'failed',
+        reason: 'insufficient_funds',
+      },
+      {
+        date: '2026-08-14T09:30:00Z',
+        action: 'Payment attempt #3',
+        status: 'failed',
+        reason: 'insufficient_funds',
+      },
       { date: '2026-08-14T10:00:00Z', action: 'Dunning email sent', status: 'sent' },
     ],
     settings: {
@@ -448,7 +462,7 @@ export const dunningCases = [
     subscriptionId: 'SUB-008',
     tenantName: 'Desert Oasis Phoenix',
     invoiceId: 'INV-2026-0515-007',
-    amount: 219.40,
+    amount: 219.4,
     status: 'cancelled',
     stage: 4,
     maxStages: 4,
@@ -461,10 +475,30 @@ export const dunningCases = [
     escalationDate: '2026-05-15',
     actions: [
       { date: '2026-05-15T00:00:00Z', action: 'Invoice created', status: 'success' },
-      { date: '2026-05-15T09:30:00Z', action: 'Payment attempt #1', status: 'failed', reason: 'card_expired' },
-      { date: '2026-05-16T09:30:00Z', action: 'Payment attempt #2', status: 'failed', reason: 'card_expired' },
-      { date: '2026-05-18T09:30:00Z', action: 'Payment attempt #3', status: 'failed', reason: 'card_expired' },
-      { date: '2026-05-20T09:30:00Z', action: 'Payment attempt #4', status: 'failed', reason: 'card_expired' },
+      {
+        date: '2026-05-15T09:30:00Z',
+        action: 'Payment attempt #1',
+        status: 'failed',
+        reason: 'card_expired',
+      },
+      {
+        date: '2026-05-16T09:30:00Z',
+        action: 'Payment attempt #2',
+        status: 'failed',
+        reason: 'card_expired',
+      },
+      {
+        date: '2026-05-18T09:30:00Z',
+        action: 'Payment attempt #3',
+        status: 'failed',
+        reason: 'card_expired',
+      },
+      {
+        date: '2026-05-20T09:30:00Z',
+        action: 'Payment attempt #4',
+        status: 'failed',
+        reason: 'card_expired',
+      },
       { date: '2026-05-20T10:00:00Z', action: 'Subscription cancelled', status: 'cancelled' },
     ],
     settings: {
@@ -493,9 +527,23 @@ export const dunningCases = [
     escalationDate: null,
     actions: [
       { date: '2026-07-20T00:00:00Z', action: 'Invoice created', status: 'success' },
-      { date: '2026-07-20T09:30:00Z', action: 'Payment attempt #1', status: 'failed', reason: 'bank_decline' },
-      { date: '2026-07-21T09:30:00Z', action: 'Payment attempt #2', status: 'failed', reason: 'bank_decline' },
-      { date: '2026-07-21T14:00:00Z', action: 'Customer updated payment method', status: 'success' },
+      {
+        date: '2026-07-20T09:30:00Z',
+        action: 'Payment attempt #1',
+        status: 'failed',
+        reason: 'bank_decline',
+      },
+      {
+        date: '2026-07-21T09:30:00Z',
+        action: 'Payment attempt #2',
+        status: 'failed',
+        reason: 'bank_decline',
+      },
+      {
+        date: '2026-07-21T14:00:00Z',
+        action: 'Customer updated payment method',
+        status: 'success',
+      },
       { date: '2026-07-21T14:30:00Z', action: 'Payment successful', status: 'success' },
     ],
     settings: {
@@ -521,7 +569,13 @@ export const planConfig = {
     basePrice: 499,
     includedSeats: 12,
     extraSeatPrice: 35,
-    features: ['booking-engine', 'guest-portal', 'crm-loyalty', 'channel-manager', 'advanced-reports'],
+    features: [
+      'booking-engine',
+      'guest-portal',
+      'crm-loyalty',
+      'channel-manager',
+      'advanced-reports',
+    ],
     limits: { rooms: 200, storage: 100, apiCalls: 100000 },
   },
   Enterprise: {
@@ -537,33 +591,89 @@ export const planConfig = {
 export const subscriptionStatusMeta = {
   active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
   trial: { label: 'Trial', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
-  past_due: { label: 'Past Due', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  pending: { label: 'Pending', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  cancelled: { label: 'Cancelled', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
-  paused: { label: 'Paused', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  past_due: {
+    label: 'Past Due',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
+  pending: {
+    label: 'Pending',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
+  paused: {
+    label: 'Paused',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const invoiceStatusMeta = {
   paid: { label: 'Paid', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  pending: { label: 'Pending', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  overdue: { label: 'Overdue', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
+  pending: {
+    label: 'Pending',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  overdue: {
+    label: 'Overdue',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
   draft: { label: 'Draft', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
   failed: { label: 'Failed', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  void: { label: 'Void', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  void: {
+    label: 'Void',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const creditNoteStatusMeta = {
   open: { label: 'Open', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
-  applied: { label: 'Applied', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  partial: { label: 'Partial', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  void: { label: 'Void', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  applied: {
+    label: 'Applied',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  partial: {
+    label: 'Partial',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  void: {
+    label: 'Void',
+    class: 'bg-neutral/10 text-text-muted border-border',
+    dot: 'bg-text-muted',
+  },
 };
 
 export const dunningStatusMeta = {
-  in_progress: { label: 'In Progress', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
-  resolved: { label: 'Resolved', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
-  cancelled: { label: 'Cancelled', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
-  escalated: { label: 'Escalated', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger' },
+  in_progress: {
+    label: 'In Progress',
+    class: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+  },
+  resolved: {
+    label: 'Resolved',
+    class: 'bg-accent/10 text-accent border-accent/20',
+    dot: 'bg-accent',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
+  escalated: {
+    label: 'Escalated',
+    class: 'bg-danger/10 text-danger border-danger/20',
+    dot: 'bg-danger',
+  },
 };
 
 export const failureReasonMeta = {
@@ -582,10 +692,21 @@ export function formatCurrency(amount) {
 
 export function formatDate(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
-export function calculateProration(currentPlan, newPlan, currentSeats, newSeats, billingCycle, daysRemaining) {
+export function calculateProration(
+  currentPlan,
+  newPlan,
+  currentSeats,
+  newSeats,
+  billingCycle,
+  daysRemaining
+) {
   const daysInCycle = billingCycle === 'annual' ? 365 : 30;
   const currentPlanConfig = planConfig[currentPlan];
   const newPlanConfig = planConfig[newPlan];

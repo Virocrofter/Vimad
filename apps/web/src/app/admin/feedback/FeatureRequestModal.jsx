@@ -1,8 +1,16 @@
 /* src/app/admin/feedback/FeatureRequestModal.jsx */
 import { useState, useEffect } from 'react';
 import {
-  X, Check, Lightbulb, Tag, Calendar, ArrowUp, MessageSquare,
-  Target, Zap, AlertTriangle
+  X,
+  Check,
+  Lightbulb,
+  Tag,
+  Calendar,
+  ArrowUp,
+  MessageSquare,
+  Target,
+  Zap,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
@@ -60,7 +68,7 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
     }
   }, [feature]);
 
-  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -95,7 +103,10 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -103,7 +114,9 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Title */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Title</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Title
+            </label>
             <input
               type="text"
               required
@@ -116,7 +129,9 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
 
           {/* Description */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Description</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Description
+            </label>
             <textarea
               value={form.description}
               onChange={(e) => update('description', e.target.value)}
@@ -129,30 +144,44 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
           {/* Category & Priority */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Category</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Category
+              </label>
               <select
                 value={form.category}
                 onChange={(e) => update('category', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {categories.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+                {categories.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Priority</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Priority
+              </label>
               <select
                 value={form.priority}
                 onChange={(e) => update('priority', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {priorities.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
+                {priorities.map((p) => (
+                  <option key={p.key} value={p.key}>
+                    {p.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           {/* Status */}
           <div>
-            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">Status</label>
+            <label className="mb-2 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Status
+            </label>
             <div className="grid grid-cols-5 gap-2">
               {statuses.map((s) => (
                 <button
@@ -188,7 +217,9 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
 
           {/* Tenant Attribution */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">Requested By</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+              Requested By
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <select
                 value={form.tenantId}
@@ -196,7 +227,11 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select tenant...</option>
-                {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                {tenants.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
               </select>
               <input
                 type="text"
@@ -210,7 +245,9 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" variant="secondary">
               <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Request'}
             </Button>

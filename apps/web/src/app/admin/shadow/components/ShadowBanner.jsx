@@ -1,8 +1,16 @@
 /* src/app/admin/shadow/components/ShadowBanner.jsx */
 import { useState, useEffect } from 'react';
 import {
-  Eye, X, LogOut, Shield, Clock, ChevronUp, ChevronDown,
-  User, ArrowLeftRight, Zap
+  Eye,
+  X,
+  LogOut,
+  Shield,
+  Clock,
+  ChevronUp,
+  ChevronDown,
+  User,
+  ArrowLeftRight,
+  Zap,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useShadowStore } from '../store';
@@ -16,7 +24,7 @@ import { formatDuration } from '../data';
 export function ShadowBanner() {
   const [collapsed, setCollapsed] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  
+
   const isShadowActive = useShadowStore((s) => s.isShadowActive);
   const shadowUser = useShadowStore((s) => s.shadowUser);
   const originalUser = useShadowStore((s) => s.originalUser);
@@ -55,21 +63,29 @@ export function ShadowBanner() {
   }
 
   return (
-    <div className={cn(
-      'fixed left-0 right-0 z-50 transition-all duration-300',
-      collapsed ? 'bottom-0' : 'bottom-0'
-    )}>
-      <div className={cn(
-        'mx-auto max-w-7xl px-4 transition-all duration-300',
-        collapsed ? 'translate-y-[calc(100%-2.5rem)]' : 'translate-y-0'
-      )}>
+    <div
+      className={cn(
+        'fixed left-0 right-0 z-50 transition-all duration-300',
+        collapsed ? 'bottom-0' : 'bottom-0'
+      )}
+    >
+      <div
+        className={cn(
+          'mx-auto max-w-7xl px-4 transition-all duration-300',
+          collapsed ? 'translate-y-[calc(100%-2.5rem)]' : 'translate-y-0'
+        )}
+      >
         <div className="rounded-t-xl border border-purple-500/20 bg-purple-500/10 backdrop-blur-md shadow-lg">
           {/* Collapse Handle */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex w-full items-center justify-center py-1.5 hover:bg-purple-500/5 rounded-t-xl transition-colors"
           >
-            {collapsed ? <ChevronUp className="h-4 w-4 text-purple-500" /> : <ChevronDown className="h-4 w-4 text-purple-500" />}
+            {collapsed ? (
+              <ChevronUp className="h-4 w-4 text-purple-500" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-purple-500" />
+            )}
           </button>
 
           {!collapsed && (
@@ -82,7 +98,9 @@ export function ShadowBanner() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-purple-500">Shadow Mode Active</span>
+                      <span className="text-sm font-semibold text-purple-500">
+                        Shadow Mode Active
+                      </span>
                       <span className="rounded-full bg-purple-500/20 px-1.5 py-0 text-[10px] font-mono font-medium text-purple-500">
                         {shadowUser.sessionId?.slice(0, 12)}
                       </span>

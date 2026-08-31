@@ -1,18 +1,46 @@
 /* src/app/admin/analytics/components.jsx */
 import { useState } from 'react';
 import {
-  TrendingUp, TrendingDown, Minus, Users, Clock, Zap, BarChart3,
-  Activity, AlertTriangle, ChevronDown, ChevronUp, Target, ArrowRight,
-  Lightbulb, DollarSign, MousePointer, Eye, Layers, Star, Crown,
-  Calendar, Timer, MousePointerClick, Percent
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Users,
+  Clock,
+  Zap,
+  BarChart3,
+  Activity,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Target,
+  ArrowRight,
+  Lightbulb,
+  DollarSign,
+  MousePointer,
+  Eye,
+  Layers,
+  Star,
+  Crown,
+  Calendar,
+  Timer,
+  MousePointerClick,
+  Percent,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { getHeatmapColor, getHeatmapIntensity, getUsageBarColor, formatNumber, classificationMeta, severityMeta, categoryMeta } from './data';
+import {
+  getHeatmapColor,
+  getHeatmapIntensity,
+  getUsageBarColor,
+  formatNumber,
+  classificationMeta,
+  severityMeta,
+  categoryMeta,
+} from './data';
 
 /* ─── Stat Card ─── */
 export function AnalyticsStatCard({ label, value, subtext, icon: Icon, color, trend, onClick }) {
   return (
-    <div 
+    <div
       onClick={onClick}
       className={cn(
         'rounded-xl border border-border bg-surface p-4 transition-all',
@@ -25,18 +53,35 @@ export function AnalyticsStatCard({ label, value, subtext, icon: Icon, color, tr
           <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
           {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
           {trend !== undefined && (
-            <p className={cn('mt-1 text-xs font-medium flex items-center gap-1', 
-              parseFloat(trend) >= 0 ? 'text-accent' : 'text-danger'
-            )}>
-              {parseFloat(trend) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-              {trend >= 0 ? '+' : ''}{trend}% vs last period
+            <p
+              className={cn(
+                'mt-1 text-xs font-medium flex items-center gap-1',
+                parseFloat(trend) >= 0 ? 'text-accent' : 'text-danger'
+              )}
+            >
+              {parseFloat(trend) >= 0 ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
+              {trend >= 0 ? '+' : ''}
+              {trend}% vs last period
             </p>
           )}
         </div>
-        <div className={cn(
-          'rounded-lg p-2.5',
-          color.replace('text-', 'bg-').replace('danger', 'danger/10').replace('accent', 'accent/10').replace('warning', 'warning/10').replace('info', 'info/10').replace('secondary', 'secondary/10').replace('purple-500', 'purple-500/10')
-        )}>
+        <div
+          className={cn(
+            'rounded-lg p-2.5',
+            color
+              .replace('text-', 'bg-')
+              .replace('danger', 'danger/10')
+              .replace('accent', 'accent/10')
+              .replace('warning', 'warning/10')
+              .replace('info', 'info/10')
+              .replace('secondary', 'secondary/10')
+              .replace('purple-500', 'purple-500/10')
+          )}
+        >
           <Icon className={cn('h-5 w-5', color)} />
         </div>
       </div>
@@ -48,10 +93,14 @@ export function AnalyticsStatCard({ label, value, subtext, icon: Icon, color, tr
 export function ClassificationBadge({ classification }) {
   const meta = classificationMeta[classification] || classificationMeta.engaged;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -62,10 +111,14 @@ export function ClassificationBadge({ classification }) {
 export function SeverityBadge({ severity }) {
   const meta = severityMeta[severity] || severityMeta.medium;
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-      meta.bg, meta.color, meta.border
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        meta.bg,
+        meta.color,
+        meta.border
+      )}
+    >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </span>
@@ -76,10 +129,14 @@ export function SeverityBadge({ severity }) {
 export function CategoryBadge({ category }) {
   const meta = categoryMeta[category] || categoryMeta.operations;
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-      meta.bg, meta.color, 'border-current/20'
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        meta.bg,
+        meta.color,
+        'border-current/20'
+      )}
+    >
       {meta.label}
     </span>
   );
@@ -94,7 +151,7 @@ export function FeatureHeatmap({ data, maxValue }) {
     <div className="space-y-3">
       {/* Hour labels */}
       <div className="flex items-center gap-0.5 ml-32">
-        {hours.map(h => (
+        {hours.map((h) => (
           <div key={h} className="flex-1 text-center">
             <span className="text-[9px] text-text-muted">{h}</span>
           </div>
@@ -108,7 +165,9 @@ export function FeatureHeatmap({ data, maxValue }) {
             {/* Feature label */}
             <div className="w-32 shrink-0">
               <p className="text-xs font-medium text-text-primary truncate">{feature.feature}</p>
-              <p className="text-[9px] text-text-muted">{formatNumber(feature.totalEvents)} events</p>
+              <p className="text-[9px] text-text-muted">
+                {formatNumber(feature.totalEvents)} events
+              </p>
             </div>
 
             {/* Hourly cells */}
@@ -120,15 +179,23 @@ export function FeatureHeatmap({ data, maxValue }) {
                     'flex-1 h-6 rounded-sm transition-all cursor-pointer relative',
                     getHeatmapColor(value, maxValue)
                   )}
-                  onMouseEnter={() => setHoveredCell({ feature: feature.feature, hour: idx, value })}
+                  onMouseEnter={() =>
+                    setHoveredCell({ feature: feature.feature, hour: idx, value })
+                  }
                   onMouseLeave={() => setHoveredCell(null)}
                 >
                   {hoveredCell?.feature === feature.feature && hoveredCell?.hour === idx && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-10">
                       <div className="rounded-md border border-border bg-surface-elevated shadow-lg px-2 py-1 whitespace-nowrap">
-                        <p className="text-[10px] font-medium text-text-primary">{feature.feature}</p>
-                        <p className="text-[9px] text-text-muted">{idx}:00 — {value} events</p>
-                        <p className="text-[9px] text-text-muted">{getHeatmapIntensity(value, maxValue)} activity</p>
+                        <p className="text-[10px] font-medium text-text-primary">
+                          {feature.feature}
+                        </p>
+                        <p className="text-[9px] text-text-muted">
+                          {idx}:00 — {value} events
+                        </p>
+                        <p className="text-[9px] text-text-muted">
+                          {getHeatmapIntensity(value, maxValue)} activity
+                        </p>
                       </div>
                     </div>
                   )}
@@ -143,7 +210,14 @@ export function FeatureHeatmap({ data, maxValue }) {
       <div className="flex items-center justify-end gap-3 pt-2">
         <span className="text-[10px] text-text-muted">Low</span>
         <div className="flex gap-0.5">
-          {['bg-border', 'bg-warning/60', 'bg-info', 'bg-accent', 'bg-secondary', 'bg-purple-500'].map((c, i) => (
+          {[
+            'bg-border',
+            'bg-warning/60',
+            'bg-info',
+            'bg-accent',
+            'bg-secondary',
+            'bg-purple-500',
+          ].map((c, i) => (
             <div key={i} className={cn('h-3 w-4 rounded-sm', c)} />
           ))}
         </div>
@@ -159,7 +233,7 @@ export function FunnelChart({ funnel, onSelect }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div 
+    <div
       onClick={() => onSelect?.(funnel)}
       className={cn(
         'rounded-xl border border-border bg-surface p-5 transition-all',
@@ -173,7 +247,16 @@ export function FunnelChart({ funnel, onSelect }) {
           <p className="text-xs text-text-muted mt-0.5">{funnel.description}</p>
         </div>
         <div className="text-right">
-          <p className={cn('text-lg font-bold font-mono', funnel.totalConversion >= 40 ? 'text-accent' : funnel.totalConversion >= 20 ? 'text-warning' : 'text-danger')}>
+          <p
+            className={cn(
+              'text-lg font-bold font-mono',
+              funnel.totalConversion >= 40
+                ? 'text-accent'
+                : funnel.totalConversion >= 20
+                  ? 'text-warning'
+                  : 'text-danger'
+            )}
+          >
             {funnel.totalConversion}%
           </p>
           <p className="text-[10px] text-text-muted">conversion</p>
@@ -191,15 +274,21 @@ export function FunnelChart({ funnel, onSelect }) {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-xs text-text-secondary">{step.name}</span>
-                    <span className="text-xs font-mono font-medium text-text-primary">{step.count.toLocaleString()}</span>
+                    <span className="text-xs font-mono font-medium text-text-primary">
+                      {step.count.toLocaleString()}
+                    </span>
                   </div>
                   <div className="h-6 rounded-md bg-border overflow-hidden relative">
                     <div
                       className={cn(
                         'h-full rounded-md transition-all',
-                        idx === 0 ? 'bg-secondary' : 
-                        step.dropOff > 30 ? 'bg-danger' :
-                        step.dropOff > 15 ? 'bg-warning' : 'bg-accent'
+                        idx === 0
+                          ? 'bg-secondary'
+                          : step.dropOff > 30
+                            ? 'bg-danger'
+                            : step.dropOff > 15
+                              ? 'bg-warning'
+                              : 'bg-accent'
                       )}
                       style={{ width: `${width}%` }}
                     />
@@ -210,9 +299,7 @@ export function FunnelChart({ funnel, onSelect }) {
                     )}
                   </div>
                 </div>
-                {!isLast && (
-                  <ArrowRight className="h-3.5 w-3.5 text-text-muted shrink-0" />
-                )}
+                {!isLast && <ArrowRight className="h-3.5 w-3.5 text-text-muted shrink-0" />}
               </div>
             </div>
           );
@@ -226,7 +313,10 @@ export function FunnelChart({ funnel, onSelect }) {
           Avg. time: {funnel.avgTimeMin ? `${funnel.avgTimeMin} min` : `${funnel.avgTimeDays} days`}
         </span>
         <button
-          onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(!expanded);
+          }}
           className="text-secondary hover:underline flex items-center gap-1"
         >
           {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -239,7 +329,9 @@ export function FunnelChart({ funnel, onSelect }) {
         <div className="mt-3 rounded-lg border border-border bg-background p-3 space-y-2">
           {funnel.steps.map((step, idx) => (
             <div key={step.name} className="flex items-center justify-between text-xs">
-              <span className="text-text-secondary">{idx + 1}. {step.name}</span>
+              <span className="text-text-secondary">
+                {idx + 1}. {step.name}
+              </span>
               <div className="flex items-center gap-3">
                 {step.dropOff > 0 && (
                   <span className="text-danger font-medium">-{step.dropOff}% drop</span>
@@ -258,34 +350,48 @@ export function FunnelChart({ funnel, onSelect }) {
 export function EngagementCard({ user, onClick }) {
   const [showBreakdown, setShowBreakdown] = useState(false);
   const meta = classificationMeta[user.classification];
-  const scoreColor = user.score >= 80 ? 'text-purple-500' : user.score >= 60 ? 'text-accent' : user.score >= 40 ? 'text-warning' : 'text-danger';
+  const scoreColor =
+    user.score >= 80
+      ? 'text-purple-500'
+      : user.score >= 60
+        ? 'text-accent'
+        : user.score >= 40
+          ? 'text-warning'
+          : 'text-danger';
 
   return (
-    <div 
+    <div
       onClick={onClick}
       className={cn(
         'rounded-xl border bg-surface p-4 transition-all',
         onClick && 'cursor-pointer hover:shadow-md',
-        user.classification === 'power' ? 'border-purple-500/20 hover:border-purple-500/40' :
-        user.classification === 'engaged' ? 'border-accent/20 hover:border-accent/40' :
-        user.classification === 'at-risk' ? 'border-warning/20 hover:border-warning/40' :
-        'border-danger/20 hover:border-danger/40'
+        user.classification === 'power'
+          ? 'border-purple-500/20 hover:border-purple-500/40'
+          : user.classification === 'engaged'
+            ? 'border-accent/20 hover:border-accent/40'
+            : user.classification === 'at-risk'
+              ? 'border-warning/20 hover:border-warning/40'
+              : 'border-danger/20 hover:border-danger/40'
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-lg',
-            meta.bg
-          )}>
-            {user.classification === 'power' ? <Crown className={cn('h-5 w-5', meta.color)} /> :
-             user.classification === 'engaged' ? <Star className={cn('h-5 w-5', meta.color)} /> :
-             user.classification === 'at-risk' ? <AlertTriangle className={cn('h-5 w-5', meta.color)} /> :
-             <Zap className={cn('h-5 w-5', meta.color)} />}
+          <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', meta.bg)}>
+            {user.classification === 'power' ? (
+              <Crown className={cn('h-5 w-5', meta.color)} />
+            ) : user.classification === 'engaged' ? (
+              <Star className={cn('h-5 w-5', meta.color)} />
+            ) : user.classification === 'at-risk' ? (
+              <AlertTriangle className={cn('h-5 w-5', meta.color)} />
+            ) : (
+              <Zap className={cn('h-5 w-5', meta.color)} />
+            )}
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{user.tenantName}</h3>
-            <p className="text-[10px] text-text-muted font-mono">{user.tenantId} · {user.plan}</p>
+            <p className="text-[10px] text-text-muted font-mono">
+              {user.tenantId} · {user.plan}
+            </p>
           </div>
         </div>
         <div className="text-right">
@@ -315,7 +421,13 @@ export function EngagementCard({ user, onClick }) {
           <div
             className={cn(
               'h-full rounded-full transition-all',
-              user.score >= 80 ? 'bg-purple-500' : user.score >= 60 ? 'bg-accent' : user.score >= 40 ? 'bg-warning' : 'bg-danger'
+              user.score >= 80
+                ? 'bg-purple-500'
+                : user.score >= 60
+                  ? 'bg-accent'
+                  : user.score >= 40
+                    ? 'bg-warning'
+                    : 'bg-danger'
             )}
             style={{ width: `${user.score}%` }}
           />
@@ -325,15 +437,27 @@ export function EngagementCard({ user, onClick }) {
       {/* Trend */}
       <div className="mt-2 flex items-center justify-between">
         <ClassificationBadge classification={user.classification} />
-        <span className={cn('text-xs font-medium flex items-center gap-1', parseFloat(user.trend) >= 0 ? 'text-accent' : 'text-danger')}>
-          {parseFloat(user.trend) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+        <span
+          className={cn(
+            'text-xs font-medium flex items-center gap-1',
+            parseFloat(user.trend) >= 0 ? 'text-accent' : 'text-danger'
+          )}
+        >
+          {parseFloat(user.trend) >= 0 ? (
+            <TrendingUp className="h-3 w-3" />
+          ) : (
+            <TrendingDown className="h-3 w-3" />
+          )}
           {user.trend}%
         </span>
       </div>
 
       {/* Breakdown toggle */}
       <button
-        onClick={(e) => { e.stopPropagation(); setShowBreakdown(!showBreakdown); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowBreakdown(!showBreakdown);
+        }}
         className="mt-3 text-xs text-secondary hover:underline flex items-center gap-1 w-full justify-center"
       >
         {showBreakdown ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -351,7 +475,9 @@ export function EngagementCard({ user, onClick }) {
             <div key={item.label}>
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-text-secondary">{item.label}</span>
-                <span className="font-mono text-text-primary">{item.value}/{item.max}</span>
+                <span className="font-mono text-text-primary">
+                  {item.value}/{item.max}
+                </span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
                 <div
@@ -372,40 +498,63 @@ export function DropOffCard({ dropOff, onClick }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div 
+    <div
       onClick={onClick}
       className={cn(
         'rounded-xl border bg-surface p-4 transition-all',
         onClick && 'cursor-pointer hover:shadow-md',
-        dropOff.severity === 'critical' ? 'border-danger/30 hover:border-danger/50' :
-        dropOff.severity === 'high' ? 'border-warning/30 hover:border-warning/50' :
-        'border-border hover:border-secondary/30'
+        dropOff.severity === 'critical'
+          ? 'border-danger/30 hover:border-danger/50'
+          : dropOff.severity === 'high'
+            ? 'border-warning/30 hover:border-warning/50'
+            : 'border-border hover:border-secondary/30'
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg',
-            dropOff.severity === 'critical' ? 'bg-danger/10' :
-            dropOff.severity === 'high' ? 'bg-warning/10' :
-            dropOff.severity === 'medium' ? 'bg-info/10' : 'bg-neutral/10'
-          )}>
-            <Target className={cn('h-4 w-4',
-              dropOff.severity === 'critical' ? 'text-danger' :
-              dropOff.severity === 'high' ? 'text-warning' :
-              dropOff.severity === 'medium' ? 'text-info' : 'text-text-muted'
-            )} />
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              dropOff.severity === 'critical'
+                ? 'bg-danger/10'
+                : dropOff.severity === 'high'
+                  ? 'bg-warning/10'
+                  : dropOff.severity === 'medium'
+                    ? 'bg-info/10'
+                    : 'bg-neutral/10'
+            )}
+          >
+            <Target
+              className={cn(
+                'h-4 w-4',
+                dropOff.severity === 'critical'
+                  ? 'text-danger'
+                  : dropOff.severity === 'high'
+                    ? 'text-warning'
+                    : dropOff.severity === 'medium'
+                      ? 'text-info'
+                      : 'text-text-muted'
+              )}
+            />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{dropOff.location}</h3>
-            <p className="text-[10px] text-text-muted">{dropOff.affectedUsers.toLocaleString()} users affected</p>
+            <p className="text-[10px] text-text-muted">
+              {dropOff.affectedUsers.toLocaleString()} users affected
+            </p>
           </div>
         </div>
         <div className="text-right">
-          <p className={cn('text-lg font-bold font-mono',
-            dropOff.dropOffRate >= 35 ? 'text-danger' :
-            dropOff.dropOffRate >= 20 ? 'text-warning' : 'text-info'
-          )}>
+          <p
+            className={cn(
+              'text-lg font-bold font-mono',
+              dropOff.dropOffRate >= 35
+                ? 'text-danger'
+                : dropOff.dropOffRate >= 20
+                  ? 'text-warning'
+                  : 'text-info'
+            )}
+          >
             {dropOff.dropOffRate}%
           </p>
           <p className="text-[10px] text-text-muted">drop-off</p>
@@ -414,11 +563,16 @@ export function DropOffCard({ dropOff, onClick }) {
 
       <div className="mt-3 flex items-center gap-2">
         <SeverityBadge severity={dropOff.severity} />
-        <span className="text-[10px] text-text-muted">{dropOff.funnel !== 'internal' && `in ${dropOff.funnel}`}</span>
+        <span className="text-[10px] text-text-muted">
+          {dropOff.funnel !== 'internal' && `in ${dropOff.funnel}`}
+        </span>
       </div>
 
       <button
-        onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setExpanded(!expanded);
+        }}
         className="mt-3 text-xs text-secondary hover:underline flex items-center gap-1 w-full justify-center"
       >
         {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -428,18 +582,24 @@ export function DropOffCard({ dropOff, onClick }) {
       {expanded && (
         <div className="mt-3 rounded-lg border border-border bg-background p-3 space-y-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">Root Cause</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
+              Root Cause
+            </p>
             <p className="text-xs text-text-secondary">{dropOff.reason}</p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">Suggested Fix</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
+              Suggested Fix
+            </p>
             <div className="flex items-start gap-2">
               <Lightbulb className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
               <p className="text-xs text-text-secondary">{dropOff.suggestedFix}</p>
             </div>
           </div>
           <div className="pt-2 border-t border-border">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">Business Impact</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
+              Business Impact
+            </p>
             <p className="text-xs font-medium text-text-primary flex items-center gap-1">
               <DollarSign className="h-3 w-3 text-accent" />
               {dropOff.impact}
@@ -455,13 +615,18 @@ export function DropOffCard({ dropOff, onClick }) {
 export function PowerUserRow({ user, rank }) {
   return (
     <div className="flex items-center gap-4 p-3 rounded-lg border border-border bg-surface hover:bg-background/50 transition-colors">
-      <div className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold',
-        rank === 1 ? 'bg-purple-500 text-white' :
-        rank === 2 ? 'bg-secondary text-white' :
-        rank === 3 ? 'bg-accent text-white' :
-        'bg-border text-text-muted'
-      )}>
+      <div
+        className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold',
+          rank === 1
+            ? 'bg-purple-500 text-white'
+            : rank === 2
+              ? 'bg-secondary text-white'
+              : rank === 3
+                ? 'bg-accent text-white'
+                : 'bg-border text-text-muted'
+        )}
+      >
         {rank}
       </div>
       <div className="flex-1 min-w-0">
@@ -488,7 +653,7 @@ export function PowerUserRow({ user, rank }) {
 
 /* ─── Session Duration Bar Chart ─── */
 export function SessionDurationChart({ data }) {
-  const maxCount = Math.max(...data.map(d => d.count));
+  const maxCount = Math.max(...data.map((d) => d.count));
 
   return (
     <div className="space-y-3">
@@ -499,17 +664,25 @@ export function SessionDurationChart({ data }) {
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-text-secondary">{item.range}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-text-muted">{item.count.toLocaleString()}</span>
-                <span className="text-xs font-mono font-medium text-text-primary">{item.percentage}%</span>
+                <span className="text-xs font-mono text-text-muted">
+                  {item.count.toLocaleString()}
+                </span>
+                <span className="text-xs font-mono font-medium text-text-primary">
+                  {item.percentage}%
+                </span>
               </div>
             </div>
             <div className="h-4 w-full rounded-full bg-border overflow-hidden">
               <div
                 className={cn(
                   'h-full rounded-full transition-all',
-                  item.percentage > 25 ? 'bg-secondary' :
-                  item.percentage > 15 ? 'bg-accent' :
-                  item.percentage > 5 ? 'bg-info' : 'bg-text-muted/30'
+                  item.percentage > 25
+                    ? 'bg-secondary'
+                    : item.percentage > 15
+                      ? 'bg-accent'
+                      : item.percentage > 5
+                        ? 'bg-info'
+                        : 'bg-text-muted/30'
                 )}
                 style={{ width: `${width}%` }}
               />

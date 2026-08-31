@@ -1,20 +1,50 @@
 /* src/app/guest-portal/profile/preferences/page.jsx */
 import { useState } from 'react';
 import {
-  ArrowLeft, Save, CheckCircle2, Globe, Bell, Moon, Sun,
-  Monitor, Smartphone, Mail, MessageSquare, Shield, KeyRound,
-  Bed, UtensilsCrossed, Accessibility,
-  Volume2, VolumeX, Wifi, Plane, Hotel, CreditCard, User,
-  Loader2, AlertTriangle
+  ArrowLeft,
+  Save,
+  CheckCircle2,
+  Globe,
+  Bell,
+  Moon,
+  Sun,
+  Monitor,
+  Smartphone,
+  Mail,
+  MessageSquare,
+  Shield,
+  KeyRound,
+  Bed,
+  UtensilsCrossed,
+  Accessibility,
+  Volume2,
+  VolumeX,
+  Wifi,
+  Plane,
+  Hotel,
+  CreditCard,
+  User,
+  Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 import {
-  guestProfile, roomTypeOptions, bedTypeOptions, pillowTypeOptions,
-  dietaryOptions, accessibilityOptions, communicationOptions, languageOptions,
+  guestProfile,
+  roomTypeOptions,
+  bedTypeOptions,
+  pillowTypeOptions,
+  dietaryOptions,
+  accessibilityOptions,
+  communicationOptions,
+  languageOptions,
 } from '../../data';
 import {
-  SectionHeader, FormSelect, ToggleSwitch, CheckboxGroup, RadioGroup,
+  SectionHeader,
+  FormSelect,
+  ToggleSwitch,
+  CheckboxGroup,
+  RadioGroup,
 } from '../../components';
 
 export default function PreferencesPage() {
@@ -38,35 +68,35 @@ export default function PreferencesPage() {
   });
 
   const updatePref = (key, value) => {
-    setPrefs(p => ({ ...p, [key]: value }));
+    setPrefs((p) => ({ ...p, [key]: value }));
     setSaved(false);
   };
 
   const toggleDietary = (value) => {
-    setPrefs(p => ({
+    setPrefs((p) => ({
       ...p,
       dietary: p.dietary.includes(value)
-        ? p.dietary.filter(v => v !== value)
+        ? p.dietary.filter((v) => v !== value)
         : [...p.dietary, value],
     }));
     setSaved(false);
   };
 
   const toggleAccessibility = (value) => {
-    setPrefs(p => ({
+    setPrefs((p) => ({
       ...p,
       accessibility: p.accessibility.includes(value)
-        ? p.accessibility.filter(v => v !== value)
+        ? p.accessibility.filter((v) => v !== value)
         : [...p.accessibility, value],
     }));
     setSaved(false);
   };
 
   const toggleCommunication = (value) => {
-    setPrefs(p => ({
+    setPrefs((p) => ({
       ...p,
       communication: p.communication.includes(value)
-        ? p.communication.filter(v => v !== value)
+        ? p.communication.filter((v) => v !== value)
         : [...p.communication, value],
     }));
     setSaved(false);
@@ -74,7 +104,7 @@ export default function PreferencesPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise((r) => setTimeout(r, 1200));
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -185,7 +215,10 @@ export default function PreferencesPage() {
             Select any dietary requirements. Our kitchen will be notified before your arrival.
           </p>
           <CheckboxGroup
-            options={dietaryOptions.map(d => ({ value: d, label: d.charAt(0).toUpperCase() + d.slice(1).replace('-', ' ') }))}
+            options={dietaryOptions.map((d) => ({
+              value: d,
+              label: d.charAt(0).toUpperCase() + d.slice(1).replace('-', ' '),
+            }))}
             selected={prefs.dietary}
             onToggle={toggleDietary}
             columns={2}
@@ -278,7 +311,11 @@ export default function PreferencesPage() {
           Cancel
         </a>
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Save className="mr-1.5 h-4 w-4" />}
+          {saving ? (
+            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-1.5 h-4 w-4" />
+          )}
           Save Preferences
         </Button>
       </div>
