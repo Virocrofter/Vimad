@@ -1,0 +1,413 @@
+/* src/app/admin/quotas/data.js */
+
+/* ─── Mock Quota Rules ─── */
+export const quotaRules = [
+  {
+    id: 'QR-001',
+    name: 'API Requests — Starter Plan',
+    description: 'Monthly API call limit for Starter tier tenants',
+    resource: 'api_calls',
+    scope: 'plan',
+    scopeTarget: 'Starter',
+    limit: 25000,
+    unit: 'calls',
+    period: 'monthly',
+    action: 'throttle',
+    throttleRate: 10, // requests per second when throttled
+    overageEnabled: true,
+    overageRate: 0.001, // $ per extra call
+    overageCap: 500,
+    warnThreshold: 80,
+    hardLimit: 120,
+    createdAt: '2026-01-15',
+    updatedAt: '2026-08-10',
+    enabled: true,
+  },
+  {
+    id: 'QR-002',
+    name: 'API Requests — Professional Plan',
+    description: 'Monthly API call limit for Professional tier tenants',
+    resource: 'api_calls',
+    scope: 'plan',
+    scopeTarget: 'Professional',
+    limit: 100000,
+    unit: 'calls',
+    period: 'monthly',
+    action: 'throttle',
+    throttleRate: 50,
+    overageEnabled: true,
+    overageRate: 0.0005,
+    overageCap: 1000,
+    warnThreshold: 85,
+    hardLimit: 110,
+    createdAt: '2026-01-15',
+    updatedAt: '2026-08-10',
+    enabled: true,
+  },
+  {
+    id: 'QR-003',
+    name: 'API Requests — Enterprise Plan',
+    description: 'Monthly API call limit for Enterprise tier tenants',
+    resource: 'api_calls',
+    scope: 'plan',
+    scopeTarget: 'Enterprise',
+    limit: 500000,
+    unit: 'calls',
+    period: 'monthly',
+    action: 'notify',
+    throttleRate: null,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 90,
+    hardLimit: 100,
+    createdAt: '2026-01-15',
+    updatedAt: '2026-08-10',
+    enabled: true,
+  },
+  {
+    id: 'QR-004',
+    name: 'Storage — Starter Plan',
+    description: 'Cloud storage cap for Starter tier',
+    resource: 'storage',
+    scope: 'plan',
+    scopeTarget: 'Starter',
+    limit: 50,
+    unit: 'GB',
+    period: 'monthly',
+    action: 'block',
+    throttleRate: null,
+    overageEnabled: true,
+    overageRate: 0.10,
+    overageCap: 200,
+    warnThreshold: 80,
+    hardLimit: 100,
+    createdAt: '2026-02-01',
+    updatedAt: '2026-07-20',
+    enabled: true,
+  },
+  {
+    id: 'QR-005',
+    name: 'Storage — Professional Plan',
+    description: 'Cloud storage cap for Professional tier',
+    resource: 'storage',
+    scope: 'plan',
+    scopeTarget: 'Professional',
+    limit: 100,
+    unit: 'GB',
+    period: 'monthly',
+    action: 'block',
+    throttleRate: null,
+    overageEnabled: true,
+    overageRate: 0.08,
+    overageCap: 500,
+    warnThreshold: 85,
+    hardLimit: 100,
+    createdAt: '2026-02-01',
+    updatedAt: '2026-07-20',
+    enabled: true,
+  },
+  {
+    id: 'QR-006',
+    name: 'Storage — Enterprise Plan',
+    description: 'Cloud storage cap for Enterprise tier',
+    resource: 'storage',
+    scope: 'plan',
+    scopeTarget: 'Enterprise',
+    limit: 500,
+    unit: 'GB',
+    period: 'monthly',
+    action: 'notify',
+    throttleRate: null,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 90,
+    hardLimit: 100,
+    createdAt: '2026-02-01',
+    updatedAt: '2026-07-20',
+    enabled: true,
+  },
+  {
+    id: 'QR-007',
+    name: 'Room Ceiling — Starter Plan',
+    description: 'Maximum rooms allowed for Starter properties',
+    resource: 'rooms',
+    scope: 'plan',
+    scopeTarget: 'Starter',
+    limit: 75,
+    unit: 'rooms',
+    period: 'fixed',
+    action: 'block',
+    throttleRate: null,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 90,
+    hardLimit: 100,
+    createdAt: '2026-03-01',
+    updatedAt: '2026-06-15',
+    enabled: true,
+  },
+  {
+    id: 'QR-008',
+    name: 'Room Ceiling — Professional Plan',
+    description: 'Maximum rooms allowed for Professional properties',
+    resource: 'rooms',
+    scope: 'plan',
+    scopeTarget: 'Professional',
+    limit: 200,
+    unit: 'rooms',
+    period: 'fixed',
+    action: 'block',
+    throttleRate: null,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 90,
+    hardLimit: 100,
+    createdAt: '2026-03-01',
+    updatedAt: '2026-06-15',
+    enabled: true,
+  },
+  {
+    id: 'QR-009',
+    name: 'Room Ceiling — Enterprise Plan',
+    description: 'Maximum rooms allowed for Enterprise properties',
+    resource: 'rooms',
+    scope: 'plan',
+    scopeTarget: 'Enterprise',
+    limit: 500,
+    unit: 'rooms',
+    period: 'fixed',
+    action: 'notify',
+    throttleRate: null,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 95,
+    hardLimit: 100,
+    createdAt: '2026-03-01',
+    updatedAt: '2026-06-15',
+    enabled: true,
+  },
+  {
+    id: 'QR-010',
+    name: 'User Seats — Starter Plan',
+    description: 'Team member limit for Starter tier',
+    resource: 'users',
+    scope: 'plan',
+    scopeTarget: 'Starter',
+    limit: 5,
+    unit: 'users',
+    period: 'fixed',
+    action: 'block',
+    throttleRate: null,
+    overageEnabled: true,
+    overageRate: 10,
+    overageCap: 50,
+    warnThreshold: 80,
+    hardLimit: 100,
+    createdAt: '2026-03-15',
+    updatedAt: '2026-05-20',
+    enabled: true,
+  },
+  {
+    id: 'QR-011',
+    name: 'User Seats — Professional Plan',
+    description: 'Team member limit for Professional tier',
+    resource: 'users',
+    scope: 'plan',
+    scopeTarget: 'Professional',
+    limit: 15,
+    unit: 'users',
+    period: 'fixed',
+    action: 'block',
+    throttleRate: null,
+    overageEnabled: true,
+    overageRate: 8,
+    overageCap: 100,
+    warnThreshold: 85,
+    hardLimit: 100,
+    createdAt: '2026-03-15',
+    updatedAt: '2026-05-20',
+    enabled: true,
+  },
+  {
+    id: 'QR-012',
+    name: 'User Seats — Enterprise Plan',
+    description: 'Team member limit for Enterprise tier',
+    resource: 'users',
+    scope: 'plan',
+    scopeTarget: 'Enterprise',
+    limit: 50,
+    unit: 'users',
+    period: 'fixed',
+    action: 'notify',
+    throttleRate: null,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 90,
+    hardLimit: 100,
+    createdAt: '2026-03-15',
+    updatedAt: '2026-05-20',
+    enabled: true,
+  },
+  {
+    id: 'QR-013',
+    name: 'Grand Hotel Boston — Custom API Limit',
+    description: 'Bespoke API quota for flagship enterprise customer',
+    resource: 'api_calls',
+    scope: 'tenant',
+    scopeTarget: 'TNT-001',
+    limit: 750000,
+    unit: 'calls',
+    period: 'monthly',
+    action: 'notify',
+    throttleRate: null,
+    overageEnabled: true,
+    overageRate: 0.0003,
+    overageCap: 2000,
+    warnThreshold: 85,
+    hardLimit: 110,
+    createdAt: '2026-04-01',
+    updatedAt: '2026-08-12',
+    enabled: true,
+  },
+  {
+    id: 'QR-014',
+    name: 'Rate Limit — Global Burst Control',
+    description: 'Global burst protection across all tenants',
+    resource: 'api_calls',
+    scope: 'global',
+    scopeTarget: null,
+    limit: 10000,
+    unit: 'calls/min',
+    period: 'minute',
+    action: 'throttle',
+    throttleRate: 100,
+    overageEnabled: false,
+    overageRate: 0,
+    overageCap: 0,
+    warnThreshold: 70,
+    hardLimit: 100,
+    createdAt: '2026-05-01',
+    updatedAt: '2026-08-15',
+    enabled: true,
+  },
+];
+
+/* ─── Mock Tenant Usage (current cycle) ─── */
+export const tenantUsage = [
+  { tenantId: 'TNT-001', tenantName: 'Grand Hotel Boston', plan: 'Enterprise', resource: 'api_calls', used: 28400, limit: 750000, unit: 'calls' },
+  { tenantId: 'TNT-001', tenantName: 'Grand Hotel Boston', plan: 'Enterprise', resource: 'storage', used: 45.2, limit: 500, unit: 'GB' },
+  { tenantId: 'TNT-001', tenantName: 'Grand Hotel Boston', plan: 'Enterprise', resource: 'rooms', used: 142, limit: 500, unit: 'rooms' },
+  { tenantId: 'TNT-001', tenantName: 'Grand Hotel Boston', plan: 'Enterprise', resource: 'users', used: 18, limit: 50, unit: 'users' },
+  { tenantId: 'TNT-002', tenantName: 'Seaside Resort Miami', plan: 'Professional', resource: 'api_calls', used: 15600, limit: 100000, unit: 'calls' },
+  { tenantId: 'TNT-002', tenantName: 'Seaside Resort Miami', plan: 'Professional', resource: 'storage', used: 28.5, limit: 100, unit: 'GB' },
+  { tenantId: 'TNT-002', tenantName: 'Seaside Resort Miami', plan: 'Professional', resource: 'rooms', used: 85, limit: 200, unit: 'rooms' },
+  { tenantId: 'TNT-002', tenantName: 'Seaside Resort Miami', plan: 'Professional', resource: 'users', used: 12, limit: 15, unit: 'users' },
+  { tenantId: 'TNT-003', tenantName: 'Mountain Lodge Aspen', plan: 'Professional', resource: 'api_calls', used: 4200, limit: 100000, unit: 'calls' },
+  { tenantId: 'TNT-003', tenantName: 'Mountain Lodge Aspen', plan: 'Professional', resource: 'storage', used: 8.2, limit: 100, unit: 'GB' },
+  { tenantId: 'TNT-003', tenantName: 'Mountain Lodge Aspen', plan: 'Professional', resource: 'rooms', used: 45, limit: 200, unit: 'rooms' },
+  { tenantId: 'TNT-003', tenantName: 'Mountain Lodge Aspen', plan: 'Professional', resource: 'users', used: 6, limit: 15, unit: 'users' },
+  { tenantId: 'TNT-004', tenantName: 'Downtown Suites Chicago', plan: 'Starter', resource: 'api_calls', used: 8900, limit: 25000, unit: 'calls' },
+  { tenantId: 'TNT-004', tenantName: 'Downtown Suites Chicago', plan: 'Starter', resource: 'storage', used: 12.1, limit: 50, unit: 'GB' },
+  { tenantId: 'TNT-004', tenantName: 'Downtown Suites Chicago', plan: 'Starter', resource: 'rooms', used: 32, limit: 75, unit: 'rooms' },
+  { tenantId: 'TNT-004', tenantName: 'Downtown Suites Chicago', plan: 'Starter', resource: 'users', used: 4, limit: 5, unit: 'users' },
+  { tenantId: 'TNT-005', tenantName: 'Coastal Inn San Diego', plan: 'Starter', resource: 'api_calls', used: 6700, limit: 25000, unit: 'calls' },
+  { tenantId: 'TNT-005', tenantName: 'Coastal Inn San Diego', plan: 'Starter', resource: 'storage', used: 9.8, limit: 50, unit: 'GB' },
+  { tenantId: 'TNT-005', tenantName: 'Coastal Inn San Diego', plan: 'Starter', resource: 'rooms', used: 28, limit: 75, unit: 'rooms' },
+  { tenantId: 'TNT-005', tenantName: 'Coastal Inn San Diego', plan: 'Starter', resource: 'users', used: 3, limit: 5, unit: 'users' },
+  { tenantId: 'TNT-007', tenantName: 'Urban Hotel NYC', plan: 'Professional', resource: 'api_calls', used: 42100, limit: 100000, unit: 'calls' },
+  { tenantId: 'TNT-007', tenantName: 'Urban Hotel NYC', plan: 'Professional', resource: 'storage', used: 38.7, limit: 100, unit: 'GB' },
+  { tenantId: 'TNT-007', tenantName: 'Urban Hotel NYC', plan: 'Professional', resource: 'rooms', used: 120, limit: 200, unit: 'rooms' },
+  { tenantId: 'TNT-007', tenantName: 'Urban Hotel NYC', plan: 'Professional', resource: 'users', used: 15, limit: 15, unit: 'users' },
+];
+
+/* ─── Mock Overage Billing History ─── */
+export const overageHistory = [
+  { id: 'OV-001', tenantId: 'TNT-002', tenantName: 'Seaside Resort Miami', resource: 'api_calls', period: '2026-07', excess: 8400, rate: 0.0005, charge: 4.20, status: 'billed', invoiceId: 'INV-2026-0720' },
+  { id: 'OV-002', tenantId: 'TNT-004', tenantName: 'Downtown Suites Chicago', resource: 'storage', period: '2026-07', excess: 7.1, rate: 0.10, charge: 0.71, status: 'billed', invoiceId: 'INV-2026-0712' },
+  { id: 'OV-003', tenantId: 'TNT-007', tenantName: 'Urban Hotel NYC', resource: 'users', period: '2026-07', excess: 2, rate: 8, charge: 16.00, status: 'billed', invoiceId: 'INV-2026-0722' },
+  { id: 'OV-004', tenantId: 'TNT-002', tenantName: 'Seaside Resort Miami', resource: 'api_calls', period: '2026-06', excess: 12500, rate: 0.0005, charge: 6.25, status: 'billed', invoiceId: 'INV-2026-0620' },
+  { id: 'OV-005', tenantId: 'TNT-001', tenantName: 'Grand Hotel Boston', resource: 'api_calls', period: '2026-08', excess: 0, rate: 0.0003, charge: 0, status: 'projected', invoiceId: null },
+  { id: 'OV-006', tenantId: 'TNT-007', tenantName: 'Urban Hotel NYC', resource: 'api_calls', period: '2026-08', excess: 5200, rate: 0.0005, charge: 2.60, status: 'projected', invoiceId: null },
+];
+
+/* ─── Mock Throttle Events ─── */
+export const throttleEvents = [
+  { id: 'TE-001', tenantId: 'TNT-004', resource: 'api_calls', timestamp: '2026-08-16 14:23:00', duration: 45, reason: 'Rate limit exceeded — throttled to 10 req/s', resolved: true },
+  { id: 'TE-002', tenantId: 'TNT-005', resource: 'api_calls', timestamp: '2026-08-16 11:05:00', duration: 120, reason: 'Burst limit hit — temporary slowdown', resolved: true },
+  { id: 'TE-003', tenantId: 'TNT-004', resource: 'api_calls', timestamp: '2026-08-15 09:45:00', duration: 300, reason: 'Sustained over-limit usage — extended throttle', resolved: true },
+  { id: 'TE-004', tenantId: 'TNT-002', resource: 'api_calls', timestamp: '2026-08-14 18:30:00', duration: 60, reason: 'Approaching limit — preventive throttle', resolved: true },
+  { id: 'TE-005', tenantId: 'TNT-004', resource: 'api_calls', timestamp: '2026-08-16 15:00:00', duration: null, reason: 'Currently throttled — rate limit active', resolved: false },
+];
+
+/* ─── Metadata ─── */
+export const resourceMeta = {
+  api_calls: { label: 'API Calls', icon: 'Zap', color: 'text-secondary', bg: 'bg-secondary/10' },
+  storage: { label: 'Storage', icon: 'HardDrive', color: 'text-info', bg: 'bg-info/10' },
+  rooms: { label: 'Rooms', icon: 'BedDouble', color: 'text-accent', bg: 'bg-accent/10' },
+  users: { label: 'Users', icon: 'Users', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+};
+
+export const scopeMeta = {
+  plan: { label: 'Plan', icon: 'Tag', color: 'text-secondary' },
+  tenant: { label: 'Tenant', icon: 'Building2', color: 'text-accent' },
+  global: { label: 'Global', icon: 'Globe', color: 'text-warning' },
+};
+
+export const actionMeta = {
+  throttle: { label: 'Throttle', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning', desc: 'Slow down requests' },
+  block: { label: 'Block', class: 'bg-danger/10 text-danger border-danger/20', dot: 'bg-danger', desc: 'Hard stop at limit' },
+  notify: { label: 'Notify Only', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info', desc: 'Alert, no enforcement' },
+};
+
+export const periodMeta = {
+  monthly: { label: 'Monthly', short: 'mo' },
+  fixed: { label: 'Fixed', short: 'fixed' },
+  minute: { label: 'Per Minute', short: 'min' },
+  hourly: { label: 'Hourly', short: 'hr' },
+  daily: { label: 'Daily', short: 'day' },
+};
+
+export const overageStatusMeta = {
+  billed: { label: 'Billed', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
+  projected: { label: 'Projected', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
+  waived: { label: 'Waived', class: 'bg-neutral/10 text-text-muted border-border', dot: 'bg-text-muted' },
+  disputed: { label: 'Disputed', class: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
+};
+
+/* ─── Helpers ─── */
+export function getUsagePercent(used, limit) {
+  if (typeof limit === 'string') return null;
+  return Math.round((used / limit) * 100);
+}
+
+export function getUsageColor(pct) {
+  if (pct === null) return 'text-text-muted';
+  if (pct >= 100) return 'text-danger';
+  if (pct >= 90) return 'text-warning';
+  if (pct >= 75) return 'text-info';
+  return 'text-accent';
+}
+
+export function getUsageBarColor(pct) {
+  if (pct === null) return 'bg-text-muted';
+  if (pct >= 100) return 'bg-danger';
+  if (pct >= 90) return 'bg-warning';
+  if (pct >= 75) return 'bg-info';
+  return 'bg-accent';
+}
+
+export function formatNumber(num) {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
+export function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}

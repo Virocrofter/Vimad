@@ -1,0 +1,373 @@
+/* src/app/admin/security/data.js */
+
+/* ─── Failed Login Attempts (Geolocated) ─── */
+export const failedLogins = [
+  { id: 'FL-001', ip: '185.220.101.42', location: 'Moscow, Russia', lat: 55.7558, lng: 37.6173, country: 'RU', attempts: 47, lastAttempt: '2026-08-16 23:45:00', userAgent: 'Mozilla/5.0 (compatible; Bot/1.0)', risk: 'critical', type: 'brute-force', target: 'admin@unifiedpms.com' },
+  { id: 'FL-002', ip: '192.168.1.105', location: 'New York, USA', lat: 40.7128, lng: -74.0060, country: 'US', attempts: 3, lastAttempt: '2026-08-16 14:22:00', userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', risk: 'low', type: 'user-error', target: 'robert@grandhotel.com' },
+  { id: 'FL-003', ip: '103.253.145.88', location: 'Jakarta, Indonesia', lat: -6.2088, lng: 106.8456, country: 'ID', attempts: 12, lastAttempt: '2026-08-16 21:10:00', userAgent: 'python-requests/2.28.1', risk: 'high', type: 'credential-stuffing', target: 'maria@seasideresort.com' },
+  { id: 'FL-004', ip: '91.219.236.14', location: 'Kyiv, Ukraine', lat: 50.4501, lng: 30.5234, country: 'UA', attempts: 28, lastAttempt: '2026-08-16 22:30:00', userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', risk: 'critical', type: 'brute-force', target: 'admin@unifiedpms.com' },
+  { id: 'FL-005', ip: '45.33.32.156', location: 'Dallas, USA', lat: 32.7767, lng: -96.7970, country: 'US', attempts: 1, lastAttempt: '2026-08-16 13:05:00', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5)', risk: 'low', type: 'user-error', target: 'james@mountainlodge.com' },
+  { id: 'FL-006', ip: '198.51.100.22', location: 'Toronto, Canada', lat: 43.6532, lng: -79.3832, country: 'CA', attempts: 5, lastAttempt: '2026-08-16 16:45:00', userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', risk: 'medium', type: 'password-spray', target: 'multiple' },
+  { id: 'FL-007', ip: '203.0.113.77', location: 'São Paulo, Brazil', lat: -23.5505, lng: -46.6333, country: 'BR', attempts: 8, lastAttempt: '2026-08-16 19:20:00', userAgent: 'curl/7.68.0', risk: 'high', type: 'credential-stuffing', target: 'kevin@urbanhotel.com' },
+  { id: 'FL-008', ip: '185.220.101.42', location: 'Moscow, Russia', lat: 55.7558, lng: 37.6173, country: 'RU', attempts: 15, lastAttempt: '2026-08-15 04:12:00', userAgent: 'Mozilla/5.0 (compatible; Bot/1.0)', risk: 'critical', type: 'brute-force', target: 'david@coastalinn.com' },
+  { id: 'FL-009', ip: '198.51.100.44', location: 'London, UK', lat: 51.5074, lng: -0.1278, country: 'GB', attempts: 2, lastAttempt: '2026-08-16 11:30:00', userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', risk: 'low', type: 'user-error', target: 'lisa@downtownsuites.com' },
+  { id: 'FL-010', ip: '192.0.2.99', location: 'Singapore', lat: 1.3521, lng: 103.8198, country: 'SG', attempts: 19, lastAttempt: '2026-08-16 20:55:00', userAgent: 'python-requests/2.28.1', risk: 'high', type: 'brute-force', target: 'amanda@lakesideresort.com' },
+];
+
+/* ─── Suspicious Activity Alerts ─── */
+export const suspiciousActivity = [
+  {
+    id: 'SA-001',
+    type: 'impossible-travel',
+    severity: 'critical',
+    title: 'Impossible Travel Detected',
+    description: 'User logged in from New York and Singapore within 30 minutes',
+    user: 'robert@grandhotel.com',
+    ip: '192.168.1.105 → 192.0.2.99',
+    timestamp: '2026-08-16 14:22:00',
+    status: 'open',
+    locations: ['New York, USA', 'Singapore'],
+    actionRequired: true,
+  },
+  {
+    id: 'SA-002',
+    type: 'off-hours-access',
+    severity: 'warning',
+    title: 'Off-Hours Admin Access',
+    description: 'Admin panel accessed at 3:47 AM local time',
+    user: 'admin@unifiedpms.com',
+    ip: '185.220.101.42',
+    timestamp: '2026-08-16 03:47:00',
+    status: 'open',
+    locations: ['Moscow, Russia'],
+    actionRequired: true,
+  },
+  {
+    id: 'SA-003',
+    type: 'privilege-escalation',
+    severity: 'critical',
+    title: 'Privilege Escalation Attempt',
+    description: 'Front desk user attempted to access super-admin endpoints',
+    user: 'sarah.j@grandhotel.com',
+    ip: '203.0.113.45',
+    timestamp: '2026-08-16 10:15:00',
+    status: 'investigating',
+    locations: ['Boston, USA'],
+    actionRequired: true,
+  },
+  {
+    id: 'SA-004',
+    type: 'data-exfiltration',
+    severity: 'high',
+    title: 'Unusual Data Export',
+    description: 'User exported 4,200 guest records in a single session (typical: <50)',
+    user: 'temp-contractor@external.com',
+    ip: '198.51.100.201',
+    timestamp: '2026-08-15 16:30:00',
+    status: 'resolved',
+    locations: ['Remote — VPN Exit: Frankfurt, DE'],
+    actionRequired: false,
+    resolution: 'Contractor access revoked, audit completed',
+  },
+  {
+    id: 'SA-005',
+    type: 'new-device',
+    severity: 'info',
+    title: 'New Device Login',
+    description: 'First-time login from unrecognized device',
+    user: 'maria@seasideresort.com',
+    ip: '192.168.1.110',
+    timestamp: '2026-08-16 09:00:00',
+    status: 'resolved',
+    locations: ['Miami, USA'],
+    actionRequired: false,
+    resolution: 'User confirmed device ownership via email',
+  },
+  {
+    id: 'SA-006',
+    type: 'brute-force',
+    severity: 'critical',
+    title: 'Brute Force Attack',
+    description: '47 failed login attempts in 5 minutes from single IP',
+    user: 'admin@unifiedpms.com',
+    ip: '185.220.101.42',
+    timestamp: '2026-08-16 23:45:00',
+    status: 'open',
+    locations: ['Moscow, Russia'],
+    actionRequired: true,
+  },
+  {
+    id: 'SA-007',
+    type: 'session-hijack',
+    severity: 'high',
+    title: 'Session Cookie Anomaly',
+    description: 'Session token used from two different IP addresses simultaneously',
+    user: 'kevin@urbanhotel.com',
+    ip: '45.33.32.156 → 203.0.113.77',
+    timestamp: '2026-08-16 18:20:00',
+    status: 'investigating',
+    locations: ['Dallas, USA', 'São Paulo, Brazil'],
+    actionRequired: true,
+  },
+];
+
+/* ─── 2FA Enforcement Policies ─── */
+export const twoFAPolicies = [
+  {
+    id: '2FA-001',
+    name: 'Super Admin Mandate',
+    scope: 'role',
+    target: ['super_admin', 'platform_admin'],
+    enforced: true,
+    method: 'totp',
+    gracePeriodDays: 0,
+    createdAt: '2026-01-15',
+    complianceRate: 100,
+    exemptUsers: [],
+  },
+  {
+    id: '2FA-001',
+    name: 'Admin Mandate',
+    scope: 'role',
+    target: ['admin', 'property_manager'],
+    enforced: true,
+    method: 'totp-or-sms',
+    gracePeriodDays: 7,
+    createdAt: '2026-02-01',
+    complianceRate: 94,
+    exemptUsers: ['legacy-admin@oldhotel.com'],
+  },
+  {
+    id: '2FA-003',
+    name: 'Finance Team Mandate',
+    scope: 'role',
+    target: ['finance', 'billing_admin'],
+    enforced: true,
+    method: 'totp',
+    gracePeriodDays: 3,
+    createdAt: '2026-03-10',
+    complianceRate: 100,
+    exemptUsers: [],
+  },
+  {
+    id: '2FA-004',
+    name: 'All Staff Mandate',
+    scope: 'role',
+    target: ['all'],
+    enforced: false,
+    method: 'totp',
+    gracePeriodDays: 14,
+    createdAt: '2026-05-01',
+    complianceRate: 67,
+    exemptUsers: ['front-desk-shared@grandhotel.com', 'kiosk@seasideresort.com'],
+  },
+  {
+    id: '2FA-005',
+    name: 'High-Risk IP Enforced',
+    scope: 'condition',
+    target: ['new-ip', 'high-risk-country'],
+    enforced: true,
+    method: 'totp',
+    gracePeriodDays: 0,
+    createdAt: '2026-06-15',
+    complianceRate: 100,
+    exemptUsers: [],
+  },
+];
+
+/* ─── IP Allowlists ─── */
+export const ipAllowlists = [
+  {
+    id: 'WL-001',
+    name: 'Grand Hotel Boston Office',
+    ip: '192.168.1.0/24',
+    type: 'subnet',
+    description: 'Main office network',
+    createdAt: '2026-01-10',
+    lastUsed: '2026-08-16 14:32:00',
+    hitCount: 2847,
+    status: 'active',
+    tenant: 'TNT-001',
+  },
+  {
+    id: 'WL-002',
+    name: 'Seaside Resort VPN',
+    ip: '203.0.113.0/26',
+    type: 'subnet',
+    description: 'Corporate VPN range',
+    createdAt: '2026-02-20',
+    lastUsed: '2026-08-16 13:45:00',
+    hitCount: 1923,
+    status: 'active',
+    tenant: 'TNT-002',
+  },
+  {
+    id: 'WL-003',
+    name: 'Admin Home Office',
+    ip: '198.51.100.45',
+    type: 'single',
+    description: 'Robert Chen home IP',
+    createdAt: '2026-03-05',
+    lastUsed: '2026-08-16 22:10:00',
+    hitCount: 456,
+    status: 'active',
+    tenant: null,
+  },
+  {
+    id: 'WL-004',
+    name: 'Downtown Suites Chicago',
+    ip: '192.0.2.0/24',
+    type: 'subnet',
+    description: 'Property network',
+    createdAt: '2026-04-12',
+    lastUsed: '2026-08-15 09:15:00',
+    hitCount: 890,
+    status: 'suspended',
+    tenant: 'TNT-004',
+  },
+  {
+    id: 'WL-005',
+    name: 'AWS us-east-1',
+    ip: '52.0.0.0/8',
+    type: 'subnet',
+    description: 'Integration services',
+    createdAt: '2026-05-01',
+    lastUsed: '2026-08-16 00:00:00',
+    hitCount: 12400,
+    status: 'active',
+    tenant: null,
+  },
+];
+
+/* ─── Breach Simulation Scenarios ─── */
+export const breachScenarios = [
+  {
+    id: 'BS-001',
+    name: 'Credential Stuffing Wave',
+    description: 'Simulate 1,000 login attempts using leaked credentials from dark web',
+    severity: 'high',
+    duration: '5 minutes',
+    targets: ['all-tenants'],
+    estimatedImpact: { blocked: 1000, alerts: 12, falsePositives: 2 },
+    status: 'available',
+  },
+  {
+    id: 'BS-002',
+    name: 'Insider Data Exfiltration',
+    description: 'Simulate a privileged user bulk-exporting guest PII and payment data',
+    severity: 'critical',
+    duration: '15 minutes',
+    targets: ['single-tenant'],
+    estimatedImpact: { blocked: 1, alerts: 5, falsePositives: 0 },
+    status: 'available',
+  },
+  {
+    id: 'BS-003',
+    name: 'DDoS + Login Flood',
+    description: 'Layer 7 DDoS combined with distributed brute force from 50 IPs',
+    severity: 'critical',
+    duration: '10 minutes',
+    targets: ['platform-wide'],
+    estimatedImpact: { blocked: 5000, alerts: 25, falsePositives: 8 },
+    status: 'available',
+  },
+  {
+    id: 'BS-004',
+    name: 'Session Hijacking Campaign',
+    description: 'Stolen session cookies reused from different geolocations',
+    severity: 'high',
+    duration: '20 minutes',
+    targets: ['active-sessions'],
+    estimatedImpact: { blocked: 15, alerts: 15, falsePositives: 1 },
+    status: 'available',
+  },
+  {
+    id: 'BS-005',
+    name: 'API Key Leak Response',
+    description: 'Simulate leaked API key used for unauthorized data access',
+    severity: 'medium',
+    duration: '8 minutes',
+    targets: ['api-gateway'],
+    estimatedImpact: { blocked: 200, alerts: 3, falsePositives: 0 },
+    status: 'available',
+  },
+];
+
+/* ─── Security Overview Stats ─── */
+export const securityOverview = {
+  threatLevel: 'elevated', // low, normal, elevated, critical
+  lastAssessment: '2026-08-16 23:00:00',
+  nextAssessment: '2026-08-17 06:00:00',
+  activeThreats: 3,
+  resolvedToday: 7,
+  avgResponseTime: '4m 32s',
+  mfaAdoption: 78,
+  passwordPolicy: {
+    minLength: 12,
+    requireSpecial: true,
+    requireNumbers: true,
+    requireUppercase: true,
+    maxAge: 90,
+    preventReuse: 12,
+  },
+};
+
+/* ─── Metadata ─── */
+export const threatSeverityMeta = {
+  critical: { label: 'Critical', dot: 'bg-danger', class: 'bg-danger/10 text-danger border-danger/20', iconColor: 'text-danger' },
+  high: { label: 'High', dot: 'bg-warning', class: 'bg-warning/10 text-warning border-warning/20', iconColor: 'text-warning' },
+  medium: { label: 'Medium', dot: 'bg-orange-500', class: 'bg-orange-500/10 text-orange-500 border-orange-500/20', iconColor: 'text-orange-500' },
+  low: { label: 'Low', dot: 'bg-info', class: 'bg-info/10 text-info border-info/20', iconColor: 'text-info' },
+  info: { label: 'Info', dot: 'bg-accent', class: 'bg-accent/10 text-accent border-accent/20', iconColor: 'text-accent' },
+};
+
+export const alertStatusMeta = {
+  open: { label: 'Open', class: 'bg-danger/10 text-danger border-danger/20' },
+  investigating: { label: 'Investigating', class: 'bg-warning/10 text-warning border-warning/20' },
+  resolved: { label: 'Resolved', class: 'bg-accent/10 text-accent border-accent/20' },
+  dismissed: { label: 'Dismissed', class: 'bg-neutral/10 text-text-muted border-border' },
+};
+
+export const threatLevelMeta = {
+  low: { label: 'Low Threat', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20', icon: 'ShieldCheck' },
+  normal: { label: 'Normal', color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', icon: 'Shield' },
+  elevated: { label: 'Elevated Threat', color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', icon: 'AlertTriangle' },
+  critical: { label: 'Critical Threat', color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', icon: 'ShieldAlert' },
+};
+
+export const activityTypeMeta = {
+  'impossible-travel': { label: 'Impossible Travel', icon: 'Plane' },
+  'off-hours-access': { label: 'Off-Hours Access', icon: 'Moon' },
+  'privilege-escalation': { label: 'Privilege Escalation', icon: 'ArrowUp' },
+  'data-exfiltration': { label: 'Data Exfiltration', icon: 'Download' },
+  'new-device': { label: 'New Device', icon: 'Smartphone' },
+  'brute-force': { label: 'Brute Force', icon: 'Hammer' },
+  'session-hijack': { label: 'Session Hijack', icon: 'Key' },
+};
+
+export const countryMeta = {
+  US: { flag: '🇺🇸', name: 'United States' },
+  RU: { flag: '🇷🇺', name: 'Russia' },
+  ID: { flag: '🇮🇩', name: 'Indonesia' },
+  UA: { flag: '🇺🇦', name: 'Ukraine' },
+  CA: { flag: '🇨🇦', name: 'Canada' },
+  BR: { flag: '🇧🇷', name: 'Brazil' },
+  GB: { flag: '🇬🇧', name: 'United Kingdom' },
+  SG: { flag: '🇸🇬', name: 'Singapore' },
+  DE: { flag: '🇩🇪', name: 'Germany' },
+};
+
+/* ─── Helpers ─── */
+export function timeAgo(timestamp) {
+  const date = new Date(timestamp.replace(' ', 'T'));
+  const now = new Date('2026-08-16T23:50:00');
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+export function formatNumber(num) {
+  return new Intl.NumberFormat('en-US').format(num);
+}
