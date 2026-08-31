@@ -7,26 +7,305 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Tenant & Identity ───
+
 model Tenant {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
   plan      String   @default("trial")
+  status    String   @default("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  users     User[]
+
+  properties Property[]
+  users      User[]
+  guests     Guest[]
+  reservations Reservation[]
+  roomTypes  RoomType[]
+  rooms      Room[]
+  ratePlans  RatePlan[]
+  auditLogs  AuditLog[]
+
+  @@map("tenants")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  role      String   @default("staff")
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String
+  passwordHash String?
+  firstName    String?
+  lastName     String?
+  role         String   @default("staff") // owner, admin, manager, staff
+  status       String   @default("active")
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+// ─── Property & Inventory ───
+
+model Property {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  code        String // short property code
+  address     String?
+  city        String?
+  country     String?
+  timezone    String   @default("UTC")
+  currency    String   @default("USD")
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roomTypes RoomType[]
+  rooms     Room[]
+  ratePlans RatePlan[]
+  reservations Reservation[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("properties")
+}
+
+model RoomType {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name        String
+  code        String
+  description String?
+  baseOccupancy Int    @default(2)
+  maxOccupancy  Int    @default(4)
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rooms Room[]
+  ratePlans RatePlan[]
+
+  @@unique([propertyId, code])
+  @@index([tenantId])
+  @@index([propertyId])
+  @@map("room_types")
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomTypeId  String
+  roomType    RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  number      String
+  floor       String?
+  status      String   @default("clean") // clean, dirty, inspected, maintenance
+  housekeepingStatus String @default("ready")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reservationStays ReservationStay[]
+
+  @@unique([propertyId, number])
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([roomTypeId])
+  @@map("rooms")
+}
+
+model RatePlan {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomTypeId  String
+  roomType    RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  name        String
+  code        String
+  baseRate    Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([propertyId, code])
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([roomTypeId])
+  @@map("rate_plans")
+}
+
+// ─── Guests ───
+
+model Guest {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  dateOfBirth DateTime?
+  nationality String?
+  address     String?
+  city        String?
+  country     String?
+  passportNumber String?
+  loyaltyPoints Int @default(0)
+  vipStatus   String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reservations Reservation[]
+  preferences GuestPreference[]
+  documents   GuestDocument[]
 
   @@index([tenantId])
+  @@index([email])
+  @@map("guests")
+}
+
+model GuestPreference {
+  id        String @id @default(cuid())
+  guestId   String
+  guest     Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  category  String // e.g. room, pillow, dietary
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+
+  @@index([guestId])
+  @@map("guest_preferences")
+}
+
+model GuestDocument {
+  id        String @id @default(cuid())
+  guestId   String
+  guest     Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  type      String // passport, id_card, drivers_license
+  number    String?
+  issuedBy  String?
+  issueDate DateTime?
+  expiryDate DateTime?
+  fileUrl   String?
+  createdAt DateTime @default(now())
+
+  @@index([guestId])
+  @@map("guest_documents")
+}
+
+// ─── Reservations ───
+
+model Reservation {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  guestId       String
+  guest         Guest    @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  confirmationNumber String @unique
+  status        String   @default("confirmed") // confirmed, checked_in, checked_out, cancelled, no_show
+  source        String   @default("direct") // direct, bookingcom, expedia, walkin
+  arrivalDate   DateTime @db.Date
+  departureDate DateTime @db.Date
+  nights        Int
+  adults        Int      @default(1)
+  children      Int      @default(0)
+  notes         String?
+  totalAmount   Decimal  @db.Decimal(10, 2)
+  balance       Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  stays ReservationStay[]
+  folio Folio?
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([guestId])
+  @@index([status])
+  @@index([arrivalDate, departureDate])
+  @@map("reservations")
+}
+
+model ReservationStay {
+  id            String   @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  roomId        String
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  date          DateTime @db.Date
+  rate          Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+
+  @@unique([reservationId, roomId, date])
+  @@index([roomId, date])
+  @@map("reservation_stays")
+}
+
+// ─── Billing ───
+
+model Folio {
+  id            String   @id @default(cuid())
+  reservationId String   @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  totalCharges  Decimal  @default(0) @db.Decimal(10, 2)
+  totalPayments Decimal  @default(0) @db.Decimal(10, 2)
+  balance       Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items FolioItem[]
+
+  @@map("folios")
+}
+
+model FolioItem {
+  id          String   @id @default(cuid())
+  folioId     String
+  folio       Folio    @relation(fields: [folioId], references: [id], onDelete: Cascade)
+  type        String   // room_charge, tax, service, payment, refund
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  quantity    Int      @default(1)
+  postedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([folioId])
+  @@map("folio_items")
+}
+
+// ─── Audit & Ops ───
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

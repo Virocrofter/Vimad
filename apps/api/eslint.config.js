@@ -4,11 +4,10 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'eslint.config.js'],
+    ignores: ['dist', 'node_modules', 'eslint.config.js', 'prisma'],
   },
   {
     files: ['**/*.{js,ts}'],
-    ignores: ['dist', 'node_modules'],
     languageOptions: {
       globals: globals.node,
       parser: tseslint.parser,

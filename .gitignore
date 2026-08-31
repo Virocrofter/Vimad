@@ -44,3 +44,8 @@ test-results
 
 # Turbo
 .turbo
+
+# Prisma compiled seed
+apps/api/prisma/*.js
+apps/api/prisma/*.d.ts
+apps/api/dist

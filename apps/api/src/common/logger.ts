@@ -34,7 +34,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
 declare global {
   namespace Express {
     interface Request {
-      requestId: string;
+      requestId?: string;
       user?: unknown;
     }
   }
