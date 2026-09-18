@@ -15,9 +15,10 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { libraryReports, generateReportData, reportTableColumns } from './data';
-import { useChartTheme, ExportToolbar, ReportDataTable, ReportChartRenderer } from './components';
+import { ExportToolbar, ReportDataTable, ReportChartRenderer } from './components';
+import { useChartTheme } from './useChartTheme';
 
 /* ─── Icon Map (string → component) ─── */
 const iconMap = {

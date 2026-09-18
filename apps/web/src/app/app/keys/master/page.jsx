@@ -49,6 +49,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Circle,
 } from 'lucide-react';
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────

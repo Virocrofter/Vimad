@@ -42,9 +42,10 @@ import {
   Lock,
   Unlock,
   Archive,
+  User,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
   initialTickets,
@@ -677,7 +678,6 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
 
 /* ─── Main Page ─── */
 export default function TicketsPage() {
-  const navigate = useNavigate();
   const [tickets, setTickets] = useState(initialTickets);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

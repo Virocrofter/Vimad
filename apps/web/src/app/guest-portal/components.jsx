@@ -1,5 +1,5 @@
 /* src/app/guest-portal/components.jsx */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Key,
@@ -51,6 +51,8 @@ import {
   FileText,
   Shield,
   Check,
+  Upload,
+  Eye,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -61,7 +63,7 @@ import {
   formatDate,
   timeAgo,
 } from './data';
-import { tierBenefits } from './data';
+import { tierBenefits, serviceStatusMeta } from './data';
 
 // ─── Guest Booking Card ───
 export function GuestBookingCard({ stay, onAction }) {

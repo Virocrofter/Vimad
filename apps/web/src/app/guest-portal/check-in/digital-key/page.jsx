@@ -33,8 +33,8 @@ import { guestStays, formatDate } from '../../data';
 import { DigitalKeyWidget } from '../../components';
 
 export default function GuestDigitalKeySetupPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const stayId = searchParams.get('stay');
 
   const stay = guestStays.find((s) => s.id === stayId);

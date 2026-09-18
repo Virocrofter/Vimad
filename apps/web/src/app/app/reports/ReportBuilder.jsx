@@ -11,7 +11,7 @@ import {
   Save,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
   BarChart as ReBarChart,
@@ -27,7 +27,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { builderFields, builderMockData } from './data';
-import { useChartTheme, ThemeTooltip } from './components';
+import { ThemeTooltip } from './components';
+import { useChartTheme } from './useChartTheme';
 
 export default function ReportBuilder() {
   const [selectedFields, setSelectedFields] = useState(

@@ -1,0 +1,64 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Vimad PMS — Caddy TLS Terminator
+# Automatic HTTPS via Let's Encrypt
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Main application domain
+{$DOMAIN} {
+    # Reverse proxy to web frontend
+    reverse_proxy {$WEB_INTERNAL_URL}
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # Compress responses
+    encode zstd gzip
+
+    # Logging
+    log {
+        output stdout
+        format json
+        level INFO
+    }
+}
+
+# API subdomain
+api.{$DOMAIN} {
+    reverse_proxy {$API_INTERNAL_URL}
+
+    # CORS headers (allow main domain)
+    header {
+        Access-Control-Allow-Origin "https://{$DOMAIN}"
+        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization, x-request-id, x-api-version, idempotency-key"
+        Access-Control-Allow-Credentials "true"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+
+    # Handle preflight
+    @options method OPTIONS
+    handle @options {
+        respond 204
+    }
+
+    encode zstd gzip
+
+    log {
+        output stdout
+        format json
+        level INFO
+    }
+}
+
+# ─── Optional: WWW redirect ───
+www.{$DOMAIN} {
+    redir https://{$DOMAIN}{uri} permanent
+}

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Plus, LayoutGrid, Settings, Clock } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import ReportLibrary from './ReportLibrary';
 import ReportBuilder from './ReportBuilder';
 import ReportScheduler from './ReportScheduler';

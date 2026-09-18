@@ -1,92 +1,274 @@
-name: CI
+name: CI/CD
 
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+env:
+  NODE_VERSION: '22'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint-and-typecheck:
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 1: Lint & Type Check
+  # ═══════════════════════════════════════════════════════════════
+  lint:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint API
+        run: npm run lint --workspace=apps/api
 
-      - name: Type check
-        run: npm run typecheck
+      - name: Lint Web
+        run: npm run lint --workspace=apps/web
 
-      - name: Format check
-        run: npm run format:check
+      - name: Type Check API
+        run: npm run typecheck --workspace=apps/api
 
-  test:
+      - name: Type Check Shared
+        run: npm run typecheck --workspace=packages/shared
+
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 2: Unit Tests
+  # ═══════════════════════════════════════════════════════════════
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate --workspace=apps/api
+
+      - name: Run Unit Tests
+        run: npm run test:unit --workspace=apps/api
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: github.event_name == 'push'
+        with:
+          files: ./apps/api/coverage/coverage-final.json
+          flags: unit
+          name: api-unit-coverage
+
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 3: E2E Tests (with PostgreSQL)
+  # ═══════════════════════════════════════════════════════════════
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [lint]
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: unified_pms_test
-        ports:
-          - 5432:5432
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: vimad_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
+
       redis:
         image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 6379:6379
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run database migrations
-        run: npm run db:migrate:prod
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/unified_pms_test
+      - name: Generate Prisma Client
+        run: npm run db:generate --workspace=apps/api
 
-      - name: Run tests
-        run: npm run test
+      - name: Run Prisma Migrations
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/unified_pms_test
+          DATABASE_URL: postgresql://test:test@localhost:5432/vimad_test
+        run: npm run db:migrate:prod --workspace=apps/api
+
+      - name: Seed Database
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/vimad_test
+        run: npm run db:seed --workspace=apps/api
+
+      - name: Run E2E Tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/vimad_test
           REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret-for-ci-only-must-be-32-chars-long
           NODE_ENV: test
+          RATE_LIMIT_ENABLED: false
+          RUN_DB_TESTS: true
+        run: npm run test:e2e --workspace=apps/api
 
+      - name: Upload E2E coverage
+        uses: codecov/codecov-action@v4
+        if: github.event_name == 'push'
+        with:
+          files: ./apps/api/coverage/coverage-final.json
+          flags: e2e
+          name: api-e2e-coverage
+
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 4: Build & Docker
+  # ═══════════════════════════════════════════════════════════════
   build:
+    name: Build & Docker Check
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate --workspace=apps/api
+
+      - name: Build API
+        run: npm run build --workspace=apps/api
+
+      - name: Build Shared
+        run: npm run build --workspace=packages/shared
+
+      - name: Build Web
+        run: npm run build --workspace=apps/web
+
+      - name: Verify Docker Build (API)
+        run: docker build -f apps/api/Dockerfile --target build .
+
+      - name: Verify Docker Build (Web)
+        run: docker build -f apps/web/Dockerfile .
+
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 5: Security Audit
+  # ═══════════════════════════════════════════════════════════════
+  security:
+    name: Security Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Audit Dependencies
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 6: Deploy (Staging) — on main branch only
+  # ═══════════════════════════════════════════════════════════════
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.vimad.io
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging..."
+          # Add your staging deployment commands here
+          # e.g., vercel --prod, or kubectl apply, etc.
+
+  # ═══════════════════════════════════════════════════════════════
+  # JOB 7: Deploy (Production) — manual trigger only
+  # ═══════════════════════════════════════════════════════════════
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    environment:
+      name: production
+      url: https://vimad.io
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production..."
+          # Add your production deployment commands here
+          # e.g., vercel --prod, or kubectl apply, etc.

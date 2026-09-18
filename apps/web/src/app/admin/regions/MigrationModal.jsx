@@ -1,4 +1,4 @@
-/* src/app/admin/regions/MigrationModal.jsx */
+/* src/app/admin/regions/MigrationModal.jsx — wired: regions via props, async onSave (Phase 3D) */
 import { useState } from 'react';
 import {
   X,
@@ -13,10 +13,19 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
-import { regions, getRegionName } from './data';
+import { Button } from '@/components/ui/button';
+// Regions are passed in from the page (fetched from api/regions.ts)
 
-export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
+export default function MigrationModal({
+  job,
+  onClose,
+  onSave,
+  tenants = [],
+  regions = [],
+  saving = false,
+}) {
+  const getRegionName = (idOrCode) =>
+    regions.find((r) => r.id === idOrCode || r.code === idOrCode)?.name ?? idOrCode;
   const isEditing = !!job;
   const [form, setForm] = useState({
     tenantId: job?.tenantId || '',
@@ -39,22 +48,21 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
   );
   const targetRegion = regions.find((r) => r.id === form.targetRegion);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
-      ...form,
-      id: job?.id || `MIG-${Date.now().toString(36).toUpperCase()}`,
-      status: form.scheduledAt ? 'scheduled' : 'pending',
-      progress: 0,
-      dataSizeGB: selectedTenant?.storageGB || 0,
-      startedAt: null,
-      completedAt: null,
-      duration: null,
-      initiatedBy: 'You',
-      verificationStatus: 'pending',
-      downtimeSeconds: null,
+    // Parent calls createMigration (or update) via useApiMutation and closes on success.
+    await onSave({
+      tenantId: form.tenantId,
+      tenantName: form.tenantName,
+      sourceRegion: form.sourceRegion,
+      targetRegion: form.targetRegion,
+      reason: form.reason,
+      scheduledAt: form.scheduledAt || null,
+      verifyBeforeCutover: form.verifyBeforeCutover,
+      notifyTenant: form.notifyTenant,
+      maintenanceWindow: form.maintenanceWindow,
+      id: job?.id,
     });
-    onClose();
   };
 
   const canProceed = () => {
@@ -398,9 +406,9 @@ export default function MigrationModal({ job, onClose, onSave, tenants = [] }) {
                 Next
               </Button>
             ) : (
-              <Button type="submit" variant="secondary">
+              <Button type="submit" variant="secondary" disabled={saving}>
                 <ArrowRight className="mr-1.5 h-4 w-4" />
-                {isEditing ? 'Save Changes' : 'Create Migration'}
+                {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Migration'}
               </Button>
             )}
           </div>

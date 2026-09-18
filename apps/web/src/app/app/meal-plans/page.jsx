@@ -35,9 +35,10 @@ import {
   Eye,
   Save,
   Calendar,
+  Download,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 /* ─── Board Basis Codes ─── */
 const boardBasisCodes = {
@@ -797,7 +798,6 @@ function MealPlanModal({ plan, onClose, onSave }) {
 
 /* ─── Main Page ─── */
 export default function MealPlansPage() {
-  const navigate = useNavigate();
   const [mealPlans, setMealPlans] = useState(initialMealPlans);
   const [query, setQuery] = useState('');
   const [boardFilter, setBoardFilter] = useState('all');

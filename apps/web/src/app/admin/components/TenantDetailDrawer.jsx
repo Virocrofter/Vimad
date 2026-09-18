@@ -24,7 +24,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { tenantStatusMeta, planMeta, formatCurrency, formatDate } from '../data';
 
 export default function TenantDetailDrawer({ tenant, onClose, onUpdateStatus }) {

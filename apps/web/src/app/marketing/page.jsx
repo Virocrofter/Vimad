@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -383,13 +383,19 @@ function ProductShowcase() {
     },
   ];
 
-  const next = () => setActive((a) => (a + 1) % screenshots.length);
-  const prev = () => setActive((a) => (a - 1 + screenshots.length) % screenshots.length);
+  const next = useCallback(
+    () => setActive((a) => (a + 1) % screenshots.length),
+    [screenshots.length]
+  );
+  const prev = useCallback(
+    () => setActive((a) => (a - 1 + screenshots.length) % screenshots.length),
+    [screenshots.length]
+  );
 
   useEffect(() => {
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [next]);
 
   return (
     <section className="bg-surface py-24">

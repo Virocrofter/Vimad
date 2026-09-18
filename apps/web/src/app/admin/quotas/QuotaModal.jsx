@@ -1,484 +1,460 @@
-/* src/app/admin/quotas/QuotaModal.jsx */
-import { useState, useEffect } from 'react';
-import { X, Check, Zap, Tag, Building2, Globe, AlertTriangle } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
-import { resourceMeta, actionMeta, periodMeta } from './data';
+'use client';
 
-const resources = Object.keys(resourceMeta);
-const scopes = [
-  { id: 'plan', label: 'Subscription Plan', icon: Tag },
-  { id: 'tenant', label: 'Specific Tenant', icon: Building2 },
-  { id: 'global', label: 'Global (All Tenants)', icon: Globe },
+import { useState } from 'react';
+import { X, AlertTriangle, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+
+const RESOURCE_OPTIONS = [
+  { value: 'api_calls', label: 'API Calls' },
+  { value: 'storage', label: 'Storage' },
+  { value: 'reservations', label: 'Reservations' },
+  { value: 'users', label: 'Users' },
+  { value: 'properties', label: 'Properties' },
+  { value: 'bandwidth', label: 'Bandwidth' },
 ];
-const actions = Object.keys(actionMeta);
-const periods = Object.keys(periodMeta);
-const plans = ['Starter', 'Professional', 'Enterprise'];
 
-export default function QuotaModal({ rule, onClose, onSave, tenants }) {
+const SCOPE_OPTIONS = [
+  { value: 'plan', label: 'Plan Level' },
+  { value: 'tenant', label: 'Specific Tenant' },
+  { value: 'global', label: 'Global' },
+];
+
+const PERIOD_OPTIONS = [
+  { value: 'hourly', label: 'Hourly' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'monthly', label: 'Monthly' },
+];
+
+const ACTION_OPTIONS = [
+  { value: 'throttle', label: 'Throttle (Slow Down)' },
+  { value: 'block', label: 'Block (Hard Stop)' },
+  { value: 'notify', label: 'Notify Only' },
+];
+
+const PLAN_TARGETS = ['Starter', 'Professional', 'Enterprise'];
+
+export function QuotaModal({ rule, onClose, onSave, loading }) {
   const isEditing = !!rule;
+
   const [form, setForm] = useState({
     name: '',
     description: '',
     resource: 'api_calls',
     scope: 'plan',
     scopeTarget: 'Starter',
-    limit: 25000,
-    unit: 'calls',
+    limit: '',
+    unit: '',
     period: 'monthly',
     action: 'throttle',
-    throttleRate: 10,
+    throttleRate: '',
     overageEnabled: false,
-    overageRate: 0,
-    overageCap: 0,
+    overageRate: '',
+    overageCap: '',
     warnThreshold: 80,
     hardLimit: 100,
     enabled: true,
   });
 
-  useEffect(() => {
+  const [errors, setErrors] = useState({});
+
+  const [prevRule, setPrevRule] = useState(null);
+  if (rule !== prevRule) {
+    setPrevRule(rule);
     if (rule) {
       setForm({
         name: rule.name || '',
         description: rule.description || '',
         resource: rule.resource || 'api_calls',
         scope: rule.scope || 'plan',
-        scopeTarget: rule.scopeTarget || '',
-        limit: rule.limit || 0,
-        unit: rule.unit || 'calls',
+        scopeTarget: rule.scopeTarget || 'Starter',
+        limit: rule.limit?.toString() || '',
+        unit: rule.unit || '',
         period: rule.period || 'monthly',
         action: rule.action || 'throttle',
-        throttleRate: rule.throttleRate || 10,
+        throttleRate: rule.throttleRate?.toString() || '',
         overageEnabled: rule.overageEnabled || false,
-        overageRate: rule.overageRate || 0,
-        overageCap: rule.overageCap || 0,
+        overageRate: rule.overageRate?.toString() || '',
+        overageCap: rule.overageCap?.toString() || '',
         warnThreshold: rule.warnThreshold || 80,
         hardLimit: rule.hardLimit || 100,
-        enabled: rule.enabled !== false,
+        enabled: rule.enabled ?? true,
       });
     }
-  }, [rule]);
+  }
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
-
-  const handleResourceChange = (resource) => {
-    update('resource', resource);
-    const unitMap = { api_calls: 'calls', storage: 'GB', rooms: 'rooms', users: 'users' };
-    update('unit', unitMap[resource] || 'units');
+  const validate = () => {
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = 'Name is required';
+    if (!form.limit || parseInt(form.limit) <= 0) newErrors.limit = 'Limit must be positive';
+    if (form.action === 'throttle' && (!form.throttleRate || parseInt(form.throttleRate) <= 0)) {
+      newErrors.throttleRate = 'Throttle rate is required';
+    }
+    if (form.overageEnabled && (!form.overageRate || parseFloat(form.overageRate) <= 0)) {
+      newErrors.overageRate = 'Overage rate is required';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleScopeChange = (scope) => {
-    update('scope', scope);
-    if (scope === 'plan') update('scopeTarget', 'Starter');
-    else if (scope === 'tenant') update('scopeTarget', tenants?.[0]?.id || '');
-    else update('scopeTarget', null);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
-      ...form,
-      id: rule?.id || `QR-${Date.now().toString(36).toUpperCase()}`,
-      createdAt: rule?.createdAt || new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-    });
-    onClose();
+    if (!validate()) return;
+
+    const payload = {
+      ...(isEditing && { id: rule.id }),
+      name: form.name,
+      description: form.description,
+      resource: form.resource,
+      scope: form.scope,
+      scopeTarget: form.scopeTarget,
+      limit: parseInt(form.limit),
+      unit: form.unit || getDefaultUnit(form.resource),
+      period: form.period,
+      action: form.action,
+      throttleRate: form.action === 'throttle' ? parseInt(form.throttleRate) : null,
+      overageEnabled: form.overageEnabled,
+      overageRate: form.overageEnabled ? parseFloat(form.overageRate) : 0,
+      overageCap: form.overageEnabled ? parseFloat(form.overageCap) || 0 : 0,
+      warnThreshold: parseInt(form.warnThreshold) || 80,
+      hardLimit: parseInt(form.hardLimit) || 100,
+      enabled: form.enabled,
+    };
+
+    try {
+      await onSave(payload);
+    } catch (err) {
+      // Error handling is done by parent
+    }
+  };
+
+  const getDefaultUnit = (resource) => {
+    const units = {
+      api_calls: 'calls',
+      storage: 'GB',
+      reservations: 'bookings',
+      users: 'users',
+      properties: 'properties',
+      bandwidth: 'GB',
+    };
+    return units[resource] || 'units';
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-auto rounded-xl border border-border bg-background shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-surface p-6 shadow-xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/10">
-              <Zap className="h-5 w-5 text-secondary" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-text-primary">
-                {isEditing ? 'Edit Quota Rule' : 'Create Quota Rule'}
-              </h3>
-              <p className="text-xs text-text-muted">
-                {isEditing ? rule.id : 'Define limits and enforcement'}
-              </p>
-            </div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-semibold text-text-primary">
+              {isEditing ? 'Edit Quota Rule' : 'New Quota Rule'}
+            </h2>
+            <p className="text-sm text-text-muted">
+              {isEditing ? `Editing ${rule.name}` : 'Define resource limits and enforcement'}
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
+            className="rounded-lg p-2 text-text-muted hover:bg-neutral/10 hover:text-text-primary"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Rule Name
-              </label>
-              <input
-                type="text"
-                required
+              <Label htmlFor="name">Rule Name *</Label>
+              <Input
+                id="name"
                 value={form.name}
-                onChange={(e) => update('name', e.target.value)}
-                placeholder="e.g. API Requests — Starter Plan"
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="e.g., API Requests — Starter Plan"
+                className={cn(errors.name && 'border-danger')}
               />
+              {errors.name && <p className="mt-1 text-xs text-danger">{errors.name}</p>}
             </div>
+
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Description
-              </label>
-              <textarea
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
                 value={form.description}
-                onChange={(e) => update('description', e.target.value)}
-                rows={2}
-                placeholder="What does this quota control?"
-                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="Brief description of this quota rule"
               />
             </div>
           </div>
 
-          {/* Resource Selection */}
-          <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Resource Type
-            </label>
-            <div className="grid grid-cols-4 gap-3">
-              {resources.map((res) => {
-                const meta = resourceMeta[res];
-                const active = form.resource === res;
-                return (
-                  <button
-                    key={res}
-                    type="button"
-                    onClick={() => handleResourceChange(res)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg border p-3 text-left transition-all',
-                      active
-                        ? 'border-secondary bg-secondary/5'
-                        : 'border-border bg-surface hover:border-secondary/30'
-                    )}
-                  >
-                    <div
-                      className={cn('h-2 w-2 rounded-full', meta.color.replace('text-', 'bg-'))}
-                    />
-                    <span
-                      className={cn(
-                        'text-sm font-medium',
-                        active ? 'text-secondary' : 'text-text-primary'
-                      )}
-                    >
-                      {meta.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Scope Selection */}
-          <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Scope
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              {scopes.map((s) => {
-                const Icon = s.icon;
-                const active = form.scope === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => handleScopeChange(s.id)}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg border p-3 text-left transition-all',
-                      active
-                        ? 'border-secondary bg-secondary/5'
-                        : 'border-border bg-surface hover:border-secondary/30'
-                    )}
-                  >
-                    <Icon
-                      className={cn('h-5 w-5', active ? 'text-secondary' : 'text-text-muted')}
-                    />
-                    <div>
-                      <p
-                        className={cn(
-                          'text-sm font-medium',
-                          active ? 'text-secondary' : 'text-text-primary'
-                        )}
-                      >
-                        {s.label}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Scope Target */}
-            {form.scope === 'plan' && (
-              <div className="grid grid-cols-3 gap-2">
-                {plans.map((plan) => (
-                  <button
-                    key={plan}
-                    type="button"
-                    onClick={() => update('scopeTarget', plan)}
-                    className={cn(
-                      'rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
-                      form.scopeTarget === plan
-                        ? 'border-secondary bg-secondary/5 text-secondary'
-                        : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-                    )}
-                  >
-                    {plan}
-                  </button>
-                ))}
-              </div>
-            )}
-            {form.scope === 'tenant' && (
-              <select
-                value={form.scopeTarget || ''}
-                onChange={(e) => update('scopeTarget', e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          {/* Resource & Scope */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Resource *</Label>
+              <Select
+                value={form.resource}
+                onValueChange={(v) => setForm({ ...form, resource: v, unit: getDefaultUnit(v) })}
               >
-                {tenants?.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.id} — {t.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Limit & Period */}
-          <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-              Limit Configuration
-            </h4>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">
-                  Limit Value
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  value={form.limit}
-                  onChange={(e) => update('limit', parseInt(e.target.value) || 0)}
-                  className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Unit</label>
-                <input
-                  type="text"
-                  value={form.unit}
-                  onChange={(e) => update('unit', e.target.value)}
-                  className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Period</label>
-                <select
-                  value={form.period}
-                  onChange={(e) => update('period', e.target.value)}
-                  className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {periods.map((p) => (
-                    <option key={p} value={p}>
-                      {periodMeta[p].label}
-                    </option>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RESOURCE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">
-                  Warn Threshold (%)
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="50"
-                    max="95"
-                    value={form.warnThreshold}
-                    onChange={(e) => update('warnThreshold', parseInt(e.target.value))}
-                    className="flex-1 accent-secondary"
-                  />
-                  <span className="text-sm font-mono font-medium text-text-primary w-10 text-right">
-                    {form.warnThreshold}%
-                  </span>
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">
-                  Hard Limit (%)
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="100"
-                    max="200"
-                    value={form.hardLimit}
-                    onChange={(e) => update('hardLimit', parseInt(e.target.value))}
-                    className="flex-1 accent-danger"
-                  />
-                  <span className="text-sm font-mono font-medium text-text-primary w-10 text-right">
-                    {form.hardLimit}%
-                  </span>
-                </div>
-              </div>
+            <div>
+              <Label>Scope *</Label>
+              <Select value={form.scope} onValueChange={(v) => setForm({ ...form, scope: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SCOPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Action */}
-          <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Enforcement Action
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              {actions.map((act) => {
-                const meta = actionMeta[act];
-                const active = form.action === act;
-                return (
-                  <button
-                    key={act}
-                    type="button"
-                    onClick={() => update('action', act)}
-                    className={cn(
-                      'rounded-lg border p-3 text-left transition-all',
-                      active
-                        ? cn(meta.class, 'border-current')
-                        : 'border-border bg-surface hover:bg-surface-elevated'
-                    )}
-                  >
-                    <p
-                      className={cn(
-                        'text-sm font-medium',
-                        active ? meta.class.split(' ')[1] : 'text-text-primary'
-                      )}
-                    >
-                      {meta.label}
-                    </p>
-                    <p className="text-xs text-text-muted mt-0.5">{meta.desc}</p>
-                  </button>
-                );
-              })}
+          {/* Scope Target */}
+          {form.scope === 'plan' && (
+            <div>
+              <Label>Plan Tier *</Label>
+              <Select
+                value={form.scopeTarget}
+                onValueChange={(v) => setForm({ ...form, scopeTarget: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLAN_TARGETS.map((plan) => (
+                    <SelectItem key={plan} value={plan}>
+                      {plan}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          )}
+
+          {form.scope === 'tenant' && (
+            <div>
+              <Label htmlFor="scopeTarget">Tenant ID *</Label>
+              <Input
+                id="scopeTarget"
+                value={form.scopeTarget}
+                onChange={(e) => setForm({ ...form, scopeTarget: e.target.value })}
+                placeholder="Enter tenant ID"
+              />
+            </div>
+          )}
+
+          {/* Limit Configuration */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="limit">Limit *</Label>
+              <Input
+                id="limit"
+                type="number"
+                min="1"
+                value={form.limit}
+                onChange={(e) => setForm({ ...form, limit: e.target.value })}
+                className={cn(errors.limit && 'border-danger')}
+              />
+              {errors.limit && <p className="mt-1 text-xs text-danger">{errors.limit}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="unit">Unit</Label>
+              <Input
+                id="unit"
+                value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                placeholder={getDefaultUnit(form.resource)}
+              />
+            </div>
+
+            <div>
+              <Label>Period *</Label>
+              <Select value={form.period} onValueChange={(v) => setForm({ ...form, period: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PERIOD_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Action Configuration */}
+          <div className="space-y-4">
+            <div>
+              <Label>Enforcement Action *</Label>
+              <Select value={form.action} onValueChange={(v) => setForm({ ...form, action: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACTION_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {form.action === 'throttle' && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">
-                  Throttle Rate (requests/sec)
-                </label>
-                <input
+                <Label htmlFor="throttleRate">Throttle Rate (requests/sec) *</Label>
+                <Input
+                  id="throttleRate"
                   type="number"
                   min="1"
-                  value={form.throttleRate || ''}
-                  onChange={(e) => update('throttleRate', parseInt(e.target.value) || null)}
-                  className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  value={form.throttleRate}
+                  onChange={(e) => setForm({ ...form, throttleRate: e.target.value })}
+                  className={cn(errors.throttleRate && 'border-danger')}
                 />
+                {errors.throttleRate && (
+                  <p className="mt-1 text-xs text-danger">{errors.throttleRate}</p>
+                )}
               </div>
             )}
           </div>
 
-          {/* Overage Billing */}
-          <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
+          {/* Thresholds */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="warnThreshold">Warning Threshold (%)</Label>
+              <Input
+                id="warnThreshold"
+                type="number"
+                min="1"
+                max="100"
+                value={form.warnThreshold}
+                onChange={(e) => setForm({ ...form, warnThreshold: e.target.value })}
+              />
+              <p className="mt-1 text-xs text-text-muted">
+                Alert when usage reaches this percentage
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="hardLimit">Hard Limit (%)</Label>
+              <Input
+                id="hardLimit"
+                type="number"
+                min="1"
+                max="100"
+                value={form.hardLimit}
+                onChange={(e) => setForm({ ...form, hardLimit: e.target.value })}
+              />
+              <p className="mt-1 text-xs text-text-muted">Absolute maximum before blocking</p>
+            </div>
+          </div>
+
+          {/* Overage Configuration */}
+          <div className="rounded-lg border border-border bg-background p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  Overage Billing
-                </h4>
-                <p className="text-xs text-text-muted mt-0.5">
-                  Charge tenants for usage beyond the limit
-                </p>
+                <Label htmlFor="overageEnabled" className="text-sm font-medium">
+                  Enable Overage Billing
+                </Label>
+                <p className="text-xs text-text-muted">Charge tenants for usage beyond the limit</p>
               </div>
-              <button
-                type="button"
-                onClick={() => update('overageEnabled', !form.overageEnabled)}
-                className={cn(
-                  'relative inline-flex h-7 w-12 items-center rounded-full transition-colors',
-                  form.overageEnabled ? 'bg-accent' : 'bg-border'
-                )}
-              >
-                <span
-                  className={cn(
-                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                    form.overageEnabled ? 'translate-x-6' : 'translate-x-1'
-                  )}
-                />
-              </button>
+              <Switch
+                id="overageEnabled"
+                checked={form.overageEnabled}
+                onCheckedChange={(v) => setForm({ ...form, overageEnabled: v })}
+              />
             </div>
 
             {form.overageEnabled && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">
-                    Rate per Unit ($)
-                  </label>
-                  <input
+                  <Label htmlFor="overageRate">Rate per Unit ($) *</Label>
+                  <Input
+                    id="overageRate"
                     type="number"
-                    min="0"
                     step="0.0001"
+                    min="0"
                     value={form.overageRate}
-                    onChange={(e) => update('overageRate', parseFloat(e.target.value) || 0)}
-                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onChange={(e) => setForm({ ...form, overageRate: e.target.value })}
+                    className={cn(errors.overageRate && 'border-danger')}
                   />
+                  {errors.overageRate && (
+                    <p className="mt-1 text-xs text-danger">{errors.overageRate}</p>
+                  )}
                 </div>
+
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">
-                    Monthly Cap ($)
-                  </label>
-                  <input
+                  <Label htmlFor="overageCap">Monthly Cap ($)</Label>
+                  <Input
+                    id="overageCap"
                     type="number"
+                    step="0.01"
                     min="0"
                     value={form.overageCap}
-                    onChange={(e) => update('overageCap', parseFloat(e.target.value) || 0)}
-                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onChange={(e) => setForm({ ...form, overageCap: e.target.value })}
+                    placeholder="0 = unlimited"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Enable Toggle */}
-          <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
+          {/* Enabled Toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-border bg-background p-4">
             <div>
-              <p className="text-sm font-medium text-text-primary">Enable Rule</p>
-              <p className="text-xs text-text-muted">
-                {form.enabled ? 'Rule is actively enforced' : 'Rule is disabled'}
-              </p>
+              <Label htmlFor="enabled" className="text-sm font-medium">
+                Rule Enabled
+              </Label>
+              <p className="text-xs text-text-muted">Disabled rules are not enforced</p>
             </div>
-            <button
-              type="button"
-              onClick={() => update('enabled', !form.enabled)}
-              className={cn(
-                'relative inline-flex h-7 w-12 items-center rounded-full transition-colors',
-                form.enabled ? 'bg-accent' : 'bg-border'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  form.enabled ? 'translate-x-6' : 'translate-x-1'
-                )}
-              />
-            </button>
+            <Switch
+              id="enabled"
+              checked={form.enabled}
+              onCheckedChange={(v) => setForm({ ...form, enabled: v })}
+            />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="secondary">
-              <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Rule'}
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Rule'}
             </Button>
           </div>
         </form>

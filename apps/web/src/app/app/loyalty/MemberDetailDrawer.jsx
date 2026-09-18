@@ -15,6 +15,7 @@ import {
   Coffee,
   CheckCircle2,
   History,
+  Crown,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { tierMeta, benefitIcons } from './data';

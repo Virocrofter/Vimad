@@ -1,823 +1,579 @@
-/* src/app/admin/integrations/page.jsx */
-import { useState, useMemo } from 'react';
+'use client';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiMutation } from '@/hooks/useApiMutation';
+import {
+  fetchIntegrations,
+  connectIntegration,
+  disconnectIntegration,
+  syncIntegration,
+} from '@/api/integrations';
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { toast } from '@/hooks/use-toast';
 import {
   Plug,
-  Webhook,
-  Code,
-  Terminal,
-  Search,
-  Filter,
-  Plus,
-  RefreshCw,
-  Download,
-  Shield,
-  Activity,
-  Globe,
-  Zap,
   CheckCircle2,
-  AlertTriangle,
   XCircle,
-  Clock,
-  TrendingUp,
-  ChevronDown,
-  ChevronUp,
-  LayoutGrid,
-  List,
+  RefreshCw,
+  Settings,
+  Trash2,
+  Calendar,
+  Mail,
+  MessageSquare,
+  CreditCard,
+  Cloud,
+  Database,
+  BarChart3,
+  Bell,
+  FileText,
+  Globe,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
-import {
-  integrations,
-  webhooks,
-  apiEndpoints,
-  eventTypes,
-  categoryMeta,
-  statusMeta,
-  formatNumber,
-} from './data';
-import {
-  StatCard,
-  IntegrationCard,
-  WebhookRow,
-  EndpointCard,
-  ApiPlayground,
-  NewWebhookModal,
-  IntegrationStatusBadge,
-  CategoryBadge,
-} from './components';
 
-/* ─── Main Page ─── */
+// Integration categories with icons
+const CATEGORIES = {
+  all: { label: 'All Integrations', icon: Plug },
+  channel: { label: 'Channel Managers', icon: Globe },
+  payment: { label: 'Payment Gateways', icon: CreditCard },
+  communication: { label: 'Communication', icon: MessageSquare },
+  analytics: { label: 'Analytics & Reporting', icon: BarChart3 },
+  productivity: { label: 'Productivity', icon: Calendar },
+  storage: { label: 'Storage & Backup', icon: Database },
+  notifications: { label: 'Notifications', icon: Bell },
+};
+
+// Provider icon mapping
+const PROVIDER_ICONS = {
+  bookingcom: Globe,
+  expedia: Globe,
+  airbnb: Globe,
+  agoda: Globe,
+  tripcom: Globe,
+  vrbo: Globe,
+  stripe: CreditCard,
+  paypal: CreditCard,
+  square: CreditCard,
+  twilio: MessageSquare,
+  sendgrid: Mail,
+  slack: MessageSquare,
+  google_analytics: BarChart3,
+  mixpanel: BarChart3,
+  segment: BarChart3,
+  google_calendar: Calendar,
+  outlook: Calendar,
+  dropbox: Cloud,
+  google_drive: Cloud,
+  s3: Database,
+  webhook: Bell,
+  zapier: Plug,
+};
+
 export default function IntegrationsPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview'); // overview | connectors | webhooks | playground
-  const [integrationList, setIntegrationList] = useState(integrations);
-  const [webhookList, setWebhookList] = useState(webhooks);
-  const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [expandedWebhooks, setExpandedWebhooks] = useState(new Set());
-  const [selectedEndpoint, setSelectedEndpoint] = useState(null);
-  const [showNewWebhook, setShowNewWebhook] = useState(false);
-  const [viewMode, setViewMode] = useState('grid');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [configValues, setConfigValues] = useState({});
 
-  /* ─── Computed Stats ─── */
-  const stats = useMemo(() => {
-    const connected = integrationList.filter((i) => i.status === 'connected').length;
-    const disconnected = integrationList.filter((i) => i.status === 'disconnected').length;
-    const error = integrationList.filter((i) => i.status === 'error').length;
-    const pending = integrationList.filter((i) => i.status === 'pending').length;
-    const totalWebhooks = webhookList.length;
-    const activeWebhooks = webhookList.filter((w) => w.status === 'active').length;
-    const totalDeliveries = webhookList.reduce((s, w) => s + w.totalDeliveries, 0);
-    return {
-      connected,
-      disconnected,
-      error,
-      pending,
-      totalWebhooks,
-      activeWebhooks,
-      totalDeliveries,
-    };
-  }, [integrationList, webhookList]);
+  // Fetch integrations
+  const {
+    data: integrations,
+    loading,
+    error,
+    refetch,
+  } = useApiFetch(() => fetchIntegrations(), []);
 
-  /* ─── Filtered Integrations ─── */
-  const filteredIntegrations = useMemo(() => {
-    return integrationList.filter((i) => {
-      const matchesQuery =
-        !query ||
-        i.name.toLowerCase().includes(query.toLowerCase()) ||
-        i.description.toLowerCase().includes(query.toLowerCase()) ||
-        i.id.toLowerCase().includes(query.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || i.category === categoryFilter;
-      const matchesStatus = statusFilter === 'all' || i.status === statusFilter;
-      return matchesQuery && matchesCategory && matchesStatus;
-    });
-  }, [integrationList, query, categoryFilter, statusFilter]);
+  // Mutations
+  const connectMutation = useApiMutation(connectIntegration);
+  const disconnectMutation = useApiMutation(disconnectIntegration);
+  const syncMutation = useApiMutation(syncIntegration);
 
-  /* ─── Filtered Webhooks ─── */
-  const filteredWebhooks = useMemo(() => {
-    return webhookList.filter((w) => {
-      const matchesQuery =
-        !query ||
-        w.name.toLowerCase().includes(query.toLowerCase()) ||
-        w.endpoint.toLowerCase().includes(query.toLowerCase()) ||
-        w.id.toLowerCase().includes(query.toLowerCase());
-      return matchesQuery;
-    });
-  }, [webhookList, query]);
+  // Filter integrations by category
+  const filteredIntegrations =
+    integrations?.filter((integration) => {
+      if (activeCategory === 'all') return true;
+      return integration.category === activeCategory;
+    }) || [];
 
-  /* ─── Filtered Endpoints ─── */
-  const filteredEndpoints = useMemo(() => {
-    return apiEndpoints.filter((e) => {
-      const matchesQuery =
-        !query ||
-        e.path.toLowerCase().includes(query.toLowerCase()) ||
-        e.description.toLowerCase().includes(query.toLowerCase()) ||
-        e.category.toLowerCase().includes(query.toLowerCase());
-      return matchesQuery;
-    });
-  }, [query]);
+  // Group by connection status
+  const connectedIntegrations = filteredIntegrations.filter((i) => i.status === 'connected');
+  const availableIntegrations = filteredIntegrations.filter((i) => i.status !== 'connected');
 
-  /* ─── Handlers ─── */
-  const toggleWebhook = (id) => {
-    setExpandedWebhooks((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const handleConnect = (integration) => {
+    setSelectedIntegration(integration);
+    setConfigValues({});
+    setConnectDialogOpen(true);
   };
 
-  const handleToggleIntegration = (id) => {
-    setIntegrationList((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? {
-              ...i,
-              status: i.status === 'connected' ? 'disconnected' : 'connected',
-              lastSync: i.status === 'connected' ? null : new Date().toISOString(),
-            }
-          : i
-      )
+  const handleDisconnect = async (integrationId) => {
+    try {
+      await disconnectMutation.mutate(integrationId);
+      toast({
+        title: 'Integration disconnected',
+        description: 'The integration has been successfully disconnected.',
+      });
+      refetch();
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to disconnect integration',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSync = async (integrationId) => {
+    try {
+      await syncMutation.mutate(integrationId);
+      toast({
+        title: 'Sync started',
+        description: 'The integration sync has been initiated.',
+      });
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to start sync',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSubmitConnection = async (e) => {
+    e.preventDefault();
+
+    try {
+      await connectMutation.mutate({
+        integrationId: selectedIntegration.id,
+        config: configValues,
+      });
+
+      toast({
+        title: 'Integration connected',
+        description: `${selectedIntegration.name} has been successfully connected.`,
+      });
+
+      setConnectDialogOpen(false);
+      setSelectedIntegration(null);
+      setConfigValues({});
+      refetch();
+    } catch (err) {
+      toast({
+        title: 'Connection failed',
+        description: err.message || 'Failed to connect integration',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getProviderIcon = (provider) => {
+    const IconComponent = PROVIDER_ICONS[provider] || Plug;
+    return <IconComponent className="h-6 w-6" />;
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <LoadingSkeleton count={6} />
+      </div>
     );
-  };
+  }
 
-  const handleDisconnect = (id) => {
-    setIntegrationList((prev) =>
-      prev.map((i) =>
-        i.id === id ? { ...i, status: 'disconnected', health: 'unknown', lastSync: null } : i
-      )
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <ErrorState error={error} onRetry={refetch} title="Failed to load integrations" />
+      </div>
     );
-  };
-
-  const handleCreateWebhook = (newWebhook) => {
-    setWebhookList((prev) => [newWebhook, ...prev]);
-  };
-
-  const handleTestWebhook = (id) => {
-    setWebhookList((prev) =>
-      prev.map((w) =>
-        w.id === id
-          ? {
-              ...w,
-              lastTriggered: new Date().toISOString().replace('T', ' ').slice(0, 19),
-              totalDeliveries: w.totalDeliveries + 1,
-            }
-          : w
-      )
-    );
-  };
-
-  const handlePauseWebhook = (id) => {
-    setWebhookList((prev) =>
-      prev.map((w) =>
-        w.id === id ? { ...w, status: w.status === 'active' ? 'paused' : 'active' } : w
-      )
-    );
-  };
-
-  const handleDeleteWebhook = (id) => {
-    setWebhookList((prev) => prev.filter((w) => w.id !== id));
-  };
-
-  /* ─── Tabs ─── */
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: Activity },
-    { id: 'connectors', label: 'Connectors', icon: Plug, badge: stats.connected },
-    { id: 'webhooks', label: 'Webhooks', icon: Webhook, badge: stats.activeWebhooks },
-    { id: 'playground', label: 'API Playground', icon: Terminal },
-  ];
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Integrations Hub</h1>
-          <p className="text-sm text-text-secondary">
-            Manage third-party connectors, webhooks, and explore the API
-          </p>
+          <h1 className="text-3xl font-bold">Integrations</h1>
+          <p className="text-muted-foreground mt-1">Connect and manage third-party integrations</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-1.5 h-4 w-4" /> Export
-          </Button>
-          <Button variant="outline" size="sm">
-            <Shield className="mr-1.5 h-4 w-4" /> API Keys
-          </Button>
-        </div>
+        <Button onClick={() => refetch()} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard
-          label="Connected"
-          value={stats.connected}
-          icon={CheckCircle2}
-          color="text-accent"
-          subtext={`of ${integrationList.length} integrations`}
-        />
-        <StatCard
-          label="Webhooks Active"
-          value={stats.activeWebhooks}
-          icon={Webhook}
-          color="text-secondary"
-          subtext={`${stats.totalWebhooks} total configured`}
-        />
-        <StatCard
-          label="Total Deliveries"
-          value={formatNumber(stats.totalDeliveries)}
-          icon={Zap}
-          color="text-info"
-          subtext="All time webhook calls"
-        />
-        <StatCard
-          label="Issues"
-          value={stats.error + stats.pending}
-          icon={AlertTriangle}
-          color={stats.error > 0 ? 'text-danger' : 'text-warning'}
-          subtext={`${stats.error} errors · ${stats.pending} pending`}
-        />
-      </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Integrations</CardTitle>
+            <Plug className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{integrations?.length || 0}</div>
+          </CardContent>
+        </Card>
 
-      {/* Tabs */}
-      <div className="border-b border-border">
-        <div className="flex gap-1">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setQuery('');
-                }}
-                className={cn(
-                  'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-secondary text-secondary'
-                    : 'border-transparent text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-bold text-white">
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ─── OVERVIEW TAB ─── */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Recent Activity */}
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="border-b border-border bg-background px-6 py-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-                <Activity className="h-4 w-4 text-secondary" /> Recent Activity
-              </h3>
-              <button className="text-xs text-secondary hover:underline">View All</button>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Connected</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {integrations?.filter((i) => i.status === 'connected').length || 0}
             </div>
-            <div className="divide-y divide-border">
-              {integrationList
-                .filter((i) => i.lastSync)
-                .sort((a, b) => new Date(b.lastSync) - new Date(a.lastSync))
-                .slice(0, 5)
-                .map((integration) => (
-                  <div
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <RefreshCw className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {integrations?.filter((i) => i.status === 'pending').length || 0}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Errors</CardTitle>
+            <XCircle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {integrations?.filter((i) => i.status === 'error').length || 0}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Category Tabs */}
+      <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          {Object.entries(CATEGORIES).map(([key, { label, icon: Icon }]) => (
+            <TabsTrigger key={key} value={key} className="flex items-center gap-2">
+              <Icon className="h-4 w-4" />
+              <span className="hidden sm:inline">{label}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value={activeCategory} className="mt-6">
+          {/* Connected Integrations */}
+          {connectedIntegrations.length > 0 && (
+            <div className="space-y-4 mb-8">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                Connected ({connectedIntegrations.length})
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {connectedIntegrations.map((integration) => (
+                  <IntegrationCard
                     key={integration.id}
-                    className="flex items-center gap-4 px-6 py-3 hover:bg-background/50 transition-colors"
-                  >
-                    <div
-                      className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-lg',
-                        integration.health === 'healthy'
-                          ? 'bg-accent/10'
-                          : integration.health === 'degraded'
-                            ? 'bg-warning/10'
-                            : integration.health === 'critical'
-                              ? 'bg-danger/10'
-                              : 'bg-neutral/10'
-                      )}
-                    >
-                      {integration.health === 'healthy' ? (
-                        <CheckCircle2 className="h-4 w-4 text-accent" />
-                      ) : integration.health === 'degraded' ? (
-                        <AlertTriangle className="h-4 w-4 text-warning" />
-                      ) : integration.health === 'critical' ? (
-                        <XCircle className="h-4 w-4 text-danger" />
-                      ) : (
-                        <Clock className="h-4 w-4 text-text-muted" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-text-primary">
-                        <span className="font-medium">{integration.name}</span>{' '}
-                        <span className="text-text-secondary">synced successfully</span>
-                      </p>
-                      <p className="text-xs text-text-muted">{integration.lastSync}</p>
-                    </div>
-                    <IntegrationStatusBadge status={integration.status} />
-                  </div>
+                    integration={integration}
+                    onDisconnect={() => handleDisconnect(integration.id)}
+                    onSync={() => handleSync(integration.id)}
+                    onConfigure={() => navigate(`/admin/integrations/${integration.id}`)}
+                    isSyncing={syncMutation.loading}
+                  />
                 ))}
-            </div>
-          </div>
-
-          {/* Integration Health Grid */}
-          <div>
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Shield className="h-4 w-4 text-secondary" /> Integration Health
-            </h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {integrationList.map((integration) => {
-                const meta = categoryMeta[integration.category] || categoryMeta.payments;
-                return (
-                  <button
-                    key={integration.id}
-                    onClick={() => setActiveTab('connectors')}
-                    className="rounded-xl border border-border bg-surface p-4 text-left hover:border-secondary/30 transition-all"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div
-                        className={cn(
-                          'flex h-8 w-8 items-center justify-center rounded-lg',
-                          meta.bg
-                        )}
-                      >
-                        <span className={cn('text-sm font-bold', meta.color)}>
-                          {integration.name.charAt(0)}
-                        </span>
-                      </div>
-                      <span
-                        className={cn(
-                          'h-2 w-2 rounded-full',
-                          integration.status === 'connected' && integration.health === 'healthy'
-                            ? 'bg-accent'
-                            : integration.status === 'connected' &&
-                                integration.health === 'degraded'
-                              ? 'bg-warning'
-                              : integration.status === 'error'
-                                ? 'bg-danger'
-                                : integration.status === 'pending'
-                                  ? 'bg-warning'
-                                  : 'bg-text-muted'
-                        )}
-                      />
-                    </div>
-                    <p className="text-sm font-medium text-text-primary truncate">
-                      {integration.name}
-                    </p>
-                    <p className="text-[10px] text-text-muted mt-0.5">
-                      {integration.status === 'connected'
-                        ? 'Connected'
-                        : integration.status === 'error'
-                          ? 'Error'
-                          : 'Not connected'}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <button
-              onClick={() => setActiveTab('connectors')}
-              className="rounded-xl border border-border bg-surface p-5 text-left hover:border-secondary/30 transition-all group"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10 mb-3">
-                <Plug className="h-5 w-5 text-secondary" />
-              </div>
-              <h4 className="text-sm font-semibold text-text-primary">Browse Connectors</h4>
-              <p className="text-xs text-text-secondary mt-1">
-                Connect Stripe, Twilio, SendGrid, and more
-              </p>
-              <ArrowRight className="h-4 w-4 text-secondary mt-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-            <button
-              onClick={() => setActiveTab('webhooks')}
-              className="rounded-xl border border-border bg-surface p-5 text-left hover:border-secondary/30 transition-all group"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10 mb-3">
-                <Webhook className="h-5 w-5 text-secondary" />
-              </div>
-              <h4 className="text-sm font-semibold text-text-primary">Manage Webhooks</h4>
-              <p className="text-xs text-text-secondary mt-1">
-                Configure endpoints and event subscriptions
-              </p>
-              <ArrowRight className="h-4 w-4 text-secondary mt-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-            <button
-              onClick={() => setActiveTab('playground')}
-              className="rounded-xl border border-border bg-surface p-5 text-left hover:border-secondary/30 transition-all group"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10 mb-3">
-                <Terminal className="h-5 w-5 text-secondary" />
-              </div>
-              <h4 className="text-sm font-semibold text-text-primary">API Playground</h4>
-              <p className="text-xs text-text-secondary mt-1">Test endpoints and explore the API</p>
-              <ArrowRight className="h-4 w-4 text-secondary mt-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ─── CONNECTORS TAB ─── */}
-      {activeTab === 'connectors' && (
-        <div className="space-y-6">
-          {/* Filters */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1 sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              <input
-                type="text"
-                placeholder="Search integrations..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="all">All Categories</option>
-                {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="all">All Statuses</option>
-                <option value="connected">Connected</option>
-                <option value="disconnected">Disconnected</option>
-                <option value="error">Error</option>
-                <option value="pending">Pending</option>
-              </select>
-              <div className="flex rounded-md border border-border bg-surface p-0.5">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
-                    'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                    viewMode === 'grid'
-                      ? 'bg-secondary text-white'
-                      : 'text-text-secondary hover:text-text-primary'
-                  )}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={cn(
-                    'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                    viewMode === 'list'
-                      ? 'bg-secondary text-white'
-                      : 'text-text-secondary hover:text-text-primary'
-                  )}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results */}
-          <p className="text-sm text-text-muted">
-            Showing{' '}
-            <span className="font-medium text-text-primary">{filteredIntegrations.length}</span> of{' '}
-            {integrationList.length} integrations
-          </p>
-
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredIntegrations.map((integration) => (
-                <IntegrationCard
-                  key={integration.id}
-                  integration={integration}
-                  onToggle={handleToggleIntegration}
-                  onConfigure={(id) => {
-                    const int = integrationList.find((i) => i.id === id);
-                    if (int?.status === 'disconnected' || int?.status === 'pending') {
-                      setIntegrationList((prev) =>
-                        prev.map((i) =>
-                          i.id === id
-                            ? {
-                                ...i,
-                                status: 'connected',
-                                health: 'healthy',
-                                connectedAt: new Date().toISOString().split('T')[0],
-                                lastSync: new Date().toISOString().replace('T', ' ').slice(0, 19),
-                              }
-                            : i
-                        )
-                      );
-                    }
-                  }}
-                  onDisconnect={handleDisconnect}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border bg-surface overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-background border-b border-border">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                        Integration
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                        Category
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                        Health
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                        Last Sync
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredIntegrations.map((integration) => {
-                      const meta = categoryMeta[integration.category] || categoryMeta.payments;
-                      return (
-                        <tr
-                          key={integration.id}
-                          className="hover:bg-background/50 transition-colors"
-                        >
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={cn(
-                                  'flex h-8 w-8 items-center justify-center rounded-lg',
-                                  meta.bg
-                                )}
-                              >
-                                <span className={cn('text-xs font-bold', meta.color)}>
-                                  {integration.name.charAt(0)}
-                                </span>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-text-primary">
-                                  {integration.name}
-                                </p>
-                                <p className="text-[10px] text-text-muted">{integration.version}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <CategoryBadge category={integration.category} />
-                          </td>
-                          <td className="px-4 py-3">
-                            <IntegrationStatusBadge status={integration.status} />
-                          </td>
-                          <td className="px-4 py-3">
-                            {integration.health ? (
-                              <span
-                                className={cn(
-                                  'text-xs font-medium',
-                                  integration.health === 'healthy'
-                                    ? 'text-accent'
-                                    : integration.health === 'degraded'
-                                      ? 'text-warning'
-                                      : integration.health === 'critical'
-                                        ? 'text-danger'
-                                        : 'text-text-muted'
-                                )}
-                              >
-                                {integration.health.charAt(0).toUpperCase() +
-                                  integration.health.slice(1)}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-text-muted">—</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-xs text-text-secondary">
-                            {integration.lastSync || 'Never'}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-1">
-                              {integration.status === 'connected' ? (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-danger hover:bg-danger/10"
-                                  onClick={() => handleDisconnect(integration.id)}
-                                >
-                                  <XCircle className="h-3.5 w-3.5" />
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setIntegrationList((prev) =>
-                                      prev.map((i) =>
-                                        i.id === integration.id
-                                          ? {
-                                              ...i,
-                                              status: 'connected',
-                                              health: 'healthy',
-                                              connectedAt: new Date().toISOString().split('T')[0],
-                                              lastSync: new Date()
-                                                .toISOString()
-                                                .replace('T', ' ')
-                                                .slice(0, 19),
-                                            }
-                                          : i
-                                      )
-                                    );
-                                  }}
-                                >
-                                  <Plug className="h-3.5 w-3.5" />
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
               </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* ─── WEBHOOKS TAB ─── */}
-      {activeTab === 'webhooks' && (
-        <div className="space-y-6">
-          {/* Filters */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1 sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              <input
-                type="text"
-                placeholder="Search webhooks..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          {/* Available Integrations */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Plug className="h-5 w-5 text-muted-foreground" />
+              Available ({availableIntegrations.length})
+            </h2>
+
+            {availableIntegrations.length === 0 ? (
+              <EmptyState
+                title="No integrations available"
+                description="All integrations in this category are already connected."
+                icon={CheckCircle2}
               />
-            </div>
-            <Button size="sm" onClick={() => setShowNewWebhook(true)}>
-              <Plus className="mr-1.5 h-4 w-4" /> New Webhook
-            </Button>
-          </div>
-
-          {/* Results */}
-          <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredWebhooks.length}</span>{' '}
-            of {webhookList.length} webhooks
-          </p>
-
-          {/* Webhooks Table */}
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-background border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Events
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Endpoint
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Last Triggered
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredWebhooks.map((webhook) => (
-                    <WebhookRow
-                      key={webhook.id}
-                      webhook={webhook}
-                      expanded={expandedWebhooks.has(webhook.id)}
-                      onToggle={() => toggleWebhook(webhook.id)}
-                      onTest={() => handleTestWebhook(webhook.id)}
-                      onPause={() => handlePauseWebhook(webhook.id)}
-                      onDelete={() => handleDeleteWebhook(webhook.id)}
-                    />
-                  ))}
-                  {filteredWebhooks.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-12 text-center text-text-muted">
-                        <Webhook className="mx-auto h-10 w-10 mb-3" />
-                        <p>No webhooks match your search.</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── API PLAYGROUND TAB ─── */}
-      {activeTab === 'playground' && (
-        <div className="space-y-6">
-          {/* Search */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-            <input
-              type="text"
-              placeholder="Search endpoints by path or description..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2">
-            {['all', 'tenants', 'reservations', 'rooms', 'system', 'webhooks'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setQuery(cat === 'all' ? '' : cat)}
-                className={cn(
-                  'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-                  (cat === 'all' && !query) || query === cat
-                    ? 'border-secondary bg-secondary/10 text-secondary'
-                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-                )}
-              >
-                {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {/* Results */}
-          <p className="text-sm text-text-muted">
-            Showing{' '}
-            <span className="font-medium text-text-primary">{filteredEndpoints.length}</span> of{' '}
-            {apiEndpoints.length} endpoints
-          </p>
-
-          {/* Endpoints */}
-          <div className="space-y-3">
-            {filteredEndpoints.map((endpoint) => (
-              <EndpointCard
-                key={endpoint.id}
-                endpoint={endpoint}
-                onTry={() => setSelectedEndpoint(endpoint)}
-              />
-            ))}
-            {filteredEndpoints.length === 0 && (
-              <div className="rounded-xl border border-border bg-surface p-12 text-center text-text-muted">
-                <Code className="mx-auto h-10 w-10 mb-3" />
-                <p>No endpoints match your search.</p>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {availableIntegrations.map((integration) => (
+                  <AvailableIntegrationCard
+                    key={integration.id}
+                    integration={integration}
+                    onConnect={() => handleConnect(integration)}
+                  />
+                ))}
               </div>
             )}
           </div>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
 
-      {/* ─── Modals ─── */}
-      {showNewWebhook && (
-        <NewWebhookModal
-          isOpen={showNewWebhook}
-          onClose={() => setShowNewWebhook(false)}
-          onCreate={handleCreateWebhook}
-          eventTypes={eventTypes}
-        />
-      )}
+      {/* Connection Dialog */}
+      <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Connect {selectedIntegration?.name}</DialogTitle>
+            <DialogDescription>
+              Enter your {selectedIntegration?.name} credentials to establish the connection.
+            </DialogDescription>
+          </DialogHeader>
 
-      {selectedEndpoint && (
-        <ApiPlayground
-          endpoint={selectedEndpoint}
-          onClose={() => setSelectedEndpoint(null)}
-          onSend={(ep, params) => console.log('API Call:', ep.path, params)}
-        />
-      )}
+          <form onSubmit={handleSubmitConnection} className="space-y-4">
+            {/* Dynamic form fields based on integration config schema */}
+            {selectedIntegration?.configFields?.map((field) => (
+              <div key={field.name} className="space-y-2">
+                <Label htmlFor={field.name}>
+                  {field.label}
+                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+
+                {field.type === 'select' ? (
+                  <Select
+                    value={configValues[field.name] || ''}
+                    onValueChange={(value) =>
+                      setConfigValues((prev) => ({ ...prev, [field.name]: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={`Select ${field.label}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.options?.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : field.type === 'password' ? (
+                  <Input
+                    id={field.name}
+                    type="password"
+                    value={configValues[field.name] || ''}
+                    onChange={(e) =>
+                      setConfigValues((prev) => ({ ...prev, [field.name]: e.target.value }))
+                    }
+                    placeholder={field.placeholder}
+                    required={field.required}
+                  />
+                ) : field.type === 'textarea' ? (
+                  <textarea
+                    id={field.name}
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={configValues[field.name] || ''}
+                    onChange={(e) =>
+                      setConfigValues((prev) => ({ ...prev, [field.name]: e.target.value }))
+                    }
+                    placeholder={field.placeholder}
+                    required={field.required}
+                  />
+                ) : (
+                  <Input
+                    id={field.name}
+                    type={field.type || 'text'}
+                    value={configValues[field.name] || ''}
+                    onChange={(e) =>
+                      setConfigValues((prev) => ({ ...prev, [field.name]: e.target.value }))
+                    }
+                    placeholder={field.placeholder}
+                    required={field.required}
+                  />
+                )}
+
+                {field.description && (
+                  <p className="text-xs text-muted-foreground">{field.description}</p>
+                )}
+              </div>
+            ))}
+
+            {/* Default fields if no config schema */}
+            {!selectedIntegration?.configFields && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="apiKey">
+                    API Key <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="apiKey"
+                    type="password"
+                    value={configValues.apiKey || ''}
+                    onChange={(e) =>
+                      setConfigValues((prev) => ({ ...prev, apiKey: e.target.value }))
+                    }
+                    placeholder="Enter your API key"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="apiSecret">API Secret</Label>
+                  <Input
+                    id="apiSecret"
+                    type="password"
+                    value={configValues.apiSecret || ''}
+                    onChange={(e) =>
+                      setConfigValues((prev) => ({ ...prev, apiSecret: e.target.value }))
+                    }
+                    placeholder="Enter your API secret (if applicable)"
+                  />
+                </div>
+              </>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setConnectDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={connectMutation.loading}>
+                {connectMutation.loading ? 'Connecting...' : 'Connect'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// Connected Integration Card Component
+const getStatusBadge = (status) => {
+  const variants = {
+    connected: 'bg-green-100 text-green-800 hover:bg-green-100',
+    pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
+    error: 'bg-red-100 text-red-800 hover:bg-red-100',
+    disconnected: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+  };
+
+  return <Badge className={variants[status] || variants.disconnected}>{status}</Badge>;
+};
+
+function IntegrationCard({ integration, onDisconnect, onSync, onConfigure, isSyncing }) {
+  const Icon = PROVIDER_ICONS[integration.provider] || Plug;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Icon className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">{integration.name}</CardTitle>
+              <CardDescription>{integration.description}</CardDescription>
+            </div>
+          </div>
+          {getStatusBadge(integration.status)}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Last sync info */}
+        {integration.lastSyncAt && (
+          <div className="text-sm text-muted-foreground">
+            Last synced: {new Date(integration.lastSyncAt).toLocaleString()}
+          </div>
+        )}
+
+        {/* Stats */}
+        {integration.stats && (
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {Object.entries(integration.stats).map(([key, value]) => (
+              <div key={key} className="flex justify-between">
+                <span className="text-muted-foreground capitalize">{key}:</span>
+                <span className="font-medium">{value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-2">
+          <Button variant="outline" size="sm" onClick={onSync} disabled={isSyncing}>
+            <RefreshCw className={`h-4 w-4 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
+            Sync
+          </Button>
+          <Button variant="outline" size="sm" onClick={onConfigure}>
+            <Settings className="h-4 w-4 mr-1" />
+            Configure
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onDisconnect}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Available Integration Card Component
+function AvailableIntegrationCard({ integration, onConnect }) {
+  const Icon = PROVIDER_ICONS[integration.provider] || Plug;
+
+  return (
+    <Card className="relative overflow-hidden">
+      <CardHeader>
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-muted rounded-lg">
+            <Icon className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="flex-1">
+            <CardTitle className="text-lg">{integration.name}</CardTitle>
+            <CardDescription className="line-clamp-2">{integration.description}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-wrap gap-1">
+            {integration.features?.slice(0, 3).map((feature) => (
+              <Badge key={feature} variant="secondary" className="text-xs">
+                {feature}
+              </Badge>
+            ))}
+          </div>
+          <Button onClick={onConnect} size="sm">
+            Connect
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

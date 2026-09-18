@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
@@ -10,8 +11,7 @@ export default defineConfig([
     files: ['**/*.{js,jsx,ts,tsx}'],
     extends: [
       js.configs.recommended,
-      // TODO: re-enable after fixing hook rule violations in existing UI code (Phase 2)
-      // reactHooks.configs.flat.recommended,
+      reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
     languageOptions: {
@@ -19,11 +19,12 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      // TODO: tighten these rules after the initial TypeScript / cleanup sprint
-      'no-unused-vars': 'warn',
-      'no-undef': 'warn',
-      'no-useless-assignment': 'warn',
+      'no-unused-vars': 'off',
+      'no-undef': 'error',
+      'no-useless-assignment': 'error',
       'react-refresh/only-export-components': 'warn',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
   {
@@ -40,7 +41,10 @@ export default defineConfig([
     rules: {
       ...tseslint.configs.recommended.rules,
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
 ]);

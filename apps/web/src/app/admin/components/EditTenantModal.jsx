@@ -1,5 +1,5 @@
 /* src/app/admin/components/EditTenantModal.jsx */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   X,
   Check,
@@ -13,7 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { planMeta } from '../data';
 
 export default function EditTenantModal({ tenant, onClose, onSave }) {
@@ -42,7 +42,9 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
   });
 
   // Populate form when tenant changes
-  useEffect(() => {
+  const [prevTenant, setPrevTenant] = useState(null);
+  if (tenant !== prevTenant) {
+    setPrevTenant(tenant);
     if (tenant) {
       setForm({
         name: tenant.name || '',
@@ -68,7 +70,7 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
         features: tenant.features || [],
       });
     }
-  }, [tenant]);
+  }
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 

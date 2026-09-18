@@ -4,154 +4,31 @@ import {
   FileText,
   Plus,
   Search,
-  Filter,
   X,
   Check,
   ChevronDown,
   ChevronUp,
   ArrowDownLeft,
   ArrowUpRight,
-  Calendar,
   DollarSign,
-  Building2,
   Clock,
-  AlertTriangle,
   Download,
-  MoreHorizontal,
   Eye,
-  Edit3,
-  Trash2,
   RotateCcw,
   Send,
   Printer,
   Copy,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-
-/* ─── Mock Credit Notes ─── */
-const initialCreditNotes = [
-  {
-    id: 'CN-2026-001',
-    tenantId: 'TNT-001',
-    tenantName: 'Grand Hotel Boston',
-    invoiceId: 'INV-2026-0812',
-    amount: 499.0,
-    currency: 'USD',
-    reason: 'service_outage',
-    reasonDetail: 'Platform downtime on Aug 10 — 45 min outage affected check-in flow',
-    status: 'issued',
-    type: 'full',
-    issuedAt: '2026-08-14',
-    appliedAt: null,
-    refundedAt: null,
-    expiresAt: '2027-08-14',
-    remaining: 499.0,
-    appliedTo: [],
-    createdBy: 'Robert Chen',
-    notes: 'Approved by ops team. Customer retention priority.',
-  },
-  {
-    id: 'CN-2026-002',
-    tenantId: 'TNT-002',
-    tenantName: 'Seaside Resort Miami',
-    invoiceId: 'INV-2026-0720',
-    amount: 249.5,
-    currency: 'USD',
-    reason: 'billing_error',
-    reasonDetail: 'Double-charged for channel manager integration in July invoice',
-    status: 'applied',
-    type: 'partial',
-    issuedAt: '2026-08-01',
-    appliedAt: '2026-08-05',
-    refundedAt: null,
-    expiresAt: '2027-08-01',
-    remaining: 0,
-    appliedTo: [{ invoiceId: 'INV-2026-0820', amount: 249.5, date: '2026-08-05' }],
-    createdBy: 'Sarah J.',
-    notes: 'Auto-detected by billing reconciliation.',
-  },
-  {
-    id: 'CN-2026-003',
-    tenantId: 'TNT-004',
-    tenantName: 'Downtown Suites Chicago',
-    invoiceId: 'INV-2026-0712',
-    amount: 199.0,
-    currency: 'USD',
-    reason: 'goodwill',
-    reasonDetail: 'Goodwill credit for delayed onboarding — 2 week delay beyond SLA',
-    status: 'refunded',
-    type: 'full',
-    issuedAt: '2026-07-20',
-    appliedAt: null,
-    refundedAt: '2026-07-22',
-    expiresAt: '2027-07-20',
-    remaining: 0,
-    appliedTo: [],
-    createdBy: 'David Park',
-    notes: 'Refunded to original payment method (Visa •••• 4242).',
-  },
-  {
-    id: 'CN-2026-004',
-    tenantId: 'TNT-007',
-    tenantName: 'Urban Hotel NYC',
-    invoiceId: 'INV-2026-0722',
-    amount: 750.0,
-    currency: 'USD',
-    reason: 'feature_delay',
-    reasonDetail: 'AI Revenue Manager feature delayed by 3 weeks past committed date',
-    status: 'issued',
-    type: 'partial',
-    issuedAt: '2026-08-10',
-    appliedAt: null,
-    refundedAt: null,
-    expiresAt: '2027-08-10',
-    remaining: 750.0,
-    appliedTo: [],
-    createdBy: 'Maria Garcia',
-    notes: 'Enterprise account — escalation handled by CSM.',
-  },
-  {
-    id: 'CN-2026-005',
-    tenantId: 'TNT-005',
-    tenantName: 'Coastal Inn San Diego',
-    invoiceId: 'INV-2026-0905',
-    amount: 99.5,
-    currency: 'USD',
-    reason: 'service_outage',
-    reasonDetail: 'Minor API latency spike on Aug 8 — p95 exceeded 500ms for 10 min',
-    status: 'partially_applied',
-    type: 'partial',
-    issuedAt: '2026-08-09',
-    appliedAt: '2026-08-12',
-    refundedAt: null,
-    expiresAt: '2027-08-09',
-    remaining: 49.5,
-    appliedTo: [{ invoiceId: 'INV-2026-0905', amount: 50.0, date: '2026-08-12' }],
-    createdBy: 'System',
-    notes: 'Auto-generated from SLA breach detection.',
-  },
-  {
-    id: 'CN-2026-006',
-    tenantId: 'TNT-003',
-    tenantName: 'Mountain Lodge Aspen',
-    invoiceId: null,
-    amount: 299.0,
-    currency: 'USD',
-    reason: 'promotional',
-    reasonDetail: 'Trial extension credit — converted from 14-day to 30-day trial',
-    status: 'issued',
-    type: 'full',
-    issuedAt: '2026-08-15',
-    appliedAt: null,
-    refundedAt: null,
-    expiresAt: '2026-09-15',
-    remaining: 299.0,
-    appliedTo: [],
-    createdBy: 'James Miller',
-    notes: 'Sales-approved promotional credit.',
-  },
-];
+import { getCreditNotes, createCreditNote, applyCreditNote } from '../../../../api/billing';
+import { api } from '../../../../api/client';
+import { useApiFetch } from '../../../../hooks/useApiFetch';
+import { useApiMutation } from '../../../../hooks/useApiMutation';
+import { useApiError } from '../../../../hooks/useApiError';
+import { useToast } from '../../../../hooks/use-toast';
 
 /* ─── Metadata ─── */
 const reasonMeta = {
@@ -219,12 +96,47 @@ const typeMeta = {
 
 /* ─── Helpers ─── */
 function formatCurrency(amount, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
+}
+
+function formatDate(value) {
+  if (!value) return '—';
+  return new Date(value).toISOString().split('T')[0];
 }
 
 function daysUntil(dateStr) {
-  const diff = Math.ceil((new Date(dateStr) - new Date('2026-08-16')) / (1000 * 60 * 60 * 24));
-  return diff;
+  if (!dateStr) return 0;
+  return Math.ceil((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24));
+}
+
+/* Normalize the API credit note into the shape the UI expects */
+function normalizeCreditNote(n) {
+  const amount = n.amount ?? 0;
+  const remaining = n.remaining ?? n.remainingAmount ?? (n.status === 'issued' ? amount : 0);
+  return {
+    id: n.id ?? n.creditNoteId ?? '',
+    tenantId: n.tenantId ?? '',
+    tenantName: n.tenantName ?? n.tenantId ?? 'Unknown',
+    invoiceId: n.invoiceId ?? null,
+    amount,
+    currency: n.currency ?? 'USD',
+    reason: n.reason ?? 'goodwill',
+    reasonDetail: n.reasonDetail ?? n.description ?? '',
+    status: n.status ?? 'issued',
+    type: n.type ?? (n.invoiceId ? 'partial' : 'full'),
+    issuedAt: formatDate(n.issuedAt ?? n.createdAt),
+    appliedAt: n.appliedAt ? formatDate(n.appliedAt) : null,
+    refundedAt: n.refundedAt ? formatDate(n.refundedAt) : null,
+    expiresAt: formatDate(n.expiresAt),
+    remaining,
+    appliedTo: (n.appliedTo ?? n.applications ?? []).map((a) => ({
+      invoiceId: a.invoiceId ?? '',
+      amount: a.amount ?? 0,
+      date: formatDate(a.date ?? a.appliedAt),
+    })),
+    createdBy: n.createdBy ?? n.createdByName ?? 'System',
+    notes: n.notes ?? '',
+  };
 }
 
 /* ─── Components ─── */
@@ -288,7 +200,7 @@ function StatCard({ label, value, subtext, icon: Icon, color }) {
 }
 
 /* ─── Create Modal ─── */
-function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
+function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants, saving }) {
   const [form, setForm] = useState({
     tenantId: '',
     invoiceId: '',
@@ -301,34 +213,32 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const tenant = tenants.find((t) => t.id === form.tenantId);
-    onCreate({
-      ...form,
-      id: `CN-${Date.now().toString(36).toUpperCase()}`,
-      tenantName: tenant?.name || 'Unknown',
-      currency: 'USD',
-      status: 'issued',
-      issuedAt: new Date().toISOString().split('T')[0],
-      appliedAt: null,
-      refundedAt: null,
-      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      remaining: parseFloat(form.amount) || 0,
-      appliedTo: [],
-      createdBy: 'You',
+    // Parent performs the API call and closes the modal on success
+    const ok = await onCreate({
+      tenantId: form.tenantId,
+      tenantName: tenant?.name || form.tenantId,
+      invoiceId: form.invoiceId || null,
       amount: parseFloat(form.amount) || 0,
+      currency: 'USD',
+      reason: form.reason,
+      reasonDetail: form.reasonDetail,
+      type: form.type,
+      notes: form.notes,
     });
-    onClose();
-    setForm({
-      tenantId: '',
-      invoiceId: '',
-      amount: '',
-      reason: 'service_outage',
-      reasonDetail: '',
-      type: 'full',
-      notes: '',
-    });
+    if (ok !== false) {
+      setForm({
+        tenantId: '',
+        invoiceId: '',
+        amount: '',
+        reason: 'service_outage',
+        reasonDetail: '',
+        type: 'full',
+        notes: '',
+      });
+    }
   };
 
   if (!isOpen) return null;
@@ -472,11 +382,16 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
-            <Button type="submit" variant="secondary">
-              <Plus className="mr-1.5 h-4 w-4" /> Create Credit Note
+            <Button type="submit" variant="secondary" disabled={saving}>
+              {saving ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="mr-1.5 h-4 w-4" />
+              )}
+              {saving ? 'Creating…' : 'Create Credit Note'}
             </Button>
           </div>
         </form>
@@ -486,7 +401,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants }) {
 }
 
 /* ─── Detail Drawer ─── */
-function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
+function CreditNoteDrawer({ note, onClose, onVoid, onRefund, onApply, actionLoading }) {
   const [activeTab, setActiveTab] = useState('details');
   if (!note) return null;
 
@@ -505,6 +420,11 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
     if (confirm(`Refund ${formatCurrency(note.remaining)} to tenant?`)) {
       onRefund(note.id);
     }
+  };
+
+  const handleApply = () => {
+    const invoiceId = window.prompt('Apply credit to invoice ID:', note.invoiceId || '');
+    if (invoiceId) onApply(note.id, invoiceId);
   };
 
   return (
@@ -658,11 +578,31 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-2 flex-wrap">
                 {note.status === 'issued' && note.remaining > 0 && (
-                  <Button variant="outline" size="sm" onClick={handleRefund}>
-                    <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Refund
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleApply}
+                      disabled={actionLoading}
+                    >
+                      {actionLoading ? (
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="mr-1.5 h-3.5 w-3.5" />
+                      )}
+                      Apply
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRefund}
+                      disabled={actionLoading}
+                    >
+                      <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Refund
+                    </Button>
+                  </>
                 )}
                 {(note.status === 'issued' || note.status === 'partially_applied') && (
                   <Button
@@ -670,14 +610,24 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
                     size="sm"
                     className="text-danger border-danger/30 hover:bg-danger/10"
                     onClick={handleVoid}
+                    disabled={actionLoading}
                   >
                     <X className="mr-1.5 h-3.5 w-3.5" /> Void
                   </Button>
                 )}
-                <Button variant="outline" size="sm" className="ml-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={() => window.print()}
+                >
                   <Printer className="mr-1.5 h-3.5 w-3.5" /> Print
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigator.clipboard?.writeText(note.id)}
+                >
                   <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy ID
                 </Button>
               </div>
@@ -723,7 +673,7 @@ function CreditNoteDrawer({ note, onClose, onVoid, onRefund }) {
 
 /* ─── Main Page ─── */
 export default function CreditNotesPage() {
-  const [notes, setNotes] = useState(initialCreditNotes);
+  const toast = useToast();
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [reasonFilter, setReasonFilter] = useState('all');
@@ -731,25 +681,80 @@ export default function CreditNotesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'issuedAt', dir: 'desc' });
 
-  // Mock tenants for dropdown
-  const tenants = [
-    { id: 'TNT-001', name: 'Grand Hotel Boston' },
-    { id: 'TNT-002', name: 'Seaside Resort Miami' },
-    { id: 'TNT-003', name: 'Mountain Lodge Aspen' },
-    { id: 'TNT-004', name: 'Downtown Suites Chicago' },
-    { id: 'TNT-005', name: 'Coastal Inn San Diego' },
-    { id: 'TNT-006', name: 'Lakeside Resort Tahoe' },
-    { id: 'TNT-007', name: 'Urban Hotel NYC' },
-    { id: 'TNT-008', name: 'Desert Oasis Phoenix' },
-  ];
+  // Fetch credit notes
+  const notesQuery = useApiFetch(() => getCreditNotes(), [], { initialData: [] });
+  useApiError(notesQuery.error);
+
+  // Fetch tenants for the create-modal dropdown
+  const tenantsQuery = useApiFetch(() => api.get('/admin/tenants'), [], { initialData: [] });
+
+  const notes = useMemo(
+    () => (notesQuery.data?.data ?? notesQuery.data ?? []).map(normalizeCreditNote),
+    [notesQuery.data]
+  );
+
+  const tenants = useMemo(
+    () =>
+      (tenantsQuery.data?.data ?? tenantsQuery.data ?? []).map((t) => ({
+        id: t.id ?? t.tenantId,
+        name: t.name ?? t.tenantName ?? t.id,
+      })),
+    [tenantsQuery.data]
+  );
+
+  // Create mutation
+  const createMutation = useApiMutation(createCreditNote, {
+    onSuccess: () => {
+      toast.success('Credit note created');
+      setShowCreate(false);
+      notesQuery.refetch();
+    },
+    onError: (err) => toast.error(err?.message || 'Failed to create credit note'),
+  });
+
+  // Apply mutation
+  const applyMutation = useApiMutation((id) => applyCreditNote(id), {
+    onSuccess: () => {
+      toast.success('Credit note applied');
+      setSelectedNote(null);
+      notesQuery.refetch();
+    },
+    onError: (err) => toast.error(err?.message || 'Failed to apply credit note'),
+  });
+
+  // Void mutation — POST /admin/billing/credit-notes/:id/void
+  const voidMutation = useApiMutation((id) => api.post(`/admin/billing/credit-notes/${id}/void`), {
+    onSuccess: () => {
+      toast.success('Credit note voided');
+      setSelectedNote(null);
+      notesQuery.refetch();
+    },
+    onError: (err) => toast.error(err?.message || 'Failed to void credit note'),
+  });
+
+  // Refund mutation — POST /admin/billing/credit-notes/:id/refund
+  const refundMutation = useApiMutation(
+    (id) => api.post(`/admin/billing/credit-notes/${id}/refund`),
+    {
+      onSuccess: () => {
+        toast.success('Credit note refunded');
+        setSelectedNote(null);
+        notesQuery.refetch();
+      },
+      onError: (err) => toast.error(err?.message || 'Failed to refund credit note'),
+    }
+  );
+
+  const actionLoading = applyMutation.loading || voidMutation.loading || refundMutation.loading;
 
   const filteredNotes = useMemo(() => {
     let result = notes.filter((n) => {
+      const q = query.toLowerCase();
       const matchesQuery =
         !query ||
-        n.id.toLowerCase().includes(query.toLowerCase()) ||
-        n.tenantName.toLowerCase().includes(query.toLowerCase()) ||
-        n.reasonDetail.toLowerCase().includes(query.toLowerCase());
+        n.id.toLowerCase().includes(q) ||
+        n.tenantName.toLowerCase().includes(q) ||
+        n.reasonDetail.toLowerCase().includes(q);
       const matchesStatus = statusFilter === 'all' || n.status === statusFilter;
       const matchesReason = reasonFilter === 'all' || n.reason === reasonFilter;
       return matchesQuery && matchesStatus && matchesReason;
@@ -783,29 +788,13 @@ export default function CreditNotesPage() {
     [notes]
   );
 
-  const handleCreate = (newNote) => {
-    setNotes((prev) => [newNote, ...prev]);
-  };
-
-  const handleVoid = (id) => {
-    setNotes((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, status: 'voided', remaining: 0 } : n))
-    );
-  };
-
-  const handleRefund = (id) => {
-    setNotes((prev) =>
-      prev.map((n) =>
-        n.id === id
-          ? {
-              ...n,
-              status: 'refunded',
-              remaining: 0,
-              refundedAt: new Date().toISOString().split('T')[0],
-            }
-          : n
-      )
-    );
+  const handleCreate = async (payload) => {
+    try {
+      await createMutation.mutate(payload);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleSort = (key) => {
@@ -813,6 +802,16 @@ export default function CreditNotesPage() {
       key,
       dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc',
     }));
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(filteredNotes, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'credit-notes-export.json';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -826,7 +825,15 @@ export default function CreditNotesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => notesQuery.refetch()}
+            disabled={notesQuery.loading}
+          >
+            <RefreshCw className={cn('h-4 w-4', notesQuery.loading && 'animate-spin')} />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
           <Button size="sm" onClick={() => setShowCreate(true)}>
@@ -919,9 +926,6 @@ export default function CreditNotesPage() {
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-10">
-                  <input type="checkbox" className="rounded border-border" />
-                </th>
                 {[
                   { key: 'id', label: 'Credit Note' },
                   { key: 'tenantName', label: 'Tenant' },
@@ -951,77 +955,87 @@ export default function CreditNotesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredNotes.map((note) => (
-                <tr
-                  key={note.id}
-                  className="hover:bg-background/50 transition-colors group cursor-pointer"
-                  onClick={() => setSelectedNote(note)}
-                >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" className="rounded border-border" />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10">
-                        <FileText className="h-4 w-4 text-secondary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-text-primary font-mono">{note.id}</p>
-                        <p className="text-[10px] text-text-muted">
-                          {note.invoiceId || 'No invoice'}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-sm text-text-primary">{note.tenantName}</p>
-                    <p className="text-[10px] text-text-muted font-mono">{note.tenantId}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <ReasonBadge reason={note.reason} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={note.status} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">
-                      {formatCurrency(note.amount)}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p
-                      className={cn(
-                        'text-sm font-mono font-medium',
-                        note.remaining > 0 ? 'text-secondary' : 'text-accent'
-                      )}
-                    >
-                      {formatCurrency(note.remaining)}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">{note.issuedAt}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedNote(note);
-                        }}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
-                        title="View Details"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredNotes.length === 0 && (
+              {notesQuery.loading && notes.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-text-muted">
-                    <FileText className="mx-auto h-10 w-10 mb-3" />
-                    <p>No credit notes match your filters.</p>
+                  <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
+                    <Loader2 className="mx-auto h-6 w-6 animate-spin mb-2" />
+                    Loading credit notes…
                   </td>
                 </tr>
+              ) : (
+                <>
+                  {filteredNotes.map((note) => (
+                    <tr
+                      key={note.id}
+                      className="hover:bg-background/50 transition-colors group cursor-pointer"
+                      onClick={() => setSelectedNote(note)}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10">
+                            <FileText className="h-4 w-4 text-secondary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-text-primary font-mono">
+                              {note.id}
+                            </p>
+                            <p className="text-[10px] text-text-muted">
+                              {note.invoiceId || 'No invoice'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-text-primary">{note.tenantName}</p>
+                        <p className="text-[10px] text-text-muted font-mono">{note.tenantId}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <ReasonBadge reason={note.reason} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={note.status} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm font-mono font-medium text-text-primary">
+                          {formatCurrency(note.amount)}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p
+                          className={cn(
+                            'text-sm font-mono font-medium',
+                            note.remaining > 0 ? 'text-secondary' : 'text-accent'
+                          )}
+                        >
+                          {formatCurrency(note.remaining)}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary text-xs">{note.issuedAt}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedNote(note);
+                            }}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredNotes.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
+                        <FileText className="mx-auto h-10 w-10 mb-3" />
+                        <p>No credit notes match your filters.</p>
+                      </td>
+                    </tr>
+                  )}
+                </>
               )}
             </tbody>
           </table>
@@ -1035,6 +1049,7 @@ export default function CreditNotesPage() {
           onClose={() => setShowCreate(false)}
           onCreate={handleCreate}
           tenants={tenants}
+          saving={createMutation.loading}
         />
       )}
 
@@ -1042,8 +1057,10 @@ export default function CreditNotesPage() {
         <CreditNoteDrawer
           note={selectedNote}
           onClose={() => setSelectedNote(null)}
-          onVoid={handleVoid}
-          onRefund={handleRefund}
+          onVoid={(id) => voidMutation.mutate(id)}
+          onRefund={(id) => refundMutation.mutate(id)}
+          onApply={(id) => applyMutation.mutate(id)}
+          actionLoading={actionLoading}
         />
       )}
     </div>

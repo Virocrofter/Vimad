@@ -1,5 +1,5 @@
 /* src/app/admin/feedback/FeatureRequestModal.jsx */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   X,
   Check,
@@ -13,7 +13,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 const categories = [
   { key: 'revenue', label: 'Revenue' },
@@ -53,7 +53,9 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
     createdBy: '',
   });
 
-  useEffect(() => {
+  const [prevFeature, setPrevFeature] = useState(null);
+  if (feature !== prevFeature) {
+    setPrevFeature(feature);
     if (feature) {
       setForm({
         title: feature.title || '',
@@ -66,7 +68,7 @@ export default function FeatureRequestModal({ feature, onClose, onSave, tenants 
         createdBy: feature.createdBy || '',
       });
     }
-  }, [feature]);
+  }
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 

@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { TicketCard, TicketDetail, ticketStatusMeta } from '../components';
+import { TicketCard, TicketDetail } from '../components';
+import { ticketStatusMeta } from '../data';
 
 const initialTickets = [
   {

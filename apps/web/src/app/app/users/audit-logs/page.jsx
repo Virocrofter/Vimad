@@ -46,9 +46,11 @@ import {
   BarChart3,
   PieChart,
   TrendingUp,
+  Sparkles,
+  Wrench,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -587,7 +589,6 @@ function AuditDetailDrawer({ entry, onClose }) {
 
 /* ─── Main Page ─── */
 export default function AuditLogsPage() {
-  const navigate = useNavigate();
   const [entries] = useState(auditEntries);
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');

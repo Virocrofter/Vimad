@@ -1,8 +1,8 @@
 /* src/app/admin/health/AlertRuleModal.jsx */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Check, Bell, Plus, Trash2 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { alertMetricMeta, alertConditions, alertSeverityMeta } from './alert-data';
 
 const availableChannels = [
@@ -27,7 +27,9 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
     channels: ['email'],
   });
 
-  useEffect(() => {
+  const [prevRule, setPrevRule] = useState(null);
+  if (rule !== prevRule) {
+    setPrevRule(rule);
     if (rule) {
       setForm({
         name: rule.name || '',
@@ -41,7 +43,7 @@ export default function AlertRuleModal({ rule, onClose, onSave }) {
         channels: rule.channels || ['email'],
       });
     }
-  }, [rule]);
+  }
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const toggleChannel = (ch) => {

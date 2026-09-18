@@ -10,8 +10,6 @@ import {
   BarChart3,
   PieChart,
   Activity,
-  Calendar,
-  Filter,
   Download,
   ChevronDown,
   ChevronUp,
@@ -21,107 +19,14 @@ import {
   UserMinus,
   Zap,
   Target,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-
-/* ─── Mock Revenue Data ─── */
-const revenueOverview = {
-  mrr: 28450,
-  arr: 341400,
-  lastMonthMrr: 26500,
-  churnRate: 2.4,
-  lastMonthChurn: 3.1,
-  netRevenueRetention: 108.5,
-  lastMonthNrr: 105.2,
-  activeCustomers: 142,
-  newCustomersThisMonth: 8,
-  churnedCustomersThisMonth: 3,
-  avgRevenuePerUser: 200.35,
-  expansionRevenue: 1850,
-  contractionRevenue: 420,
-};
-
-const mrrBreakdown = [
-  { month: 'Jan', mrr: 18500, new: 3200, expansion: 800, contraction: 400, churned: 1200 },
-  { month: 'Feb', mrr: 19800, new: 2800, expansion: 600, contraction: 300, churned: 900 },
-  { month: 'Mar', mrr: 21200, new: 3100, expansion: 900, contraction: 200, churned: 1100 },
-  { month: 'Apr', mrr: 22800, new: 3500, expansion: 700, contraction: 400, churned: 800 },
-  { month: 'May', mrr: 24100, new: 2900, expansion: 1100, contraction: 300, churned: 700 },
-  { month: 'Jun', mrr: 25200, new: 2600, expansion: 800, contraction: 200, churned: 600 },
-  { month: 'Jul', mrr: 26500, new: 3200, expansion: 950, contraction: 350, churned: 850 },
-  { month: 'Aug', mrr: 28450, new: 3800, expansion: 1200, contraction: 250, churned: 700 },
-];
-
-const planDistribution = [
-  { plan: 'Starter', customers: 78, mrr: 15522, color: 'bg-info', textColor: 'text-info' },
-  {
-    plan: 'Professional',
-    customers: 45,
-    mrr: 22455,
-    color: 'bg-secondary',
-    textColor: 'text-secondary',
-  },
-  {
-    plan: 'Enterprise',
-    customers: 19,
-    mrr: 10473,
-    color: 'bg-purple-500',
-    textColor: 'text-purple-500',
-  },
-];
-
-const churnReasons = [
-  { reason: 'Switched to competitor', count: 12, pct: 35 },
-  { reason: 'Business closed', count: 8, pct: 24 },
-  { reason: 'Too expensive', count: 6, pct: 18 },
-  { reason: 'Missing features', count: 4, pct: 12 },
-  { reason: 'Poor support', count: 3, pct: 9 },
-  { reason: 'Other', count: 1, pct: 2 },
-];
-
-const topCustomers = [
-  {
-    id: 'TNT-001',
-    name: 'Grand Hotel Boston',
-    plan: 'Enterprise',
-    mrr: 4990,
-    trend: 5.2,
-    since: '2025-03',
-  },
-  {
-    id: 'TNT-007',
-    name: 'Urban Hotel NYC',
-    plan: 'Professional',
-    mrr: 499,
-    trend: 12.8,
-    since: '2025-04',
-  },
-  {
-    id: 'TNT-002',
-    name: 'Seaside Resort Miami',
-    plan: 'Professional',
-    mrr: 499,
-    trend: -2.1,
-    since: '2025-06',
-  },
-  {
-    id: 'TNT-005',
-    name: 'Coastal Inn San Diego',
-    plan: 'Starter',
-    mrr: 199,
-    trend: 0,
-    since: '2025-09',
-  },
-  {
-    id: 'TNT-003',
-    name: 'Mountain Lodge Aspen',
-    plan: 'Professional',
-    mrr: 0,
-    trend: 0,
-    since: '2026-08',
-  },
-];
+import { getRevenueAnalytics } from '../../../../api/billing';
+import { useApiFetch } from '../../../../hooks/useApiFetch';
+import { useApiError } from '../../../../hooks/useApiError';
 
 /* ─── Helpers ─── */
 function formatCurrency(amount) {
@@ -129,7 +34,7 @@ function formatCurrency(amount) {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(amount || 0);
 }
 
 function formatCompactCurrency(amount) {
@@ -138,6 +43,74 @@ function formatCompactCurrency(amount) {
   return `$${amount}`;
 }
 
+const PLAN_COLORS = [
+  { color: 'bg-info', textColor: 'text-info' },
+  { color: 'bg-secondary', textColor: 'text-secondary' },
+  { color: 'bg-purple-500', textColor: 'text-purple-500' },
+  { color: 'bg-accent', textColor: 'text-accent' },
+  { color: 'bg-warning', textColor: 'text-warning' },
+];
+
+/* Normalize the revenue-analytics API response into the shape the UI expects.
+ * Expected endpoint: GET /admin/billing/revenue-analytics?period=12m */
+function normalizeAnalytics(raw) {
+  const d = raw?.data ?? raw ?? {};
+  const overview = d.overview ?? d;
+  return {
+    overview: {
+      mrr: overview.mrr ?? 0,
+      arr: overview.arr ?? (overview.mrr ?? 0) * 12,
+      lastMonthMrr: overview.lastMonthMrr ?? overview.previousMrr ?? overview.mrr ?? 0,
+      churnRate: overview.churnRate ?? 0,
+      lastMonthChurn:
+        overview.lastMonthChurn ?? overview.previousChurnRate ?? overview.churnRate ?? 0,
+      netRevenueRetention: overview.netRevenueRetention ?? overview.nrr ?? 0,
+      lastMonthNrr:
+        overview.lastMonthNrr ?? overview.previousNrr ?? overview.netRevenueRetention ?? 0,
+      activeCustomers: overview.activeCustomers ?? 0,
+      newCustomersThisMonth: overview.newCustomersThisMonth ?? overview.newCustomers ?? 0,
+      churnedCustomersThisMonth:
+        overview.churnedCustomersThisMonth ?? overview.churnedCustomers ?? 0,
+      avgRevenuePerUser: overview.avgRevenuePerUser ?? overview.arpu ?? 0,
+      expansionRevenue: overview.expansionRevenue ?? 0,
+      contractionRevenue: overview.contractionRevenue ?? 0,
+      activeCustomersTrend: overview.activeCustomersTrend ?? 0,
+      arpuTrend: overview.arpuTrend ?? 0,
+      expansionTrend: overview.expansionTrend ?? 0,
+      contractionTrend: overview.contractionTrend ?? 0,
+      ltvToCac: overview.ltvToCac ?? null,
+    },
+    mrrBreakdown: (d.mrrBreakdown ?? d.mrrHistory ?? []).map((m) => ({
+      month: m.month ?? m.label ?? '',
+      mrr: m.mrr ?? 0,
+      new: m.new ?? m.newMrr ?? 0,
+      expansion: m.expansion ?? m.expansionMrr ?? 0,
+      contraction: m.contraction ?? m.contractionMrr ?? 0,
+      churned: m.churned ?? m.churnedMrr ?? 0,
+    })),
+    planDistribution: (d.planDistribution ?? d.revenueByPlan ?? []).map((p, i) => ({
+      plan: p.plan ?? p.name ?? 'Unknown',
+      customers: p.customers ?? p.count ?? 0,
+      mrr: p.mrr ?? p.revenue ?? 0,
+      ...PLAN_COLORS[i % PLAN_COLORS.length],
+    })),
+    churnReasons: (d.churnReasons ?? []).map((r) => ({
+      reason: r.reason ?? r.label ?? 'Other',
+      count: r.count ?? 0,
+      pct: r.pct ?? r.percentage ?? 0,
+    })),
+    topCustomers: (d.topCustomers ?? []).map((c) => ({
+      id: c.id ?? c.tenantId ?? '',
+      name: c.name ?? c.tenantName ?? c.tenantId ?? 'Unknown',
+      plan: c.plan ?? 'Starter',
+      mrr: c.mrr ?? 0,
+      trend: c.trend ?? 0,
+      since: c.since ?? (c.createdAt ? c.createdAt.slice(0, 7) : '—'),
+    })),
+  };
+}
+
+/* ─── Trend Badge ─── */
 function TrendBadge({ value, suffix = '%', invert = false }) {
   const isPositive = value > 0;
   const isNegative = value < 0;
@@ -200,9 +173,6 @@ function RevenueStatCard({ label, value, subtext, icon: Icon, color, trend, inve
 /* ─── Simple Bar Chart (SVG) ─── */
 function SimpleBarChart({ data, dataKey, labelKey, color = '#863bff', height = 160 }) {
   const max = Math.max(...data.map((d) => d[dataKey]));
-  const barWidth = data.length > 0 ? (100 / data.length) * 0.7 : 0;
-  const gap = data.length > 0 ? (100 / data.length) * 0.3 : 0;
-
   return (
     <div className="w-full" style={{ height }}>
       <svg
@@ -236,9 +206,15 @@ function SimpleBarChart({ data, dataKey, labelKey, color = '#863bff', height = 1
 
 /* ─── Stacked Bar Chart for MRR Breakdown ─── */
 function MrrStackedChart({ data }) {
+  if (!data.length) {
+    return (
+      <div className="flex h-[200px] items-center justify-center text-sm text-text-muted">
+        No MRR history available.
+      </div>
+    );
+  }
   const max = Math.max(...data.map((d) => d.mrr));
   const height = 200;
-  const barWidth = data.length > 0 ? (100 / data.length) * 0.65 : 0;
 
   return (
     <div className="w-full" style={{ height }}>
@@ -329,21 +305,38 @@ function MrrStackedChart({ data }) {
 /* ─── Donut Chart ─── */
 function DonutChart({ data, size = 140 }) {
   const total = data.reduce((s, d) => s + d.mrr, 0);
-  let accumulated = 0;
   const center = size / 2;
   const radius = (size - 16) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  const colors = { 'bg-info': '#3b82f6', 'bg-secondary': '#863bff', 'bg-purple-500': '#a855f7' };
+  const colors = {
+    'bg-info': '#3b82f6',
+    'bg-secondary': '#863bff',
+    'bg-purple-500': '#a855f7',
+    'bg-accent': '#22c55e',
+    'bg-warning': '#f59e0b',
+  };
+
+  if (!data.length) {
+    return <p className="py-8 text-center text-sm text-text-muted">No plan data.</p>;
+  }
+
+  // Precompute dash length and cumulative offset for each segment
+  const segments = data.reduce(
+    (acc, d) => {
+      const dash = (total > 0 ? d.mrr / total : 0) * circumference;
+      acc.items.push({ dash, offset: circumference - acc.sum });
+      acc.sum += dash;
+      return acc;
+    },
+    { sum: 0, items: [] }
+  ).items;
 
   return (
     <div className="flex items-center gap-4">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {data.map((d, i) => {
-          const pct = total > 0 ? d.mrr / total : 0;
-          const dash = pct * circumference;
-          const offset = circumference - accumulated;
-          accumulated += dash;
+          const { dash, offset } = segments[i];
           const color = colors[d.color] || '#94a3b8';
           return (
             <circle
@@ -377,7 +370,7 @@ function DonutChart({ data, size = 140 }) {
           className="fill-text-muted"
           style={{ fontSize: '9px' }}
         >
-          customers
+          plans
         </text>
       </svg>
       <div className="space-y-2">
@@ -401,15 +394,71 @@ export default function RevenuePage() {
   const [timeRange, setTimeRange] = useState('12m');
   const [showChurnDetails, setShowChurnDetails] = useState(false);
 
-  const mrrGrowth = (
-    ((revenueOverview.mrr - revenueOverview.lastMonthMrr) / revenueOverview.lastMonthMrr) *
-    100
-  ).toFixed(1);
+  // GET /admin/billing/revenue-analytics?period=...
+  const analyticsQuery = useApiFetch(() => getRevenueAnalytics(timeRange), [timeRange], {
+    initialData: null,
+  });
+  useApiError(analyticsQuery.error);
+
+  const {
+    overview: revenueOverview,
+    mrrBreakdown,
+    planDistribution,
+    churnReasons,
+    topCustomers,
+  } = useMemo(
+    () =>
+      normalizeAnalytics(analyticsQuery.data) ?? {
+        overview: {},
+        mrrBreakdown: [],
+        planDistribution: [],
+        churnReasons: [],
+        topCustomers: [],
+      },
+    [analyticsQuery.data]
+  );
+
+  const loading = analyticsQuery.loading && !analyticsQuery.data;
+
+  const mrrGrowth =
+    revenueOverview.lastMonthMrr > 0
+      ? (
+          ((revenueOverview.mrr - revenueOverview.lastMonthMrr) / revenueOverview.lastMonthMrr) *
+          100
+        ).toFixed(1)
+      : '0.0';
   const churnChange = (revenueOverview.churnRate - revenueOverview.lastMonthChurn).toFixed(1);
   const nrrChange = (revenueOverview.netRevenueRetention - revenueOverview.lastMonthNrr).toFixed(1);
 
   const totalCustomers = planDistribution.reduce((s, d) => s + d.customers, 0);
   const totalMrr = planDistribution.reduce((s, d) => s + d.mrr, 0);
+
+  const handleExport = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      period: timeRange,
+      overview: revenueOverview,
+      mrrBreakdown,
+      planDistribution,
+      churnReasons,
+      topCustomers,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `revenue-analytics-${timeRange}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center gap-2 text-text-muted">
+        <Loader2 className="h-5 w-5 animate-spin" /> Loading revenue analytics…
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -432,7 +481,15 @@ export default function RevenuePage() {
             <option value="12m">Last 12 Months</option>
             <option value="ytd">Year to Date</option>
           </select>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => analyticsQuery.refetch()}
+            disabled={analyticsQuery.loading}
+          >
+            <RefreshCw className={cn('h-4 w-4', analyticsQuery.loading && 'animate-spin')} />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
         </div>
@@ -482,7 +539,7 @@ export default function RevenuePage() {
           icon={Users}
           color="text-info"
           subtext={`+${revenueOverview.newCustomersThisMonth} this month`}
-          trend={5.6}
+          trend={revenueOverview.activeCustomersTrend}
         />
         <RevenueStatCard
           label="ARPU"
@@ -490,7 +547,7 @@ export default function RevenuePage() {
           icon={CreditCard}
           color="text-warning"
           subtext="Average revenue per user"
-          trend={3.2}
+          trend={revenueOverview.arpuTrend}
         />
         <RevenueStatCard
           label="Expansion Revenue"
@@ -498,7 +555,7 @@ export default function RevenuePage() {
           icon={TrendingUp}
           color="text-accent"
           subtext="Upsells & upgrades this month"
-          trend={8.4}
+          trend={revenueOverview.expansionTrend}
         />
         <RevenueStatCard
           label="Contraction Revenue"
@@ -506,7 +563,7 @@ export default function RevenuePage() {
           icon={TrendingDown}
           color="text-danger"
           subtext="Downgrades this month"
-          trend={-12.5}
+          trend={revenueOverview.contractionTrend}
           invertTrend
         />
       </div>
@@ -584,27 +641,31 @@ export default function RevenuePage() {
             <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">
               Top Churn Reasons
             </h4>
-            <div className="space-y-3">
-              {churnReasons.map((r) => (
-                <div key={r.reason} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-secondary">{r.reason}</span>
-                    <span className="font-mono text-text-primary">
-                      {r.count} ({r.pct}%)
-                    </span>
+            {churnReasons.length === 0 ? (
+              <p className="text-sm text-text-muted">No churn data for this period.</p>
+            ) : (
+              <div className="space-y-3">
+                {(showChurnDetails ? churnReasons : churnReasons.slice(0, 5)).map((r) => (
+                  <div key={r.reason} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-secondary">{r.reason}</span>
+                      <span className="font-mono text-text-primary">
+                        {r.count} ({r.pct}%)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-border overflow-hidden">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all',
+                          r.pct >= 30 ? 'bg-danger' : r.pct >= 15 ? 'bg-warning' : 'bg-text-muted'
+                        )}
+                        style={{ width: `${r.pct}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                    <div
-                      className={cn(
-                        'h-full rounded-full transition-all',
-                        r.pct >= 30 ? 'bg-danger' : r.pct >= 15 ? 'bg-warning' : 'bg-text-muted'
-                      )}
-                      style={{ width: `${r.pct}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Churn Metrics */}
@@ -630,12 +691,14 @@ export default function RevenuePage() {
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Net Churn</p>
                   <p className="mt-1 text-xl font-bold font-mono text-accent">
-                    {(
-                      ((revenueOverview.newCustomersThisMonth -
-                        revenueOverview.churnedCustomersThisMonth) /
-                        revenueOverview.activeCustomers) *
-                      100
-                    ).toFixed(1)}
+                    {revenueOverview.activeCustomers > 0
+                      ? (
+                          ((revenueOverview.newCustomersThisMonth -
+                            revenueOverview.churnedCustomersThisMonth) /
+                            revenueOverview.activeCustomers) *
+                          100
+                        ).toFixed(1)
+                      : '0.0'}
                     %
                   </p>
                 </div>
@@ -657,14 +720,18 @@ export default function RevenuePage() {
                     Customer Lifetime Value
                   </p>
                   <p className="mt-1 text-xl font-bold font-mono text-secondary">
-                    {formatCurrency(
-                      revenueOverview.avgRevenuePerUser / (revenueOverview.churnRate / 100)
-                    )}
+                    {revenueOverview.churnRate > 0
+                      ? formatCurrency(
+                          revenueOverview.avgRevenuePerUser / (revenueOverview.churnRate / 100)
+                        )
+                      : '—'}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-text-muted">LTV:CAC</p>
-                  <p className="text-sm font-mono text-text-primary">3.2:1</p>
+                  <p className="text-sm font-mono text-text-primary">
+                    {revenueOverview.ltvToCac != null ? `${revenueOverview.ltvToCac}:1` : '—'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -702,47 +769,55 @@ export default function RevenuePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {topCustomers.map((c) => (
-                <tr key={c.id} className="hover:bg-background/50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-xs font-bold text-secondary">
-                        {c.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                          .slice(0, 2)
-                          .toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">{c.name}</p>
-                        <p className="text-[10px] text-text-muted font-mono">{c.id}</p>
-                      </div>
-                    </div>
+              {topCustomers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-text-muted">
+                    No customer revenue data available.
                   </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={cn(
-                        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                        c.plan === 'Enterprise'
-                          ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
-                          : c.plan === 'Professional'
-                            ? 'bg-secondary/10 text-secondary border-secondary/20'
-                            : 'bg-info/10 text-info border-info/20'
-                      )}
-                    >
-                      {c.plan}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
-                    {formatCurrency(c.mrr)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <TrendBadge value={c.trend} />
-                  </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">{c.since}</td>
                 </tr>
-              ))}
+              ) : (
+                topCustomers.map((c) => (
+                  <tr key={c.id} className="hover:bg-background/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-xs font-bold text-secondary">
+                          {c.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-text-primary">{c.name}</p>
+                          <p className="text-[10px] text-text-muted font-mono">{c.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                          c.plan === 'Enterprise'
+                            ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                            : c.plan === 'Professional'
+                              ? 'bg-secondary/10 text-secondary border-secondary/20'
+                              : 'bg-info/10 text-info border-info/20'
+                        )}
+                      >
+                        {c.plan}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
+                      {formatCurrency(c.mrr)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <TrendBadge value={c.trend} />
+                    </td>
+                    <td className="px-4 py-3 text-text-secondary text-xs">{c.since}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

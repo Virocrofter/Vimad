@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Plus, Clock, Calendar, FileText, Mail, Play, Edit3, Trash2, X, Save } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { libraryReports, frequencyMeta, formatMeta, initialSchedules } from './data';
 
 export default function ReportScheduler() {

@@ -16,6 +16,14 @@ import {
   RotateCcw,
   Download,
   Info,
+  Mail,
+  User,
+  Phone,
+  Fingerprint,
+  MapPin,
+  Calendar,
+  Globe,
+  FileText,
 } from 'lucide-react';
 
 const AnonymizeModal = ({ isOpen, onClose, onRun, datasetInfo = null }) => {
@@ -135,17 +143,9 @@ const AnonymizeModal = ({ isOpen, onClose, onRun, datasetInfo = null }) => {
     },
   ]);
 
-  // Mock icons since we can't import all
-  const Mail = () => <span className="text-xs">@</span>;
-  const User = () => <span className="text-xs">👤</span>;
-  const Phone = () => <span className="text-xs">📞</span>;
-  const Fingerprint = () => <span className="text-xs">🔐</span>;
-  const MapPin = () => <span className="text-xs">📍</span>;
-  const Calendar = () => <span className="text-xs">📅</span>;
-  const Globe = () => <span className="text-xs">🌐</span>;
-  const FileText = () => <span className="text-xs">📝</span>;
-
-  useEffect(() => {
+  const [prevSchema, setPrevSchema] = useState(null);
+  if (datasetInfo?.schema !== prevSchema) {
+    setPrevSchema(datasetInfo?.schema);
     if (datasetInfo?.schema) {
       const detectedFields = datasetInfo.schema
         .filter((col) => fieldTypes.some((ft) => ft.value === col.type))
@@ -157,7 +157,7 @@ const AnonymizeModal = ({ isOpen, onClose, onRun, datasetInfo = null }) => {
         }));
       setConfig((prev) => ({ ...prev, fields: detectedFields }));
     }
-  }, [datasetInfo]);
+  }
 
   if (!isOpen) return null;
 

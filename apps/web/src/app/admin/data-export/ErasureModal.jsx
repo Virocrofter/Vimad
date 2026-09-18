@@ -17,7 +17,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { dataCategories, initialTenants } from './data';
 
 const tenantOptions = initialTenants.map((t) => ({ id: t.id, name: t.name, status: t.status }));

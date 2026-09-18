@@ -82,7 +82,8 @@ export function PointsDisplay({ points, toNextTier, tier }) {
 }
 
 /* ─── Reward Card ─── */
-export function RewardCard({ reward, canAfford, onRedeem, isRedeeming, isRedeemed }) {
+export function RewardCard({ reward, points, onRedeem, isRedeeming, isRedeemed }) {
+  const canAfford = points >= reward.pointsCost;
   const categoryIcons = {
     stay: '🏨',
     dining: '🍽️',

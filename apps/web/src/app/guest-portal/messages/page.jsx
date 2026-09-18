@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useGuestStore } from '../store';
-import { mockMessages, mockStaff, formatMessageTime } from './components';
+import { mockMessages, mockStaff, formatMessageTime } from './data';
 
 export default function MessagesPage() {
   const navigate = useNavigate();

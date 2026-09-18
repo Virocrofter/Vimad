@@ -1,14 +1,24 @@
-/* src/app/admin/shadow/store.js */
+/* src/app/admin/shadow/store.js — wired to api/shadow.ts (Phase 3D) */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { startShadowSession, endShadowSession, terminateShadowSession } from '../../../api/shadow';
+import { api } from '../../../api/client';
 
 /**
  * Shadow Mode Store
  * Manages user impersonation sessions with stealth capabilities.
- * Shadow sessions bypass normal audit trails and appear as the target user.
+ * Local state is an optimistic mirror — the server is the source of truth
+ * (sessions are created/ended via api/shadow.ts and audited server-side).
  */
 
 const SHADOW_STORAGE_KEY = 'pms-shadow-session';
+
+/** Fire-and-forget remote audit event (server also generates its own audit trail). */
+const postAuditEvent = (action) => {
+  api.post('/admin/shadow/audit', action).catch(() => {
+    /* audit endpoint may not exist yet — local log retained */
+  });
+};
 
 export const useShadowStore = create(
   persist(
@@ -31,11 +41,13 @@ export const useShadowStore = create(
       /* ─── Actions ─── */
 
       /**
-       * Start a shadow session — impersonate a target user
+       * Start a shadow session — impersonate a target user.
+       * Calls POST /admin/shadow/sessions; returns the server session id.
        */
-      startShadow: (targetUser, adminUser) => {
-        const sessionId = `SHD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-        const startTime = new Date().toISOString();
+      startShadow: async (targetUser, adminUser, reason = 'Support impersonation') => {
+        const session = await startShadowSession(targetUser.id, reason);
+        const sessionId = session?.id ?? `SHD-${Date.now().toString(36).toUpperCase()}`;
+        const startTime = session?.startedAt ?? new Date().toISOString();
 
         set({
           isShadowActive: true,
@@ -47,14 +59,13 @@ export const useShadowStore = create(
           activeModule: targetUser.defaultModule || 'dashboard',
         });
 
-        // Log to shadow audit (separate from main audit)
         get().logShadowAction({
           sessionId,
           action: 'SESSION_STARTED',
           targetUserId: targetUser.id,
           targetUserName: targetUser.name,
-          adminUserId: adminUser.id,
-          adminUserName: adminUser.name,
+          adminUserId: adminUser?.id,
+          adminUserName: adminUser?.name,
           timestamp: startTime,
           stealth: get().stealthMode,
         });
@@ -63,9 +74,9 @@ export const useShadowStore = create(
       },
 
       /**
-       * End the current shadow session and restore admin context
+       * End the current shadow session (POST .../sessions/:id/end) and restore admin context.
        */
-      endShadow: (reason = 'manual') => {
+      endShadow: async (reason = 'manual') => {
         const state = get();
         if (!state.isShadowActive) return;
 
@@ -73,6 +84,12 @@ export const useShadowStore = create(
         const duration = state.shadowStartTime
           ? Math.round((new Date(endTime) - new Date(state.shadowStartTime)) / 1000)
           : 0;
+
+        try {
+          await endShadowSession(state.shadowSessionId);
+        } catch {
+          /* session may already be ended server-side */
+        }
 
         // Archive session to history
         const archivedSession = {
@@ -113,6 +130,13 @@ export const useShadowStore = create(
       },
 
       /**
+       * Terminate another active shadow session (admin action).
+       */
+      terminateSession: async (sessionId, reason = 'Terminated by admin') => {
+        return terminateShadowSession(sessionId, reason);
+      },
+
+      /**
        * Toggle stealth mode — hides all shadow UI indicators
        */
       toggleStealth: () => {
@@ -149,15 +173,12 @@ export const useShadowStore = create(
       },
 
       /**
-       * Log an action taken during shadow session
+       * Log an action taken during shadow session (local mirror + remote POST)
        */
       logShadowAction: (action) => {
-        set((prev) => ({
-          sessionHistory: [
-            ...prev.sessionHistory,
-            { ...action, id: `ACT-${Date.now().toString(36).toUpperCase()}` },
-          ],
-        }));
+        const entry = { ...action, id: `ACT-${Date.now().toString(36).toUpperCase()}` };
+        set((prev) => ({ sessionHistory: [...prev.sessionHistory, entry] }));
+        postAuditEvent(entry);
       },
 
       /**
@@ -178,11 +199,13 @@ export const useShadowStore = create(
       },
 
       /**
-       * Take over an existing user session (session hijacking simulation)
+       * Take over an existing user session (session hijacking simulation).
+       * Creates a real shadow session server-side for the target user.
        */
-      takeoverSession: (targetSession, adminUser) => {
-        const sessionId = `SHD-TAKEOVER-${Date.now().toString(36).toUpperCase()}`;
-        const startTime = new Date().toISOString();
+      takeoverSession: async (targetSession, adminUser) => {
+        const session = await startShadowSession(targetSession.user.id, 'Session takeover');
+        const sessionId = session?.id ?? `SHD-TAKEOVER-${Date.now().toString(36).toUpperCase()}`;
+        const startTime = session?.startedAt ?? new Date().toISOString();
 
         set({
           isShadowActive: true,
@@ -200,8 +223,8 @@ export const useShadowStore = create(
           targetUserId: targetSession.user.id,
           targetUserName: targetSession.user.name,
           takenOverSessionId: targetSession.id,
-          adminUserId: adminUser.id,
-          adminUserName: adminUser.name,
+          adminUserId: adminUser?.id,
+          adminUserName: adminUser?.name,
           timestamp: startTime,
           stealth: get().stealthMode,
         });
@@ -210,7 +233,7 @@ export const useShadowStore = create(
       },
 
       /**
-       * Clear all shadow history (irreversible)
+       * Clear all shadow history (irreversible, local mirror only)
        */
       clearHistory: () => {
         set({ sessionHistory: [] });

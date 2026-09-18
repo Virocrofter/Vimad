@@ -1,0 +1,85 @@
+name: Nightly Regression
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 2 AM UTC daily
+  workflow_dispatch:
+
+jobs:
+  full-regression:
+    name: Full Regression Suite
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: vimad_nightly
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate --workspace=apps/api
+
+      - name: Run Migrations
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/vimad_nightly
+        run: npm run db:migrate:prod --workspace=apps/api
+
+      - name: Run Full Test Suite with Coverage
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/vimad_nightly
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: nightly-jwt-secret-must-be-32-chars-long
+          NODE_ENV: test
+          RATE_LIMIT_ENABLED: false
+          RUN_DB_TESTS: true
+        run: |
+          npm run test:coverage --workspace=apps/api
+
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./apps/api/coverage/coverage-final.json
+          flags: nightly
+          name: nightly-coverage
+
+      - name: Notify on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "❌ Nightly regression failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

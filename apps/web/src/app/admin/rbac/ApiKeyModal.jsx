@@ -1,8 +1,9 @@
-/* src/app/admin/rbac/ApiKeyModal.jsx */
+/* src/app/admin/rbac/ApiKeyModal.jsx — wired: server-side key generation (Phase 3D) */
 import { useState } from 'react';
-import { X, Check, Key, Copy, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { X, Check, Key, Copy, Eye, EyeOff, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
+// Static permission catalogue (reference metadata, not mock entities)
 import { permissionCategories } from './data';
 
 const environments = [
@@ -11,7 +12,13 @@ const environments = [
   { key: 'development', label: 'Development' },
 ];
 
-export default function ApiKeyModal({ onClose, onSave }) {
+/**
+ * Props:
+ * - onClose()
+ * - onGenerate(form) -> Promise<{ apiKey, secret } | undefined>  (calls createApiKey API)
+ * - generating: boolean
+ */
+export default function ApiKeyModal({ onClose, onGenerate, generating = false }) {
   const [form, setForm] = useState({
     name: '',
     environment: 'production',
@@ -21,6 +28,7 @@ export default function ApiKeyModal({ onClose, onSave }) {
   });
   const [generatedKey, setGeneratedKey] = useState(null);
   const [showKey, setShowKey] = useState(false);
+  const [error, setError] = useState(null);
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -43,37 +51,23 @@ export default function ApiKeyModal({ onClose, onSave }) {
     });
   };
 
-  const handleGenerate = (e) => {
+  const handleGenerate = async (e) => {
     e.preventDefault();
-    const prefix = form.environment === 'production' ? 'pk_live_' : 'pk_test_';
-    const random = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    const key = `${prefix}${random}`;
-
+    setError(null);
+    // Server creates the key and returns the full secret exactly once.
+    const result = await onGenerate(form);
+    if (!result) {
+      setError('Failed to generate key. Please try again.');
+      return;
+    }
+    const { apiKey, secret } = result;
     setGeneratedKey({
+      ...apiKey,
       ...form,
-      id: `key-${Date.now().toString(36)}`,
-      keyFull: key,
-      keyPrefix: `${key.slice(0, 12)}...`,
-      status: 'active',
-      createdAt: new Date().toISOString().split('T')[0],
-      expiresAt: form.expiresIn
-        ? new Date(Date.now() + parseInt(form.expiresIn) * 86400000).toISOString().split('T')[0]
-        : null,
-      lastUsedAt: null,
-      createdBy: 'You',
-      usageCount: 0,
+      keyFull: secret,
+      keyPrefix: apiKey?.keyPrefix ?? `${secret?.slice(0, 12)}...`,
     });
   };
-
-  const handleSave = () => {
-    if (!generatedKey) return;
-    onSave(generatedKey);
-    onClose();
-  };
-
-  const allPerms = permissionCategories.flatMap((c) => c.permissions.map((p) => p.key));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -216,13 +210,24 @@ export default function ApiKeyModal({ onClose, onSave }) {
               </div>
             </div>
 
+            {error && (
+              <p className="flex items-center gap-1.5 text-xs text-danger">
+                <AlertTriangle className="h-3.5 w-3.5" /> {error}
+              </p>
+            )}
+
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={generating}>
                 Cancel
               </Button>
-              <Button type="submit" variant="secondary">
-                <Key className="mr-1.5 h-4 w-4" /> Generate Key
+              <Button type="submit" variant="secondary" disabled={generating}>
+                {generating ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <Key className="mr-1.5 h-4 w-4" />
+                )}
+                Generate Key
               </Button>
             </div>
           </form>
@@ -284,15 +289,16 @@ export default function ApiKeyModal({ onClose, onSave }) {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Expires</span>
-                <span className="text-text-primary">{generatedKey.expiresAt || 'Never'}</span>
+                <span className="text-text-primary">
+                  {generatedKey.expiresAt
+                    ? new Date(generatedKey.expiresAt).toLocaleDateString()
+                    : 'Never'}
+                </span>
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setGeneratedKey(null)}>
-                Regenerate
-              </Button>
-              <Button variant="secondary" onClick={handleSave}>
+              <Button variant="secondary" onClick={onClose}>
                 <Check className="mr-1.5 h-4 w-4" /> Done
               </Button>
             </div>

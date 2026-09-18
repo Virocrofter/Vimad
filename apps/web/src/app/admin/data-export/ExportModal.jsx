@@ -16,7 +16,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { exportTypes, exportFormats, initialTenants } from './data';
 
 const tenantOptions = [

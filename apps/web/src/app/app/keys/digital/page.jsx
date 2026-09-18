@@ -1108,7 +1108,6 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
 
 /* ─── Main Page ─── */
 export default function DigitalKeysPage() {
-  const navigate = useNavigate();
   const [keys, setKeys] = useState(digitalKeys);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

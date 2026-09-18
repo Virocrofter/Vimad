@@ -1,4 +1,4 @@
-/* src/app/admin/regions/RegionDetailDrawer.jsx */
+/* src/app/admin/regions/RegionDetailDrawer.jsx — wired to api/regions.ts (Phase 3D) */
 import { useState } from 'react';
 import {
   X,
@@ -17,16 +17,37 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
-import { regionStatusMeta, regionTenants, latencyHistory, formatDuration } from './data';
+import { Button } from '@/components/ui/button';
+import { regionStatusMeta, formatDuration } from './data';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { api } from '../../../api/client';
 import { TenantRow, LatencySparkline } from './components';
 
 export default function RegionDetailDrawer({ region, onClose }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const regionId = region?.id;
+
+  // Real API: tenants placed in this region + 24h latency history
+  const tenantsQuery = useApiFetch(
+    () => api.get(`/admin/regions/${regionId}/tenants`),
+    [regionId],
+    { immediate: !!regionId, initialData: [] }
+  );
+  const latencyQuery = useApiFetch(() => api.get('/admin/regions/latency-history'), [regionId], {
+    immediate: !!regionId,
+    initialData: [],
+  });
+
   if (!region) return null;
 
   const meta = regionStatusMeta[region.status];
-  const tenants = regionTenants[region.id] || [];
+  const tenants = tenantsQuery.data?.data ?? tenantsQuery.data ?? [];
+  const latencyHistory = latencyQuery.data ?? [];
+  const latencyValues = latencyHistory.map((d) => d[region.id] || 0).filter((v) => v > 0);
+  const avgLatency = latencyValues.length
+    ? Math.round(latencyValues.reduce((sum, v) => sum + v, 0) / latencyValues.length)
+    : null;
+  const peakLatency = latencyValues.length ? Math.max(...latencyValues) : null;
   const utilization = Math.round((region.tenantCount / region.capacity) * 100);
   const storagePct = Math.round((region.storageUsedTB / region.storageTotalTB) * 100);
 
@@ -180,7 +201,7 @@ export default function RegionDetailDrawer({ region, onClose }) {
                   Certifications & Compliance
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {region.certifications.map((cert) => (
+                  {(region.certifications ?? []).map((cert) => (
                     <span
                       key={cert}
                       className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2.5 py-1 text-xs font-medium text-accent"
@@ -202,7 +223,7 @@ export default function RegionDetailDrawer({ region, onClose }) {
                   Replication Targets
                 </h3>
                 <div className="space-y-2">
-                  {region.replicationTargets.map((target) => (
+                  {(region.replicationTargets ?? []).map((target) => (
                     <div key={target} className="flex items-center gap-3 text-sm">
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary/10">
                         <Server className="h-3 w-3 text-secondary" />
@@ -313,11 +334,7 @@ export default function RegionDetailDrawer({ region, onClose }) {
                     Avg Latency (24h)
                   </p>
                   <p className="mt-1 text-xl font-bold font-mono text-text-primary">
-                    {Math.round(
-                      latencyHistory.reduce((s, d) => s + (d[region.id] || 0), 0) /
-                        latencyHistory.length
-                    )}
-                    ms
+                    {avgLatency !== null ? `${avgLatency}ms` : '—'}
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-surface p-4">
@@ -325,7 +342,7 @@ export default function RegionDetailDrawer({ region, onClose }) {
                     Peak Latency (24h)
                   </p>
                   <p className="mt-1 text-xl font-bold font-mono text-text-primary">
-                    {Math.max(...latencyHistory.map((d) => d[region.id] || 0))}ms
+                    {peakLatency !== null ? `${peakLatency}ms` : '—'}
                   </p>
                 </div>
               </div>
@@ -341,7 +358,7 @@ export default function RegionDetailDrawer({ region, onClose }) {
                 </h3>
                 <p className="text-sm text-text-secondary">{region.dataResidency}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {region.certifications.map((cert) => (
+                  {(region.certifications ?? []).map((cert) => (
                     <span
                       key={cert}
                       className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2.5 py-1 text-xs font-medium text-accent"
@@ -357,7 +374,7 @@ export default function RegionDetailDrawer({ region, onClose }) {
                   Replication Configuration
                 </h3>
                 <div className="space-y-2">
-                  {region.replicationTargets.map((target) => (
+                  {(region.replicationTargets ?? []).map((target) => (
                     <div
                       key={target}
                       className="flex items-center justify-between py-2 border-b border-border last:border-0"

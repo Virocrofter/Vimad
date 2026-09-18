@@ -1,76 +1,22 @@
-/* src/app/admin/onboarding/page.jsx */
+// apps/web/src/app/admin/onboarding/page.jsx
+'use client';
+
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { PlayCircle, Users, TrendingUp, Clock, AlertTriangle, Zap, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiMutation } from '@/hooks/useApiMutation';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Funnel,
-  Users,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Clock,
-  Filter,
-  Search,
-  ChevronDown,
-  ChevronUp,
-  BarChart3,
-  Activity,
-  Zap,
-  Target,
-  Flag,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus,
-  Download,
-  Plus,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  Mail,
-  Phone,
-  Monitor,
-  Video,
-  Tag,
-  Clock3,
-  Sparkles,
-  PieChart,
-  LineChart,
-} from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
-import {
-  LineChart as ReLineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  PieChart as RePieChart,
-  Pie,
-  Cell,
-} from 'recharts';
-
-import {
-  funnelStages,
-  onboardingTenants,
-  funnelMetrics,
-  stageDropOffs,
-  dailyConversions,
-  csmTeam,
-  dropOffReasons,
-  interventionTypes,
-  getOverallProgress,
-  getHealthScoreColor,
-  getStatusMeta,
-} from './data';
-
+  getOnboardingDashboard,
+  getFlows,
+  getSessions,
+  getInterventions,
+  getMetrics,
+  triggerIntervention,
+  resolveIntervention,
+} from '@/api/onboarding';
 import {
   OnboardingStatCard,
   OnboardingStatusBadge,
@@ -81,755 +27,438 @@ import {
   CsmPerformanceCard,
   MiniSparkline,
 } from './components';
-
 import InterventionModal from './InterventionModal';
 
-/* ─── Colors for charts ─── */
-const CHART_COLORS = {
-  primary: '#863bff',
-  accent: '#22c55e',
-  warning: '#f59e0b',
-  danger: '#ef4444',
-  info: '#3b82f6',
-  secondary: '#a855f7',
-};
+/* ─── API → UI mappers ─── */
 
-/* ─── Main Page ─── */
-export default function OnboardingFunnelPage() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [tenants, setTenants] = useState(onboardingTenants);
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [stageFilter, setStageFilter] = useState('all');
-  const [csmFilter, setCsmFilter] = useState('all');
-  const [expandedTenants, setExpandedTenants] = useState(new Set());
-  const [showFilters, setShowFilters] = useState(false);
-  const [showInterventionModal, setShowInterventionModal] = useState(false);
-  const [selectedTenant, setSelectedTenant] = useState(null);
-  const [timeRange, setTimeRange] = useState('30d');
+// OnboardingSession → the tenant-shaped object TenantProgressRow / InterventionModal expect
+function mapSessionToTenant(session) {
+  const lastActivity = session.lastActivityAt ? new Date(session.lastActivityAt) : null;
+  const daysSinceActivity = lastActivity
+    ? Math.floor((Date.now() - lastActivity.getTime()) / 86400000)
+    : null;
+  return {
+    id: session.id,
+    _sessionId: session.id,
+    name: session.userName || 'Unknown user',
+    subdomain: session.flowId || '',
+    status: session.status, // in_progress | completed | abandoned | overdue
+    healthScore: session.progress ?? 0,
+    progress: session.progress ?? 0,
+    daysRemaining: daysSinceActivity,
+    dropOffStage:
+      session.status === 'abandoned' || session.status === 'overdue' ? session.currentStepId : null,
+    dropOffReason:
+      session.status === 'abandoned'
+        ? 'Abandoned'
+        : session.status === 'overdue'
+          ? 'Overdue'
+          : null,
+    assignedCSM: null,
+    revenueAtRisk: 0,
+    interventions: (session.interventions || []).map((i) => ({
+      type: i.type,
+      subject: i.type,
+      notes: '',
+      sentAt: i.sentAt ? i.sentAt.replace('T', ' ').slice(0, 19) : '',
+      scheduledAt: null,
+      status: i.resolved ? 'resolved' : 'sent',
+    })),
+  };
+}
 
-  /* ─── Computed Data ─── */
-  const filteredTenants = useMemo(() => {
-    return tenants.filter((t) => {
-      const matchesQuery =
-        !query ||
-        t.name.toLowerCase().includes(query.toLowerCase()) ||
-        t.id.toLowerCase().includes(query.toLowerCase()) ||
-        t.subdomain.toLowerCase().includes(query.toLowerCase()) ||
-        t.assignedCSM.toLowerCase().includes(query.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
-      const matchesStage =
-        stageFilter === 'all' ||
-        t.dropOffStage === stageFilter ||
-        (stageFilter === 'no_dropoff' && !t.dropOffStage);
-      const matchesCSM = csmFilter === 'all' || t.assignedCSM === csmFilter;
-      return matchesQuery && matchesStatus && matchesStage && matchesCSM;
-    });
-  }, [tenants, query, statusFilter, stageFilter, csmFilter]);
+// OnboardingIntervention → InterventionCard shape
+function mapIntervention(i, sessionById) {
+  return {
+    id: i.id,
+    type: i.type,
+    subject: (i.message || '').slice(0, 60) || i.type,
+    notes: i.message || '',
+    sentAt: i.sentAt ? i.sentAt.replace('T', ' ').slice(0, 19) : '',
+    scheduledAt: null,
+    status: i.resolvedAt ? 'resolved' : 'sent',
+    tenantName: sessionById.get(i.sessionId)?.userName || '',
+    _raw: i,
+  };
+}
 
-  const stats = useMemo(() => {
-    const activeTrials = tenants.filter((t) => t.status === 'active_trial').length;
-    const atRisk = tenants.filter((t) => t.status === 'at_risk').length;
-    const expired = tenants.filter((t) => t.status === 'trial_expired').length;
-    const converted = tenants.filter((t) => t.status === 'converted').length;
-    const totalRevenueAtRisk = tenants.reduce((s, t) => s + t.revenueAtRisk, 0);
-    const avgHealth =
-      tenants.length > 0
-        ? Math.round(tenants.reduce((s, t) => s + t.healthScore, 0) / tenants.length)
-        : 0;
-    const interventionSuccess = 68.4;
+export default function OnboardingPage() {
+  const { toast } = useToast();
+  const [period, setPeriod] = useState('30d');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
+  const [interveneTarget, setInterveneTarget] = useState(null);
 
-    return {
-      activeTrials,
-      atRisk,
-      expired,
-      converted,
-      totalRevenueAtRisk,
-      avgHealth,
-      interventionSuccess,
-      total: tenants.length,
-    };
-  }, [tenants]);
+  /* ─── Queries (useApiFetch) ─── */
 
-  const chartData = useMemo(() => {
-    if (timeRange === '30d') return dailyConversions;
-    if (timeRange === '14d') return dailyConversions.slice(-14);
-    if (timeRange === '7d') return dailyConversions.slice(-7);
-    return dailyConversions;
-  }, [timeRange]);
+  const dashboard = useApiFetch(() => getOnboardingDashboard(), []);
+  const flows = useApiFetch(() => getFlows({ page: 1, pageSize: 50 }), []);
+  const sessions = useApiFetch(
+    () => getSessions({ page: 1, pageSize: 50, ...(statusFilter && { status: statusFilter }) }),
+    [statusFilter]
+  );
+  const interventions = useApiFetch(
+    () => getInterventions(undefined, { page: 1, pageSize: 50 }),
+    []
+  );
+  const metrics = useApiFetch(() => getMetrics(period), [period]);
 
-  const dropOffPieData = useMemo(() => {
-    const reasons = {};
-    tenants.forEach((t) => {
-      if (t.dropOffReason) {
-        reasons[t.dropOffReason] = (reasons[t.dropOffReason] || 0) + 1;
-      }
-    });
-    return Object.entries(reasons).map(([key, value]) => ({
-      name: dropOffReasons[key]?.label || key,
-      value,
-      key,
-    }));
-  }, [tenants]);
+  /* ─── Mutations (useApiMutation) ─── */
 
-  const conversionByPlan = useMemo(() => {
-    const plans = ['Starter', 'Professional', 'Enterprise'];
-    return plans.map((plan) => {
-      const planTenants = tenants.filter((t) => t.plan === plan);
-      const converted = planTenants.filter((t) => t.status === 'converted').length;
-      const rate = planTenants.length > 0 ? (converted / planTenants.length) * 100 : 0;
-      return { plan, converted, total: planTenants.length, rate: rate.toFixed(1) };
-    });
-  }, [tenants]);
+  const interveneMutation = useApiMutation(
+    ({ sessionId, type, message }) => triggerIntervention(sessionId, type, message),
+    {
+      onSuccess: () => {
+        toast({ title: 'Intervention sent', description: 'The tenant has been notified.' });
+        sessions.refetch();
+        interventions.refetch();
+        dashboard.refetch();
+      },
+    }
+  );
+
+  const resolveMutation = useApiMutation((id) => resolveIntervention(id, 'Admin'), {
+    onSuccess: () => {
+      toast({ title: 'Intervention resolved' });
+      interventions.refetch();
+    },
+  });
 
   /* ─── Handlers ─── */
-  const toggleTenant = (id) => {
-    setExpandedTenants((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+
+  const handleSaveIntervention = async (payload) => {
+    if (!interveneTarget) return;
+    try {
+      await interveneMutation.mutate({
+        sessionId: interveneTarget._sessionId,
+        type:
+          payload.type === 'in_app'
+            ? 'notification'
+            : payload.type === 'call' || payload.type === 'demo'
+              ? 'manual'
+              : 'email',
+        message: payload.body || payload.subject,
+      });
+      setInterveneTarget(null);
+    } catch (err) {
+      toast({
+        title: 'Failed to send intervention',
+        description: err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleResolve = (id) =>
+    resolveMutation
+      .mutate(id)
+      .catch((err) =>
+        toast({ title: 'Failed to resolve', description: err.message, variant: 'destructive' })
+      );
+
+  /* ─── Derived data ─── */
+
+  const sessionList = useMemo(() => sessions.data?.data || [], [sessions.data]);
+  const flowList = useMemo(() => flows.data?.data || [], [flows.data]);
+  const tenants = useMemo(() => sessionList.map(mapSessionToTenant), [sessionList]);
+
+  const sessionById = useMemo(() => new Map(sessionList.map((s) => [s.id, s])), [sessionList]);
+  const interventionCards = useMemo(
+    () => (interventions.data?.data || []).map((i) => mapIntervention(i, sessionById)),
+    [interventions.data, sessionById]
+  );
+
+  // Funnel: one stage per flow, entered = sessions started, completed = completed sessions
+  const funnelData = useMemo(
+    () =>
+      flowList.map((flow) => {
+        const flowSessions = sessionList.filter((s) => s.flowId === flow.id);
+        const completed = flowSessions.filter((s) => s.status === 'completed').length;
+        const abandoned = flowSessions.filter(
+          (s) => s.status === 'abandoned' || s.status === 'overdue'
+        ).length;
+        const entered = flowSessions.length;
+        return {
+          stage: flow.name,
+          entered,
+          completed,
+          dropOffRate: entered > 0 ? Math.round((abandoned / entered) * 100) : 0,
+        };
+      }),
+    [flowList, sessionList]
+  );
+
+  // Completion-rate trend for MiniSparkline
+  const completionTrend = useMemo(() => {
+    const data = metrics.data || [];
+    return data.map((m) => (m.started > 0 ? Math.round((m.completed / m.started) * 100) : 0));
+  }, [metrics.data]);
+
+  // CSM performance derived from interventions grouped by resolver
+  const csmList = useMemo(() => {
+    const grouped = new Map();
+    (interventions.data?.data || []).forEach((i) => {
+      if (!i.resolvedBy) return;
+      const entry = grouped.get(i.resolvedBy) || { name: i.resolvedBy, resolved: 0, total: 0 };
+      entry.resolved += 1;
+      grouped.set(i.resolvedBy, entry);
     });
-  };
+    (interventions.data?.data || []).forEach((i) => {
+      const key = i.resolvedBy;
+      if (key && grouped.has(key)) grouped.get(key).total += 1;
+    });
+    return Array.from(grouped.values()).map((g) => ({
+      name: g.name,
+      activeCases: Math.max(g.total - g.resolved, 0),
+      conversionRate: g.total > 0 ? Math.round((g.resolved / g.total) * 100) : 0,
+    }));
+  }, [interventions.data]);
 
-  const handleIntervene = (tenant) => {
-    setSelectedTenant(tenant);
-    setShowInterventionModal(true);
-  };
+  const dash = dashboard.data;
 
-  const handleSaveIntervention = (intervention) => {
-    setTenants((prev) =>
-      prev.map((t) => {
-        if (t.id === selectedTenant.id) {
-          return { ...t, interventions: [...t.interventions, intervention] };
-        }
-        return t;
-      })
+  if (dashboard.loading) {
+    return (
+      <div className="space-y-4 p-8">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-28 w-full" />
+        ))}
+      </div>
     );
-  };
+  }
 
-  const handleExport = () => {
-    const data = {
-      exportedAt: new Date().toISOString(),
-      metrics: funnelMetrics,
-      tenants: filteredTenants,
-      stageDropOffs,
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `onboarding-funnel-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const uniqueCSMs = useMemo(() => [...new Set(tenants.map((t) => t.assignedCSM))], [tenants]);
-
-  /* ─── Tabs ─── */
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: Funnel },
-    { id: 'tenants', label: 'Tenant Progress', icon: Users, badge: stats.atRisk + stats.expired },
-    { id: 'interventions', label: 'Interventions', icon: Flag },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  ];
+  if (dashboard.error) {
+    return (
+      <div className="p-8">
+        <div className="rounded-xl border border-danger/30 bg-danger/5 p-6 text-center">
+          <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-danger" />
+          <p className="text-sm text-danger">
+            Failed to load onboarding data: {dashboard.error.message}
+          </p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={dashboard.refetch}>
+            <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Onboarding Funnel</h1>
-          <p className="text-sm text-text-secondary">
-            Trial-to-paid conversion tracking, drop-off analysis, and intervention management
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="mr-1.5 h-4 w-4" /> Export
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              setSelectedTenant(null);
-              setShowInterventionModal(true);
-            }}
-          >
-            <Flag className="mr-1.5 h-4 w-4" /> Bulk Intervention
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <OnboardingStatCard
-          label="Active Trials"
-          value={stats.activeTrials}
-          icon={Users}
-          color="text-info"
-          subtext={`${stats.total} total enrolled`}
-          trend={12.5}
-        />
-        <OnboardingStatCard
-          label="At Risk / Expired"
-          value={stats.atRisk + stats.expired}
-          icon={AlertTriangle}
-          color="text-warning"
-          subtext={`${stats.atRisk} at risk, ${stats.expired} expired`}
-          trend={-8.2}
-        />
-        <OnboardingStatCard
-          label="Converted"
-          value={stats.converted}
-          icon={CheckCircle2}
-          color="text-accent"
-          subtext={`${funnelMetrics.conversionRate}% conversion rate`}
-          trend={5.3}
-        />
-        <OnboardingStatCard
-          label="Revenue at Risk"
-          value={`$${stats.totalRevenueAtRisk.toLocaleString()}`}
-          icon={DollarSign}
-          color="text-danger"
-          subtext={`${funnelMetrics.interventionSuccessRate}% intervention success`}
-        />
-      </div>
-
-      {/* Secondary Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">
-            Avg. Time to Convert
-          </p>
-          <p className="mt-1 text-lg font-bold font-mono text-text-primary">
-            {funnelMetrics.avgTimeToConvert}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg. Health Score</p>
-          <p
-            className={cn('mt-1 text-lg font-bold font-mono', getHealthScoreColor(stats.avgHealth))}
-          >
-            {stats.avgHealth}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">Revenue Converted</p>
-          <p className="mt-1 text-lg font-bold font-mono text-accent">
-            ${funnelMetrics.revenueConverted.toLocaleString()}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">
-            Intervention Success
-          </p>
-          <p className="mt-1 text-lg font-bold font-mono text-secondary">
-            {funnelMetrics.interventionSuccessRate}%
-          </p>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-border">
-        <div className="flex gap-1">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-secondary text-secondary'
-                    : 'border-transparent text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ─── OVERVIEW TAB ─── */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Funnel Visualization */}
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-                <Funnel className="h-4 w-4 text-secondary" /> Conversion Funnel
-              </h3>
-              <div className="flex items-center gap-4 text-xs">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-secondary/40" /> Completed
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-warning/20" /> In Progress / Dropped
-                </span>
-              </div>
-            </div>
-            <FunnelVisualization stageData={stageDropOffs} />
-          </div>
-
-          {/* Drop-off Reasons & CSM Performance */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Drop-off Reasons */}
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-secondary" /> Drop-off Reasons
-              </h3>
-              {dropOffPieData.length > 0 ? (
-                <div className="space-y-3">
-                  {dropOffPieData.map((item) => {
-                    const total = dropOffPieData.reduce((s, d) => s + d.value, 0);
-                    const pct = total > 0 ? (item.value / total) * 100 : 0;
-                    const reasonMeta = dropOffReasons[item.key];
-                    return (
-                      <div key={item.key}>
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={cn(
-                                'h-2 w-2 rounded-full',
-                                reasonMeta?.color.replace('text-', 'bg-') || 'bg-text-muted'
-                              )}
-                            />
-                            <span className="text-xs font-medium text-text-secondary">
-                              {item.name}
-                            </span>
-                          </div>
-                          <span className="text-xs font-mono text-text-primary">
-                            {item.value} ({pct.toFixed(1)}%)
-                          </span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                          <div
-                            className={cn(
-                              'h-full rounded-full',
-                              reasonMeta?.color.replace('text-', 'bg-') || 'bg-text-muted'
-                            )}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-text-muted text-center py-8">
-                  No drop-off data available
-                </p>
-              )}
-            </div>
-
-            {/* CSM Performance */}
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Users className="h-4 w-4 text-secondary" /> CSM Performance
-              </h3>
-              <div className="space-y-3">
-                {csmTeam.map((csm) => (
-                  <CsmPerformanceCard key={csm.id} csm={csm} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── TENANTS TAB ─── */}
-      {activeTab === 'tenants' && (
-        <div className="space-y-6">
-          {/* Filters */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1 sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              <input
-                type="text"
-                placeholder="Search tenants by name, ID, CSM..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={cn(
-                  'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-                  showFilters
-                    ? 'border-secondary bg-secondary/10 text-secondary'
-                    : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-                )}
-              >
-                <Filter className="h-4 w-4" /> Filters
-              </button>
-            </div>
-          </div>
-
-          {/* Filter Panel */}
-          {showFilters && (
-            <div className="rounded-xl border border-border bg-surface p-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-text-secondary">Status</label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="active_trial">Active Trial</option>
-                    <option value="at_risk">At Risk</option>
-                    <option value="trial_expired">Trial Expired</option>
-                    <option value="converted">Converted</option>
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-text-secondary">Drop-off Stage</label>
-                  <select
-                    value={stageFilter}
-                    onChange={(e) => setStageFilter(e.target.value)}
-                    className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">All Stages</option>
-                    <option value="no_dropoff">No Drop-off</option>
-                    {funnelStages
-                      .filter((s) => !s.isStart && !s.isEnd)
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.label}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-text-secondary">Assigned CSM</label>
-                  <select
-                    value={csmFilter}
-                    onChange={(e) => setCsmFilter(e.target.value)}
-                    className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">All CSMs</option>
-                    {uniqueCSMs.map((csm) => (
-                      <option key={csm} value={csm}>
-                        {csm}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="mt-3 flex justify-end">
-                <button
-                  onClick={() => {
-                    setStatusFilter('all');
-                    setStageFilter('all');
-                    setCsmFilter('all');
-                    setQuery('');
-                  }}
-                  className="h-9 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Results Count */}
+          <h1 className="text-2xl font-bold">Onboarding Management</h1>
           <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredTenants.length}</span>{' '}
-            of {tenants.length} tenants
+            Track tenant onboarding progress and run interventions
           </p>
+        </div>
+        <select
+          value={period}
+          onChange={(e) => setPeriod(e.target.value)}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+        >
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+        </select>
+      </div>
 
-          {/* Tenant Table */}
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-background border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10"></th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Tenant
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Health
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Progress
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      CSM
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
-                      Revenue at Risk
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-16"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredTenants.map((tenant) => (
-                    <TenantProgressRow
-                      key={tenant.id}
-                      tenant={tenant}
-                      expanded={expandedTenants.has(tenant.id)}
-                      onToggle={() => toggleTenant(tenant.id)}
-                      onIntervene={handleIntervene}
-                    />
-                  ))}
-                  {filteredTenants.length === 0 && (
-                    <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
-                        <Users className="mx-auto h-10 w-10 mb-3" />
-                        <p>No tenants match your filters.</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      {/* Stat cards */}
+      {dash && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <OnboardingStatCard
+            label="Active Flows"
+            value={dash.activeFlows}
+            icon={PlayCircle}
+            color="text-secondary"
+          />
+          <OnboardingStatCard
+            label="Active Sessions"
+            value={dash.activeSessions}
+            icon={Users}
+            color="text-info"
+          />
+          <OnboardingStatCard
+            label="Completion Rate"
+            value={`${dash.completionRate}%`}
+            icon={TrendingUp}
+            color="text-accent"
+          />
+          <OnboardingStatCard
+            label="Avg. Time"
+            value={`${dash.averageTimeMinutes}m`}
+            icon={Clock}
+            color="text-secondary"
+          />
+          <OnboardingStatCard
+            label="At Risk"
+            value={dash.atRiskSessions}
+            icon={AlertTriangle}
+            color="text-warning"
+          />
+          <OnboardingStatCard
+            label="Interventions Today"
+            value={dash.interventionsToday}
+            icon={Zap}
+            color="text-danger"
+          />
         </div>
       )}
 
-      {/* ─── INTERVENTIONS TAB ─── */}
-      {activeTab === 'interventions' && (
-        <div className="space-y-6">
-          {/* Intervention Stats */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <OnboardingStatCard
-              label="Total Sent"
-              value={tenants.reduce((s, t) => s + t.interventions.length, 0)}
-              icon={Mail}
-              color="text-secondary"
-              subtext="All time"
-            />
-            <OnboardingStatCard
-              label="Opened / Clicked"
-              value={tenants.reduce(
-                (s, t) =>
-                  s +
-                  t.interventions.filter((i) => ['opened', 'clicked'].includes(i.status)).length,
-                0
-              )}
-              icon={CheckCircle2}
-              color="text-accent"
-              subtext="Engaged recipients"
-            />
-            <OnboardingStatCard
-              label="No Response"
-              value={tenants.reduce(
-                (s, t) =>
-                  s +
-                  t.interventions.filter((i) => ['unopened', 'no_answer'].includes(i.status))
-                    .length,
-                0
-              )}
-              icon={XCircle}
-              color="text-warning"
-              subtext="Follow-up needed"
-            />
-            <OnboardingStatCard
-              label="Success Rate"
-              value={`${funnelMetrics.interventionSuccessRate}%`}
-              icon={Target}
-              color="text-info"
-              subtext="Led to conversion"
-            />
-          </div>
+      {/* Funnel + trend */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="rounded-xl border border-border bg-surface p-5 lg:col-span-2">
+          <h3 className="mb-4 text-sm font-semibold text-text-primary">Onboarding Funnel</h3>
+          {funnelData.length > 0 ? (
+            <FunnelVisualization stageData={funnelData} />
+          ) : (
+            <p className="py-8 text-center text-sm text-text-muted">No flows configured yet.</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <h3 className="mb-4 text-sm font-semibold text-text-primary">Completion Trend</h3>
+          <MiniSparkline data={completionTrend} width={260} height={80} />
+          <p className="mt-2 text-xs text-text-muted">Completion % per day ({period})</p>
+        </div>
+      </div>
 
-          {/* Recent Interventions */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Flag className="h-4 w-4 text-secondary" /> Recent Interventions
-            </h3>
+      {/* Flows */}
+      <div className="rounded-xl border border-border bg-surface p-5">
+        <h3 className="mb-4 text-sm font-semibold text-text-primary">Flows</h3>
+        {flowList.length === 0 ? (
+          <p className="py-6 text-center text-sm text-text-muted">No onboarding flows yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {flowList.map((flow) => (
+              <div
+                key={flow.id}
+                className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-medium text-text-primary">{flow.name}</p>
+                  <p className="text-xs text-text-muted">
+                    {flow.steps?.length || 0} steps · {flow.completionRate}% completion
+                  </p>
+                </div>
+                <OnboardingStatusBadge status={flow.status} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Sessions (tenant progress) */}
+      <div className="rounded-xl border border-border bg-surface p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-text-primary">Active Sessions</h3>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs"
+          >
+            <option value="">All statuses</option>
+            <option value="in_progress">In progress</option>
+            <option value="completed">Completed</option>
+            <option value="abandoned">Abandoned</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+        {sessions.loading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </div>
+        ) : tenants.length === 0 ? (
+          <p className="py-6 text-center text-sm text-text-muted">No sessions found.</p>
+        ) : (
+          <div className="space-y-2">
+            {tenants.map((tenant) => (
+              <TenantProgressRow
+                key={tenant.id}
+                tenant={tenant}
+                expanded={expandedId === tenant.id}
+                onToggle={() => setExpandedId((prev) => (prev === tenant.id ? null : tenant.id))}
+                onIntervene={(t) => setInterveneTarget(t)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Interventions + CSM */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <h3 className="mb-4 text-sm font-semibold text-text-primary">Recent Interventions</h3>
+          {interventionCards.length === 0 ? (
+            <p className="py-6 text-center text-sm text-text-muted">No interventions yet.</p>
+          ) : (
             <div className="space-y-3">
-              {tenants
-                .flatMap((t) =>
-                  t.interventions.map((i) => ({ ...i, tenantName: t.name, tenantId: t.id }))
-                )
-                .sort(
-                  (a, b) =>
-                    new Date(b.sentAt || b.scheduledAt) - new Date(a.sentAt || a.scheduledAt)
-                )
-                .slice(0, 10)
-                .map((intervention) => (
+              {interventionCards.slice(0, 8).map((intervention) => (
+                <div key={intervention.id} className="relative">
                   <InterventionCard
-                    key={intervention.id}
                     intervention={intervention}
                     tenantName={intervention.tenantName}
                   />
-                ))}
-              {tenants.every((t) => t.interventions.length === 0) && (
-                <p className="text-sm text-text-muted text-center py-8">
-                  No interventions recorded yet
-                </p>
-              )}
+                  {intervention.status !== 'resolved' && (
+                    <button
+                      onClick={() => handleResolve(intervention.id)}
+                      className="absolute right-3 top-3 text-xs text-secondary hover:underline"
+                    >
+                      Mark resolved
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <h3 className="mb-4 text-sm font-semibold text-text-primary">CSM Performance</h3>
+          {csmList.length === 0 ? (
+            <p className="py-6 text-center text-sm text-text-muted">
+              No resolved interventions yet — CSM stats appear once interventions are resolved.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {csmList.map((csm) => (
+                <CsmPerformanceCard key={csm.name} csm={csm} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Health score summary of at-risk sessions */}
+      {tenants.some((t) => t.status === 'abandoned' || t.status === 'overdue') && (
+        <div className="rounded-xl border border-warning/30 bg-warning/5 p-5">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-warning">
+            <AlertTriangle className="h-4 w-4" /> At-risk sessions
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {tenants
+              .filter((t) => t.status === 'abandoned' || t.status === 'overdue')
+              .map((t) => (
+                <div
+                  key={t.id}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2"
+                >
+                  <HealthScoreBadge score={t.healthScore} />
+                  <span className="text-sm text-text-primary">{t.name}</span>
+                  <Button variant="outline" size="sm" onClick={() => setInterveneTarget(t)}>
+                    Intervene
+                  </Button>
+                </div>
+              ))}
           </div>
         </div>
       )}
 
-      {/* ─── ANALYTICS TAB ─── */}
-      {activeTab === 'analytics' && (
-        <div className="space-y-6">
-          {/* Time Range */}
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-text-muted" />
-            <span className="text-xs text-text-muted">Time range:</span>
-            {['7d', '14d', '30d'].map((range) => (
-              <button
-                key={range}
-                onClick={() => setTimeRange(range)}
-                className={cn(
-                  'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                  timeRange === range
-                    ? 'bg-secondary text-white'
-                    : 'border border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-                )}
-              >
-                Last {range}
-              </button>
-            ))}
-          </div>
-
-          {/* Conversion Trend Chart */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-secondary" /> Daily Trial & Conversion Trend
-            </h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="trialGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="convGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={CHART_COLORS.accent} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={CHART_COLORS.accent} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 10 }}
-                    stroke="var(--text-muted)"
-                    interval={Math.floor(chartData.length / 6)}
-                  />
-                  <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'var(--text-primary)' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Area
-                    type="monotone"
-                    dataKey="trials"
-                    stroke={CHART_COLORS.primary}
-                    fill="url(#trialGradient)"
-                    strokeWidth={2}
-                    name="New Trials"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="conversions"
-                    stroke={CHART_COLORS.accent}
-                    fill="url(#convGradient)"
-                    strokeWidth={2}
-                    name="Conversions"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Conversion by Plan & Stage Duration */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Conversion by Plan */}
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-secondary" /> Conversion by Plan
-              </h3>
-              <div className="space-y-3">
-                {conversionByPlan.map((item) => (
-                  <div key={item.plan}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-text-secondary">{item.plan}</span>
-                      <span className="text-xs font-mono text-text-primary">
-                        {item.converted}/{item.total} ({item.rate}%)
-                      </span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all',
-                          item.plan === 'Enterprise'
-                            ? 'bg-purple-500'
-                            : item.plan === 'Professional'
-                              ? 'bg-secondary'
-                              : 'bg-info'
-                        )}
-                        style={{ width: `${item.rate}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Stage Duration */}
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Clock3 className="h-4 w-4 text-secondary" /> Avg. Time per Stage
-              </h3>
-              <div className="space-y-3">
-                {funnelStages
-                  .filter((s) => s.avgDuration)
-                  .map((stage) => (
-                    <div key={stage.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-text-secondary">{stage.label}</span>
-                        {stage.optional && (
-                          <span className="text-[10px] text-text-muted">(optional)</span>
-                        )}
-                      </div>
-                      <span className="text-xs font-mono font-medium text-text-primary">
-                        {stage.avgDuration}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Intervention Modal ─── */}
-      {showInterventionModal && (
+      {/* Intervention modal */}
+      {interveneTarget && (
         <InterventionModal
-          tenant={selectedTenant || filteredTenants[0]}
-          onClose={() => {
-            setShowInterventionModal(false);
-            setSelectedTenant(null);
-          }}
+          tenant={interveneTarget}
+          onClose={() => setInterveneTarget(null)}
           onSave={handleSaveIntervention}
         />
       )}

@@ -1,229 +1,319 @@
-/* src/app/admin/quotas/page.jsx */
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+'use client';
+
+import { useState, useMemo, useCallback } from 'react';
 import {
-  Shield,
+  Plus,
   Search,
   Filter,
-  Plus,
-  X,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Zap,
-  HardDrive,
-  BedDouble,
-  Users,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  DollarSign,
-  Gauge,
-  Ban,
-  Activity,
-  BarChart3,
   Download,
   RefreshCw,
-  Settings,
-  FileText,
-  Bell,
-  BellRing,
-  Eye,
-  EyeOff,
+  BarChart3,
+  DollarSign,
+  Ban,
+  AlertTriangle,
+  Activity,
+  Gauge,
+  Clock,
+  CheckCircle2,
+  TrendingUp,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiMutation } from '@/hooks/useApiMutation';
+import { LoadingSkeleton, TableSkeleton } from '@/components/ui/LoadingSkeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  quotaRules,
-  tenantUsage,
-  overageHistory,
-  throttleEvents,
-  resourceMeta,
-  actionMeta,
-  getUsagePercent,
-  getUsageColor,
-  getUsageBarColor,
-  formatNumber,
-  formatCurrency,
-} from './data';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+
+import {
+  fetchQuotaRules,
+  fetchQuotaUsage,
+  fetchOverages,
+  fetchThrottleEvents,
+  fetchQuotaStats,
+  createQuotaRule,
+  updateQuotaRule,
+  deleteQuotaRule,
+  updateOverageStatus,
+} from '@/api/quotas';
+
 import {
   QuotaStatCard,
   QuotaRuleCard,
-  TenantUsageRow,
+  UsageBar,
   OverageHistoryRow,
   ThrottleEventRow,
   ResourceBadge,
-  ActionBadge,
   ScopeBadge,
-  MiniProgressRing,
+  ActionBadge,
+  OverageStatusBadge,
 } from './components';
-import QuotaModal from './QuotaModal';
-import OverageModal from './OverageModal';
 
-/* ─── Mock tenants for scope selection ─── */
-const mockTenants = [
-  { id: 'TNT-001', name: 'Grand Hotel Boston' },
-  { id: 'TNT-002', name: 'Seaside Resort Miami' },
-  { id: 'TNT-003', name: 'Mountain Lodge Aspen' },
-  { id: 'TNT-004', name: 'Downtown Suites Chicago' },
-  { id: 'TNT-005', name: 'Coastal Inn San Diego' },
-  { id: 'TNT-006', name: 'Lakeside Resort Tahoe' },
-  { id: 'TNT-007', name: 'Urban Hotel NYC' },
-  { id: 'TNT-008', name: 'Desert Oasis Phoenix' },
+import { QuotaModal } from './QuotaModal';
+import { OverageModal } from './OverageModal';
+
+// ─── Constants ───
+
+const TABS = [
+  { id: 'rules', label: 'Quota Rules', icon: BarChart3 },
+  { id: 'usage', label: 'Usage Monitor', icon: Activity },
+  { id: 'overages', label: 'Overage Billing', icon: DollarSign },
+  { id: 'throttles', label: 'Throttle Log', icon: Gauge },
 ];
 
+const RESOURCE_OPTIONS = [
+  { value: 'all', label: 'All Resources' },
+  { value: 'api_calls', label: 'API Calls' },
+  { value: 'storage', label: 'Storage' },
+  { value: 'reservations', label: 'Reservations' },
+  { value: 'users', label: 'Users' },
+  { value: 'properties', label: 'Properties' },
+  { value: 'bandwidth', label: 'Bandwidth' },
+];
+
+// ─── Main Component ───
+
 export default function QuotasPage() {
-  const navigate = useNavigate();
-  const [rules, setRules] = useState(quotaRules);
-  const [usage] = useState(tenantUsage);
-  const [overages, setOverages] = useState(overageHistory);
-  const [throttles] = useState(throttleEvents);
-
   const [activeTab, setActiveTab] = useState('rules');
-  const [query, setQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [resourceFilter, setResourceFilter] = useState('all');
-  const [scopeFilter, setScopeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
 
+  // Modal states
   const [showQuotaModal, setShowQuotaModal] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
   const [showOverageModal, setShowOverageModal] = useState(false);
   const [editingOverage, setEditingOverage] = useState(null);
 
-  const [expandedUsage, setExpandedUsage] = useState(new Set());
+  // ─── Data Fetching ───
 
-  /* ─── Computed Data ─── */
+  const {
+    data: rules,
+    loading: rulesLoading,
+    error: rulesError,
+    refetch: refetchRules,
+  } = useApiFetch(fetchQuotaRules, []);
+
+  const {
+    data: usage,
+    loading: usageLoading,
+    error: usageError,
+    refetch: refetchUsage,
+  } = useApiFetch(
+    () => fetchQuotaUsage({ resource: resourceFilter !== 'all' ? resourceFilter : undefined }),
+    [resourceFilter]
+  );
+
+  const {
+    data: overages,
+    loading: overagesLoading,
+    error: overagesError,
+    refetch: refetchOverages,
+  } = useApiFetch(
+    () => fetchOverages({ status: statusFilter !== 'all' ? statusFilter : undefined }),
+    [statusFilter]
+  );
+
+  const {
+    data: throttles,
+    loading: throttlesLoading,
+    error: throttlesError,
+    refetch: refetchThrottles,
+  } = useApiFetch(
+    () => fetchThrottleEvents({ resource: resourceFilter !== 'all' ? resourceFilter : undefined }),
+    [resourceFilter]
+  );
+
+  const {
+    data: stats,
+    loading: statsLoading,
+    refetch: refetchStats,
+  } = useApiFetch(fetchQuotaStats, []);
+
+  // ─── Mutations ───
+
+  const saveRuleMutation = useApiMutation(async ({ id, ...data }) => {
+    if (id) {
+      return updateQuotaRule(id, data);
+    }
+    return createQuotaRule(data);
+  });
+
+  const deleteRuleMutation = useApiMutation(deleteQuotaRule);
+
+  const updateOverageMutation = useApiMutation(({ id, status }) => updateOverageStatus(id, status));
+
+  // ─── Handlers ───
+
+  const handleSaveRule = useCallback(
+    async (formData) => {
+      try {
+        await saveRuleMutation.mutate(formData);
+        setShowQuotaModal(false);
+        setEditingRule(null);
+        refetchRules();
+        refetchStats();
+      } catch (err) {
+        console.error('Failed to save rule:', err);
+        throw err; // Let modal handle the error display
+      }
+    },
+    [saveRuleMutation, refetchRules, refetchStats]
+  );
+
+  const handleDeleteRule = useCallback(
+    async (ruleId) => {
+      if (!confirm('Are you sure you want to delete this quota rule?')) return;
+      try {
+        await deleteRuleMutation.mutate(ruleId);
+        refetchRules();
+        refetchStats();
+      } catch (err) {
+        console.error('Failed to delete rule:', err);
+        alert('Failed to delete rule. Please try again.');
+      }
+    },
+    [deleteRuleMutation, refetchRules, refetchStats]
+  );
+
+  const handleToggleRule = useCallback(
+    async (rule) => {
+      try {
+        await updateQuotaRule(rule.id, { enabled: !rule.enabled });
+        refetchRules();
+      } catch (err) {
+        console.error('Failed to toggle rule:', err);
+        alert('Failed to update rule. Please try again.');
+      }
+    },
+    [refetchRules]
+  );
+
+  const handleSaveOverage = useCallback(
+    async ({ id, status }) => {
+      try {
+        await updateOverageMutation.mutate({ id, status });
+        setShowOverageModal(false);
+        setEditingOverage(null);
+        refetchOverages();
+        refetchStats();
+      } catch (err) {
+        console.error('Failed to update overage:', err);
+        throw err;
+      }
+    },
+    [updateOverageMutation, refetchOverages, refetchStats]
+  );
+
+  const handleRefreshAll = useCallback(() => {
+    refetchRules();
+    refetchUsage();
+    refetchOverages();
+    refetchThrottles();
+    refetchStats();
+  }, [refetchRules, refetchUsage, refetchOverages, refetchThrottles, refetchStats]);
+
+  // ─── Derived Data ───
+
   const filteredRules = useMemo(() => {
-    return rules.filter((r) => {
-      const matchesQuery =
-        !query ||
-        r.name.toLowerCase().includes(query.toLowerCase()) ||
-        r.id.toLowerCase().includes(query.toLowerCase()) ||
-        r.description.toLowerCase().includes(query.toLowerCase());
-      const matchesResource = resourceFilter === 'all' || r.resource === resourceFilter;
-      const matchesScope = scopeFilter === 'all' || r.scope === scopeFilter;
-      const matchesStatus =
-        statusFilter === 'all' || (statusFilter === 'enabled' ? r.enabled : !r.enabled);
-      return matchesQuery && matchesResource && matchesScope && matchesStatus;
+    if (!rules) return [];
+    return rules.filter((rule) => {
+      const matchesSearch =
+        searchQuery === '' ||
+        rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rule.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesResource = resourceFilter === 'all' || rule.resource === resourceFilter;
+      return matchesSearch && matchesResource;
     });
-  }, [rules, query, resourceFilter, scopeFilter, statusFilter]);
+  }, [rules, searchQuery, resourceFilter]);
 
   const filteredUsage = useMemo(() => {
+    if (!usage) return [];
     return usage.filter((u) => {
-      const matchesQuery =
-        !query ||
-        u.tenantName.toLowerCase().includes(query.toLowerCase()) ||
-        u.tenantId.toLowerCase().includes(query.toLowerCase());
+      const matchesSearch =
+        searchQuery === '' || u.tenantName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesResource = resourceFilter === 'all' || u.resource === resourceFilter;
-      return matchesQuery && matchesResource;
+      return matchesSearch && matchesResource;
     });
-  }, [usage, query, resourceFilter]);
+  }, [usage, searchQuery, resourceFilter]);
 
   const filteredOverages = useMemo(() => {
+    if (!overages) return [];
     return overages.filter((o) => {
-      const matchesQuery =
-        !query ||
-        o.tenantName.toLowerCase().includes(query.toLowerCase()) ||
-        o.tenantId.toLowerCase().includes(query.toLowerCase());
-      const matchesResource = resourceFilter === 'all' || o.resource === resourceFilter;
-      return matchesQuery && matchesResource;
+      const matchesSearch =
+        searchQuery === '' || o.tenantName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+      return matchesSearch && matchesStatus;
     });
-  }, [overages, query, resourceFilter]);
+  }, [overages, searchQuery, statusFilter]);
 
   const filteredThrottles = useMemo(() => {
+    if (!throttles) return [];
     return throttles.filter((t) => {
-      const matchesQuery =
-        !query ||
-        t.tenantId.toLowerCase().includes(query.toLowerCase()) ||
-        t.reason.toLowerCase().includes(query.toLowerCase());
+      const matchesSearch =
+        searchQuery === '' ||
+        t.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.reason.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesResource = resourceFilter === 'all' || t.resource === resourceFilter;
-      return matchesQuery && matchesResource;
+      return matchesSearch && matchesResource;
     });
-  }, [throttles, query, resourceFilter]);
+  }, [throttles, searchQuery, resourceFilter]);
 
-  /* ─── Stats ─── */
-  const stats = useMemo(() => {
-    const enabled = rules.filter((r) => r.enabled).length;
-    const throttling = rules.filter((r) => r.enabled && r.action === 'throttle').length;
-    const blocking = rules.filter((r) => r.enabled && r.action === 'block').length;
-    const totalOverages = overages.reduce((s, o) => s + o.charge, 0);
-    const projectedOverages = overages
-      .filter((o) => o.status === 'projected')
-      .reduce((s, o) => s + o.charge, 0);
-    const activeThrottles = throttles.filter((t) => !t.resolved).length;
-    const criticalUsage = usage.filter((u) => getUsagePercent(u.used, u.limit) >= 90).length;
-    return {
-      enabled,
-      throttling,
-      blocking,
-      totalOverages,
-      projectedOverages,
-      activeThrottles,
-      criticalUsage,
-      total: rules.length,
-    };
-  }, [rules, overages, throttles, usage]);
+  // ─── Loading States ───
 
-  /* ─── Handlers ─── */
-  const handleToggleRule = (id) => {
-    setRules((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
-  };
+  const isLoading =
+    activeTab === 'rules'
+      ? rulesLoading
+      : activeTab === 'usage'
+        ? usageLoading
+        : activeTab === 'overages'
+          ? overagesLoading
+          : throttlesLoading;
 
-  const handleDeleteRule = (id) => {
-    if (confirm('Delete this quota rule? This cannot be undone.')) {
-      setRules((prev) => prev.filter((r) => r.id !== id));
-    }
-  };
+  const isError =
+    activeTab === 'rules'
+      ? rulesError
+      : activeTab === 'usage'
+        ? usageError
+        : activeTab === 'overages'
+          ? overagesError
+          : throttlesError;
 
-  const handleSaveRule = (rule) => {
-    setRules((prev) => {
-      const exists = prev.find((r) => r.id === rule.id);
-      if (exists) return prev.map((r) => (r.id === rule.id ? rule : r));
-      return [rule, ...prev];
-    });
-  };
-
-  const handleSaveOverage = (entry) => {
-    setOverages((prev) => {
-      const exists = prev.find((o) => o.id === entry.id);
-      if (exists) return prev.map((o) => (o.id === entry.id ? entry : o));
-      return [entry, ...prev];
-    });
-  };
-
-  const toggleUsage = (key) => {
-    setExpandedUsage((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  /* ─── Tabs ─── */
-  const tabs = [
-    { id: 'rules', label: 'Quota Rules', icon: Shield, badge: null },
-    { id: 'usage', label: 'Tenant Usage', icon: BarChart3, badge: stats.criticalUsage },
-    { id: 'overages', label: 'Overage Billing', icon: DollarSign, badge: null },
-    { id: 'throttles', label: 'Throttle Log', icon: Gauge, badge: stats.activeThrottles },
-  ];
+  // ─── Render ───
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Rate Limiting & Quotas</h1>
-          <p className="text-sm text-text-secondary">
-            Per-tenant API limits, storage caps, room ceilings, and overage controls
+          <h1 className="text-2xl font-bold text-text-primary">Quota Management</h1>
+          <p className="mt-1 text-sm text-text-muted">
+            Configure resource limits, monitor usage, and manage overage billing
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-1.5 h-4 w-4" /> Export
+          <Button variant="outline" size="sm" onClick={handleRefreshAll}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // TODO: Implement CSV export
+              console.log('Export CSV');
+            }}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export
           </Button>
           {activeTab === 'rules' && (
             <Button
@@ -233,476 +323,324 @@ export default function QuotasPage() {
                 setShowQuotaModal(true);
               }}
             >
-              <Plus className="mr-1.5 h-4 w-4" /> New Rule
-            </Button>
-          )}
-          {activeTab === 'overages' && (
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditingOverage(null);
-                setShowOverageModal(true);
-              }}
-            >
-              <Plus className="mr-1.5 h-4 w-4" /> Record Overage
+              <Plus className="mr-2 h-4 w-4" />
+              New Rule
             </Button>
           )}
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <QuotaStatCard
-          label="Active Rules"
-          value={stats.enabled}
-          icon={Shield}
-          color="text-accent"
-          subtext={`of ${stats.total} total`}
-        />
-        <QuotaStatCard
-          label="Throttling"
-          value={stats.throttling}
-          icon={Gauge}
-          color="text-warning"
-          subtext="Rate-limit enforced"
-        />
-        <QuotaStatCard
-          label="Overage Revenue"
-          value={formatCurrency(stats.totalOverages)}
-          icon={DollarSign}
-          color="text-secondary"
-          subtext={`${formatCurrency(stats.projectedOverages)} projected`}
-        />
-        <QuotaStatCard
-          label="Critical Usage"
-          value={stats.criticalUsage}
-          icon={AlertTriangle}
-          color="text-danger"
-          subtext="Tenants near limit"
-        />
-      </div>
+      {/* Stats Overview */}
+      {statsLoading ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-border bg-surface p-4">
+              <div className="h-4 w-20 animate-pulse rounded bg-neutral/20" />
+              <div className="mt-2 h-8 w-16 animate-pulse rounded bg-neutral/20" />
+            </div>
+          ))}
+        </div>
+      ) : stats ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <QuotaStatCard
+            label="Active Rules"
+            value={stats.activeRules}
+            icon={BarChart3}
+            color="text-secondary"
+            subtext={`${stats.totalRules} total`}
+          />
+          <QuotaStatCard
+            label="Throttled Tenants"
+            value={stats.throttledTenants}
+            icon={Gauge}
+            color="text-warning"
+            subtext="Currently limited"
+          />
+          <QuotaStatCard
+            label="Monthly Overages"
+            value={stats.monthlyOverages}
+            icon={DollarSign}
+            color="text-accent"
+            subtext="This billing cycle"
+          />
+          <QuotaStatCard
+            label="Active Throttles"
+            value={stats.activeThrottles}
+            icon={Activity}
+            color="text-danger"
+            subtext="In progress now"
+          />
+        </div>
+      ) : null}
 
       {/* Tabs */}
       <div className="border-b border-border">
-        <div className="flex gap-1">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-secondary text-secondary'
-                    : 'border-transparent text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <nav className="-mb-px flex space-x-8">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'flex items-center gap-2 border-b-2 px-1 py-3 text-sm font-medium transition-colors',
+                activeTab === tab.id
+                  ? 'border-secondary text-secondary'
+                  : 'border-transparent text-text-muted hover:border-border hover:text-text-primary'
+              )}
+            >
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          ))}
+        </nav>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-md">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search by name, ID, tenant..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          <Input
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
           />
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(
-              'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters
-                ? 'border-secondary bg-secondary/10 text-secondary'
-                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-            )}
-          >
-            <Filter className="h-4 w-4" /> Filters
-          </button>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-text-muted" />
+          <Select value={resourceFilter} onValueChange={setResourceFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Resource" />
+            </SelectTrigger>
+            <SelectContent>
+              {RESOURCE_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {activeTab === 'overages' && (
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="projected">Projected</SelectItem>
+                <SelectItem value="billed">Billed</SelectItem>
+                <SelectItem value="waived">Waived</SelectItem>
+                <SelectItem value="disputed">Disputed</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
-      {/* Filter Panel */}
-      {showFilters && (
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary">Resource</label>
-              <select
-                value={resourceFilter}
-                onChange={(e) => setResourceFilter(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="all">All Resources</option>
-                {Object.entries(resourceMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {activeTab === 'rules' && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-text-secondary">Scope</label>
-                  <select
-                    value={scopeFilter}
-                    onChange={(e) => setScopeFilter(e.target.value)}
-                    className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">All Scopes</option>
-                    <option value="plan">Plan</option>
-                    <option value="tenant">Tenant</option>
-                    <option value="global">Global</option>
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-text-secondary">Status</label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="enabled">Enabled</option>
-                    <option value="disabled">Disabled</option>
-                  </select>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="mt-3 flex justify-end">
-            <button
-              onClick={() => {
-                setResourceFilter('all');
-                setScopeFilter('all');
-                setStatusFilter('all');
-                setQuery('');
-              }}
-              className="h-9 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
-            >
-              Reset Filters
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ─── QUOTA RULES TAB ─── */}
-      {activeTab === 'rules' && (
-        <div className="space-y-6">
-          <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredRules.length}</span> of{' '}
-            {rules.length} rules
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredRules.map((rule) => (
-              <QuotaRuleCard
-                key={rule.id}
-                rule={rule}
-                onEdit={(r) => {
-                  setEditingRule(r);
-                  setShowQuotaModal(true);
-                }}
-                onToggle={handleToggleRule}
-                onDelete={handleDeleteRule}
-              />
-            ))}
-            {filteredRules.length === 0 && (
-              <div className="col-span-full rounded-xl border border-border bg-surface p-12 text-center">
-                <Shield className="mx-auto h-10 w-10 text-text-muted mb-3" />
-                <p className="text-sm text-text-muted">No quota rules match your filters.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ─── TENANT USAGE TAB ─── */}
-      {activeTab === 'usage' && (
-        <div className="space-y-6">
-          {/* Usage Summary Cards */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {Object.entries(resourceMeta).map(([key, meta]) => {
-              const resourceUsage = usage.filter((u) => u.resource === key);
-              const avgPct =
-                resourceUsage.length > 0
-                  ? Math.round(
-                      resourceUsage.reduce((s, u) => s + getUsagePercent(u.used, u.limit), 0) /
-                        resourceUsage.length
-                    )
-                  : 0;
-              return (
-                <div key={key} className="rounded-xl border border-border bg-surface p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-text-muted uppercase tracking-wider">
-                      {meta.label}
-                    </span>
-                    <MiniProgressRing percent={avgPct} size={36} strokeWidth={3} />
-                  </div>
-                  <p className={cn('text-lg font-bold font-mono', getUsageColor(avgPct))}>
-                    {avgPct}% avg
-                  </p>
-                  <p className="text-xs text-text-muted">{resourceUsage.length} tenants tracked</p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Usage Table */}
-          <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredUsage.length}</span> of{' '}
-            {usage.length} usage records
-          </p>
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-background border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Resource
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Tenant
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Plan
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Usage
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Amount
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredUsage.map((u) => (
-                    <TenantUsageRow
-                      key={`${u.tenantId}-${u.resource}`}
-                      usage={u}
-                      expanded={expandedUsage.has(`${u.tenantId}-${u.resource}`)}
-                      onToggle={() => toggleUsage(`${u.tenantId}-${u.resource}`)}
+      {/* Content */}
+      {isLoading ? (
+        <TableSkeleton rows={6} />
+      ) : isError ? (
+        <ErrorState
+          error={isError}
+          onRetry={() => {
+            if (activeTab === 'rules') refetchRules();
+            else if (activeTab === 'usage') refetchUsage();
+            else if (activeTab === 'overages') refetchOverages();
+            else refetchThrottles();
+          }}
+        />
+      ) : (
+        <>
+          {/* Rules Tab */}
+          {activeTab === 'rules' && (
+            <>
+              {filteredRules.length === 0 ? (
+                <EmptyState
+                  title="No quota rules"
+                  description="Create your first quota rule to start limiting resource usage."
+                  actionLabel="Create Rule"
+                  onAction={() => {
+                    setEditingRule(null);
+                    setShowQuotaModal(true);
+                  }}
+                />
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredRules.map((rule) => (
+                    <QuotaRuleCard
+                      key={rule.id}
+                      rule={rule}
+                      onEdit={() => {
+                        setEditingRule(rule);
+                        setShowQuotaModal(true);
+                      }}
+                      onToggle={() => handleToggleRule(rule)}
+                      onDelete={() => handleDeleteRule(rule.id)}
                     />
                   ))}
-                  {filteredUsage.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
-                        <BarChart3 className="mx-auto h-10 w-10 mb-3" />
-                        <p>No usage records match your filters.</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Usage Tab */}
+          {activeTab === 'usage' && (
+            <>
+              {filteredUsage.length === 0 ? (
+                <EmptyState
+                  title="No usage data"
+                  description="Usage data will appear here once tenants start consuming resources."
+                />
+              ) : (
+                <div className="rounded-xl border border-border bg-surface overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-background border-b border-border">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Tenant
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Resource
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Usage
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Limit
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Progress
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Reset At
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filteredUsage.map((entry) => (
+                          <UsageBar key={entry.id} entry={entry} />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Overages Tab */}
+          {activeTab === 'overages' && (
+            <>
+              {filteredOverages.length === 0 ? (
+                <EmptyState
+                  title="No overages"
+                  description="No overage charges have been recorded."
+                />
+              ) : (
+                <div className="rounded-xl border border-border bg-surface overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-background border-b border-border">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Tenant
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Resource
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Period
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Excess
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Rate
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Charge
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Invoice
+                          </th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filteredOverages.map((entry) => (
+                          <OverageHistoryRow
+                            key={entry.id}
+                            entry={entry}
+                            onEdit={() => {
+                              setEditingOverage(entry);
+                              setShowOverageModal(true);
+                            }}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Throttles Tab */}
+          {activeTab === 'throttles' && (
+            <>
+              {filteredThrottles.length === 0 ? (
+                <EmptyState
+                  title="No throttle events"
+                  description="No rate limiting events have occurred."
+                />
+              ) : (
+                <div className="rounded-xl border border-border bg-surface overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-background border-b border-border">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Resource
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Tenant
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Timestamp
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Reason
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Duration
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filteredThrottles.map((event) => (
+                          <ThrottleEventRow key={event.id} event={event} />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
-      {/* ─── OVERAGE BILLING TAB ─── */}
-      {activeTab === 'overages' && (
-        <div className="space-y-6">
-          {/* Overage Summary */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <QuotaStatCard
-              label="Total Billed"
-              value={formatCurrency(
-                overages.filter((o) => o.status === 'billed').reduce((s, o) => s + o.charge, 0)
-              )}
-              icon={DollarSign}
-              color="text-accent"
-              subtext="Collected revenue"
-            />
-            <QuotaStatCard
-              label="Projected"
-              value={formatCurrency(
-                overages.filter((o) => o.status === 'projected').reduce((s, o) => s + o.charge, 0)
-              )}
-              icon={TrendingUp}
-              color="text-info"
-              subtext="Current cycle estimate"
-            />
-            <QuotaStatCard
-              label="Waived"
-              value={formatCurrency(
-                overages.filter((o) => o.status === 'waived').reduce((s, o) => s + o.charge, 0)
-              )}
-              icon={Ban}
-              color="text-text-muted"
-              subtext="Forgiven charges"
-            />
-            <QuotaStatCard
-              label="Disputed"
-              value={formatCurrency(
-                overages.filter((o) => o.status === 'disputed').reduce((s, o) => s + o.charge, 0)
-              )}
-              icon={AlertTriangle}
-              color="text-warning"
-              subtext="Under review"
-            />
-          </div>
-
-          {/* Overage Table */}
-          <p className="text-sm text-text-muted">
-            Showing <span className="font-medium text-text-primary">{filteredOverages.length}</span>{' '}
-            of {overages.length} entries
-          </p>
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-background border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Tenant
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Resource
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Period
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Excess
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Rate
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Charge
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Invoice
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredOverages.map((entry) => (
-                    <OverageHistoryRow key={entry.id} entry={entry} />
-                  ))}
-                  {filteredOverages.length === 0 && (
-                    <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
-                        <DollarSign className="mx-auto h-10 w-10 mb-3" />
-                        <p>No overage records found.</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── THROTTLE LOG TAB ─── */}
-      {activeTab === 'throttles' && (
-        <div className="space-y-6">
-          {/* Throttle Stats */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <QuotaStatCard
-              label="Total Events"
-              value={throttles.length}
-              icon={Activity}
-              color="text-text-primary"
-              subtext="All time"
-            />
-            <QuotaStatCard
-              label="Active Now"
-              value={stats.activeThrottles}
-              icon={Gauge}
-              color="text-warning"
-              subtext="Currently throttled"
-            />
-            <QuotaStatCard
-              label="Avg Duration"
-              value="105s"
-              icon={Clock}
-              color="text-info"
-              subtext="Mean throttle time"
-            />
-            <QuotaStatCard
-              label="Resolution Rate"
-              value="96%"
-              icon={CheckCircle2}
-              color="text-accent"
-              subtext="Auto-resolved"
-            />
-          </div>
-
-          {/* Throttle Table */}
-          <p className="text-sm text-text-muted">
-            Showing{' '}
-            <span className="font-medium text-text-primary">{filteredThrottles.length}</span> of{' '}
-            {throttles.length} events
-          </p>
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-background border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Resource
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Tenant
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Timestamp
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Reason
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Duration
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredThrottles.map((event) => (
-                    <ThrottleEventRow key={event.id} event={event} />
-                  ))}
-                  {filteredThrottles.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
-                        <Gauge className="mx-auto h-10 w-10 mb-3" />
-                        <p>No throttle events match your filters.</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Modals ─── */}
+      {/* Modals */}
       {showQuotaModal && (
         <QuotaModal
           rule={editingRule}
@@ -711,7 +649,7 @@ export default function QuotasPage() {
             setEditingRule(null);
           }}
           onSave={handleSaveRule}
-          tenants={mockTenants}
+          loading={saveRuleMutation.loading}
         />
       )}
 
@@ -723,6 +661,7 @@ export default function QuotasPage() {
             setEditingOverage(null);
           }}
           onSave={handleSaveOverage}
+          loading={updateOverageMutation.loading}
         />
       )}
     </div>

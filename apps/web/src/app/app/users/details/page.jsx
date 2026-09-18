@@ -476,8 +476,8 @@ function SessionModal({ sessions, onClose, onTerminate }) {
 
 /* ─── Main Page ─── */
 export default function UserDetailPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const userId = searchParams.get('id');
   const user = userProfiles[userId];
 

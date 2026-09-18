@@ -23,7 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { tierMeta, mockMembers, pointsTransactions } from './data';
 import { TierBadge, StatCard, TierProgressBar } from './components';
@@ -39,7 +39,6 @@ function formatNumber(num) {
 
 /* ─── Main Page ─── */
 export default function LoyaltyPage() {
-  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [tierFilter, setTierFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'

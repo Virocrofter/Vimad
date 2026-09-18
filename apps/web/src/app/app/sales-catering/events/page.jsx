@@ -399,8 +399,8 @@ function TimelineItem({ item, index, onToggle }) {
 
 /* ─── Main Page ─── */
 export default function BEOEventPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const beoId = searchParams.get('id') || eventData.id;
 
   const [activeTab, setActiveTab] = useState('overview');

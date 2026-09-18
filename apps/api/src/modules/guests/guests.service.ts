@@ -31,15 +31,32 @@ export async function listGuests(
   const where: Record<string, unknown> = { tenantId };
 
   if (query.search) {
-    const term = { contains: query.search, mode: 'insensitive' };
-    where.OR = [{ firstName: term }, { lastName: term }, { email: term }, { phone: term }];
+    where.OR = [
+      { firstName: { contains: query.search, mode: 'insensitive' } },
+      { lastName: { contains: query.search, mode: 'insensitive' } },
+      { email: { contains: query.search, mode: 'insensitive' } },
+      { phone: { contains: query.search, mode: 'insensitive' } },
+    ];
   }
 
   const [total, items] = await Promise.all([
     prisma.guest.count({ where }),
     prisma.guest.findMany({
       where,
-      orderBy: { lastName: 'asc' },
+      include: {
+        reservations: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            confirmationNumber: true,
+            status: true,
+            arrivalDate: true,
+            departureDate: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
       ...skipTake(pagination),
     }),
   ]);
@@ -50,22 +67,41 @@ export async function listGuests(
 export async function getGuest(tenantId: string, id: string) {
   const guest = await prisma.guest.findFirst({
     where: { id, tenantId },
-    include: { preferences: true, documents: true },
+    include: {
+      preferences: true,
+      documents: true,
+      reservations: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          property: { select: { id: true, name: true } },
+          stays: { include: { room: true } },
+        },
+      },
+    },
   });
+
   if (!guest) {
     throw new AppError(404, 'Guest not found', 'NOT_FOUND');
   }
+
   return guest;
 }
 
 export async function createGuest(tenantId: string, input: GuestCreateInput) {
   return prisma.guest.create({
-    data: { ...input, tenantId },
+    data: {
+      tenantId,
+      ...input,
+    },
   });
 }
 
 export async function updateGuest(tenantId: string, id: string, input: GuestUpdateInput) {
-  await getGuest(tenantId, id);
+  const _existing = await prisma.guest.findFirst({ where: { id, tenantId } });
+  if (!_existing) {
+    throw new AppError(404, 'Guest not found', 'NOT_FOUND');
+  }
+
   return prisma.guest.update({
     where: { id },
     data: input,
@@ -73,6 +109,10 @@ export async function updateGuest(tenantId: string, id: string, input: GuestUpda
 }
 
 export async function deleteGuest(tenantId: string, id: string) {
-  await getGuest(tenantId, id);
+  const _existing = await prisma.guest.findFirst({ where: { id, tenantId } });
+  if (!_existing) {
+    throw new AppError(404, 'Guest not found', 'NOT_FOUND');
+  }
+
   return prisma.guest.delete({ where: { id } });
 }

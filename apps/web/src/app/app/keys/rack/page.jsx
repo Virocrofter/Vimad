@@ -746,7 +746,6 @@ function KeyDetailDrawer({ keyItem, onClose, onUpdateStatus }) {
 
 /* ─── Main Page ─── */
 export default function KeysPage() {
-  const navigate = useNavigate();
   const [keys, setKeys] = useState(keyRack);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

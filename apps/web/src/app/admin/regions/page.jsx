@@ -1,11 +1,10 @@
-/* src/app/admin/regions/page.jsx */
+/* src/app/admin/regions/page.jsx — wired to api/regions.ts (Phase 3D) */
 import { useState, useMemo } from 'react';
 import {
   Globe,
   ArrowRight,
   Plus,
   Search,
-  Filter,
   RefreshCw,
   Download,
   Shield,
@@ -14,26 +13,15 @@ import {
   XCircle,
   Activity,
   Server,
-  HardDrive,
-  Zap,
-  TrendingUp,
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  MapPin,
-  BarChart3,
   FileText,
   Layers,
+  MapPin,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   LineChart,
   Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -42,115 +30,171 @@ import {
   Legend,
 } from 'recharts';
 
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiMutation } from '../../../hooks/useApiMutation';
+import { useToast } from '../../../hooks/use-toast';
+import { useApiError } from '../../../hooks/useApiError';
 import {
-  regions,
-  migrationJobs,
-  complianceRules,
-  latencyHistory,
-  regionStatusMeta,
-  migrationStatusMeta,
-  complianceStatusMeta,
-  getRegionName,
-  regionTenants,
-} from './data';
+  getRegions,
+  getRegionStats,
+  getMigrationJobs,
+  createMigration,
+  cancelMigration,
+} from '../../../api/regions';
+import { api } from '../../../api/client';
 
-import {
-  RegionCard,
-  MigrationJobCard,
-  ComplianceCard,
-  RegionStatCard,
-  LatencySparkline,
-} from './components';
+// Static metadata only (status labels/colors, helpers) — entity data comes from the API.
+import { formatDuration } from './data';
+
+import { RegionCard, MigrationJobCard, ComplianceCard, RegionStatCard } from './components';
 
 import RegionDetailDrawer from './RegionDetailDrawer';
 import MigrationModal from './MigrationModal';
 
-/* ═══════════════════════════════════════════════════════════════════════════════
-   DEBUG: Find bad tenant data before flattening
-   ═══════════════════════════════════════════════════════════════════════════════ */
-(function debugTenants() {
-  if (!regionTenants || typeof regionTenants !== 'object') {
-    console.error('❌ regionTenants is missing or not an object:', regionTenants);
-    return;
-  }
-  console.log('🔍 Debugging regionTenants...');
-  Object.entries(regionTenants).forEach(([regionId, tenants]) => {
-    // Check if tenants is an array
-    if (!Array.isArray(tenants)) {
-      console.error(
-        `❌ Region "${regionId}": tenants is NOT an array →`,
-        tenants,
-        `(type: ${typeof tenants})`
-      );
-      return;
-    }
-    console.log(`✅ Region "${regionId}": ${tenants.length} tenants`);
-    // Check each tenant
-    tenants.forEach((t, i) => {
-      if (t === null) {
-        console.error(`   ❌ Index ${i}: tenant is NULL`);
-      } else if (t === undefined) {
-        console.error(`   ❌ Index ${i}: tenant is UNDEFINED`);
-      } else if (typeof t !== 'object') {
-        console.error(`   ❌ Index ${i}: tenant is not an object →`, t, `(type: ${typeof t})`);
-      } else if (Array.isArray(t)) {
-        console.error(`   ❌ Index ${i}: tenant is an ARRAY (should be object) →`, t);
-      } else if (!t.id) {
-        console.warn(`   ⚠️ Index ${i}: tenant missing "id" field →`, t);
-      }
-    });
-  });
-})();
+/* ─── Normalizers: API shapes → component shapes ─── */
+const regionStatusMap = {
+  active: 'operational',
+  degraded: 'degraded',
+  maintenance: 'maintenance',
+  offline: 'critical',
+};
 
-/* ═══════════════════════════════════════════════════════════════════════════════
-   Flatten all tenants for migration selector — ROBUST VERSION
-   ═══════════════════════════════════════════════════════════════════════════════ */
-const allTenants = (() => {
-  // Guard 1: regionTenants must exist and be an object
-  if (!regionTenants || typeof regionTenants !== 'object' || Array.isArray(regionTenants)) {
-    console.error('❌ regionTenants is invalid:', regionTenants);
-    return [];
-  }
+const normalizeRegion = (r) => {
+  const storageTotalTB = r.capacity?.storage ?? 0;
+  const storageUsedTB = r.usage?.storage ?? 0;
+  const cpuUtil = r.capacity?.cpu > 0 ? (r.usage?.cpu ?? 0) / r.capacity.cpu : 0;
+  const capacity =
+    r.tenantCount > 0 && cpuUtil > 0
+      ? Math.ceil(r.tenantCount / cpuUtil)
+      : Math.max(r.tenantCount * 2, 1);
 
-  try {
-    return Object.entries(regionTenants).flatMap(([regionId, tenants]) => {
-      // Guard 2: tenants must be an array
-      if (!Array.isArray(tenants)) {
-        console.warn(`⚠️ Region "${regionId}": tenants is not an array, skipping. Value:`, tenants);
-        return [];
-      }
-      // Guard 3: each tenant must be a valid object
-      return tenants
-        .filter((t, i) => {
-          const isValid =
-            t !== null && t !== undefined && typeof t === 'object' && !Array.isArray(t);
-          if (!isValid) {
-            console.warn(`⚠️ Region "${regionId}" index ${i}: invalid tenant skipped →`, t);
-          }
-          return isValid;
-        })
-        .map((t) => ({ ...t, regionId }));
-    });
-  } catch (error) {
-    console.error('❌ Error flattening tenants:', error);
-    return [];
-  }
-})();
+  return {
+    ...r,
+    status: regionStatusMap[r.status] ?? r.status,
+    location: r.datacenter ?? r.code ?? '',
+    latencyMs: r.latency ?? 0,
+    capacity,
+    storageUsedTB,
+    storageTotalTB: storageTotalTB || 1,
+    throughputRps: r.throughputRps ?? 0,
+    monthlyCost: r.monthlyCost ?? 0,
+    costPerTenant: r.tenantCount > 0 ? Math.round((r.monthlyCost ?? 0) / r.tenantCount) : 0,
+    certifications: r.certifications ?? [],
+    replicationTargets: r.replicationTargets ?? [],
+    dataResidency: r.dataResidency ?? '—',
+    lastIncident: r.lastIncident ?? null,
+  };
+};
 
-console.log('✅ allTenants loaded:', allTenants.length, 'tenants');
+const normalizeMigrationJob = (j) => ({
+  ...j,
+  error: j.errorMessage ?? null,
+  dataSizeGB: j.dataSizeGB ?? 0,
+  initiatedBy: j.initiatedBy ?? '—',
+  duration:
+    j.startedAt && j.completedAt
+      ? formatDuration(Math.round((new Date(j.completedAt) - new Date(j.startedAt)) / 1000))
+      : null,
+  downtimeSeconds: j.downtimeSeconds ?? null,
+});
+
+const CHART_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#863bff'];
 
 export default function RegionsPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRegion, setSelectedRegion] = useState(null);
-  const [selectedJob, setSelectedJob] = useState(null);
   const [showMigrationModal, setShowMigrationModal] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
-  const [jobs, setJobs] = useState(migrationJobs);
   const [lastRefresh, setLastRefresh] = useState(new Date());
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [selectedReport, setSelectedReport] = useState(null);
+
+  /* ─── Data fetching (real API) ─── */
+  const regionsQuery = useApiFetch(async () => {
+    const res = await getRegions();
+    return (Array.isArray(res) ? res : (res?.data ?? [])).map(normalizeRegion);
+  }, []);
+
+  const statsQuery = useApiFetch(() => getRegionStats(), []);
+
+  const jobsQuery = useApiFetch(async () => {
+    const res = await getMigrationJobs({ pageSize: 100 });
+    return (res?.data ?? res ?? []).map(normalizeMigrationJob);
+  }, []);
+
+  // Compliance rules — endpoint: GET /admin/regions/compliance
+  const complianceQuery = useApiFetch(
+    async () => {
+      const res = await api.get('/admin/regions/compliance');
+      return res?.data ?? res ?? [];
+    },
+    [],
+    { initialData: [] }
+  );
+
+  // 24h cross-region latency history — endpoint: GET /admin/regions/latency-history
+  const latencyQuery = useApiFetch(() => api.get('/admin/regions/latency-history'), [], {
+    initialData: [],
+  });
+
+  // Tenants (for the migration selector) — endpoint: GET /admin/tenants
+  const tenantsQuery = useApiFetch(
+    async () => {
+      const res = await api.get('/admin/tenants');
+      return res?.data ?? res ?? [];
+    },
+    [],
+    { initialData: [] }
+  );
+
+  useApiError(regionsQuery.error);
+  useApiError(jobsQuery.error);
+
+  const regions = useMemo(() => regionsQuery.data ?? [], [regionsQuery.data]);
+  const jobs = useMemo(() => jobsQuery.data ?? [], [jobsQuery.data]);
+  const complianceRules = useMemo(() => complianceQuery.data ?? [], [complianceQuery.data]);
+  const latencyHistory = useMemo(() => latencyQuery.data ?? [], [latencyQuery.data]);
+  const tenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+
+  const pageLoading = regionsQuery.loading || jobsQuery.loading;
+
+  /* ─── Mutations ─── */
+  const { mutate: startMigration, loading: savingMigration } = useApiMutation(
+    (form) =>
+      createMigration({
+        tenantId: form.tenantId,
+        sourceRegion: form.sourceRegion,
+        targetRegion: form.targetRegion,
+      }),
+    {
+      onSuccess: () => {
+        toast({ title: 'Migration started' });
+        jobsQuery.refetch();
+        setShowMigrationModal(false);
+        setEditingJob(null);
+      },
+      onError: (err) =>
+        toast({
+          title: 'Failed to start migration',
+          description: err.message,
+          variant: 'destructive',
+        }),
+    }
+  );
+
+  const { mutate: stopMigration } = useApiMutation((job) => cancelMigration(job.id), {
+    onSuccess: () => {
+      toast({ title: 'Migration cancelled' });
+      jobsQuery.refetch();
+    },
+    onError: (err) =>
+      toast({
+        title: 'Failed to cancel migration',
+        description: err.message,
+        variant: 'destructive',
+      }),
+  });
 
   /* ─── Computed Data ─── */
   const filteredRegions = useMemo(() => {
@@ -159,31 +203,28 @@ export default function RegionsPage() {
         !query ||
         r.name.toLowerCase().includes(query.toLowerCase()) ||
         r.id.toLowerCase().includes(query.toLowerCase()) ||
-        r.location.toLowerCase().includes(query.toLowerCase());
+        (r.location ?? '').toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
-  }, [query, statusFilter]);
+  }, [regions, query, statusFilter]);
 
   const regionStats = useMemo(() => {
     const operational = regions.filter((r) => r.status === 'operational').length;
     const degraded = regions.filter((r) => r.status === 'degraded').length;
     const maintenance = regions.filter((r) => r.status === 'maintenance').length;
-    const totalTenants = regions.reduce((s, r) => s + r.tenantCount, 0);
-    const totalCapacity = regions.reduce((s, r) => s + r.capacity, 0);
-    const totalStorage = regions.reduce((s, r) => s + r.storageUsedTB, 0);
-    const totalCost = regions.reduce((s, r) => s + r.monthlyCost, 0);
+    const totalTenants =
+      statsQuery.data?.totalTenants ?? regions.reduce((s, r) => s + r.tenantCount, 0);
+    const totalCapacity = regions.reduce((s, r) => s + r.capacity, 0) || 1;
     return {
       operational,
       degraded,
       maintenance,
       totalTenants,
       totalCapacity,
-      totalStorage,
-      totalCost,
-      total: regions.length,
+      total: statsQuery.data?.totalRegions ?? regions.length,
     };
-  }, []);
+  }, [regions, statsQuery.data]);
 
   const migrationStats = useMemo(() => {
     const completed = jobs.filter((j) => j.status === 'completed').length;
@@ -198,16 +239,16 @@ export default function RegionsPage() {
     const atRisk = complianceRules.filter((r) => r.status === 'at_risk').length;
     const nonCompliant = complianceRules.filter((r) => r.status === 'non_compliant').length;
     return { compliant, atRisk, nonCompliant, total: complianceRules.length };
-  }, []);
+  }, [complianceRules]);
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((j) => {
       const matchesQuery =
         !query ||
-        j.tenantName.toLowerCase().includes(query.toLowerCase()) ||
+        j.tenantName?.toLowerCase().includes(query.toLowerCase()) ||
         j.id.toLowerCase().includes(query.toLowerCase()) ||
-        j.sourceRegion.toLowerCase().includes(query.toLowerCase()) ||
-        j.targetRegion.toLowerCase().includes(query.toLowerCase());
+        j.sourceRegion?.toLowerCase().includes(query.toLowerCase()) ||
+        j.targetRegion?.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || j.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
@@ -217,25 +258,21 @@ export default function RegionsPage() {
     return complianceRules.filter((r) => {
       const matchesQuery =
         !query ||
-        r.name.toLowerCase().includes(query.toLowerCase()) ||
-        r.regulation.toLowerCase().includes(query.toLowerCase());
+        r.name?.toLowerCase().includes(query.toLowerCase()) ||
+        r.regulation?.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
-  }, [query, statusFilter]);
+  }, [complianceRules, query, statusFilter]);
 
   /* ─── Handlers ─── */
-  const handleRefresh = () => setLastRefresh(new Date());
-
-  const handleCreateMigration = (job) => {
-    setJobs((prev) => [job, ...prev]);
-    setShowMigrationModal(false);
-  };
-
-  const handleUpdateMigration = (updated) => {
-    setJobs((prev) => prev.map((j) => (j.id === updated.id ? updated : j)));
-    setEditingJob(null);
-    setShowMigrationModal(false);
+  const handleRefresh = () => {
+    regionsQuery.refetch();
+    statsQuery.refetch();
+    jobsQuery.refetch();
+    complianceQuery.refetch();
+    latencyQuery.refetch();
+    setLastRefresh(new Date());
   };
 
   const handleExport = () => {
@@ -286,8 +323,8 @@ export default function RegionsPage() {
           <span className="text-xs text-text-muted">
             Refreshed {lastRefresh.toLocaleTimeString()}
           </span>
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={pageLoading}>
+            <RefreshCw className={cn('mr-1.5 h-4 w-4', pageLoading && 'animate-spin')} /> Refresh
           </Button>
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-1.5 h-4 w-4" /> Export
@@ -376,8 +413,15 @@ export default function RegionsPage() {
         </div>
       </div>
 
+      {/* Loading state */}
+      {pageLoading && (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface py-12 text-sm text-text-muted">
+          <RefreshCw className="h-4 w-4 animate-spin" /> Loading region data…
+        </div>
+      )}
+
       {/* ─── OVERVIEW TAB ─── */}
-      {activeTab === 'overview' && (
+      {!pageLoading && activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Region Grid */}
           <div>
@@ -412,69 +456,42 @@ export default function RegionsPage() {
           </div>
 
           {/* Latency Overview Chart */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-secondary" /> Cross-Region Latency Trends (24h)
-            </h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={latencyHistory}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="hour" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
-                  <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" unit="ms" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'var(--text-primary)' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Line
-                    type="monotone"
-                    dataKey="us-east-1"
-                    stroke="#22c55e"
-                    strokeWidth={2}
-                    dot={false}
-                    name="US East"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="us-west-2"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    dot={false}
-                    name="US West"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="eu-west-1"
-                    stroke="#f59e0b"
-                    strokeWidth={2}
-                    dot={false}
-                    name="EU West"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="eu-central-1"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    dot={false}
-                    name="EU Central"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="ap-southeast-1"
-                    stroke="#863bff"
-                    strokeWidth={2}
-                    dot={false}
-                    name="APAC SE"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+          {latencyHistory.length > 0 && (
+            <div className="rounded-xl border border-border bg-surface p-5">
+              <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <Activity className="h-4 w-4 text-secondary" /> Cross-Region Latency Trends (24h)
+              </h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={latencyHistory}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+                    <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" unit="ms" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                      }}
+                      labelStyle={{ color: 'var(--text-primary)' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                    {regions.slice(0, 5).map((region, i) => (
+                      <Line
+                        key={region.id}
+                        type="monotone"
+                        dataKey={region.id}
+                        stroke={CHART_COLORS[i % CHART_COLORS.length]}
+                        strokeWidth={2}
+                        dot={false}
+                        name={region.name}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Recent Migrations Preview */}
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
@@ -491,15 +508,24 @@ export default function RegionsPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
               {jobs.slice(0, 3).map((job) => (
-                <MigrationJobCard key={job.id} job={job} onClick={() => setSelectedJob(job)} />
+                <MigrationJobCard
+                  key={job.id}
+                  job={job}
+                  onClick={() => setActiveTab('migrations')}
+                />
               ))}
+              {jobs.length === 0 && (
+                <p className="col-span-full py-8 text-center text-sm text-text-muted">
+                  No migrations yet.
+                </p>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* ─── REGIONS TAB ─── */}
-      {activeTab === 'regions' && (
+      {!pageLoading && activeTab === 'regions' && (
         <div className="space-y-6">
           {/* Filters */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -551,7 +577,7 @@ export default function RegionsPage() {
       )}
 
       {/* ─── MIGRATIONS TAB ─── */}
-      {activeTab === 'migrations' && (
+      {!pageLoading && activeTab === 'migrations' && (
         <div className="space-y-6">
           {/* Migration Stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -629,7 +655,15 @@ export default function RegionsPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredJobs.map((job) => (
-              <MigrationJobCard key={job.id} job={job} onClick={() => setSelectedJob(job)} />
+              <MigrationJobCard
+                key={job.id}
+                job={job}
+                onClick={() =>
+                  (job.status === 'pending' || job.status === 'in_progress') &&
+                  window.confirm(`Cancel migration ${job.id}?`) &&
+                  stopMigration(job)
+                }
+              />
             ))}
             {filteredJobs.length === 0 && (
               <div className="col-span-full rounded-xl border border-border bg-surface p-12 text-center">
@@ -642,7 +676,7 @@ export default function RegionsPage() {
       )}
 
       {/* ─── COMPLIANCE TAB ─── */}
-      {activeTab === 'compliance' && (
+      {!pageLoading && activeTab === 'compliance' && (
         <div className="space-y-6">
           {/* Compliance Stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -734,8 +768,10 @@ export default function RegionsPage() {
             setShowMigrationModal(false);
             setEditingJob(null);
           }}
-          onSave={editingJob ? handleUpdateMigration : handleCreateMigration}
-          tenants={allTenants}
+          onSave={startMigration}
+          tenants={tenants}
+          regions={regions}
+          saving={savingMigration}
         />
       )}
     </div>

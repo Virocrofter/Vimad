@@ -1,310 +1,199 @@
-/* src/app/admin/announcements/MaintenanceModal.jsx */
-import { useState, useEffect } from 'react';
-import {
-  X,
-  Check,
-  Server,
-  Calendar,
-  Clock,
-  Wrench,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-} from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+// apps/web/src/app/admin/announcements/MaintenanceModal.jsx
+'use client';
 
-const impacts = [
-  { id: 'none', label: 'No Impact', desc: 'Services remain fully operational' },
-  { id: 'degraded', label: 'Degraded', desc: 'Slower performance, all features work' },
-  { id: 'read-only', label: 'Read-Only', desc: 'Viewing allowed, no modifications' },
-  { id: 'unavailable', label: 'Unavailable', desc: 'Complete service interruption' },
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { X, Plus, Wrench, Save } from 'lucide-react';
+import { createMaintenanceWindow, updateMaintenanceWindow } from '@/api/announcements';
+
+const SERVICE_OPTIONS = [
+  'API',
+  'Web App',
+  'Database',
+  'Email',
+  'SMS',
+  'Channel Manager',
+  'Reports',
+  'Guest Portal',
+  'Mobile App',
 ];
 
-const allServices = [
-  'API Gateway',
-  'Auth Service',
-  'Primary Database',
-  'Redis Cache',
-  'Background Worker',
-  'File Storage (S3)',
-  'Search Index',
-  'Notification Service',
-];
-
-export default function MaintenanceModal({ window, onClose, onSave }) {
-  const isEditing = !!window;
+export default function MaintenanceModal({ maintenanceWindow, onClose, onSuccess }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: '',
     description: '',
-    status: 'scheduled',
     startTime: '',
     endTime: '',
-    estimatedDuration: '',
     affectedServices: [],
-    impact: 'none',
-    tenantNotification: true,
   });
 
-  useEffect(() => {
-    if (window) {
+  const [prevMaintenanceWindow, setPrevMaintenanceWindow] = useState(null);
+  if (maintenanceWindow !== prevMaintenanceWindow) {
+    setPrevMaintenanceWindow(maintenanceWindow);
+    if (maintenanceWindow) {
       setForm({
-        title: window.title || '',
-        description: window.description || '',
-        status: window.status || 'scheduled',
-        startTime: window.startTime ? new Date(window.startTime).toISOString().slice(0, 16) : '',
-        endTime: window.endTime ? new Date(window.endTime).toISOString().slice(0, 16) : '',
-        estimatedDuration: window.estimatedDuration || '',
-        affectedServices: window.affectedServices || [],
-        impact: window.impact || 'none',
-        tenantNotification: window.tenantNotification !== false,
+        title: maintenanceWindow.title || '',
+        description: maintenanceWindow.description || '',
+        startTime: maintenanceWindow.startTime
+          ? new Date(maintenanceWindow.startTime).toISOString().slice(0, 16)
+          : '',
+        endTime: maintenanceWindow.endTime
+          ? new Date(maintenanceWindow.endTime).toISOString().slice(0, 16)
+          : '',
+        affectedServices: maintenanceWindow.affectedServices || [],
       });
     }
-  }, [window]);
+  }
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const toggleService = (svc) => {
-    const current = form.affectedServices;
-    update(
-      'affectedServices',
-      current.includes(svc) ? current.filter((s) => s !== svc) : [...current, svc]
-    );
+    try {
+      const data = {
+        ...form,
+        startTime: new Date(form.startTime).toISOString(),
+        endTime: new Date(form.endTime).toISOString(),
+      };
+
+      if (maintenanceWindow) {
+        await updateMaintenanceWindow(maintenanceWindow.id, data);
+        toast({ title: 'Updated', description: 'Maintenance window updated successfully' });
+      } else {
+        await createMaintenanceWindow(data);
+        toast({ title: 'Scheduled', description: 'Maintenance window scheduled successfully' });
+      }
+      onSuccess();
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to save maintenance window',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const payload = {
-      ...form,
-      id: window?.id || `MW-${Date.now().toString(36).toUpperCase()}`,
-      startTime: new Date(form.startTime).toISOString(),
-      endTime: new Date(form.endTime).toISOString(),
-      createdBy: window?.createdBy || 'Admin',
-      createdAt: window?.createdAt || new Date().toISOString(),
-      actualDuration: window?.actualDuration || null,
-    };
-    onSave(payload);
-    onClose();
+  const toggleService = (service) => {
+    setForm((prev) => ({
+      ...prev,
+      affectedServices: prev.affectedServices.includes(service)
+        ? prev.affectedServices.filter((s) => s !== service)
+        : [...prev.affectedServices, service],
+    }));
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-auto rounded-xl border border-border bg-background shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning/10">
-              <Wrench className="h-5 w-5 text-warning" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-text-primary">
-                {isEditing ? 'Edit Maintenance Window' : 'Schedule Maintenance'}
-              </h3>
-              <p className="text-xs text-text-muted">
-                {isEditing ? window.id : 'Plan and communicate system maintenance'}
-              </p>
-            </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-lg">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">
+              {maintenanceWindow ? 'Edit Maintenance' : 'Schedule Maintenance'}
+            </h2>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="w-4 h-4" />
+            </Button>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Title
-              </label>
-              <input
-                type="text"
-                required
+              <label className="block text-sm font-medium mb-1">Title *</label>
+              <Input
                 value={form.title}
-                onChange={(e) => update('title', e.target.value)}
-                placeholder="e.g. Database Cluster Upgrade"
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Description
-              </label>
-              <textarea
+                onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g., Database Upgrade"
                 required
-                value={form.description}
-                onChange={(e) => update('description', e.target.value)}
-                rows={3}
-                placeholder="Describe the maintenance and its purpose..."
-                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
               />
             </div>
-          </div>
 
-          {/* Time Window */}
-          <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-              Time Window
-            </h4>
+            <div>
+              <label className="block text-sm font-medium mb-1">Description *</label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe the maintenance work and expected impact"
+                rows={4}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                required
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-[10px] text-text-muted flex items-center gap-1">
-                  <Calendar className="h-3 w-3" /> Start Time
-                </label>
-                <input
+                <label className="block text-sm font-medium mb-1">Start Time *</label>
+                <Input
                   type="datetime-local"
-                  required
                   value={form.startTime}
-                  onChange={(e) => update('startTime', e.target.value)}
-                  className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-[10px] text-text-muted flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> End Time
-                </label>
-                <input
-                  type="datetime-local"
+                  onChange={(e) => setForm((prev) => ({ ...prev, startTime: e.target.value }))}
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">End Time *</label>
+                <Input
+                  type="datetime-local"
                   value={form.endTime}
-                  onChange={(e) => update('endTime', e.target.value)}
-                  className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))}
+                  required
                 />
               </div>
             </div>
-            <div>
-              <label className="mb-1 block text-[10px] text-text-muted">Estimated Duration</label>
-              <input
-                type="text"
-                value={form.estimatedDuration}
-                onChange={(e) => update('estimatedDuration', e.target.value)}
-                placeholder="e.g. 30 minutes"
-                className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-          </div>
 
-          {/* Impact Level */}
-          <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Impact Level
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {impacts.map((imp) => {
-                const active = form.impact === imp.id;
-                return (
+            <div>
+              <label className="block text-sm font-medium mb-2">Affected Services *</label>
+              <div className="flex flex-wrap gap-2">
+                {SERVICE_OPTIONS.map((service) => (
                   <button
-                    key={imp.id}
+                    key={service}
                     type="button"
-                    onClick={() => update('impact', imp.id)}
-                    className={cn(
-                      'flex flex-col gap-1 rounded-lg border p-3 text-left transition-all',
-                      active
-                        ? 'border-warning bg-warning/5'
-                        : 'border-border bg-surface hover:border-secondary/30'
-                    )}
+                    onClick={() => toggleService(service)}
+                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                      form.affectedServices.includes(service)
+                        ? 'bg-orange-100 text-orange-800 border-orange-300'
+                        : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'
+                    }`}
                   >
-                    <span
-                      className={cn(
-                        'text-sm font-medium',
-                        active ? 'text-warning' : 'text-text-primary'
-                      )}
-                    >
-                      {imp.label}
-                    </span>
-                    <span className="text-xs text-text-muted">{imp.desc}</span>
+                    {service}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Affected Services */}
-          <div className="space-y-3">
-            <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Affected Services
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {allServices.map((svc) => (
-                <button
-                  key={svc}
-                  type="button"
-                  onClick={() => toggleService(svc)}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                    form.affectedServices.includes(svc)
-                      ? 'bg-secondary/10 text-secondary border-secondary/30'
-                      : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-                  )}
-                >
-                  {form.affectedServices.includes(svc) && <Check className="h-3 w-3" />}
-                  <Server className="h-3 w-3" />
-                  {svc}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tenant Notification Toggle */}
-          <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
-            <div>
-              <p className="text-sm font-medium text-text-primary">Notify Tenants</p>
-              <p className="text-xs text-text-muted">
-                {form.tenantNotification
-                  ? 'An announcement will be automatically created and sent to affected tenants'
-                  : 'This maintenance will not be communicated to tenants'}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => update('tenantNotification', !form.tenantNotification)}
-              className={cn(
-                'relative inline-flex h-7 w-12 items-center rounded-full transition-colors',
-                form.tenantNotification ? 'bg-secondary' : 'bg-border'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                  form.tenantNotification ? 'translate-x-6' : 'translate-x-1'
-                )}
-              />
-            </button>
-          </div>
-
-          {/* Status (edit only) */}
-          {isEditing && (
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-text-secondary">Status:</label>
-              <select
-                value={form.status}
-                onChange={(e) => update('status', e.target.value)}
-                className="h-9 rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading || form.affectedServices.length === 0}
+                className="gap-2"
               >
-                <option value="scheduled">Scheduled</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                {loading ? (
+                  'Saving...'
+                ) : maintenanceWindow ? (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Update
+                  </>
+                ) : (
+                  <>
+                    <Wrench className="w-4 h-4" />
+                    Schedule
+                  </>
+                )}
+              </Button>
             </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="secondary">
-              <Check className="mr-1.5 h-4 w-4" />
-              {isEditing ? 'Save Changes' : 'Schedule Maintenance'}
-            </Button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      </Card>
     </div>
   );
 }

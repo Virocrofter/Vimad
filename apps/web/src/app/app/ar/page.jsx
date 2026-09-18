@@ -42,9 +42,10 @@ import {
   AlertCircle,
   Info,
   Layers,
+  User,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -1038,7 +1039,6 @@ function NewInvoiceModal({ accounts, onClose, onCreate }) {
 
 /* ─── Main Page ─── */
 export default function AccountsReceivablePage() {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'invoices' | 'accounts'
   const [accounts, setAccounts] = useState(corporateAccounts);
   const [invoiceList, setInvoiceList] = useState(invoices);

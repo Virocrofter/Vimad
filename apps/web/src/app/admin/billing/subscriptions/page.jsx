@@ -1,6 +1,5 @@
-/* src/app/admin/billing/subscriptions/page.jsx */
+/* src/app/admin/billing/subscriptions/page.jsx — wired to api/billing.ts (Phase 3E) */
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -10,29 +9,50 @@ import {
   ChevronDown,
   ChevronUp,
   Users,
-  DollarSign,
-  Calendar,
   ArrowRightLeft,
   Building2,
   Edit3,
   Pause,
   Play,
   Ban,
-  Trash2,
   RefreshCw,
   Download,
   Info,
-  AlertTriangle,
-  CreditCard,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
-import { subscriptions, planConfig, calculateProration, formatCurrency, formatDate } from '../data';
-import { SubscriptionStatusBadge, ProrationDisplay, SubscriptionMiniCard } from '../components';
+import { useApiFetch } from '../../../../hooks/useApiFetch';
+import { useApiMutation } from '../../../../hooks/useApiMutation';
+import { useToast } from '../../../../hooks/use-toast';
+import { useApiError } from '../../../../hooks/useApiError';
+import { getSubscriptions, updateSubscription, cancelSubscription } from '../../../../api/billing';
+import { api } from '../../../../api/client';
+// Static plan catalogue + formatters only — subscription data comes from the API.
+import { planConfig, calculateProration, formatCurrency, formatDate } from '../data';
+import { SubscriptionStatusBadge, ProrationDisplay } from '../components';
+
+/* ─── Normalizer: API subscription → component shape ─── */
+const subStatusMap = { trialing: 'trial' };
+const normalizeSubscription = (s) => ({
+  ...s,
+  tenantName: s.tenantName ?? s.tenantId,
+  status: subStatusMap[s.status] ?? s.status,
+  billingCycle: s.billingCycle ?? 'monthly',
+  seats: s.usage?.users ?? s.seats ?? 1,
+  amount: s.amount ?? 0,
+  addOns: s.addOns ?? [],
+  autoRenew: s.autoRenew ?? !s.cancelAtPeriodEnd,
+  startDate: s.startDate ?? s.currentPeriodStart ?? s.createdAt,
+  nextBillingDate: s.nextBillingDate ?? s.currentPeriodEnd ?? null,
+  billingEmail: s.billingEmail ?? '—',
+  taxRate: s.taxRate ?? 0,
+  taxRegion: s.taxRegion ?? '—',
+  paymentMethod: s.paymentMethod ?? null,
+  discount: s.discount ?? null,
+});
 
 /* ─── Plan Change Modal ─── */
-function PlanChangeModal({ subscription, onClose, onSave }) {
+function PlanChangeModal({ subscription, onClose, onSave, saving }) {
   const [newPlan, setNewPlan] = useState(subscription?.plan || 'Starter');
   const [newSeats, setNewSeats] = useState(subscription?.seats || 1);
   const [newCycle, setNewCycle] = useState(subscription?.billingCycle || 'monthly');
@@ -162,16 +182,19 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                onSave({ plan: newPlan, seats: newSeats, billingCycle: newCycle });
-                onClose();
-              }}
+              disabled={saving}
+              onClick={() => onSave({ plan: newPlan, seats: newSeats, billingCycle: newCycle })}
             >
-              <Check className="mr-1.5 h-4 w-4" /> Apply Change
+              {saving ? (
+                <RefreshCw className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-1.5 h-4 w-4" />
+              )}
+              Apply Change
             </Button>
           </div>
         </div>
@@ -181,7 +204,7 @@ function PlanChangeModal({ subscription, onClose, onSave }) {
 }
 
 /* ─── Subscription Detail Drawer ─── */
-function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
+function SubscriptionDrawer({ subscription, onClose, onUpdate, onAction, actionLoading }) {
   const [showPlanChange, setShowPlanChange] = useState(false);
   if (!subscription) return null;
 
@@ -339,15 +362,21 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowPlanChange(true)}>
+            {/* Actions (wired to API) */}
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPlanChange(true)}
+                disabled={actionLoading}
+              >
                 <ArrowRightLeft className="mr-1.5 h-3.5 w-3.5" /> Change Plan
               </Button>
               {subscription.status === 'active' && (
                 <Button
                   variant="outline"
                   className="text-warning border-warning/30 hover:bg-warning/10"
+                  onClick={() => onAction('pause', subscription)}
+                  disabled={actionLoading}
                 >
                   <Pause className="mr-1.5 h-3.5 w-3.5" /> Pause
                 </Button>
@@ -356,16 +385,22 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
                 <Button
                   variant="outline"
                   className="text-accent border-accent/30 hover:bg-accent/10"
+                  onClick={() => onAction('resume', subscription)}
+                  disabled={actionLoading}
                 >
                   <Play className="mr-1.5 h-3.5 w-3.5" /> Resume
                 </Button>
               )}
-              <Button
-                variant="outline"
-                className="text-danger border-danger/30 hover:bg-danger/10 ml-auto"
-              >
-                <Ban className="mr-1.5 h-3.5 w-3.5" /> Cancel
-              </Button>
+              {subscription.status !== 'cancelled' && (
+                <Button
+                  variant="outline"
+                  className="text-danger border-danger/30 hover:bg-danger/10 ml-auto"
+                  onClick={() => onAction('cancel', subscription)}
+                  disabled={actionLoading}
+                >
+                  <Ban className="mr-1.5 h-3.5 w-3.5" /> Cancel
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -376,6 +411,7 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
           subscription={subscription}
           onClose={() => setShowPlanChange(false)}
           onSave={(updates) => onUpdate(subscription.id, updates)}
+          saving={actionLoading}
         />
       )}
     </>
@@ -384,15 +420,86 @@ function SubscriptionDrawer({ subscription, onClose, onUpdate }) {
 
 /* ─── Main Page ─── */
 export default function SubscriptionsPage() {
-  const navigate = useNavigate();
-  const [subs, setSubs] = useState(subscriptions);
+  const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
   const [selectedSub, setSelectedSub] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'nextBillingDate', dir: 'asc' });
+  const [actionLoading, setActionLoading] = useState(false);
 
+  /* ─── Data fetching (real API) ─── */
+  const subsQuery = useApiFetch(async () => {
+    const res = await getSubscriptions({ page: 1, pageSize: 100 });
+    return (res?.data ?? res ?? []).map(normalizeSubscription);
+  }, []);
+
+  useApiError(subsQuery.error);
+
+  const subs = useMemo(() => subsQuery.data ?? [], [subsQuery.data]);
+
+  /* ─── Mutations ─── */
+  const { mutate: saveSubscription } = useApiMutation(
+    ({ id, updates }) => updateSubscription(id, updates),
+    {
+      onSuccess: () => {
+        toast({ title: 'Subscription updated' });
+        subsQuery.refetch();
+        setSelectedSub(null);
+      },
+      onError: (err) =>
+        toast({ title: 'Update failed', description: err.message, variant: 'destructive' }),
+    }
+  );
+
+  const handleUpdate = (id, updates) => saveSubscription({ id, updates });
+
+  const handleAction = async (action, sub) => {
+    setActionLoading(true);
+    try {
+      switch (action) {
+        case 'pause':
+          // endpoint: POST /admin/billing/subscriptions/:id/pause
+          await api.post(`/admin/billing/subscriptions/${sub.id}/pause`);
+          toast({ title: 'Subscription paused' });
+          break;
+        case 'resume':
+          // endpoint: POST /admin/billing/subscriptions/:id/resume
+          await api.post(`/admin/billing/subscriptions/${sub.id}/resume`);
+          toast({ title: 'Subscription resumed' });
+          break;
+        case 'cancel': {
+          const immediately = window.confirm(
+            `Cancel subscription for ${sub.tenantName}?\n\nOK = cancel immediately\nCancel = cancel at period end`
+          );
+          await cancelSubscription(sub.id, { immediately });
+          toast({ title: 'Subscription cancelled' });
+          setSelectedSub(null);
+          break;
+        }
+        default:
+          break;
+      }
+      subsQuery.refetch();
+    } catch (err) {
+      toast({ title: 'Action failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(subs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `subscriptions-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  /* ─── Filtering + sorting ─── */
   const filteredSubs = useMemo(() => {
     let result = subs.filter((s) => {
       const matchesQuery =
@@ -443,10 +550,6 @@ export default function SubscriptionsPage() {
     }));
   };
 
-  const handleUpdate = (id, updates) => {
-    setSubs((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -458,11 +561,17 @@ export default function SubscriptionsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-1.5 h-4 w-4" /> Export
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={subsQuery.refetch}
+            disabled={subsQuery.loading}
+          >
+            <RefreshCw className={cn('mr-1.5 h-4 w-4', subsQuery.loading && 'animate-spin')} />
+            Refresh
           </Button>
-          <Button size="sm">
-            <Plus className="mr-1.5 h-4 w-4" /> New Subscription
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
         </div>
       </div>
@@ -570,105 +679,110 @@ export default function SubscriptionsPage() {
         {subs.length} subscriptions
       </p>
 
-      {/* Table */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-background border-b border-border">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10">
-                  <input type="checkbox" className="rounded border-border" />
-                </th>
-                {[
-                  { key: 'tenantName', label: 'Tenant' },
-                  { key: 'plan', label: 'Plan' },
-                  { key: 'status', label: 'Status' },
-                  { key: 'amount', label: 'Amount' },
-                  { key: 'nextBillingDate', label: 'Next Billing' },
-                ].map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col.key)}
-                    className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase cursor-pointer hover:text-text-primary select-none"
-                  >
-                    <div className="flex items-center gap-1">
-                      {col.label}
-                      {sortConfig.key === col.key &&
-                        (sortConfig.dir === 'asc' ? (
-                          <ChevronUp className="h-3 w-3" />
-                        ) : (
-                          <ChevronDown className="h-3 w-3" />
-                        ))}
-                    </div>
-                  </th>
-                ))}
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredSubs.map((sub) => (
-                <tr
-                  key={sub.id}
-                  className="hover:bg-background/50 transition-colors group cursor-pointer"
-                  onClick={() => setSelectedSub(sub)}
-                >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" className="rounded border-border" />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">{sub.tenantName}</p>
-                      <p className="text-[10px] text-text-muted font-mono">{sub.id}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-medium text-text-primary">{sub.plan}</span>
-                    <p className="text-[10px] text-text-muted">
-                      {sub.seats} seats · {sub.billingCycle}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <SubscriptionStatusBadge status={sub.status} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">
-                      {formatCurrency(sub.amount)}
-                    </p>
-                    <p className="text-[10px] text-text-muted">
-                      per {sub.billingCycle === 'annual' ? 'year' : 'month'}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-xs text-text-secondary">{formatDate(sub.nextBillingDate)}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSub(sub);
-                        }}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
-                        title="View Details"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredSubs.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-text-muted">
-                    <Users className="mx-auto h-10 w-10 mb-3" />
-                    <p>No subscriptions match your filters.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Loading */}
+      {subsQuery.loading && (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface py-12 text-sm text-text-muted">
+          <RefreshCw className="h-4 w-4 animate-spin" /> Loading subscriptions…
         </div>
-      </div>
+      )}
+
+      {/* Table */}
+      {!subsQuery.loading && (
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-background border-b border-border">
+                <tr>
+                  {[
+                    { key: 'tenantName', label: 'Tenant' },
+                    { key: 'plan', label: 'Plan' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'amount', label: 'Amount' },
+                    { key: 'nextBillingDate', label: 'Next Billing' },
+                  ].map((col) => (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase cursor-pointer hover:text-text-primary select-none"
+                    >
+                      <div className="flex items-center gap-1">
+                        {col.label}
+                        {sortConfig.key === col.key &&
+                          (sortConfig.dir === 'asc' ? (
+                            <ChevronUp className="h-3 w-3" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3" />
+                          ))}
+                      </div>
+                    </th>
+                  ))}
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredSubs.map((sub) => (
+                  <tr
+                    key={sub.id}
+                    className="hover:bg-background/50 transition-colors group cursor-pointer"
+                    onClick={() => setSelectedSub(sub)}
+                  >
+                    <td className="px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium text-text-primary">{sub.tenantName}</p>
+                        <p className="text-[10px] text-text-muted font-mono">{sub.id}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs font-medium text-text-primary">{sub.plan}</span>
+                      <p className="text-[10px] text-text-muted">
+                        {sub.seats} seats · {sub.billingCycle}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <SubscriptionStatusBadge status={sub.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-sm font-mono font-medium text-text-primary">
+                        {formatCurrency(sub.amount)}
+                      </p>
+                      <p className="text-[10px] text-text-muted">
+                        per {sub.billingCycle === 'annual' ? 'year' : 'month'}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-xs text-text-secondary">
+                        {formatDate(sub.nextBillingDate)}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedSub(sub);
+                          }}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                          title="View Details"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredSubs.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
+                      <Users className="mx-auto h-10 w-10 mb-3" />
+                      <p>No subscriptions match your filters.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Drawer */}
       {selectedSub && (
@@ -676,6 +790,8 @@ export default function SubscriptionsPage() {
           subscription={selectedSub}
           onClose={() => setSelectedSub(null)}
           onUpdate={handleUpdate}
+          onAction={handleAction}
+          actionLoading={actionLoading}
         />
       )}
     </div>

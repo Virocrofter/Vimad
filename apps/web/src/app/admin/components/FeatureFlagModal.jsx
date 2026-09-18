@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { X, Check, ToggleLeft, Percent, Building2, Globe, Tag } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { flagCategoryMeta, impactMeta, regions, plans } from '../data';
 
 const rolloutTypes = [

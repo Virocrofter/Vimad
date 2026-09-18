@@ -31,7 +31,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 /* ─── Mock Data ─── */
 const parkingSpots = [
@@ -856,7 +856,6 @@ function AssignSpotModal({ availableSpots, onClose, onAssign }) {
 
 /* ─── Main Page ─── */
 export default function ParkingDashboardPage() {
-  const navigate = useNavigate();
   const [spots, setSpots] = useState(parkingSpots);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [showAssign, setShowAssign] = useState(false);

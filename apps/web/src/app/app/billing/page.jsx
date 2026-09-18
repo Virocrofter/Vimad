@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -179,8 +179,6 @@ function calculateProration(currentPlan, newPlan, billingInterval) {
 
 /* ─── Main Component ─── */
 export default function BillingPage() {
-  const navigate = useNavigate();
-
   // State
   const [activeWindow, setActiveWindow] = useState(1);
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -192,14 +190,21 @@ export default function BillingPage() {
 
   const [selectedTxIds, setSelectedTxIds] = useState([]);
 
-  const currentTransactions = transactions[activeWindow] || [];
+  const currentTransactions = useMemo(
+    () => transactions[activeWindow] || [],
+    [transactions, activeWindow]
+  );
 
   const runningBalance = useMemo(() => {
-    let balance = 0;
-    return currentTransactions.map((t) => {
-      balance += t.charge - t.payment;
-      return { ...t, balance };
-    });
+    return currentTransactions.reduce(
+      (acc, t) => {
+        const balance = acc.balance + t.charge - t.payment;
+        acc.items.push({ ...t, balance });
+        acc.balance = balance;
+        return acc;
+      },
+      { balance: 0, items: [] }
+    ).items;
   }, [currentTransactions]);
 
   const totalBalance =

@@ -33,7 +33,7 @@ import {
   Download,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -510,7 +510,6 @@ function ConnectionCard({ connection, onConfigure, onToggle, onSync, onMap }) {
 
 /* ─── Main Page ─── */
 export default function ChannelManagerPage() {
-  const navigate = useNavigate();
   const [connections, setConnections] = useState(otaConnections);
   const [viewMode, setViewMode] = useState('grid');
   const [query, setQuery] = useState('');

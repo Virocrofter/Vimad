@@ -268,8 +268,8 @@ function RoomingListModal({ group, onClose }) {
 
 /* ─── Main Detail Page ─── */
 export default function GroupDetailPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
   const group = useGroupStore((s) => s.getGroupById(id));
 

@@ -1,5 +1,5 @@
-/* src/app/admin/rbac/page.jsx */
-import { useState, useMemo } from 'react';
+/* src/app/admin/rbac/page.jsx — wired to api/rbac.ts (Phase 3D) */
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -8,43 +8,38 @@ import {
   Globe,
   Plus,
   Search,
-  Filter,
-  BarChart3,
-  Activity,
-  Lock,
-  Unlock,
-  Zap,
-  CheckCircle2,
-  AlertTriangle,
-  ChevronRight,
-  RefreshCw,
-  Trash2,
-  Edit3,
-  Eye,
   ArrowLeft,
   SlidersHorizontal,
   Download,
-  ChevronDown,
-  ChevronUp,
+  RefreshCw,
+  AlertTriangle,
+  Lock,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiMutation } from '../../../hooks/useApiMutation';
+import { useToast } from '../../../hooks/use-toast';
+import { useApiError } from '../../../hooks/useApiError';
 import {
-  systemRoles,
-  customRoles,
-  apiKeys,
-  ssoProviders,
-  adminUsers,
-  permissionCategories,
-  roleTypeMeta,
-  apiKeyStatusMeta,
-  environmentMeta,
-  getKeyStatus,
-  getPermissionLabel,
-} from './data';
+  getRoles,
+  createRole,
+  updateRole,
+  deleteRole,
+  getApiKeys,
+  createApiKey,
+  revokeApiKey,
+  getSSOConfigs,
+  createSSOConfig,
+  updateSSOConfig,
+  deleteSSOConfig,
+} from '../../../api/rbac';
+import { api } from '../../../api/client';
+// Static reference metadata only (labels, permission catalogue, helpers).
+// All entity data (roles/keys/SSO/users) now comes from the API.
+import { permissionCategories, getKeyStatus } from './data';
 import {
   RoleCard,
-  RoleTypeBadge,
   PermissionMatrixRow,
   ApiKeyRow,
   SSOCard,
@@ -55,20 +50,57 @@ import RoleModal from './RoleModal';
 import ApiKeyModal from './ApiKeyModal';
 import SSOModal from './SSOModal';
 
-const tabs = [
-  {
-    id: 'roles',
-    label: 'Roles',
-    icon: Shield,
-    count: () => systemRoles.length + customRoles.length,
-  },
-  { id: 'api-keys', label: 'API Keys', icon: Key, count: () => apiKeys.length },
-  { id: 'sso', label: 'SSO', icon: Globe, count: () => ssoProviders.length },
-  { id: 'users', label: 'Users', icon: Users, count: () => adminUsers.length },
-];
+/* ─── Admin user endpoints (thin wrapper — add to api/rbac.ts when backend lands) ─── */
+const getAdminUsers = () => api.get('/admin/rbac/users');
+const assignUserRole = (userId, roleId) =>
+  api.patch(`/admin/rbac/users/${userId}/role`, { roleId });
+
+/* ─── Normalizers: map API shapes → the shapes the existing components expect ─── */
+const normalizeRole = (r) => ({
+  userCount: 0,
+  description: '',
+  ...r,
+  permissions: r.permissions ?? [],
+});
+
+const normalizeKey = (k) => ({
+  rateLimit: '1000/min',
+  environment: 'production',
+  usageCount: 0,
+  ...k,
+  scopes: k.scopes ?? [],
+  // Full secret is only available at creation time; otherwise show prefix only.
+  keyFull: k.keyFull ?? k.keyPrefix,
+});
+
+const ssoProviderNames = {
+  google: 'Google Workspace',
+  microsoft: 'Microsoft Entra ID',
+  okta: 'Okta',
+  saml: 'SAML 2.0',
+  custom: 'Custom SSO',
+};
+
+const normalizeSSO = (s) => ({
+  ...s,
+  name: s.name ?? ssoProviderNames[s.provider] ?? s.provider,
+  status: s.enabled ? 'active' : 'inactive',
+  domains: s.domains ?? (s.domain ? [s.domain] : []),
+  forceSSO: s.forceSSO ?? false,
+  userCount: s.userCount ?? 0,
+  syncErrors: s.syncErrors ?? 0,
+  lastSyncAt: s.lastSyncAt ?? null,
+});
+
+const normalizeUser = (u) => ({
+  ...u,
+  name: u.name ?? [u.firstName, u.lastName].filter(Boolean).join(' ') ?? u.email,
+  lastActive: u.lastActive ?? u.lastLoginAt ?? null,
+});
 
 export default function AdminRbacPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('roles');
   const [search, setSearch] = useState('');
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -76,13 +108,189 @@ export default function AdminRbacPage() {
   const [showSSOModal, setShowSSOModal] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [editingSSO, setEditingSSO] = useState(null);
-  const [roles, setRoles] = useState([...systemRoles, ...customRoles]);
-  const [keys, setKeys] = useState(apiKeys);
-  const [ssos, setSSOs] = useState(ssoProviders);
-  const [users, setUsers] = useState(adminUsers);
-  const [expandedRole, setExpandedRole] = useState(null);
 
-  // Stats
+  /* ─── Data fetching ─── */
+  const rolesQuery = useApiFetch(async () => {
+    const res = await getRoles({ pageSize: 100 });
+    return (res?.data ?? res ?? []).map(normalizeRole);
+  }, []);
+
+  const keysQuery = useApiFetch(async () => {
+    const res = await getApiKeys({ pageSize: 100 });
+    return (res?.data ?? res ?? []).map(normalizeKey);
+  }, []);
+
+  const ssoQuery = useApiFetch(async () => {
+    const res = await getSSOConfigs();
+    return (Array.isArray(res) ? res : (res?.data ?? [])).map(normalizeSSO);
+  }, []);
+
+  const usersQuery = useApiFetch(async () => {
+    const res = await getAdminUsers();
+    return (res?.data ?? res ?? []).map(normalizeUser);
+  }, []);
+
+  useApiError(rolesQuery.error);
+  useApiError(keysQuery.error);
+  useApiError(ssoQuery.error);
+  useApiError(usersQuery.error);
+
+  const roles = useMemo(() => rolesQuery.data ?? [], [rolesQuery.data]);
+  const keys = useMemo(() => keysQuery.data ?? [], [keysQuery.data]);
+  const ssos = useMemo(() => ssoQuery.data ?? [], [ssoQuery.data]);
+  const users = useMemo(() => usersQuery.data ?? [], [usersQuery.data]);
+
+  const pageLoading =
+    rolesQuery.loading || keysQuery.loading || ssoQuery.loading || usersQuery.loading;
+
+  /* ─── Mutations ─── */
+  const { mutate: saveRole, loading: savingRole } = useApiMutation(
+    (role) =>
+      role.id && !String(role.id).startsWith('role-custom-')
+        ? updateRole(role.id, role)
+        : roles.some((r) => r.id === role.id)
+          ? updateRole(role.id, role)
+          : createRole(role),
+    {
+      onSuccess: () => {
+        toast({ title: 'Role saved' });
+        rolesQuery.refetch();
+        setShowRoleModal(false);
+        setEditingRole(null);
+      },
+      onError: (err) =>
+        toast({ title: 'Failed to save role', description: err.message, variant: 'destructive' }),
+    }
+  );
+
+  const { mutate: removeRole } = useApiMutation((role) => deleteRole(role.id), {
+    onSuccess: () => {
+      toast({ title: 'Role deleted' });
+      rolesQuery.refetch();
+    },
+    onError: (err) =>
+      toast({ title: 'Failed to delete role', description: err.message, variant: 'destructive' }),
+  });
+
+  const { mutate: generateKey, loading: generatingKey } = useApiMutation(
+    (form) =>
+      createApiKey({
+        name: form.name,
+        scopes: form.scopes,
+        environment: form.environment,
+        expiresAt: form.expiresIn
+          ? new Date(Date.now() + parseInt(form.expiresIn, 10) * 86400000).toISOString()
+          : undefined,
+      }),
+    {
+      onSuccess: () => keysQuery.refetch(),
+      onError: (err) =>
+        toast({
+          title: 'Failed to create API key',
+          description: err.message,
+          variant: 'destructive',
+        }),
+    }
+  );
+
+  const { mutate: revokeKey } = useApiMutation(
+    (key) => revokeApiKey(key.id, 'Revoked from admin console'),
+    {
+      onSuccess: () => {
+        toast({ title: 'API key revoked' });
+        keysQuery.refetch();
+      },
+      onError: (err) =>
+        toast({ title: 'Failed to revoke key', description: err.message, variant: 'destructive' }),
+    }
+  );
+
+  const { mutate: regenerateKey } = useApiMutation(
+    // Backend rotates the secret; response carries the new secret once.
+    (key) => api.post(`/admin/rbac/api-keys/${key.id}/regenerate`),
+    {
+      onSuccess: (res) => {
+        if (res?.secret) {
+          navigator.clipboard?.writeText(res.secret).catch(() => {});
+          toast({ title: 'Key regenerated', description: 'New secret copied to clipboard.' });
+        } else {
+          toast({ title: 'Key regenerated' });
+        }
+        keysQuery.refetch();
+      },
+      onError: (err) =>
+        toast({
+          title: 'Failed to regenerate key',
+          description: err.message,
+          variant: 'destructive',
+        }),
+    }
+  );
+
+  const { mutate: saveSSO, loading: savingSSO } = useApiMutation(
+    ({ id, ...form }) =>
+      id
+        ? updateSSOConfig(id, {
+            provider: form.providerType,
+            clientId: form.clientId,
+            domain: form.issuerUrl || undefined,
+            enabled: form.isEnabled,
+          })
+        : createSSOConfig({
+            provider: form.providerType,
+            clientId: form.clientId,
+            domain: form.issuerUrl || undefined,
+            enabled: form.isEnabled,
+            autoProvision: true,
+            defaultRole: 'role-readonly',
+          }),
+    {
+      onSuccess: () => {
+        toast({ title: 'SSO configuration saved' });
+        ssoQuery.refetch();
+        setShowSSOModal(false);
+        setEditingSSO(null);
+      },
+      onError: (err) =>
+        toast({
+          title: 'Failed to save SSO config',
+          description: err.message,
+          variant: 'destructive',
+        }),
+    }
+  );
+
+  const { mutate: toggleSSO } = useApiMutation(
+    (provider) => updateSSOConfig(provider.id, { enabled: provider.status !== 'active' }),
+    {
+      onSuccess: () => ssoQuery.refetch(),
+      onError: (err) =>
+        toast({ title: 'Failed to update SSO', description: err.message, variant: 'destructive' }),
+    }
+  );
+
+  const { mutate: removeSSO } = useApiMutation((provider) => deleteSSOConfig(provider.id), {
+    onSuccess: () => {
+      toast({ title: 'SSO provider deleted' });
+      ssoQuery.refetch();
+    },
+    onError: (err) =>
+      toast({ title: 'Failed to delete SSO', description: err.message, variant: 'destructive' }),
+  });
+
+  const { mutate: changeUserRole } = useApiMutation(
+    ({ userId, roleId }) => assignUserRole(userId, roleId),
+    {
+      onSuccess: () => {
+        toast({ title: 'Role assigned' });
+        usersQuery.refetch();
+      },
+      onError: (err) =>
+        toast({ title: 'Failed to assign role', description: err.message, variant: 'destructive' }),
+    }
+  );
+
+  /* ─── Stats ─── */
   const stats = useMemo(() => {
     const activeKeys = keys.filter((k) => getKeyStatus(k) === 'active').length;
     const revokedKeys = keys.filter((k) => getKeyStatus(k) === 'revoked').length;
@@ -98,7 +306,6 @@ export default function AdminRbacPage() {
         subtext: `${roles.filter((r) => r.type === 'custom').length} custom`,
         icon: Shield,
         color: 'text-secondary',
-        trend: 12,
       },
       {
         label: 'Active API Keys',
@@ -106,7 +313,6 @@ export default function AdminRbacPage() {
         subtext: `${revokedKeys} revoked · ${expiredKeys} expired`,
         icon: Key,
         color: 'text-accent',
-        trend: 8,
       },
       {
         label: 'SSO Providers',
@@ -114,7 +320,6 @@ export default function AdminRbacPage() {
         subtext: `${ssos.length - activeSSO} inactive`,
         icon: Globe,
         color: 'text-info',
-        trend: 0,
       },
       {
         label: 'Admin Users',
@@ -122,31 +327,30 @@ export default function AdminRbacPage() {
         subtext: `${activeUsers} active`,
         icon: Users,
         color: 'text-warning',
-        trend: -2,
       },
     ];
   }, [roles, keys, ssos, users]);
 
-  // Filtered data
+  /* ─── Filters ─── */
   const filteredRoles = useMemo(() => {
     if (!search) return roles;
     const q = search.toLowerCase();
     return roles.filter(
-      (r) => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q)
+      (r) => r.name?.toLowerCase().includes(q) || (r.description ?? '').toLowerCase().includes(q)
     );
   }, [roles, search]);
 
   const filteredKeys = useMemo(() => {
     if (!search) return keys;
     const q = search.toLowerCase();
-    return keys.filter((k) => k.name.toLowerCase().includes(q) || k.id.toLowerCase().includes(q));
+    return keys.filter((k) => k.name?.toLowerCase().includes(q) || k.id.toLowerCase().includes(q));
   }, [keys, search]);
 
   const filteredSSOs = useMemo(() => {
     if (!search) return ssos;
     const q = search.toLowerCase();
     return ssos.filter(
-      (s) => s.name.toLowerCase().includes(q) || s.provider.toLowerCase().includes(q)
+      (s) => s.name?.toLowerCase().includes(q) || s.provider?.toLowerCase().includes(q)
     );
   }, [ssos, search]);
 
@@ -154,123 +358,66 @@ export default function AdminRbacPage() {
     if (!search) return users;
     const q = search.toLowerCase();
     return users.filter(
-      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+      (u) => u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
     );
   }, [users, search]);
 
-  // Actions
-  const handleSaveRole = (role) => {
-    setRoles((prev) => {
-      const idx = prev.findIndex((r) => r.id === role.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = role;
-        return next;
-      }
-      return [...prev, role];
-    });
-    setShowRoleModal(false);
-    setEditingRole(null);
-  };
-
+  /* ─── Handlers ─── */
   const handleDeleteRole = (role) => {
     if (role.isLocked) return;
-    if (confirm(`Delete role "${role.name}"? This will affect ${role.userCount} users.`)) {
-      setRoles((prev) => prev.filter((r) => r.id !== role.id));
+    if (window.confirm(`Delete role "${role.name}"? This will affect ${role.userCount} users.`)) {
+      removeRole(role);
     }
-  };
-
-  const handleSaveKey = (key) => {
-    setKeys((prev) => [...prev, key]);
-    setShowApiKeyModal(false);
   };
 
   const handleRevokeKey = (key) => {
-    if (confirm(`Revoke API key "${key.name}"? This cannot be undone.`)) {
-      setKeys((prev) =>
-        prev.map((k) =>
-          k.id === key.id
-            ? { ...k, status: 'revoked', revokedAt: new Date().toISOString(), revokedBy: 'You' }
-            : k
-        )
-      );
-    }
+    if (window.confirm(`Revoke API key "${key.name}"? This cannot be undone.`)) revokeKey(key);
   };
 
   const handleRegenerateKey = (key) => {
-    if (confirm(`Regenerate API key "${key.name}"? The old key will be invalidated immediately.`)) {
-      const prefix = key.environment === 'production' ? 'pk_live_' : 'pk_test_';
-      const random = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-      setKeys((prev) =>
-        prev.map((k) =>
-          k.id === key.id
-            ? {
-                ...k,
-                keyFull: `${prefix}${random}`,
-                keyPrefix: `${prefix}${random.slice(0, 12)}...`,
-                createdAt: new Date().toISOString().split('T')[0],
-                usageCount: 0,
-                lastUsedAt: null,
-              }
-            : k
-        )
-      );
-    }
-  };
-
-  const handleToggleSSO = (provider) => {
-    setSSOs((prev) =>
-      prev.map((s) =>
-        s.id === provider.id ? { ...s, status: s.status === 'active' ? 'inactive' : 'active' } : s
+    if (
+      window.confirm(
+        `Regenerate API key "${key.name}"? The old key will be invalidated immediately.`
       )
-    );
-  };
-
-  const handleSaveSSO = (sso) => {
-    setSSOs((prev) => {
-      const idx = prev.findIndex((s) => s.id === sso.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = { ...next[idx], ...sso, updatedAt: new Date().toISOString().split('T')[0] };
-        return next;
-      }
-      return [
-        ...prev,
-        {
-          ...sso,
-          id: `sso-${Date.now().toString(36)}`,
-          createdAt: new Date().toISOString().split('T')[0],
-          userCount: 0,
-          syncErrors: 0,
-        },
-      ];
-    });
-    setShowSSOModal(false);
-    setEditingSSO(null);
+    )
+      regenerateKey(key);
   };
 
   const handleDeleteSSO = (provider) => {
     if (
-      confirm(
+      window.confirm(
         `Delete SSO provider "${provider.name}"? Users will no longer be able to sign in via this provider.`
       )
-    ) {
-      setSSOs((prev) => prev.filter((s) => s.id !== provider.id));
-    }
+    )
+      removeSSO(provider);
   };
 
-  const handleUserRoleChange = (userId, newRole) => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
-  };
+  const handleSyncSSO = useCallback(
+    async (provider) => {
+      try {
+        await api.post(`/admin/rbac/sso/${provider.id}/sync`);
+        toast({ title: `Sync started for ${provider.name}` });
+        ssoQuery.refetch();
+      } catch (err) {
+        toast({ title: 'Sync failed', description: err.message, variant: 'destructive' });
+      }
+    },
+    [toast, ssoQuery]
+  );
 
-  const handleSyncSSO = (provider) => {
-    alert(`Syncing ${provider.name}... (mock)`);
-  };
+  const tabs = [
+    { id: 'roles', label: 'Roles', icon: Shield, count: roles.length },
+    { id: 'api-keys', label: 'API Keys', icon: Key, count: keys.length },
+    { id: 'sso', label: 'SSO', icon: Globe, count: ssos.length },
+    { id: 'users', label: 'Users', icon: Users, count: users.length },
+  ];
 
-  const activeTabConfig = tabs.find((t) => t.id === activeTab);
-  const ActiveIcon = activeTabConfig?.icon || Shield;
+  const refetchAll = () => {
+    rolesQuery.refetch();
+    keysQuery.refetch();
+    ssoQuery.refetch();
+    usersQuery.refetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -291,6 +438,9 @@ export default function AdminRbacPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={refetchAll} disabled={pageLoading}>
+            <RefreshCw className={cn('mr-1.5 h-4 w-4', pageLoading && 'animate-spin')} /> Refresh
+          </Button>
           <Button variant="outline" size="sm">
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
@@ -326,7 +476,7 @@ export default function AdminRbacPage() {
                   isActive ? 'bg-secondary/10 text-secondary' : 'bg-border text-text-muted'
                 )}
               >
-                {tab.count()}
+                {tab.count}
               </span>
               {isActive && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-secondary" />
@@ -377,8 +527,15 @@ export default function AdminRbacPage() {
         </div>
       </div>
 
+      {/* Loading / error states */}
+      {pageLoading && (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface py-12 text-sm text-text-muted">
+          <RefreshCw className="h-4 w-4 animate-spin" /> Loading access control data…
+        </div>
+      )}
+
       {/* Roles Tab */}
-      {activeTab === 'roles' && (
+      {!pageLoading && activeTab === 'roles' && (
         <div className="space-y-6">
           {/* System Roles */}
           <div>
@@ -397,7 +554,7 @@ export default function AdminRbacPage() {
                       setShowRoleModal(true);
                     }}
                     onDelete={handleDeleteRole}
-                    onAssign={(r) => setActiveTab('users')}
+                    onAssign={() => setActiveTab('users')}
                   />
                 ))}
             </div>
@@ -420,9 +577,14 @@ export default function AdminRbacPage() {
                       setShowRoleModal(true);
                     }}
                     onDelete={handleDeleteRole}
-                    onAssign={(r) => setActiveTab('users')}
+                    onAssign={() => setActiveTab('users')}
                   />
                 ))}
+              {filteredRoles.filter((r) => r.type === 'custom').length === 0 && (
+                <p className="text-sm text-text-muted col-span-full py-6 text-center">
+                  No custom roles yet.
+                </p>
+              )}
             </div>
           </div>
 
@@ -452,7 +614,7 @@ export default function AdminRbacPage() {
       )}
 
       {/* API Keys Tab */}
-      {activeTab === 'api-keys' && (
+      {!pageLoading && activeTab === 'api-keys' && (
         <div className="rounded-xl border border-border bg-surface overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -492,7 +654,9 @@ export default function AdminRbacPage() {
                     onRevoke={handleRevokeKey}
                     onRegenerate={handleRegenerateKey}
                     onView={(k) =>
-                      alert(`Key: ${k.name}\\nFull: ${k.keyFull}\\nScopes: ${k.scopes.join(', ')}`)
+                      window.alert(
+                        `Key: ${k.name}\nPrefix: ${k.keyPrefix}\nScopes: ${k.scopes.join(', ')}`
+                      )
                     }
                   />
                 ))}
@@ -509,26 +673,39 @@ export default function AdminRbacPage() {
       )}
 
       {/* SSO Tab */}
-      {activeTab === 'sso' && (
+      {!pageLoading && activeTab === 'sso' && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredSSOs.map((provider) => (
             <SSOCard
               key={provider.id}
               provider={provider}
               onEdit={(p) => {
-                setEditingSSO(p);
+                setEditingSSO({
+                  id: p.id,
+                  providerType: p.provider,
+                  displayName: p.name,
+                  clientId: p.clientId ?? '',
+                  issuerUrl: p.domain ?? '',
+                  isEnabled: p.status === 'active',
+                });
                 setShowSSOModal(true);
               }}
-              onToggle={handleToggleSSO}
+              onToggle={(p) => toggleSSO(p)}
               onSync={handleSyncSSO}
               onDelete={handleDeleteSSO}
             />
           ))}
+          {filteredSSOs.length === 0 && (
+            <div className="col-span-full px-4 py-12 text-center rounded-xl border border-border bg-surface">
+              <Globe className="mx-auto h-10 w-10 text-text-muted mb-3" />
+              <p className="text-sm text-text-muted">No SSO providers configured.</p>
+            </div>
+          )}
         </div>
       )}
 
       {/* Users Tab */}
-      {activeTab === 'users' && (
+      {!pageLoading && activeTab === 'users' && (
         <div className="rounded-xl border border-border bg-surface overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -554,7 +731,7 @@ export default function AdminRbacPage() {
                     key={user.id}
                     user={user}
                     roles={roles}
-                    onRoleChange={handleUserRoleChange}
+                    onRoleChange={(userId, roleId) => changeUserRole({ userId, roleId })}
                   />
                 ))}
               </tbody>
@@ -573,15 +750,20 @@ export default function AdminRbacPage() {
       {showRoleModal && (
         <RoleModal
           role={editingRole}
+          loading={savingRole}
           onClose={() => {
             setShowRoleModal(false);
             setEditingRole(null);
           }}
-          onSave={handleSaveRole}
+          onSave={saveRole}
         />
       )}
       {showApiKeyModal && (
-        <ApiKeyModal onClose={() => setShowApiKeyModal(false)} onSave={handleSaveKey} />
+        <ApiKeyModal
+          onClose={() => setShowApiKeyModal(false)}
+          onGenerate={generateKey}
+          generating={generatingKey}
+        />
       )}
       {showSSOModal && (
         <SSOModal
@@ -591,7 +773,8 @@ export default function AdminRbacPage() {
             setEditingSSO(null);
           }}
           ssoConfig={editingSSO}
-          onSave={handleSaveSSO}
+          onSave={saveSSO}
+          saving={savingSSO}
         />
       )}
     </div>

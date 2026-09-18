@@ -223,12 +223,15 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  useEffect(() => {
+  // Populate edit state when the selected reservation changes
+  const [prevReservation, setPrevReservation] = useState(null);
+  if (reservation !== prevReservation) {
+    setPrevReservation(reservation);
     if (reservation) {
       setEditData({ ...reservation });
       setIsEditing(false);
     }
-  }, [reservation]);
+  }
 
   if (!isOpen || !reservation || !editData) return null;
 
@@ -511,39 +514,35 @@ function ReservationDrawer({ reservation, room, isOpen, onClose, onSave, onCheck
 }
 
 /* ─── Quick Create Modal ─── */
-function QuickCreateModal({ isOpen, onClose, onCreate, defaultRoomId, defaultDate }) {
-  const [data, setData] = useState({
+function buildQuickCreateData(defaultRoomId, defaultDate, today) {
+  const start = defaultDate || today;
+  return {
     guest: '',
     email: '',
     phone: '',
     roomId: defaultRoomId || ROOMS[0].id,
-    startDate: defaultDate || format(new Date(), 'yyyy-MM-dd'),
-    endDate: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
+    startDate: start,
+    endDate: format(addDays(parseISO(start), 1), 'yyyy-MM-dd'),
     rate: 189,
     adults: '2',
     children: '0',
     status: 'confirmed',
-  });
+  };
+}
 
-  useEffect(() => {
+function QuickCreateModal({ isOpen, onClose, onCreate, defaultRoomId, defaultDate }) {
+  const [today] = useState(() => format(new Date(), 'yyyy-MM-dd'));
+  const [data, setData] = useState(() => buildQuickCreateData(defaultRoomId, defaultDate, today));
+
+  // Reset the form whenever the modal opens or its defaults change
+  const [prevResetKey, setPrevResetKey] = useState(null);
+  const resetKey = `${isOpen}|${defaultRoomId}|${defaultDate}`;
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
     if (isOpen) {
-      setData({
-        guest: '',
-        email: '',
-        phone: '',
-        roomId: defaultRoomId || ROOMS[0].id,
-        startDate: defaultDate || format(new Date(), 'yyyy-MM-dd'),
-        endDate: format(
-          addDays(parseISO(defaultDate || format(new Date(), 'yyyy-MM-dd')), 1),
-          'yyyy-MM-dd'
-        ),
-        rate: 189,
-        adults: '2',
-        children: '0',
-        status: 'confirmed',
-      });
+      setData(buildQuickCreateData(defaultRoomId, defaultDate, today));
     }
-  }, [isOpen, defaultRoomId, defaultDate]);
+  }
 
   if (!isOpen) return null;
 
@@ -873,14 +872,26 @@ function BulkActionBar({ selectedIds, reservations, onClear, onDelete, onChangeS
    MAIN TAPE CHART COMPONENT
    ═════════════════════════════════════════ */
 
-export default function TapeChart() {
-  const navigate = useNavigate();
+export default function TapeChart({ rooms: propRooms, reservations: propReservations }) {
   const gridRef = useRef(null);
+
+  const rooms = propRooms != null ? propRooms : ROOMS;
 
   /* ── Batch 1: Core State ── */
   const [viewMode, setViewMode] = useState('7');
   const [startDate, setStartDate] = useState(startOfDay(new Date()));
-  const [reservations, setReservations] = useState(generateMockReservations());
+  const [reservations, setReservations] = useState(() =>
+    propReservations != null ? propReservations : generateMockReservations()
+  );
+
+  // Adopt externally supplied reservations when they change
+  const [prevPropReservations, setPrevPropReservations] = useState(propReservations);
+  if (propReservations !== prevPropReservations) {
+    setPrevPropReservations(propReservations);
+    if (propReservations != null) {
+      setReservations(propReservations);
+    }
+  }
 
   /* ── Batch 2: Context Menu State ── */
   const [contextMenu, setContextMenu] = useState({
@@ -917,12 +928,12 @@ export default function TapeChart() {
 
   /* ── Derived: Filtered Rooms ── */
   const filteredRooms = useMemo(() => {
-    return ROOMS.filter((room) => {
+    return rooms.filter((room) => {
       if (filters.floor !== 'all' && String(room.floor) !== filters.floor) return false;
       if (filters.type !== 'all' && room.type !== filters.type) return false;
       return true;
     });
-  }, [filters.floor, filters.type]);
+  }, [filters.floor, filters.type, rooms]);
 
   /* ── Derived: Filtered Reservations for Display ── */
   const visibleReservations = useMemo(() => {
@@ -930,8 +941,11 @@ export default function TapeChart() {
     return reservations.filter((r) => r.status === filters.status);
   }, [reservations, filters.status]);
 
-  const roomTypes = useMemo(() => [...new Set(ROOMS.map((r) => r.type))], []);
-  const floors = useMemo(() => [...new Set(ROOMS.map((r) => r.floor))].sort((a, b) => a - b), []);
+  const roomTypes = useMemo(() => [...new Set(rooms.map((r) => r.type))], [rooms]);
+  const floors = useMemo(
+    () => [...new Set(rooms.map((r) => r.floor))].sort((a, b) => a - b),
+    [rooms]
+  );
 
   /* ── Global click to close context menu ── */
   useEffect(() => {
@@ -951,6 +965,13 @@ export default function TapeChart() {
     };
     window.addEventListener('mouseup', handleMouseUp);
     return () => window.removeEventListener('mouseup', handleMouseUp);
+  }, [resizeState]);
+
+  /* ── Resize cursor while dragging ── */
+  useEffect(() => {
+    if (!resizeState) return;
+    document.body.style.cursor = resizeState.edge === 'left' ? 'w-resize' : 'e-resize';
+    document.body.style.userSelect = 'none';
   }, [resizeState]);
 
   /* ── Global mouse move for resize ── */
@@ -1124,9 +1145,6 @@ export default function TapeChart() {
       startDate: reservation.startDate,
       endDate: reservation.endDate,
     });
-
-    document.body.style.cursor = edge === 'left' ? 'w-resize' : 'e-resize';
-    document.body.style.userSelect = 'none';
   };
 
   /* ── Batch 4: Drag-to-Move Handlers ── */
@@ -1272,7 +1290,7 @@ export default function TapeChart() {
         roomTypes={roomTypes}
         floors={floors}
         activeCount={filteredRooms.length}
-        totalCount={ROOMS.length}
+        totalCount={rooms.length}
       />
 
       {/* Grid */}
@@ -1432,7 +1450,7 @@ export default function TapeChart() {
       {/* Batch 3: Detail Drawer */}
       <ReservationDrawer
         reservation={selectedReservation}
-        room={selectedReservation ? ROOMS.find((r) => r.id === selectedReservation.roomId) : null}
+        room={selectedReservation ? rooms.find((r) => r.id === selectedReservation.roomId) : null}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         onSave={handleSaveReservation}

@@ -30,9 +30,10 @@ import {
   Minus,
   Plus,
   FileText,
+  Send,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { guestStay, formatCurrency, formatDate, getStayPhase } from '../data';
 import { CheckoutSummaryCard, CheckoutActionCard, ExpressCheckoutButton } from './components';
 

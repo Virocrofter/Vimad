@@ -1,5 +1,5 @@
-// src/app/admin/rbac/SSOModal.jsx
-import React, { useState, useEffect } from 'react';
+// src/app/admin/rbac/SSOModal.jsx — wired: async onSave + saving state (Phase 3D)
+import React, { useState } from 'react';
 import { X, Copy, Check, Shield, Link2 } from 'lucide-react';
 
 const PROVIDER_TYPES = [
@@ -17,6 +17,7 @@ export default function SSOModal({
   onClose,
   ssoConfig = null,
   onSave,
+  saving = false,
   appDomain = 'https://app.example.com',
 }) {
   const isEditing = !!ssoConfig;
@@ -35,7 +36,10 @@ export default function SSOModal({
   const [copied, setCopied] = useState(false);
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
+  const [prevResetKey, setPrevResetKey] = useState();
+  const resetKey = ssoConfig ?? (isOpen ? 'open' : 'closed');
+  if (prevResetKey === undefined || prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
     if (ssoConfig) {
       setFormData({
         providerType: ssoConfig.providerType || 'google',
@@ -65,7 +69,7 @@ export default function SSOModal({
     }
     setErrors({});
     setCopied(false);
-  }, [ssoConfig, isOpen]);
+  }
 
   if (!isOpen) return null;
 
@@ -81,10 +85,11 @@ export default function SSOModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    onSave?.({ ...formData, id: ssoConfig?.id });
+    // Parent calls createSSOConfig/updateSSOConfig via useApiMutation and closes on success.
+    await onSave?.({ ...formData, id: ssoConfig?.id });
   };
 
   const updateMapping = (index, field, value) => {
@@ -371,9 +376,10 @@ export default function SSOModal({
           <button
             type="submit"
             onClick={handleSubmit}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            disabled={saving}
+            className="rounded-lg bg-indigo-600 disabled:opacity-60 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
-            {isEditing ? 'Save Changes' : 'Save Configuration'}
+            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Save Configuration'}
           </button>
         </div>
       </div>

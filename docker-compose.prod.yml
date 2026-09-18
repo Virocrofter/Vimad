@@ -1,0 +1,158 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Vimad PMS — Production Compose
+# Usage: docker compose -f docker-compose.prod.yml up -d
+#
+# Prerequisites:
+#   1. Copy .env.example → .env and fill in all secrets
+#   2. DNS A record pointing to this host (for Caddy TLS)
+#   3. Ports 80 + 443 open
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: vimad-prod
+
+services:
+  # ─── Caddy: TLS Terminator + Reverse Proxy ───
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      API_INTERNAL_URL: http://api:3001
+      WEB_INTERNAL_URL: http://web:80
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:2019/config/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - vimad
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ─── API (Express + Prisma + BullMQ Workers) ───
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://vimad:${POSTGRES_PASSWORD}@postgres:5432/vimad?schema=public
+      REDIS_URL: redis://redis:6379
+      WEB_URL: https://${DOMAIN}
+      API_PUBLIC_URL: https://api.${DOMAIN}
+    volumes:
+      - api_storage:/app/apps/api/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - vimad
+    mem_limit: 1g
+    cpus: 1.0
+
+  # ─── Web (Nginx serving Vite build) ───
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: https://api.${DOMAIN}
+    environment:
+      VITE_API_URL: https://api.${DOMAIN}
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - vimad
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ─── PostgreSQL 16 ───
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vimad}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-vimad}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-vimad} -d $${POSTGRES_DB:-vimad}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - vimad
+    mem_limit: 1g
+    cpus: 1.0
+
+  # ─── Redis 7 ───
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - vimad
+    mem_limit: 512m
+    cpus: 0.5
+
+# ─── Named Volumes ───
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_storage:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+# ─── Networks ───
+networks:
+  vimad:
+    driver: bridge

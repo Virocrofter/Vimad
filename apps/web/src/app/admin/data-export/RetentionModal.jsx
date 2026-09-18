@@ -1,8 +1,8 @@
 /* src/app/admin/data-export/RetentionModal.jsx */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Check, Clock, Save, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { dataCategories, formatDuration } from './data';
 
 const actionOptions = [
@@ -37,7 +37,9 @@ export default function RetentionModal({ policy, onClose, onSave }) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
+  const [prevPolicy, setPrevPolicy] = useState(null);
+  if (policy !== prevPolicy) {
+    setPrevPolicy(policy);
     if (policy) {
       setForm({
         name: policy.name || '',
@@ -52,7 +54,7 @@ export default function RetentionModal({ policy, onClose, onSave }) {
         active: policy.active !== false,
       });
     }
-  }, [policy]);
+  }
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const toggleException = (ex) => {

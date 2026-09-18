@@ -43,7 +43,7 @@ import {
   Minus,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 /* ─── Mock Data ─── */
 const dateRanges = [
@@ -332,33 +332,39 @@ function BarChart({ data, labels, color = '#3B82F6', height = 200 }) {
 
 function DonutChart({ data, size = 120 }) {
   const total = data.reduce((s, d) => s + d.value, 0);
-  let currentAngle = 0;
   const radius = size / 2 - 8;
   const center = size / 2;
 
-  const getArc = (value) => {
-    const angle = (value / total) * 360;
-    const startAngle = currentAngle;
-    currentAngle += angle;
-    const endAngle = currentAngle;
+  // Precompute the SVG path for each segment's arc
+  const arcs = data.reduce(
+    (acc, d) => {
+      const angle = (d.value / total) * 360;
+      const startAngle = acc.currentAngle;
+      acc.currentAngle += angle;
+      const endAngle = acc.currentAngle;
 
-    const startRad = ((startAngle - 90) * Math.PI) / 180;
-    const endRad = ((endAngle - 90) * Math.PI) / 180;
+      const startRad = ((startAngle - 90) * Math.PI) / 180;
+      const endRad = ((endAngle - 90) * Math.PI) / 180;
 
-    const x1 = center + radius * Math.cos(startRad);
-    const y1 = center + radius * Math.sin(startRad);
-    const x2 = center + radius * Math.cos(endRad);
-    const y2 = center + radius * Math.sin(endRad);
+      const x1 = center + radius * Math.cos(startRad);
+      const y1 = center + radius * Math.sin(startRad);
+      const x2 = center + radius * Math.cos(endRad);
+      const y2 = center + radius * Math.sin(endRad);
 
-    const largeArc = angle > 180 ? 1 : 0;
+      const largeArc = angle > 180 ? 1 : 0;
 
-    return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-  };
+      acc.paths.push(
+        `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`
+      );
+      return acc;
+    },
+    { currentAngle: 0, paths: [] }
+  ).paths;
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {data.map((d, i) => (
-        <path key={i} d={getArc(d.value)} fill={d.color} stroke="white" strokeWidth="2" />
+        <path key={i} d={arcs[i]} fill={d.color} stroke="white" strokeWidth="2" />
       ))}
       <circle
         cx={center}
@@ -559,7 +565,6 @@ function TabButton({ active, onClick, children }) {
 
 /* ─── Main Page ─── */
 export function MarketingAnalyticsPage() {
-  const navigate = useNavigate();
   const [dateRange, setDateRange] = useState('7d');
   const [activeMetric, setActiveMetric] = useState('overview');
   const [showDatePicker, setShowDatePicker] = useState(false);

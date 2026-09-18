@@ -26,6 +26,10 @@ import {
   User,
   Loader2,
   AlertTriangle,
+  Check,
+  BedDouble,
+  Thermometer,
+  Languages,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';

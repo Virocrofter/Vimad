@@ -29,6 +29,7 @@ import {
   ArrowRight,
   ArrowLeft,
   CalendarDays,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -374,7 +375,6 @@ function PlanCard({ plan, isCurrent, onSelect, billingInterval }) {
 
 /* ─── Main Page ─── */
 export default function BillingDashboardPage() {
-  const navigate = useNavigate();
   const [billingInterval, setBillingInterval] = useState('monthly');
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);

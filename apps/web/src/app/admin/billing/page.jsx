@@ -1,34 +1,30 @@
-/* src/app/admin/billing/page.jsx */
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+// apps/web/src/app/admin/billing/page.jsx — wired to api/billing.ts (Phase 3E)
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   Users,
-  CreditCard,
-  Receipt,
   AlertTriangle,
-  RotateCcw,
-  ArrowUpRight,
-  ArrowDownRight,
-  BarChart3,
-  PieChart,
-  Zap,
-  Calendar,
-  ChevronRight,
+  RefreshCw,
+  FileText,
+  CreditCard,
+  ArrowRight,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiError } from '../../../hooks/useApiError';
 import {
-  revenueOverview,
-  mrrHistory,
-  revenueByPlan,
-  subscriptions,
-  invoices,
-  creditNotes,
-  dunningCases,
-} from './data';
+  getBillingDashboard,
+  getInvoices,
+  getSubscriptions,
+  getCreditNotes,
+  getDunningEvents,
+  getRevenueAnalytics,
+} from '@/api/billing';
+import { api } from '@/api/client';
+// Static metadata + formatters only — entity data comes from the API.
+import { formatCurrency } from './data';
 import {
   BillingStatCard,
   MrrMovementBar,
@@ -37,358 +33,299 @@ import {
   SubscriptionMiniCard,
   DunningTimeline,
 } from './components';
-import { formatCurrency } from './data';
 
-export default function BillingDashboard() {
-  const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState('6m');
+/* ─── Normalizers: API shapes → component shapes ─── */
+const invoiceStatusMap = { sent: 'pending', cancelled: 'void' };
+const normalizeInvoice = (inv) => ({
+  ...inv,
+  tenantName: inv.tenantName ?? inv.tenantId,
+  amount: inv.totalAmount ?? inv.amount ?? 0,
+  status: invoiceStatusMap[inv.status] ?? inv.status,
+});
 
-  const stats = useMemo(
-    () => ({
-      mrr: revenueOverview.mrr,
-      mrrGrowth: revenueOverview.mrrGrowth,
-      arr: revenueOverview.arr,
-      activeSubs: revenueOverview.activeSubscriptions,
-      trialSubs: revenueOverview.trialSubscriptions,
-      churnRate: revenueOverview.churnRate,
-      nrr: revenueOverview.netRevenueRetention,
-      arpu: revenueOverview.avgRevenuePerUser,
-      ltv: revenueOverview.lifetimeValue,
-      cac: revenueOverview.customerAcquisitionCost,
-      payback: revenueOverview.paybackPeriod,
-    }),
-    []
+const subStatusMap = { trialing: 'trial' };
+const normalizeSubscription = (s) => ({
+  ...s,
+  tenantName: s.tenantName ?? s.tenantId,
+  status: subStatusMap[s.status] ?? s.status,
+  billingCycle: s.billingCycle ?? 'monthly',
+  seats: s.usage?.users ?? s.seats ?? 0,
+  amount: s.amount ?? 0,
+});
+
+const normalizeCreditNote = (cn) => ({
+  ...cn,
+  tenantName: cn.tenantName ?? cn.invoiceId,
+});
+
+const dunningEventToAction = (e) => ({
+  date: e.sentAt,
+  action: `Payment attempt #${e.attempt}`,
+  status: e.status === 'resolved' ? 'success' : e.status, // sent | failed | success
+  reason: e.failureReason,
+});
+
+export default function BillingPage() {
+  /* ─── Data fetching (real API) ─── */
+  const dashboardQuery = useApiFetch(() => getBillingDashboard(), []);
+  const invoicesQuery = useApiFetch(async () => {
+    const res = await getInvoices({ page: 1, pageSize: 5 });
+    return (res?.data ?? res ?? []).map(normalizeInvoice);
+  }, []);
+  const subscriptionsQuery = useApiFetch(async () => {
+    const res = await getSubscriptions({ page: 1, pageSize: 5 });
+    return (res?.data ?? res ?? []).map(normalizeSubscription);
+  }, []);
+  const creditNotesQuery = useApiFetch(async () => {
+    const res = await getCreditNotes();
+    return (Array.isArray(res) ? res : (res?.data ?? [])).map(normalizeCreditNote);
+  }, []);
+  const dunningQuery = useApiFetch(async () => {
+    const res = await getDunningEvents();
+    return Array.isArray(res) ? res : (res?.data ?? []);
+  }, []);
+
+  // MRR movement history — endpoint: GET /admin/billing/mrr-history
+  const mrrHistoryQuery = useApiFetch(
+    async () => {
+      const res = await api.get('/admin/billing/mrr-history');
+      return res?.data ?? res ?? [];
+    },
+    [],
+    { initialData: [] }
   );
 
-  const recentInvoices = useMemo(() => invoices.slice(0, 5), []);
-  const recentSubs = useMemo(() => subscriptions.slice(0, 5), []);
-  const activeDunning = useMemo(() => dunningCases.filter((d) => d.status === 'in_progress'), []);
-
-  const pendingAmount = useMemo(
-    () =>
-      invoices
-        .filter((i) => i.status === 'pending' || i.status === 'overdue')
-        .reduce((s, i) => s + i.amount, 0),
-    []
+  // Revenue by plan — endpoint: GET /admin/billing/revenue-by-plan
+  const planRevenueQuery = useApiFetch(
+    async () => {
+      const res = await api.get('/admin/billing/revenue-by-plan');
+      return res?.data ?? res ?? [];
+    },
+    [],
+    { initialData: [] }
   );
 
-  const overdueAmount = useMemo(
-    () => invoices.filter((i) => i.status === 'overdue').reduce((s, i) => s + i.amount, 0),
-    []
-  );
+  useApiError(dashboardQuery.error);
+  useApiError(invoicesQuery.error);
+
+  const dashboard = dashboardQuery.data;
+  const invoices = invoicesQuery.data ?? [];
+  const subscriptions = subscriptionsQuery.data ?? [];
+  const creditNotes = creditNotesQuery.data ?? [];
+  const mrrHistory = mrrHistoryQuery.data ?? [];
+  const planRevenue = planRevenueQuery.data ?? [];
+
+  const loading = dashboardQuery.loading || invoicesQuery.loading || subscriptionsQuery.loading;
+
+  // Group dunning events by invoice → timeline of the most recent case
+  const latestDunningActions = useMemo(() => {
+    const dunningEvents = dunningQuery.data ?? [];
+    if (!dunningEvents.length) return [];
+    const byInvoice = new Map();
+    dunningEvents.forEach((e) => {
+      if (!byInvoice.has(e.invoiceId)) byInvoice.set(e.invoiceId, []);
+      byInvoice.get(e.invoiceId).push(dunningEventToAction(e));
+    });
+    const first = byInvoice.values().next().value;
+    return first.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [dunningQuery.data]);
+
+  const refetchAll = () => {
+    dashboardQuery.refetch();
+    invoicesQuery.refetch();
+    subscriptionsQuery.refetch();
+    creditNotesQuery.refetch();
+    dunningQuery.refetch();
+    mrrHistoryQuery.refetch();
+    planRevenueQuery.refetch();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 p-12 text-sm text-text-muted">
+        <RefreshCw className="h-4 w-4 animate-spin" /> Loading billing data…
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Billing & Revenue</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Billing Management</h1>
           <p className="text-sm text-text-secondary">
-            Subscription management, invoicing, and revenue analytics
+            Revenue, subscriptions, invoices, credit notes, and dunning
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-border bg-background p-1">
-            {[
-              { id: '1m', label: '1M' },
-              { id: '3m', label: '3M' },
-              { id: '6m', label: '6M' },
-              { id: '1y', label: '1Y' },
-            ].map((r) => (
-              <button
-                key={r.id}
-                onClick={() => setTimeRange(r.id)}
-                className={cn(
-                  'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                  timeRange === r.id
-                    ? 'bg-secondary text-white'
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <Button variant="outline" size="sm" onClick={refetchAll}>
+          <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
+        </Button>
       </div>
 
-      {/* Revenue Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <BillingStatCard
-          label="Monthly Recurring Revenue"
-          value={formatCurrency(stats.mrr)}
-          icon={DollarSign}
-          color="text-secondary"
-          subtext={`ARR: ${formatCurrency(stats.arr)}`}
-          trend={stats.mrrGrowth}
-        />
-        <BillingStatCard
-          label="Active Subscriptions"
-          value={stats.activeSubs}
-          icon={Users}
-          color="text-accent"
-          subtext={`${stats.trialSubs} in trial`}
-        />
-        <BillingStatCard
-          label="Net Revenue Retention"
-          value={`${stats.nrr}%`}
-          icon={TrendingUp}
-          color="text-accent"
-          subtext="Annual metric"
-          trend={stats.nrr - 100}
-        />
-        <BillingStatCard
-          label="Churn Rate"
-          value={`${stats.churnRate}%`}
-          icon={TrendingDown}
-          color="text-warning"
-          subtext="Monthly"
-          trend={-stats.churnRate}
-        />
-      </div>
-
-      {/* Secondary Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <BillingStatCard
-          label="ARPU"
-          value={formatCurrency(stats.arpu)}
-          icon={Users}
-          color="text-info"
-          subtext="Per active subscriber"
-        />
-        <BillingStatCard
-          label="Lifetime Value"
-          value={formatCurrency(stats.ltv)}
-          icon={DollarSign}
-          color="text-purple-500"
-          subtext="Average LTV"
-        />
-        <BillingStatCard
-          label="CAC"
-          value={formatCurrency(stats.cac)}
-          icon={CreditCard}
-          color="text-danger"
-          subtext="Customer acquisition cost"
-        />
-        <BillingStatCard
-          label="CAC Payback"
-          value={`${stats.payback}m`}
-          icon={Calendar}
-          color="text-accent"
-          subtext="Months to recover CAC"
-        />
-      </div>
-
-      {/* Pending Revenue Alert */}
-      {(pendingAmount > 0 || overdueAmount > 0) && (
-        <div className="rounded-xl border border-warning/20 bg-warning/5 p-4 flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10">
-            <AlertTriangle className="h-5 w-5 text-warning" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-text-primary">
-              {overdueAmount > 0
-                ? `${formatCurrency(overdueAmount)} overdue across ${invoices.filter((i) => i.status === 'overdue').length} invoices`
-                : `${formatCurrency(pendingAmount)} pending across ${invoices.filter((i) => i.status === 'pending').length} invoices`}
-            </p>
-            <p className="text-xs text-text-muted">
-              {activeDunning.length > 0
-                ? `${activeDunning.length} dunning case${activeDunning.length > 1 ? 's' : ''} in progress`
-                : 'All payments on track'}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/admin/billing/invoices')}>
-            View Invoices <ChevronRight className="ml-1 h-3.5 w-3.5" />
-          </Button>
+      {/* KPI Stats */}
+      {dashboard && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <BillingStatCard
+            label="MRR"
+            value={formatCurrency(dashboard.mrr ?? 0)}
+            icon={DollarSign}
+            color="text-accent"
+            subtext="Monthly recurring revenue"
+          />
+          <BillingStatCard
+            label="Total Revenue"
+            value={formatCurrency(dashboard.totalRevenue ?? 0)}
+            icon={TrendingUp}
+            color="text-secondary"
+            subtext="All time"
+          />
+          <BillingStatCard
+            label="Active Subscriptions"
+            value={dashboard.activeSubscriptions ?? 0}
+            icon={Users}
+            color="text-info"
+            subtext={`${dashboard.trialConversions ?? 0} trial conversions`}
+          />
+          <BillingStatCard
+            label="Overdue"
+            value={formatCurrency(dashboard.overdueAmount ?? 0)}
+            icon={AlertTriangle}
+            color="text-danger"
+            subtext={`${dashboard.outstandingInvoices ?? 0} outstanding invoices`}
+          />
         </div>
       )}
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* MRR Movement */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-secondary" /> MRR Movement
-            </h3>
-            <div className="flex gap-3 text-[10px] text-text-muted">
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-accent" />
-                New
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-secondary" />
-                Expansion
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-warning" />
-                Contraction
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-danger" />
-                Churn
-              </span>
-            </div>
-          </div>
-          <MrrMovementBar data={mrrHistory} />
-        </div>
-
-        {/* Plan Distribution */}
+      {/* Charts row */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-surface p-5">
           <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <PieChart className="h-4 w-4 text-secondary" /> Revenue by Plan
+            <TrendingUp className="h-4 w-4 text-secondary" /> MRR Movement
           </h3>
-          <PlanDistributionChart data={revenueByPlan} />
+          {mrrHistory.length > 0 ? (
+            <MrrMovementBar data={mrrHistory} />
+          ) : (
+            <p className="py-8 text-center text-sm text-text-muted">No MRR history available.</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-secondary" /> Revenue by Plan
+          </h3>
+          {planRevenue.length > 0 ? (
+            <PlanDistributionChart data={planRevenue} />
+          ) : (
+            <p className="py-8 text-center text-sm text-text-muted">
+              No plan revenue data available.
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          {
-            label: 'Subscriptions',
-            count: subscriptions.length,
-            icon: Users,
-            path: '/admin/billing/subscriptions',
-            color: 'text-accent',
-            desc: 'Manage plans & billing cycles',
-          },
-          {
-            label: 'Invoices',
-            count: invoices.length,
-            icon: Receipt,
-            path: '/admin/billing/invoices',
-            color: 'text-secondary',
-            desc: 'Generate & track invoices',
-          },
-          {
-            label: 'Credit Notes',
-            count: creditNotes.length,
-            icon: RotateCcw,
-            path: '/admin/billing/credit-notes',
-            color: 'text-info',
-            desc: 'Refunds & adjustments',
-          },
-          {
-            label: 'Dunning',
-            count: activeDunning.length,
-            icon: AlertTriangle,
-            path: '/admin/billing/dunning',
-            color: 'text-warning',
-            desc: 'Failed payment recovery',
-          },
-        ].map((card) => (
-          <button
-            key={card.label}
-            onClick={() => navigate(card.path)}
-            className="rounded-xl border border-border bg-surface p-4 text-left hover:border-secondary/30 hover:shadow-md transition-all group"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div
-                className={cn(
-                  'rounded-lg p-2',
-                  card.color
-                    .replace('text-', 'bg-')
-                    .replace('accent', 'accent/10')
-                    .replace('secondary', 'secondary/10')
-                    .replace('info', 'info/10')
-                    .replace('warning', 'warning/10')
-                )}
-              >
-                <card.icon className={cn('h-5 w-5', card.color)} />
-              </div>
-              <span className="text-2xl font-bold font-mono text-text-primary">{card.count}</span>
-            </div>
-            <p className="text-sm font-medium text-text-primary group-hover:text-secondary transition-colors">
-              {card.label}
-            </p>
-            <p className="text-xs text-text-muted">{card.desc}</p>
-          </button>
-        ))}
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent Invoices */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between mb-4">
+      {/* Lists row */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Recent invoices */}
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <Receipt className="h-4 w-4 text-secondary" /> Recent Invoices
+              <FileText className="h-4 w-4 text-secondary" /> Recent Invoices
             </h3>
-            <button
-              onClick={() => navigate('/admin/billing/invoices')}
-              className="text-xs text-secondary hover:underline"
+            <Link
+              to="/admin/billing/invoices"
+              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
             >
-              View All →
-            </button>
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-          <div className="space-y-2">
-            {recentInvoices.map((inv) => (
+          <div className="p-3 space-y-2">
+            {invoices.map((inv) => (
               <InvoiceMiniCard key={inv.id} invoice={inv} />
             ))}
+            {invoices.length === 0 && (
+              <p className="py-6 text-center text-sm text-text-muted">No invoices yet.</p>
+            )}
           </div>
         </div>
 
-        {/* Recent Subscriptions */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between mb-4">
+        {/* Recent subscriptions */}
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
               <Users className="h-4 w-4 text-secondary" /> Recent Subscriptions
             </h3>
-            <button
-              onClick={() => navigate('/admin/billing/subscriptions')}
-              className="text-xs text-secondary hover:underline"
+            <Link
+              to="/admin/billing/subscriptions"
+              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
             >
-              View All →
-            </button>
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-          <div className="space-y-2">
-            {recentSubs.map((sub) => (
+          <div className="p-3 space-y-2">
+            {subscriptions.map((sub) => (
               <SubscriptionMiniCard key={sub.id} subscription={sub} />
             ))}
+            {subscriptions.length === 0 && (
+              <p className="py-6 text-center text-sm text-text-muted">No subscriptions yet.</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Active Dunning Cases */}
-      {activeDunning.length > 0 && (
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-warning" /> Active Dunning Cases
-            </h3>
-            <button
-              onClick={() => navigate('/admin/billing/dunning')}
-              className="text-xs text-secondary hover:underline"
+      {/* Credit notes + dunning row */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-text-primary">Recent Credit Notes</h3>
+            <Link
+              to="/admin/billing/credit-notes"
+              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
             >
-              Manage All →
-            </button>
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {activeDunning.map((dun) => (
-              <div key={dun.id} className="rounded-lg border border-border bg-background p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{dun.tenantName}</p>
-                    <p className="text-xs text-text-muted">
-                      {dun.id} · {dun.invoiceId}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-mono font-medium text-danger">
-                      {formatCurrency(dun.amount)}
-                    </p>
-                    <p className="text-[10px] text-text-muted">
-                      Attempt {dun.retryCount}/{dun.maxRetries}
-                    </p>
-                  </div>
+          <div className="p-3 space-y-2">
+            {creditNotes.slice(0, 5).map((cn) => (
+              <div
+                key={cn.id}
+                className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+              >
+                <div>
+                  <p className="text-sm font-medium text-text-primary">{cn.tenantName}</p>
+                  <p className="text-[10px] text-text-muted">
+                    {cn.id} · {cn.reason}
+                  </p>
                 </div>
-                <DunningTimeline actions={dun.actions} />
+                <p className="text-sm font-mono font-medium text-accent">
+                  -{formatCurrency(cn.amount ?? 0)}
+                </p>
               </div>
             ))}
+            {creditNotes.length === 0 && (
+              <p className="py-6 text-center text-sm text-text-muted">No credit notes.</p>
+            )}
           </div>
         </div>
-      )}
+
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-text-primary">Latest Dunning Activity</h3>
+            <Link
+              to="/admin/billing/dunning"
+              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
+            >
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="p-4">
+            {latestDunningActions.length > 0 ? (
+              <DunningTimeline actions={latestDunningActions} />
+            ) : (
+              <p className="py-6 text-center text-sm text-text-muted">No dunning activity.</p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

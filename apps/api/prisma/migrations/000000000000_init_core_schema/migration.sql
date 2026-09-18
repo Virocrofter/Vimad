@@ -39,6 +39,7 @@ CREATE TABLE "properties" (
     "timezone" TEXT NOT NULL DEFAULT 'UTC',
     "currency" TEXT NOT NULL DEFAULT 'USD',
     "status" TEXT NOT NULL DEFAULT 'active',
+    "currentBusinessDate" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -90,6 +91,10 @@ CREATE TABLE "rate_plans" (
     "currency" TEXT NOT NULL DEFAULT 'USD',
     "startDate" TIMESTAMP(3),
     "endDate" TIMESTAMP(3),
+    "minStay" INTEGER,
+    "maxStay" INTEGER,
+    "closeToArrival" BOOLEAN NOT NULL DEFAULT false,
+    "closeToDeparture" BOOLEAN NOT NULL DEFAULT false,
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -186,6 +191,8 @@ CREATE TABLE "reservation_stays" (
 CREATE TABLE "folios" (
     "id" TEXT NOT NULL,
     "reservationId" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'open',
     "totalCharges" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "totalPayments" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "balance" DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -210,6 +217,107 @@ CREATE TABLE "folio_items" (
 );
 
 -- CreateTable
+CREATE TABLE "invoices" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "customerId" TEXT,
+    "periodStart" DATE NOT NULL,
+    "periodEnd" DATE NOT NULL,
+    "dueDate" DATE NOT NULL,
+    "plan" TEXT NOT NULL,
+    "baseAmount" DECIMAL(10,2) NOT NULL,
+    "overageAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "totalAmount" DECIMAL(10,2) NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "status" TEXT NOT NULL DEFAULT 'draft',
+    "paidAt" TIMESTAMP(3),
+    "items" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "invoices_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "channel_connections" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "propertyId" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "hotelId" TEXT NOT NULL,
+    "apiKey" TEXT NOT NULL,
+    "apiSecret" TEXT,
+    "endpoint" TEXT,
+    "settings" JSONB NOT NULL DEFAULT '{}',
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "lastSyncStatus" TEXT,
+    "lastSyncAt" TIMESTAMP(3),
+    "connectedAt" TIMESTAMP(3),
+    "disconnectedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "channel_connections_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "channel_mappings" (
+    "id" TEXT NOT NULL,
+    "channelConnectionId" TEXT NOT NULL,
+    "roomTypeId" TEXT,
+    "ratePlanId" TEXT,
+    "externalRoomTypeId" TEXT,
+    "externalRatePlanId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "channel_mappings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "housekeeping_tasks" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "propertyId" TEXT NOT NULL,
+    "roomId" TEXT NOT NULL,
+    "type" TEXT NOT NULL DEFAULT 'cleaning',
+    "priority" TEXT NOT NULL DEFAULT 'normal',
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "scheduledAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "startedAt" TIMESTAMP(3),
+    "completedAt" TIMESTAMP(3),
+    "verifiedAt" TIMESTAMP(3),
+    "estimatedDuration" INTEGER,
+    "actualDuration" INTEGER,
+    "notes" TEXT,
+    "checklist" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "assigneeId" TEXT,
+    "inspectorId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "housekeeping_tasks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "night_audits" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "propertyId" TEXT NOT NULL,
+    "auditDate" DATE NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'in_progress',
+    "runBy" TEXT NOT NULL,
+    "steps" JSONB NOT NULL DEFAULT '{}',
+    "results" JSONB,
+    "errorMessage" TEXT,
+    "completedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "night_audits_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "audit_logs" (
     "id" TEXT NOT NULL,
     "tenantId" TEXT NOT NULL,
@@ -223,6 +331,113 @@ CREATE TABLE "audit_logs" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "audit_logs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "notifications" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "userId" TEXT,
+    "type" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "actionUrl" TEXT,
+    "actionLabel" TEXT,
+    "entityType" TEXT,
+    "entityId" TEXT,
+    "read" BOOLEAN NOT NULL DEFAULT false,
+    "readAt" TIMESTAMP(3),
+    "deliveredVia" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "notifications_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "push_subscriptions" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "endpoint" TEXT NOT NULL,
+    "p256dh" TEXT NOT NULL,
+    "auth" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "push_subscriptions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "roles" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "type" TEXT NOT NULL DEFAULT 'custom',
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "isLocked" BOOLEAN NOT NULL DEFAULT false,
+    "tenantId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "permissions" (
+    "id" TEXT NOT NULL,
+    "resource" TEXT NOT NULL,
+    "action" TEXT NOT NULL,
+    "description" TEXT,
+    "category" TEXT NOT NULL DEFAULT 'general',
+
+    CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "role_permissions" (
+    "id" TEXT NOT NULL,
+    "roleId" TEXT NOT NULL,
+    "permissionId" TEXT NOT NULL,
+    "conditions" JSONB,
+
+    CONSTRAINT "role_permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "role_assignments" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "roleId" TEXT NOT NULL,
+    "propertyId" TEXT,
+    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "assignedBy" TEXT,
+
+    CONSTRAINT "role_assignments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "api_keys" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "keyHash" TEXT NOT NULL,
+    "keyPrefix" TEXT NOT NULL,
+    "scopes" TEXT[],
+    "status" TEXT NOT NULL DEFAULT 'active',
+    "environment" TEXT NOT NULL DEFAULT 'production',
+    "rateLimit" TEXT NOT NULL DEFAULT '1000/min',
+    "expiresAt" TIMESTAMP(3),
+    "lastUsedAt" TIMESTAMP(3),
+    "usageCount" INTEGER NOT NULL DEFAULT 0,
+    "createdBy" TEXT,
+    "revokedAt" TIMESTAMP(3),
+    "revokedBy" TEXT,
+    "revokeReason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "api_keys_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -313,13 +528,124 @@ CREATE UNIQUE INDEX "reservation_stays_reservationId_roomId_date_key" ON "reserv
 CREATE UNIQUE INDEX "folios_reservationId_key" ON "folios"("reservationId");
 
 -- CreateIndex
+CREATE INDEX "folios_tenantId_idx" ON "folios"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "folios_status_idx" ON "folios"("status");
+
+-- CreateIndex
 CREATE INDEX "folio_items_folioId_idx" ON "folio_items"("folioId");
+
+-- CreateIndex
+CREATE INDEX "invoices_tenantId_idx" ON "invoices"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "invoices_status_idx" ON "invoices"("status");
+
+-- CreateIndex
+CREATE INDEX "invoices_dueDate_idx" ON "invoices"("dueDate");
+
+-- CreateIndex
+CREATE INDEX "channel_connections_tenantId_idx" ON "channel_connections"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "channel_connections_propertyId_idx" ON "channel_connections"("propertyId");
+
+-- CreateIndex
+CREATE INDEX "channel_connections_status_idx" ON "channel_connections"("status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "channel_connections_tenantId_propertyId_provider_hotelId_key" ON "channel_connections"("tenantId", "propertyId", "provider", "hotelId");
+
+-- CreateIndex
+CREATE INDEX "channel_mappings_channelConnectionId_idx" ON "channel_mappings"("channelConnectionId");
+
+-- CreateIndex
+CREATE INDEX "housekeeping_tasks_tenantId_idx" ON "housekeeping_tasks"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "housekeeping_tasks_propertyId_idx" ON "housekeeping_tasks"("propertyId");
+
+-- CreateIndex
+CREATE INDEX "housekeeping_tasks_roomId_idx" ON "housekeeping_tasks"("roomId");
+
+-- CreateIndex
+CREATE INDEX "housekeeping_tasks_status_idx" ON "housekeeping_tasks"("status");
+
+-- CreateIndex
+CREATE INDEX "housekeeping_tasks_scheduledAt_idx" ON "housekeeping_tasks"("scheduledAt");
+
+-- CreateIndex
+CREATE INDEX "night_audits_tenantId_idx" ON "night_audits"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "night_audits_propertyId_idx" ON "night_audits"("propertyId");
+
+-- CreateIndex
+CREATE INDEX "night_audits_auditDate_idx" ON "night_audits"("auditDate");
+
+-- CreateIndex
+CREATE INDEX "night_audits_status_idx" ON "night_audits"("status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "night_audits_tenantId_propertyId_auditDate_key" ON "night_audits"("tenantId", "propertyId", "auditDate");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_tenantId_idx" ON "audit_logs"("tenantId");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_createdAt_idx" ON "audit_logs"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "notifications_tenantId_idx" ON "notifications"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "notifications_userId_idx" ON "notifications"("userId");
+
+-- CreateIndex
+CREATE INDEX "notifications_read_idx" ON "notifications"("read");
+
+-- CreateIndex
+CREATE INDEX "notifications_createdAt_idx" ON "notifications"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "push_subscriptions_tenantId_idx" ON "push_subscriptions"("tenantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "push_subscriptions_userId_key" ON "push_subscriptions"("userId");
+
+-- CreateIndex
+CREATE INDEX "roles_tenantId_idx" ON "roles"("tenantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "permissions_resource_action_key" ON "permissions"("resource", "action");
+
+-- CreateIndex
+CREATE INDEX "role_permissions_roleId_idx" ON "role_permissions"("roleId");
+
+-- CreateIndex
+CREATE INDEX "role_permissions_permissionId_idx" ON "role_permissions"("permissionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "role_permissions_roleId_permissionId_key" ON "role_permissions"("roleId", "permissionId");
+
+-- CreateIndex
+CREATE INDEX "role_assignments_userId_idx" ON "role_assignments"("userId");
+
+-- CreateIndex
+CREATE INDEX "role_assignments_roleId_idx" ON "role_assignments"("roleId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "role_assignments_userId_roleId_propertyId_key" ON "role_assignments"("userId", "roleId", "propertyId");
+
+-- CreateIndex
+CREATE INDEX "api_keys_tenantId_idx" ON "api_keys"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "api_keys_keyPrefix_idx" ON "api_keys"("keyPrefix");
+
+-- CreateIndex
+CREATE INDEX "api_keys_status_idx" ON "api_keys"("status");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -382,5 +708,62 @@ ALTER TABLE "folios" ADD CONSTRAINT "folios_reservationId_fkey" FOREIGN KEY ("re
 ALTER TABLE "folio_items" ADD CONSTRAINT "folio_items_folioId_fkey" FOREIGN KEY ("folioId") REFERENCES "folios"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "channel_connections" ADD CONSTRAINT "channel_connections_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "channel_connections" ADD CONSTRAINT "channel_connections_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "channel_mappings" ADD CONSTRAINT "channel_mappings_channelConnectionId_fkey" FOREIGN KEY ("channelConnectionId") REFERENCES "channel_connections"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "housekeeping_tasks" ADD CONSTRAINT "housekeeping_tasks_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "housekeeping_tasks" ADD CONSTRAINT "housekeeping_tasks_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "housekeeping_tasks" ADD CONSTRAINT "housekeeping_tasks_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "rooms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "housekeeping_tasks" ADD CONSTRAINT "housekeeping_tasks_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "housekeeping_tasks" ADD CONSTRAINT "housekeeping_tasks_inspectorId_fkey" FOREIGN KEY ("inspectorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "night_audits" ADD CONSTRAINT "night_audits_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "night_audits" ADD CONSTRAINT "night_audits_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "push_subscriptions" ADD CONSTRAINT "push_subscriptions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "push_subscriptions" ADD CONSTRAINT "push_subscriptions_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permissionId_fkey" FOREIGN KEY ("permissionId") REFERENCES "permissions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "role_assignments" ADD CONSTRAINT "role_assignments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "role_assignments" ADD CONSTRAINT "role_assignments_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

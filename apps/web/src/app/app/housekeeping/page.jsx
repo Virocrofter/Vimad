@@ -18,7 +18,7 @@ import {
   List,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -369,7 +369,6 @@ function StatusColumn({
 }
 
 export default function HousekeepingPage() {
-  const navigate = useNavigate();
   const [rooms, setRooms] = useState(initialRooms);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'board'
   const [floorFilter, setFloorFilter] = useState('all');

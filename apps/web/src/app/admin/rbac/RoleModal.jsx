@@ -1,12 +1,13 @@
-/* src/app/admin/rbac/RoleModal.jsx */
-import { useState, useEffect } from 'react';
-import { X, Check, Shield, Users, Lock, Unlock } from 'lucide-react';
+/* src/app/admin/rbac/RoleModal.jsx — wired: async onSave, loading state (Phase 3D) */
+import { useState } from 'react';
+import { X, Check, Shield, Loader2 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
+// Static permission catalogue (reference metadata, not mock entities)
 import { permissionCategories } from './data';
 import { PermissionMatrixRow } from './components';
 
-export default function RoleModal({ role, onClose, onSave }) {
+export default function RoleModal({ role, onClose, onSave, loading = false }) {
   const isEditing = !!role;
   const [form, setForm] = useState({
     name: '',
@@ -15,7 +16,9 @@ export default function RoleModal({ role, onClose, onSave }) {
     isDefault: false,
   });
 
-  useEffect(() => {
+  const [prevRole, setPrevRole] = useState(null);
+  if (role !== prevRole) {
+    setPrevRole(role);
     if (role) {
       setForm({
         name: role.name || '',
@@ -24,7 +27,7 @@ export default function RoleModal({ role, onClose, onSave }) {
         isDefault: role.isDefault || false,
       });
     }
-  }, [role]);
+  }
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -45,19 +48,16 @@ export default function RoleModal({ role, onClose, onSave }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
+    // Parent calls createRole/updateRole via useApiMutation and closes on success.
+    await onSave({
       ...form,
-      id: role?.id || `role-custom-${Date.now().toString(36)}`,
-      type: 'custom',
-      isLocked: false,
-      userCount: role?.userCount || 0,
-      createdAt: role?.createdAt || new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-      createdBy: role?.createdBy || 'You',
+      id: role?.id,
+      type: role?.type ?? 'custom',
+      isLocked: role?.isLocked ?? false,
+      tenantId: role?.tenantId,
     });
-    onClose();
   };
 
   const allPermissions = permissionCategories.flatMap((c) => c.permissions.map((p) => p.key));
@@ -188,11 +188,16 @@ export default function RoleModal({ role, onClose, onSave }) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" variant="secondary">
-              <Check className="mr-1.5 h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Role'}
+            <Button type="submit" variant="secondary" disabled={loading}>
+              {loading ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-1.5 h-4 w-4" />
+              )}
+              {isEditing ? 'Save Changes' : 'Create Role'}
             </Button>
           </div>
         </form>

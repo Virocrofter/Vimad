@@ -1,1476 +1,587 @@
-/* src/app/admin/settings/page.jsx */
-import { useState, useMemo, useCallback } from 'react';
+'use client';
+
+import { useState } from 'react';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { useApiMutation } from '@/hooks/useApiMutation';
+import { fetchSettings, updateSettings } from '@/api/settings';
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
-  Save,
-  Undo,
-  Settings,
-  Mail,
-  Paintbrush,
-  Gauge,
-  Wrench,
-  Bell,
-  Globe,
-  Clock,
-  DollarSign,
-  Shield,
-  Database,
-  Server,
-  Key,
-  Zap,
-  AlertTriangle,
-  Check,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  Eye,
-  Code,
-  Monitor,
-  Smartphone,
-  MessageSquare,
-  Hash,
-  Plus,
-  Trash2,
-  Copy,
-  ExternalLink,
-  Upload,
-  Palette,
-  Lock,
-  FileText,
-  Activity,
-  Cloud,
-  HardDrive,
-  Wifi,
-  Layers,
-  BarChart3,
-  Users,
-} from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
-import {
-  initialPlatformConfig,
-  initialEmailTemplates,
-  initialBranding,
-  initialRateLimits,
-  initialMaintenance,
-  initialNotificationPrefs,
-  templateCategories,
-  timezones,
-  currencies,
-  dateFormats,
-  backupFrequencies,
-  ssoProviders,
-  getCategoryMeta,
-} from './data';
-import {
-  SectionCard,
-  SettingRow,
-  Toggle,
-  ColorPicker,
-  NumberStepper,
   Select,
-  TextInput,
-  Textarea,
-  TagInput,
-  TemplateEditor,
-  RateLimitCard,
-  ChannelToggle,
-  EventRow,
-  FileUploadZone,
-  UnsavedBar,
-  DangerZone,
-} from './components';
-
-/* ─── Tabs ─── */
-const tabs = [
-  { id: 'general', label: 'General', icon: Settings },
-  { id: 'email', label: 'Email Templates', icon: Mail },
-  { id: 'branding', label: 'Branding', icon: Paintbrush },
-  { id: 'security', label: 'Security', icon: Shield },
-  { id: 'rate-limits', label: 'Rate Limits', icon: Gauge },
-  { id: 'maintenance', label: 'Maintenance', icon: Wrench },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-];
-
-/* ═════════════════════════════════════════
-   SUB-SECTION COMPONENTS
-   ═════════════════════════════════════════ */
-
-/* ─── General Settings ─── */
-function GeneralSettings({ config, onChange }) {
-  return (
-    <div className="space-y-6">
-      <SectionCard
-        title="Platform Identity"
-        icon={Globe}
-        description="Core platform identifiers and defaults"
-      >
-        <div className="space-y-1">
-          <SettingRow label="Platform Name" description="Displayed in emails, UI, and browser tab">
-            <TextInput
-              value={config.platformName}
-              onChange={(v) => onChange({ ...config, platformName: v })}
-              className="w-64"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Support Email" description="Reply-to address for all platform emails">
-            <TextInput
-              value={config.supportEmail}
-              onChange={(v) => onChange({ ...config, supportEmail: v })}
-              type="email"
-              className="w-64"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Sender Name" description="Display name for transactional emails">
-            <TextInput
-              value={config.senderName}
-              onChange={(v) => onChange({ ...config, senderName: v })}
-              className="w-64"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Reply-To Email" description="Where replies to system emails go">
-            <TextInput
-              value={config.replyToEmail}
-              onChange={(v) => onChange({ ...config, replyToEmail: v })}
-              type="email"
-              className="w-64"
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Regional Defaults"
-        icon={Clock}
-        description="Default timezone, currency, and formatting"
-      >
-        <div className="space-y-1">
-          <SettingRow label="Default Timezone">
-            <Select
-              value={config.defaultTimezone}
-              onChange={(v) => onChange({ ...config, defaultTimezone: v })}
-              options={timezones.map((t) => ({ value: t, label: t.replace(/_/g, ' ') }))}
-              className="w-64"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Default Currency">
-            <Select
-              value={config.defaultCurrency}
-              onChange={(v) => onChange({ ...config, defaultCurrency: v })}
-              options={currencies.map((c) => ({
-                value: c.code,
-                label: `${c.code} (${c.symbol}) — ${c.name}`,
-              }))}
-              className="w-64"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Date Format">
-            <Select
-              value={config.dateFormat}
-              onChange={(v) => onChange({ ...config, dateFormat: v })}
-              options={dateFormats}
-              className="w-64"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Time Format">
-            <div className="flex items-center gap-2">
-              {['12h', '24h'].map((fmt) => (
-                <button
-                  key={fmt}
-                  onClick={() => onChange({ ...config, timeFormat: fmt })}
-                  className={cn(
-                    'h-10 rounded-md border px-4 text-sm font-medium transition-colors',
-                    config.timeFormat === fmt
-                      ? 'border-secondary bg-secondary/5 text-secondary'
-                      : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-                  )}
-                >
-                  {fmt === '12h' ? '12-hour' : '24-hour'}
-                </button>
-              ))}
-            </div>
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Default Language">
-            <Select
-              value={config.language}
-              onChange={(v) => onChange({ ...config, language: v })}
-              options={[
-                { value: 'en', label: 'English' },
-                { value: 'es', label: 'Spanish' },
-                { value: 'fr', label: 'French' },
-                { value: 'de', label: 'German' },
-                { value: 'pt', label: 'Portuguese' },
-                { value: 'it', label: 'Italian' },
-                { value: 'ja', label: 'Japanese' },
-                { value: 'zh', label: 'Chinese (Simplified)' },
-              ]}
-              className="w-64"
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="File Uploads"
-        icon={HardDrive}
-        description="Limits and restrictions for file uploads"
-      >
-        <div className="space-y-1">
-          <SettingRow label="Max File Size" description="Maximum upload size per file">
-            <NumberStepper
-              value={config.maxFileUploadSize}
-              onChange={(v) => onChange({ ...config, maxFileUploadSize: v })}
-              unit="MB"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow
-            label="Allowed File Types"
-            description="Comma-separated list of permitted extensions"
-          >
-            <TagInput
-              tags={config.allowedFileTypes}
-              onChange={(v) => onChange({ ...config, allowedFileTypes: v })}
-              placeholder="Add extension (e.g. pdf)"
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Data & Backups"
-        icon={Database}
-        description="Retention policies and backup configuration"
-      >
-        <div className="space-y-1">
-          <SettingRow
-            label="Data Retention"
-            description="How long to keep activity logs and deleted data"
-          >
-            <NumberStepper
-              value={config.dataRetentionDays}
-              onChange={(v) => onChange({ ...config, dataRetentionDays: v })}
-              unit="days"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Auto Backup">
-            <Toggle
-              checked={config.autoBackupEnabled}
-              onChange={(v) => onChange({ ...config, autoBackupEnabled: v })}
-            />
-          </SettingRow>
-          {config.autoBackupEnabled && (
-            <>
-              <div className="border-t border-border" />
-              <SettingRow label="Backup Frequency">
-                <Select
-                  value={config.backupFrequency}
-                  onChange={(v) => onChange({ ...config, backupFrequency: v })}
-                  options={backupFrequencies}
-                  className="w-48"
-                />
-              </SettingRow>
-              <div className="border-t border-border" />
-              <SettingRow label="Retention Count" description="Number of backups to keep">
-                <NumberStepper
-                  value={config.backupRetentionCount}
-                  onChange={(v) => onChange({ ...config, backupRetentionCount: v })}
-                />
-              </SettingRow>
-            </>
-          )}
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
-
-/* ─── Email Templates ─── */
-function EmailTemplates({ templates, onChange }) {
-  const [selectedId, setSelectedId] = useState(templates[0]?.id);
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const selected = templates.find((t) => t.id === selectedId);
-
-  const filtered = useMemo(() => {
-    return templates.filter((t) => {
-      const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
-      const matchesSearch =
-        !searchQuery ||
-        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.subject.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [templates, categoryFilter, searchQuery]);
-
-  const handleUpdate = (updated) => {
-    onChange(templates.map((t) => (t.id === updated.id ? updated : t)));
-  };
-
-  const handleToggle = (id) => {
-    onChange(templates.map((t) => (t.id === id ? { ...t, enabled: !t.enabled } : t)));
-  };
-
-  return (
-    <div className="flex gap-6 h-[calc(100vh-12rem)]">
-      {/* Sidebar */}
-      <div className="w-80 shrink-0 flex flex-col rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="border-b border-border p-4 space-y-3">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search templates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-          </div>
-          <div className="flex flex-wrap gap-1">
-            <button
-              onClick={() => setCategoryFilter('all')}
-              className={cn(
-                'rounded-full border px-2.5 py-0.5 text-[10px] font-medium transition-colors',
-                categoryFilter === 'all'
-                  ? 'border-secondary bg-secondary/10 text-secondary'
-                  : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-              )}
-            >
-              All
-            </button>
-            {templateCategories.map((c) => (
-              <button
-                key={c.key}
-                onClick={() => setCategoryFilter(c.key)}
-                className={cn(
-                  'rounded-full border px-2.5 py-0.5 text-[10px] font-medium transition-colors',
-                  categoryFilter === c.key
-                    ? cn(c.bg, c.color, 'border-current/30')
-                    : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-                )}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          {filtered.map((t) => {
-            const catMeta = getCategoryMeta(t.category);
-            return (
-              <button
-                key={t.id}
-                onClick={() => setSelectedId(t.id)}
-                className={cn(
-                  'flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors',
-                  selectedId === t.id ? 'bg-secondary/5' : 'hover:bg-background/50'
-                )}
-              >
-                <div
-                  className={cn(
-                    'mt-0.5 h-2 w-2 rounded-full shrink-0',
-                    t.enabled ? 'bg-accent' : 'bg-border'
-                  )}
-                />
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={cn(
-                      'text-sm font-medium truncate',
-                      selectedId === t.id ? 'text-secondary' : 'text-text-primary'
-                    )}
-                  >
-                    {t.name}
-                  </p>
-                  <p className="text-xs text-text-muted truncate mt-0.5">{t.subject}</p>
-                  <div className="mt-1.5 flex items-center gap-2">
-                    <span
-                      className={cn(
-                        'inline-flex items-center rounded-full border px-1.5 py-0 text-[9px] font-medium',
-                        catMeta.bg,
-                        catMeta.color,
-                        'border-current/20'
-                      )}
-                    >
-                      {catMeta.label}
-                    </span>
-                    <span className="text-[10px] text-text-muted">{t.lastModified}</span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Editor */}
-      <div className="flex-1 min-w-0 overflow-y-auto">
-        {selected ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-text-primary">{selected.name}</h2>
-                <p className="text-xs text-text-muted font-mono mt-0.5">{selected.id}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-text-muted mr-2">Enabled</span>
-                <Toggle checked={selected.enabled} onChange={() => handleToggle(selected.id)} />
-              </div>
-            </div>
-            <TemplateEditor
-              template={selected}
-              onChange={handleUpdate}
-              onPreview={() => console.log('Preview:', selected.id)}
-            />
-          </div>
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center text-text-muted">
-            <Mail className="h-12 w-12 mb-3" />
-            <p>Select a template to edit</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ─── Branding ─── */
-function BrandingSettings({ branding, onChange }) {
-  return (
-    <div className="space-y-6">
-      <SectionCard title="Logo & Assets" icon={Upload} description="Upload your brand assets">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Light Mode Logo
-            </label>
-            <FileUploadZone
-              onUpload={(file) => console.log('Upload:', file.name)}
-              accept=".svg,.png,.jpg,.jpeg"
-              label="Drop logo for light backgrounds"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Dark Mode Logo
-            </label>
-            <FileUploadZone
-              onUpload={(file) => console.log('Upload dark:', file.name)}
-              accept=".svg,.png,.jpg,.jpeg"
-              label="Drop logo for dark backgrounds"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Favicon
-            </label>
-            <FileUploadZone
-              onUpload={(file) => console.log('Upload favicon:', file.name)}
-              accept=".svg,.png,.ico"
-              label="Drop favicon (.svg, .png, .ico)"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Login Background
-            </label>
-            <FileUploadZone
-              onUpload={(file) => console.log('Upload bg:', file.name)}
-              accept=".jpg,.jpeg,.png"
-              label="Drop background image"
-            />
-          </div>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Colors" icon={Palette} description="Customize the platform color scheme">
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Primary
-            </label>
-            <ColorPicker
-              value={branding.primaryColor}
-              onChange={(v) => onChange({ ...branding, primaryColor: v })}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Accent
-            </label>
-            <ColorPicker
-              value={branding.accentColor}
-              onChange={(v) => onChange({ ...branding, accentColor: v })}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Danger
-            </label>
-            <ColorPicker
-              value={branding.dangerColor}
-              onChange={(v) => onChange({ ...branding, dangerColor: v })}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Warning
-            </label>
-            <ColorPicker
-              value={branding.warningColor}
-              onChange={(v) => onChange({ ...branding, warningColor: v })}
-            />
-          </div>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Typography" icon={FileText} description="Font and text styling">
-        <div className="space-y-1">
-          <SettingRow label="Font Family">
-            <Select
-              value={branding.fontFamily}
-              onChange={(v) => onChange({ ...branding, fontFamily: v })}
-              options={[
-                { value: 'Inter', label: 'Inter (Default)' },
-                { value: 'Roboto', label: 'Roboto' },
-                { value: 'Open Sans', label: 'Open Sans' },
-                { value: 'Lato', label: 'Lato' },
-                { value: 'Poppins', label: 'Poppins' },
-                { value: 'Nunito', label: 'Nunito' },
-              ]}
-              className="w-48"
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Email Branding" icon={Mail} description="Customize transactional emails">
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Email Header Image
-            </label>
-            <FileUploadZone
-              onUpload={(file) => console.log('Upload header:', file.name)}
-              accept=".png,.jpg,.jpeg"
-              label="Drop email header image (600×120px recommended)"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Email Footer Text
-            </label>
-            <Textarea
-              value={branding.emailFooterText}
-              onChange={(v) => onChange({ ...branding, emailFooterText: v })}
-              rows={2}
-            />
-          </div>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Platform Badge"
-        icon={Zap}
-        description="Show or hide the powered-by badge"
-      >
-        <SettingRow
-          label='Show "Powered by Vimad" Badge'
-          description="Displayed on login and footer for free plans"
-        >
-          <Toggle
-            checked={branding.poweredByBadge}
-            onChange={(v) => onChange({ ...branding, poweredByBadge: v })}
-          />
-        </SettingRow>
-      </SectionCard>
-
-      <DangerZone>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-danger">Reset to Defaults</p>
-            <p className="text-xs text-text-muted mt-0.5">
-              This will erase all custom branding and restore factory settings
-            </p>
-          </div>
-          <Button variant="outline" className="text-danger border-danger/30 hover:bg-danger/10">
-            <RefreshCw className="mr-1.5 h-4 w-4" /> Reset
-          </Button>
-        </div>
-      </DangerZone>
-    </div>
-  );
-}
-
-/* ─── Security Settings ─── */
-function SecuritySettings({ config, onChange }) {
-  return (
-    <div className="space-y-6">
-      <SectionCard title="Authentication" icon={Lock} description="Login and session policies">
-        <div className="space-y-1">
-          <SettingRow label="Session Timeout" description="Auto-logout after inactivity">
-            <NumberStepper
-              value={config.sessionTimeout}
-              onChange={(v) => onChange({ ...config, sessionTimeout: v })}
-              unit="min"
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Max Login Attempts" description="Before account lockout">
-            <NumberStepper
-              value={config.maxLoginAttempts}
-              onChange={(v) => onChange({ ...config, maxLoginAttempts: v })}
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Lockout Duration" description="How long accounts stay locked">
-            <NumberStepper
-              value={config.lockoutDuration}
-              onChange={(v) => onChange({ ...config, lockoutDuration: v })}
-              unit="min"
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Password Policy"
-        icon={Key}
-        description="Minimum requirements for user passwords"
-      >
-        <div className="space-y-1">
-          <SettingRow label="Minimum Length">
-            <NumberStepper
-              value={config.passwordMinLength}
-              onChange={(v) => onChange({ ...config, passwordMinLength: v })}
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Require Special Character">
-            <Toggle
-              checked={config.passwordRequireSpecialChar}
-              onChange={(v) => onChange({ ...config, passwordRequireSpecialChar: v })}
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Require Number">
-            <Toggle
-              checked={config.passwordRequireNumber}
-              onChange={(v) => onChange({ ...config, passwordRequireNumber: v })}
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Require Uppercase Letter">
-            <Toggle
-              checked={config.passwordRequireUppercase}
-              onChange={(v) => onChange({ ...config, passwordRequireUppercase: v })}
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Multi-Factor Authentication"
-        icon={Shield}
-        description="2FA and MFA settings"
-      >
-        <div className="space-y-1">
-          <SettingRow label="Enable MFA Globally" description="Allow users to set up MFA">
-            <Toggle
-              checked={config.mfaEnabled}
-              onChange={(v) => onChange({ ...config, mfaEnabled: v })}
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow label="Require MFA for Admins" description="Force 2FA for all admin accounts">
-            <Toggle
-              checked={config.mfaRequiredForAdmins}
-              onChange={(v) => onChange({ ...config, mfaRequiredForAdmins: v })}
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Single Sign-On" icon={Globe} description="Enterprise SSO configuration">
-        <div className="space-y-1">
-          <SettingRow label="Enable SSO">
-            <Toggle
-              checked={config.ssoEnabled}
-              onChange={(v) => onChange({ ...config, ssoEnabled: v })}
-            />
-          </SettingRow>
-          {config.ssoEnabled && (
-            <>
-              <div className="border-t border-border" />
-              <SettingRow label="SSO Provider">
-                <Select
-                  value={config.ssoProvider}
-                  onChange={(v) => onChange({ ...config, ssoProvider: v })}
-                  options={ssoProviders}
-                  className="w-48"
-                />
-              </SettingRow>
-            </>
-          )}
-        </div>
-      </SectionCard>
-
-      <SectionCard title="API Security" icon={Server} description="API-level protections">
-        <div className="space-y-1">
-          <SettingRow label="API Rate Limit" description="Global requests per minute">
-            <NumberStepper
-              value={config.apiRateLimit}
-              onChange={(v) => onChange({ ...config, apiRateLimit: v })}
-            />
-          </SettingRow>
-          <div className="border-t border-border" />
-          <SettingRow
-            label="Webhook Timeout"
-            description="Max seconds to wait for webhook response"
-          >
-            <NumberStepper
-              value={config.webhookTimeout}
-              onChange={(v) => onChange({ ...config, webhookTimeout: v })}
-              unit="s"
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
-
-/* ─── Rate Limits ─── */
-function RateLimitSettings({ limits, onChange }) {
-  const updateSection = (key, value) => {
-    onChange({ ...limits, [key]: value });
-  };
-
-  return (
-    <div className="space-y-6">
-      <SectionCard title="Global Limits" icon={Globe} description="Platform-wide rate limiting">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <RateLimitCard
-            title="Global"
-            icon={Activity}
-            values={limits.global}
-            onChange={(v) => updateSection('global', v)}
-          />
-          <RateLimitCard
-            title="Authentication"
-            icon={Lock}
-            values={limits.auth}
-            onChange={(v) => updateSection('auth', v)}
-          />
-          <RateLimitCard
-            title="API"
-            icon={Server}
-            values={limits.api}
-            onChange={(v) => updateSection('api', v)}
-          />
-          <RateLimitCard
-            title="Webhooks"
-            icon={Wifi}
-            values={limits.webhook}
-            onChange={(v) => updateSection('webhook', v)}
-          />
-          <RateLimitCard
-            title="File Uploads"
-            icon={HardDrive}
-            values={limits.fileUpload}
-            onChange={(v) => updateSection('fileUpload', v)}
-          />
-          <RateLimitCard
-            title="Search"
-            icon={Zap}
-            values={limits.search}
-            onChange={(v) => updateSection('search', v)}
-          />
-          <RateLimitCard
-            title="Exports"
-            icon={Database}
-            values={limits.export}
-            onChange={(v) => updateSection('export', v)}
-          />
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Per-Tenant Limits"
-        icon={Layers}
-        description="Rate limits applied per tenant"
-      >
-        <div className="space-y-4">
-          <SettingRow label="Enable Per-Tenant Limits">
-            <Toggle
-              checked={limits.perTenant.enabled}
-              onChange={(v) => updateSection('perTenant', { ...limits.perTenant, enabled: v })}
-            />
-          </SettingRow>
-          {limits.perTenant.enabled && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div>
-                <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                  Req/min
-                </label>
-                <input
-                  type="number"
-                  value={limits.perTenant.requestsPerMinute}
-                  onChange={(e) =>
-                    updateSection('perTenant', {
-                      ...limits.perTenant,
-                      requestsPerMinute: Number(e.target.value),
-                    })
-                  }
-                  className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                  Burst
-                </label>
-                <input
-                  type="number"
-                  value={limits.perTenant.burstLimit}
-                  onChange={(e) =>
-                    updateSection('perTenant', {
-                      ...limits.perTenant,
-                      burstLimit: Number(e.target.value),
-                    })
-                  }
-                  className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                  Max Connections
-                </label>
-                <input
-                  type="number"
-                  value={limits.perTenant.concurrentConnections}
-                  onChange={(e) =>
-                    updateSection('perTenant', {
-                      ...limits.perTenant,
-                      concurrentConnections: Number(e.target.value),
-                    })
-                  }
-                  className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Per-User Limits" icon={Users} description="Rate limits applied per user">
-        <div className="space-y-4">
-          <SettingRow label="Enable Per-User Limits">
-            <Toggle
-              checked={limits.perUser.enabled}
-              onChange={(v) => updateSection('perUser', { ...limits.perUser, enabled: v })}
-            />
-          </SettingRow>
-          {limits.perUser.enabled && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                  Req/min
-                </label>
-                <input
-                  type="number"
-                  value={limits.perUser.requestsPerMinute}
-                  onChange={(e) =>
-                    updateSection('perUser', {
-                      ...limits.perUser,
-                      requestsPerMinute: Number(e.target.value),
-                    })
-                  }
-                  className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                  Burst
-                </label>
-                <input
-                  type="number"
-                  value={limits.perUser.burstLimit}
-                  onChange={(e) =>
-                    updateSection('perUser', {
-                      ...limits.perUser,
-                      burstLimit: Number(e.target.value),
-                    })
-                  }
-                  className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm font-mono text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </SectionCard>
-
-      <SectionCard title="IP Management" icon={Shield} description="Blocklist and whitelist IPs">
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Blocklist
-            </label>
-            <TagInput
-              tags={limits.ipBlocklist}
-              onChange={(v) => updateSection('ipBlocklist', v)}
-              placeholder="Add IP to block..."
-            />
-            <p className="text-xs text-text-muted">
-              Requests from these IPs will be rejected immediately
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Whitelist
-            </label>
-            <TagInput
-              tags={limits.whitelist}
-              onChange={(v) => updateSection('whitelist', v)}
-              placeholder="Add IP to whitelist..."
-            />
-            <p className="text-xs text-text-muted">
-              These IPs bypass rate limiting (use with caution)
-            </p>
-          </div>
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
-
-/* ─── Maintenance Mode ─── */
-function MaintenanceSettings({ maintenance, onChange }) {
-  return (
-    <div className="space-y-6">
-      <div
-        className={cn(
-          'rounded-xl border p-4 flex items-center gap-4',
-          maintenance.enabled ? 'bg-warning/10 border-warning/20' : 'bg-accent/10 border-accent/20'
-        )}
-      >
-        <div
-          className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-full bg-background',
-            maintenance.enabled ? 'text-warning' : 'text-accent'
-          )}
-        >
-          <Wrench className="h-6 w-6" />
-        </div>
-        <div className="flex-1">
-          <p
-            className={cn(
-              'text-lg font-bold',
-              maintenance.enabled ? 'text-warning' : 'text-accent'
-            )}
-          >
-            {maintenance.enabled ? 'Maintenance Mode is ACTIVE' : 'All Systems Operational'}
-          </p>
-          <p className="text-xs text-text-secondary">
-            {maintenance.enabled
-              ? 'Users will see the maintenance page. Admins can still access the platform.'
-              : 'The platform is accessible to all users.'}
-          </p>
-        </div>
-        <Toggle
-          checked={maintenance.enabled}
-          onChange={(v) => onChange({ ...maintenance, enabled: v })}
-        />
-      </div>
-
-      <SectionCard
-        title="Maintenance Page"
-        icon={Monitor}
-        description="What users see during maintenance"
-      >
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Message
-            </label>
-            <Textarea
-              value={maintenance.message}
-              onChange={(v) => onChange({ ...maintenance, message: v })}
-              rows={3}
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Start Time
-              </label>
-              <input
-                type="datetime-local"
-                value={maintenance.startTime || ''}
-                onChange={(e) => onChange({ ...maintenance, startTime: e.target.value || null })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-                End Time
-              </label>
-              <input
-                type="datetime-local"
-                value={maintenance.endTime || ''}
-                onChange={(e) => onChange({ ...maintenance, endTime: e.target.value || null })}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-          </div>
-          <SettingRow label="Show Countdown Timer">
-            <Toggle
-              checked={maintenance.showCountdown}
-              onChange={(v) => onChange({ ...maintenance, showCountdown: v })}
-            />
-          </SettingRow>
-          <SettingRow label="Allow Admin Access" description="Super admins can bypass maintenance">
-            <Toggle
-              checked={maintenance.allowAdminAccess}
-              onChange={(v) => onChange({ ...maintenance, allowAdminAccess: v })}
-            />
-          </SettingRow>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Allowed IPs"
-        icon={Shield}
-        description="IPs that can access during maintenance"
-      >
-        <TagInput
-          tags={maintenance.allowedIps}
-          onChange={(v) => onChange({ ...maintenance, allowedIps: v })}
-          placeholder="Add allowed IP..."
-        />
-      </SectionCard>
-
-      <SectionCard
-        title="Custom HTML"
-        icon={Code}
-        description="Override the default maintenance page"
-      >
-        <div className="space-y-2">
-          <Textarea
-            value={maintenance.customPageHtml}
-            onChange={(v) => onChange({ ...maintenance, customPageHtml: v })}
-            rows={10}
-            placeholder="<!DOCTYPE html>..."
-          />
-          <p className="text-xs text-text-muted">Leave empty to use the default maintenance page</p>
-        </div>
-      </SectionCard>
-
-      <DangerZone>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-danger">Force Maintenance Page</p>
-            <p className="text-xs text-text-muted mt-0.5">
-              Immediately redirect all traffic to maintenance (bypasses scheduled time)
-            </p>
-          </div>
-          <Button variant="outline" className="text-danger border-danger/30 hover:bg-danger/10">
-            <AlertTriangle className="mr-1.5 h-4 w-4" /> Force Now
-          </Button>
-        </div>
-      </DangerZone>
-    </div>
-  );
-}
-
-/* ─── Notification Preferences ─── */
-function NotificationSettings({ prefs, onChange }) {
-  const updateChannel = (channel, config) => {
-    onChange({ ...prefs, channels: { ...prefs.channels, [channel]: config } });
-  };
-
-  const updateEvent = (event, config) => {
-    onChange({ ...prefs, events: { ...prefs.events, [event]: config } });
-  };
-
-  const updateDigest = (updates) => {
-    onChange({ ...prefs, digest: { ...prefs.digest, ...updates } });
-  };
-
-  const updateEscalation = (updates) => {
-    onChange({ ...prefs, escalation: { ...prefs.escalation, ...updates } });
-  };
-
-  const channelKeys = Object.keys(prefs.channels);
-  const eventKeys = Object.keys(prefs.events);
-
-  return (
-    <div className="space-y-6">
-      <SectionCard
-        title="Channels"
-        icon={Wifi}
-        description="Configure notification delivery methods"
-      >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {channelKeys.map((ch) => (
-            <ChannelToggle
-              key={ch}
-              channel={ch}
-              config={prefs.channels[ch]}
-              onChange={(v) => updateChannel(ch, v)}
-            />
-          ))}
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Event Routing"
-        icon={Bell}
-        description="Choose which channels notify for each event"
-      >
-        <div className="space-y-2">
-          {eventKeys.map((event) => (
-            <EventRow
-              key={event}
-              event={event}
-              config={prefs.events[event]}
-              channels={channelKeys}
-              onChange={(v) => updateEvent(event, v)}
-            />
-          ))}
-        </div>
-      </SectionCard>
-
-      <SectionCard title="Daily Digest" icon={FileText} description="Consolidated summary emails">
-        <div className="space-y-1">
-          <SettingRow label="Enable Digest">
-            <Toggle checked={prefs.digest.enabled} onChange={(v) => updateDigest({ enabled: v })} />
-          </SettingRow>
-          {prefs.digest.enabled && (
-            <>
-              <div className="border-t border-border" />
-              <SettingRow label="Frequency">
-                <div className="flex items-center gap-2">
-                  {['daily', 'weekly'].map((freq) => (
-                    <button
-                      key={freq}
-                      onClick={() => updateDigest({ frequency: freq })}
-                      className={cn(
-                        'h-10 rounded-md border px-4 text-sm font-medium transition-colors capitalize',
-                        prefs.digest.frequency === freq
-                          ? 'border-secondary bg-secondary/5 text-secondary'
-                          : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-                      )}
-                    >
-                      {freq}
-                    </button>
-                  ))}
-                </div>
-              </SettingRow>
-              <div className="border-t border-border" />
-              <SettingRow label="Delivery Time">
-                <input
-                  type="time"
-                  value={prefs.digest.time}
-                  onChange={(e) => updateDigest({ time: e.target.value })}
-                  className="h-10 rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </SettingRow>
-              <div className="border-t border-border" />
-              <SettingRow label="Timezone">
-                <Select
-                  value={prefs.digest.timezone}
-                  onChange={(v) => updateDigest({ timezone: v })}
-                  options={timezones.map((t) => ({ value: t, label: t.replace(/_/g, ' ') }))}
-                  className="w-56"
-                />
-              </SettingRow>
-              <div className="border-t border-border" />
-              <SettingRow label="Include Metrics">
-                <Toggle
-                  checked={prefs.digest.includeMetrics}
-                  onChange={(v) => updateDigest({ includeMetrics: v })}
-                />
-              </SettingRow>
-              <div className="border-t border-border" />
-              <SettingRow label="Include Errors">
-                <Toggle
-                  checked={prefs.digest.includeErrors}
-                  onChange={(v) => updateDigest({ includeErrors: v })}
-                />
-              </SettingRow>
-              <div className="border-t border-border" />
-              <SettingRow label="Include New Tenants">
-                <Toggle
-                  checked={prefs.digest.includeNewTenants}
-                  onChange={(v) => updateDigest({ includeNewTenants: v })}
-                />
-              </SettingRow>
-            </>
-          )}
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Escalation Policy"
-        icon={AlertTriangle}
-        description="Auto-escalate unacknowledged alerts"
-      >
-        <div className="space-y-4">
-          <SettingRow label="Enable Escalation">
-            <Toggle
-              checked={prefs.escalation.enabled}
-              onChange={(v) => updateEscalation({ enabled: v })}
-            />
-          </SettingRow>
-          {prefs.escalation.enabled && (
-            <div className="space-y-3">
-              {prefs.escalation.levels.map((level, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-background p-3"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                    {idx + 1}
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 flex-1">
-                    <div>
-                      <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                        After
-                      </label>
-                      <NumberStepper
-                        value={level.afterMinutes}
-                        onChange={(v) => {
-                          const newLevels = [...prefs.escalation.levels];
-                          newLevels[idx] = { ...level, afterMinutes: v };
-                          updateEscalation({ levels: newLevels });
-                        }}
-                        unit="min"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                        Channel
-                      </label>
-                      <Select
-                        value={level.channel}
-                        onChange={(v) => {
-                          const newLevels = [...prefs.escalation.levels];
-                          newLevels[idx] = { ...level, channel: v };
-                          updateEscalation({ levels: newLevels });
-                        }}
-                        options={channelKeys.map((c) => ({
-                          value: c,
-                          label: c.charAt(0).toUpperCase() + c.slice(1),
-                        }))}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-text-muted uppercase tracking-wider">
-                        Recipients
-                      </label>
-                      <TagInput
-                        tags={level.recipients}
-                        onChange={(v) => {
-                          const newLevels = [...prefs.escalation.levels];
-                          newLevels[idx] = { ...level, recipients: v };
-                          updateEscalation({ levels: newLevels });
-                        }}
-                        placeholder="Add recipient..."
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
-
-/* ═════════════════════════════════════════
-   MAIN PAGE
-   ═════════════════════════════════════════ */
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Save, RotateCcw } from 'lucide-react';
 
 export default function SettingsPage() {
+  const { toast } = useToast();
+  const { data: settings, loading, error, refetch } = useApiFetch(fetchSettings, []);
   const [activeTab, setActiveTab] = useState('general');
-  const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [formData, setFormData] = useState(null);
 
-  /* ─── State ─── */
-  const [platformConfig, setPlatformConfig] = useState(initialPlatformConfig);
-  const [emailTemplates, setEmailTemplates] = useState(initialEmailTemplates);
-  const [branding, setBranding] = useState(initialBranding);
-  const [rateLimits, setRateLimits] = useState(initialRateLimits);
-  const [maintenance, setMaintenance] = useState(initialMaintenance);
-  const [notificationPrefs, setNotificationPrefs] = useState(initialNotificationPrefs);
+  const updateMutation = useApiMutation(updateSettings, {
+    onSuccess: () => {
+      toast({
+        title: 'Settings saved',
+        description: 'Your changes have been saved successfully.',
+      });
+      setHasChanges(false);
+      refetch();
+    },
+    onError: (err) => {
+      toast({
+        title: 'Error saving settings',
+        description: err.message || 'Failed to save settings',
+        variant: 'destructive',
+      });
+    },
+  });
 
-  /* ─── Track changes ─── */
-  const markChanged = () => setHasChanges(true);
+  // Initialize form data when settings load
+  if (settings && !formData) {
+    setFormData(settings);
+  }
 
-  const handleSave = async () => {
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSaving(false);
+  const handleChange = (section, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value,
+      },
+    }));
+    setHasChanges(true);
+  };
+
+  const handleSave = () => {
+    updateMutation.mutate(formData);
+  };
+
+  const handleReset = () => {
+    setFormData(settings);
     setHasChanges(false);
-    console.log('Saved all settings');
+    toast({
+      title: 'Changes discarded',
+      description: 'All unsaved changes have been reset.',
+    });
   };
 
-  const handleDiscard = () => {
-    setPlatformConfig(initialPlatformConfig);
-    setEmailTemplates(initialEmailTemplates);
-    setBranding(initialBranding);
-    setRateLimits(initialRateLimits);
-    setMaintenance(initialMaintenance);
-    setNotificationPrefs(initialNotificationPrefs);
-    setHasChanges(false);
-  };
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <LoadingSkeleton count={5} />
+      </div>
+    );
+  }
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'general':
-        return (
-          <GeneralSettings
-            config={platformConfig}
-            onChange={(v) => {
-              setPlatformConfig(v);
-              markChanged();
-            }}
-          />
-        );
-      case 'email':
-        return (
-          <EmailTemplates
-            templates={emailTemplates}
-            onChange={(v) => {
-              setEmailTemplates(v);
-              markChanged();
-            }}
-          />
-        );
-      case 'branding':
-        return (
-          <BrandingSettings
-            branding={branding}
-            onChange={(v) => {
-              setBranding(v);
-              markChanged();
-            }}
-          />
-        );
-      case 'security':
-        return (
-          <SecuritySettings
-            config={platformConfig}
-            onChange={(v) => {
-              setPlatformConfig(v);
-              markChanged();
-            }}
-          />
-        );
-      case 'rate-limits':
-        return (
-          <RateLimitSettings
-            limits={rateLimits}
-            onChange={(v) => {
-              setRateLimits(v);
-              markChanged();
-            }}
-          />
-        );
-      case 'maintenance':
-        return (
-          <MaintenanceSettings
-            maintenance={maintenance}
-            onChange={(v) => {
-              setMaintenance(v);
-              markChanged();
-            }}
-          />
-        );
-      case 'notifications':
-        return (
-          <NotificationSettings
-            prefs={notificationPrefs}
-            onChange={(v) => {
-              setNotificationPrefs(v);
-              markChanged();
-            }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <ErrorState error={error} onRetry={refetch} />
+      </div>
+    );
+  }
+
+  if (!formData) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Platform Settings</h1>
-          <p className="text-sm text-text-secondary">
-            Configure global platform behavior, branding, and policies
+          <h1 className="text-3xl font-bold">Platform Settings</h1>
+          <p className="text-muted-foreground mt-1">
+            Configure global platform settings and preferences
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDiscard}
-            disabled={!hasChanges || saving}
-          >
-            <Undo className="mr-1.5 h-4 w-4" /> Reset
-          </Button>
-          <Button size="sm" onClick={handleSave} isLoading={saving} disabled={!hasChanges}>
-            <Save className="mr-1.5 h-4 w-4" /> Save All Changes
-          </Button>
+        <div className="flex gap-2">
+          {hasChanges && (
+            <>
+              <Button variant="outline" onClick={handleReset}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Discard
+              </Button>
+              <Button onClick={handleSave} disabled={updateMutation.loading}>
+                <Save className="h-4 w-4 mr-2" />
+                {updateMutation.loading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-border">
-        <div className="flex gap-1 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
-                  active
-                    ? 'border-secondary text-secondary'
-                    : 'border-transparent text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
+      {/* Settings Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
+        </TabsList>
+
+        {/* General Settings */}
+        <TabsContent value="general" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+              <CardDescription>Basic platform configuration and defaults</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="platformName">Platform Name</Label>
+                  <Input
+                    id="platformName"
+                    value={formData.general.platformName}
+                    onChange={(e) => handleChange('general', 'platformName', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="supportEmail">Support Email</Label>
+                  <Input
+                    id="supportEmail"
+                    type="email"
+                    value={formData.general.supportEmail}
+                    onChange={(e) => handleChange('general', 'supportEmail', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="defaultTimezone">Default Timezone</Label>
+                  <Select
+                    value={formData.general.defaultTimezone}
+                    onValueChange={(value) => handleChange('general', 'defaultTimezone', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                      <SelectItem value="America/Chicago">Central Time</SelectItem>
+                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                      <SelectItem value="Europe/London">London</SelectItem>
+                      <SelectItem value="Europe/Paris">Paris</SelectItem>
+                      <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="defaultCurrency">Default Currency</Label>
+                  <Select
+                    value={formData.general.defaultCurrency}
+                    onValueChange={(value) => handleChange('general', 'defaultCurrency', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD - US Dollar</SelectItem>
+                      <SelectItem value="EUR">EUR - Euro</SelectItem>
+                      <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                      <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dateFormat">Date Format</Label>
+                  <Select
+                    value={formData.general.dateFormat}
+                    onValueChange={(value) => handleChange('general', 'dateFormat', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="timeFormat">Time Format</Label>
+                  <Select
+                    value={formData.general.timeFormat}
+                    onValueChange={(value) => handleChange('general', 'timeFormat', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="12h">12 Hour (AM/PM)</SelectItem>
+                      <SelectItem value="24h">24 Hour</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Security Settings */}
+        <TabsContent value="security" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+              <CardDescription>Authentication and access control configuration</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                  <Input
+                    id="sessionTimeout"
+                    type="number"
+                    value={formData.security.sessionTimeout}
+                    onChange={(e) =>
+                      handleChange('security', 'sessionTimeout', parseInt(e.target.value))
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="maxLoginAttempts">Max Login Attempts</Label>
+                  <Input
+                    id="maxLoginAttempts"
+                    type="number"
+                    value={formData.security.maxLoginAttempts}
+                    onChange={(e) =>
+                      handleChange('security', 'maxLoginAttempts', parseInt(e.target.value))
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lockoutDuration">Lockout Duration (minutes)</Label>
+                  <Input
+                    id="lockoutDuration"
+                    type="number"
+                    value={formData.security.lockoutDuration}
+                    onChange={(e) =>
+                      handleChange('security', 'lockoutDuration', parseInt(e.target.value))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Require Two-Factor Authentication</Label>
+                  <p className="text-sm text-muted-foreground">Enforce 2FA for all admin users</p>
+                </div>
+                <Switch
+                  checked={formData.security.requireTwoFactor}
+                  onCheckedChange={(checked) =>
+                    handleChange('security', 'requireTwoFactor', checked)
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="passwordMinLength">Password Min Length</Label>
+                  <Input
+                    id="passwordMinLength"
+                    type="number"
+                    min="8"
+                    max="32"
+                    value={formData.security.passwordMinLength}
+                    onChange={(e) =>
+                      handleChange('security', 'passwordMinLength', parseInt(e.target.value))
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="passwordExpiryDays">Password Expiry (days)</Label>
+                  <Input
+                    id="passwordExpiryDays"
+                    type="number"
+                    value={formData.security.passwordExpiryDays}
+                    onChange={(e) =>
+                      handleChange('security', 'passwordExpiryDays', parseInt(e.target.value))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Require Special Characters</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Passwords must contain special characters
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.security.passwordRequireSpecial}
+                  onCheckedChange={(checked) =>
+                    handleChange('security', 'passwordRequireSpecial', checked)
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Email Settings */}
+        <TabsContent value="email" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Configuration</CardTitle>
+              <CardDescription>SMTP and email service settings</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="emailProvider">Email Provider</Label>
+                  <Select
+                    value={formData.email.provider}
+                    onValueChange={(value) => handleChange('email', 'provider', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="smtp">SMTP</SelectItem>
+                      <SelectItem value="sendgrid">SendGrid</SelectItem>
+                      <SelectItem value="ses">Amazon SES</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fromName">From Name</Label>
+                  <Input
+                    id="fromName"
+                    value={formData.email.fromName}
+                    onChange={(e) => handleChange('email', 'fromName', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fromEmail">From Email</Label>
+                <Input
+                  id="fromEmail"
+                  type="email"
+                  value={formData.email.fromEmail}
+                  onChange={(e) => handleChange('email', 'fromEmail', e.target.value)}
+                />
+              </div>
+
+              {formData.email.provider === 'smtp' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpHost">SMTP Host</Label>
+                      <Input
+                        id="smtpHost"
+                        value={formData.email.smtpHost || ''}
+                        onChange={(e) => handleChange('email', 'smtpHost', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpPort">SMTP Port</Label>
+                      <Input
+                        id="smtpPort"
+                        type="number"
+                        value={formData.email.smtpPort || ''}
+                        onChange={(e) =>
+                          handleChange('email', 'smtpPort', parseInt(e.target.value))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpUser">SMTP Username</Label>
+                      <Input
+                        id="smtpUser"
+                        value={formData.email.smtpUser || ''}
+                        onChange={(e) => handleChange('email', 'smtpUser', e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between pt-8">
+                      <div className="space-y-0.5">
+                        <Label>Use SSL/TLS</Label>
+                        <p className="text-sm text-muted-foreground">Secure connection</p>
+                      </div>
+                      <Switch
+                        checked={formData.email.smtpSecure}
+                        onCheckedChange={(checked) => handleChange('email', 'smtpSecure', checked)}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Feature Flags */}
+        <TabsContent value="features" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Toggles</CardTitle>
+              <CardDescription>Enable or disable platform features</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                {
+                  key: 'enableGuestPortal',
+                  label: 'Guest Portal',
+                  description: 'Allow guests to self-manage bookings',
+                },
+                {
+                  key: 'enableMobileApp',
+                  label: 'Mobile App',
+                  description: 'Enable mobile app access',
+                },
+                {
+                  key: 'enableChannelManager',
+                  label: 'Channel Manager',
+                  description: 'Connect to booking channels',
+                },
+                {
+                  key: 'enableLoyaltyProgram',
+                  label: 'Loyalty Program',
+                  description: 'Guest loyalty and rewards',
+                },
+                {
+                  key: 'enableMarketingAutomation',
+                  label: 'Marketing Automation',
+                  description: 'Automated email campaigns',
+                },
+                {
+                  key: 'enableAdvancedReporting',
+                  label: 'Advanced Reporting',
+                  description: 'Custom reports and analytics',
+                },
+              ].map((feature) => (
+                <div key={feature.key} className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>{feature.label}</Label>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </div>
+                  <Switch
+                    checked={formData.features[feature.key]}
+                    onCheckedChange={(checked) => handleChange('features', feature.key, checked)}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Integrations */}
+        <TabsContent value="integrations" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Third-Party Integrations</CardTitle>
+              <CardDescription>Configure external service integrations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Payment Processing (Stripe)</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="stripePublicKey">Public Key</Label>
+                    <Input
+                      id="stripePublicKey"
+                      value={formData.integrations.stripePublicKey || ''}
+                      onChange={(e) =>
+                        handleChange('integrations', 'stripePublicKey', e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="stripeSecretKey">Secret Key</Label>
+                    <Input
+                      id="stripeSecretKey"
+                      type="password"
+                      value={formData.integrations.stripeSecretKey || ''}
+                      onChange={(e) =>
+                        handleChange('integrations', 'stripeSecretKey', e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="text-lg font-semibold">SMS (Twilio)</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="twilioSid">Account SID</Label>
+                    <Input
+                      id="twilioSid"
+                      value={formData.integrations.twilioAccountSid || ''}
+                      onChange={(e) =>
+                        handleChange('integrations', 'twilioAccountSid', e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="twilioToken">Auth Token</Label>
+                    <Input
+                      id="twilioToken"
+                      type="password"
+                      value={formData.integrations.twilioAuthToken || ''}
+                      onChange={(e) =>
+                        handleChange('integrations', 'twilioAuthToken', e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="twilioPhone">Phone Number</Label>
+                    <Input
+                      id="twilioPhone"
+                      value={formData.integrations.twilioPhoneNumber || ''}
+                      onChange={(e) =>
+                        handleChange('integrations', 'twilioPhoneNumber', e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="text-lg font-semibold">Error Tracking (Sentry)</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="sentryDsn">DSN</Label>
+                  <Input
+                    id="sentryDsn"
+                    value={formData.integrations.sentryDsn || ''}
+                    onChange={(e) => handleChange('integrations', 'sentryDsn', e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Last Updated Info */}
+      {settings && (
+        <div className="text-sm text-muted-foreground text-center">
+          Last updated: {new Date(settings.updatedAt).toLocaleString()} by {settings.updatedBy}
         </div>
-      </div>
-
-      {/* Content */}
-      <div className="pb-20">{renderTab()}</div>
-
-      {/* Unsaved Bar */}
-      <UnsavedBar
-        visible={hasChanges}
-        onSave={handleSave}
-        onDiscard={handleDiscard}
-        saving={saving}
-      />
+      )}
     </div>
   );
 }

@@ -20,6 +20,8 @@ import {
   IdCard,
   Plane,
   FileCheck,
+  CheckCircle2,
+  Clock,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';

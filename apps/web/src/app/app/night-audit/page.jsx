@@ -25,7 +25,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 /* ─── Mock Data ─── */
 const initialChecklist = [

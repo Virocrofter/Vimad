@@ -20,6 +20,9 @@ import {
   Wrench,
   MessageSquare,
   ChevronRight,
+  EyeOff,
+  Eye,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { useGuestStore } from '../../store';

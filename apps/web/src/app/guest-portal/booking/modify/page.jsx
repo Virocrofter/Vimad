@@ -1,5 +1,5 @@
 /* src/app/guest-portal/booking/modify/page.jsx */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -21,8 +21,8 @@ import { Button } from '../../../../components/ui/button';
 import { guestStays, formatCurrency, formatDate, getCancellationPolicy } from '../../data';
 
 export default function GuestBookingModifyPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const stayId = searchParams.get('stay');
 
   const stay = guestStays.find((s) => s.id === stayId);
@@ -35,13 +35,15 @@ export default function GuestBookingModifyPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [priceDiff, setPriceDiff] = useState(0);
 
-  useEffect(() => {
+  const [prevStay, setPrevStay] = useState(null);
+  if (stay !== prevStay) {
+    setPrevStay(stay);
     if (stay) {
       setArrival(stay.dates.arrival);
       setDeparture(stay.dates.departure);
       setRoomType(stay.room.type);
     }
-  }, [stay]);
+  }
 
   if (!stay) {
     return (

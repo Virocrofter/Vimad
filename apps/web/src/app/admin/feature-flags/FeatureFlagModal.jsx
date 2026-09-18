@@ -35,7 +35,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -822,7 +822,6 @@ function NewFlagModal({ onClose, onCreate }) {
 
 /* ─── Main Page ─── */
 export default function FeatureFlagsPage() {
-  const navigate = useNavigate();
   const [flags, setFlags] = useState(initialFlags);
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');

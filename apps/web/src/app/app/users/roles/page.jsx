@@ -647,7 +647,6 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
 
 /* ─── Main Page ─── */
 export default function RolesPage() {
-  const navigate = useNavigate();
   const [roles, setRoles] = useState(initialRoles);
   const [query, setQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState(null);

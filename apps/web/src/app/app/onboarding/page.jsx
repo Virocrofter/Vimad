@@ -1,25 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { RegisterWizard } from '../../../components/auth/RegisterWizard';
 import { RotateCcw, Clock } from 'lucide-react';
 
 const STORAGE_KEY = 'pms-onboarding-progress';
 
-export default function OnboardingPage() {
-  const [savedProgress, setSavedProgress] = useState(null);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.savedAt) {
-          setSavedProgress(parsed);
-        }
+function loadSavedProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.savedAt) {
+        return parsed;
       }
-    } catch {
-      // ignore
     }
-  }, []);
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+export default function OnboardingPage() {
+  const [savedProgress, setSavedProgress] = useState(loadSavedProgress);
 
   const handleResume = () => {
     // The RegisterWizard auto-loads on mount, so just clear the banner

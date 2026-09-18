@@ -181,8 +181,8 @@ function TimelineItem({ event, isLast }) {
 }
 
 export default function ReservationDetailPage() {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState('details');
   const [notes, setNotes] = useState([
     {

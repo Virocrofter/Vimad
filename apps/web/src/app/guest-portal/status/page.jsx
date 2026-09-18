@@ -34,7 +34,7 @@ import {
   BedDouble,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { serviceStatuses, serviceStatusMeta, guestAnnouncements, formatDateTime } from '../data';
 import { GuestAnnouncementCard, ServiceStatusCard, EmptyState } from '../components';
 

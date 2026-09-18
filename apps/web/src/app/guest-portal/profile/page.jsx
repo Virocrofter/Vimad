@@ -23,7 +23,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { guestProfile, tierBenefits, formatDate } from '../data';
 import { TierBadge, FormInput, FormSelect, SectionHeader } from '../components';
 import { languageOptions } from '../data';

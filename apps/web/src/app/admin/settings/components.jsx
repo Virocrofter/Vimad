@@ -45,7 +45,7 @@ import {
   Hash,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 /* ─── Section Card ─── */
 export function SectionCard({ title, description, icon: Icon, children, className }) {

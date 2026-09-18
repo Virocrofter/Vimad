@@ -37,13 +37,13 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { guestStays, formatDate, formatCurrency, getStayPhase, canCheckIn } from '../data';
 import { StepIndicator, FileUploadZone } from '../components';
 
 export default function GuestCheckInPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const stayId = searchParams.get('stay');
 
   const stay = guestStays.find((s) => s.id === stayId);

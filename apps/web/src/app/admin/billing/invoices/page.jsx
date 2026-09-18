@@ -1,11 +1,10 @@
-/* src/app/admin/billing/invoices/page.jsx */
+/* src/app/admin/billing/invoices/page.jsx — wired to api/billing.ts (Phase 3E) */
 import { useState, useMemo } from 'react';
 import {
   Search,
   Filter,
   Plus,
   X,
-  Check,
   ChevronDown,
   ChevronUp,
   Download,
@@ -14,8 +13,6 @@ import {
   FileText,
   Printer,
   Trash2,
-  Copy,
-  DollarSign,
   Receipt,
   AlertTriangle,
   CheckCircle2,
@@ -23,17 +20,58 @@ import {
   Calendar,
   Mail,
   CreditCard,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { invoices, invoiceStatusMeta, formatCurrency, formatDate } from '../data';
+import { useApiFetch } from '../../../../hooks/useApiFetch';
+import { useApiMutation } from '../../../../hooks/useApiMutation';
+import { useToast } from '../../../../hooks/use-toast';
+import { useApiError } from '../../../../hooks/useApiError';
+import {
+  getInvoices,
+  getInvoice,
+  updateInvoice,
+  deleteInvoice,
+  markInvoicePaid,
+  getInvoicePdfUrl,
+  generateInvoice,
+  triggerDunning,
+} from '../../../../api/billing';
+import { api } from '../../../../api/client';
+// Static metadata + formatters only — entity data comes from the API.
+import { invoiceStatusMeta, formatCurrency, formatDate } from '../data';
 import { InvoiceStatusBadge } from '../components';
 
-/* ─── Invoice Detail Drawer ─── */
-function InvoiceDrawer({ invoice, onClose }) {
-  if (!invoice) return null;
+/* ─── Normalizer: API invoice → component shape ─── */
+const invoiceStatusMap = { sent: 'pending', cancelled: 'void' };
+const normalizeInvoice = (inv) => {
+  const amount = inv.totalAmount ?? inv.amount ?? 0;
+  const subtotal = inv.baseAmount ?? inv.subtotal ?? amount;
+  return {
+    ...inv,
+    tenantName: inv.tenantName ?? inv.tenantId,
+    amount,
+    subtotal,
+    tax: inv.tax ?? Math.max(amount - subtotal - (inv.overageAmount ?? 0), 0),
+    paidDate: inv.paidAt ?? inv.paidDate ?? null,
+    status: invoiceStatusMap[inv.status] ?? inv.status,
+    lineItems: Array.isArray(inv.lineItems)
+      ? inv.lineItems
+      : inv.items && typeof inv.items === 'object'
+        ? Object.entries(inv.items).map(([description, v]) => ({
+            description,
+            quantity: v?.quantity ?? 1,
+            unitPrice: v?.unitPrice ?? v?.amount ?? 0,
+            amount: v?.amount ?? 0,
+          }))
+        : [],
+  };
+};
 
-  const statusMeta = invoiceStatusMeta[invoice.status];
+/* ─── Invoice Detail Drawer ─── */
+function InvoiceDrawer({ invoice, onClose, onAction, actionLoading }) {
+  if (!invoice) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -124,68 +162,80 @@ function InvoiceDrawer({ invoice, onClose }) {
           </div>
 
           {/* Line Items */}
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-background border-b border-border">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                    Description
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
-                    Qty
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
-                    Unit Price
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {invoice.lineItems.map((item, i) => (
-                  <tr key={i} className="hover:bg-background/50">
-                    <td className="px-4 py-3 text-text-primary">{item.description}</td>
-                    <td className="px-4 py-3 text-right font-mono text-text-secondary">
-                      {item.quantity}
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono text-text-secondary">
-                      {formatCurrency(item.unitPrice)}
-                    </td>
+          {invoice.lineItems.length > 0 && (
+            <div className="rounded-xl border border-border bg-surface overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-background border-b border-border">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                      Description
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Qty
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Unit Price
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {invoice.lineItems.map((item, i) => (
+                    <tr key={i} className="hover:bg-background/50">
+                      <td className="px-4 py-3 text-text-primary">{item.description}</td>
+                      <td className="px-4 py-3 text-right font-mono text-text-secondary">
+                        {item.quantity}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-text-secondary">
+                        {formatCurrency(item.unitPrice)}
+                      </td>
+                      <td
+                        className={cn(
+                          'px-4 py-3 text-right font-mono font-medium',
+                          item.amount < 0 ? 'text-accent' : 'text-text-primary'
+                        )}
+                      >
+                        {item.amount < 0 ? '-' : ''}
+                        {formatCurrency(Math.abs(item.amount))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-background border-t border-border">
+                  <tr>
                     <td
-                      className={cn(
-                        'px-4 py-3 text-right font-mono font-medium',
-                        item.amount < 0 ? 'text-accent' : 'text-text-primary'
-                      )}
+                      colSpan={3}
+                      className="px-4 py-3 text-right text-sm font-medium text-text-secondary"
                     >
-                      {item.amount < 0 ? '-' : ''}
-                      {formatCurrency(Math.abs(item.amount))}
+                      Total
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm font-bold font-mono text-text-primary">
+                      {formatCurrency(invoice.amount)}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot className="bg-background border-t border-border">
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="px-4 py-3 text-right text-sm font-medium text-text-secondary"
-                  >
-                    Total
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm font-bold font-mono text-text-primary">
-                    {formatCurrency(invoice.amount)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+                </tfoot>
+              </table>
+            </div>
+          )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 pt-2">
-            <Button variant="outline" size="sm">
+          {/* Actions (wired to API) */}
+          <div className="flex flex-wrap items-center gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              disabled={actionLoading}
+            >
               <Printer className="mr-1.5 h-3.5 w-3.5" /> Print
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onAction('pdf', invoice)}
+              disabled={actionLoading}
+            >
               <Download className="mr-1.5 h-3.5 w-3.5" /> Download PDF
             </Button>
             {invoice.status === 'draft' && (
@@ -193,8 +243,21 @@ function InvoiceDrawer({ invoice, onClose }) {
                 variant="outline"
                 size="sm"
                 className="text-accent border-accent/30 hover:bg-accent/10"
+                onClick={() => onAction('send', invoice)}
+                disabled={actionLoading}
               >
                 <Send className="mr-1.5 h-3.5 w-3.5" /> Send Invoice
+              </Button>
+            )}
+            {(invoice.status === 'pending' || invoice.status === 'overdue') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-accent border-accent/30 hover:bg-accent/10"
+                onClick={() => onAction('pay', invoice)}
+                disabled={actionLoading}
+              >
+                <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Mark Paid
               </Button>
             )}
             {invoice.status === 'overdue' && (
@@ -202,17 +265,23 @@ function InvoiceDrawer({ invoice, onClose }) {
                 variant="outline"
                 size="sm"
                 className="text-warning border-warning/30 hover:bg-warning/10"
+                onClick={() => onAction('remind', invoice)}
+                disabled={actionLoading}
               >
                 <Mail className="mr-1.5 h-3.5 w-3.5" /> Send Reminder
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto text-danger border-danger/30 hover:bg-danger/10"
-            >
-              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Void
-            </Button>
+            {invoice.status !== 'void' && invoice.status !== 'paid' && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto text-danger border-danger/30 hover:bg-danger/10"
+                onClick={() => onAction('void', invoice)}
+                disabled={actionLoading}
+              >
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Void
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -222,13 +291,110 @@ function InvoiceDrawer({ invoice, onClose }) {
 
 /* ─── Main Page ─── */
 export default function InvoicesPage() {
-  const [invList, setInvList] = useState(invoices);
+  const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'dueDate', dir: 'desc' });
+  const [actionLoading, setActionLoading] = useState(false);
 
+  /* ─── Data fetching (real API) ─── */
+  const invoicesQuery = useApiFetch(async () => {
+    const res = await getInvoices({ page: 1, pageSize: 100 });
+    return (res?.data ?? res ?? []).map(normalizeInvoice);
+  }, []);
+
+  useApiError(invoicesQuery.error);
+
+  const invList = useMemo(() => invoicesQuery.data ?? [], [invoicesQuery.data]);
+
+  /* ─── Mutations ─── */
+  const { mutate: createInvoice, loading: creating } = useApiMutation(
+    // Generate an invoice for the current period — endpoint: POST /admin/billing/generate
+    async () => {
+      const now = new Date();
+      const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+      const tenantId = window.prompt('Tenant ID to generate invoice for:');
+      if (!tenantId) return undefined;
+      return generateInvoice(tenantId, periodStart, periodEnd);
+    },
+    {
+      onSuccess: (inv) => {
+        if (!inv) return;
+        toast({ title: 'Invoice generated', description: inv.id });
+        invoicesQuery.refetch();
+      },
+      onError: (err) =>
+        toast({
+          title: 'Failed to generate invoice',
+          description: err.message,
+          variant: 'destructive',
+        }),
+    }
+  );
+
+  const refresh = () => invoicesQuery.refetch();
+
+  /* Drawer + row actions */
+  const handleAction = async (action, inv) => {
+    setActionLoading(true);
+    try {
+      switch (action) {
+        case 'pdf': {
+          const { url } = await getInvoicePdfUrl(inv.id);
+          if (url) window.open(url, '_blank');
+          break;
+        }
+        case 'send': {
+          // endpoint: POST /admin/billing/invoices/:id/send
+          await api.post(`/admin/billing/invoices/${inv.id}/send`);
+          toast({ title: 'Invoice sent' });
+          refresh();
+          break;
+        }
+        case 'pay': {
+          await markInvoicePaid(inv.id);
+          toast({ title: 'Invoice marked as paid' });
+          refresh();
+          break;
+        }
+        case 'remind': {
+          await triggerDunning(inv.id);
+          toast({ title: 'Payment reminder sent' });
+          break;
+        }
+        case 'void': {
+          if (window.confirm(`Void invoice ${inv.id}? This cannot be undone.`)) {
+            await updateInvoice(inv.id, { status: 'cancelled' });
+            toast({ title: 'Invoice voided' });
+            setSelectedInvoice(null);
+            refresh();
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    } catch (err) {
+      toast({ title: 'Action failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(invList, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoices-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  /* ─── Filtering + sorting ─── */
   const filteredInvoices = useMemo(() => {
     let result = invList.filter((inv) => {
       const matchesQuery =
@@ -285,10 +451,14 @@ export default function InvoicesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={refresh} disabled={invoicesQuery.loading}>
+            <RefreshCw className={cn('mr-1.5 h-4 w-4', invoicesQuery.loading && 'animate-spin')} />
+            Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => createInvoice()} disabled={creating}>
             <Plus className="mr-1.5 h-4 w-4" /> Create Invoice
           </Button>
         </div>
@@ -392,124 +562,139 @@ export default function InvoicesPage() {
         {invList.length} invoices
       </p>
 
-      {/* Table */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-background border-b border-border">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase w-10">
-                  <input type="checkbox" className="rounded border-border" />
-                </th>
-                {[
-                  { key: 'id', label: 'Invoice' },
-                  { key: 'tenantName', label: 'Tenant' },
-                  { key: 'status', label: 'Status' },
-                  { key: 'amount', label: 'Amount' },
-                  { key: 'dueDate', label: 'Due Date' },
-                ].map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col.key)}
-                    className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase cursor-pointer hover:text-text-primary select-none"
-                  >
-                    <div className="flex items-center gap-1">
-                      {col.label}
-                      {sortConfig.key === col.key &&
-                        (sortConfig.dir === 'asc' ? (
-                          <ChevronUp className="h-3 w-3" />
-                        ) : (
-                          <ChevronDown className="h-3 w-3" />
-                        ))}
-                    </div>
-                  </th>
-                ))}
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredInvoices.map((inv) => (
-                <tr
-                  key={inv.id}
-                  className="hover:bg-background/50 transition-colors group cursor-pointer"
-                  onClick={() => setSelectedInvoice(inv)}
-                >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" className="rounded border-border" />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-text-muted" />
-                      <div>
-                        <p className="text-sm font-medium text-text-primary font-mono">{inv.id}</p>
-                        <p className="text-[10px] text-text-muted">
-                          {formatDate(inv.periodStart)} — {formatDate(inv.periodEnd)}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-text-primary">{inv.tenantName}</td>
-                  <td className="px-4 py-3">
-                    <InvoiceStatusBadge status={inv.status} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-mono font-medium text-text-primary">
-                      {formatCurrency(inv.amount)}
-                    </p>
-                    <p className="text-[10px] text-text-muted">Tax: {formatCurrency(inv.tax)}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p
-                      className={cn(
-                        'text-xs',
-                        inv.status === 'overdue' ? 'text-danger font-medium' : 'text-text-secondary'
-                      )}
-                    >
-                      {formatDate(inv.dueDate)}
-                    </p>
-                    {inv.paidDate && (
-                      <p className="text-[10px] text-accent">Paid {formatDate(inv.paidDate)}</p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedInvoice(inv);
-                        }}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
-                        title="View Details"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
-                        title="Download"
-                      >
-                        <Download className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredInvoices.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-text-muted">
-                    <Receipt className="mx-auto h-10 w-10 mb-3" />
-                    <p>No invoices match your filters.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Loading */}
+      {invoicesQuery.loading && (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface py-12 text-sm text-text-muted">
+          <RefreshCw className="h-4 w-4 animate-spin" /> Loading invoices…
         </div>
-      </div>
+      )}
+
+      {/* Table */}
+      {!invoicesQuery.loading && (
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-background border-b border-border">
+                <tr>
+                  {[
+                    { key: 'id', label: 'Invoice' },
+                    { key: 'tenantName', label: 'Tenant' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'amount', label: 'Amount' },
+                    { key: 'dueDate', label: 'Due Date' },
+                  ].map((col) => (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase cursor-pointer hover:text-text-primary select-none"
+                    >
+                      <div className="flex items-center gap-1">
+                        {col.label}
+                        {sortConfig.key === col.key &&
+                          (sortConfig.dir === 'asc' ? (
+                            <ChevronUp className="h-3 w-3" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3" />
+                          ))}
+                      </div>
+                    </th>
+                  ))}
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase w-20"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredInvoices.map((inv) => (
+                  <tr
+                    key={inv.id}
+                    className="hover:bg-background/50 transition-colors group cursor-pointer"
+                    onClick={() => setSelectedInvoice(inv)}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-text-muted" />
+                        <div>
+                          <p className="text-sm font-medium text-text-primary font-mono">
+                            {inv.id}
+                          </p>
+                          <p className="text-[10px] text-text-muted">
+                            {formatDate(inv.periodStart)} — {formatDate(inv.periodEnd)}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-text-primary">{inv.tenantName}</td>
+                    <td className="px-4 py-3">
+                      <InvoiceStatusBadge status={inv.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-sm font-mono font-medium text-text-primary">
+                        {formatCurrency(inv.amount)}
+                      </p>
+                      <p className="text-[10px] text-text-muted">Tax: {formatCurrency(inv.tax)}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p
+                        className={cn(
+                          'text-xs',
+                          inv.status === 'overdue'
+                            ? 'text-danger font-medium'
+                            : 'text-text-secondary'
+                        )}
+                      >
+                        {formatDate(inv.dueDate)}
+                      </p>
+                      {inv.paidDate && (
+                        <p className="text-[10px] text-accent">Paid {formatDate(inv.paidDate)}</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedInvoice(inv);
+                          }}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAction('pdf', inv);
+                          }}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                          title="Download PDF"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredInvoices.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
+                      <Receipt className="mx-auto h-10 w-10 mb-3" />
+                      <p>No invoices match your filters.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Drawer */}
       {selectedInvoice && (
-        <InvoiceDrawer invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} />
+        <InvoiceDrawer
+          invoice={selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
+          onAction={handleAction}
+          actionLoading={actionLoading}
+        />
       )}
     </div>
   );

@@ -45,7 +45,7 @@ import {
   History,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { alertSeverityMeta, getAlertStatus, formatDuration } from './alert-data';
 
 /* ─── Alert Status Badge ─── */

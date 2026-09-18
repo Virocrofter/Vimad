@@ -21,7 +21,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { useGroupStore } from './store';
 import { formatCurrency } from './data';
 import { StatusBadge, BlockTypeBadge, PickupBar, GroupStatCard } from './components';

@@ -40,7 +40,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 /* ─── Node Type Definitions ─── */
 const NODE_TYPES = {
@@ -477,6 +477,29 @@ function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+/* ─── Workflow Builder ─── */
+function buildWorkflow(template) {
+  const newNodes = deepClone(template.nodes).map((n) => ({ ...n, id: generateId() }));
+  const idMap = {};
+  template.nodes.forEach((old, i) => {
+    idMap[old.id] = newNodes[i].id;
+  });
+  const newEdges = deepClone(template.edges).map((e) => ({
+    ...e,
+    id: `edge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    from: idMap[e.from],
+    to: idMap[e.to],
+  }));
+  return {
+    nodes: newNodes,
+    edges: newEdges,
+    name: template.name,
+    description: template.description || '',
+  };
+}
+
+const INITIAL_WORKFLOW = buildWorkflow(SAMPLE_WORKFLOWS[0]);
+
 /* ─── Connection Path ─── */
 function getConnectionPath(x1, y1, x2, y2) {
   const midX = (x1 + x2) / 2;
@@ -822,11 +845,11 @@ function PropertyPanel({ node, onChange, onDelete }) {
 export function AutomationPage() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [nodes, setNodes] = useState(INITIAL_WORKFLOW.nodes);
+  const [edges, setEdges] = useState(INITIAL_WORKFLOW.edges);
   const [selectedId, setSelectedId] = useState(null);
-  const [workflowName, setWorkflowName] = useState('Untitled Workflow');
-  const [workflowDescription, setWorkflowDescription] = useState('');
+  const [workflowName, setWorkflowName] = useState(INITIAL_WORKFLOW.name);
+  const [workflowDescription, setWorkflowDescription] = useState(INITIAL_WORKFLOW.description);
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionProgress, setExecutionProgress] = useState({});
   const [showTemplates, setShowTemplates] = useState(false);
@@ -838,13 +861,16 @@ export function AutomationPage() {
   const [dragState, setDragState] = useState(null);
   const [connectState, setConnectState] = useState(null);
   const [tempEdge, setTempEdge] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-
-  // Initialize with welcome series
-  useEffect(() => {
-    loadWorkflow(SAMPLE_WORKFLOWS[0]);
-  }, []);
+  // Mirrors the history entry the mount-time loadWorkflow() used to push:
+  // the entry name lags one workflow behind, matching undo() expectations
+  const [history, setHistory] = useState([
+    {
+      nodes: deepClone(INITIAL_WORKFLOW.nodes),
+      edges: deepClone(INITIAL_WORKFLOW.edges),
+      name: 'Untitled Workflow',
+    },
+  ]);
+  const [historyIndex, setHistoryIndex] = useState(0);
 
   // History management
   const pushHistory = useCallback(
@@ -885,23 +911,13 @@ export function AutomationPage() {
 
   // Load workflow
   const loadWorkflow = (template) => {
-    const newNodes = deepClone(template.nodes).map((n) => ({ ...n, id: generateId() }));
-    const idMap = {};
-    template.nodes.forEach((old, i) => {
-      idMap[old.id] = newNodes[i].id;
-    });
-    const newEdges = deepClone(template.edges).map((e) => ({
-      ...e,
-      id: `edge-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      from: idMap[e.from],
-      to: idMap[e.to],
-    }));
-    setNodes(newNodes);
-    setEdges(newEdges);
-    setWorkflowName(template.name);
-    setWorkflowDescription(template.description || '');
+    const wf = buildWorkflow(template);
+    setNodes(wf.nodes);
+    setEdges(wf.edges);
+    setWorkflowName(wf.name);
+    setWorkflowDescription(wf.description);
     setSelectedId(null);
-    pushHistory(newNodes, newEdges);
+    pushHistory(wf.nodes, wf.edges);
   };
 
   // Add node

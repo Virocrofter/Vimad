@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { X, Send, MessageSquare, User, Building2, Star } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { NpsScoreBadge, SentimentBadge, CategoryBadge } from './components';
 
 const responseTemplates = [

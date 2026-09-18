@@ -43,7 +43,7 @@ import {
   Laptop,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 
 /* ─── Mock Data ─── */
@@ -1197,7 +1197,6 @@ function CardDetailDrawer({ card, onClose, onUpdate }) {
 
 /* ─── Main Page ─── */
 export default function VCCPage() {
-  const navigate = useNavigate();
   const [cards, setCards] = useState(initialCards);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
