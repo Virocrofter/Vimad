@@ -1,32 +1,49 @@
+/* apps/api/src/modules/rbac/rbac.routes.ts */
 import { Router, type Request, type Response, type NextFunction } from 'express';
-import { z } from 'zod';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
-import {
-  authMiddleware,
-  tenantScope,
-  requirePermission,
-  type AuthenticatedRequest,
-} from '../auth/auth.middleware.js';
+import { z } from 'zod';
+import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 import { validateBody } from '../../common/validate.js';
+import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import {
-  ErrorResponseSchema,
-  IdParamSchema,
-  MessageResponseSchema,
-} from '../../common/openapi-schemas.js';
-import {
-  assignRole,
-  listPermissions,
   listRoles,
-  listUserRoles,
-  removeRoleAssignment,
-  roleAssignmentSchema,
+  getRole,
+  createRole,
+  updateRole,
+  deleteRole,
+  assignRole,
+  unassignRole,
+  listPermissions,
+  roleCreateSchema,
+  roleUpdateSchema,
 } from './rbac.service.js';
 
 extendZodWithOpenApi(z);
 
 export const registry = new OpenAPIRegistry();
 
-const permissionSchema = z
+const RoleCreateInputSchema = roleCreateSchema.openapi('RoleCreateInput');
+const RoleUpdateInputSchema = roleUpdateSchema.openapi('RoleUpdateInput');
+
+const RoleIdParamSchema = z.object({ id: z.string() }).openapi('RoleIdParam');
+
+const AssignRoleInputSchema = z
+  .object({
+    userId: z.string(),
+    roleId: z.string(),
+    propertyId: z.string().optional(),
+  })
+  .openapi('AssignRoleInput');
+
+const UnassignRoleInputSchema = z
+  .object({
+    userId: z.string(),
+    roleId: z.string(),
+    propertyId: z.string().optional(),
+  })
+  .openapi('UnassignRoleInput');
+
+const PermissionItemSchema = z
   .object({
     id: z.string(),
     resource: z.string(),
@@ -34,9 +51,19 @@ const permissionSchema = z
     description: z.string().nullable(),
     category: z.string(),
   })
-  .openapi('Permission');
+  .openapi('PermissionItem');
 
-const roleSchema = z
+const RolePermissionSchema = z
+  .object({
+    id: z.string(),
+    roleId: z.string(),
+    permissionId: z.string(),
+    conditions: z.unknown().nullable(),
+    permission: PermissionItemSchema,
+  })
+  .openapi('RolePermission');
+
+const RoleItemSchema = z
   .object({
     id: z.string(),
     name: z.string(),
@@ -45,45 +72,39 @@ const roleSchema = z
     isDefault: z.boolean(),
     isLocked: z.boolean(),
     tenantId: z.string().nullable(),
-    permissions: z.array(z.string()),
-    assignmentCount: z.number().int(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    rolePermissions: z.array(RolePermissionSchema).optional(),
+    _count: z.object({ roleAssignments: z.number().int() }).optional(),
   })
-  .openapi('Role');
+  .openapi('RoleItem');
 
-const roleListResponseSchema = z.object({ data: z.array(roleSchema) }).openapi('RoleListResponse');
-const permissionListResponseSchema = z
-  .object({ data: z.array(permissionSchema) })
+const RoleListResponseSchema = z
+  .object({ data: z.array(RoleItemSchema) })
+  .openapi('RoleListResponse');
+
+const RoleResponseSchema = z.object({ data: RoleItemSchema }).openapi('RoleResponse');
+
+const PermissionListResponseSchema = z
+  .object({ data: z.array(PermissionItemSchema) })
   .openapi('PermissionListResponse');
 
-const roleAssignmentSchemaOut = z
-  .object({
-    id: z.string(),
-    userId: z.string(),
-    roleId: z.string(),
-    propertyId: z.string().nullable(),
-    assignedAt: z.string().datetime(),
-    role: roleSchema.omit({ permissions: true, assignmentCount: true }),
-  })
-  .openapi('RoleAssignment');
-const roleAssignmentListResponseSchema = z
-  .object({ data: z.array(roleAssignmentSchemaOut) })
-  .openapi('RoleAssignmentListResponse');
+const MessageResponseSchema = z.object({ message: z.string() }).openapi('MessageResponse');
 
 export const rbacRouter = Router();
 
 rbacRouter.use(authMiddleware, tenantScope);
 
-// ─── Roles ───
-
+/* ─── GET /rbac/roles ─── */
 registry.registerPath({
   method: 'get',
-  path: '/rbac/roles',
+  path: '/roles',
   tags: ['RBAC'],
-  description: 'List roles available to the tenant (platform-wide + tenant-scoped)',
+  description: 'List all roles (system + tenant)',
   responses: {
     200: {
       description: 'List of roles',
-      content: { 'application/json': { schema: roleListResponseSchema } },
+      content: { 'application/json': { schema: RoleListResponseSchema } },
     },
     401: {
       description: 'Unauthorized',
@@ -101,39 +122,212 @@ rbacRouter.get(
   requirePermission('user', 'read'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const roles = await listRoles(req.tenantId);
-      res.json({
-        data: roles.map((role) => ({
-          id: role.id,
-          name: role.name,
-          description: role.description,
-          type: role.type,
-          isDefault: role.isDefault,
-          isLocked: role.isLocked,
-          tenantId: role.tenantId,
-          permissions: role.rolePermissions.map(
-            (rp) => `${rp.permission.resource}:${rp.permission.action}`
-          ),
-          assignmentCount: role._count.roleAssignments,
-        })),
-      });
+      const result = await listRoles(req.tenantId);
+      res.json({ data: result });
     } catch (err) {
       next(err);
     }
   }
 );
 
-// ─── Permissions ───
-
+/* ─── GET /rbac/roles/:id ─── */
 registry.registerPath({
   method: 'get',
-  path: '/rbac/permissions',
+  path: '/roles/{id}',
   tags: ['RBAC'],
-  description: 'List all permissions in the system',
+  description: 'Get a role by ID with permissions and assignments',
+  request: { params: RoleIdParamSchema },
+  responses: {
+    200: {
+      description: 'Role details',
+      content: { 'application/json': { schema: RoleResponseSchema } },
+    },
+    401: {
+      description: 'Unauthorized',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    403: {
+      description: 'Forbidden',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    404: {
+      description: 'Role not found',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+rbacRouter.get(
+  '/roles/:id',
+  requirePermission('user', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await getRole(req.params.id);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── POST /rbac/roles ─── */
+registry.registerPath({
+  method: 'post',
+  path: '/roles',
+  tags: ['RBAC'],
+  description: 'Create a new role',
+  request: {
+    body: {
+      description: 'Role payload',
+      content: { 'application/json': { schema: RoleCreateInputSchema } },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Role created',
+      content: { 'application/json': { schema: RoleResponseSchema } },
+    },
+    400: {
+      description: 'Validation error',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    401: {
+      description: 'Unauthorized',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    403: {
+      description: 'Forbidden',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+rbacRouter.post(
+  '/roles',
+  requirePermission('user', 'create'),
+  validateBody(roleCreateSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await createRole(
+        req.tenantId,
+        req.validatedBody as z.infer<typeof roleCreateSchema>
+      );
+      res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── PATCH /rbac/roles/:id ─── */
+registry.registerPath({
+  method: 'patch',
+  path: '/roles/{id}',
+  tags: ['RBAC'],
+  description: 'Update a role',
+  request: {
+    params: RoleIdParamSchema,
+    body: {
+      description: 'Role update payload',
+      content: { 'application/json': { schema: RoleUpdateInputSchema } },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Role updated',
+      content: { 'application/json': { schema: RoleResponseSchema } },
+    },
+    400: {
+      description: 'Validation error',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    401: {
+      description: 'Unauthorized',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    403: {
+      description: 'Forbidden',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    404: {
+      description: 'Role not found',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    409: {
+      description: 'Cannot modify locked role',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+rbacRouter.patch(
+  '/roles/:id',
+  requirePermission('user', 'update'),
+  validateBody(roleUpdateSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await updateRole(
+        req.params.id,
+        req.validatedBody as z.infer<typeof roleUpdateSchema>
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── DELETE /rbac/roles/:id ─── */
+registry.registerPath({
+  method: 'delete',
+  path: '/roles/{id}',
+  tags: ['RBAC'],
+  description: 'Delete a role',
+  request: { params: RoleIdParamSchema },
+  responses: {
+    204: { description: 'Role deleted' },
+    401: {
+      description: 'Unauthorized',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    403: {
+      description: 'Forbidden',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    404: {
+      description: 'Role not found',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+    409: {
+      description: 'Cannot delete locked role',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+rbacRouter.delete(
+  '/roles/:id',
+  requirePermission('user', 'delete'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await deleteRole(req.params.id);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── GET /rbac/permissions ─── */
+registry.registerPath({
+  method: 'get',
+  path: '/permissions',
+  tags: ['RBAC'],
+  description: 'List all available permissions',
   responses: {
     200: {
       description: 'List of permissions',
-      content: { 'application/json': { schema: permissionListResponseSchema } },
+      content: { 'application/json': { schema: PermissionListResponseSchema } },
     },
     401: {
       description: 'Unauthorized',
@@ -151,93 +345,33 @@ rbacRouter.get(
   requirePermission('user', 'read'),
   async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const permissions = await listPermissions();
-      res.json({ data: permissions });
+      const result = await listPermissions();
+      res.json({ data: result });
     } catch (err) {
       next(err);
     }
   }
 );
 
-// ─── Role assignments ───
-
-registry.registerPath({
-  method: 'get',
-  path: '/rbac/users/{id}/roles',
-  tags: ['RBAC'],
-  description: 'List role assignments for a user',
-  request: { params: IdParamSchema },
-  responses: {
-    200: {
-      description: 'User role assignments',
-      content: { 'application/json': { schema: roleAssignmentListResponseSchema } },
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'User not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
-
-rbacRouter.get(
-  '/users/:id/roles',
-  requirePermission('user', 'read'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const assignments = await listUserRoles(req.params.id, req.tenantId);
-      res.json({
-        data: assignments.map((assignment) => ({
-          id: assignment.id,
-          userId: assignment.userId,
-          roleId: assignment.roleId,
-          propertyId: assignment.propertyId,
-          assignedAt: assignment.assignedAt,
-          role: {
-            id: assignment.role.id,
-            name: assignment.role.name,
-            description: assignment.role.description,
-            type: assignment.role.type,
-            isDefault: assignment.role.isDefault,
-            isLocked: assignment.role.isLocked,
-            tenantId: assignment.role.tenantId,
-          },
-        })),
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
+/* ─── POST /rbac/assign ─── */
 registry.registerPath({
   method: 'post',
-  path: '/rbac/users/{id}/roles',
+  path: '/assign',
   tags: ['RBAC'],
-  description: 'Assign a role to a user (optionally scoped to a property)',
+  description: 'Assign a role to a user',
   request: {
-    params: IdParamSchema,
     body: {
-      description: 'Role assignment payload',
-      content: {
-        'application/json': { schema: roleAssignmentSchema.openapi('RoleAssignmentCreate') },
-      },
+      description: 'Assignment payload',
+      content: { 'application/json': { schema: AssignRoleInputSchema } },
     },
   },
   responses: {
-    201: {
+    200: {
       description: 'Role assigned',
-      content: { 'application/json': { schema: z.object({ data: roleAssignmentSchemaOut }) } },
+      content: { 'application/json': { schema: MessageResponseSchema } },
     },
     400: {
-      description: 'Invalid payload',
+      description: 'Validation error',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
     401: {
@@ -249,66 +383,48 @@ registry.registerPath({
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
     404: {
-      description: 'User, role, or property not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Role already assigned',
+      description: 'User or role not found',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
   },
 });
 
 rbacRouter.post(
-  '/users/:id/roles',
+  '/assign',
   requirePermission('user', 'update'),
-  validateBody(roleAssignmentSchema),
+  validateBody(AssignRoleInputSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const assignment = await assignRole(
-        req.params.id,
-        req.tenantId,
-        req.validatedBody as z.infer<typeof roleAssignmentSchema>,
-        authReq.auth.user.id
-      );
-      res.status(201).json({
-        data: {
-          id: assignment.id,
-          userId: assignment.userId,
-          roleId: assignment.roleId,
-          propertyId: assignment.propertyId,
-          assignedAt: assignment.assignedAt,
-          role: {
-            id: assignment.role.id,
-            name: assignment.role.name,
-            description: assignment.role.description,
-            type: assignment.role.type,
-            isDefault: assignment.role.isDefault,
-            isLocked: assignment.role.isLocked,
-            tenantId: assignment.role.tenantId,
-          },
-        },
-      });
+      const body = req.validatedBody as z.infer<typeof AssignRoleInputSchema>;
+      const authReq = req as any;
+      await assignRole(body.userId, body.roleId, body.propertyId, authReq.auth?.user?.id);
+      res.json({ message: 'Role assigned successfully' });
     } catch (err) {
       next(err);
     }
   }
 );
 
+/* ─── POST /rbac/unassign ─── */
 registry.registerPath({
-  method: 'delete',
-  path: '/rbac/users/{id}/roles/{roleId}',
+  method: 'post',
+  path: '/unassign',
   tags: ['RBAC'],
   description: 'Remove a role assignment from a user',
   request: {
-    params: z.object({ id: z.string(), roleId: z.string() }).openapi('RoleAssignmentParams'),
-    query: z.object({ propertyId: z.string().optional() }).openapi('RoleAssignmentDeleteQuery'),
+    body: {
+      description: 'Unassignment payload',
+      content: { 'application/json': { schema: UnassignRoleInputSchema } },
+    },
   },
   responses: {
     200: {
-      description: 'Role assignment removed',
+      description: 'Role unassigned',
       content: { 'application/json': { schema: MessageResponseSchema } },
+    },
+    400: {
+      description: 'Validation error',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
     },
     401: {
       description: 'Unauthorized',
@@ -318,24 +434,18 @@ registry.registerPath({
       description: 'Forbidden',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
-    404: {
-      description: 'User or assignment not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
   },
 });
 
-rbacRouter.delete(
-  '/users/:id/roles/:roleId',
+rbacRouter.post(
+  '/unassign',
   requirePermission('user', 'update'),
+  validateBody(UnassignRoleInputSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const propertyId =
-        req.query.propertyId && typeof req.query.propertyId === 'string'
-          ? req.query.propertyId
-          : undefined;
-      await removeRoleAssignment(req.params.id, req.tenantId, req.params.roleId, propertyId);
-      res.json({ message: 'Role assignment removed' });
+      const body = req.validatedBody as z.infer<typeof UnassignRoleInputSchema>;
+      await unassignRole(body.userId, body.roleId, body.propertyId);
+      res.json({ message: 'Role unassigned successfully' });
     } catch (err) {
       next(err);
     }

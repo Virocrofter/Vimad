@@ -237,6 +237,39 @@ export async function pushAvailability(
   const dateFrom = new Date(input.dateFrom);
   const dateTo = new Date(input.dateTo);
 
+  // ─── N+1 FIX: one grouped query for the whole range instead of
+  // roomTypes × days individual count() round-trips ───
+  const roomTypeIds = property.roomTypes
+    .filter((rt) => (input.roomTypes ? input.roomTypes.includes(rt.id) : true))
+    .map((rt) => rt.id);
+
+  const occupiedRows = roomTypeIds.length
+    ? await prisma.reservationStay.groupBy({
+        by: ['date', 'roomId'],
+        where: {
+          date: { gte: dateFrom, lte: dateTo },
+          room: { roomTypeId: { in: roomTypeIds } },
+          reservation: {
+            tenantId,
+            propertyId: input.propertyId,
+            status: { in: ['confirmed', 'checked_in'] },
+          },
+        },
+        _count: { _all: true },
+      })
+    : [];
+
+  // Occupied count per (roomTypeId, dateKey)
+  const occupiedByTypeAndDate = new Map<string, number>();
+  const roomTypeByRoomId = new Map(property.rooms.map((r) => [r.id, r.roomTypeId]));
+  for (const row of occupiedRows) {
+    const rtId = roomTypeByRoomId.get(row.roomId);
+    if (!rtId) continue;
+    const dateKey = row.date.toISOString().split('T')[0];
+    const k = `${rtId}:${dateKey}`;
+    occupiedByTypeAndDate.set(k, (occupiedByTypeAndDate.get(k) ?? 0) + row._count._all);
+  }
+
   const availability = [];
 
   for (const roomType of property.roomTypes.filter((rt) =>
@@ -246,20 +279,11 @@ export async function pushAvailability(
     const totalRooms = rooms.length;
 
     for (let d = new Date(dateFrom); d <= dateTo; d.setDate(d.getDate() + 1)) {
-      const occupied = await prisma.reservationStay.count({
-        where: {
-          date: d,
-          room: { roomTypeId: roomType.id },
-          reservation: {
-            tenantId,
-            propertyId: input.propertyId,
-            status: { in: ['confirmed', 'checked_in'] },
-          },
-        },
-      });
+      const dateKey = d.toISOString().split('T')[0];
+      const occupied = occupiedByTypeAndDate.get(`${roomType.id}:${dateKey}`) ?? 0;
 
       availability.push({
-        date: d.toISOString().split('T')[0],
+        date: dateKey,
         roomTypeId: roomType.id,
         roomTypeCode: roomType.code,
         available: totalRooms - occupied,

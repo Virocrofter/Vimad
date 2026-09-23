@@ -97,3 +97,11 @@ export async function getTenantActivity(): Promise<ActivityItem[]> {
 export async function getPlanDistribution(): Promise<PlanDistributionItem[]> {
   return client.get('/admin/plans');
 }
+
+/* Aliases used by src/app/admin/dashboard/page.jsx */
+export const fetchAdminKpis = getKpiCards;
+export const fetchSystemHealth = getSystemHealth;
+export const fetchAdminAlerts = getRecentAlerts;
+export const fetchTenantActivity = getTenantActivity;
+export const fetchPlanDistribution = getPlanDistribution;
+export const fetchQuickActions = getQuickActions;

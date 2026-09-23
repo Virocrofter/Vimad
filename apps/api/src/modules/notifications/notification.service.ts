@@ -2,8 +2,6 @@ import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { paginate, paginationSchema, skipTake } from '../../common/pagination.js';
-import { emitToUser, emitToTenant } from '../../common/socket.js';
-import { sendPushToUser } from '../push/push.service.js';
 
 export const notificationCreateSchema = z.object({
   userId: z.string(),
@@ -26,6 +24,32 @@ export const notificationBroadcastSchema = notificationCreateSchema.omit({ userI
 
 export type NotificationCreateInput = z.infer<typeof notificationCreateSchema>;
 export type NotificationUpdateInput = z.infer<typeof notificationUpdateSchema>;
+
+// Socket emits disabled to break circular dependency: socket.js → auth.service.ts → prisma.js
+function emitToUser(_userId: string, _event: string, _payload: unknown): void {
+  // no-op
+}
+function emitToTenant(_tenantId: string, _event: string, _payload: unknown): void {
+  // no-op
+}
+
+// Lazy-load push service so a VAPID init failure at module load can never
+// block the request pipeline.
+async function sendPushSafely(
+  userId: string,
+  payload: {
+    title: string;
+    body: string;
+    data: Record<string, unknown>;
+  }
+): Promise<void> {
+  try {
+    const { sendPushToUser } = await import('../push/push.service.js');
+    await sendPushToUser(userId, payload);
+  } catch {
+    // Push is best-effort; never block the request path.
+  }
+}
 
 export async function listNotifications(
   userId: string,
@@ -86,7 +110,7 @@ export async function createNotification(tenantId: string, input: NotificationCr
 
   emitToUser(input.userId, 'notification:new', notification);
 
-  void sendPushToUser(input.userId, {
+  void sendPushSafely(input.userId, {
     title: input.title,
     body: input.message,
     data: {

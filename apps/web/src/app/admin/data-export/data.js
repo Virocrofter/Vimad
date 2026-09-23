@@ -1,5 +1,34 @@
 /* src/app/admin/data-export/data.js */
 
+/* ─── Tenants (dropdown options for export/erasure modals) ─── */
+export const initialTenants = [
+  { id: 'TNT-001', name: 'Grand Hotel Boston', subdomain: 'grand-hotel-boston', status: 'active' },
+  {
+    id: 'TNT-002',
+    name: 'Seaside Resort Miami',
+    subdomain: 'seaside-resort-miami',
+    status: 'active',
+  },
+  {
+    id: 'TNT-003',
+    name: 'Mountain Lodge Aspen',
+    subdomain: 'mountain-lodge-aspen',
+    status: 'trial',
+  },
+  {
+    id: 'TNT-004',
+    name: 'Riverside Suites Chicago',
+    subdomain: 'riverside-suites-chicago',
+    status: 'active',
+  },
+  {
+    id: 'TNT-005',
+    name: 'Coastal Inn San Diego',
+    subdomain: 'coastal-inn-san-diego',
+    status: 'active',
+  },
+];
+
 /* ─── Export Request Types ─── */
 export const exportTypes = [
   {

@@ -141,7 +141,7 @@ registry.registerPath({
 
 nightAuditRouter.post(
   '/run',
-  requirePermission('night_audit', 'create'),
+  requirePermission('night_audit', 'run'),
   validateBody(nightAuditSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -191,7 +191,7 @@ registry.registerPath({
 
 nightAuditRouter.post(
   '/:id/rollback',
-  requirePermission('night_audit', 'update'),
+  requirePermission('night_audit', 'run'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await rollbackNightAudit(req.tenantId, req.params.id);

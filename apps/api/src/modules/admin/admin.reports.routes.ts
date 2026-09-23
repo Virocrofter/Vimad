@@ -1,12 +1,15 @@
 /* apps/api/src/modules/admin/admin.reports.routes.ts */
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import { authMiddleware } from '../auth/auth.middleware.js';
+import { authMiddleware, type AuthenticatedRequest } from '../auth/auth.middleware.js';
 import { requireAdminRole } from './admin.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { paginationSchema } from '../../common/pagination.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
+import { prisma } from '../../common/prisma.js';
+import { putFile, getSignedDownloadUrl } from '../../common/storage.js';
+import { sendEmail } from '../../jobs/email.queue.js';
 
 export const adminReportsRouter = Router();
 
@@ -49,68 +52,137 @@ const executeReportSchema = z.object({
   parameters: z.record(z.string(), z.unknown()).default({}),
 });
 
-// ─── In-memory storage for demo (replace with DB models) ───
-// TODO: Create proper Prisma models for ReportTemplate, ScheduledReport, ReportRun
+// ─── System templates (idempotent ensure — no reseed required) ───
 
-const templates: Map<string, any> = new Map();
-const scheduledReports: Map<string, any> = new Map();
-const reportRuns: Map<string, any> = new Map();
+const SYSTEM_TEMPLATES = [
+  {
+    id: 'sys-tpl-occupancy',
+    name: 'Occupancy Report',
+    description: 'Daily room occupancy statistics',
+    category: 'operations',
+    type: 'system',
+    config: {},
+    fields: [
+      { name: 'date', type: 'date', label: 'Date', required: true },
+      { name: 'roomNumber', type: 'string', label: 'Room', required: true },
+      { name: 'status', type: 'string', label: 'Status', required: true },
+    ],
+  },
+  {
+    id: 'sys-tpl-revenue',
+    name: 'Revenue Report',
+    description: 'Monthly revenue breakdown',
+    category: 'financial',
+    type: 'system',
+    config: {},
+    fields: [
+      { name: 'month', type: 'string', label: 'Month', required: true },
+      { name: 'revenue', type: 'number', label: 'Revenue', required: true },
+      { name: 'bookings', type: 'number', label: 'Bookings', required: true },
+    ],
+  },
+] as const;
 
-// Seed some default templates
-templates.set('tpl-1', {
-  id: 'tpl-1',
-  name: 'Occupancy Report',
-  description: 'Daily room occupancy statistics',
-  category: 'operations',
-  type: 'system',
-  config: {},
-  fields: [
-    { name: 'date', type: 'date', label: 'Date', required: true },
-    { name: 'roomNumber', type: 'string', label: 'Room', required: true },
-    { name: 'status', type: 'string', label: 'Status', required: true },
-  ],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
+let systemTemplatesEnsured = false;
 
-templates.set('tpl-2', {
-  id: 'tpl-2',
-  name: 'Revenue Report',
-  description: 'Monthly revenue breakdown',
-  category: 'financial',
-  type: 'system',
-  config: {},
-  fields: [
-    { name: 'month', type: 'string', label: 'Month', required: true },
-    { name: 'revenue', type: 'number', label: 'Revenue', required: true },
-    { name: 'bookings', type: 'number', label: 'Bookings', required: true },
-  ],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
+async function ensureSystemTemplates(): Promise<void> {
+  if (systemTemplatesEnsured) return;
+  for (const tpl of SYSTEM_TEMPLATES) {
+    await prisma.reportTemplate.upsert({
+      where: { id: tpl.id },
+      update: {},
+      create: { ...tpl, tenantId: null, fields: tpl.fields as any, config: tpl.config as any },
+    });
+  }
+  systemTemplatesEnsured = true;
+}
+
+function tenantIdOf(req: Request): string {
+  return (req as AuthenticatedRequest).auth.tenantId;
+}
+
+// ─── Export file generation ───
+
+async function generateExportFile(
+  runId: string,
+  tenantId: string,
+  format: 'pdf' | 'csv' | 'excel'
+): Promise<{ key: string; contentType: string }> {
+  const run = await prisma.reportRun.findFirst({
+    where: { id: runId },
+    include: { template: true },
+  });
+  if (!run) throw new AppError(404, 'Report run not found', 'NOT_FOUND');
+
+  const payload = {
+    report: run.template.name,
+    category: run.template.category,
+    status: run.status,
+    startedAt: run.startedAt,
+    completedAt: run.completedAt,
+    rowCount: run.rowCount,
+    generatedAt: new Date().toISOString(),
+  };
+
+  // csv → real CSV. excel/pdf → JSON payload until a renderer is integrated.
+  const isCsv = format === 'csv';
+  const ext = isCsv ? 'csv' : 'json';
+  const contentType = isCsv ? 'text/csv' : 'application/json';
+  const content = isCsv
+    ? [
+        'report,category,status,startedAt,completedAt,rowCount,generatedAt',
+        [
+          payload.report,
+          payload.category,
+          payload.status,
+          payload.startedAt.toISOString(),
+          payload.completedAt?.toISOString() ?? '',
+          payload.rowCount,
+          payload.generatedAt,
+        ].join(','),
+      ].join('\n')
+    : JSON.stringify(payload, null, 2);
+
+  const key = `reports/${tenantId}/${runId}.${ext}`;
+  await putFile(key, content, contentType);
+  return { key, contentType };
+}
 
 // ─── Dashboard Stats ───
 
-adminReportsRouter.get('/dashboard', async (_req: Request, res: Response, next: NextFunction) => {
+adminReportsRouter.get('/dashboard', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const totalReports = templates.size;
-    const scheduledActive = Array.from(scheduledReports.values()).filter(
-      (s) => s.status === 'active'
-    ).length;
-    const runsThisMonth = Array.from(reportRuns.values()).filter((r) => {
-      const runDate = new Date(r.startedAt);
-      const now = new Date();
-      return runDate.getMonth() === now.getMonth() && runDate.getFullYear() === now.getFullYear();
-    }).length;
+    await ensureSystemTemplates();
+    const tenantId = tenantIdOf(req);
 
-    const completedRuns = Array.from(reportRuns.values()).filter(
-      (r) => r.status === 'completed' && r.completedAt
-    );
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [totalReports, scheduledActive, runsThisMonth, completedRuns] = await Promise.all([
+      prisma.reportTemplate.count({ where: { OR: [{ tenantId: null }, { tenantId }] } }),
+      prisma.scheduledReport.count({
+        where: { status: 'active', template: { OR: [{ tenantId: null }, { tenantId }] } },
+      }),
+      prisma.reportRun.count({
+        where: {
+          startedAt: { gte: monthStart },
+          template: { OR: [{ tenantId: null }, { tenantId }] },
+        },
+      }),
+      prisma.reportRun.findMany({
+        where: {
+          status: 'completed',
+          completedAt: { not: null },
+          template: { OR: [{ tenantId: null }, { tenantId }] },
+        },
+        select: { startedAt: true, completedAt: true },
+      }),
+    ]);
+
     const avgRuntime =
       completedRuns.length > 0
         ? completedRuns.reduce((sum, r) => {
-            const duration = new Date(r.completedAt).getTime() - new Date(r.startedAt).getTime();
-            return sum + duration / 1000;
+            return sum + (r.completedAt!.getTime() - r.startedAt.getTime()) / 1000;
           }, 0) / completedRuns.length
         : 0;
 
@@ -135,25 +207,26 @@ adminReportsRouter.get(
   validateQuery(paginationSchema.extend({ category: z.string().optional() })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      await ensureSystemTemplates();
+      const tenantId = tenantIdOf(req);
       const { page, pageSize, category } = req.validatedQuery as any;
-      let allTemplates = Array.from(templates.values());
 
-      if (category) {
-        allTemplates = allTemplates.filter((t) => t.category === category);
-      }
+      const where = {
+        OR: [{ tenantId: null }, { tenantId }],
+        ...(category ? { category } : {}),
+      };
 
-      const start = (page - 1) * pageSize;
-      const paginatedTemplates = allTemplates.slice(start, start + pageSize);
+      const [data, total] = await Promise.all([
+        prisma.reportTemplate.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.reportTemplate.count({ where }),
+      ]);
 
-      res.json({
-        data: paginatedTemplates,
-        meta: {
-          page,
-          pageSize,
-          total: allTemplates.length,
-          totalPages: Math.ceil(allTemplates.length / pageSize),
-        },
-      });
+      res.json({ data, meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) } });
     } catch (err) {
       next(err);
     }
@@ -164,10 +237,11 @@ adminReportsRouter.get(
   '/templates/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const template = templates.get(req.params.id);
-      if (!template) {
-        throw new AppError(404, 'Template not found', 'NOT_FOUND');
-      }
+      const tenantId = tenantIdOf(req);
+      const template = await prisma.reportTemplate.findFirst({
+        where: { id: req.params.id, OR: [{ tenantId: null }, { tenantId }] },
+      });
+      if (!template) throw new AppError(404, 'Template not found', 'NOT_FOUND');
       res.json({ data: template });
     } catch (err) {
       next(err);
@@ -180,14 +254,11 @@ adminReportsRouter.post(
   validateBody(createTemplateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = `tpl-${Date.now()}`;
-      const template = {
-        id,
-        ...(req.validatedBody as Record<string, unknown>),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      templates.set(id, template);
+      const tenantId = tenantIdOf(req);
+      const body = req.validatedBody as z.infer<typeof createTemplateSchema>;
+      const template = await prisma.reportTemplate.create({
+        data: { ...body, tenantId, config: body.config as any, fields: body.fields as any },
+      });
       res.status(201).json({ data: template });
     } catch (err) {
       next(err);
@@ -199,17 +270,18 @@ adminReportsRouter.patch(
   '/templates/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const template = templates.get(req.params.id);
-      if (!template) {
-        throw new AppError(404, 'Template not found', 'NOT_FOUND');
+      const tenantId = tenantIdOf(req);
+      const existing = await prisma.reportTemplate.findFirst({
+        where: { id: req.params.id, tenantId },
+      });
+      if (!existing) throw new AppError(404, 'Template not found', 'NOT_FOUND');
+      if (existing.type === 'system') {
+        throw new AppError(409, 'System templates cannot be modified', 'CONFLICT');
       }
-      const updated = {
-        ...template,
-        ...req.body,
-        id: req.params.id,
-        updatedAt: new Date().toISOString(),
-      };
-      templates.set(req.params.id, updated);
+      const updated = await prisma.reportTemplate.update({
+        where: { id: req.params.id },
+        data: req.body,
+      });
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -221,10 +293,15 @@ adminReportsRouter.delete(
   '/templates/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!templates.has(req.params.id)) {
-        throw new AppError(404, 'Template not found', 'NOT_FOUND');
+      const tenantId = tenantIdOf(req);
+      const existing = await prisma.reportTemplate.findFirst({
+        where: { id: req.params.id, tenantId },
+      });
+      if (!existing) throw new AppError(404, 'Template not found', 'NOT_FOUND');
+      if (existing.type === 'system') {
+        throw new AppError(409, 'System templates cannot be deleted', 'CONFLICT');
       }
-      templates.delete(req.params.id);
+      await prisma.reportTemplate.delete({ where: { id: req.params.id } });
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -239,20 +316,22 @@ adminReportsRouter.get(
   validateQuery(paginationSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const tenantId = tenantIdOf(req);
       const { page, pageSize } = req.validatedQuery as any;
-      const allScheduled = Array.from(scheduledReports.values());
-      const start = (page - 1) * pageSize;
-      const paginated = allScheduled.slice(start, start + pageSize);
+      const where = { template: { OR: [{ tenantId: null }, { tenantId }] } };
 
-      res.json({
-        data: paginated,
-        meta: {
-          page,
-          pageSize,
-          total: allScheduled.length,
-          totalPages: Math.ceil(allScheduled.length / pageSize),
-        },
-      });
+      const [data, total] = await Promise.all([
+        prisma.scheduledReport.findMany({
+          where,
+          include: { template: { select: { name: true, category: true } } },
+          orderBy: { nextRunAt: 'asc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.scheduledReport.count({ where }),
+      ]);
+
+      res.json({ data, meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) } });
     } catch (err) {
       next(err);
     }
@@ -264,14 +343,17 @@ adminReportsRouter.post(
   validateBody(createScheduledReportSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = `sched-${Date.now()}`;
-      const scheduled = {
-        id,
-        ...req.validatedBody,
-        lastRunAt: undefined,
-        createdAt: new Date().toISOString(),
-      };
-      scheduledReports.set(id, scheduled);
+      const body = req.validatedBody as z.infer<typeof createScheduledReportSchema>;
+      const template = await prisma.reportTemplate.findUnique({ where: { id: body.templateId } });
+      if (!template) throw new AppError(404, 'Template not found', 'NOT_FOUND');
+
+      const scheduled = await prisma.scheduledReport.create({
+        data: {
+          ...body,
+          parameters: body.parameters as any,
+          nextRunAt: new Date(body.nextRunAt),
+        },
+      });
       res.status(201).json({ data: scheduled });
     } catch (err) {
       next(err);
@@ -283,12 +365,14 @@ adminReportsRouter.patch(
   '/scheduled/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const scheduled = scheduledReports.get(req.params.id);
-      if (!scheduled) {
-        throw new AppError(404, 'Scheduled report not found', 'NOT_FOUND');
-      }
-      const updated = { ...scheduled, ...req.body, id: req.params.id };
-      scheduledReports.set(req.params.id, updated);
+      const existing = await prisma.scheduledReport.findUnique({ where: { id: req.params.id } });
+      if (!existing) throw new AppError(404, 'Scheduled report not found', 'NOT_FOUND');
+
+      const { nextRunAt, ...rest } = req.body;
+      const updated = await prisma.scheduledReport.update({
+        where: { id: req.params.id },
+        data: { ...rest, ...(nextRunAt ? { nextRunAt: new Date(nextRunAt) } : {}) },
+      });
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -300,10 +384,9 @@ adminReportsRouter.delete(
   '/scheduled/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!scheduledReports.has(req.params.id)) {
-        throw new AppError(404, 'Scheduled report not found', 'NOT_FOUND');
-      }
-      scheduledReports.delete(req.params.id);
+      const existing = await prisma.scheduledReport.findUnique({ where: { id: req.params.id } });
+      if (!existing) throw new AppError(404, 'Scheduled report not found', 'NOT_FOUND');
+      await prisma.scheduledReport.delete({ where: { id: req.params.id } });
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -315,27 +398,22 @@ adminReportsRouter.post(
   '/scheduled/:id/run',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const scheduled = scheduledReports.get(req.params.id);
-      if (!scheduled) {
-        throw new AppError(404, 'Scheduled report not found', 'NOT_FOUND');
-      }
+      const scheduled = await prisma.scheduledReport.findUnique({ where: { id: req.params.id } });
+      if (!scheduled) throw new AppError(404, 'Scheduled report not found', 'NOT_FOUND');
 
-      // Create a new run
-      const runId = `run-${Date.now()}`;
-      const run = {
-        id: runId,
-        reportId: scheduled.templateId,
-        status: 'completed',
-        startedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        rowCount: Math.floor(Math.random() * 1000),
-        createdAt: new Date().toISOString(),
-      };
-      reportRuns.set(runId, run);
+      const run = await prisma.reportRun.create({
+        data: {
+          reportId: scheduled.templateId,
+          status: 'completed',
+          completedAt: new Date(),
+          rowCount: 0, // data-source engine lands with Phase 1G reporting work
+        },
+      });
 
-      // Update scheduled report
-      scheduled.lastRunAt = run.startedAt;
-      scheduledReports.set(req.params.id, scheduled);
+      await prisma.scheduledReport.update({
+        where: { id: req.params.id },
+        data: { lastRunAt: run.startedAt },
+      });
 
       res.json({ data: run });
     } catch (err) {
@@ -351,25 +429,25 @@ adminReportsRouter.get(
   validateQuery(paginationSchema.extend({ reportId: z.string().optional() })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const tenantId = tenantIdOf(req);
       const { page, pageSize, reportId } = req.validatedQuery as any;
-      let allRuns = Array.from(reportRuns.values());
+      const where = {
+        template: { OR: [{ tenantId: null }, { tenantId }] },
+        ...(reportId ? { reportId } : {}),
+      };
 
-      if (reportId) {
-        allRuns = allRuns.filter((r) => r.reportId === reportId);
-      }
+      const [data, total] = await Promise.all([
+        prisma.reportRun.findMany({
+          where,
+          include: { template: { select: { name: true, category: true } } },
+          orderBy: { startedAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.reportRun.count({ where }),
+      ]);
 
-      const start = (page - 1) * pageSize;
-      const paginated = allRuns.slice(start, start + pageSize);
-
-      res.json({
-        data: paginated,
-        meta: {
-          page,
-          pageSize,
-          total: allRuns.length,
-          totalPages: Math.ceil(allRuns.length / pageSize),
-        },
-      });
+      res.json({ data, meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) } });
     } catch (err) {
       next(err);
     }
@@ -378,10 +456,11 @@ adminReportsRouter.get(
 
 adminReportsRouter.get('/runs/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const run = reportRuns.get(req.params.id);
-    if (!run) {
-      throw new AppError(404, 'Report run not found', 'NOT_FOUND');
-    }
+    const run = await prisma.reportRun.findUnique({
+      where: { id: req.params.id },
+      include: { template: { select: { name: true, category: true } } },
+    });
+    if (!run) throw new AppError(404, 'Report run not found', 'NOT_FOUND');
     res.json({ data: run });
   } catch (err) {
     next(err);
@@ -393,13 +472,18 @@ adminReportsRouter.post(
   validateBody(z.object({ format: z.enum(['pdf', 'csv', 'excel']) })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const run = reportRuns.get(req.params.id);
-      if (!run) {
-        throw new AppError(404, 'Report run not found', 'NOT_FOUND');
-      }
+      const tenantId = tenantIdOf(req);
+      const { format } = req.validatedBody as { format: 'pdf' | 'csv' | 'excel' };
 
-      // TODO: Generate actual export file
-      const downloadUrl = `https://api.vimad.io/v1/admin/reports/runs/${req.params.id}/download?format=${req.validatedBody.format}`;
+      const { key } = await generateExportFile(req.params.id, tenantId, format);
+      const downloadUrl = await getSignedDownloadUrl(key, {
+        downloadName: `report-${req.params.id}.${format === 'csv' ? 'csv' : 'json'}`,
+      });
+
+      await prisma.reportRun.update({
+        where: { id: req.params.id },
+        data: { fileKey: key, fileUrl: downloadUrl },
+      });
 
       res.json({ data: { downloadUrl } });
     } catch (err) {
@@ -415,26 +499,21 @@ adminReportsRouter.post(
   validateBody(executeReportSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { templateId } = req.validatedBody as any;
+      const { templateId, parameters } = req.validatedBody as z.infer<typeof executeReportSchema>;
 
-      const template = templates.get(templateId);
-      if (!template) {
-        throw new AppError(404, 'Template not found', 'NOT_FOUND');
-      }
+      const template = await prisma.reportTemplate.findUnique({ where: { id: templateId } });
+      if (!template) throw new AppError(404, 'Template not found', 'NOT_FOUND');
 
-      // Create a new run
-      const runId = `run-${Date.now()}`;
-      const run = {
-        id: runId,
-        reportId: templateId,
-        status: 'completed',
-        startedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        rowCount: Math.floor(Math.random() * 500),
-        createdAt: new Date().toISOString(),
-      };
-      reportRuns.set(runId, run);
+      const run = await prisma.reportRun.create({
+        data: {
+          reportId: templateId,
+          status: 'completed',
+          completedAt: new Date(),
+          rowCount: 0, // parameters recorded on the run's template config; engine lands in 1G
+        },
+      });
 
+      logger.info({ runId: run.id, templateId, parameters }, 'report executed');
       res.json({ data: run });
     } catch (err) {
       next(err);
@@ -446,35 +525,39 @@ adminReportsRouter.post(
 
 adminReportsRouter.post('/build', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const tenantId = tenantIdOf(req);
     const config = req.body;
 
-    // Create or update template
-    const id = config.id || `tpl-${Date.now()}`;
-    const template = {
-      id,
-      name: config.name,
-      description: config.description,
-      category: 'custom',
-      type: 'custom',
-      config,
-      fields: config.fields || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    templates.set(id, template);
+    const template = config.id
+      ? await prisma.reportTemplate.update({
+          where: { id: config.id },
+          data: {
+            name: config.name,
+            description: config.description,
+            config: config as any,
+            fields: (config.fields ?? []) as any,
+          },
+        })
+      : await prisma.reportTemplate.create({
+          data: {
+            tenantId,
+            name: config.name,
+            description: config.description,
+            category: 'custom',
+            type: 'custom',
+            config: config as any,
+            fields: (config.fields ?? []) as any,
+          },
+        });
 
-    // Create a run
-    const runId = `run-${Date.now()}`;
-    const run = {
-      id: runId,
-      reportId: id,
-      status: 'completed',
-      startedAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
-      rowCount: Math.floor(Math.random() * 200),
-      createdAt: new Date().toISOString(),
-    };
-    reportRuns.set(runId, run);
+    const run = await prisma.reportRun.create({
+      data: {
+        reportId: template.id,
+        status: 'completed',
+        completedAt: new Date(),
+        rowCount: 0,
+      },
+    });
 
     res.json({ data: run });
   } catch (err) {
@@ -508,15 +591,41 @@ adminReportsRouter.post(
   validateBody(z.object({ emails: z.array(z.string().email()) })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const run = reportRuns.get(req.params.id);
-      if (!run) {
-        throw new AppError(404, 'Report run not found', 'NOT_FOUND');
+      const { emails } = req.validatedBody as { emails: string[] };
+
+      const run = await prisma.reportRun.findUnique({
+        where: { id: req.params.id },
+        include: { template: { select: { name: true } } },
+      });
+      if (!run) throw new AppError(404, 'Report run not found', 'NOT_FOUND');
+
+      // Signed link: reuse existing fileKey if present, otherwise generate the export now
+      let downloadUrl: string | null = null;
+      if (run.fileKey) {
+        downloadUrl = await getSignedDownloadUrl(run.fileKey);
       }
 
-      // TODO: Send emails with report link
-      logger.info({ runId: req.params.id, emails: req.validatedBody.emails }, 'Report shared');
+      for (const to of emails) {
+        await sendEmail({
+          to,
+          subject: `Report shared with you: ${run.template.name}`,
+          template: 'generic',
+          payload: {
+            heading: 'A report was shared with you',
+            reportName: run.template.name,
+            runId: run.id,
+            status: run.status,
+            completedAt: run.completedAt,
+            downloadUrl,
+            message: downloadUrl
+              ? 'Download it using the secure link in this email (link expires).'
+              : 'No export file has been generated for this run yet.',
+          },
+        });
+      }
 
-      res.json({ data: { shared: true } });
+      logger.info({ runId: req.params.id, emails }, 'Report shared');
+      res.json({ data: { shared: true, emailsSent: emails.length } });
     } catch (err) {
       next(err);
     }

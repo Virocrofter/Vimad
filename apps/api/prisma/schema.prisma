@@ -298,6 +298,8 @@ model Reservation {
   @@index([guestId])
   @@index([status])
   @@index([arrivalDate, departureDate])
+  @@index([tenantId, status, arrivalDate])
+  @@index([tenantId, propertyId, status])
   @@map("reservations")
 }
 
@@ -313,6 +315,8 @@ model ReservationStay {
 
   @@unique([reservationId, roomId, date])
   @@index([roomId, date])
+  @@index([date])
+  @@index([reservationId])
   @@map("reservation_stays")
 }
 
@@ -332,8 +336,8 @@ model Folio {
 
   items FolioItem[]
 
-  @@index([tenantId])
   @@index([status])
+  @@index([tenantId, status, createdAt])
   @@map("folios")
 }
 
@@ -451,11 +455,11 @@ model HousekeepingTask {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  @@index([tenantId])
   @@index([propertyId])
   @@index([roomId])
   @@index([status])
   @@index([scheduledAt])
+  @@index([tenantId, status, scheduledAt])
   @@map("housekeeping_tasks")
 }
 
@@ -500,8 +504,7 @@ model AuditLog {
   userAgent String?
   createdAt DateTime @default(now())
 
-  @@index([tenantId])
-  @@index([createdAt])
+  @@index([tenantId, createdAt])
   @@map("audit_logs")
 }
 
@@ -663,17 +666,116 @@ model ApiKey {
 // ─── Idempotency Keys ───
 
 model IdempotencyKey {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  scope     String
-  payload   Json?
-  response  Json?
-  status    String   @default("pending")
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  key         String   @unique
+  scope       String
+  requestPath String?  // ADD THIS
+  requestBody Json?    // ADD THIS
+  payload     Json?
+  response    Json?
+  status      String   @default("pending")
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt  // ADD THIS
 
   @@index([key])
   @@index([scope])
   @@index([expiresAt])
   @@map("idempotency_keys")
 }
+
+// ─── Reports ───
+
+model ReportTemplate {
+  id          String   @id @default(cuid())
+  tenantId    String?  // null = system template
+  name        String
+  description String?
+  category    String   @default("custom")
+  type        String   @default("custom") // system | custom
+  config      Json     @default("{}")
+  fields      Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scheduledReports ScheduledReport[]
+  reportRuns         ReportRun[]
+
+  @@index([tenantId])
+  @@map("report_templates")
+}
+
+model ScheduledReport {
+  id         String   @id @default(cuid())
+  templateId String
+  template   ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  name       String
+  frequency  String   // daily | weekly | monthly | quarterly
+  recipients String[]
+  format     String   // pdf | csv | excel
+  parameters Json     @default("{}")
+  nextRunAt  DateTime
+  lastRunAt  DateTime?
+  status     String   @default("active") // active | paused | error
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([templateId])
+  @@index([nextRunAt])
+  @@map("scheduled_reports")
+}
+
+model ReportRun {
+  id          String   @id @default(cuid())
+  reportId    String
+  template    ReportTemplate @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  status      String   @default("pending") // pending | running | completed | failed
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  rowCount    Int      @default(0)
+  fileKey     String?  // storage key for generated file
+  fileUrl     String?  // signed download URL (transient)
+  error       String?
+  createdAt   DateTime @default(now())
+
+  @@index([reportId])
+  @@index([status])
+  @@map("report_runs")
+}
+
+// ─── Dead Letter Queue Persistence ───
+
+model FailedJob {
+  id             String   @id @default(cuid())
+  queue          String
+  jobId          String
+  jobName        String
+  payload        Json?
+  failReason     String
+  attemptCount   Int      @default(0)
+  status         String   @default("pending") // pending | retried | resolved | abandoned
+  retriedAt      DateTime?
+  resolvedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([queue, jobId])
+  @@index([status])
+  @@map("failed_jobs")
+}
+
+// ─── Usage Metering ───
+
+model UsageRecord {
+  id         String   @id @default(cuid())
+  tenantId   String
+  metric     String   // api_calls | storage_bytes | sms_sent | emails_sent | reports_generated
+  quantity   Int      @default(1)
+  recordedAt DateTime @default(now())
+  metadata   Json?
+
+  @@index([recordedAt])
+  @@index([tenantId, metric, recordedAt])
+  @@map("usage_records")
+}
+

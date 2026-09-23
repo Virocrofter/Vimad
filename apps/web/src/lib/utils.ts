@@ -1,5 +1,17 @@
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+/** Simple className joiner (enhanced with tailwind-merge). */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 /** Format a number as currency. */
-export function formatCurrency(value, currency = 'USD', opts = {}) {
+export function formatCurrency(
+  value: number | null | undefined,
+  currency = 'USD',
+  opts: Intl.NumberFormatOptions = {}
+) {
   if (value == null || isNaN(value)) return '—';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -10,16 +22,19 @@ export function formatCurrency(value, currency = 'USD', opts = {}) {
 }
 
 /** Format a number with thousands separators. */
-export function formatNumber(value) {
+export function formatNumber(value: number | null | undefined) {
   if (value == null || isNaN(value)) return '—';
   return new Intl.NumberFormat('en-US').format(value);
 }
 
 /** Format an ISO date string as a readable date. */
-export function formatDate(value, opts = {}) {
+export function formatDate(
+  value: string | Date | null | undefined,
+  opts: Intl.DateTimeFormatOptions = {}
+) {
   if (!value) return '—';
   const d = new Date(value);
-  if (isNaN(d)) return '—';
+  if (isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -29,10 +44,10 @@ export function formatDate(value, opts = {}) {
 }
 
 /** Format an ISO date string as date + time. */
-export function formatDateTime(value) {
+export function formatDateTime(value: string | Date | null | undefined) {
   if (!value) return '—';
   const d = new Date(value);
-  if (isNaN(d)) return '—';
+  if (isNaN(d.getTime())) return '—';
   return d.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -43,10 +58,10 @@ export function formatDateTime(value) {
 }
 
 /** Relative time, e.g. "3h ago". */
-export function timeAgo(value) {
+export function timeAgo(value: string | Date | null | undefined) {
   if (!value) return '—';
   const d = new Date(value);
-  if (isNaN(d)) return '—';
+  if (isNaN(d.getTime())) return '—';
   const diff = Date.now() - d.getTime();
   const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
@@ -58,16 +73,11 @@ export function timeAgo(value) {
 }
 
 /** Convert bytes to a human-readable string. */
-export function formatBytes(bytes) {
+export function formatBytes(bytes: number | null | undefined) {
   if (bytes == null || isNaN(bytes)) return '—';
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
-
-/** Simple className joiner. */
-export function cn(...classes) {
-  return classes.filter(Boolean).join(' ');
 }

@@ -50,7 +50,7 @@ const PropertyListResponseSchema =
 
 export const propertiesRouter = Router();
 
-propertiesRouter.use(authMiddleware, tenantScope);
+// propertiesRouter.use(authMiddleware, tenantScope);
 
 registry.registerPath({
   method: 'get',

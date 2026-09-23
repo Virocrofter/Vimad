@@ -1,22 +1,8 @@
 /* src/app/guest-portal/billing/invoice/page.jsx */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  FileText,
-  Download,
-  ArrowLeft,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Receipt,
-  Hotel,
-  CreditCard,
-  Mail,
-  Printer,
-  Check,
-} from 'lucide-react';
+import { FileText, Download, ArrowLeft, Clock, Receipt, Mail, Check } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { Button } from '../../../../components/ui/button';
 import { guestStay, pastStays, formatCurrency, formatDate } from '../../data';
 
 export default function InvoicePage() {
@@ -53,6 +39,7 @@ export default function InvoicePage() {
 
   const handleDownload = async (id) => {
     setDownloading(id);
+    // Simulate download — replace with actual API call when backend is ready
     await new Promise((r) => setTimeout(r, 1500));
     setDownloading(null);
     setDownloaded((prev) => [...prev, id]);
@@ -60,6 +47,7 @@ export default function InvoicePage() {
 
   const handleEmail = async (id) => {
     setDownloading(id + '-email');
+    // Simulate email — replace with actual API call when backend is ready
     await new Promise((r) => setTimeout(r, 1000));
     setDownloading(null);
   };

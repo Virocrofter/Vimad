@@ -1,5 +1,4 @@
 /* src/app/guest-portal/billing/components.jsx */
-import { useState } from 'react';
 import { cn } from '../../../lib/utils';
 
 /* ─── Folio Line Item ─── */
@@ -34,61 +33,8 @@ export function FolioLineItem({ charge, onClick, selected }) {
   );
 }
 
-/* ─── Payment Method Card ─── */
-export function PaymentMethodCard({ method, selected, onSelect }) {
-  const brandIcons = {
-    visa: 'VISA',
-    mastercard: 'MC',
-    amex: 'AMEX',
-  };
-
-  return (
-    <button
-      onClick={() => onSelect(method.id)}
-      className={cn(
-        'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all',
-        selected
-          ? 'border-secondary bg-secondary/5'
-          : 'border-border bg-surface hover:border-secondary/30'
-      )}
-    >
-      <div
-        className={cn(
-          'flex h-10 w-14 items-center justify-center rounded-md font-bold text-xs',
-          method.brand === 'visa'
-            ? 'bg-blue-600 text-white'
-            : method.brand === 'mastercard'
-              ? 'bg-orange-500 text-white'
-              : 'bg-slate-600 text-white'
-        )}
-      >
-        {brandIcons[method.brand] || method.brand.toUpperCase()}
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium text-text-primary">
-          {method.brand.charAt(0).toUpperCase() + method.brand.slice(1)} ending {method.last4}
-        </p>
-        <p className="text-xs text-text-muted">Expires {method.expiry}</p>
-      </div>
-      {method.isDefault && (
-        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-          Default
-        </span>
-      )}
-      <div
-        className={cn(
-          'h-4 w-4 rounded-full border-2 flex items-center justify-center',
-          selected ? 'border-secondary bg-secondary' : 'border-border'
-        )}
-      >
-        {selected && <div className="h-2 w-2 rounded-full bg-white" />}
-      </div>
-    </button>
-  );
-}
-
 /* ─── Invoice Row ─── */
-export function InvoiceRow({ invoice, onDownload, onEmail, downloading, downloaded }) {
+export function InvoiceRow({ invoice, onDownload, downloading, downloaded }) {
   const typeLabels = { deposit: 'Deposit', final: 'Final', interim: 'Interim' };
 
   return (

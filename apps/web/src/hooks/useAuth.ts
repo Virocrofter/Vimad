@@ -1,151 +1,121 @@
+/* apps/web/src/hooks/useAuth.ts */
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuthStore, type User } from '../stores/authStores';
+import { apiPost, ApiError } from '../api/client';
+import { setTokens, clearTokens } from '../stores/authStores';
 
-interface User {
-  id: string;
+export interface LoginInput {
+  tenantSlug: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  tenantId: string;
-  permissions: string[];
+  password: string;
 }
 
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+export interface RegisterInput {
+  tenantName: string;
+  tenantSlug: string;
+  ownerEmail: string;
+  ownerPassword: string;
+  ownerFirstName?: string;
+  ownerLastName?: string;
 }
 
-interface UseAuthReturn extends AuthState {
-  login: (tenantSlug: string, email: string, password: string) => Promise<void>;
+interface AuthResult {
+  success: boolean;
+  error?: string;
+}
+
+interface UseAuthReturn {
+  login: (input: LoginInput) => Promise<AuthResult>;
+  register: (data: RegisterInput) => Promise<AuthResult>;
   logout: () => void;
-  hasPermission: (_resource: string, _action: string) => boolean;
-  refreshUser: () => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+  clearError: () => void;
+  user: User | null;
+  isAuthenticated: boolean;
 }
 
 export function useAuth(): UseAuthReturn {
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [state, setState] = useState<AuthState>(() => {
-    let token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const storeLogin = useAuthStore((state) => state.login);
+  const storeLogout = useAuthStore((state) => state.logout);
 
-    // Discard credentials that are already expired (or malformed)
-    if (token) {
+  const clearError = useCallback(() => setError(null), []);
+
+  const login = useCallback(
+    async (input: LoginInput): Promise<AuthResult> => {
+      setIsLoading(true);
+      setError(null);
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.exp * 1000 <= Date.now()) {
-          token = null;
-        }
-      } catch {
-        token = null;
+        const response = await apiPost<{
+          data: {
+            token: string;
+            refreshToken: string;
+            user: User;
+          };
+        }>('/auth/login', input);
+
+        const { token, refreshToken, user: loggedInUser } = response.data;
+        setTokens(token, refreshToken);
+        storeLogin(loggedInUser, token, refreshToken);
+        return { success: true };
+      } catch (err) {
+        const message = err instanceof ApiError ? err.message : 'Login failed. Please try again.';
+        setError(message);
+        return { success: false, error: message };
+      } finally {
+        setIsLoading(false);
       }
-      if (!token) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      }
-    }
-
-    return {
-      user: token && userStr ? JSON.parse(userStr) : null,
-      token,
-      isAuthenticated: !!token,
-      isLoading: false,
-    };
-  });
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    setState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
-    navigate('/auth/login');
-  }, [navigate]);
-
-  const login = useCallback(async (tenantSlug: string, email: string, password: string) => {
-    setState((prev) => ({ ...prev, isLoading: true }));
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/login`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenantSlug, email, password }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-
-      const { data } = await response.json();
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      setState({
-        user: data.user,
-        token: data.token,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (err) {
-      setState((prev) => ({ ...prev, isLoading: false }));
-      throw err;
-    }
-  }, []);
-
-  const hasPermission = useCallback(
-    (_resource: string, _action: string): boolean => {
-      if (!state.user) return false;
-      if (state.user.role === 'owner' || state.user.role === 'admin') return true;
-
-      // Check permissions array
-      const permissions = state.user.permissions || [];
-      return permissions.includes('*') || permissions.includes(`${_resource}:${_action}`);
     },
-    [state.user]
+    [storeLogin]
   );
 
-  const refreshUser = useCallback(async () => {
-    if (!state.token) return;
+  const register = useCallback(
+    async (data: RegisterInput): Promise<AuthResult> => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await apiPost<{
+          data: {
+            token: string;
+            refreshToken: string;
+            user: User;
+          };
+        }>('/auth/register', data);
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/me`,
-        {
-          headers: { Authorization: `Bearer ${state.token}` },
-        }
-      );
-
-      if (response.ok) {
-        const { data } = await response.json();
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setState((prev) => ({ ...prev, user: data.user }));
-      } else if (response.status === 401) {
-        logout();
+        const { token, refreshToken, user: registeredUser } = response.data;
+        setTokens(token, refreshToken);
+        storeLogin(registeredUser, token, refreshToken);
+        return { success: true };
+      } catch (err) {
+        const message =
+          err instanceof ApiError ? err.message : 'Registration failed. Please try again.';
+        setError(message);
+        return { success: false, error: message };
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to refresh user:', err);
-    }
-  }, [state.token, logout]);
+    },
+    [storeLogin]
+  );
+
+  const logout = useCallback(() => {
+    clearTokens();
+    storeLogout();
+  }, [storeLogout]);
 
   return {
-    ...state,
     login,
+    register,
     logout,
-    hasPermission,
-    refreshUser,
+    isLoading,
+    error,
+    clearError,
+    user,
+    isAuthenticated,
   };
 }

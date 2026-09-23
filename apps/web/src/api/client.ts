@@ -41,7 +41,7 @@ function onTokenRefreshFailed(error: Error): void {
 // Token expiration helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PREEMPTIVE_REFRESH_MS = 60_000; // refresh 1 minute before expiry
+const PREEMPTIVE_REFRESH_MS = 60_000;
 
 interface DecodedToken {
   exp: number;
@@ -59,7 +59,7 @@ function getTokenExpiry(token: string): number | null {
 
 function isTokenExpiringSoon(token: string, bufferMs: number = PREEMPTIVE_REFRESH_MS): boolean {
   const expiry = getTokenExpiry(token);
-  if (!expiry) return true; // treat un-decodable as expired
+  if (!expiry) return true;
   return Date.now() + bufferMs >= expiry;
 }
 
@@ -81,7 +81,6 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // Skip auth for public endpoints
     const isPublicEndpoint =
       config.url?.includes('/auth/login') ||
       config.url?.includes('/auth/register') ||
@@ -94,9 +93,7 @@ apiClient.interceptors.request.use(
 
     const token = getAccessToken();
 
-    // ─── Pre-emptive refresh: rotate before expiry ───
     if (token && isTokenExpiringSoon(token) && !config.headers['x-skip-preemptive-refresh']) {
-      // Prevent recursive refresh loops by marking the refresh request itself
       if (!config.url?.includes('/auth/refresh')) {
         try {
           const newToken = await performTokenRefresh();
@@ -105,8 +102,7 @@ apiClient.interceptors.request.use(
           }
           return config;
         } catch {
-          // Let the request proceed with current token; response interceptor
-          // will handle the 401 if it's truly expired
+          // Let response interceptor handle 401
         }
       }
     }
@@ -133,9 +129,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ─── Handle 401 Unauthorized ───
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // If this was the refresh token endpoint itself → session dead
       if (originalRequest.url?.includes('/auth/refresh')) {
         await handleLogout('session_expired');
         return Promise.reject(error);
@@ -143,7 +137,6 @@ apiClient.interceptors.response.use(
 
       originalRequest._retry = true;
 
-      // ─── Queue this request if a refresh is already in flight ───
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           subscribeTokenRefresh({
@@ -158,13 +151,9 @@ apiClient.interceptors.response.use(
         });
       }
 
-      // ─── Single-flight token refresh ───
       try {
         const newToken = await performTokenRefresh();
-
         onTokenRefreshed(newToken);
-
-        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
@@ -174,7 +163,6 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // ─── Handle 403 Forbidden ───
     if (error.response?.status === 403) {
       console.warn('[API] Permission denied:', error.response.data);
     }
@@ -184,12 +172,11 @@ apiClient.interceptors.response.use(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Token refresh logic (extracted for reuse by request + response interceptors)
+// Token refresh logic
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function performTokenRefresh(): Promise<string> {
   if (isRefreshing) {
-    // Another caller already started; wait for it
     return new Promise((resolve, reject) => {
       subscribeTokenRefresh({ resolve, reject });
     });
@@ -203,7 +190,6 @@ async function performTokenRefresh(): Promise<string> {
       throw new Error('No refresh token available');
     }
 
-    // Use a raw axios instance (no interceptors) to avoid infinite loops
     const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
       refreshToken,
     });
@@ -216,7 +202,6 @@ async function performTokenRefresh(): Promise<string> {
       throw new Error('Refresh response missing token');
     }
 
-    // Persist to storage + sync across tabs
     setTokens(newToken, newRefreshToken);
     useAuthStore.setState({
       token: newToken,
@@ -225,7 +210,6 @@ async function performTokenRefresh(): Promise<string> {
       isAuthenticated: true,
     });
 
-    // Broadcast auth change to other tabs
     broadcastAuthEvent({ type: 'token_refreshed', token: newToken, refreshToken: newRefreshToken });
 
     return newToken;
@@ -235,14 +219,13 @@ async function performTokenRefresh(): Promise<string> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Logout handler (centralized redirect)
+// Logout handler
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function handleLogout(reason: 'session_expired' | 'auth_error' = 'session_expired') {
   clearTokens();
   useAuthStore.getState().clearAuth();
 
-  // Broadcast logout to other tabs
   broadcastAuthEvent({ type: 'logout' });
 
   const currentPath = window.location.pathname;
@@ -255,7 +238,7 @@ async function handleLogout(reason: 'session_expired' | 'auth_error' = 'session_
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cross-tab auth synchronization (BroadcastChannel + storage fallback)
+// Cross-tab auth synchronization
 // ─────────────────────────────────────────────────────────────────────────────
 
 type AuthBroadcastMessage =
@@ -272,7 +255,6 @@ function getBroadcastChannel(): BroadcastChannel | null {
 }
 
 function broadcastAuthEvent(message: AuthBroadcastMessage): void {
-  // BroadcastChannel (instant, same-origin)
   const bc = getBroadcastChannel();
   if (bc) {
     try {
@@ -282,23 +264,19 @@ function broadcastAuthEvent(message: AuthBroadcastMessage): void {
     }
   }
 
-  // localStorage fallback (works across all same-origin contexts)
   try {
     localStorage.setItem('vimad_auth_event', JSON.stringify({ ...message, _ts: Date.now() }));
-    // Clean up to avoid stale events on next read
     setTimeout(() => {
       localStorage.removeItem('vimad_auth_event');
     }, 100);
   } catch {
-    // ignore (e.g. private mode)
+    // ignore
   }
 }
 
-// ─── Setup cross-tab listeners (call once on app init) ───
 export function setupAuthSync(): () => void {
   const listeners: Array<() => void> = [];
 
-  // BroadcastChannel listener
   const bc = getBroadcastChannel();
   if (bc) {
     const handler = (event: MessageEvent<AuthBroadcastMessage>) => {
@@ -308,17 +286,15 @@ export function setupAuthSync(): () => void {
     listeners.push(() => bc.removeEventListener('message', handler));
   }
 
-  // localStorage fallback listener
   const storageHandler = (event: StorageEvent) => {
     if (event.key === 'vimad_auth_event' && event.newValue) {
       try {
         const data = JSON.parse(event.newValue) as AuthBroadcastMessage & { _ts: number };
-        // Ignore our own events (dedup via timestamp proximity)
         if (Date.now() - (data._ts ?? 0) < 500) {
           handleAuthBroadcast(data);
         }
       } catch {
-        // ignore parse errors
+        // ignore
       }
     }
   };
@@ -331,7 +307,6 @@ export function setupAuthSync(): () => void {
 function handleAuthBroadcast(message: AuthBroadcastMessage): void {
   switch (message.type) {
     case 'token_refreshed': {
-      // Another tab refreshed — adopt the new tokens
       setTokens(message.token, message.refreshToken);
       useAuthStore.setState({
         token: message.token,
@@ -341,7 +316,6 @@ function handleAuthBroadcast(message: AuthBroadcastMessage): void {
       break;
     }
     case 'logout': {
-      // Another tab logged out — clear our state too
       clearTokens();
       useAuthStore.getState().clearAuth();
       const currentPath = window.location.pathname;
@@ -354,10 +328,10 @@ function handleAuthBroadcast(message: AuthBroadcastMessage): void {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Convenience wrappers
+// Convenience wrappers — params typed as `object` to accept any params shape
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function apiGet<T>(url: string, params?: Record<string, unknown>): Promise<T> {
+export async function apiGet<T>(url: string, params?: object): Promise<T> {
   const response = await apiClient.get(url, { params });
   return response.data;
 }
@@ -381,25 +355,27 @@ export async function apiDelete<T>(url: string): Promise<T> {
   const response = await apiClient.delete(url);
   return response.data;
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Compatibility exports (used by api/*.ts modules and admin pages)
+// ApiError — normalized error with status + server code
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Normalized API error with status + server message */
 export class ApiError extends Error {
-  status: number;
-  data: unknown;
+  code?: string;
+  status?: number;
 
-  constructor(error: AxiosError) {
-    const data = error.response?.data as { message?: string } | undefined;
-    super(data?.message ?? error.message);
+  constructor(message: string, options?: { code?: string; status?: number }) {
+    super(message);
     this.name = 'ApiError';
-    this.status = error.response?.status ?? 0;
-    this.data = error.response?.data;
+    this.code = options?.code;
+    this.status = options?.status;
   }
 }
 
-/** Object-style wrapper so callers can do api.get(url, params) — returns data directly */
+// ─────────────────────────────────────────────────────────────────────────────
+// Compatibility exports
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const api = {
   get: apiGet,
   post: apiPost,
@@ -408,7 +384,6 @@ export const api = {
   delete: apiDelete,
 };
 
-/** Back-compat for api modules that call getApiClient() — returns the same wrapper */
 export function getApiClient() {
   return api;
 }

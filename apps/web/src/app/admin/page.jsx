@@ -1,8 +1,8 @@
-/* src/app/admin/tickets/page.jsx */
-import { useState, useMemo, useCallback } from 'react';
+/* src/app/admin/page.jsx */
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Ticket,
+  Shield,
   Search,
   Filter,
   Plus,
@@ -10,130 +10,137 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  MessageSquare,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-  Eye,
-  Edit3,
-  Trash2,
-  Send,
-  UserPlus,
   Building2,
-  Tag,
-  ArrowUpDown,
-  MoreHorizontal,
-  Star,
-  StarOff,
-  RefreshCw,
-  Download,
-  Mail,
-  Phone,
-  Link2,
-  Shield,
+  Users,
+  BedDouble,
+  DollarSign,
+  HardDrive,
   Zap,
   TrendingUp,
   TrendingDown,
   Minus,
+  MoreHorizontal,
+  Eye,
+  Edit3,
+  Trash2,
+  RefreshCw,
+  Download,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  ArrowUpRight,
+  ArrowDownRight,
   Calendar,
-  Hash,
-  Timer,
-  Reply,
-  Lock,
-  Unlock,
-  Archive,
-  User,
+  CreditCard,
+  BarChart3,
+  Settings,
+  ExternalLink,
+  Copy,
+  Ban,
+  Play,
+  Pause,
+  Sparkles,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '../../../components/ui/input';
+import { cn } from '../../lib/utils';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { useTenantStore } from './store';
 import {
-  priorityMeta,
   statusMeta,
-  categoryMeta,
-  formatDateTime,
-  timeAgo,
-  getSlaStatus,
-  getResponseTime,
-  teamMembers,
+  billingStatusMeta,
+  planMeta,
+  getUsagePercent,
+  getUsageColor,
+  getUsageBarColor,
+  formatCurrency,
 } from './data';
 import {
-  getTickets,
-  createTicket,
-  updateTicket,
-  assignTicket,
-  closeTicket,
-  getTicketComments,
-  addComment,
-  getTicketStats,
-} from '../../../api/tickets';
-import { useToast } from '../../../hooks/use-toast';
-import { useApiFetch } from '@/hooks/useApiFetch';
-import {
-  PriorityBadge,
-  StatusBadge,
-  CategoryBadge,
-  SlaBadge,
-  TicketStatCard,
-  PriorityBar,
-  SatisfactionStars,
-  MessageBubble,
-  TeamMemberCard,
-  TimelineItem,
-  TicketVolumeChart,
+  TenantStatusBadge,
+  BillingStatusBadge,
+  PlanBadge,
+  StatCard,
+  MiniUsageBar,
+  MrrSparkline,
+  TenantAvatar,
 } from './components';
 
-/* ─── Ticket Detail Drawer ─── */
-function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
-  const [activeTab, setActiveTab] = useState('conversation');
-  const [replyText, setReplyText] = useState('');
-  const [isInternal, setIsInternal] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
+/* ─── Mock MRR Data for Sparklines ─── */
+const mrrHistory = {
+  'TNT-001': [420, 435, 450, 445, 460, 475, 480, 499, 499, 499, 499, 499],
+  'TNT-002': [850, 880, 900, 920, 950, 975, 990, 999, 999, 999, 999, 999],
+  'TNT-003': [180, 185, 190, 195, 199, 199, 199, 199, 199, 199, 199, 199],
+  'TNT-004': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  'TNT-005': [499, 499, 499, 499, 499, 0, 0, 0, 0, 0, 0, 0],
+  'TNT-006': [850, 900, 925, 950, 975, 999, 999, 999, 999, 999, 999, 999],
+  'TNT-007': [199, 199, 199, 199, 199, 0, 0, 0, 0, 0, 0, 0],
+  'TNT-008': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  'TNT-009': [199, 199, 199, 199, 199, 199, 199, 199, 199, 199, 199, 199],
+  'TNT-010': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+};
 
-  if (!ticket) return null;
+/* ─── Tenant Detail Drawer ─── */
+function TenantDetailDrawer({ tenant, onClose, onUpdate }) {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  if (!tenant) return null;
 
   const tabs = [
-    { id: 'conversation', label: 'Conversation', icon: MessageSquare },
-    { id: 'details', label: 'Details', icon: Hash },
-    { id: 'timeline', label: 'Timeline', icon: Clock },
+    { id: 'overview', label: 'Overview', icon: Building2 },
+    { id: 'usage', label: 'Usage & Limits', icon: BarChart3 },
+    { id: 'billing', label: 'Billing History', icon: CreditCard },
+    { id: 'activity', label: 'Activity Log', icon: Clock },
   ];
 
-  const handleSendReply = () => {
-    if (!replyText.trim()) return;
-    const newMessage = {
-      id: ticket.messages.length + 1,
-      from: 'agent',
-      author: 'You',
-      timestamp: '2026-08-16 14:35:00',
-      body: replyText,
-      internal: isInternal,
-    };
-    onUpdate(ticket.id, {
-      messages: [...ticket.messages, newMessage],
-      updatedAt: '2026-08-16 14:35:00',
-      status: ticket.status === 'open' ? 'in_progress' : ticket.status,
-    });
-    setReplyText('');
-  };
-
-  const handleAssign = (member) => {
-    onUpdate(ticket.id, {
-      assignee: { name: member.name, email: member.email, avatar: member.avatar },
-      updatedAt: '2026-08-16 14:35:00',
-    });
-    setShowAssignModal(false);
-  };
-
   const handleStatusChange = (newStatus) => {
-    const updates = { status: newStatus, updatedAt: '2026-08-16 14:35:00' };
-    if (newStatus === 'resolved') {
-      updates.resolvedAt = '2026-08-16 14:35:00';
-    }
-    onUpdate(ticket.id, updates);
+    onUpdate(tenant.id, {
+      status: newStatus,
+      lastActive: newStatus === 'active' ? new Date().toISOString() : tenant.lastActive,
+    });
+    setShowSuspendConfirm(false);
   };
 
-  const sla = getSlaStatus(ticket);
-  const responseTime = getResponseTime(ticket);
+  const mockBillingHistory = [
+    {
+      id: 'INV-2026-0812',
+      date: '2026-08-12',
+      amount: tenant.revenue.mrr,
+      status: 'paid',
+      method: 'Visa •••• 4242',
+    },
+    {
+      id: 'INV-2026-0712',
+      date: '2026-07-12',
+      amount: tenant.revenue.mrr,
+      status: 'paid',
+      method: 'Visa •••• 4242',
+    },
+    {
+      id: 'INV-2026-0612',
+      date: '2026-06-12',
+      amount: tenant.revenue.mrr,
+      status: 'paid',
+      method: 'Visa •••• 4242',
+    },
+  ];
+
+  const mockActivityLog = [
+    { date: '2026-08-15 14:32', action: 'User login', user: 'Robert Chen', ip: '192.168.1.45' },
+    {
+      date: '2026-08-15 10:15',
+      action: 'Reservation created',
+      user: 'Sarah J.',
+      ip: '192.168.1.12',
+    },
+    { date: '2026-08-14 22:00', action: 'Night audit completed', user: 'System', ip: '127.0.0.1' },
+    { date: '2026-08-14 16:45', action: 'Rate override', user: 'David Park', ip: '192.168.1.78' },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -143,49 +150,21 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
         <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-lg',
-                  ticket.priority === 'critical'
-                    ? 'bg-danger/10'
-                    : ticket.priority === 'high'
-                      ? 'bg-warning/10'
-                      : ticket.priority === 'medium'
-                        ? 'bg-info/10'
-                        : 'bg-neutral/10'
-                )}
-              >
-                <Ticket
-                  className={cn(
-                    'h-5 w-5',
-                    ticket.priority === 'critical'
-                      ? 'text-danger'
-                      : ticket.priority === 'high'
-                        ? 'text-warning'
-                        : ticket.priority === 'medium'
-                          ? 'text-info'
-                          : 'text-text-muted'
-                  )}
-                />
-              </div>
+              <TenantAvatar name={tenant.name} size="lg" />
               <div>
-                <h2 className="text-lg font-bold text-text-primary">{ticket.subject}</h2>
+                <h2 className="text-lg font-bold text-text-primary">{tenant.name}</h2>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="text-xs text-text-muted font-mono">{ticket.id}</span>
-                  <PriorityBadge priority={ticket.priority} />
-                  <StatusBadge status={ticket.status} />
+                  <span className="text-xs text-text-muted font-mono">{tenant.id}</span>
+                  <span className="text-xs text-text-muted">·</span>
+                  <TenantStatusBadge status={tenant.status} />
+                  <PlanBadge plan={tenant.plan} />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {ticket.status !== 'resolved' && ticket.status !== 'closed' && (
-                <button
-                  onClick={() => handleStatusChange('resolved')}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/90"
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
-                </button>
-              )}
+              <Button variant="outline" size="sm">
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Open
+              </Button>
               <button
                 onClick={onClose}
                 className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
@@ -219,337 +198,404 @@ function TicketDetailDrawer({ ticket, onClose, onUpdate, teamMembers }) {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* ─── Conversation Tab ─── */}
-          {activeTab === 'conversation' && (
+          {/* Overview Tab */}
+          {activeTab === 'overview' && (
             <div className="space-y-6">
-              {/* Ticket Info Bar */}
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-text-muted" />
-                    <span className="text-text-secondary">{ticket.tenant.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-text-muted" />
-                    <span className="text-text-secondary">{ticket.requester.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-text-muted" />
-                    <CategoryBadge category={ticket.category} />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-text-muted" />
-                    <SlaBadge ticket={ticket} />
-                  </div>
-                </div>
-                {ticket.assignee ? (
-                  <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
-                    <span className="text-xs text-text-muted">Assigned to:</span>
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary">
-                        {ticket.assignee.avatar}
-                      </div>
-                      <span className="text-sm text-text-primary">{ticket.assignee.name}</span>
-                    </div>
-                    <button
-                      onClick={() => setShowAssignModal(true)}
-                      className="ml-auto text-xs text-secondary hover:underline"
-                    >
-                      Reassign
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <button
-                      onClick={() => setShowAssignModal(true)}
-                      className="inline-flex items-center gap-1.5 text-xs text-secondary hover:underline"
-                    >
-                      <UserPlus className="h-3.5 w-3.5" /> Assign to agent
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Messages */}
-              <div className="space-y-4">
-                {ticket.messages.map((msg) => (
-                  <MessageBubble key={msg.id} message={msg} isInternal={msg.internal} />
-                ))}
-              </div>
-
-              {/* Reply Box */}
-              {ticket.status !== 'resolved' && ticket.status !== 'closed' && (
-                <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-text-primary">Reply</span>
-                    <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isInternal}
-                        onChange={(e) => setIsInternal(e.target.checked)}
-                        className="h-4 w-4 rounded border-border"
-                      />
-                      <Lock className="h-3 w-3" /> Internal note
-                    </label>
-                  </div>
-                  <textarea
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder={isInternal ? 'Add an internal note...' : 'Type your reply...'}
-                    rows={4}
-                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
-                  />
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        <Link2 className="mr-1.5 h-3.5 w-3.5" /> Attach
-                      </Button>
-                    </div>
-                    <Button size="sm" onClick={handleSendReply} disabled={!replyText.trim()}>
-                      <Send className="mr-1.5 h-3.5 w-3.5" /> Send Reply
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Satisfaction */}
-              {ticket.status === 'resolved' && (
-                <div className="rounded-xl border border-border bg-surface p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">Customer Satisfaction</p>
-                      <p className="text-xs text-text-muted">
-                        How the tenant rated this resolution
-                      </p>
-                    </div>
-                    <SatisfactionStars rating={ticket.satisfaction} />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ─── Details Tab ─── */}
-          {activeTab === 'details' && (
-            <div className="space-y-6">
-              <div className="rounded-xl border border-border bg-surface p-5 space-y-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  Description
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">{ticket.description}</p>
-              </div>
-
+              {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Requester
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-text-muted" />
-                      <span className="text-text-primary">{ticket.requester.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-text-muted" />
-                      <span className="text-text-secondary">{ticket.requester.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Shield className="h-4 w-4 text-text-muted" />
-                      <span className="text-text-secondary capitalize">
-                        {ticket.requester.role}
-                      </span>
-                    </div>
+                <div className="rounded-xl border border-border bg-surface p-4">
+                  <p className="text-xs text-text-muted uppercase tracking-wider">
+                    Monthly Recurring Revenue
+                  </p>
+                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+                    {formatCurrency(tenant.revenue.mrr)}
+                  </p>
+                  <div className="mt-2">
+                    <MrrSparkline
+                      data={mrrHistory[tenant.id] || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+                    />
                   </div>
                 </div>
+                <div className="rounded-xl border border-border bg-surface p-4">
+                  <p className="text-xs text-text-muted uppercase tracking-wider">Total Revenue</p>
+                  <p className="mt-1 text-2xl font-bold font-mono text-text-primary">
+                    {formatCurrency(tenant.revenue.totalPaid)}
+                  </p>
+                  <p className="mt-1 text-xs text-text-muted">Lifetime value</p>
+                </div>
+              </div>
 
-                <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                    Tenant
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Building2 className="h-4 w-4 text-text-muted" />
-                      <span className="text-text-primary">{ticket.tenant.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Hash className="h-4 w-4 text-text-muted" />
-                      <span className="text-text-secondary font-mono">{ticket.tenant.id}</span>
-                    </div>
+              {/* Owner Info */}
+              <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  Owner Information
+                </h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex items-center gap-3 text-sm text-text-primary">
+                    <Users className="h-4 w-4 text-text-muted" />
+                    {tenant.owner.name}
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-text-primary">
+                    <Mail className="h-4 w-4 text-text-muted" />
+                    {tenant.owner.email}
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-text-primary">
+                    <Phone className="h-4 w-4 text-text-muted" />
+                    {tenant.owner.phone}
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-text-primary">
+                    <MapPin className="h-4 w-4 text-text-muted" />
+                    {tenant.location}
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                  Metadata
+              {/* Features */}
+              <div className="rounded-xl border border-border bg-surface p-5">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
+                  Enabled Features
                 </h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Created</span>
-                    <span className="text-text-primary">{formatDateTime(ticket.createdAt)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Updated</span>
-                    <span className="text-text-primary">{formatDateTime(ticket.updatedAt)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Source</span>
-                    <span className="capitalize text-text-primary">{ticket.source}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">First Response</span>
-                    <span className="text-text-primary">{responseTime || '—'}</span>
-                  </div>
-                  {ticket.resolvedAt && (
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Resolved</span>
-                      <span className="text-text-primary">{formatDateTime(ticket.resolvedAt)}</span>
-                    </div>
+                <div className="flex flex-wrap gap-2">
+                  {tenant.features.map((feature) => (
+                    <span
+                      key={feature}
+                      className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2.5 py-1 text-xs font-medium text-accent"
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                      {feature}
+                    </span>
+                  ))}
+                  {tenant.features.length === 0 && (
+                    <p className="text-sm text-text-muted">No features enabled</p>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-surface p-4">
+              {/* Notes */}
+              {tenant.notes && (
+                <div className="rounded-xl border border-border bg-surface p-5">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2">
+                    Notes
+                  </h3>
+                  <p className="text-sm text-text-secondary">{tenant.notes}</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pt-2">
+                {tenant.status === 'active' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-warning border-warning/30 hover:bg-warning/10"
+                    onClick={() => setShowSuspendConfirm(true)}
+                  >
+                    <Pause className="mr-1.5 h-3.5 w-3.5" /> Suspend
+                  </Button>
+                ) : tenant.status === 'suspended' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-accent border-accent/30 hover:bg-accent/10"
+                    onClick={() => handleStatusChange('active')}
+                  >
+                    <Play className="mr-1.5 h-3.5 w-3.5" /> Reactivate
+                  </Button>
+                ) : null}
+                <Button variant="outline" size="sm">
+                  <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-danger border-danger/30 hover:bg-danger/10"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Usage Tab */}
+          {activeTab === 'usage' && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <MiniUsageBar used={tenant.rooms.used} total={tenant.rooms.total} label="Rooms" />
+                <MiniUsageBar
+                  used={tenant.users.used}
+                  total={tenant.users.total}
+                  label="Users"
+                  unit=""
+                />
+                <MiniUsageBar
+                  used={tenant.storage.used}
+                  total={tenant.storage.total}
+                  label="Storage"
+                  unit={tenant.storage.unit}
+                />
+                <MiniUsageBar
+                  used={tenant.apiCalls.used}
+                  total={tenant.apiCalls.total}
+                  label="API Calls"
+                  unit=""
+                />
+              </div>
+
+              <div className="rounded-xl border border-border bg-surface p-5">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
-                  Tags
+                  Usage Summary
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {ticket.tags.map((tag) => (
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Room Utilization</span>
                     <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 rounded-full bg-background border border-border px-2.5 py-1 text-xs text-text-secondary"
+                      className={cn(
+                        'font-mono font-medium',
+                        getUsageColor(getUsagePercent(tenant.rooms.used, tenant.rooms.total))
+                      )}
                     >
-                      <Tag className="h-3 w-3" />
-                      {tag}
+                      {getUsagePercent(tenant.rooms.used, tenant.rooms.total)}%
                     </span>
-                  ))}
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Storage Used</span>
+                    <span className="font-mono font-medium text-text-primary">
+                      {tenant.storage.used}
+                      {tenant.storage.unit} / {tenant.storage.total}
+                      {tenant.storage.unit}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">API Usage</span>
+                    <span
+                      className={cn(
+                        'font-mono font-medium',
+                        getUsageColor(getUsagePercent(tenant.apiCalls.used, tenant.apiCalls.total))
+                      )}
+                    >
+                      {getUsagePercent(tenant.apiCalls.used, tenant.apiCalls.total)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Team Size</span>
+                    <span className="font-mono font-medium text-text-primary">
+                      {tenant.users.used} users
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* ─── Timeline Tab ─── */}
-          {activeTab === 'timeline' && (
-            <div className="space-y-2">
-              <TimelineItem
-                icon={Zap}
-                iconColor="text-secondary"
-                iconBg="bg-secondary/10"
-                title="Ticket Created"
-                time={formatDateTime(ticket.createdAt)}
-                description={`By ${ticket.requester.name} via ${ticket.source}`}
-              />
-              {ticket.firstResponseAt && (
-                <TimelineItem
-                  icon={Reply}
-                  iconColor="text-info"
-                  iconBg="bg-info/10"
-                  title="First Response"
-                  time={formatDateTime(ticket.firstResponseAt)}
-                  description={`Response time: ${responseTime}`}
-                />
-              )}
-              {ticket.assignee && (
-                <TimelineItem
-                  icon={UserPlus}
-                  iconColor="text-accent"
-                  iconBg="bg-accent/10"
-                  title={`Assigned to ${ticket.assignee.name}`}
-                  time={formatDateTime(ticket.updatedAt)}
-                />
-              )}
-              {ticket.status === 'resolved' && (
-                <TimelineItem
-                  icon={CheckCircle2}
-                  iconColor="text-accent"
-                  iconBg="bg-accent/10"
-                  title="Ticket Resolved"
-                  time={formatDateTime(ticket.resolvedAt)}
-                />
-              )}
-              <TimelineItem
-                icon={Clock}
-                iconColor="text-text-muted"
-                iconBg="bg-surface-elevated"
-                title="Last Updated"
-                time={formatDateTime(ticket.updatedAt)}
-              />
+          {/* Billing Tab */}
+          {activeTab === 'billing' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">Current Plan</p>
+                  <p className="text-lg font-bold text-text-primary">{tenant.plan}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-text-muted uppercase tracking-wider">Next Renewal</p>
+                  <p className="text-sm text-text-primary">{tenant.nextRenewal || '—'}</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-surface overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-background border-b border-border">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Invoice
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
+                        Amount
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {mockBillingHistory.map((inv) => (
+                      <tr key={inv.id} className="hover:bg-background/50">
+                        <td className="px-4 py-3 font-mono text-xs text-text-primary">{inv.id}</td>
+                        <td className="px-4 py-3 text-text-secondary">{inv.date}</td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {formatCurrency(inv.amount)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-xs font-medium text-accent">
+                            <CheckCircle2 className="h-3 w-3" /> Paid
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Activity Tab */}
+          {activeTab === 'activity' && (
+            <div className="space-y-3">
+              {mockActivityLog.map((entry, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10">
+                    <Clock className="h-4 w-4 text-secondary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-text-primary">{entry.action}</p>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
+                      <span>{entry.user}</span>
+                      <span>·</span>
+                      <span>{entry.date}</span>
+                      <span>·</span>
+                      <span className="font-mono">{entry.ip}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
+      </div>
 
-        {/* Assign Modal */}
-        {showAssignModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setShowAssignModal(false)}
-            />
-            <div className="relative w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl">
-              <h3 className="text-lg font-bold text-text-primary mb-4">Assign Ticket</h3>
-              <div className="space-y-1">
-                {teamMembers.map((member) => (
-                  <TeamMemberCard
-                    key={member.id}
-                    member={member}
-                    isSelected={ticket.assignee?.name === member.name}
-                    onClick={() => handleAssign(member)}
-                  />
-                ))}
+      {/* Suspend Confirm Modal */}
+      {showSuspendConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowSuspendConfirm(false)}
+          />
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10">
+                <AlertTriangle className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-text-primary">Suspend Tenant</h3>
+                <p className="text-xs text-text-muted">{tenant.name}</p>
               </div>
             </div>
+            <p className="text-sm text-text-secondary mb-4">
+              Suspending this tenant will immediately restrict access to the platform. All active
+              sessions will be terminated. This action can be reversed.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSuspendConfirm(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="outline"
+                className="text-warning border-warning/30 hover:bg-warning/10"
+                onClick={() => handleStatusChange('suspended')}
+              >
+                <Ban className="mr-1.5 h-4 w-4" /> Suspend Tenant
+              </Button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Delete Confirm Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-danger/10">
+                <Trash2 className="h-5 w-5 text-danger" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-text-primary">Delete Tenant</h3>
+                <p className="text-xs text-text-muted">{tenant.name}</p>
+              </div>
+            </div>
+            <p className="text-sm text-text-secondary mb-4">
+              This will permanently delete the tenant and all associated data. This action{' '}
+              <strong className="text-danger">cannot be undone</strong>.
+            </p>
+            <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 mb-4">
+              <p className="text-xs text-danger">
+                Type <span className="font-mono font-bold">{tenant.id}</span> to confirm deletion
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </Button>
+              <Button variant="outline" className="text-danger border-danger/30 hover:bg-danger/10">
+                <Trash2 className="mr-1.5 h-4 w-4" /> Delete Permanently
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ─── New Ticket Modal ─── */
-function NewTicketModal({ onClose, onCreate, tenants }) {
+/* ─── New Tenant Modal ─── */
+function NewTenantModal({ onClose, onCreate }) {
   const [form, setForm] = useState({
-    subject: '',
-    description: '',
-    priority: 'medium',
-    category: 'billing',
-    tenantId: tenants[0]?.id || '',
-    requesterName: '',
-    requesterEmail: '',
+    name: '',
+    subdomain: '',
+    plan: 'Starter',
+    ownerName: '',
+    ownerEmail: '',
+    ownerPhone: '',
+    location: '',
+    timezone: 'America/New_York',
+    currency: 'USD',
   });
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const tenant = tenants.find((t) => t.id === form.tenantId);
     onCreate({
-      id: `TKT-${Date.now().toString(36).toUpperCase()}`,
-      subject: form.subject,
-      description: form.description,
-      status: 'open',
-      priority: form.priority,
-      category: form.category,
-      source: 'internal',
-      tenant: tenant || { id: form.tenantId, name: 'Unknown' },
-      requester: { name: form.requesterName, email: form.requesterEmail, role: 'admin' },
-      assignee: null,
-      createdAt: '2026-08-16 14:35:00',
-      updatedAt: '2026-08-16 14:35:00',
-      resolvedAt: null,
-      firstResponseAt: null,
-      slaDeadline: '2026-08-17 14:35:00',
-      tags: [],
-      satisfaction: null,
-      messages: [
-        {
-          id: 1,
-          from: 'system',
-          author: form.requesterName,
-          timestamp: '2026-08-16 14:35:00',
-          body: form.description,
-          internal: false,
-        },
-      ],
+      id: `TNT-${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}`,
+      name: form.name,
+      subdomain: form.subdomain,
+      plan: form.plan,
+      status: 'pending',
+      owner: { name: form.ownerName, email: form.ownerEmail, phone: form.ownerPhone },
+      users: { used: 0, total: 'Unlimited' },
+      rooms: {
+        used: 0,
+        total: form.plan === 'Enterprise' ? 500 : form.plan === 'Professional' ? 200 : 75,
+      },
+      storage: {
+        used: 0,
+        total: form.plan === 'Enterprise' ? 500 : form.plan === 'Professional' ? 100 : 50,
+        unit: 'GB',
+      },
+      revenue: { mrr: 0, totalPaid: 0 },
+      createdAt: new Date().toISOString().split('T')[0],
+      lastActive: null,
+      billingStatus: 'pending',
+      nextRenewal: null,
+      features: [],
+      location: form.location,
+      timezone: form.timezone,
+      currency: form.currency,
+      apiCalls: {
+        used: 0,
+        total: form.plan === 'Enterprise' ? 500000 : form.plan === 'Professional' ? 100000 : 25000,
+      },
+      notes: 'New tenant awaiting onboarding.',
     });
     onClose();
   };
@@ -559,7 +605,7 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg rounded-xl border border-border bg-background p-6 shadow-xl max-h-[90vh] overflow-auto">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">Create Support Ticket</h3>
+          <h3 className="text-lg font-bold text-text-primary">Create New Tenant</h3>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
             <X className="h-5 w-5" />
           </button>
@@ -568,108 +614,149 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Subject
+              Property Name
             </label>
             <input
               type="text"
               required
-              value={form.subject}
-              onChange={(e) => update('subject', e.target.value)}
-              placeholder="Brief description of the issue"
+              value={form.name}
+              onChange={(e) => update('name', e.target.value)}
+              placeholder="e.g. Grand Hotel Boston"
               className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
           <div>
             <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Description
+              Subdomain
             </label>
-            <textarea
-              required
-              value={form.description}
-              onChange={(e) => update('description', e.target.value)}
-              rows={4}
-              placeholder="Detailed description..."
-              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Priority
-              </label>
-              <select
-                value={form.priority}
-                onChange={(e) => update('priority', e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {Object.entries(priorityMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Category
-              </label>
-              <select
-                value={form.category}
-                onChange={(e) => update('category', e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
-              </select>
+            <div className="flex items-center">
+              <input
+                type="text"
+                required
+                value={form.subdomain}
+                onChange={(e) =>
+                  update('subdomain', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                }
+                placeholder="grandhotel"
+                className="h-10 flex-1 rounded-l-md border border-border bg-surface px-3 text-sm font-mono text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <span className="inline-flex h-10 items-center rounded-r-md border border-l-0 border-border bg-background px-3 text-sm text-text-muted">
+                .unifiedpms.com
+              </span>
             </div>
           </div>
 
           <div>
             <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-              Tenant
+              Plan
             </label>
-            <select
-              value={form.tenantId}
-              onChange={(e) => update('tenantId', e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {tenants.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
+            <div className="grid grid-cols-3 gap-2">
+              {['Starter', 'Professional', 'Enterprise'].map((plan) => (
+                <button
+                  key={plan}
+                  type="button"
+                  onClick={() => update('plan', plan)}
+                  className={cn(
+                    'rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                    form.plan === plan
+                      ? 'border-secondary bg-secondary/5 text-secondary'
+                      : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+                  )}
+                >
+                  {plan}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Requester Name
+                Owner Name
               </label>
               <input
                 type="text"
-                value={form.requesterName}
-                onChange={(e) => update('requesterName', e.target.value)}
-                placeholder="Name"
+                required
+                value={form.ownerName}
+                onChange={(e) => update('ownerName', e.target.value)}
+                placeholder="Full name"
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Requester Email
+                Owner Email
               </label>
               <input
                 type="email"
-                value={form.requesterEmail}
-                onChange={(e) => update('requesterEmail', e.target.value)}
+                required
+                value={form.ownerEmail}
+                onChange={(e) => update('ownerEmail', e.target.value)}
                 placeholder="email@company.com"
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Phone
+              </label>
+              <input
+                type="tel"
+                value={form.ownerPhone}
+                onChange={(e) => update('ownerPhone', e.target.value)}
+                placeholder="+1 (555) 000-0000"
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Location
+              </label>
+              <input
+                type="text"
+                value={form.location}
+                onChange={(e) => update('location', e.target.value)}
+                placeholder="City, State"
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Timezone
+              </label>
+              <select
+                value={form.timezone}
+                onChange={(e) => update('timezone', e.target.value)}
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="America/New_York">Eastern (ET)</option>
+                <option value="America/Chicago">Central (CT)</option>
+                <option value="America/Denver">Mountain (MT)</option>
+                <option value="America/Los_Angeles">Pacific (PT)</option>
+                <option value="America/Phoenix">Arizona (MST)</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Currency
+              </label>
+              <select
+                value={form.currency}
+                onChange={(e) => update('currency', e.target.value)}
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="CAD">CAD (C$)</option>
+              </select>
             </div>
           </div>
 
@@ -677,8 +764,8 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              <Plus className="mr-1.5 h-4 w-4" /> Create Ticket
+            <Button type="submit" variant="secondary">
+              <Plus className="mr-1.5 h-4 w-4" /> Create Tenant
             </Button>
           </div>
         </form>
@@ -687,292 +774,73 @@ function NewTicketModal({ onClose, onCreate, tenants }) {
   );
 }
 
-/* ─── API <-> UI Mappers ─── */
-// UI priority: low | medium | high | critical  /  API priority: low | normal | high | urgent
-const toUiPriority = (p) => ({ normal: 'medium', urgent: 'critical' })[p] || p;
-const toApiPriority = (p) => ({ medium: 'normal', critical: 'urgent' })[p] || p;
-// UI status: open | in_progress | pending | resolved | closed  /  API status: open | in_progress | waiting | resolved | closed
-const toUiStatus = (s) => (s === 'waiting' ? 'pending' : s);
-const toApiStatus = (s) => (s === 'pending' ? 'waiting' : s);
-
-const toUiTime = (iso) => (iso ? iso.replace('T', ' ').slice(0, 19) : '');
-const fromUiTime = (ui) => (ui ? new Date(ui.replace(' ', 'T')).toISOString() : undefined);
-
-// SLA deadline heuristic by priority (API does not expose SLA fields yet)
-const slaHoursFor = { critical: 4, high: 8, medium: 24, low: 72 };
-
-function mapApiTicket(t) {
-  const priority = toUiPriority(t.priority);
-  const created = t.createdAt ? new Date(t.createdAt) : new Date();
-  const slaDeadline = new Date(created.getTime() + (slaHoursFor[priority] || 24) * 3600 * 1000);
-  const initials = (t.assigneeName || '')
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-  return {
-    _id: t.id, // raw API id for mutations
-    id: t.ticketNumber || t.id,
-    subject: t.subject,
-    description: t.description,
-    status: toUiStatus(t.status),
-    priority,
-    category: t.category || 'general',
-    source: t.metadata?.source || 'web',
-    tenant: { id: t.tenantId || '—', name: t.tenantName || 'Direct / Unknown Tenant' },
-    requester: {
-      name: t.userEmail ? t.userEmail.split('@')[0] : 'Unknown',
-      email: t.userEmail || '',
-      role: 'manager',
-    },
-    assignee: t.assigneeName
-      ? { id: t.assigneeId, name: t.assigneeName, email: '', avatar: initials }
-      : null,
-    tags: t.metadata?.tags || [],
-    messages: [], // lazy-loaded via getTicketComments when the drawer opens
-    createdAt: toUiTime(t.createdAt),
-    updatedAt: toUiTime(t.updatedAt),
-    resolvedAt: toUiTime(t.resolvedAt),
-    closedAt: toUiTime(t.closedAt),
-    firstResponseAt: null,
-    slaDeadline: toUiTime(slaDeadline.toISOString()),
-    satisfaction: t.satisfaction ?? null,
-  };
-}
-
-function mapApiComment(c) {
-  return {
-    id: c.id,
-    from: 'agent',
-    author: c.userName || 'Agent',
-    timestamp: toUiTime(c.createdAt),
-    body: c.message,
-    internal: !!c.isInternal,
-  };
-}
-
 /* ─── Main Page ─── */
-export default function TicketsPage() {
-  const { toast } = useToast();
+export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const tenants = useTenantStore((s) => s.tenants);
+  const updateTenant = useTenantStore((s) => s.updateTenant);
+  const addTenant = useTenantStore((s) => s.addTenant);
+  const removeTenant = useTenantStore((s) => s.removeTenant);
 
-  /* ─── Live data: tickets + stats from the API ─── */
-  const {
-    data: ticketData,
-    loading: ticketsLoading,
-    error: ticketsError,
-    refetch: refetchTickets,
-  } = useApiFetch(() => getTickets({ page: 1, pageSize: 100 }), []);
-  const { data: apiStats } = useApiFetch(() => getTicketStats(), []);
-
-  const tickets = useMemo(() => (ticketData?.data || []).map(mapApiTicket), [ticketData]);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [assigneeFilter, setAssigneeFilter] = useState('all');
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const [showNewTicket, setShowNewTicket] = useState(false);
+  const [planFilter, setPlanFilter] = useState('all');
+  const [billingFilter, setBillingFilter] = useState('all');
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [showNewTenant, setShowNewTenant] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: 'updatedAt', dir: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'lastActive', dir: 'desc' });
 
-  /* ─── Tenant list for filters/modals ─── */
-  const tenants = useMemo(() => {
-    const map = new Map();
-    tickets.forEach((t) => map.set(t.tenant.id, t.tenant));
-    return Array.from(map.values());
-  }, [tickets]);
-
-  /* ─── Filtered & Sorted Tickets ─── */
-  const filteredTickets = useMemo(() => {
-    let result = tickets.filter((t) => {
+  const filteredTenants = useMemo(() => {
+    let result = tenants.filter((t) => {
       const matchesQuery =
         !query ||
-        t.subject.toLowerCase().includes(query.toLowerCase()) ||
+        t.name.toLowerCase().includes(query.toLowerCase()) ||
         t.id.toLowerCase().includes(query.toLowerCase()) ||
-        t.description.toLowerCase().includes(query.toLowerCase()) ||
-        t.tenant.name.toLowerCase().includes(query.toLowerCase()) ||
-        t.requester.name.toLowerCase().includes(query.toLowerCase()) ||
-        t.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
+        t.subdomain.toLowerCase().includes(query.toLowerCase()) ||
+        t.owner.name.toLowerCase().includes(query.toLowerCase()) ||
+        t.owner.email.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
-      const matchesPriority = priorityFilter === 'all' || t.priority === priorityFilter;
-      const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
-      const matchesAssignee =
-        assigneeFilter === 'all' ||
-        (assigneeFilter === 'unassigned' ? !t.assignee : t.assignee?.name === assigneeFilter);
-      return matchesQuery && matchesStatus && matchesPriority && matchesCategory && matchesAssignee;
+      const matchesPlan = planFilter === 'all' || t.plan === planFilter;
+      const matchesBilling = billingFilter === 'all' || t.billingStatus === billingFilter;
+      return matchesQuery && matchesStatus && matchesPlan && matchesBilling;
     });
 
     result.sort((a, b) => {
-      if (sortConfig.key === 'updatedAt') {
+      if (sortConfig.key === 'lastActive') {
+        const aDate = a.lastActive ? new Date(a.lastActive) : new Date(0);
+        const bDate = b.lastActive ? new Date(b.lastActive) : new Date(0);
+        return sortConfig.dir === 'asc' ? aDate - bDate : bDate - aDate;
+      }
+      if (sortConfig.key === 'name') {
         return sortConfig.dir === 'asc'
-          ? new Date(a.updatedAt.replace(' ', 'T')) - new Date(b.updatedAt.replace(' ', 'T'))
-          : new Date(b.updatedAt.replace(' ', 'T')) - new Date(a.updatedAt.replace(' ', 'T'));
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      }
+      if (sortConfig.key === 'mrr') {
+        return sortConfig.dir === 'asc'
+          ? a.revenue.mrr - b.revenue.mrr
+          : b.revenue.mrr - a.revenue.mrr;
       }
       if (sortConfig.key === 'createdAt') {
         return sortConfig.dir === 'asc'
-          ? new Date(a.createdAt.replace(' ', 'T')) - new Date(b.createdAt.replace(' ', 'T'))
-          : new Date(b.createdAt.replace(' ', 'T')) - new Date(a.createdAt.replace(' ', 'T'));
-      }
-      if (sortConfig.key === 'priority') {
-        const order = { critical: 4, high: 3, medium: 2, low: 1 };
-        return sortConfig.dir === 'asc'
-          ? order[a.priority] - order[b.priority]
-          : order[b.priority] - order[a.priority];
-      }
-      if (sortConfig.key === 'subject') {
-        return sortConfig.dir === 'asc'
-          ? a.subject.localeCompare(b.subject)
-          : b.subject.localeCompare(a.subject);
+          ? new Date(a.createdAt) - new Date(b.createdAt)
+          : new Date(b.createdAt) - new Date(a.createdAt);
       }
       return 0;
     });
 
     return result;
-  }, [tickets, query, statusFilter, priorityFilter, categoryFilter, assigneeFilter, sortConfig]);
+  }, [tenants, query, statusFilter, planFilter, billingFilter, sortConfig]);
 
-  /* ─── Stats ─── */
   const stats = useMemo(() => {
-    const open = tickets.filter((t) => t.status === 'open').length;
-    const inProgress = tickets.filter((t) => t.status === 'in_progress').length;
-    const pending = tickets.filter((t) => t.status === 'pending').length;
-    const resolved = tickets.filter((t) => t.status === 'resolved').length;
-    const unassigned = tickets.filter(
-      (t) => !t.assignee && t.status !== 'resolved' && t.status !== 'closed'
-    ).length;
-    const breached = tickets.filter(
-      (t) => getSlaStatus(t) === 'breached' && t.status !== 'resolved'
-    ).length;
-    const avgResponse =
-      tickets
-        .filter((t) => t.firstResponseAt)
-        .reduce((sum, t) => {
-          const created = new Date(t.createdAt.replace(' ', 'T'));
-          const responded = new Date(t.firstResponseAt.replace(' ', 'T'));
-          return sum + (responded - created);
-        }, 0) / (tickets.filter((t) => t.firstResponseAt).length || 1);
-    const avgResponseMin = Math.round(avgResponse / (1000 * 60));
-
-    const priorityCounts = {
-      critical: tickets.filter((t) => t.priority === 'critical' && t.status !== 'resolved').length,
-      high: tickets.filter((t) => t.priority === 'high' && t.status !== 'resolved').length,
-      medium: tickets.filter((t) => t.priority === 'medium' && t.status !== 'resolved').length,
-      low: tickets.filter((t) => t.priority === 'low' && t.status !== 'resolved').length,
-    };
-
-    return {
-      // Prefer server-computed stats when available, fall back to local derivation
-      open: apiStats?.totalOpen ?? open,
-      inProgress: apiStats?.totalInProgress ?? inProgress,
-      pending,
-      resolved,
-      unassigned,
-      breached,
-      avgResponseMin: apiStats?.avgResolutionTime ?? avgResponseMin,
-      priorityCounts,
-      satisfactionScore: apiStats?.satisfactionScore,
-    };
-  }, [tickets, apiStats]);
-
-  /* ─── Volume data for chart ─── */
-  const volumeData = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map((label, i) => ({
-      label,
-      count: tickets.filter((t) => {
-        const d = new Date(t.createdAt.replace(' ', 'T'));
-        return d.getDay() === (i + 1) % 7;
-      }).length,
-    }));
-  }, [tickets]);
-
-  /* ─── Open the drawer: lazy-load the conversation from the API ─── */
-  const openTicket = useCallback(
-    async (ticket) => {
-      setSelectedTicket(ticket);
-      try {
-        const comments = await getTicketComments(ticket._id);
-        setSelectedTicket((prev) =>
-          prev && prev.id === ticket.id ? { ...prev, messages: comments.map(mapApiComment) } : prev
-        );
-      } catch (err) {
-        toast({
-          title: 'Failed to load conversation',
-          description: err.message,
-          variant: 'destructive',
-        });
-      }
-    },
-    [toast]
-  );
-
-  /* ─── Handlers ─── */
-  const handleUpdate = async (id, updates) => {
-    const ticket = tickets.find((t) => t.id === id);
-    if (!ticket) return;
-    // Optimistic update of the open drawer
-    if (selectedTicket?.id === id) {
-      setSelectedTicket((prev) => ({ ...prev, ...updates }));
-    }
-    try {
-      // Drawer appended a reply → POST a comment
-      if (updates.messages && updates.messages.length > (ticket.messages?.length || 0)) {
-        const newMessage = updates.messages[updates.messages.length - 1];
-        await addComment(ticket._id, newMessage.body, newMessage.internal);
-        // First agent reply flips open → in_progress
-        if (ticket.status === 'open') {
-          await updateTicket(ticket._id, { status: 'in_progress' });
-        }
-      }
-      if (updates.assignee) {
-        const member = teamMembers.find((m) => m.name === updates.assignee.name);
-        await assignTicket(ticket._id, member?.id || updates.assignee.name);
-      }
-      if (updates.status === 'closed') {
-        await closeTicket(ticket._id, updates.resolution || 'Closed by admin');
-      } else {
-        const patch = {};
-        if (updates.status) patch.status = toApiStatus(updates.status);
-        if (updates.priority) patch.priority = toApiPriority(updates.priority);
-        if (Object.keys(patch).length > 0) {
-          await updateTicket(ticket._id, patch);
-        }
-      }
-      await refetchTickets();
-      // Refresh the open drawer with fresh comments
-      if (selectedTicket?.id === id) {
-        const comments = await getTicketComments(ticket._id);
-        setSelectedTicket((prev) =>
-          prev && prev.id === id
-            ? { ...prev, ...updates, messages: comments.map(mapApiComment) }
-            : prev
-        );
-      }
-    } catch (err) {
-      toast({ title: 'Update failed', description: err.message, variant: 'destructive' });
-      openTicket(ticket); // resync drawer with server state
-    }
-  };
-
-  const handleCreate = async (newTicket) => {
-    try {
-      await createTicket({
-        subject: newTicket.subject,
-        description: newTicket.description,
-        status: 'open',
-        priority: toApiPriority(newTicket.priority),
-        category: newTicket.category,
-        tenantId: newTicket.tenant?.id,
-        tenantName: newTicket.tenant?.name,
-        userId: newTicket.requester?.email || 'admin',
-        userEmail: newTicket.requester?.email || '',
-      });
-      toast({ title: 'Ticket created', description: newTicket.subject });
-      refetchTickets();
-    } catch (err) {
-      toast({ title: 'Failed to create ticket', description: err.message, variant: 'destructive' });
-    }
-  };
+    const active = tenants.filter((t) => t.status === 'active').length;
+    const trial = tenants.filter((t) => t.status === 'trial').length;
+    const suspended = tenants.filter((t) => t.status === 'suspended').length;
+    const totalMrr = tenants.reduce((s, t) => s + t.revenue.mrr, 0);
+    const totalPaid = tenants.reduce((s, t) => s + t.revenue.totalPaid, 0);
+    return { active, trial, suspended, totalMrr, totalPaid, total: tenants.length };
+  }, [tenants]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -981,89 +849,56 @@ export default function TicketsPage() {
     }));
   };
 
-  const handleBulkStatus = (status) => {
-    // Would need selection state for bulk actions
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Support Tickets</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Tenant Management</h1>
           <p className="text-sm text-text-secondary">
-            Manage customer issues, track SLAs, and coordinate resolutions
+            Manage all properties, subscriptions, and billing
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
-          <Button size="sm" onClick={() => setShowNewTicket(true)}>
-            <Plus className="mr-1.5 h-4 w-4" /> New Ticket
+          <Button size="sm" onClick={() => setShowNewTenant(true)}>
+            <Plus className="mr-1.5 h-4 w-4" /> New Tenant
           </Button>
         </div>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <TicketStatCard
-          label="Open"
-          value={stats.open}
-          icon={AlertTriangle}
-          color="text-danger"
-          subtext={`${stats.unassigned} unassigned`}
+        <StatCard
+          label="Active Tenants"
+          value={stats.active}
+          icon={CheckCircle2}
+          color="text-accent"
+          subtext={`of ${stats.total} total`}
         />
-        <TicketStatCard
-          label="In Progress"
-          value={stats.inProgress}
+        <StatCard
+          label="In Trial"
+          value={stats.trial}
           icon={Clock}
           color="text-info"
-          subtext="Being worked on"
+          subtext="Pending conversion"
         />
-        <TicketStatCard
-          label="SLA Breached"
-          value={stats.breached}
-          icon={Timer}
+        <StatCard
+          label="Suspended"
+          value={stats.suspended}
+          icon={AlertTriangle}
           color="text-warning"
-          subtext="Require immediate attention"
+          subtext="Require attention"
         />
-        <TicketStatCard
-          label="Avg Response"
-          value={`${stats.avgResponseMin}m`}
-          icon={Zap}
-          color="text-accent"
-          subtext="First response time"
-          trend={-12}
+        <StatCard
+          label="Total MRR"
+          value={formatCurrency(stats.totalMrr)}
+          icon={DollarSign}
+          color="text-secondary"
+          subtext={`${formatCurrency(stats.totalPaid)} lifetime`}
         />
-      </div>
-
-      {/* Priority Distribution & Volume */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface p-4 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-text-primary mb-3">
-            Ticket Volume (This Week)
-          </h3>
-          <TicketVolumeChart data={volumeData} />
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <h3 className="text-sm font-semibold text-text-primary mb-3">Priority Queue</h3>
-          <PriorityBar counts={stats.priorityCounts} />
-          <div className="mt-4 space-y-2">
-            {Object.entries(stats.priorityCounts).map(([key, count]) => {
-              const meta = priorityMeta[key];
-              return (
-                <div key={key} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className={cn('h-2 w-2 rounded-full', meta.dot)} />
-                    <span className="text-text-secondary">{meta.label}</span>
-                  </div>
-                  <span className="font-mono font-medium text-text-primary">{count}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       {/* Filters */}
@@ -1072,7 +907,7 @@ export default function TicketsPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
-            placeholder="Search tickets by ID, subject, tenant, tags..."
+            placeholder="Search tenants by name, ID, subdomain, owner..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -1095,10 +930,10 @@ export default function TicketsPage() {
             onChange={(e) => setSortConfig({ key: e.target.value, dir: 'desc' })}
             className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <option value="updatedAt">Sort by Updated</option>
+            <option value="lastActive">Sort by Last Active</option>
+            <option value="name">Sort by Name</option>
+            <option value="mrr">Sort by MRR</option>
             <option value="createdAt">Sort by Created</option>
-            <option value="priority">Sort by Priority</option>
-            <option value="subject">Sort by Subject</option>
           </select>
         </div>
       </div>
@@ -1106,7 +941,7 @@ export default function TicketsPage() {
       {/* Filter Panel */}
       {showFilters && (
         <div className="rounded-xl border border-border bg-surface p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-secondary">Status</label>
               <select
@@ -1115,57 +950,39 @@ export default function TicketsPage() {
                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="all">All Statuses</option>
-                {Object.entries(statusMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
+                <option value="active">Active</option>
+                <option value="trial">Trial</option>
+                <option value="suspended">Suspended</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="pending">Pending</option>
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary">Priority</label>
+              <label className="text-xs font-medium text-text-secondary">Plan</label>
               <select
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
+                value={planFilter}
+                onChange={(e) => setPlanFilter(e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <option value="all">All Priorities</option>
-                {Object.entries(priorityMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
+                <option value="all">All Plans</option>
+                <option value="Starter">Starter</option>
+                <option value="Professional">Professional</option>
+                <option value="Enterprise">Enterprise</option>
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary">Category</label>
+              <label className="text-xs font-medium text-text-secondary">Billing</label>
               <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                value={billingFilter}
+                onChange={(e) => setBillingFilter(e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <option value="all">All Categories</option>
-                {Object.entries(categoryMeta).map(([key, meta]) => (
-                  <option key={key} value={key}>
-                    {meta.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary">Assignee</label>
-              <select
-                value={assigneeFilter}
-                onChange={(e) => setAssigneeFilter(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="all">All Agents</option>
-                <option value="unassigned">Unassigned</option>
-                {teamMembers.map((m) => (
-                  <option key={m.id} value={m.name}>
-                    {m.name}
-                  </option>
-                ))}
+                <option value="all">All Billing</option>
+                <option value="paid">Paid</option>
+                <option value="trial">Trial</option>
+                <option value="overdue">Overdue</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           </div>
@@ -1173,9 +990,8 @@ export default function TicketsPage() {
             <button
               onClick={() => {
                 setStatusFilter('all');
-                setPriorityFilter('all');
-                setCategoryFilter('all');
-                setAssigneeFilter('all');
+                setPlanFilter('all');
+                setBillingFilter('all');
                 setQuery('');
               }}
               className="text-xs text-secondary hover:underline"
@@ -1188,11 +1004,11 @@ export default function TicketsPage() {
 
       {/* Results Count */}
       <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredTickets.length}</span> of{' '}
-        {tickets.length} tickets
+        Showing <span className="font-medium text-text-primary">{filteredTenants.length}</span> of{' '}
+        {tenants.length} tenants
       </p>
 
-      {/* Tickets Table */}
+      {/* Tenant Table */}
       <div className="rounded-xl border border-border bg-surface overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -1202,12 +1018,12 @@ export default function TicketsPage() {
                   <input type="checkbox" className="rounded border-border" />
                 </th>
                 {[
-                  { key: 'subject', label: 'Ticket' },
-                  { key: 'priority', label: 'Priority' },
+                  { key: 'name', label: 'Tenant' },
                   { key: 'status', label: 'Status' },
-                  { key: 'category', label: 'Category' },
-                  { key: 'assignee', label: 'Assignee' },
-                  { key: 'updatedAt', label: 'Last Update' },
+                  { key: 'plan', label: 'Plan' },
+                  { key: 'mrr', label: 'MRR' },
+                  { key: 'usage', label: 'Usage' },
+                  { key: 'lastActive', label: 'Last Active' },
                 ].map((col) => (
                   <th
                     key={col.key}
@@ -1229,138 +1045,108 @@ export default function TicketsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredTickets.map((ticket) => (
-                <tr
-                  key={ticket.id}
-                  className="hover:bg-background/50 transition-colors group cursor-pointer"
-                  onClick={() => openTicket(ticket)}
-                >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" className="rounded border-border" />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          'flex h-8 w-8 items-center justify-center rounded-lg',
-                          ticket.priority === 'critical'
-                            ? 'bg-danger/10'
-                            : ticket.priority === 'high'
-                              ? 'bg-warning/10'
-                              : ticket.priority === 'medium'
-                                ? 'bg-info/10'
-                                : 'bg-neutral/10'
-                        )}
-                      >
-                        <Ticket
-                          className={cn(
-                            'h-4 w-4',
-                            ticket.priority === 'critical'
-                              ? 'text-danger'
-                              : ticket.priority === 'high'
-                                ? 'text-warning'
-                                : ticket.priority === 'medium'
-                                  ? 'text-info'
-                                  : 'text-text-muted'
-                          )}
+              {filteredTenants.map((tenant) => {
+                const roomPct = getUsagePercent(tenant.rooms.used, tenant.rooms.total);
+                const storagePct = getUsagePercent(tenant.storage.used, tenant.storage.total);
+                return (
+                  <tr
+                    key={tenant.id}
+                    className="hover:bg-background/50 transition-colors group cursor-pointer"
+                    onClick={() => setSelectedTenant(tenant)}
+                  >
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" className="rounded border-border" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <TenantAvatar name={tenant.name} size="sm" />
+                        <div>
+                          <p className="text-sm font-medium text-text-primary">{tenant.name}</p>
+                          <p className="text-[10px] text-text-muted font-mono">
+                            {tenant.subdomain}.unifiedpms.com
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <TenantStatusBadge status={tenant.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <PlanBadge plan={tenant.plan} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-mono font-medium text-text-primary">
+                        {formatCurrency(tenant.revenue.mrr)}
+                      </div>
+                      <BillingStatusBadge status={tenant.billingStatus} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1.5">
+                        <MiniUsageBar
+                          used={tenant.rooms.used}
+                          total={tenant.rooms.total}
+                          label="Rooms"
+                        />
+                        <MiniUsageBar
+                          used={tenant.storage.used}
+                          total={tenant.storage.total}
+                          label="Storage"
+                          unit={tenant.storage.unit}
                         />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">
-                          {ticket.subject}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-text-muted font-mono">{ticket.id}</span>
-                          <span className="text-[10px] text-text-muted">·</span>
-                          <span className="text-[10px] text-text-muted truncate">
-                            {ticket.tenant.name}
-                          </span>
-                        </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-text-secondary text-xs">
+                        {tenant.lastActive
+                          ? new Date(tenant.lastActive).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : 'Never'}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <PriorityBadge priority={ticket.priority} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={ticket.status} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <CategoryBadge category={ticket.category} />
-                  </td>
-                  <td className="px-4 py-3">
-                    {ticket.assignee ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary">
-                          {ticket.assignee.avatar}
-                        </div>
-                        <span className="text-sm text-text-secondary">{ticket.assignee.name}</span>
-                      </div>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
-                        <AlertTriangle className="h-3 w-3" /> Unassigned
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-text-secondary text-xs">{timeAgo(ticket.updatedAt)}</div>
-                    <SlaBadge ticket={ticket} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openTicket(ticket);
-                        }}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
-                        title="View Details"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      {ticket.status !== 'resolved' && (
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleUpdate(ticket.id, {
-                              status: 'resolved',
-                              resolvedAt: '2026-08-16 14:35:00',
-                            });
+                            setSelectedTenant(tenant);
                           }}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-accent/10 hover:text-accent"
-                          title="Resolve"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                          title="View Details"
                         >
-                          <CheckCircle2 className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {ticketsLoading &&
-                [1, 2, 3, 4, 5].map((i) => (
-                  <tr key={`skeleton-${i}`} className="animate-pulse border-t border-border">
-                    <td colSpan={8} className="px-4 py-4">
-                      <div className="h-4 w-2/3 rounded bg-surface-elevated" />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                          title="Edit"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))}
-              {ticketsError && !ticketsLoading && (
-                <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-danger">
-                    <AlertTriangle className="mx-auto h-10 w-10 mb-3" />
-                    <p>Failed to load tickets: {ticketsError.message}</p>
-                    <Button variant="outline" size="sm" className="mt-3" onClick={refetchTickets}>
-                      <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry
-                    </Button>
-                  </td>
-                </tr>
-              )}
-              {!ticketsLoading && !ticketsError && filteredTickets.length === 0 && (
+                );
+              })}
+              {filteredTenants.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
-                    <Ticket className="mx-auto h-10 w-10 mb-3" />
-                    <p>No tickets match your filters.</p>
+                    <Building2 className="mx-auto h-10 w-10 mb-3" />
+                    <p>No tenants match your filters.</p>
                   </td>
                 </tr>
               )}
@@ -1370,20 +1156,15 @@ export default function TicketsPage() {
       </div>
 
       {/* ─── Modals ─── */}
-      {showNewTicket && (
-        <NewTicketModal
-          onClose={() => setShowNewTicket(false)}
-          onCreate={handleCreate}
-          tenants={tenants}
-        />
+      {showNewTenant && (
+        <NewTenantModal onClose={() => setShowNewTenant(false)} onCreate={addTenant} />
       )}
 
-      {selectedTicket && (
-        <TicketDetailDrawer
-          ticket={selectedTicket}
-          onClose={() => setSelectedTicket(null)}
-          onUpdate={handleUpdate}
-          teamMembers={teamMembers}
+      {selectedTenant && (
+        <TenantDetailDrawer
+          tenant={selectedTenant}
+          onClose={() => setSelectedTenant(null)}
+          onUpdate={updateTenant}
         />
       )}
     </div>

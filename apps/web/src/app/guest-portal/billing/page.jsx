@@ -3,35 +3,20 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Receipt,
-  CreditCard,
   Download,
   ArrowRight,
-  ChevronDown,
-  ChevronUp,
   Hotel,
   UtensilsCrossed,
   Sparkles,
   ConciergeBell,
   AlertCircle,
   CheckCircle2,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   FileText,
-  Split,
   Users,
-  Plus,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
-import {
-  guestStay,
-  formatCurrency,
-  formatDate,
-  getCategoryTotal,
-  folioCategoryMeta,
-} from '../data';
+import { guestStay, formatCurrency, formatDate, folioCategoryMeta } from '../data';
 
 const categoryIcons = {
   room: Hotel,
@@ -43,8 +28,6 @@ const categoryIcons = {
 export default function BillingPage() {
   const navigate = useNavigate();
   const { folio, rate, property, dates } = guestStay;
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const categories = useMemo(() => {
     const cats = {};
@@ -64,8 +47,6 @@ export default function BillingPage() {
       }))
       .sort((a, b) => b.total - a.total);
   }, [categories]);
-
-  const handlePayBalance = () => setShowPaymentModal(true);
 
   return (
     <div className="space-y-6">
@@ -113,12 +94,15 @@ export default function BillingPage() {
               {formatCurrency(folio.balance)}
             </p>
             <p className="mt-1 text-xs text-text-muted">
-              {folio.balance > 0 ? 'Payment required at checkout' : 'Fully paid'}
+              {folio.balance > 0 ? 'Please settle at the front desk or contact us' : 'Fully paid'}
             </p>
             {folio.balance > 0 && (
-              <Button className="mt-3" size="sm" onClick={handlePayBalance}>
-                <CreditCard className="mr-1.5 h-4 w-4" /> Pay Now
-              </Button>
+              <div className="mt-3 rounded-lg border border-warning/20 bg-warning/5 px-3 py-2">
+                <p className="text-xs text-warning font-medium">Online payments coming soon</p>
+                <p className="text-[10px] text-text-muted mt-0.5">
+                  Contact the front desk to settle your balance
+                </p>
+              </div>
             )}
           </div>
 
@@ -150,10 +134,10 @@ export default function BillingPage() {
             </div>
           </div>
 
-          {/* Payment Method */}
+          {/* Payment History */}
           <div className="rounded-lg border border-border bg-background p-4">
             <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">
-              Payment Methods
+              Payment History
             </p>
             {folio.payments.map((p) => (
               <div key={p.id} className="flex items-center gap-3 py-2">
@@ -176,7 +160,7 @@ export default function BillingPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-danger">Balance Due</p>
-                  <p className="text-xs text-text-muted">Due at checkout</p>
+                  <p className="text-xs text-text-muted">Settle at checkout</p>
                 </div>
                 <p className="text-sm font-mono font-bold text-danger">
                   {formatCurrency(folio.balance)}
@@ -193,16 +177,7 @@ export default function BillingPage() {
           const meta = folioCategoryMeta[category] || folioCategoryMeta.services;
           const Icon = categoryIcons[category] || ConciergeBell;
           return (
-            <button
-              key={category}
-              onClick={() => setExpandedCategory(expandedCategory === category ? null : category)}
-              className={cn(
-                'rounded-xl border bg-surface p-4 text-left transition-all hover:shadow-md',
-                expandedCategory === category
-                  ? 'border-secondary/30 ring-1 ring-secondary/10'
-                  : 'border-border'
-              )}
-            >
+            <div key={category} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center gap-2">
                 <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', meta.bg)}>
                   <Icon className={cn('h-4 w-4', meta.color)} />
@@ -217,7 +192,7 @@ export default function BillingPage() {
               <p className="mt-1 text-[10px] text-text-muted">
                 {count} charge{count !== 1 ? 's' : ''}
               </p>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -291,7 +266,7 @@ export default function BillingPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           onClick={() => navigate('/guest-portal/billing/invoice')}
           className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 transition-all hover:shadow-md hover:border-secondary/30 text-left"
@@ -318,174 +293,6 @@ export default function BillingPage() {
           </div>
           <ArrowRight className="ml-auto h-4 w-4 text-text-muted" />
         </button>
-        <button
-          onClick={() => setShowPaymentModal(true)}
-          className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 transition-all hover:shadow-md hover:border-secondary/30 text-left"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10">
-            <CreditCard className="h-5 w-5 text-purple-500" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text-primary">Make Payment</p>
-            <p className="text-xs text-text-muted">Pay balance with saved card</p>
-          </div>
-          <ArrowRight className="ml-auto h-4 w-4 text-text-muted" />
-        </button>
-      </div>
-
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <PaymentModal
-          balance={folio.balance}
-          paymentMethods={guestStay.paymentMethods}
-          onClose={() => setShowPaymentModal(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-/* ─── Payment Modal ─── */
-function PaymentModal({ balance, paymentMethods, onClose }) {
-  const [selectedMethod, setSelectedMethod] = useState(
-    paymentMethods.find((m) => m.isDefault)?.id || ''
-  );
-  const [amount, setAmount] = useState(balance.toString());
-  const [processing, setProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const handlePay = async () => {
-    setProcessing(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setProcessing(false);
-    setSuccess(true);
-    setTimeout(() => onClose(), 2000);
-  };
-
-  const brandIcons = {
-    visa: '💳 Visa',
-    mastercard: '💳 Mastercard',
-    amex: '💳 Amex',
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl">
-        <div className="border-b border-border px-6 py-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">Make Payment</h3>
-          <button
-            onClick={onClose}
-            className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
-          >
-            <Minus className="h-5 w-5" />
-          </button>
-        </div>
-
-        {success ? (
-          <div className="p-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 mx-auto">
-              <CheckCircle2 className="h-8 w-8 text-accent" />
-            </div>
-            <h4 className="mt-4 text-lg font-bold text-text-primary">Payment Successful</h4>
-            <p className="mt-1 text-sm text-text-muted">Your payment has been processed.</p>
-          </div>
-        ) : (
-          <div className="p-6 space-y-5">
-            {/* Amount */}
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">$</span>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="h-10 w-full rounded-md border border-border bg-surface pl-8 pr-4 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
-                />
-              </div>
-              <p className="mt-1 text-xs text-text-muted">Balance due: {formatCurrency(balance)}</p>
-            </div>
-
-            {/* Payment Method */}
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider">
-                Payment Method
-              </label>
-              {paymentMethods.map((pm) => (
-                <button
-                  key={pm.id}
-                  onClick={() => setSelectedMethod(pm.id)}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all',
-                    selectedMethod === pm.id
-                      ? 'border-secondary bg-secondary/5'
-                      : 'border-border bg-surface hover:bg-surface-elevated'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'h-4 w-4 rounded-full border flex items-center justify-center',
-                      selectedMethod === pm.id ? 'border-secondary bg-secondary' : 'border-border'
-                    )}
-                  >
-                    {selectedMethod === pm.id && <div className="h-2 w-2 rounded-full bg-white" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-text-primary">
-                      {brandIcons[pm.brand] || pm.brand} ending {pm.last4}
-                    </p>
-                    <p className="text-xs text-text-muted">Expires {pm.expiry}</p>
-                  </div>
-                  {pm.isDefault && (
-                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-                      Default
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Summary */}
-            <div className="rounded-lg border border-border bg-surface p-3 space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-text-muted">Payment amount</span>
-                <span className="font-mono font-medium text-text-primary">
-                  {formatCurrency(parseFloat(amount) || 0)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-text-muted">Processing fee</span>
-                <span className="font-mono text-text-primary">$0.00</span>
-              </div>
-              <div className="pt-1 border-t border-border flex items-center justify-between">
-                <span className="text-sm font-medium text-text-primary">Total</span>
-                <span className="text-lg font-bold font-mono text-text-primary">
-                  {formatCurrency(parseFloat(amount) || 0)}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              className="w-full"
-              onClick={handlePay}
-              disabled={processing || !selectedMethod || parseFloat(amount) <= 0}
-            >
-              {processing ? (
-                <>
-                  <Clock className="mr-1.5 h-4 w-4 animate-spin" /> Processing...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-1.5 h-4 w-4" /> Pay{' '}
-                  {formatCurrency(parseFloat(amount) || 0)}
-                </>
-              )}
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

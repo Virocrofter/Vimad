@@ -1,6 +1,16 @@
 // apps/web/src/api/integrations.ts
 import { getApiClient } from './client';
 
+export interface IntegrationConfigField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder?: string;
+  description?: string;
+  options?: { value: string; label: string }[];
+}
+
 export interface Integration {
   id: string;
   provider: string;
@@ -9,6 +19,9 @@ export interface Integration {
   category: 'payment' | 'accounting' | 'crm' | 'communication' | 'analytics' | 'channel' | 'other';
   status: 'connected' | 'disconnected' | 'error' | 'pending';
   config: Record<string, unknown>;
+  configFields?: IntegrationConfigField[];
+  features?: string[];
+  stats?: Record<string, string | number>;
   webhooks?: {
     url: string;
     events: string[];
@@ -65,6 +78,13 @@ export interface IntegrationLog {
 }
 
 const client = getApiClient();
+
+export async function fetchIntegrations(params?: {
+  category?: string;
+  status?: string;
+}): Promise<Integration[]> {
+  return client.get('/admin/integrations', params);
+}
 
 export async function getIntegrations(params?: {
   category?: string;

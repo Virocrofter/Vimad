@@ -10,17 +10,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky",
-    "db:migrate": "npm run db:migrate --workspace=apps/api",
-    "db:generate": "npm run db:generate --workspace=apps/api",
-    "db:seed": "npm run db:seed --workspace=apps/api"
+    "test": "turbo run test --filter=@unified-pms/web --filter=@unified-pms/shared",
+    "test:all": "turbo run test",
+    "test:api": "cd apps/api && npx vitest run",
+    "test:web": "turbo run test --filter=@unified-pms/web",
+    "test:shared": "turbo run test --filter=@unified-pms/shared"
   },
   "devDependencies": {
     "@turbo/gen": "^2.0.0",

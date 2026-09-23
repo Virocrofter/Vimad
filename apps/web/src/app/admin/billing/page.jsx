@@ -24,7 +24,7 @@ import {
 } from '@/api/billing';
 import { api } from '@/api/client';
 // Static metadata + formatters only — entity data comes from the API.
-import { formatCurrency } from './data';
+import { formatCurrency } from '../../../lib/utils';
 import {
   BillingStatCard,
   MrrMovementBar,

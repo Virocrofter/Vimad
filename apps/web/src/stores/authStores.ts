@@ -1,12 +1,13 @@
 /* apps/web/src/stores/authStores.ts */
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
 export interface User {
   id: string;
   email: string;
   firstName?: string;
   lastName?: string;
+  name?: string;
   role: string;
   tenantId?: string;
 }
@@ -15,151 +16,75 @@ export interface Tenant {
   id: string;
   name: string;
   slug: string;
+  plan?: string;
+  status?: string;
 }
 
 interface AuthState {
   user: User | null;
-  tenant: Tenant | null;
   token: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  initialized: boolean;
-
-  setAuth: (payload: {
-    user: User;
-    tenant?: Tenant | null;
-    token: string;
-    refreshToken: string;
-  }) => void;
+  permissions: string[];
+  login: (user: User, token: string, refreshToken?: string) => void;
+  logout: () => void;
   clearAuth: () => void;
-  setLoading: (loading: boolean) => void;
-  setInitialized: (initialized: boolean) => void;
-  refreshAccessToken: () => Promise<boolean>;
+  setPermissions: (permissions: string[]) => void;
 }
 
-const STORAGE_KEY = 'vimad_auth';
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      refreshToken: null,
+      isAuthenticated: false,
+      permissions: [],
+      login: (user, token, refreshToken) =>
+        set({ user, token, refreshToken: refreshToken ?? null, isAuthenticated: true }),
+      logout: () =>
+        set({
+          user: null,
+          token: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          permissions: [],
+        }),
+      clearAuth: () =>
+        set({
+          user: null,
+          token: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          permissions: [],
+        }),
+      setPermissions: (permissions) => set({ permissions }),
+    }),
+    { name: 'auth-storage' }
+  )
+);
 
-// ─── Storage helpers (used by interceptors outside React) ───
+// ─── Token helpers (used by api/client.ts) ───
+
+const ACCESS_TOKEN_KEY = 'vimad_access_token';
+const REFRESH_TOKEN_KEY = 'vimad_refresh_token';
 
 export function getAccessToken(): string | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed.state?.token ?? null;
-  } catch {
-    return null;
-  }
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 export function getRefreshToken(): string | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed.state?.refreshToken ?? null;
-  } catch {
-    return null;
-  }
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
-export function setTokens(token: string, refreshToken: string): void {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    parsed.state = {
-      ...parsed.state,
-      token,
-      refreshToken,
-      isAuthenticated: true,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-  } catch {
-    // ignore (e.g. private mode)
+export function setTokens(accessToken: string, refreshToken?: string): void {
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  if (refreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   }
 }
 
 export function clearTokens(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
-
-// ─── Zustand store with persistence ───
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      tenant: null,
-      token: null,
-      refreshToken: null,
-      isAuthenticated: false,
-      isLoading: true,
-      initialized: false,
-
-      setAuth: ({ user, tenant, token, refreshToken }) =>
-        set({
-          user,
-          tenant: tenant ?? null,
-          token,
-          refreshToken,
-          isAuthenticated: true,
-          isLoading: false,
-        }),
-
-      clearAuth: () =>
-        set({
-          user: null,
-          tenant: null,
-          token: null,
-          refreshToken: null,
-          isAuthenticated: false,
-          isLoading: false,
-          initialized: true,
-        }),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-      setInitialized: (initialized) => set({ initialized }),
-
-      refreshAccessToken: async () => {
-        const currentRefresh = get().refreshToken;
-        if (!currentRefresh) {
-          get().clearAuth();
-          return false;
-        }
-
-        try {
-          const { refreshToken } = await import('../api/auth');
-          const response = await refreshToken(currentRefresh);
-
-          set({
-            token: response.data.token,
-            refreshToken: response.data.refreshToken,
-            user: response.data.user,
-            isAuthenticated: true,
-          });
-
-          return true;
-        } catch {
-          get().clearAuth();
-          return false;
-        }
-      },
-    }),
-    {
-      name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        user: state.user,
-        tenant: state.tenant,
-        token: state.token,
-        refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated,
-      }),
-    }
-  )
-);

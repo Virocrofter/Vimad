@@ -1,0 +1,15 @@
+title = "Vimad gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives"
+paths = [
+  '''package-lock\.json''',
+  '''pnpm-lock\.yaml''',
+  '''repomix-output\.xml''',
+  '''Vimad-packed.*\.md''',
+  '''\.env\.example$''',
+  '''\.env\.sample$''',
+]

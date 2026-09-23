@@ -1096,3 +1096,229 @@ export function EmptyState({ icon: Icon, title, description, action }) {
     </div>
   );
 }
+
+/* ─── Report Builder helpers (used by ReportBuilderModal) ─── */
+import {
+  BarChart as ReBarChart,
+  Bar,
+  LineChart as ReLineChart,
+  Line,
+  AreaChart as ReAreaChart,
+  Area,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  ComposedChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { ScatterChart as ScatterChartIcon, HeartPulse, LifeBuoy, FilePlus } from 'lucide-react';
+
+const CHART_TYPE_ICONS = {
+  bar: BarChart3,
+  line: LineChart,
+  area: AreaChart,
+  pie: PieChart,
+  combo: BarChart3,
+  scatter: ScatterChartIcon,
+  table: Table,
+  number: Hash,
+};
+
+export function ChartTypeIcon({ type, className }) {
+  const Icon = CHART_TYPE_ICONS[type] || BarChart3;
+  return <Icon className={className} />;
+}
+
+const TEMPLATE_ICONS = {
+  blank: FilePlus,
+  'revenue-dashboard': DollarSign,
+  'tenant-overview': Building2,
+  'usage-analytics': Activity,
+  'health-monitor': HeartPulse,
+  'support-metrics': LifeBuoy,
+};
+
+export function TemplateIcon({ template, className }) {
+  const Icon = TEMPLATE_ICONS[template] || LayoutDashboard;
+  return <Icon className={className} />;
+}
+
+const PIE_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#863bff', '#14b8a6'];
+
+export function FieldChip({ field, isSelected, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+        isSelected
+          ? 'border-secondary bg-secondary/10 text-secondary'
+          : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
+      )}
+    >
+      {field.label}
+    </button>
+  );
+}
+
+export function ChartRenderer({ type, data = [], config = {} }) {
+  const { xAxis = 'month', yAxis = [], columns = [] } = config;
+  const series = yAxis.length > 0 ? yAxis : columns.slice(0, 4);
+  const isEmpty = !Array.isArray(data) || data.length === 0;
+
+  if (isEmpty) {
+    return (
+      <div className="flex h-48 items-center justify-center rounded-lg border border-border bg-background text-sm text-text-muted">
+        No preview data available
+      </div>
+    );
+  }
+
+  if (type === 'table') {
+    const cols = columns.length > 0 ? columns : [xAxis, ...series];
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="border-b border-border">
+            <tr>
+              {cols.map((c) => (
+                <th
+                  key={c}
+                  className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-text-secondary"
+                >
+                  {c}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {data.slice(0, 12).map((row, i) => (
+              <tr key={i}>
+                {cols.map((c) => (
+                  <td key={c} className="px-3 py-2 font-mono text-xs text-text-primary">
+                    {typeof row[c] === 'number' ? row[c].toLocaleString() : String(row[c] ?? '—')}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  if (type === 'pie') {
+    const sliceKey = series[0];
+    if (!sliceKey) {
+      return (
+        <div className="flex h-48 items-center justify-center text-sm text-text-muted">
+          Select a numeric field for the pie chart
+        </div>
+      );
+    }
+    return (
+      <ResponsiveContainer width="100%" height={240}>
+        <RePieChart>
+          <Pie
+            data={data}
+            dataKey={sliceKey}
+            nameKey={xAxis}
+            cx="50%"
+            cy="50%"
+            outerRadius={90}
+            label
+          >
+            {data.map((_, i) => (
+              <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </RePieChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  const grid = <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />;
+
+  if (type === 'line') {
+    return (
+      <ResponsiveContainer width="100%" height={240}>
+        <ReLineChart data={data}>
+          {grid}
+          <XAxis dataKey={xAxis} tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+          <Tooltip />
+          {series.map((key, i) => (
+            <Line
+              key={key}
+              type="monotone"
+              dataKey={key}
+              stroke={PIE_COLORS[i % PIE_COLORS.length]}
+              strokeWidth={2}
+              dot={false}
+            />
+          ))}
+        </ReLineChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (type === 'area') {
+    return (
+      <ResponsiveContainer width="100%" height={240}>
+        <ReAreaChart data={data}>
+          {grid}
+          <XAxis dataKey={xAxis} tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+          <Tooltip />
+          {series.map((key, i) => (
+            <Area
+              key={key}
+              type="monotone"
+              dataKey={key}
+              stroke={PIE_COLORS[i % PIE_COLORS.length]}
+              fill={PIE_COLORS[i % PIE_COLORS.length]}
+              fillOpacity={0.2}
+            />
+          ))}
+        </ReAreaChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (type === 'combo' && series.length > 1) {
+    const [barKey, lineKey] = series;
+    return (
+      <ResponsiveContainer width="100%" height={240}>
+        <ComposedChart data={data}>
+          {grid}
+          <XAxis dataKey={xAxis} tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+          <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+          <Tooltip />
+          <Bar dataKey={barKey} fill={PIE_COLORS[0]} />
+          <Line type="monotone" dataKey={lineKey} stroke={PIE_COLORS[1]} strokeWidth={2} />
+        </ComposedChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  /* default: bar */
+  return (
+    <ResponsiveContainer width="100%" height={240}>
+      <ReBarChart data={data}>
+        {grid}
+        <XAxis dataKey={xAxis} tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+        <YAxis tick={{ fontSize: 10 }} stroke="var(--text-muted)" />
+        <Tooltip />
+        {series.map((key, i) => (
+          <Bar key={key} dataKey={key} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+        ))}
+      </ReBarChart>
+    </ResponsiveContainer>
+  );
+}

@@ -45,3 +45,15 @@ export async function fetchAuditLogById(id: string): Promise<AuditLogEntry> {
   const res = await getApiClient().get<{ data: AuditLogEntry }>(`/admin/audit-logs/${id}`);
   return res.data;
 }
+
+export interface AuditStats {
+  totalEvents: number;
+  criticalEvents: number;
+  eventsLast24h: number;
+  uniqueUsers: number;
+}
+
+export async function fetchAuditStats(): Promise<AuditStats> {
+  const res = await getApiClient().get<{ data: AuditStats }>('/admin/audit-logs/stats');
+  return res.data;
+}

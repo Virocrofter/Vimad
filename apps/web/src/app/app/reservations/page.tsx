@@ -1,3 +1,4 @@
+/* apps/web/src/app/app/reservations/page.tsx */
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -20,7 +21,7 @@ import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton, SkeletonText } from '../../../components/ui/skeleton';
 import type { Reservation } from '../../../types';
-import { useReservationsList } from '../../../hooks/useReservations';
+import { useReservations } from '../../../hooks/useReservations';
 
 const statusMeta: Record<string, { label: string; class: string }> = {
   confirmed: { label: 'Confirmed', class: 'bg-accent/10 text-accent border-accent/20' },
@@ -65,7 +66,7 @@ function InlineActions({ status, onView, onCheckIn, onCancel }: InlineActionsPro
         <Eye className="h-4 w-4" />
       </button>
       <button
-        onClick={onCheckIn}
+        onClick={onView}
         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
         title="Edit"
       >
@@ -93,14 +94,17 @@ function InlineActions({ status, onView, onCheckIn, onCancel }: InlineActionsPro
   );
 }
 
-function getGuestName(reservation: Reservation) {
-  return `${reservation.guest.firstName} ${reservation.guest.lastName}`;
+function getGuestName(reservation: Reservation): string {
+  return reservation.guestName ?? '';
+}
+
+function formatDate(iso: string): string {
+  return iso?.slice(0, 10) ?? '';
 }
 
 /* ─── Main Page ─── */
 export default function ReservationsPage() {
-  const { data, isLoading, error, refetch } = useReservationsList();
-  const reservations = useMemo(() => data?.data ?? [], [data]);
+  const { reservations, isLoading, error, refetch } = useReservations();
 
   const [query, setQuery] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -112,17 +116,16 @@ export default function ReservationsPage() {
 
   /* Filters */
   const filtered = useMemo(() => {
-    return reservations.filter((r) => {
+    return reservations.filter((r: Reservation) => {
       const guestName = getGuestName(r);
       const matchesQuery =
         guestName.toLowerCase().includes(query.toLowerCase()) ||
-        r.id.includes(query) ||
-        (r.guest.email?.toLowerCase().includes(query.toLowerCase()) ?? false) ||
-        (r.roomNumber && r.roomNumber.includes(query));
+        r.confirmationNumber.toLowerCase().includes(query.toLowerCase()) ||
+        r.id.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
       const matchesSource = sourceFilter === 'all' || r.source === sourceFilter;
-      const matchesFrom = !dateFrom || r.arrival >= dateFrom;
-      const matchesTo = !dateTo || r.departure <= dateTo;
+      const matchesFrom = !dateFrom || formatDate(r.arrivalDate) >= dateFrom;
+      const matchesTo = !dateTo || formatDate(r.departureDate) <= dateTo;
       return matchesQuery && matchesStatus && matchesSource && matchesFrom && matchesTo;
     });
   }, [query, statusFilter, sourceFilter, dateFrom, dateTo, reservations]);
@@ -138,7 +141,7 @@ export default function ReservationsPage() {
   };
   const toggleSelectAll = () => {
     if (selected.size === filtered.length) setSelected(new Set());
-    else setSelected(new Set(filtered.map((r) => r.id)));
+    else setSelected(new Set(filtered.map((r: Reservation) => r.id)));
   };
   const clearSelection = () => setSelected(new Set());
 
@@ -151,7 +154,7 @@ export default function ReservationsPage() {
         </p>
       </div>
       <Link
-        to="/app/reservations?action=new"
+        to="/app/reservations/new"
         className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90"
       >
         <Plus className="h-4 w-4" /> New Reservation
@@ -165,7 +168,7 @@ export default function ReservationsPage() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
         <input
           type="text"
-          placeholder="Search by name, conf#, email, room..."
+          placeholder="Search by name or confirmation #..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -217,10 +220,10 @@ export default function ReservationsPage() {
             className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="all">All Sources</option>
-            <option value="Direct">Direct</option>
-            <option value="Booking.com">Booking.com</option>
-            <option value="Expedia">Expedia</option>
-            <option value="Walk-in">Walk-in</option>
+            <option value="direct">Direct</option>
+            <option value="bookingcom">Booking.com</option>
+            <option value="expedia">Expedia</option>
+            <option value="walk-in">Walk-in</option>
           </select>
         </div>
         <div className="space-y-1.5">
@@ -334,17 +337,16 @@ export default function ReservationsPage() {
               </th>
               <th className="px-4 py-3 font-medium text-text-secondary">Conf #</th>
               <th className="px-4 py-3 font-medium text-text-secondary">Guest</th>
-              <th className="px-4 py-3 font-medium text-text-secondary">Room</th>
               <th className="px-4 py-3 font-medium text-text-secondary">Dates</th>
               <th className="px-4 py-3 font-medium text-text-secondary">Status</th>
-              <th className="px-4 py-3 font-medium text-text-secondary text-right">Rate</th>
+              <th className="px-4 py-3 font-medium text-text-secondary text-right">Total</th>
               <th className="px-4 py-3 font-medium text-text-secondary text-right">Balance</th>
               <th className="px-4 py-3 font-medium text-text-secondary">Source</th>
               <th className="px-4 py-3 w-24"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {filtered.map((r) => {
+            {filtered.map((r: Reservation) => {
               const guestName = getGuestName(r);
               return (
                 <tr
@@ -366,7 +368,9 @@ export default function ReservationsPage() {
                       )}
                     </button>
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-text-secondary">#{r.id}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-text-secondary">
+                    {r.confirmationNumber}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
@@ -379,34 +383,32 @@ export default function ReservationsPage() {
                       </div>
                       <div>
                         <p className="font-medium text-text-primary">{guestName}</p>
-                        <p className="text-xs text-text-muted">{r.guest.email}</p>
+                        <p className="text-xs text-text-muted">{r.nights} nights</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-text-primary">{r.roomNumber || '—'}</div>
-                    <div className="text-xs text-text-muted">{r.roomType}</div>
-                  </td>
-                  <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5 text-text-primary">
                       <Calendar className="h-3.5 w-3.5 text-text-muted" />
-                      {r.arrival}
+                      {formatDate(r.arrivalDate)}
                     </div>
                     <div className="text-xs text-text-muted mt-0.5">
-                      {r.nights} nights → {r.departure}
+                      → {formatDate(r.departureDate)}
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>
-                  <td className="px-4 py-3 text-right font-medium text-text-primary">${r.rate}</td>
+                  <td className="px-4 py-3 text-right font-medium text-text-primary">
+                    ${Number(r.totalAmount).toFixed(2)}
+                  </td>
                   <td
                     className={cn(
                       'px-4 py-3 text-right font-medium',
-                      r.balance > 0 ? 'text-danger' : 'text-accent'
+                      Number(r.balance) > 0 ? 'text-danger' : 'text-accent'
                     )}
                   >
-                    ${r.balance}
+                    ${Number(r.balance).toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-text-secondary">{r.source}</td>
                   <td className="px-4 py-3">
@@ -422,7 +424,7 @@ export default function ReservationsPage() {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-4 py-12 text-center text-text-muted">
+                <td colSpan={9} className="px-4 py-12 text-center text-text-muted">
                   No reservations match your filters.
                 </td>
               </tr>

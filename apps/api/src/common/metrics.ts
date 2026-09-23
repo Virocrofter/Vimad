@@ -1,8 +1,10 @@
 /* apps/api/src/common/metrics.ts */
 import client from 'prom-client';
 import type { Request, Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import { prisma } from './prisma.js';
 import { logger } from './logger.js';
+import { env } from './env.js';
 
 // ─── Registry ───
 export const register = new client.Registry();
@@ -100,12 +102,65 @@ export async function collectDbMetrics(): Promise<void> {
 export const metricsContentType = register.contentType;
 
 /**
+ * Bearer-token protection for the scrape endpoint.
+ *
+ * Development / test: open (no token configured → allow).
+ * Production with METRICS_BEARER_TOKEN set: require
+ *   Authorization: Bearer <token>
+ * Production without the token set: refuse to serve — a public metrics
+ * endpoint leaks route names, traffic patterns and DB state.
+ */
+function isScrapeAuthorized(req: Request): boolean {
+  if (env.NODE_ENV !== 'production') return true;
+
+  const expected = env.METRICS_BEARER_TOKEN;
+  if (!expected) {
+    logger.error(
+      'METRICS_BEARER_TOKEN is not set in production — /metrics is disabled. ' +
+        'Set the token or block the route at the network layer.'
+    );
+    return false;
+  }
+
+  const header = req.headers.authorization ?? '';
+  const [scheme, token] = header.split(' ');
+  return scheme === 'Bearer' && token === expected;
+}
+
+/**
  * Standalone request handler serving the Prometheus scrape endpoint.
  * Matches how index.ts already mounts it:
  *   app.get('/metrics', metricsHandler);
  */
-export async function metricsHandler(_req: Request, res: Response): Promise<void> {
+export async function metricsHandler(req: Request, res: Response): Promise<void> {
+  if (!isScrapeAuthorized(req)) {
+    res.status(401).json({
+      error: { code: 'UNAUTHORIZED', message: 'Valid bearer token required' },
+    });
+    return;
+  }
+
   await collectDbMetrics(); // fresh DB stats on every scrape
   res.setHeader('Content-Type', register.contentType);
   res.send(await register.metrics());
+}
+
+// ─── Usage Metering: Record API calls per tenant ───
+export async function recordApiUsage(
+  tenantId: string,
+  quantity: number = 1,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  try {
+    await prisma.usageRecord.create({
+      data: {
+        tenantId,
+        metric: 'api_calls',
+        quantity,
+        ...(metadata ? { metadata: metadata as Prisma.InputJsonValue } : {}),
+      },
+    });
+  } catch (err) {
+    logger.warn({ err, tenantId }, 'failed to record API usage');
+  }
 }

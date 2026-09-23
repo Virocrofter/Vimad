@@ -71,6 +71,16 @@ export async function getDemoRequests(
   return client.get('/admin/demo-access/requests', params as Record<string, unknown>);
 }
 
+/** Array-returning variant used by the admin demo-access page. */
+export async function fetchDemoRequests(filters: { status?: string } = {}): Promise<DemoRequest[]> {
+  const res = await getDemoRequests(filters);
+  return res?.data ?? [];
+}
+
+export async function deleteDemoRequest(id: string): Promise<void> {
+  await client.delete(`/admin/demo-access/requests/${id}`);
+}
+
 export async function getDemoRequest(id: string): Promise<DemoRequest> {
   return client.get(`/admin/demo-access/requests/${id}`);
 }

@@ -7,4 +7,10 @@ function Skeleton({ className, ...props }: SkeletonProps) {
   return <div className={cn('animate-pulse rounded-md bg-muted', className)} {...props} />;
 }
 
-export { Skeleton };
+function SkeletonText({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn('h-4 w-full animate-pulse rounded-md bg-muted', className)} {...props} />
+  );
+}
+
+export { Skeleton, SkeletonText };

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -335,7 +336,7 @@ async function seedPermissionsAndRoles() {
   const permissionMap = new Map<string, string>(); // key -> id
 
   for (const perm of PERMISSIONS) {
-    const _existing = await prisma.permission.findUnique({
+    const existing = await prisma.permission.findUnique({
       where: { resource_action: { resource: perm.resource, action: perm.action } },
     });
 
@@ -416,15 +417,19 @@ async function main() {
     },
   });
 
-  // Demo users
+  // Demo users — password hashes so /auth/login works out of the box
+  const adminPasswordHash = await bcrypt.hash('admin123', 10);
+  const frontdeskPasswordHash = await bcrypt.hash('frontdesk123', 10);
+
   await prisma.user.upsert({
     where: {
       tenantId_email: { tenantId: tenant.id, email: 'admin@demo.com' },
     },
-    update: {},
+    update: { passwordHash: adminPasswordHash },
     create: {
       tenantId: tenant.id,
       email: 'admin@demo.com',
+      passwordHash: adminPasswordHash,
       firstName: 'Admin',
       lastName: 'User',
       role: 'admin',
@@ -435,10 +440,11 @@ async function main() {
     where: {
       tenantId_email: { tenantId: tenant.id, email: 'frontdesk@demo.com' },
     },
-    update: {},
+    update: { passwordHash: frontdeskPasswordHash },
     create: {
       tenantId: tenant.id,
       email: 'frontdesk@demo.com',
+      passwordHash: frontdeskPasswordHash,
       firstName: 'Front',
       lastName: 'Desk',
       role: 'staff',
@@ -526,13 +532,12 @@ async function main() {
   // Seed permissions and system roles
   await seedPermissionsAndRoles();
 
-  // Demo guests
+  // Demo guests — Guest has no tenantId+email unique constraint, so upsert by id via findFirst
   const guest = await prisma.guest.upsert({
-    where: {
-      tenantId_email: { tenantId: tenant.id, email: 'john.smith@example.com' },
-    },
+    where: { id: 'demo-guest-john' },
     update: {},
     create: {
+      id: 'demo-guest-john',
       tenantId: tenant.id,
       firstName: 'John',
       lastName: 'Smith',
@@ -542,11 +547,10 @@ async function main() {
   });
 
   await prisma.guest.upsert({
-    where: {
-      tenantId_email: { tenantId: tenant.id, email: 'sarah.johnson@example.com' },
-    },
+    where: { id: 'demo-guest-sarah' },
     update: {},
     create: {
+      id: 'demo-guest-sarah',
       tenantId: tenant.id,
       firstName: 'Sarah',
       lastName: 'Johnson',
@@ -593,6 +597,7 @@ async function main() {
         },
         folio: {
           create: {
+            tenantId: tenant.id,
             totalCharges: total,
             totalPayments: 0,
             balance: total,

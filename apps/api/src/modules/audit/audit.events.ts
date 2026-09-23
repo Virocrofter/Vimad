@@ -1,5 +1,9 @@
-import { emitToAdmin } from '../../common/socket.js';
-import { logger } from '../../common/logger.js';
+// Socket emits disabled to break circular dependency: socket.js → auth.service.ts → prisma.js
+// TODO: re-enable after socket.js is decoupled from auth.service.ts
+
+function emitToAdmin(_event: string, _payload: unknown): void {
+  // no-op
+}
 
 export interface AuditEventPayload {
   id: string;
@@ -32,12 +36,9 @@ export function broadcastAuditEvent(payload: AuditEventPayload): void {
     receivedAt: new Date().toISOString(),
   });
 
-  // Also emit critical events to a dedicated critical channel
   if (payload.severity === 'critical' || payload.severity === 'high') {
     emitToAdmin('audit:critical', payload);
   }
-
-  logger.debug({ auditId: payload.id, severity: payload.severity }, 'audit event streamed');
 }
 
 export function broadcastAnomalyDetected(anomaly: {

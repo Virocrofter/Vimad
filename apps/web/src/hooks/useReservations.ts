@@ -1,32 +1,43 @@
+/* apps/web/src/hooks/useReservations.ts */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listReservations,
   getReservation,
   createReservation,
   updateReservation,
-  deleteReservation,
   checkInReservation,
   checkOutReservation,
   cancelReservation,
+  type CreateReservationInput,
+  type UpdateReservationInput,
 } from '../api/reservations';
-import type { CreateReservationInput, UpdateReservationInput } from '../api/reservations';
-import type { PaginationParams } from '../api/types';
 
-const RESERVATIONS_KEY = 'reservations' as const;
-
-export function useReservationsList(
-  params?: PaginationParams & { status?: string; propertyId?: string; guestId?: string }
-) {
-  return useQuery({
-    queryKey: [RESERVATIONS_KEY, 'list', params],
+export function useReservations(params?: {
+  status?: string;
+  propertyId?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  const query = useQuery({
+    queryKey: ['reservations', params],
     queryFn: () => listReservations(params),
-    staleTime: 1000 * 30,
   });
+
+  return {
+    reservations: query.data?.data ?? [],
+    meta: query.data?.meta,
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
 }
+
+// Alias for pages that expect the List-suffixed name
+export const useReservationsList = useReservations;
 
 export function useReservation(id: string) {
   return useQuery({
-    queryKey: [RESERVATIONS_KEY, id],
+    queryKey: ['reservations', id],
     queryFn: () => getReservation(id),
     enabled: !!id,
   });
@@ -37,7 +48,7 @@ export function useCreateReservation() {
   return useMutation({
     mutationFn: (input: CreateReservationInput) => createReservation(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
     },
   });
 }
@@ -47,42 +58,28 @@ export function useUpdateReservation() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateReservationInput }) =>
       updateReservation(id, input),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, vars.id] });
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, 'list'] });
-    },
-  });
-}
-
-export function useDeleteReservation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => deleteReservation(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
     },
   });
 }
 
-export function useCheckInReservation() {
+export function useCheckIn() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, roomId }: { id: string; roomId?: string }) =>
-      checkInReservation({ id, roomId }),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, vars.id] });
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, 'list'] });
+    mutationFn: (id: string) => checkInReservation({ id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
     },
   });
 }
 
-export function useCheckOutReservation() {
+export function useCheckOut() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => checkOutReservation({ id }),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, id] });
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, 'list'] });
+    mutationFn: (id: string) => checkOutReservation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
     },
   });
 }
@@ -90,10 +87,9 @@ export function useCheckOutReservation() {
 export function useCancelReservation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => cancelReservation({ id }),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, id] });
-      queryClient.invalidateQueries({ queryKey: [RESERVATIONS_KEY, 'list'] });
+    mutationFn: (id: string) => cancelReservation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
     },
   });
 }

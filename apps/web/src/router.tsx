@@ -1,6 +1,6 @@
 /* src/router.tsx */
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { GuestAuthGuard } from './components/router/GuestAuthGuard';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import GuestAuthGuard from './components/router/GuestAuthGuard';
 import { RouterError } from './components/router/RouterError';
 
 // Layouts
@@ -354,7 +354,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="analytics" replace /> },
           { path: 'analytics', element: <MarketingAnalyticsPage /> },
           { path: 'automation', element: <AutomationBuilderPage /> },
-          { path: 'automation-list', element: <AutomationListPage /> },
+          { path: 'automation-list', element: <AutomationListPage workflows={[]} /> },
           { path: 'templates', element: <TemplatesPage /> },
         ],
       },
@@ -394,7 +394,11 @@ export const router = createBrowserRouter([
   /* ─── Protected Guest Portal (auth required) ─── */
   {
     path: '/guest-portal',
-    element: <GuestAuthGuard />,
+    element: (
+      <GuestAuthGuard>
+        <Outlet />
+      </GuestAuthGuard>
+    ),
     errorElement: <RouterError />,
     children: [
       {

@@ -1,26 +1,27 @@
 import { defineConfig } from 'vitest/config';
+import dotenv from 'dotenv';
+
+// Load test environment variables
+dotenv.config({ path: '.env.test' });
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
-    exclude: ['node_modules', 'dist'],
     setupFiles: ['./tests/setup.ts'],
-    testTimeout: 30000, // 30s for DB operations
-    hookTimeout: 30000,
-    pool: 'forks', // Isolate tests to prevent DB state leakage
-    maxConcurrency: 1, // Serial execution for DB tests
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      reportsDirectory: './coverage',
-      exclude: ['node_modules/', 'tests/', '**/*.d.ts', 'prisma/', '**/index.ts'],
-    },
-  },
-  resolve: {
-    alias: {
-      '@': './src',
+    env: {
+      NODE_ENV: 'test',
+      DATABASE_URL: process.env.DATABASE_URL,
+      REDIS_URL: process.env.REDIS_URL,
+      JWT_SECRET: process.env.JWT_SECRET,
+      PORT: process.env.PORT,
+      WEB_URL: process.env.WEB_URL,
+      API_PUBLIC_URL: process.env.API_PUBLIC_URL,
+      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
+      SMTP_HOST: process.env.SMTP_HOST,
+      SMTP_PORT: process.env.SMTP_PORT,
+      SMTP_SECURE: process.env.SMTP_SECURE,
+      RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED,
     },
   },
 });

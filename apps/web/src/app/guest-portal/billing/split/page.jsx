@@ -6,14 +6,10 @@ import {
   Users,
   Plus,
   Minus,
-  Send,
   CheckCircle2,
-  AlertCircle,
   Receipt,
-  Split,
   Trash2,
   Mail,
-  MessageSquare,
   Copy,
   Check,
 } from 'lucide-react';
@@ -23,7 +19,7 @@ import { guestStay, splitParticipants, formatCurrency, folioCategoryMeta } from 
 
 export default function SplitBillPage() {
   const navigate = useNavigate();
-  const { folio, charges } = guestStay;
+  const { folio } = guestStay;
   const [participants, setParticipants] = useState(splitParticipants);
   const [assignments, setAssignments] = useState({});
   const [showAddGuest, setShowAddGuest] = useState(false);
@@ -127,9 +123,7 @@ export default function SplitBillPage() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Split Bill</h1>
-          <p className="text-sm text-text-secondary">
-            Assign charges to guests and request payment
-          </p>
+          <p className="text-sm text-text-secondary">Assign charges to guests and share the bill</p>
         </div>
       </div>
 
@@ -142,11 +136,11 @@ export default function SplitBillPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-text-primary">Share Split Link</p>
-              <p className="text-xs text-text-muted">Guests can assign their own charges</p>
+              <p className="text-xs text-text-muted">Guests can view their assigned charges</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <code className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-mono text-text-muted truncate max-w-[200px]">
+            <code className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-mono text-text-muted truncate max-w-50">
               {splitLink}
             </code>
             <button
@@ -260,7 +254,7 @@ export default function SplitBillPage() {
                       </>
                     ) : (
                       <>
-                        <Mail className="h-3.5 w-3.5" /> Request Payment
+                        <Mail className="h-3.5 w-3.5" /> Send Summary
                       </>
                     )}
                   </button>

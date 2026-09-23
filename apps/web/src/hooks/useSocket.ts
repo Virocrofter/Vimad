@@ -1,94 +1,96 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { io, type Socket } from 'socket.io-client';
-import { useAuth } from './useAuth';
+/* apps/web/src/hooks/useSocket.ts */
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { io, Socket } from 'socket.io-client';
 
-interface UseSocketOptions {
-  autoConnect?: boolean;
+interface UseSocketReturn {
+  socket: Socket | null;
+  isConnected: boolean;
+  on: (event: string, callback: (...args: unknown[]) => void) => void;
+  emit: (event: string, ...args: unknown[]) => void;
 }
 
-export function useSocket(options: UseSocketOptions = {}) {
-  const { autoConnect = true } = options;
-  const { token } = useAuth();
-  const [socket, setSocket] = useState<Socket | null>(null);
+export function useSocket(token: string | null): UseSocketReturn {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  const listenersRef = useRef<Map<string, Set<(...args: unknown[]) => void>>>(new Map());
+
+  // FIX: Use ref for token to avoid effect dependency issues
+  const tokenRef = useRef(token);
+
+  // FIX: Update ref in effect, not during render
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
 
   useEffect(() => {
-    if (!autoConnect || !token) return;
+    const currentToken = tokenRef.current;
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    if (!currentToken) {
+      // FIX: Use queueMicrotask to avoid synchronous setState in effect
+      queueMicrotask(() => setIsConnected(false));
+      return;
+    }
 
-    const newSocket = io(API_URL, {
-      auth: { token },
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
+      auth: { token: currentToken },
       transports: ['websocket', 'polling'],
     });
 
-    socketRef.current = newSocket;
-    // Publish the socket asynchronously to avoid a synchronous setState in the effect;
-    // the ref check guards against a cleanup/re-run race before the microtask fires.
-    queueMicrotask(() => {
-      if (socketRef.current === newSocket) setSocket(newSocket);
-    });
+    socketRef.current = socket;
 
-    newSocket.on('connect', () => {
+    socket.on('connect', () => {
       setIsConnected(true);
     });
 
-    newSocket.on('disconnect', () => {
+    socket.on('disconnect', () => {
       setIsConnected(false);
     });
 
+    socket.on('error', (error: Error) => {
+      console.error('Socket error:', error);
+      setIsConnected(false);
+    });
+
+    // Re-attach stored listeners
+    listenersRef.current.forEach((callbacks, event) => {
+      callbacks.forEach((callback) => {
+        socket.on(event, callback);
+      });
+    });
+
     return () => {
-      newSocket.close();
+      socket.disconnect();
       socketRef.current = null;
-      setSocket(null);
       setIsConnected(false);
     };
-  }, [autoConnect, token]);
+  }, [token]); // Only re-connect when token changes
 
   const on = useCallback((event: string, callback: (...args: unknown[]) => void) => {
-    socketRef.current?.on(event, callback);
-    return () => {
-      socketRef.current?.off(event, callback);
-    };
+    // Store listener for reconnection
+    if (!listenersRef.current.has(event)) {
+      listenersRef.current.set(event, new Set());
+    }
+    listenersRef.current.get(event)!.add(callback);
+
+    // Attach to current socket if exists
+    if (socketRef.current) {
+      socketRef.current.on(event, callback);
+    }
   }, []);
 
-  const emit = useCallback((event: string, data?: unknown) => {
-    socketRef.current?.emit(event, data);
+  const emit = useCallback((event: string, ...args: unknown[]) => {
+    if (socketRef.current?.connected) {
+      socketRef.current.emit(event, ...args);
+    }
   }, []);
 
-  const joinRoom = useCallback((room: string) => {
-    socketRef.current?.emit('join:room', room);
-  }, []);
-
-  const leaveRoom = useCallback((room: string) => {
-    socketRef.current?.emit('leave:room', room);
-  }, []);
-
+  // FIX: Return stable object, don't access ref during render
   return {
-    socket,
+    get socket() {
+      return socketRef.current;
+    },
     isConnected,
     on,
     emit,
-    joinRoom,
-    leaveRoom,
   };
-}
-
-// Specialized hook for notifications
-export function useNotifications() {
-  const { on, isConnected } = useSocket();
-  const [notifications, setNotifications] = useState<unknown[]>([]);
-
-  useEffect(() => {
-    if (!isConnected) return;
-
-    const unsubscribe = on('notification', (data) => {
-      setNotifications((prev) => [data, ...prev]);
-    });
-
-    return unsubscribe;
-  }, [on, isConnected]);
-
-  return { notifications, isConnected };
 }

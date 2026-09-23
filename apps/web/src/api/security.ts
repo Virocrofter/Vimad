@@ -1,90 +1,138 @@
 import { apiClient } from './client';
 
+// ─── Types ───
+
 export interface SecuritySettings {
-  twoFactorAuth: {
-    enabled: boolean;
-    required: boolean;
-    methods: ('authenticator' | 'sms' | 'email')[];
-    enforceForRoles: string[];
-  };
-  passwordPolicy: {
-    minLength: number;
-    requireUppercase: boolean;
-    requireLowercase: boolean;
-    requireNumbers: boolean;
-    requireSpecialChars: boolean;
-    expiryDays: number;
-    preventReuse: number;
-  };
-  sessionSecurity: {
-    maxConcurrentSessions: number;
-    idleTimeoutMinutes: number;
-    absoluteTimeoutHours: number;
-    requireReauthForSensitive: boolean;
-  };
-  ipRestrictions: {
-    enabled: boolean;
-    allowedIPs: string[];
-    blockedIPs: string[];
-  };
-  auditRetention: {
-    days: number;
-    archiveAfterDays: number;
-  };
+  id?: string;
+  twoFactorRequired: boolean;
+  passwordMinLength: number;
+  passwordRequireUppercase: boolean;
+  passwordRequireLowercase: boolean;
+  passwordRequireNumbers: boolean;
+  passwordRequireSymbols: boolean;
+  passwordExpiryDays: number;
+  maxLoginAttempts: number;
+  lockoutDurationMinutes: number;
+  sessionTimeoutMinutes: number;
+  ipWhitelist: string[];
+  ipBlacklist: string[];
+  allowedCountries: string[];
+  blockedCountries: string[];
+  requireEmailVerification: boolean;
+  allowSocialLogin: boolean;
+  auditLogRetentionDays: number;
+  encryptionAtRest: boolean;
+  encryptionInTransit: boolean;
+  lastSecurityAudit?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface SecurityAuditLog {
-  id: string;
-  timestamp: string;
-  userId: string;
-  userEmail: string;
-  action: string;
-  resource: string;
-  ipAddress: string;
-  userAgent: string;
-  status: 'success' | 'failure';
-  details?: Record<string, unknown>;
+export interface UpdateSecuritySettingsRequest {
+  twoFactorRequired?: boolean;
+  passwordMinLength?: number;
+  passwordRequireUppercase?: boolean;
+  passwordRequireLowercase?: boolean;
+  passwordRequireNumbers?: boolean;
+  passwordRequireSymbols?: boolean;
+  passwordExpiryDays?: number;
+  maxLoginAttempts?: number;
+  lockoutDurationMinutes?: number;
+  sessionTimeoutMinutes?: number;
+  ipWhitelist?: string[];
+  ipBlacklist?: string[];
+  allowedCountries?: string[];
+  blockedCountries?: string[];
+  requireEmailVerification?: boolean;
+  allowSocialLogin?: boolean;
+  auditLogRetentionDays?: number;
+  encryptionAtRest?: boolean;
+  encryptionInTransit?: boolean;
 }
+
+// ─── API Functions ───
+
+const BASE_PATH = '/admin/security';
 
 export async function fetchSecuritySettings(): Promise<SecuritySettings> {
-  const response = await apiClient.get<{ data: SecuritySettings }>('/v1/admin/security/settings');
-  return response.data;
+  const response = await apiClient.get<{ data: SecuritySettings }>(`${BASE_PATH}/settings`);
+  return response.data.data;
 }
 
 export async function updateSecuritySettings(
-  payload: Partial<SecuritySettings>
+  data: UpdateSecuritySettingsRequest
 ): Promise<SecuritySettings> {
-  const response = await apiClient.patch<{ data: SecuritySettings }>(
-    '/v1/admin/security/settings',
-    payload
-  );
-  return response.data;
+  const response = await apiClient.patch<{ data: SecuritySettings }>(`${BASE_PATH}/settings`, data);
+  return response.data.data;
 }
 
-export async function fetchSecurityAuditLogs(params: {
-  page: number;
-  pageSize: number;
-  userId?: string;
-  action?: string;
-  status?: 'success' | 'failure';
+export async function getSecurityAuditLog(params?: {
+  page?: number;
+  pageSize?: number;
   startDate?: string;
   endDate?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }): Promise<{
-  data: SecurityAuditLog[];
-  meta: { total: number; page: number; totalPages: number };
+  data: Array<{
+    id: string;
+    action: string;
+    userId: string;
+    userEmail: string;
+    ipAddress: string;
+    userAgent: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    details: Record<string, unknown>;
+    createdAt: string;
+  }>;
+  meta: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }> {
-  const response = await apiClient.get('/v1/admin/security/audit-logs', { params });
+  const response = await apiClient.get(`${BASE_PATH}/audit-log`, { params });
   return response.data;
 }
 
-export async function enableTwoFactor(userId: string): Promise<{ qrCode: string; secret: string }> {
-  const response = await apiClient.post<{ data: { qrCode: string; secret: string } }>(
-    `/v1/admin/security/2fa/enable`,
-    { userId }
-  );
+export async function getActiveThreats(): Promise<{
+  data: Array<{
+    id: string;
+    type: 'brute_force' | 'suspicious_ip' | 'unusual_activity' | 'failed_logins';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    source: string;
+    description: string;
+    detectedAt: string;
+    status: 'active' | 'investigating' | 'resolved' | 'false_positive';
+  }>;
+}> {
+  const response = await apiClient.get(`${BASE_PATH}/threats`);
   return response.data;
 }
 
-export async function disableTwoFactor(userId: string): Promise<void> {
-  await apiClient.post(`/v1/admin/security/2fa/disable`, { userId });
+export async function resolveThreat(
+  id: string,
+  status: 'resolved' | 'false_positive'
+): Promise<void> {
+  await apiClient.patch(`${BASE_PATH}/threats/${id}`, { status });
+}
+
+export async function blockIp(ipAddress: string, reason?: string): Promise<void> {
+  await apiClient.post(`${BASE_PATH}/block-ip`, { ipAddress, reason });
+}
+
+export async function unblockIp(ipAddress: string): Promise<void> {
+  await apiClient.delete(`${BASE_PATH}/block-ip/${encodeURIComponent(ipAddress)}`);
+}
+
+export async function getBlockedIps(): Promise<{
+  data: Array<{
+    ipAddress: string;
+    reason?: string;
+    blockedAt: string;
+    blockedBy: string;
+  }>;
+}> {
+  const response = await apiClient.get(`${BASE_PATH}/blocked-ips`);
+  return response.data;
 }

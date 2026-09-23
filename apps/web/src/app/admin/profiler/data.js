@@ -38,3 +38,109 @@ export const mockDatabaseStats = [
     bloatRatio: 0.15,
   },
 ];
+
+/* ─── Impact Metadata ─── */
+export const impactMeta = {
+  low: {
+    label: 'Low',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+  },
+  medium: {
+    label: 'Medium',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  high: {
+    label: 'High',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
+  critical: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+  },
+};
+
+/* ─── Severity Metadata ─── */
+export const severityMeta = {
+  low: {
+    label: 'Low',
+    dot: 'bg-info',
+    class: 'bg-info/10 text-info border-info/20',
+  },
+  medium: {
+    label: 'Medium',
+    dot: 'bg-accent',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  high: {
+    label: 'High',
+    dot: 'bg-warning',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
+  critical: {
+    label: 'Critical',
+    dot: 'bg-danger',
+    class: 'bg-danger/10 text-danger border-danger/20',
+  },
+};
+
+/* ─── Effort Metadata ─── */
+export const effortMeta = {
+  low: {
+    label: 'Low Effort',
+    class: 'bg-accent/10 text-accent border-accent/20',
+  },
+  medium: {
+    label: 'Medium Effort',
+    class: 'bg-warning/10 text-warning border-warning/20',
+  },
+  high: {
+    label: 'High Effort',
+    class: 'bg-danger/10 text-danger border-danger/20',
+  },
+};
+
+/* ─── Recommendation Type Metadata ─── */
+export const typeMeta = {
+  index: {
+    label: 'Index',
+    bg: 'bg-secondary/10',
+    color: 'text-secondary',
+  },
+  query: {
+    label: 'Query',
+    bg: 'bg-info/10',
+    color: 'text-info',
+  },
+  schema: {
+    label: 'Schema',
+    bg: 'bg-warning/10',
+    color: 'text-warning',
+  },
+  cache: {
+    label: 'Cache',
+    bg: 'bg-accent/10',
+    color: 'text-accent',
+  },
+};
+
+/* ─── Helpers ─── */
+export function formatDuration(ms) {
+  if (typeof ms !== 'number' || Number.isNaN(ms) || ms < 0) return '—';
+  if (ms < 1) return '0ms';
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  const seconds = ms / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ${Math.round(seconds % 60)}s`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
+}
+
+export function formatNumber(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '0';
+  return value.toLocaleString('en-US');
+}

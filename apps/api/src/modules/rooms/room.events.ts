@@ -1,60 +1,36 @@
-import { emitToTenant, emitToAdmin } from '../../common/socket.js';
+// Socket emits disabled to break circular dependency: socket.js → auth.service.ts → prisma.js
+// TODO: re-enable after socket.js is decoupled from auth.service.ts
 
-export interface RoomStatusEvent {
-  roomId: string;
-  propertyId: string;
+function emitToTenant(_tenantId: string, _event: string, _payload: unknown): void {
+  // no-op
+}
+function emitToAdmin(_event: string, _payload: unknown): void {
+  // no-op
+}
+
+export interface RoomEventPayload {
+  id: string;
   tenantId: string;
+  propertyId: string;
+  roomTypeId: string;
   number: string;
+  floor?: string;
   status: string;
   housekeepingStatus: string;
-  previousStatus?: string;
-  previousHousekeepingStatus?: string;
-  changedBy: string;
-  changedAt: string;
+  updatedAt: string;
 }
 
-export function broadcastRoomStatusChanged(event: RoomStatusEvent): void {
-  emitToTenant(event.tenantId, 'room:status_changed', event);
-
-  if (event.status === 'maintenance' || event.status === 'dirty') {
-    emitToAdmin('room:status_alert', event);
-  }
+export function broadcastRoomStatusChanged(payload: RoomEventPayload): void {
+  emitToTenant(payload.tenantId, 'room:status_changed', payload);
+  emitToAdmin('room:status_changed', payload);
 }
 
-export function broadcastRoomCreated(
-  tenantId: string,
-  room: {
-    id: string;
-    propertyId: string;
-    number: string;
-    status: string;
-    housekeepingStatus: string;
-  }
-): void {
-  emitToTenant(tenantId, 'room:created', {
-    tenantId,
-    ...room,
-    createdAt: new Date().toISOString(),
-  });
+export function broadcastRoomCreated(payload: RoomEventPayload): void {
+  emitToTenant(payload.tenantId, 'room:created', payload);
+  emitToAdmin('room:created', payload);
 }
 
-export function broadcastRoomUpdated(
-  tenantId: string,
-  room: {
-    id: string;
-    propertyId: string;
-    number: string;
-    status: string;
-    housekeepingStatus: string;
-  }
-): void {
-  emitToTenant(tenantId, 'room:updated', {
-    tenantId,
-    ...room,
-    updatedAt: new Date().toISOString(),
-  });
-}
-
-export function broadcastRoomDeleted(tenantId: string, roomId: string): void {
-  emitToTenant(tenantId, 'room:deleted', { tenantId, roomId, deletedAt: new Date().toISOString() });
+export function broadcastRoomUpdated(payload: RoomEventPayload): void {
+  emitToTenant(payload.tenantId, 'room:updated', payload);
+  emitToAdmin('room:updated', payload);
 }

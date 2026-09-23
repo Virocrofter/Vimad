@@ -1,128 +1,53 @@
-import { emitToTenant, emitToAdmin } from '../../common/socket.js';
-import { logger } from '../../common/logger.js';
+// Socket emits disabled to break circular dependency: socket.js → auth.service.ts → prisma.js
+// TODO: re-enable after socket.js is decoupled from auth.service.ts
+
+function emitToTenant(_tenantId: string, _event: string, _payload: unknown): void {
+  // no-op
+}
+function emitToAdmin(_event: string, _payload: unknown): void {
+  // no-op
+}
 
 export interface ReservationEventPayload {
   id: string;
-  confirmationNumber: string;
-  guestName: string;
+  tenantId: string;
   propertyId: string;
-  propertyName: string;
+  guestId: string;
+  confirmationNumber: string;
+  status: string;
   arrivalDate: string;
   departureDate: string;
-  status: string;
-  source?: string;
-  previousStatus?: string;
+  nights: number;
+  adults: number;
+  children: number;
+  totalAmount: number;
+  balance: number;
+  source: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface ReservationCheckInPayload {
-  id: string;
-  confirmationNumber: string;
-  guestName: string;
-  propertyId: string;
-  propertyName: string;
-  roomNumber?: string;
-  checkedInAt: string;
+export function broadcastReservationCreated(payload: ReservationEventPayload): void {
+  emitToTenant(payload.tenantId, 'reservation:created', payload);
+  emitToAdmin('reservation:created', payload);
 }
 
-export interface ReservationCheckOutPayload {
-  id: string;
-  confirmationNumber: string;
-  guestName: string;
-  propertyId: string;
-  propertyName: string;
-  checkedOutAt: string;
+export function broadcastReservationUpdated(payload: ReservationEventPayload): void {
+  emitToTenant(payload.tenantId, 'reservation:updated', payload);
+  emitToAdmin('reservation:updated', payload);
 }
 
-export interface ReservationCancelledPayload {
-  id: string;
-  confirmationNumber: string;
-  guestName: string;
-  propertyId: string;
-  propertyName: string;
-  cancelledAt: string;
-  reason?: string;
+export function broadcastReservationCancelled(payload: ReservationEventPayload): void {
+  emitToTenant(payload.tenantId, 'reservation:cancelled', payload);
+  emitToAdmin('reservation:cancelled', payload);
 }
 
-export function broadcastReservationCreated(
-  tenantId: string,
-  payload: ReservationEventPayload
-): void {
-  emitToTenant(tenantId, 'reservation:created', {
-    ...payload,
-    event: 'reservation:created',
-    timestamp: new Date().toISOString(),
-  });
-  emitToAdmin('reservation:created', {
-    ...payload,
-    event: 'reservation:created',
-    tenantId,
-    timestamp: new Date().toISOString(),
-  });
-  logger.debug({ reservationId: payload.id }, 'reservation:created event broadcast');
+export function broadcastReservationCheckedIn(payload: ReservationEventPayload): void {
+  emitToTenant(payload.tenantId, 'reservation:checked_in', payload);
+  emitToAdmin('reservation:checked_in', payload);
 }
 
-export function broadcastReservationUpdated(
-  tenantId: string,
-  payload: ReservationEventPayload
-): void {
-  emitToTenant(tenantId, 'reservation:updated', {
-    ...payload,
-    event: 'reservation:updated',
-    timestamp: new Date().toISOString(),
-  });
-  logger.debug({ reservationId: payload.id }, 'reservation:updated event broadcast');
-}
-
-export function broadcastReservationCheckedIn(
-  tenantId: string,
-  payload: ReservationCheckInPayload
-): void {
-  emitToTenant(tenantId, 'reservation:checked_in', {
-    ...payload,
-    event: 'reservation:checked_in',
-    timestamp: new Date().toISOString(),
-  });
-  emitToAdmin('reservation:checked_in', {
-    ...payload,
-    event: 'reservation:checked_in',
-    tenantId,
-    timestamp: new Date().toISOString(),
-  });
-  logger.debug({ reservationId: payload.id }, 'reservation:checked_in event broadcast');
-}
-
-export function broadcastReservationCheckedOut(
-  tenantId: string,
-  payload: ReservationCheckOutPayload
-): void {
-  emitToTenant(tenantId, 'reservation:checked_out', {
-    ...payload,
-    event: 'reservation:checked_out',
-    timestamp: new Date().toISOString(),
-  });
-  emitToAdmin('reservation:checked_out', {
-    ...payload,
-    event: 'reservation:checked_out',
-    tenantId,
-    timestamp: new Date().toISOString(),
-  });
-  logger.debug({ reservationId: payload.id }, 'reservation:checked_out event broadcast');
-}
-
-export function broadcastReservationCancelled(
-  tenantId: string,
-  payload: ReservationCancelledPayload
-): void {
-  emitToTenant(tenantId, 'reservation:cancelled', {
-    ...payload,
-    event: 'reservation:cancelled',
-    timestamp: new Date().toISOString(),
-  });
-  emitToAdmin('reservation:cancelled', {
-    ...payload,
-    event: 'reservation:cancelled',
-    tenantId,
-    timestamp: new Date().toISOString(),
-  });
-  logger.debug({ reservationId: payload.id }, 'reservation:cancelled event broadcast');
+export function broadcastReservationCheckedOut(payload: ReservationEventPayload): void {
+  emitToTenant(payload.tenantId, 'reservation:checked_out', payload);
+  emitToAdmin('reservation:checked_out', payload);
 }

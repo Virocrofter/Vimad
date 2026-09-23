@@ -23,6 +23,9 @@ export interface FeatureFlag {
     value?: unknown;
   }[];
   tags: string[];
+  enabled?: boolean;
+  rolloutPercentage?: number;
+  targetAudience?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +49,13 @@ export interface FeatureFlagAudit {
 }
 
 const client = getApiClient();
+
+export async function fetchFeatureFlags(params?: {
+  environment?: string;
+  tag?: string;
+}): Promise<FeatureFlag[]> {
+  return client.get('/admin/feature-flags', params);
+}
 
 export async function getFeatureFlags(params?: {
   environment?: string;

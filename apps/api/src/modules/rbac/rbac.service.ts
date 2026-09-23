@@ -139,20 +139,38 @@ export async function assignRole(
     throw new AppError(404, 'Role not found', 'NOT_FOUND');
   }
 
+  if (propertyId === undefined) {
+    const existingAssignment = await prisma.roleAssignment.findFirst({
+      where: { userId, roleId, propertyId: null },
+    });
+
+    return (
+      existingAssignment ??
+      prisma.roleAssignment.create({
+        data: {
+          userId,
+          roleId,
+          propertyId: null,
+          assignedBy: assignedBy ?? null,
+        },
+      })
+    );
+  }
+
   return prisma.roleAssignment.upsert({
     where: {
       userId_roleId_propertyId: {
         userId,
         roleId,
-        propertyId: propertyId ?? null,
+        propertyId,
       },
     },
     update: {},
     create: {
       userId,
       roleId,
-      propertyId: propertyId ?? null,
-      assignedBy,
+      propertyId,
+      assignedBy: assignedBy ?? null,
     },
   });
 }

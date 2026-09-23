@@ -1,0 +1,63 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build output
+dist
+**/dist
+build
+**/build
+
+# Environment files (never copy secrets)
+.env
+.env.*
+!.env.example
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+**/logs
+
+# Test coverage
+coverage
+**/coverage
+.nyc_output
+
+# Prisma local database
+prisma/dev.db
+prisma/migrations/dev.db*
+
+# Storage (mounted as volume)
+storage
+apps/api/storage
+
+# Documentation
+README.md
+docs
+*.md
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Temporary files
+tmp
+temp
+*.tmp

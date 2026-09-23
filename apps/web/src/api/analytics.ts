@@ -86,6 +86,37 @@ export async function getBookingTrends(params?: {
   return client.get('/admin/analytics/bookings', { params });
 }
 
+export interface AnalyticsOverview {
+  totalRevenue: number;
+  revenueChange: number;
+  activeTenants: number;
+  tenantChange: number;
+  totalUsers: number;
+  userChange: number;
+  avgRevenuePerTenant: number;
+  avgRevenueChange: number;
+  planDistribution: { plan: string; count: number }[];
+  featureUsage: { name: string; usageCount: number; percentage: number }[];
+}
+
+export interface AnalyticsTimeseriesPoint {
+  date: string;
+  revenue: number;
+  newTenants: number;
+}
+
+export async function fetchAnalyticsOverview(params: {
+  range?: string;
+}): Promise<AnalyticsOverview> {
+  return client.get('/admin/analytics/overview', { params });
+}
+
+export async function fetchAnalyticsTimeseries(params: {
+  range?: string;
+}): Promise<AnalyticsTimeseriesPoint[]> {
+  return client.get('/admin/analytics/timeseries', { params });
+}
+
 export async function exportAnalyticsReport(
   format: 'csv' | 'pdf',
   filters?: Record<string, unknown>

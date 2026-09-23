@@ -91,6 +91,28 @@ export async function getLiveness(): Promise<{ status: 'alive' }> {
 }
 
 /**
+ * Fetch admin system health overview (services, status, uptime).
+ * Consumed by the admin health page.
+ * Endpoint: GET /admin/health
+ */
+export async function fetchSystemHealth(): Promise<SystemHealthOverview> {
+  const { data } = await client.get('/admin/health');
+  return data;
+}
+
+/**
+ * Fetch per-service metric details keyed by service name.
+ * Each entry is a flat map of metric label → value rendered by the health page.
+ * Endpoint: GET /admin/health/metrics
+ */
+export async function fetchServiceMetrics(): Promise<
+  Record<string, Record<string, string | number>>
+> {
+  const { data } = await client.get('/admin/health/metrics');
+  return data;
+}
+
+/**
  * Get readiness probe.
  * Endpoint: GET /health/ready
  */

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { env } from '../../common/env.js';
+import { sendPasswordResetEmail } from '../../jobs/email.queue.js';
 
 const JWT_EXPIRES_IN = '15m' as const;
 
@@ -70,7 +71,6 @@ export async function register(input: RegisterInput) {
 
   const hashedPassword = await bcrypt.hash(input.ownerPassword, 10);
 
-  // Create tenant + owner user in a transaction
   const tenant = await prisma.tenant.create({
     data: {
       name: input.tenantName,
@@ -91,8 +91,6 @@ export async function register(input: RegisterInput) {
 
   const owner = tenant.users[0];
 
-  // ─── AUTO: Create RoleAssignment for Owner ───
-  // Look up the system "Owner" role and assign it to the new user
   const ownerRole = await prisma.role.findFirst({
     where: { name: 'Owner', tenantId: null },
   });
@@ -216,7 +214,6 @@ export async function refreshAccessToken(rawRefreshToken: string) {
     throw new AppError(401, 'Invalid or expired refresh token', 'UNAUTHORIZED');
   }
 
-  // Rotate: revoke old, create new
   await prisma.refreshToken.update({
     where: { id: stored.id },
     data: { revokedAt: new Date(), revokedReason: 'rotated' },
@@ -264,7 +261,6 @@ export async function revokeAllUserRefreshTokens(userId: string, reason?: string
 export async function requestPasswordReset(email: string, tenantSlug: string) {
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
   if (!tenant) {
-    // Silent fail: don't leak which tenants exist
     return { sent: false };
   }
 
@@ -275,10 +271,9 @@ export async function requestPasswordReset(email: string, tenantSlug: string) {
     return { sent: false };
   }
 
-  // Invalidate any existing unused reset tokens
   await prisma.passwordReset.updateMany({
     where: { userId: user.id, usedAt: null },
-    data: { usedAt: new Date() }, // mark as used to invalidate
+    data: { usedAt: new Date() },
   });
 
   const rawToken = randomBytes(32).toString('base64url');
@@ -292,10 +287,10 @@ export async function requestPasswordReset(email: string, tenantSlug: string) {
     },
   });
 
-  // TODO: Send email with reset link
-  // await sendPasswordResetEmail(user.email, rawToken);
+  // ─── WIRED: Send password reset email via queue ───
+  await sendPasswordResetEmail(user.email, rawToken);
 
-  return { sent: true, token: rawToken }; // Return token for testing; remove in production
+  return { sent: true };
 }
 
 export async function confirmPasswordReset(rawToken: string, newPassword: string) {
@@ -325,7 +320,6 @@ export async function confirmPasswordReset(rawToken: string, newPassword: string
       where: { id: reset.id },
       data: { usedAt: new Date() },
     }),
-    // Revoke all refresh tokens for this user
     prisma.refreshToken.updateMany({
       where: { userId: reset.userId, revokedAt: null },
       data: { revokedAt: new Date(), revokedReason: 'password_reset' },

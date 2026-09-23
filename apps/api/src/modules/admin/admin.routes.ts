@@ -2,6 +2,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
+import { adminJobsRouter } from './admin.jobs.routes.js';
 import { authMiddleware } from '../auth/auth.middleware.js';
 import { requireAdminRole } from './admin.middleware.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
@@ -299,6 +300,7 @@ registry.registerPath({
 });
 
 adminRouter.use('/reports', adminReportsRouter);
+adminRouter.use('/jobs', adminJobsRouter);
 
 adminRouter.get('/quick-actions', async (_req: Request, res: Response, next: NextFunction) => {
   try {

@@ -20,7 +20,7 @@ import {
   Crop,
   Trash2,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 /* ─── ID Upload Component ─── */
 export function IDUpload({ onUpload, onVerify, verified = false, uploading = false }) {

@@ -38,6 +38,52 @@ export interface DatabaseStats {
 
 const client = getApiClient();
 
+/** Row shape used by the admin profiler page's slow-queries table. */
+export interface SlowQuerySummary {
+  id: string;
+  query: string;
+  duration: number;
+  rows: number;
+  timestamp: string;
+}
+
+/** Aggregate stats for the profiler page's stat cards. */
+export interface QueryStats {
+  totalQueries: number;
+  queriesPerSecond: number;
+  avgDuration: number;
+  p95Duration: number;
+  slowQueries: number;
+  errors: number;
+  errorRate: number;
+}
+
+/** Endpoint performance entry as rendered by the profiler page. */
+export interface EndpointPerfEntry {
+  method: string;
+  path: string;
+  avgDuration: number;
+  requestCount: number;
+  errorRate: number;
+}
+
+export async function fetchSlowQueries(params?: {
+  range?: string;
+  search?: string;
+}): Promise<SlowQuerySummary[]> {
+  return client.get('/admin/profiler/slow-queries', params);
+}
+
+export async function fetchQueryStats(params?: { range?: string }): Promise<QueryStats> {
+  return client.get('/admin/profiler/query-stats', params);
+}
+
+export async function fetchEndpointPerformance(params?: {
+  range?: string;
+}): Promise<EndpointPerfEntry[]> {
+  return client.get('/admin/profiler/endpoints', params);
+}
+
 export async function getSlowQueries(
   params?: PaginationParams & {
     minDuration?: number;

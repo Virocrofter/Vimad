@@ -16,7 +16,7 @@ export const prisma =
 
 // Attach query logging with request correlation
 if (env.NODE_ENV === 'development') {
-  prisma.$on('query' as never, (e: any) => {
+  prisma.$on('query' as never, (e: { query: string; params: string; duration: number }) => {
     logger.debug(
       {
         prisma: {
@@ -30,8 +30,8 @@ if (env.NODE_ENV === 'development') {
   });
 }
 
-prisma.$on('error' as never, (e: any) => {
-  logger.error({ prismaError: e }, 'Prisma error');
+prisma.$on('error' as never, (e: { message: string; code?: string }) => {
+  logger.error({ prismaError: { message: e.message, code: e.code } }, 'Prisma error');
 });
 
 if (env.NODE_ENV !== 'production') {

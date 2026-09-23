@@ -1,3 +1,4 @@
+/* apps/web/src/hooks/useProperties.ts */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listProperties,
@@ -5,23 +6,28 @@ import {
   createProperty,
   updateProperty,
   deleteProperty,
+  type Property,
+  type CreatePropertyInput,
+  type UpdatePropertyInput,
 } from '../api/properties';
-import type { CreatePropertyInput, UpdatePropertyInput } from '../api/properties';
-import type { PaginationParams } from '../api/types';
 
-const PROPERTIES_KEY = 'properties' as const;
-
-export function usePropertiesList(params?: PaginationParams) {
-  return useQuery({
-    queryKey: [PROPERTIES_KEY, 'list', params],
-    queryFn: () => listProperties(params),
-    staleTime: 1000 * 60 * 2,
+export function useProperties() {
+  const query = useQuery({
+    queryKey: ['properties'],
+    queryFn: () => listProperties(),
   });
+
+  return {
+    properties: query.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
 }
 
 export function useProperty(id: string) {
   return useQuery({
-    queryKey: [PROPERTIES_KEY, id],
+    queryKey: ['properties', id],
     queryFn: () => getProperty(id),
     enabled: !!id,
   });
@@ -32,7 +38,7 @@ export function useCreateProperty() {
   return useMutation({
     mutationFn: (input: CreatePropertyInput) => createProperty(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PROPERTIES_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
     },
   });
 }
@@ -42,9 +48,8 @@ export function useUpdateProperty() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdatePropertyInput }) =>
       updateProperty(id, input),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: [PROPERTIES_KEY, vars.id] });
-      queryClient.invalidateQueries({ queryKey: [PROPERTIES_KEY, 'list'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
     },
   });
 }
@@ -54,7 +59,9 @@ export function useDeleteProperty() {
   return useMutation({
     mutationFn: (id: string) => deleteProperty(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PROPERTIES_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
     },
   });
 }
+
+export type { Property };

@@ -1,3 +1,4 @@
+/* apps/web/src/hooks/useRooms.ts */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMockQuery } from './useMockQuery';
 import {
@@ -14,7 +15,7 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
 const MOCK_ROOMS: Room[] = [
   {
     id: '101',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-std-king',
     number: '101',
@@ -24,7 +25,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '102',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-std-king',
     number: '102',
@@ -34,7 +35,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '103',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-std-twin',
     number: '103',
@@ -44,7 +45,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '104',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-del-king',
     number: '104',
@@ -54,7 +55,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '105',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-suite',
     number: '105',
@@ -64,7 +65,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '201',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-std-king',
     number: '201',
@@ -74,7 +75,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '202',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-std-twin',
     number: '202',
@@ -84,7 +85,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '203',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-del-king',
     number: '203',
@@ -94,7 +95,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '204',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-del-king',
     number: '204',
@@ -104,7 +105,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '205',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-suite',
     number: '205',
@@ -114,7 +115,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '301',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-std-king',
     number: '301',
@@ -124,7 +125,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '302',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-del-king',
     number: '302',
@@ -134,7 +135,7 @@ const MOCK_ROOMS: Room[] = [
   },
   {
     id: '303',
-    tenantId: 'tenant-001',
+
     propertyId: 'TNT-001',
     roomTypeId: 'rt-suite',
     number: '303',
@@ -164,7 +165,7 @@ export function useRoomMutations() {
         return {
           ...input,
           id: `room-${Date.now()}`,
-          tenantId: 'tenant-001',
+
           propertyId: 'TNT-001',
         } as Room;
       }

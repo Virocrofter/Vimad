@@ -2,98 +2,81 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 
 export default function LoginForm() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { login, isLoading } = useAuth();
-
   const [tenantSlug, setTenantSlug] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const redirectTo = searchParams.get('redirect') ?? '/app/dashboard';
+  const { login, isLoading, error } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError('');
+    setLocalError(null);
 
-    const result = await login(tenantSlug, email, password);
+    const result = await login({ tenantSlug, email, password });
 
     if (result.success) {
-      navigate(redirectTo, { replace: true });
+      const redirect = searchParams.get('redirect');
+      navigate(redirect || '/app/dashboard', { replace: true });
     } else {
-      setError(result.error ?? 'Login failed');
+      setLocalError(result.error ?? 'Login failed');
     }
   }
 
+  const displayError = localError ?? error;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 bg-white dark:bg-gray-800 p-8 rounded-lg shadow"
-    >
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Sign In</h2>
+    <form className="auth-form" onSubmit={handleSubmit}>
+      <h2>Sign in to Vimad</h2>
 
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-          {error}
-        </div>
-      )}
+      {displayError && <div className="auth-form__error">{displayError}</div>}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Hotel/Organization Slug
-        </label>
-        <Input
+      <label htmlFor="tenantSlug">
+        Tenant Slug
+        <input
+          id="tenantSlug"
           type="text"
           value={tenantSlug}
           onChange={(e) => setTenantSlug(e.target.value)}
           placeholder="your-hotel"
           required
+          autoComplete="organization"
         />
-      </div>
+      </label>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Email
-        </label>
-        <Input
+      <label htmlFor="email">
+        Email
+        <input
+          id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           required
+          autoComplete="email"
         />
-      </div>
+      </label>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Password
-        </label>
-        <Input
+      <label htmlFor="password">
+        Password
+        <input
+          id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
           required
+          autoComplete="current-password"
         />
-      </div>
+      </label>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Signing in...' : 'Sign In'}
-      </Button>
-
-      <div className="flex justify-between text-sm">
-        <a href="/auth/forgot-password" className="text-primary hover:underline">
-          Forgot password?
-        </a>
-        <a href="/auth/register" className="text-primary hover:underline">
-          Create account
-        </a>
-      </div>
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? 'Signing in…' : 'Sign in'}
+      </button>
     </form>
   );
 }

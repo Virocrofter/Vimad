@@ -8,8 +8,8 @@ import {
   reverseCharge,
   transferToCityLedger,
   deleteFolio,
-} from '../api/folios';
-import type { ChargeInput, PaymentInput } from '../api/folios';
+} from '../api/folio';
+import type { ChargeInput, PaymentInput } from '../api/folio';
 import type { PaginationParams } from '../api/types';
 
 const FOLIOS_KEY = 'folios' as const;

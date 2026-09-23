@@ -317,14 +317,182 @@ export const reportSchedules = [
   },
 ];
 
-/* ─── Mock Report Templates ─── */
+/* ─── Report Builder catalogues (static config for the builder UI) ─── */
 export const reportTemplates = [
-  { id: 'TPL-001', name: 'Security Incident Summary', category: 'security', format: 'pdf' },
-  { id: 'TPL-002', name: 'Compliance Gap Analysis', category: 'compliance', format: 'xlsx' },
-  { id: 'TPL-003', name: 'Tenant Usage Report', category: 'operations', format: 'csv' },
-  { id: 'TPL-004', name: 'Financial Reconciliation', category: 'billing', format: 'xlsx' },
-  { id: 'TPL-005', name: 'Performance & Latency', category: 'performance', format: 'pdf' },
+  {
+    key: 'blank',
+    label: 'Start from Scratch',
+    description: 'Build a custom report with your own widgets',
+    category: 'custom',
+  },
+  {
+    key: 'revenue-dashboard',
+    label: 'Revenue Dashboard',
+    description: 'MRR, churn, and revenue trends',
+    category: 'revenue',
+  },
+  {
+    key: 'tenant-overview',
+    label: 'Tenant Overview',
+    description: 'Tenant counts, plans, and growth',
+    category: 'operations',
+  },
+  {
+    key: 'usage-analytics',
+    label: 'Usage Analytics',
+    description: 'API usage, storage, and activity',
+    category: 'performance',
+  },
+  {
+    key: 'health-monitor',
+    label: 'System Health Monitor',
+    description: 'Latency, uptime, and incident trends',
+    category: 'infrastructure',
+  },
+  {
+    key: 'support-metrics',
+    label: 'Support Metrics',
+    description: 'Tickets, response times, and CSAT',
+    category: 'support',
+  },
 ];
+
+export const chartTypes = [
+  { key: 'bar', label: 'Bar Chart', category: 'comparison' },
+  { key: 'line', label: 'Line Chart', category: 'trend' },
+  { key: 'area', label: 'Area Chart', category: 'trend' },
+  { key: 'pie', label: 'Pie Chart', category: 'distribution' },
+  { key: 'combo', label: 'Combo Chart', category: 'mixed' },
+  { key: 'scatter', label: 'Scatter Plot', category: 'correlation' },
+  { key: 'table', label: 'Data Table', category: 'tabular' },
+];
+
+export const dataSources = [
+  {
+    key: 'revenue',
+    label: 'Revenue & Billing',
+    fields: [
+      { key: 'month', label: 'Month', type: 'string' },
+      { key: 'mrr', label: 'MRR', type: 'currency' },
+      { key: 'expansion', label: 'Expansion', type: 'currency' },
+      { key: 'contraction', label: 'Contraction', type: 'currency' },
+      { key: 'churned', label: 'Churned MRR', type: 'currency' },
+      { key: 'netNew', label: 'Net New MRR', type: 'currency' },
+    ],
+  },
+  {
+    key: 'tenants',
+    label: 'Tenants',
+    fields: [
+      { key: 'month', label: 'Month', type: 'string' },
+      { key: 'totalTenants', label: 'Total Tenants', type: 'number' },
+      { key: 'newTenants', label: 'New Tenants', type: 'number' },
+      { key: 'churnedTenants', label: 'Churned Tenants', type: 'number' },
+      { key: 'activeUsers', label: 'Active Users', type: 'number' },
+    ],
+  },
+  {
+    key: 'usage',
+    label: 'Usage & Activity',
+    fields: [
+      { key: 'month', label: 'Month', type: 'string' },
+      { key: 'apiCalls', label: 'API Calls', type: 'number' },
+      { key: 'storageGB', label: 'Storage (GB)', type: 'number' },
+      { key: 'activeUsers', label: 'Active Users', type: 'number' },
+      { key: 'utilization', label: 'Utilization', type: 'percent' },
+    ],
+  },
+  {
+    key: 'health',
+    label: 'System Health',
+    fields: [
+      { key: 'month', label: 'Month', type: 'string' },
+      { key: 'uptime', label: 'Uptime %', type: 'percent' },
+      { key: 'avgLatencyMs', label: 'Avg Latency (ms)', type: 'number' },
+      { key: 'incidents', label: 'Incidents', type: 'number' },
+      { key: 'errorRate', label: 'Error Rate', type: 'percent' },
+    ],
+  },
+  {
+    key: 'support',
+    label: 'Support',
+    fields: [
+      { key: 'month', label: 'Month', type: 'string' },
+      { key: 'ticketsOpened', label: 'Tickets Opened', type: 'number' },
+      { key: 'ticketsResolved', label: 'Tickets Resolved', type: 'number' },
+      { key: 'avgResponseHours', label: 'Avg Response (hrs)', type: 'number' },
+      { key: 'csat', label: 'CSAT', type: 'percent' },
+    ],
+  },
+];
+
+export const aggregations = [
+  { key: 'sum', label: 'Sum' },
+  { key: 'avg', label: 'Average' },
+  { key: 'min', label: 'Min' },
+  { key: 'max', label: 'Max' },
+  { key: 'count', label: 'Count' },
+];
+
+export const timeGranularities = [
+  { key: 'hour', label: 'Hourly' },
+  { key: 'day', label: 'Daily' },
+  { key: 'week', label: 'Weekly' },
+  { key: 'month', label: 'Monthly' },
+  { key: 'quarter', label: 'Quarterly' },
+  { key: 'year', label: 'Yearly' },
+];
+
+/* Preview sample rows for the report builder chart preview (client-side only). */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export const mockChartData = {
+  revenue: MONTHS.map((month, i) => ({
+    month,
+    mrr: 42000 + i * 1800,
+    expansion: 2400 + i * 150,
+    contraction: 800 + i * 60,
+    churned: 1200 + i * 90,
+    netNew: 3800 + i * 200,
+  })),
+  tenants: MONTHS.map((month, i) => ({
+    month,
+    totalTenants: 120 + i * 4,
+    newTenants: 6 + (i % 4),
+    churnedTenants: 2 + (i % 3),
+    activeUsers: 840 + i * 45,
+  })),
+  usage: MONTHS.map((month, i) => ({
+    month,
+    apiCalls: 1_200_000 + i * 80_000,
+    storageGB: 420 + i * 28,
+    activeUsers: 760 + i * 38,
+    utilization: 42 + i * 1.6,
+  })),
+  health: MONTHS.map((month, i) => ({
+    month,
+    uptime: 99.5 + (i % 3) * 0.15,
+    avgLatencyMs: 120 - i * 3.5,
+    incidents: 4 - (i % 3),
+    errorRate: 1.8 - i * 0.08,
+  })),
+  support: MONTHS.map((month, i) => ({
+    month,
+    ticketsOpened: 140 + i * 6,
+    ticketsResolved: 136 + i * 6,
+    avgResponseHours: 6.5 - i * 0.18,
+    csat: 88 + i * 0.7,
+  })),
+};
+
+export function getDataSourceFields(dataSourceKey) {
+  const source = dataSources.find((s) => s.key === dataSourceKey);
+  return source ? source.fields : [];
+}
+
+export function getApplicableAggregations(/* fieldType */) {
+  return aggregations;
+}
 
 /* ─── Latency History (24h sample data) ─── */
 export const latencyHistory = [

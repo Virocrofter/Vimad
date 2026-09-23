@@ -30,23 +30,37 @@ async function resolvePermissions(userId: string): Promise<string[]> {
     include: {
       role: {
         include: {
-          rolePermissions: {
-            include: { permission: true },
-          },
+          rolePermissions: { include: { permission: true } },
         },
       },
     },
   });
 
-  const permissions = new Set<string>();
+  // No explicit assignments — fall back to the global role matching user.role
+  // (seed creates global roles 'Owner'/'Admin'/'Manager'/'Staff'/'Housekeeper')
+  if (assignments.length === 0) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    if (!user) return [];
 
-  for (const assignment of assignments) {
-    for (const rp of assignment.role.rolePermissions) {
-      permissions.add(`${rp.permission.resource}:${rp.permission.action}`);
-    }
+    const role = await prisma.role.findFirst({
+      where: { name: { equals: user.role, mode: 'insensitive' }, tenantId: null },
+      include: { rolePermissions: { include: { permission: true } } },
+    });
+    if (!role) return [];
+
+    return role.rolePermissions.map((rp) => `${rp.permission.resource}:${rp.permission.action}`);
   }
 
-  return Array.from(permissions);
+  const perms = new Set<string>();
+  for (const assignment of assignments) {
+    for (const rp of assignment.role.rolePermissions) {
+      perms.add(`${rp.permission.resource}:${rp.permission.action}`);
+    }
+  }
+  return [...perms];
 }
 
 // ─── Auth Middleware (JWT or API key) ───
@@ -197,16 +211,16 @@ export function requireAllPermissions(...requiredPerms: [string, string][]) {
 }
 
 // ─── Tenant scope ───
-export function tenantScope() {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    const authReq = req as AuthenticatedRequest;
-    if (!authReq.auth) {
-      next(new AppError(401, 'Authentication required', 'UNAUTHORIZED'));
-      return;
-    }
-    req.tenantId = authReq.auth.tenantId;
-    next();
-  };
+// NOTE: plain middleware, used bare — router.use(authMiddleware, tenantScope).
+// Do NOT convert to a factory; all 16 routers pass it without ().
+export function tenantScope(req: Request, _res: Response, next: NextFunction) {
+  const authReq = req as AuthenticatedRequest;
+  if (!authReq.auth) {
+    next(new AppError(401, 'Authentication required', 'UNAUTHORIZED'));
+    return;
+  }
+  req.tenantId = authReq.auth.tenantId;
+  next();
 }
 
 declare global {

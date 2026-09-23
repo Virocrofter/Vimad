@@ -12,10 +12,10 @@ import { logger, requestLogger } from './common/logger.js';
 import { errorHandler } from './common/errors.js';
 import { sanitizeMiddleware } from './common/sanitize.js';
 import { versionMiddleware } from './common/versioning.js';
-import { metricsMiddleware, metricsHandler } from './common/metrics.js';
+import { metricsMiddleware, metricsHandler, recordApiUsage } from './common/metrics.js';
 import { sentryErrorHandler } from './common/sentry.js';
 import { generateOpenAPIDocument } from './common/openapi.js';
-import { createSocketServer } from './common/socket.js';
+// import { createSocketServer } from './common/socket.js'; // TODO: re-enable after socket.js is decoupled from auth.service.ts
 import { idempotencyMiddleware } from './common/idempotency.js';
 import {
   initRateLimitRedis,
@@ -53,12 +53,13 @@ import { notificationRouter } from './modules/notifications/notification.routes.
 import { apiKeysRouter } from './modules/rbac/api-key.routes.js';
 import { rbacRouter } from './modules/rbac/rbac.routes.js';
 import { pushRouter } from './modules/push/push.routes.js';
+import { adminRouter } from './modules/admin/admin.routes.js';
 
 const app = express();
 const server = createServer(app);
 const PORT = env.PORT;
 
-// ─── Keep worker references alive ───
+// Workers start on import (module-level createWorker) — track them for shutdown
 const activeWorkers = [
   emailWorker,
   nightAuditWorker,
@@ -78,7 +79,7 @@ async function bootstrap() {
   // Compression for responses
   app.use(
     compression({
-      filter: (req, res) => {
+      filter: (req: any, res: any) => {
         if (req.headers['x-no-compression']) return false;
         return compression.filter(req, res);
       },
@@ -139,7 +140,17 @@ async function bootstrap() {
   // Idempotency middleware (for mutating operations)
   app.use(idempotencyMiddleware);
 
-  // Prometheus scrape endpoint
+  // ─── Usage metering: record API calls per tenant ───
+  app.use((req: any, res, next) => {
+    res.on('finish', () => {
+      if (req.tenantId) {
+        recordApiUsage(req.tenantId, req.method, req.path, res.statusCode);
+      }
+    });
+    next();
+  });
+
+  // ─── Prometheus scrape endpoint (bearer-token protected in production) ───
   app.get('/metrics', metricsHandler);
 
   // Rate limiting
@@ -150,8 +161,30 @@ async function bootstrap() {
   app.use(apiLimiter);
 
   // ─── API Documentation ───
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(generateOpenAPIDocument()));
-  app.get('/openapi.json', (_req, res) => {
+  const docsAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (env.NODE_ENV !== 'production') return next();
+
+    const docsUser = process.env.DOCS_USERNAME;
+    const docsPass = process.env.DOCS_PASSWORD;
+
+    if (!docsUser || !docsPass) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } });
+      return;
+    }
+
+    const header = req.headers.authorization ?? '';
+    const [scheme, encoded] = header.split(' ');
+    if (scheme === 'Basic' && encoded) {
+      const [user, pass] = Buffer.from(encoded, 'base64').toString('utf8').split(':');
+      if (user === docsUser && pass === docsPass) return next();
+    }
+
+    res.setHeader('WWW-Authenticate', 'Basic realm="Vimad API Docs"');
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+  };
+
+  app.use('/api-docs', docsAuth, swaggerUi.serve, swaggerUi.setup(generateOpenAPIDocument()));
+  app.get('/openapi.json', docsAuth, (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(generateOpenAPIDocument());
   });
@@ -163,7 +196,7 @@ async function bootstrap() {
       version: '0.0.0',
       status: 'ok',
       environment: env.NODE_ENV,
-      documentation: '/api-docs',
+      documentation: env.NODE_ENV === 'production' ? undefined : '/api-docs',
     });
   });
   app.use('/health', healthRouter);
@@ -175,41 +208,66 @@ async function bootstrap() {
   app.use('/auth/reset-password', strictLimiter);
   app.use('/auth', authRouter);
 
-  // ─── Versioned API Routes ───
-  app.use('/v1/properties', tieredLimiter, propertiesRouter);
-  app.use('/v1/guests', tieredLimiter, guestsRouter);
-  app.use('/v1/reservations', tieredLimiter, reservationsRouter);
-  app.use('/v1/rooms', tieredLimiter, roomsRouter);
-  app.use('/v1/room-types', tieredLimiter, roomTypesRouter);
-  app.use('/v1/rates', tieredLimiter, ratesRouter);
-  app.use('/v1/folios', tieredLimiter, foliosRouter);
-  app.use('/v1/channel', tieredLimiter, channelRouter);
-  app.use('/v1/housekeeping', tieredLimiter, housekeepingRouter);
-  app.use('/v1/night-audit', tieredLimiter, nightAuditRouter);
-  app.use('/v1/sms', tieredLimiter, smsRouter);
-  app.use('/v1/notifications', tieredLimiter, notificationRouter);
-  app.use('/v1/api-keys', tieredLimiter, apiKeysRouter);
-  app.use('/v1/rbac', tieredLimiter, rbacRouter);
-  app.use('/v1/push', tieredLimiter, pushRouter);
-  app.use('/v1/guest-portal', tieredLimiter, guestPortalRouter);
+  // ─── Versioned API Routes (per-plan tiered rate limits) ───
+  app.use('/v1', tieredLimiter);
+  app.use('/v1/properties', propertiesRouter);
+  app.use('/v1/guests', guestsRouter);
+  app.use('/v1/reservations', reservationsRouter);
+  app.use('/v1/rooms', roomsRouter);
+  app.use('/v1/room-types', roomTypesRouter);
+  app.use('/v1/rates', ratesRouter);
+  app.use('/v1/folios', foliosRouter);
+  app.use('/v1/channel', channelRouter);
+  app.use('/v1/housekeeping', housekeepingRouter);
+  app.use('/v1/night-audit', nightAuditRouter);
+  app.use('/v1/sms', smsRouter);
+  app.use('/v1/notifications', notificationRouter);
+  app.use('/v1/api-keys', apiKeysRouter);
+  app.use('/v1/rbac', rbacRouter);
+  app.use('/v1/push', pushRouter);
+  app.use('/v1/guest-portal', guestPortalRouter);
 
-  // Legacy non-versioned routes
-  app.use('/properties', tieredLimiter, propertiesRouter);
-  app.use('/guests', tieredLimiter, guestsRouter);
-  app.use('/reservations', tieredLimiter, reservationsRouter);
-  app.use('/rooms', tieredLimiter, roomsRouter);
-  app.use('/room-types', tieredLimiter, roomTypesRouter);
-  app.use('/rates', tieredLimiter, ratesRouter);
-  app.use('/folios', tieredLimiter, foliosRouter);
-  app.use('/channel', tieredLimiter, channelRouter);
-  app.use('/housekeeping', tieredLimiter, housekeepingRouter);
-  app.use('/night-audit', tieredLimiter, nightAuditRouter);
-  app.use('/sms', tieredLimiter, smsRouter);
-  app.use('/notifications', tieredLimiter, notificationRouter);
-  app.use('/api-keys', tieredLimiter, apiKeysRouter);
-  app.use('/rbac', tieredLimiter, rbacRouter);
-  app.use('/push', tieredLimiter, pushRouter);
-  app.use('/guest-portal', tieredLimiter, guestPortalRouter);
+  // Legacy non-versioned routes (same tiered limits)
+  app.use(
+    [
+      '/properties',
+      '/guests',
+      '/reservations',
+      '/rooms',
+      '/room-types',
+      '/rates',
+      '/folios',
+      '/channel',
+      '/housekeeping',
+      '/night-audit',
+      '/sms',
+      '/notifications',
+      '/api-keys',
+      '/rbac',
+      '/push',
+      '/guest-portal',
+    ],
+    tieredLimiter
+  );
+  app.use('/properties', propertiesRouter);
+  app.use('/guests', guestsRouter);
+  app.use('/reservations', reservationsRouter);
+  app.use('/rooms', roomsRouter);
+  app.use('/room-types', roomTypesRouter);
+  app.use('/rates', ratesRouter);
+  app.use('/folios', foliosRouter);
+  app.use('/channel', channelRouter);
+  app.use('/housekeeping', housekeepingRouter);
+  app.use('/night-audit', nightAuditRouter);
+  app.use('/sms', smsRouter);
+  app.use('/notifications', notificationRouter);
+  app.use('/api-keys', apiKeysRouter);
+  app.use('/rbac', rbacRouter);
+  app.use('/push', pushRouter);
+  app.use('/guest-portal', guestPortalRouter);
+
+  // ─── Admin (platform admin: KPIs, health, alerts, reports, jobs) ───
+  app.use('/admin', adminRouter);
 
   // ─── Phase 3: Queue Dashboard (protected) ───
   app.use('/admin/queues', ...queueDashboardMiddleware());
@@ -218,7 +276,7 @@ async function bootstrap() {
   app.use(sentryErrorHandler);
   app.use(errorHandler);
 
-  // ─── Attach dead-letter handlers ───
+  // ─── Dead-letter handlers ───
   attachDeadLetterHandler('email');
   attachDeadLetterHandler('night-audit');
   attachDeadLetterHandler('billing');
@@ -226,20 +284,20 @@ async function bootstrap() {
   attachDeadLetterHandler('gdpr');
 
   // ─── Graceful Shutdown ───
-  process.on('SIGTERM', async () => {
-    logger.info('SIGTERM received, shutting down gracefully');
+  const shutdown = async (signal: string) => {
+    logger.info({ signal }, 'Shutdown received, closing server, workers, and queues');
+    server.close();
+    await Promise.allSettled(activeWorkers.map((w) => w.close()));
     await closeQueues();
     process.exit(0);
-  });
+  };
 
-  process.on('SIGINT', async () => {
-    logger.info('SIGINT received, shutting down gracefully');
-    await closeQueues();
-    process.exit(0);
-  });
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT', () => void shutdown('SIGINT'));
 
   // ─── Real-time Layer ───
-  createSocketServer(server);
+  // TODO: re-enable after socket.js is decoupled from auth.service.ts
+  // createSocketServer(server);
 
   // ─── Start Server ───
   server.listen(PORT, () => {

@@ -1,53 +1,55 @@
-import { getApiClient } from './client';
-import type { PaginatedResponse, PaginationParams } from './types';
-import type { RoomType } from '../types';
+/* apps/web/src/api/room-types.ts */
+import { apiGet, apiPost, apiPatch, apiDelete } from './client';
 
-export type { RoomType };
-
-export interface CreateRoomTypeInput {
+export interface RoomType {
+  id: string;
+  tenantId: string;
+  propertyId: string;
   name: string;
   code: string;
   description?: string;
-  baseRate: number;
+  baseOccupancy: number;
   maxOccupancy: number;
-  bedConfig?: string;
-  amenities?: string[];
-  imageUrl?: string;
-  status?: 'active' | 'inactive';
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export type UpdateRoomTypeInput = Partial<CreateRoomTypeInput>;
+export interface CreateRoomTypeInput {
+  propertyId: string;
+  name: string;
+  code: string;
+  description?: string;
+  baseOccupancy?: number;
+  maxOccupancy?: number;
+}
 
-export async function listRoomTypes(
-  params?: PaginationParams
-): Promise<PaginatedResponse<RoomType>> {
-  const client = getApiClient();
-  const response = await client.get<PaginatedResponse<RoomType>>('/room-types', { params });
+export interface UpdateRoomTypeInput extends Partial<CreateRoomTypeInput> {
+  status?: string;
+}
+
+export async function listRoomTypes(propertyId?: string): Promise<RoomType[]> {
+  const response = await apiGet<{ data: RoomType[] }>('/v1/room-types', {
+    propertyId,
+  });
   return response.data;
 }
 
-export async function getRoomType(id: string): Promise<{ data: RoomType }> {
-  const client = getApiClient();
-  const response = await client.get<{ data: RoomType }>(`/room-types/${id}`);
+export async function getRoomType(id: string): Promise<RoomType> {
+  const response = await apiGet<{ data: RoomType }>(`/v1/room-types/${id}`);
   return response.data;
 }
 
-export async function createRoomType(input: CreateRoomTypeInput): Promise<{ data: RoomType }> {
-  const client = getApiClient();
-  const response = await client.post<{ data: RoomType }>('/room-types', input);
+export async function createRoomType(input: CreateRoomTypeInput): Promise<RoomType> {
+  const response = await apiPost<{ data: RoomType }>('/v1/room-types', input);
   return response.data;
 }
 
-export async function updateRoomType(
-  id: string,
-  input: UpdateRoomTypeInput
-): Promise<{ data: RoomType }> {
-  const client = getApiClient();
-  const response = await client.patch<{ data: RoomType }>(`/room-types/${id}`, input);
+export async function updateRoomType(id: string, input: UpdateRoomTypeInput): Promise<RoomType> {
+  const response = await apiPatch<{ data: RoomType }>(`/v1/room-types/${id}`, input);
   return response.data;
 }
 
 export async function deleteRoomType(id: string): Promise<void> {
-  const client = getApiClient();
-  await client.delete(`/room-types/${id}`);
+  await apiDelete(`/v1/room-types/${id}`);
 }

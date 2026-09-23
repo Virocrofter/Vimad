@@ -1,8 +1,21 @@
-import { getApiClient } from './client';
-import type { PaginatedResponse, PaginationParams } from './types';
-import type { Property } from '../types';
+/* apps/web/src/api/properties.ts */
+import { apiGet, apiPost, apiPatch, apiDelete } from './client';
 
-export type { Property };
+export interface Property {
+  id: string;
+  tenantId: string;
+  name: string;
+  code: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  timezone: string;
+  currency: string;
+  status: string;
+  currentBusinessDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface CreatePropertyInput {
   name: string;
@@ -14,38 +27,30 @@ export interface CreatePropertyInput {
   currency?: string;
 }
 
-export type UpdatePropertyInput = Partial<CreatePropertyInput>;
+export interface UpdatePropertyInput extends Partial<CreatePropertyInput> {
+  status?: string;
+}
 
-export async function listProperties(
-  params?: PaginationParams
-): Promise<PaginatedResponse<Property>> {
-  const client = getApiClient();
-  const response = await client.get<PaginatedResponse<Property>>('/properties', { params });
+export async function listProperties(): Promise<Property[]> {
+  const response = await apiGet<{ data: Property[] }>('/v1/properties');
   return response.data;
 }
 
-export async function getProperty(id: string): Promise<{ data: Property }> {
-  const client = getApiClient();
-  const response = await client.get<{ data: Property }>(`/properties/${id}`);
+export async function getProperty(id: string): Promise<Property> {
+  const response = await apiGet<{ data: Property }>(`/v1/properties/${id}`);
   return response.data;
 }
 
-export async function createProperty(input: CreatePropertyInput): Promise<{ data: Property }> {
-  const client = getApiClient();
-  const response = await client.post<{ data: Property }>('/properties', input);
+export async function createProperty(input: CreatePropertyInput): Promise<Property> {
+  const response = await apiPost<{ data: Property }>('/v1/properties', input);
   return response.data;
 }
 
-export async function updateProperty(
-  id: string,
-  input: UpdatePropertyInput
-): Promise<{ data: Property }> {
-  const client = getApiClient();
-  const response = await client.patch<{ data: Property }>(`/properties/${id}`, input);
+export async function updateProperty(id: string, input: UpdatePropertyInput): Promise<Property> {
+  const response = await apiPatch<{ data: Property }>(`/v1/properties/${id}`, input);
   return response.data;
 }
 
 export async function deleteProperty(id: string): Promise<void> {
-  const client = getApiClient();
-  await client.delete(`/properties/${id}`);
+  await apiDelete(`/v1/properties/${id}`);
 }

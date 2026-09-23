@@ -177,12 +177,11 @@ registry.registerPath({
 pushRouter.delete('/subscriptions', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authReq = req as AuthenticatedRequest;
-    const endpoint =
-      req.body && typeof req.body === 'object'
-        ? (req.body as { endpoint?: string }).endpoint
-        : undefined;
-    const result = await removeSubscription(authReq.auth.user.id, endpoint);
-    res.json({ message: result.removed > 0 ? 'Subscription removed' : 'No subscription found' });
+    req.body && typeof req.body === 'object'
+      ? (req.body as { endpoint?: string }).endpoint
+      : undefined;
+    await removeSubscription(authReq.auth.user.id);
+    res.json({ message: 'Subscription removed' });
   } catch (err) {
     next(err);
   }

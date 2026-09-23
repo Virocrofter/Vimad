@@ -13,14 +13,13 @@ import {
   TableRow,
 } from '../../../components/ui/table';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerClose,
-} from '../../../components/ui/drawer';
+  Dialog as Drawer,
+  DialogContent as DrawerContent,
+  DialogHeader as DrawerHeader,
+  DialogTitle as DrawerTitle,
+  DialogDescription as DrawerDescription,
+  DialogFooter as DrawerFooter,
+} from '../../../components/ui/dialog';
 import {
   ChevronLeft,
   ChevronRight,
@@ -300,9 +299,9 @@ export function AuditDetailDrawer({ log, open, onClose }) {
         </div>
 
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
-          </DrawerClose>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
