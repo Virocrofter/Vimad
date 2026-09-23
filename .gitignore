@@ -57,4 +57,4 @@ Thumbs.db
 # ─── Misc ───
 .cache/
 tmp/
-temp/
+temp/repomix-output.xml
