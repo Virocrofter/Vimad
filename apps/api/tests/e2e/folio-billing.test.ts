@@ -62,13 +62,14 @@ describe('Folio & Billing E2E', () => {
     });
     guestId = guest.id;
 
-    // Create reservation
+    // Create reservation (unique confirmation number per run — the dev DB
+    // persists across runs and the field is unique)
     const reservation = await prisma.reservation.create({
       data: {
         tenantId: tenant.tenantId,
         propertyId,
         guestId,
-        confirmationNumber: 'TEST-001',
+        confirmationNumber: `E2E-${Date.now().toString(36).toUpperCase()}`,
         status: 'confirmed',
         arrivalDate: new Date('2026-10-01'),
         departureDate: new Date('2026-10-03'),
@@ -96,15 +97,17 @@ describe('Folio & Billing E2E', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.data).toMatchObject({
+      const data = response.body.data;
+      expect(data).toMatchObject({
         reservationId: _reservationId,
         status: 'open',
-        totalCharges: 0,
-        totalPayments: 0,
-        balance: 0,
       });
+      // Prisma Decimal serializes as a string in JSON responses
+      expect(Number(data.totalCharges)).toBe(0);
+      expect(Number(data.totalPayments)).toBe(0);
+      expect(Number(data.balance)).toBe(0);
 
-      folioId = response.body.data.id;
+      folioId = data.id;
     });
 
     it('rejects duplicate folio for same reservation', async () => {
@@ -133,10 +136,8 @@ describe('Folio & Billing E2E', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.data).toMatchObject({
-        type: 'room_charge',
-        amount: 150,
-      });
+      expect(response.body.data.type).toBe('room_charge');
+      expect(Number(response.body.data.amount)).toBe(150);
     });
 
     it('updates folio balance after charge', async () => {
@@ -145,10 +146,9 @@ describe('Folio & Billing E2E', () => {
         .set('Authorization', `Bearer ${tenant.token}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.data).toMatchObject({
-        totalCharges: 150,
-        balance: 150,
-      });
+      const data = response.body.data;
+      expect(Number(data.totalCharges)).toBe(150);
+      expect(Number(data.balance)).toBe(150);
     });
   });
 
@@ -171,22 +171,23 @@ describe('Folio & Billing E2E', () => {
         .set('Authorization', `Bearer ${tenant.token}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.data).toMatchObject({
-        totalCharges: 150,
-        totalPayments: 100,
-        balance: 50,
-      });
+      const data = response.body.data;
+      expect(Number(data.totalCharges)).toBe(150);
+      expect(Number(data.totalPayments)).toBe(100);
+      expect(Number(data.balance)).toBe(50);
     });
   });
 
   describe('POST /v1/folios/:id/charges/:chargeId/reverse', () => {
     it('reverses a charge', async () => {
-      // First get the folio to find charge ID
       const folioResponse = await request(app)
         .get(`/v1/folios/${folioId}`)
         .set('Authorization', `Bearer ${tenant.token}`);
 
-      const chargeId = folioResponse.body.data.items[0].id;
+      const roomCharge = folioResponse.body.data.items.find(
+        (i: { type: string }) => i.type === 'room_charge'
+      );
+      const chargeId = roomCharge.id;
 
       const response = await request(app)
         .post(`/v1/folios/${folioId}/charges/${chargeId}/reverse`)
@@ -197,7 +198,7 @@ describe('Folio & Billing E2E', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.data.type).toBe('adjustment');
-      expect(response.body.data.amount).toBe(-150);
+      expect(Number(response.body.data.amount)).toBe(-150);
     });
   });
 

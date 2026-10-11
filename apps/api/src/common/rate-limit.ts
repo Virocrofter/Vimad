@@ -61,12 +61,17 @@ export function getRedisClient() {
 }
 
 // ─── Key Generator ───
-function keyGenerator(req: Request): string {
-  const authReq = req as unknown as { auth?: { tenantId?: string; user?: { id?: string } } };
-  if (authReq.auth?.tenantId && authReq.auth?.user?.id) {
-    return `ratelimit:${authReq.auth.tenantId}:${authReq.auth.user.id}`;
-  }
-  return `ratelimit:ip:${ipKeyGenerator(req.ip ?? '')}`;
+// Each limiter namespace gets its own key prefix so a single request passing
+// through multiple limiters counts separately in each (avoids ERR_ERL_DOUBLE_COUNT
+// and keeps quotas independent).
+function keyGenerator(namespace: string) {
+  return (req: Request): string => {
+    const authReq = req as unknown as { auth?: { tenantId?: string; user?: { id?: string } } };
+    if (authReq.auth?.tenantId && authReq.auth?.user?.id) {
+      return `${namespace}:${authReq.auth.tenantId}:${authReq.auth.user.id}`;
+    }
+    return `${namespace}:ip:${ipKeyGenerator(req.ip ?? '')}`;
+  };
 }
 
 // ─── Tier Lookup: Read from database ───
@@ -107,10 +112,12 @@ async function getTierFromRequest(req: Request): Promise<PlanTier> {
 }
 
 // ─── Store Factory ───
-function makeStore() {
+// Distinct Redis key prefix per limiter so keys never collide across limiters.
+function makeStore(prefix: string) {
   if (!rateLimitStoreConnected) return undefined;
 
   return new RedisStore({
+    prefix,
     sendCommand: (command: string, ...args: string[]) =>
       redisConnection.call(command, ...args) as Promise<RedisReply>,
   });
@@ -118,20 +125,21 @@ function makeStore() {
 
 // ─── Create Tiered Rate Limiter ───
 export function createTieredRateLimiter(): RateLimitRequestHandler {
+  const keyGen = keyGenerator('rl:tiered');
   return rateLimit({
     windowMs: 60 * 1000,
     max: async (req: Request) => {
       const tier = await getTierFromRequest(req);
       return RATE_LIMIT_TIERS[tier].max;
     },
-    keyGenerator,
-    store: makeStore(),
+    keyGenerator: keyGen,
+    store: makeStore('rl:tiered:'),
     standardHeaders: true,
     legacyHeaders: false,
     skip: () => env.RATE_LIMIT_ENABLED !== 'true',
     handler: async (req, _res, _next, _options) => {
       const tier = await getTierFromRequest(req);
-      logger.warn({ key: keyGenerator(req), ip: req.ip, path: req.path }, 'Rate limit reached');
+      logger.warn({ key: keyGen(req), ip: req.ip, path: req.path }, 'Rate limit reached');
       throw new AppError(
         429,
         `Rate limit exceeded. Tier: ${RATE_LIMIT_TIERS[tier].label} (${RATE_LIMIT_TIERS[tier].max.toLocaleString()}/hr)`,
@@ -149,8 +157,8 @@ export function createStrictRateLimiter(
   return rateLimit({
     windowMs,
     max,
-    keyGenerator: (req) => `strict:${ipKeyGenerator(req.ip ?? '')}:${req.path}`,
-    store: makeStore(),
+    keyGenerator: (req) => `strict:ip:${ipKeyGenerator(req.ip ?? '')}:${req.path}`,
+    store: makeStore('rl:strict:'),
     standardHeaders: true,
     legacyHeaders: false,
     skip: () => env.RATE_LIMIT_ENABLED !== 'true',
@@ -169,8 +177,8 @@ export function createApiRateLimiter(): RateLimitRequestHandler {
   return rateLimit({
     windowMs: 60 * 1000,
     max: 100,
-    keyGenerator,
-    store: makeStore(),
+    keyGenerator: keyGenerator('rl:api'),
+    store: makeStore('rl:api:'),
     standardHeaders: true,
     legacyHeaders: false,
     skip: () => env.RATE_LIMIT_ENABLED !== 'true',

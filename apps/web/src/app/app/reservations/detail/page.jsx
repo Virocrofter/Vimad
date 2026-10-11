@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
 import {
   ArrowLeft,
   Calendar,
@@ -14,7 +13,6 @@ import {
   FileText,
   History,
   CreditCard,
-  Check,
   LogIn,
   LogOut,
   Printer,
@@ -22,119 +20,28 @@ import {
   Phone,
   Mail,
   MapPin,
-  Star,
   Send,
+  X,
+  UserPlus,
 } from 'lucide-react';
-
-/* ─── Mock Data ─── */
-const mockReservation = {
-  id: '4021',
-  guest: 'John Smith',
-  email: 'john@email.com',
-  phone: '+1 555-0101',
-  address: '123 Maple Ave, Boston, MA',
-  room: '204',
-  roomType: 'Deluxe King',
-  arrival: '2026-08-12',
-  departure: '2026-08-15',
-  nights: 3,
-  status: 'checked_in',
-  rate: 189,
-  tax: 28.35,
-  balance: 45.5,
-  source: 'Direct',
-  adults: 2,
-  children: 0,
-  specialRequests: 'High floor, away from elevator. Extra pillows.',
-  createdAt: '2026-08-01T10:30:00Z',
-  checkedInAt: '2026-08-12T14:15:00Z',
-  confirmationCode: 'UNF-8X2K9M',
-};
-
-const folioTransactions = [
-  {
-    id: 1,
-    date: '2026-08-12',
-    description: 'Room Charge — Deluxe King (1/3 nights)',
-    charge: 189.0,
-    payment: 0,
-    type: 'charge',
-  },
-  {
-    id: 2,
-    date: '2026-08-12',
-    description: 'Resort Fee',
-    charge: 35.0,
-    payment: 0,
-    type: 'charge',
-  },
-  {
-    id: 3,
-    date: '2026-08-12',
-    description: 'Payment — Visa •••• 4242',
-    charge: 0,
-    payment: 178.5,
-    type: 'payment',
-  },
-  {
-    id: 4,
-    date: '2026-08-13',
-    description: 'Room Charge — Deluxe King (2/3 nights)',
-    charge: 189.0,
-    payment: 0,
-    type: 'charge',
-  },
-  {
-    id: 5,
-    date: '2026-08-13',
-    description: 'Room Service — Dinner',
-    charge: 67.0,
-    payment: 0,
-    type: 'charge',
-  },
-];
-
-const historyEvents = [
-  {
-    id: 1,
-    time: '2026-08-01T10:30:00Z',
-    user: 'System',
-    action: 'Reservation created',
-    detail: 'Source: Direct • Confirmation: UNF-8X2K9M',
-  },
-  {
-    id: 2,
-    time: '2026-08-10T09:15:00Z',
-    user: 'Sarah Johnson',
-    action: 'Pre-checkin email sent',
-    detail: 'Guest prompted for arrival time',
-  },
-  {
-    id: 3,
-    time: '2026-08-12T14:15:00Z',
-    user: 'Sarah Johnson',
-    action: 'Guest checked in',
-    detail: 'Room 204 assigned • Key cards: 2',
-  },
-  {
-    id: 4,
-    time: '2026-08-13T08:45:00Z',
-    user: 'System',
-    action: 'Night audit posted',
-    detail: 'Room charge $189.00 posted to folio',
-  },
-];
-
-const stayHistory = [
-  { date: '2026-03-15', nights: 2, room: '312', revenue: 378, status: 'completed' },
-  { date: '2025-11-22', nights: 4, room: '204', revenue: 756, status: 'completed' },
-];
+import {
+  useReservation,
+  useCheckIn,
+  useCheckOut,
+  useCancelReservation,
+  useAssignRoom,
+  useUpdateReservation,
+} from '../../../../hooks/useReservations';
+import { useRooms } from '../../../../hooks/useRooms';
+import PaymentRequestsPanel from '../components/PaymentRequestsPanel';
+import { communicationsApi } from '../../../../api/communications';
 
 const statusMeta = {
   confirmed: { label: 'Confirmed', class: 'bg-accent/10 text-accent border-accent/20' },
   checked_in: { label: 'Checked In', class: 'bg-secondary/10 text-secondary border-secondary/20' },
   checked_out: { label: 'Checked Out', class: 'bg-neutral/10 text-text-muted border-border' },
   cancelled: { label: 'Cancelled', class: 'bg-danger/10 text-danger border-danger/20' },
+  no_show: { label: 'No-Show', class: 'bg-danger/10 text-danger border-danger/20' },
 };
 
 const tabs = [
@@ -145,7 +52,6 @@ const tabs = [
   { id: 'notes', label: 'Notes', icon: MessageSquare },
 ];
 
-/* ─── Components ─── */
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.confirmed;
   return (
@@ -160,6 +66,10 @@ function StatusBadge({ status }) {
   );
 }
 
+const fmt = (iso) => (iso ? new Date(iso).toLocaleString() : '—');
+const fmtDay = (iso) => (iso ?? '').slice(0, 10);
+const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
+
 function TimelineItem({ event, isLast }) {
   return (
     <div className="flex gap-4">
@@ -171,10 +81,8 @@ function TimelineItem({ event, isLast }) {
       </div>
       <div className={cn('pb-6', isLast && 'pb-0')}>
         <p className="text-sm font-medium text-text-primary">{event.action}</p>
-        <p className="text-xs text-text-secondary">{event.detail}</p>
-        <p className="mt-1 text-xs text-text-muted">
-          {new Date(event.time).toLocaleString()} • {event.user}
-        </p>
+        {event.detail && <p className="text-xs text-text-secondary">{event.detail}</p>}
+        <p className="mt-1 text-xs text-text-muted">{fmt(event.time)}</p>
       </div>
     </div>
   );
@@ -184,32 +92,130 @@ export default function ReservationDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('details');
-  const [notes, setNotes] = useState([
-    {
-      id: 1,
-      author: 'Sarah Johnson',
-      time: '2026-08-12T09:00:00Z',
-      content: 'Guest prefers extra pillows. VIP status noted.',
-    },
-    {
-      id: 2,
-      author: 'Mike Chen',
-      time: '2026-08-13T11:30:00Z',
-      content: 'Called guest about late checkout request. Approved until 1 PM.',
-    },
-  ]);
-  const [newNote, setNewNote] = useState('');
+  const [actionError, setActionError] = useState(null);
+  const [emailNotice, setEmailNotice] = useState(null);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignRoomId, setAssignRoomId] = useState('');
+  const [notesDraft, setNotesDraft] = useState(null);
 
-  const addNote = () => {
-    if (!newNote.trim()) return;
-    setNotes([
-      { id: Date.now(), author: 'You', time: new Date().toISOString(), content: newNote.trim() },
-      ...notes,
-    ]);
-    setNewNote('');
+  const { reservation: r, isLoading, error, refetch } = useReservation(id);
+  const { rooms } = useRooms();
+  const checkIn = useCheckIn();
+  const checkOut = useCheckOut();
+  const cancel = useCancelReservation();
+  const assignRoom = useAssignRoom();
+  const update = useUpdateReservation();
+
+  const mutationPending =
+    checkIn.isPending ||
+    checkOut.isPending ||
+    cancel.isPending ||
+    assignRoom.isPending ||
+    update.isPending;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-6">
+        <p className="text-sm text-text-muted">Loading reservation...</p>
+      </div>
+    );
+  }
+
+  if (error || !r) {
+    return (
+      <div className="space-y-4 p-6">
+        <button
+          onClick={() => navigate('/app/reservations')}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface hover:bg-surface-elevated"
+        >
+          <ArrowLeft className="h-4 w-4 text-text-secondary" />
+        </button>
+        <div className="rounded-xl border border-danger/20 bg-danger/5 p-8 text-center">
+          <p className="text-sm font-medium text-danger">
+            {error ? 'Failed to load reservation' : 'Reservation not found'}
+          </p>
+          {error && <p className="mt-1 text-xs text-text-muted">{error.message}</p>}
+          <Button onClick={() => refetch()} className="mt-4" size="sm">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const guest = r.guest ?? {};
+  const guestName =
+    r.guestName || `${guest.firstName ?? ''} ${guest.lastName ?? ''}`.trim() || 'Unnamed Guest';
+  const folio = r.folio;
+  const folioItems = folio?.items ?? [];
+  const balance = folio ? Number(folio.balance) : Number(r.balance ?? 0);
+  const stays = r.stays ?? [];
+  const roomNumber = r.roomNumber ?? stays[0]?.room?.number ?? null;
+  const roomTypeName = r.roomTypeName ?? stays[0]?.room?.roomType?.name ?? null;
+
+  const doCheckIn = () => {
+    setActionError(null);
+    checkIn.mutate(r.id, { onError: (e) => setActionError(e.message) });
+  };
+  const doCheckOut = () => {
+    setActionError(null);
+    checkOut.mutate(r.id, { onError: (e) => setActionError(e.message) });
+  };
+  const doCancel = () => {
+    if (!window.confirm(`Cancel reservation ${r.confirmationNumber}?`)) return;
+    setActionError(null);
+    cancel.mutate({ id: r.id }, { onError: (e) => setActionError(e.message) });
+  };
+  const doAssign = () => {
+    if (!assignRoomId) return;
+    setActionError(null);
+    assignRoom.mutate(
+      { id: r.id, input: { roomId: assignRoomId } },
+      {
+        onSuccess: () => setAssignOpen(false),
+        onError: (e) => setActionError(e.message),
+      }
+    );
   };
 
-  const folioBalance = folioTransactions.reduce((acc, t) => acc + t.charge - t.payment, 0);
+  const emailFolio = async () => {
+    setActionError(null);
+    setEmailNotice(null);
+    try {
+      await communicationsApi.sendFolio(r.id);
+      setEmailNotice('Folio email queued — check the Email Center or MailHog.');
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Failed to send folio email');
+    }
+  };
+  const saveNotes = () => {
+    setActionError(null);
+    update.mutate(
+      { id: r.id, input: { notes: notesDraft } },
+      { onError: (e) => setActionError(e.message) }
+    );
+  };
+
+  /* Derive a timeline from real data */
+  const historyEvents = [
+    {
+      id: 'created',
+      time: r.createdAt,
+      action: 'Reservation created',
+      detail: `Source: ${r.source}`,
+    },
+    ...(stays.length
+      ? [{ id: 'room', time: r.updatedAt, action: 'Room assigned', detail: `Room ${roomNumber}` }]
+      : []),
+    ...folioItems.slice(0, 10).map((item) => ({
+      id: item.id,
+      time: item.postedAt,
+      action: `Folio ${item.type}: ${item.description}`,
+      detail: money(item.amount),
+    })),
+  ]
+    .filter((e) => e.time)
+    .sort((a, b) => new Date(b.time) - new Date(a.time));
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -225,50 +231,72 @@ export default function ReservationDetailPage() {
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Arrival</label>
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-secondary" /> {mockReservation.arrival}
+                      <Calendar className="h-4 w-4 text-secondary" /> {fmtDay(r.arrivalDate)}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Departure</label>
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-secondary" /> {mockReservation.departure}
+                      <Calendar className="h-4 w-4 text-secondary" /> {fmtDay(r.departureDate)}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Nights</label>
-                    <p className="text-sm font-medium text-text-primary">
-                      {mockReservation.nights}
-                    </p>
+                    <p className="text-sm font-medium text-text-primary">{r.nights}</p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Guests</label>
                     <p className="text-sm font-medium text-text-primary">
-                      {mockReservation.adults} Adults{' '}
-                      {mockReservation.children > 0 && `• ${mockReservation.children} Children`}
+                      {r.adults} Adults {r.children > 0 && `• ${r.children} Children`}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Room</label>
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <BedDouble className="h-4 w-4 text-secondary" /> {mockReservation.room} —{' '}
-                      {mockReservation.roomType}
+                      <BedDouble className="h-4 w-4 text-secondary" />
+                      {roomNumber
+                        ? `${roomNumber}${roomTypeName ? ` — ${roomTypeName}` : ''}`
+                        : 'Unassigned'}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Rate</label>
                     <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-secondary" /> ${mockReservation.rate}
-                      /night
+                      <DollarSign className="h-4 w-4 text-secondary" />
+                      {r.rate != null ? `${money(r.rate)}/night` : 'Rate plan default'}
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-border">
-                  <label className="text-xs text-text-muted">Special Requests</label>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    {mockReservation.specialRequests}
-                  </p>
-                </div>
+                {r.notes && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <label className="text-xs text-text-muted">Notes</label>
+                    <p className="mt-1 text-sm text-text-secondary">{r.notes}</p>
+                  </div>
+                )}
               </div>
+
+              {stays.length > 0 && (
+                <div className="rounded-xl border border-border bg-surface p-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                    Room Stays ({stays.length} nights)
+                  </h3>
+                  <div className="space-y-2">
+                    {stays.map((s) => (
+                      <div
+                        key={s.id}
+                        className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-2.5"
+                      >
+                        <span className="text-sm text-text-primary">
+                          {fmtDay(s.date)} — Room {s.room?.number ?? '—'}
+                        </span>
+                        <span className="text-sm font-mono text-text-secondary">
+                          {money(s.rate)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="rounded-xl border border-border bg-surface p-6">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
@@ -278,28 +306,20 @@ export default function ReservationDetailPage() {
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Confirmation #</label>
                     <p className="text-sm font-mono font-medium text-text-primary">
-                      {mockReservation.confirmationCode}
+                      {r.confirmationNumber}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Source</label>
-                    <p className="text-sm font-medium text-text-primary">
-                      {mockReservation.source}
-                    </p>
+                    <p className="text-sm font-medium text-text-primary">{r.source}</p>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Created</label>
-                    <p className="text-sm text-text-secondary">
-                      {new Date(mockReservation.createdAt).toLocaleString()}
-                    </p>
+                    <p className="text-sm text-text-secondary">{fmt(r.createdAt)}</p>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-text-muted">Checked In</label>
-                    <p className="text-sm text-text-secondary">
-                      {mockReservation.checkedInAt
-                        ? new Date(mockReservation.checkedInAt).toLocaleString()
-                        : '—'}
-                    </p>
+                    <label className="text-xs text-text-muted">Last Updated</label>
+                    <p className="text-sm text-text-secondary">{fmt(r.updatedAt)}</p>
                   </div>
                 </div>
               </div>
@@ -311,20 +331,55 @@ export default function ReservationDetailPage() {
                   Quick Actions
                 </h3>
                 <div className="space-y-2">
-                  <Button className="w-full" size="sm">
-                    <Edit3 className="mr-1.5 h-4 w-4" /> Edit Reservation
-                  </Button>
-                  <Button variant="outline" className="w-full" size="sm">
+                  {!roomNumber && r.status === 'confirmed' && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                      onClick={() => setAssignOpen(true)}
+                      disabled={mutationPending}
+                    >
+                      <UserPlus className="mr-1.5 h-4 w-4" /> Assign Room
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                    onClick={() => window.print()}
+                  >
                     <Printer className="mr-1.5 h-4 w-4" /> Print Confirmation
                   </Button>
-                  {mockReservation.status === 'confirmed' && (
-                    <Button variant="outline" className="w-full" size="sm">
+                  {r.status === 'confirmed' && (
+                    <Button
+                      className="w-full"
+                      size="sm"
+                      onClick={doCheckIn}
+                      disabled={mutationPending}
+                    >
                       <LogIn className="mr-1.5 h-4 w-4" /> Check In
                     </Button>
                   )}
-                  {mockReservation.status === 'checked_in' && (
-                    <Button variant="outline" className="w-full" size="sm">
+                  {r.status === 'checked_in' && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                      onClick={doCheckOut}
+                      disabled={mutationPending}
+                    >
                       <LogOut className="mr-1.5 h-4 w-4" /> Check Out
+                    </Button>
+                  )}
+                  {(r.status === 'confirmed' || r.status === 'checked_in') && (
+                    <Button
+                      variant="danger"
+                      className="w-full"
+                      size="sm"
+                      onClick={doCancel}
+                      disabled={mutationPending}
+                    >
+                      Cancel Reservation
                     </Button>
                   )}
                 </div>
@@ -335,15 +390,12 @@ export default function ReservationDetailPage() {
                   Balance
                 </h3>
                 <p
-                  className={cn(
-                    'text-3xl font-bold',
-                    folioBalance > 0 ? 'text-danger' : 'text-accent'
-                  )}
+                  className={cn('text-3xl font-bold', balance > 0 ? 'text-danger' : 'text-accent')}
                 >
-                  ${folioBalance.toFixed(2)}
+                  {money(balance)}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
-                  {folioBalance > 0 ? 'Outstanding balance' : 'Fully paid'}
+                  {balance > 0 ? 'Outstanding balance' : 'Fully paid'}
                 </p>
               </div>
             </div>
@@ -352,60 +404,73 @@ export default function ReservationDetailPage() {
 
       case 'folio':
         return (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-text-primary">Folio Window 1</h3>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Printer className="mr-1.5 h-4 w-4" /> Print
+              <h3 className="text-lg font-semibold text-text-primary">
+                Folio {folio?.status ? `(${folio.status})` : ''}
+              </h3>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={emailFolio}>
+                  <Mail className="mr-1.5 h-4 w-4" /> Email Folio
                 </Button>
-                <Button variant="outline" size="sm">
-                  <DollarSign className="mr-1.5 h-4 w-4" /> Post Charge
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
+                  <Printer className="mr-1.5 h-4 w-4" /> Print
                 </Button>
               </div>
             </div>
-            <div className="rounded-xl border border-border bg-surface overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-background border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-medium text-text-secondary">Date</th>
-                    <th className="px-4 py-3 text-left font-medium text-text-secondary">
-                      Description
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-text-secondary">
-                      Charges
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-text-secondary">
-                      Payments
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {folioTransactions.map((t) => (
-                    <tr key={t.id} className="hover:bg-background/50 transition-colors">
-                      <td className="px-4 py-3 text-text-secondary">{t.date}</td>
-                      <td className="px-4 py-3 text-text-primary">{t.description}</td>
-                      <td className="px-4 py-3 text-right font-mono text-text-primary">
-                        {t.charge > 0 ? `$${t.charge.toFixed(2)}` : '—'}
+            {folioItems.length === 0 ? (
+              <div className="rounded-xl border border-border bg-surface p-10 text-center">
+                <p className="text-sm text-text-muted">
+                  No folio activity yet. Charges post automatically at night audit.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border bg-surface overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-background border-b border-border">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium text-text-secondary">Date</th>
+                      <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                        Description
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                        Charges
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-text-secondary">
+                        Payments
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {folioItems.map((t) => (
+                      <tr key={t.id} className="hover:bg-background/50 transition-colors">
+                        <td className="px-4 py-3 text-text-secondary">{fmtDay(t.postedAt)}</td>
+                        <td className="px-4 py-3 text-text-primary">{t.description}</td>
+                        <td className="px-4 py-3 text-right font-mono text-text-primary">
+                          {t.type === 'charge' ? money(t.amount) : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-accent">
+                          {t.type === 'payment' ? money(t.amount) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-background font-semibold">
+                      <td className="px-4 py-3 text-text-primary" colSpan={2}>
+                        Balance
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-accent">
-                        {t.payment > 0 ? `$${t.payment.toFixed(2)}` : '—'}
+                      <td className="px-4 py-3 text-right font-mono text-text-primary" colSpan={2}>
+                        <span className={balance > 0 ? 'text-danger' : 'text-accent'}>
+                          {money(balance)}
+                        </span>
                       </td>
                     </tr>
-                  ))}
-                  <tr className="bg-background font-semibold">
-                    <td className="px-4 py-3 text-text-primary" colSpan={2}>
-                      Balance
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono text-text-primary" colSpan={2}>
-                      <span className={folioBalance > 0 ? 'text-danger' : 'text-accent'}>
-                        ${folioBalance.toFixed(2)}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Deposit requests — emailed pay-now links, reminders, auto-cancel status */}
+            <PaymentRequestsPanel reservationId={r.id} />
           </div>
         );
 
@@ -415,22 +480,17 @@ export default function ReservationDetailPage() {
             <div className="lg:col-span-1">
               <div className="rounded-xl border border-border bg-surface p-6 text-center">
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 text-2xl font-bold text-secondary">
-                  {mockReservation.guest
+                  {guestName
                     .split(' ')
                     .map((n) => n[0])
                     .join('')
                     .slice(0, 2)
                     .toUpperCase()}
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-text-primary">
-                  {mockReservation.guest}
-                </h3>
-                <p className="text-sm text-text-secondary">Returning Guest • VIP</p>
-                <div className="mt-4 flex justify-center gap-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className="h-4 w-4 fill-warning text-warning" />
-                  ))}
-                </div>
+                <h3 className="mt-4 text-lg font-semibold text-text-primary">{guestName}</h3>
+                {guest.vipStatus && (
+                  <p className="text-sm text-text-secondary">{guest.vipStatus}</p>
+                )}
               </div>
             </div>
             <div className="lg:col-span-2 space-y-6">
@@ -440,39 +500,28 @@ export default function ReservationDetailPage() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm text-text-primary">
-                    <Mail className="h-4 w-4 text-text-muted" /> {mockReservation.email}
+                    <Mail className="h-4 w-4 text-text-muted" /> {guest.email ?? '—'}
                   </div>
                   <div className="flex items-center gap-3 text-sm text-text-primary">
-                    <Phone className="h-4 w-4 text-text-muted" /> {mockReservation.phone}
+                    <Phone className="h-4 w-4 text-text-muted" /> {guest.phone ?? '—'}
                   </div>
                   <div className="flex items-center gap-3 text-sm text-text-primary">
-                    <MapPin className="h-4 w-4 text-text-muted" /> {mockReservation.address}
+                    <MapPin className="h-4 w-4 text-text-muted" />
+                    {[guest.address, guest.city, guest.country].filter(Boolean).join(', ') || '—'}
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
-                  Stay History
-                </h3>
-                <div className="space-y-3">
-                  {stayHistory.map((stay, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">
-                          {stay.nights} nights • Room {stay.room}
-                        </p>
-                        <p className="text-xs text-text-muted">{stay.date}</p>
-                      </div>
-                      <span className="text-sm font-mono font-medium text-text-primary">
-                        ${stay.revenue}
-                      </span>
-                    </div>
-                  ))}
+              {(guest.nationality || guest.passportNumber) && (
+                <div className="rounded-xl border border-border bg-surface p-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                    Travel Documents
+                  </h3>
+                  <div className="space-y-2 text-sm text-text-primary">
+                    {guest.nationality && <p>Nationality: {guest.nationality}</p>}
+                    {guest.passportNumber && <p>Passport: {guest.passportNumber}</p>}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
@@ -483,15 +532,19 @@ export default function ReservationDetailPage() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-6">
               Activity Timeline
             </h3>
-            <div>
-              {historyEvents.map((event, i) => (
-                <TimelineItem
-                  key={event.id}
-                  event={event}
-                  isLast={i === historyEvents.length - 1}
-                />
-              ))}
-            </div>
+            {historyEvents.length === 0 ? (
+              <p className="text-sm text-text-muted">No activity recorded yet.</p>
+            ) : (
+              <div>
+                {historyEvents.map((event, i) => (
+                  <TimelineItem
+                    key={event.id}
+                    event={event}
+                    isLast={i === historyEvents.length - 1}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
 
@@ -500,34 +553,26 @@ export default function ReservationDetailPage() {
           <div className="space-y-6">
             <div className="rounded-xl border border-border bg-surface p-6">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
-                Add Note
+                Reservation Notes
               </h3>
-              <div className="flex gap-3">
-                <textarea
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Write an internal note..."
-                  rows={3}
-                  className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-                <Button onClick={addNote} className="self-end">
-                  <Send className="mr-1.5 h-4 w-4" /> Add
+              <textarea
+                value={notesDraft ?? r.notes ?? ''}
+                onChange={(e) => setNotesDraft(e.target.value)}
+                placeholder="Internal notes about this reservation..."
+                rows={4}
+                className="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <div className="mt-3 flex justify-end">
+                <Button
+                  size="sm"
+                  onClick={saveNotes}
+                  disabled={
+                    mutationPending || notesDraft === null || notesDraft === (r.notes ?? '')
+                  }
+                >
+                  <Send className="mr-1.5 h-4 w-4" /> Save Notes
                 </Button>
               </div>
-            </div>
-
-            <div className="space-y-3">
-              {notes.map((note) => (
-                <div key={note.id} className="rounded-xl border border-border bg-surface p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-text-primary">{note.author}</span>
-                    <span className="text-xs text-text-muted">
-                      {new Date(note.time).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-text-secondary">{note.content}</p>
-                </div>
-              ))}
             </div>
           </div>
         );
@@ -550,33 +595,66 @@ export default function ReservationDetailPage() {
           </button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-text-primary">Reservation #{id}</h1>
-              <StatusBadge status={mockReservation.status} />
+              <h1 className="text-2xl font-bold text-text-primary">{r.confirmationNumber}</h1>
+              <StatusBadge status={r.status} />
             </div>
             <p className="text-sm text-text-secondary">
-              {mockReservation.guest} • {mockReservation.roomType}
+              {guestName}
+              {roomTypeName ? ` • ${roomTypeName}` : ''}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-1.5 h-4 w-4" /> Print
           </Button>
-          <Button variant="outline" size="sm">
-            <Edit3 className="mr-1.5 h-4 w-4" /> Edit
-          </Button>
-          {mockReservation.status === 'confirmed' && (
-            <Button size="sm">
+          {!roomNumber && r.status === 'confirmed' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAssignOpen(true)}
+              disabled={mutationPending}
+            >
+              <UserPlus className="mr-1.5 h-4 w-4" /> Assign
+            </Button>
+          )}
+          {r.status === 'confirmed' && (
+            <Button size="sm" onClick={doCheckIn} disabled={mutationPending}>
               <LogIn className="mr-1.5 h-4 w-4" /> Check In
             </Button>
           )}
-          {mockReservation.status === 'checked_in' && (
-            <Button size="sm">
+          {r.status === 'checked_in' && (
+            <Button size="sm" onClick={doCheckOut} disabled={mutationPending}>
               <LogOut className="mr-1.5 h-4 w-4" /> Check Out
             </Button>
           )}
         </div>
       </div>
+      {/* Email notice */}
+      {emailNotice && (
+        <div className="flex items-center justify-between rounded-lg border border-accent/20 bg-accent/5 px-4 py-2.5">
+          <p className="text-sm text-accent">{emailNotice}</p>
+          <button
+            onClick={() => setEmailNotice(null)}
+            className="text-xs text-text-muted hover:text-text-primary"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Action error */}
+      {actionError && (
+        <div className="flex items-center justify-between rounded-lg border border-danger/20 bg-danger/5 px-4 py-2.5">
+          <p className="text-sm text-danger">{actionError}</p>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-xs text-text-muted hover:text-text-primary"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-b border-border">
@@ -605,6 +683,52 @@ export default function ReservationDetailPage() {
 
       {/* Content */}
       <div>{renderTabContent()}</div>
+
+      {/* Assign room modal */}
+      {assignOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">Assign Room</h3>
+              <button
+                onClick={() => setAssignOpen(false)}
+                className="text-text-muted hover:text-text-primary"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="max-h-64 overflow-y-auto space-y-1">
+              {rooms
+                .filter((rm) => (rm.status ?? '') !== 'occupied')
+                .map((rm) => (
+                  <button
+                    key={rm.id}
+                    onClick={() => setAssignRoomId(rm.id)}
+                    className={cn(
+                      'w-full flex items-center justify-between rounded-lg border px-4 py-2.5 text-left text-sm transition',
+                      assignRoomId === rm.id
+                        ? 'border-secondary bg-secondary/10 text-text-primary'
+                        : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
+                    )}
+                  >
+                    <span className="font-medium">Room {rm.number}</span>
+                    <span className="text-xs text-text-muted">
+                      Floor {rm.floor ?? '—'} · {rm.status}
+                    </span>
+                  </button>
+                ))}
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setAssignOpen(false)}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={doAssign} disabled={!assignRoomId || assignRoom.isPending}>
+                Assign Room
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

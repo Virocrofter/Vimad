@@ -261,7 +261,7 @@ const eventTypeBreakdown = [
 function formatCurrency(amount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'ZAR',
     maximumFractionDigits: 0,
   }).format(amount);
 }

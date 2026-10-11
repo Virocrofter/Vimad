@@ -928,9 +928,12 @@ export default function MarketingHome() {
               >
                 Request Demo <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-              <button className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated transition-colors">
-                <Play className="mr-2 h-4 w-4" /> Watch 2-Min Video
-              </button>
+              <Link
+                to="/book/DEMO-01"
+                className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated transition-colors"
+              >
+                <Calendar className="mr-2 h-4 w-4" /> Book a Demo Stay
+              </Link>
             </div>
             <p className="mt-4 text-xs text-text-muted">
               No setup fees. No contracts. 60-day free trial.

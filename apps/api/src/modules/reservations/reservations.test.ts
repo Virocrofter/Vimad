@@ -120,25 +120,26 @@ describe.skipIf(!RUN_DB_TESTS)('Reservations API', () => {
     expect(res.body.data.id).toBe(created.body.data.id);
   });
 
-  it('updates reservation status (cancel)', async () => {
+  it('updates reservation notes and party size', async () => {
     const created = await createReservation();
 
     const res = await request(app)
       .patch(`/v1/reservations/${created.body.data.id}`)
       .set('Authorization', `Bearer ${auth.token}`)
-      .send({ status: 'cancelled' });
+      .send({ notes: 'Late arrival', adults: 3 });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.status).toBe('cancelled');
+    expect(res.body.data.notes).toBe('Late arrival');
+    expect(res.body.data.adults).toBe(3);
   });
 
-  it('rejects invalid status transitions', async () => {
+  it('rejects invalid update payloads', async () => {
     const created = await createReservation();
 
     const res = await request(app)
       .patch(`/v1/reservations/${created.body.data.id}`)
       .set('Authorization', `Bearer ${auth.token}`)
-      .send({ status: 'not-a-status' });
+      .send({ rate: -10 });
 
     expect(res.status).toBe(400);
   });

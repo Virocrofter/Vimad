@@ -1,5 +1,4 @@
 /* src/app/guest-portal/stay/page.jsx */
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   KeyRound,
@@ -7,33 +6,23 @@ import {
   Sparkles,
   Wrench,
   ConciergeBell,
-  ArrowRight,
   Clock,
-  MapPin,
-  Star,
   AlertTriangle,
   CheckCircle2,
   ChevronRight,
-  Home,
-  Wifi,
-  Dumbbell,
-  Waves,
-  Car,
-  Coffee,
   MessageSquare,
-  Phone,
-  Bell,
   Package,
-  Trash2,
-  Bed,
+  Loader2,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { guestStay, formatDate, getStayPhase } from '../data';
+import { useStayDetails, getGuestToken } from '../../../hooks/useGuestPortalData';
+import { formatDate } from '../../../lib/guest-utils';
 
 export default function StayPage() {
   const navigate = useNavigate();
-  const stay = guestStay;
-  const phase = getStayPhase(stay);
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay, isLoading, isError, refetch } = useStayDetails();
 
   const quickServices = [
     {
@@ -43,7 +32,6 @@ export default function StayPage() {
       icon: UtensilsCrossed,
       href: '/guest-portal/stay/room-service',
       color: 'bg-orange-500/10 text-orange-500',
-      available: true,
     },
     {
       id: 'housekeeping',
@@ -52,7 +40,6 @@ export default function StayPage() {
       icon: Sparkles,
       href: '/guest-portal/stay/housekeeping',
       color: 'bg-blue-500/10 text-blue-500',
-      available: true,
     },
     {
       id: 'concierge',
@@ -61,7 +48,6 @@ export default function StayPage() {
       icon: ConciergeBell,
       href: '/guest-portal/stay/concierge',
       color: 'bg-purple-500/10 text-purple-500',
-      available: true,
     },
     {
       id: 'issues',
@@ -70,12 +56,55 @@ export default function StayPage() {
       icon: Wrench,
       href: '/guest-portal/stay/issues',
       color: 'bg-red-500/10 text-red-500',
-      available: true,
     },
   ];
 
-  const activeRequests = stay.requests || [];
-  const activeServices = stay.services || [];
+  if (!hasToken) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">Please verify your reservation first</p>
+        <button
+          onClick={() => navigate('/guest-portal/auth/login')}
+          className="mt-4 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white hover:bg-secondary/90"
+        >
+          Verify Reservation
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your stay…</p>
+      </div>
+    );
+  }
+
+  if (isError || !stay) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">We couldn’t load your stay details.</p>
+        <button
+          onClick={() => refetch()}
+          className="mt-4 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-elevated"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const nights = Math.max(
+    1,
+    Math.round(
+      (new Date(stay.departureDate).getTime() - new Date(stay.arrivalDate).getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
+  );
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -83,28 +112,53 @@ export default function StayPage() {
       <div>
         <h1 className="text-2xl font-bold text-text-primary">In-Stay Services</h1>
         <p className="text-sm text-text-secondary mt-1">
-          Room {stay.room.number} · {stay.property.name}
+          Room {stay.roomNumber} · {stay.guestName}
         </p>
       </div>
 
       {/* Stay Status Banner */}
-      <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-          <CheckCircle2 className="h-5 w-5 text-accent" />
+      <div
+        className={cn(
+          'rounded-xl border p-4 flex items-center gap-3',
+          stay.checkedIn ? 'border-accent/20 bg-accent/5' : 'border-info/20 bg-info/5'
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-full',
+            stay.checkedIn ? 'bg-accent/10' : 'bg-info/10'
+          )}
+        >
+          {stay.checkedIn ? (
+            <CheckCircle2 className="h-5 w-5 text-accent" />
+          ) : (
+            <Calendar className="h-5 w-5 text-info" />
+          )}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-accent">Checked In</p>
+          <p className={cn('text-sm font-semibold', stay.checkedIn ? 'text-accent' : 'text-info')}>
+            {stay.checkedIn ? 'Checked In' : 'Upcoming Stay'}
+          </p>
           <p className="text-xs text-text-secondary">
-            {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)} ·{' '}
-            {stay.dates.nights} nights
+            {formatDate(stay.arrivalDate)} – {formatDate(stay.departureDate)} · {nights} night
+            {nights !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/guest-portal/keys')}
-          className="inline-flex items-center gap-1 rounded-lg bg-accent px-3 py-2 text-xs font-medium text-white hover:bg-accent/90 transition-colors"
-        >
-          <KeyRound className="h-3.5 w-3.5" /> Digital Key
-        </button>
+        {stay.checkedIn ? (
+          <button
+            onClick={() => navigate('/guest-portal/keys')}
+            className="inline-flex items-center gap-1 rounded-lg bg-accent px-3 py-2 text-xs font-medium text-white hover:bg-accent/90 transition-colors"
+          >
+            <KeyRound className="h-3.5 w-3.5" /> Digital Key
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/guest-portal/check-in')}
+            className="inline-flex items-center gap-1 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-white hover:bg-secondary/90 transition-colors"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" /> Pre-Check-In
+          </button>
+        )}
       </div>
 
       {/* Quick Services Grid */}
@@ -115,11 +169,7 @@ export default function StayPage() {
             <button
               key={service.id}
               onClick={() => navigate(service.href)}
-              className={cn(
-                'flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4 transition-all hover:shadow-md hover:border-secondary/30 active:scale-95 text-left',
-                !service.available && 'opacity-50 cursor-not-allowed'
-              )}
-              disabled={!service.available}
+              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4 transition-all hover:shadow-md hover:border-secondary/30 active:scale-95 text-left"
             >
               <div
                 className={cn(
@@ -140,71 +190,22 @@ export default function StayPage() {
 
       {/* Active Orders & Requests */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Active Services */}
+        {/* Active Orders */}
         <div className="rounded-xl border border-border bg-surface overflow-hidden">
           <div className="border-b border-border bg-background px-4 py-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
               <Package className="h-4 w-4 text-secondary" /> Active Orders
             </h3>
-            <span className="text-xs text-text-muted">{activeServices.length} items</span>
           </div>
-          <div className="divide-y divide-border">
-            {activeServices.length > 0 ? (
-              activeServices.map((svc) => (
-                <div key={svc.id} className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-lg',
-                        svc.status === 'delivered' ? 'bg-accent/10' : 'bg-warning/10'
-                      )}
-                    >
-                      {svc.type === 'room_service' ? (
-                        <UtensilsCrossed
-                          className={cn(
-                            'h-4 w-4',
-                            svc.status === 'delivered' ? 'text-accent' : 'text-warning'
-                          )}
-                        />
-                      ) : (
-                        <Sparkles className="h-4 w-4 text-secondary" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">
-                        {svc.type === 'room_service' ? 'Room Service' : 'Service'}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {svc.items?.length || 0} items · {formatDate(svc.orderedAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={cn(
-                      'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
-                      svc.status === 'delivered'
-                        ? 'bg-accent/10 text-accent'
-                        : svc.status === 'pending'
-                          ? 'bg-warning/10 text-warning'
-                          : 'bg-secondary/10 text-secondary'
-                    )}
-                  >
-                    {svc.status}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="px-4 py-8 text-center">
-                <UtensilsCrossed className="h-8 w-8 text-text-muted mx-auto mb-2" />
-                <p className="text-sm text-text-muted">No active orders</p>
-                <button
-                  onClick={() => navigate('/guest-portal/stay/room-service')}
-                  className="mt-2 text-xs text-secondary hover:underline"
-                >
-                  Browse Menu
-                </button>
-              </div>
-            )}
+          <div className="px-4 py-8 text-center">
+            <UtensilsCrossed className="h-8 w-8 text-text-muted mx-auto mb-2" />
+            <p className="text-sm text-text-muted">No active orders</p>
+            <button
+              onClick={() => navigate('/guest-portal/stay/room-service')}
+              className="mt-2 text-xs text-secondary hover:underline"
+            >
+              Browse Menu
+            </button>
           </div>
         </div>
 
@@ -214,110 +215,17 @@ export default function StayPage() {
             <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
               <Wrench className="h-4 w-4 text-secondary" /> My Requests
             </h3>
-            <span className="text-xs text-text-muted">{activeRequests.length} items</span>
           </div>
-          <div className="divide-y divide-border">
-            {activeRequests.length > 0 ? (
-              activeRequests.map((req) => (
-                <div key={req.id} className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-lg',
-                        req.status === 'completed' ? 'bg-accent/10' : 'bg-info/10'
-                      )}
-                    >
-                      {req.type === 'housekeeping' ? (
-                        <Sparkles
-                          className={cn(
-                            'h-4 w-4',
-                            req.status === 'completed' ? 'text-accent' : 'text-info'
-                          )}
-                        />
-                      ) : (
-                        <Wrench className="h-4 w-4 text-secondary" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text-primary capitalize">
-                        {req.description}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {req.type} · {formatDate(req.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={cn(
-                      'rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
-                      req.status === 'completed'
-                        ? 'bg-accent/10 text-accent'
-                        : req.status === 'pending'
-                          ? 'bg-warning/10 text-warning'
-                          : 'bg-info/10 text-info'
-                    )}
-                  >
-                    {req.status}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="px-4 py-8 text-center">
-                <Wrench className="h-8 w-8 text-text-muted mx-auto mb-2" />
-                <p className="text-sm text-text-muted">No active requests</p>
-                <button
-                  onClick={() => navigate('/guest-portal/stay/housekeeping')}
-                  className="mt-2 text-xs text-secondary hover:underline"
-                >
-                  Request Service
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Property Info */}
-      <div className="rounded-xl border border-border bg-surface p-5">
-        <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-          <Home className="h-4 w-4 text-secondary" /> Property Information
-        </h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {[
-            {
-              icon: Phone,
-              label: 'Front Desk',
-              value: stay.property.phone,
-              href: `tel:${stay.property.phone}`,
-            },
-            {
-              icon: MessageSquare,
-              label: 'Chat',
-              value: 'Message Staff',
-              href: '/guest-portal/messages',
-            },
-            { icon: Clock, label: 'Check-out', value: stay.dates.departureTime, href: null },
-            { icon: Wifi, label: 'Wi-Fi', value: 'Vimad-Guest / ••••••••', href: null },
-            { icon: Dumbbell, label: 'Gym', value: '5AM – 11PM', href: null },
-            { icon: Waves, label: 'Pool', value: '6AM – 10PM', href: null },
-          ].map((item) => (
-            <div
-              key={item.label}
-              onClick={() => item.href && navigate(item.href)}
-              className={cn(
-                'flex items-center gap-3 rounded-lg border border-border bg-background p-3',
-                item.href && 'cursor-pointer hover:bg-surface-elevated transition-colors'
-              )}
+          <div className="px-4 py-8 text-center">
+            <Wrench className="h-8 w-8 text-text-muted mx-auto mb-2" />
+            <p className="text-sm text-text-muted">No active requests</p>
+            <button
+              onClick={() => navigate('/guest-portal/stay/housekeeping')}
+              className="mt-2 text-xs text-secondary hover:underline"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10">
-                <item.icon className="h-4 w-4 text-secondary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] text-text-muted uppercase tracking-wider">{item.label}</p>
-                <p className="text-sm font-medium text-text-primary truncate">{item.value}</p>
-              </div>
-            </div>
-          ))}
+              Request Service
+            </button>
+          </div>
         </div>
       </div>
 
@@ -352,6 +260,15 @@ export default function StayPage() {
             <ChevronRight className="h-4 w-4 text-text-muted" />
           </button>
         </div>
+      </div>
+
+      {/* Check-out reminder */}
+      <div className="rounded-xl border border-border bg-surface p-4 flex items-center gap-3">
+        <Clock className="h-5 w-5 text-text-muted shrink-0" />
+        <p className="text-xs text-text-secondary">
+          Check-out is on <strong>{formatDate(stay.departureDate)}</strong>. You can review your
+          bill and check out from the Billing section.
+        </p>
       </div>
     </div>
   );

@@ -8,11 +8,11 @@ export default function AppLayout() {
   const [collapsed] = useState(false);
 
   return (
-    <div className="app-layout">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar collapsed={collapsed} />
-      <div className="app-layout__main">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="app-layout__content">
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>

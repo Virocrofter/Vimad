@@ -466,7 +466,7 @@ export const initialTickets = [
     id: 'TKT-2026-0812-011',
     subject: 'Guest portal booking engine showing wrong currency',
     description:
-      'Our property is configured for USD but the guest portal is displaying prices in EUR. This started after the currency setting update on Monday.',
+      'Our property is configured for ZAR but the guest portal is displaying prices in EUR. This started after the currency setting update on Monday.',
     status: 'resolved',
     priority: 'medium',
     category: 'guest_portal',
@@ -487,7 +487,7 @@ export const initialTickets = [
         from: 'system',
         author: 'David Park',
         timestamp: '2026-08-12 15:00:00',
-        body: "Guest portal showing EUR instead of USD. Started after Monday's update.",
+        body: "Guest portal showing EUR instead of ZAR. Started after Monday's update.",
         internal: false,
       },
       {
@@ -503,7 +503,7 @@ export const initialTickets = [
         from: 'agent',
         author: 'Sarah Johnson',
         timestamp: '2026-08-13 10:00:00',
-        body: "Cache cleared and guest portal is now showing USD. I've also added a fix to prevent this in future updates.",
+        body: "Cache cleared and guest portal is now showing ZAR. I've also added a fix to prevent this in future updates.",
         internal: false,
       },
     ],

@@ -1,119 +1,107 @@
 // apps/web/src/api/rbac.ts
-import { getApiClient } from './client';
-import type { PaginatedResponse, PaginationParams } from './types';
+// Rewired: /admin/rbac/* does NOT exist on the backend.
+// Real mounts: /v1/rbac (roles + permissions) and /v1/api-keys.
+// SSO has no backend in v1 — functions kept as stubs that throw, gated by the adminSecurity flag.
+
+import { apiClient } from './client';
+
+export interface Permission {
+  id: string;
+  key?: string;
+  name?: string;
+  description?: string;
+  category?: string;
+}
 
 export interface Role {
   id: string;
   name: string;
   description?: string;
-  type: 'system' | 'custom';
-  isDefault: boolean;
-  isLocked: boolean;
-  tenantId?: string;
-  permissions: string[];
-  userCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Permission {
-  id: string;
-  resource: string;
-  action: string;
-  description?: string;
-  category: string;
+  permissions?: Array<string | Permission>;
+  userCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ApiKey {
   id: string;
   name: string;
-  keyPrefix: string;
-  scopes: string[];
-  status: 'active' | 'revoked';
-  environment: string;
-  rateLimit: string;
-  expiresAt?: string;
-  lastUsedAt?: string;
-  usageCount: number;
-  createdAt: string;
-  createdBy: string;
+  prefix?: string;
+  /** Full key — only present on the create response. */
+  key?: string;
+  scopes?: string[];
+  lastUsedAt?: string | null;
+  createdAt?: string;
+  revokedAt?: string | null;
 }
 
-export interface SSOConfig {
-  id: string;
-  provider: string;
-  clientId: string;
-  domain?: string;
-  enabled: boolean;
-  autoProvision: boolean;
-  defaultRole: string;
-  createdAt: string;
-  updatedAt: string;
-}
+/** Backend responses are inconsistently wrapped ({ data }, bare, or { roles: [...] }). */
+const unwrap = <T>(res: any): T => (res?.data?.data ?? res?.data ?? res) as T;
+const asList = (d: any, key: string): any[] => (Array.isArray(d) ? d : (d?.[key] ?? []));
 
-const client = getApiClient();
+// ---------------------------------------------------------------------------
+// Roles — /v1/rbac/roles
+// ---------------------------------------------------------------------------
 
-export async function getRoles(
-  params?: PaginationParams & { type?: string }
-): Promise<PaginatedResponse<Role>> {
-  return client.get('/admin/rbac/roles', params);
+export async function getRoles(): Promise<Role[]> {
+  const res = await apiClient.get('/v1/rbac/roles');
+  return asList(unwrap<any>(res), 'roles');
 }
 
 export async function getRole(id: string): Promise<Role> {
-  return client.get(`/admin/rbac/roles/${id}`);
+  return unwrap(await apiClient.get(`/v1/rbac/roles/${id}`));
 }
 
-export async function createRole(
-  data: Omit<Role, 'id' | 'createdAt' | 'updatedAt' | 'userCount'>
+export async function createRole(input: {
+  name: string;
+  description?: string;
+  permissions?: string[];
+}): Promise<Role> {
+  return unwrap(await apiClient.post('/v1/rbac/roles', input));
+}
+
+export async function updateRole(
+  id: string,
+  input: { name?: string; description?: string; permissions?: string[] }
 ): Promise<Role> {
-  return client.post('/admin/rbac/roles', data);
-}
-
-export async function updateRole(id: string, data: Partial<Role>): Promise<Role> {
-  return client.patch(`/admin/rbac/roles/${id}`, data);
+  return unwrap(await apiClient.put(`/v1/rbac/roles/${id}`, input));
 }
 
 export async function deleteRole(id: string): Promise<void> {
-  return client.delete(`/admin/rbac/roles/${id}`);
+  await apiClient.delete(`/v1/rbac/roles/${id}`);
 }
 
 export async function getPermissions(): Promise<Permission[]> {
-  return client.get('/admin/rbac/permissions');
+  const res = await apiClient.get('/v1/rbac/permissions');
+  return asList(unwrap<any>(res), 'permissions');
 }
 
-export async function getApiKeys(
-  params?: PaginationParams & { status?: string }
-): Promise<PaginatedResponse<ApiKey>> {
-  return client.get('/admin/rbac/api-keys', params);
+// ---------------------------------------------------------------------------
+// API keys — /v1/api-keys
+// ---------------------------------------------------------------------------
+
+export async function getApiKeys(): Promise<ApiKey[]> {
+  const res = await apiClient.get('/v1/api-keys');
+  return asList(unwrap<any>(res), 'apiKeys');
 }
 
-export async function createApiKey(data: {
-  name: string;
-  scopes: string[];
-  environment?: string;
-  expiresAt?: string;
-}): Promise<{ apiKey: ApiKey; secret: string }> {
-  return client.post('/admin/rbac/api-keys', data);
+export async function createApiKey(input: { name: string; scopes?: string[] }): Promise<ApiKey> {
+  return unwrap(await apiClient.post('/v1/api-keys', input));
 }
 
-export async function revokeApiKey(id: string, reason: string): Promise<ApiKey> {
-  return client.post(`/admin/rbac/api-keys/${id}/revoke`, { reason });
+export async function revokeApiKey(id: string): Promise<void> {
+  await apiClient.delete(`/v1/api-keys/${id}`);
 }
 
-export async function getSSOConfigs(): Promise<SSOConfig[]> {
-  return client.get('/admin/rbac/sso');
-}
+// ---------------------------------------------------------------------------
+// SSO — no backend in v1. Stubs throw loudly instead of silently 404ing.
+// ---------------------------------------------------------------------------
 
-export async function createSSOConfig(
-  data: Omit<SSOConfig, 'id' | 'createdAt' | 'updatedAt'>
-): Promise<SSOConfig> {
-  return client.post('/admin/rbac/sso', data);
-}
+const ssoUnavailable = (): never => {
+  throw new Error('SSO is not available in v1 (no backend route). Feature flag: adminSecurity.');
+};
 
-export async function updateSSOConfig(id: string, data: Partial<SSOConfig>): Promise<SSOConfig> {
-  return client.patch(`/admin/rbac/sso/${id}`, data);
-}
-
-export async function deleteSSOConfig(id: string): Promise<void> {
-  return client.delete(`/admin/rbac/sso/${id}`);
-}
+export const getSSOConfigs = ssoUnavailable;
+export const createSSOConfig = ssoUnavailable;
+export const updateSSOConfig = ssoUnavailable;
+export const deleteSSOConfig = ssoUnavailable;

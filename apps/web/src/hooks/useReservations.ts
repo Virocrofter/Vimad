@@ -5,28 +5,32 @@ import {
   getReservation,
   createReservation,
   updateReservation,
+  deleteReservation,
+  assignRoom,
   checkInReservation,
   checkOutReservation,
   cancelReservation,
   type CreateReservationInput,
   type UpdateReservationInput,
-} from '../api/reservations';
+  type AssignRoomInput,
+  type ReservationListParams,
+} from '../api/api-reservations';
 
-export function useReservations(params?: {
-  status?: string;
-  propertyId?: string;
-  page?: number;
-  pageSize?: number;
-}) {
+export interface UseReservationsParams extends ReservationListParams {}
+
+export function useReservations(params?: UseReservationsParams) {
   const query = useQuery({
-    queryKey: ['reservations', params],
-    queryFn: () => listReservations(params),
+    queryKey: ['reservations', 'list', params],
+    queryFn: () => listReservations({ pageSize: 25, ...params }),
+    placeholderData: (prev) => prev,
   });
 
   return {
+    data: query.data,
     reservations: query.data?.data ?? [],
     meta: query.data?.meta,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error: query.error as Error | null,
     refetch: query.refetch,
   };
@@ -36,60 +40,82 @@ export function useReservations(params?: {
 export const useReservationsList = useReservations;
 
 export function useReservation(id: string) {
-  return useQuery({
-    queryKey: ['reservations', id],
+  const query = useQuery({
+    queryKey: ['reservations', 'detail', id],
     queryFn: () => getReservation(id),
     enabled: !!id,
   });
+
+  return {
+    data: query.data?.data,
+    reservation: query.data?.data,
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
+}
+
+function useInvalidateReservations() {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ['reservations'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  };
 }
 
 export function useCreateReservation() {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateReservations();
   return useMutation({
     mutationFn: (input: CreateReservationInput) => createReservation(input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-    },
+    onSuccess: invalidate,
   });
 }
 
 export function useUpdateReservation() {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateReservations();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateReservationInput }) =>
       updateReservation(id, input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteReservation() {
+  const invalidate = useInvalidateReservations();
+  return useMutation({
+    mutationFn: (id: string) => deleteReservation(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useAssignRoom() {
+  const invalidate = useInvalidateReservations();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: AssignRoomInput }) => assignRoom(id, input),
+    onSuccess: invalidate,
   });
 }
 
 export function useCheckIn() {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateReservations();
   return useMutation({
-    mutationFn: (id: string) => checkInReservation({ id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-    },
+    mutationFn: (id: string) => checkInReservation(id),
+    onSuccess: invalidate,
   });
 }
 
 export function useCheckOut() {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateReservations();
   return useMutation({
     mutationFn: (id: string) => checkOutReservation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-    },
+    onSuccess: invalidate,
   });
 }
 
 export function useCancelReservation() {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateReservations();
   return useMutation({
-    mutationFn: (id: string) => cancelReservation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-    },
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => cancelReservation(id, reason),
+    onSuccess: invalidate,
   });
 }

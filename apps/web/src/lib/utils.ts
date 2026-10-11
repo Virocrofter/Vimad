@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 /** Format a number as currency. */
 export function formatCurrency(
   value: number | null | undefined,
-  currency = 'USD',
+  currency = 'ZAR',
   opts: Intl.NumberFormatOptions = {}
 ) {
   if (value == null || isNaN(value)) return '—';

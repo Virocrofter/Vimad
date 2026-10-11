@@ -1,13 +1,22 @@
 /* apps/api/src/modules/auth/auth.service.test.ts */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 // ─── Mock prisma before importing the service ───
 vi.mock('../../common/prisma.js', () => ({
   prisma: {
     tenant: { findUnique: vi.fn(), create: vi.fn() },
-    user: { findUnique: vi.fn() },
+    user: { findUnique: vi.fn(), update: vi.fn() },
+    role: { findFirst: vi.fn() },
+    roleAssignment: { create: vi.fn() },
+    refreshToken: {
+      create: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+    },
+    passwordReset: { updateMany: vi.fn(), create: vi.fn(), findFirst: vi.fn() },
+    $transaction: vi.fn(),
   },
 }));
 
@@ -26,6 +35,11 @@ const mockTenant = prisma.tenant as unknown as {
   create: ReturnType<typeof vi.fn>;
 };
 const mockUser = prisma.user as unknown as { findUnique: ReturnType<typeof vi.fn> };
+const mockRole = prisma.role as unknown as { findFirst: ReturnType<typeof vi.fn> };
+const mockRoleAssignment = prisma.roleAssignment as unknown as {
+  create: ReturnType<typeof vi.fn>;
+};
+const mockRefreshToken = prisma.refreshToken as unknown as Record<string, ReturnType<typeof vi.fn>>;
 
 const baseRegisterInput = {
   tenantName: 'Test Hotel Group',
@@ -73,6 +87,9 @@ describe('register', () => {
       slug: 'test-hotel',
       users: [fakeUser()],
     });
+    // No global 'Owner' role seeded in this mock → role assignment is skipped
+    mockRole.findFirst.mockResolvedValue(null);
+    mockRefreshToken.create.mockResolvedValue({ id: 'rt1' });
 
     const result = await register(baseRegisterInput);
 
@@ -85,6 +102,25 @@ describe('register', () => {
     const createArgs = mockTenant.create.mock.calls[0][0];
     expect(createArgs.data.users.create.passwordHash).not.toContain('supersecret1');
     expect(createArgs.data.users.create.passwordHash).toMatch(/^\$2[aby]\$/);
+  });
+
+  it('assigns the global Owner role when it exists', async () => {
+    mockTenant.findUnique.mockResolvedValue(null);
+    mockTenant.create.mockResolvedValue({
+      id: 'tenant-1',
+      name: 'Test Hotel Group',
+      slug: 'test-hotel',
+      users: [fakeUser()],
+    });
+    mockRole.findFirst.mockResolvedValue({ id: 'role-owner' });
+    mockRoleAssignment.create.mockResolvedValue({ id: 'ra1' });
+    mockRefreshToken.create.mockResolvedValue({ id: 'rt1' });
+
+    await register(baseRegisterInput);
+
+    expect(mockRoleAssignment.create).toHaveBeenCalledWith({
+      data: { userId: 'user-1', roleId: 'role-owner', assignedBy: 'user-1' },
+    });
   });
 });
 
@@ -110,9 +146,10 @@ describe('login', () => {
     });
   });
 
-  it('returns a signed token on success', async () => {
+  it('returns a signed token and a persisted refresh token on success', async () => {
     mockTenant.findUnique.mockResolvedValue({ id: 'tenant-1' });
     mockUser.findUnique.mockResolvedValue(fakeUser());
+    mockRefreshToken.create.mockResolvedValue({ id: 'rt1' });
 
     const result = await login(input);
     const payload = verifyToken(result.token);
@@ -120,6 +157,15 @@ describe('login', () => {
     expect(payload.userId).toBe('user-1');
     expect(payload.tenantId).toBe('tenant-1');
     expect(payload.role).toBe('owner');
+    expect(result.refreshToken).toBeTruthy();
+    expect(mockRefreshToken.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: 'user-1',
+          expiresAt: expect.any(Date),
+        }),
+      })
+    );
   });
 });
 
@@ -139,20 +185,44 @@ describe('tokens', () => {
     expect(() => verifyToken(token.slice(0, -4) + 'xxxx')).toThrow();
   });
 
-  it('refreshAccessToken rotates tokens for active users', async () => {
-    mockUser.findUnique.mockResolvedValue(fakeUser());
-    const refresh = generateRefreshToken('user-1');
+  it('generateRefreshToken persists a hashed token and returns the raw secret', async () => {
+    mockRefreshToken.create.mockResolvedValue({ id: 'rt1' });
 
-    const result = await refreshAccessToken(refresh);
+    const raw = await generateRefreshToken('user-1');
+
+    expect(typeof raw).toBe('string');
+    expect(raw.length).toBeGreaterThan(20);
+    const { createHash } = await import('crypto');
+    const stored = mockRefreshToken.create.mock.calls[0][0].data.tokenHash;
+    expect(stored).toBe(createHash('sha256').update(raw).digest('hex'));
+    expect(stored).not.toContain(raw);
+  });
+
+  it('refreshAccessToken rotates tokens for active users', async () => {
+    mockRefreshToken.findFirst.mockResolvedValue({ id: 'rt1', user: fakeUser() });
+    mockRefreshToken.update.mockResolvedValue({ id: 'rt1' });
+    mockRefreshToken.create.mockResolvedValue({ id: 'rt2' });
+
+    const result = await refreshAccessToken('any-raw-refresh-token');
+
     expect(result.token).toBeTruthy();
-    // The rotated refresh token is itself a valid refresh token for the same
-    // user. (Don't assert token inequality: JWTs signed within the same
-    // second from the same payload are byte-identical.)
-    const rotated = jwt.decode(result.refreshToken) as { userId: string; type: string } | null;
-    expect(rotated).toMatchObject({ userId: 'user-1', type: 'refresh' });
+    expect(result.refreshToken).toBeTruthy();
+    expect(verifyToken(result.token).userId).toBe('user-1');
+
+    // Old token revoked, new one persisted
+    expect(mockRefreshToken.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'rt1' },
+        data: expect.objectContaining({ revokedAt: expect.any(Date) }),
+      })
+    );
+    expect(mockRefreshToken.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: 'user-1' }) })
+    );
   });
 
   it('refreshAccessToken rejects access tokens used as refresh tokens', async () => {
+    mockRefreshToken.findFirst.mockResolvedValue(null);
     const accessToken = signToken({
       userId: 'user-1',
       tenantId: 't1',
@@ -163,8 +233,11 @@ describe('tokens', () => {
   });
 
   it('refreshAccessToken rejects tokens for deleted users', async () => {
-    mockUser.findUnique.mockResolvedValue(fakeUser({ status: 'deleted' }));
-    await expect(refreshAccessToken(generateRefreshToken('user-1'))).rejects.toMatchObject({
+    mockRefreshToken.findFirst.mockResolvedValue({
+      id: 'rt1',
+      user: fakeUser({ status: 'deleted' }),
+    });
+    await expect(refreshAccessToken('any-raw-refresh-token')).rejects.toMatchObject({
       statusCode: 401,
     });
   });

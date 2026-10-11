@@ -464,7 +464,7 @@ export function GuestCounter({ value, onChange, min = 1, max = 4, label }) {
 }
 
 /* ─── Price Summary ─── */
-export function PriceSummary({ breakdown, total, taxes, fees, currency = 'USD' }) {
+export function PriceSummary({ breakdown, total, taxes, fees, currency = 'ZAR' }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
       <h3 className="text-sm font-semibold text-text-primary mb-3">Price Summary</h3>

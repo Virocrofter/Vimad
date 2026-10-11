@@ -185,7 +185,7 @@ export const usageAnalytics = {
 export function formatCurrency(value) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'ZAR',
     maximumFractionDigits: 0,
   }).format(value || 0);
 }

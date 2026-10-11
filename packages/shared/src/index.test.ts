@@ -9,14 +9,12 @@ describe('@unified-pms/shared', () => {
   });
 
   it('should have schemas exports', () => {
-    // Add specific tests based on your actual exports
     expect(typeof shared).toBe('object');
   });
 });
 
 describe('Shared Types', () => {
   it('should define common types', () => {
-    // Type tests - these will fail at compile time if types are wrong
     type TestUser = {
       id: string;
       email: string;
@@ -34,10 +32,6 @@ describe('Shared Types', () => {
 
 describe('Shared Schemas', () => {
   it('should validate common data structures', () => {
-    // Add schema validation tests here
-    // Example:
-    // const result = someSchema.safeParse({ ... });
-    // expect(result.success).toBe(true);
     expect(true).toBe(true);
   });
 });

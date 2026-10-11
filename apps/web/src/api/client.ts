@@ -76,11 +76,30 @@ export const apiClient = axios.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Request Interceptor: Attach JWT + Pre-emptive Refresh
+// API versioning: single mount per router on the backend (legacy mounts were
+// cut). Every relative request path is routed under /v1 EXCEPT /auth/*, which
+// stays unversioned. Absolute URLs are left untouched.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const UNVERSIONED_PATH_PATTERNS: RegExp[] = [/^\/auth(?:\/|$)/];
+
+function normalizeApiVersion(config: InternalAxiosRequestConfig): void {
+  const url = config.url;
+  if (!url) return;
+  if (/^https?:\/\//i.test(url)) return; // absolute URL — leave alone
+  if (url.startsWith('/v1')) return; // already versioned
+  if (UNVERSIONED_PATH_PATTERNS.some((re) => re.test(url))) return; // /auth/*
+  config.url = `/v1${url.startsWith('/') ? url : `/${url}`}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Request Interceptor: Versioning + Attach JWT + Pre-emptive Refresh
 // ─────────────────────────────────────────────────────────────────────────────
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    normalizeApiVersion(config);
+
     const isPublicEndpoint =
       config.url?.includes('/auth/login') ||
       config.url?.includes('/auth/register') ||

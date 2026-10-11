@@ -4,7 +4,6 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
@@ -101,6 +100,106 @@ const DialogDescription = React.forwardRef<
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
+
+// ─── Dual-mode Dialog ───
+// Custom API (used by guests pages etc.):
+//   <Dialog open onClose title description footer size>children</Dialog>
+// Radix API (shadcn style): <Dialog><DialogTrigger/>...</Dialog>
+
+const DIALOG_SIZES = {
+  sm: 'max-w-md',
+  default: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+};
+
+type DialogProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root> & {
+  onClose?: () => void;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  footer?: React.ReactNode;
+  size?: keyof typeof DIALOG_SIZES;
+  className?: string;
+};
+
+function Dialog({
+  open,
+  onOpenChange,
+  onClose,
+  title,
+  description,
+  footer,
+  size = 'default',
+  className,
+  children,
+  ...rootProps
+}: DialogProps) {
+  const isCustom = onClose !== undefined || title !== undefined || footer !== undefined;
+
+  const handleOpenChange = (next: boolean) => {
+    onOpenChange?.(next);
+    if (!next) onClose?.();
+  };
+
+  // Radix mode — behave exactly like DialogPrimitive.Root
+  if (!isCustom) {
+    return (
+      <DialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...rootProps}>
+        {children}
+      </DialogPrimitive.Root>
+    );
+  }
+
+  // Custom modal mode — portal + overlay + header/footer, Escape/X/overlay all call onClose
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogPrimitive.Content
+          className={cn(
+            'fixed left-[50%] top-[50%] z-50 grid max-h-[90vh] w-full translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto border bg-background p-0 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg',
+            DIALOG_SIZES[size],
+            className
+          )}
+          {...rootProps}
+        >
+          {(title || description) && (
+            <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-4">
+              <div>
+                {title ? (
+                  <DialogPrimitive.Title className="text-lg font-semibold text-text-primary">
+                    {title}
+                  </DialogPrimitive.Title>
+                ) : (
+                  <DialogPrimitive.Title className="sr-only">Dialog</DialogPrimitive.Title>
+                )}
+                {description ? (
+                  <DialogPrimitive.Description className="mt-1 text-sm text-text-muted">
+                    {description}
+                  </DialogPrimitive.Description>
+                ) : (
+                  <DialogPrimitive.Description className="sr-only">
+                    Dialog
+                  </DialogPrimitive.Description>
+                )}
+              </div>
+              <DialogPrimitive.Close className="rounded-md p-1 text-text-muted transition-colors hover:bg-surface-elevated hover:text-text-primary">
+                <X className="h-5 w-5" />
+                <span className="sr-only">Close</span>
+              </DialogPrimitive.Close>
+            </div>
+          )}
+          <div className="px-6 py-4">{children}</div>
+          {footer && (
+            <div className="flex items-center justify-end gap-2 border-t border-border px-6 py-4">
+              {footer}
+            </div>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPortal>
+    </DialogPrimitive.Root>
+  );
+}
 
 export {
   Dialog,

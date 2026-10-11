@@ -10,7 +10,7 @@ export const propertyCreateSchema = z.object({
   city: z.string().optional(),
   country: z.string().optional(),
   timezone: z.string().default('UTC'),
-  currency: z.string().default('USD'),
+  currency: z.string().default('ZAR'),
 });
 
 export const propertyUpdateSchema = propertyCreateSchema.partial();

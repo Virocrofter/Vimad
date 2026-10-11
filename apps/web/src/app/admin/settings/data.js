@@ -7,7 +7,7 @@ export const initialPlatformConfig = {
   senderName: 'Vimad Platform',
   replyToEmail: 'noreply@vimad.io',
   defaultTimezone: 'America/New_York',
-  defaultCurrency: 'USD',
+  defaultCurrency: 'ZAR',
   dateFormat: 'MM/DD/YYYY',
   timeFormat: '12h',
   language: 'en',
@@ -312,7 +312,7 @@ export const timezones = [
 ];
 
 export const currencies = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'ZAR', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
   { code: 'GBP', symbol: '£', name: 'British Pound' },
   { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },

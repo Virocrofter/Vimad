@@ -465,7 +465,7 @@ export const regions = ['us-east', 'us-west', 'us-central', 'eu-west', 'ap-south
 export const plans = ['Starter', 'Professional', 'Enterprise'];
 
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ZAR' }).format(amount);
 }
 
 export function formatDate(dateStr) {

@@ -267,7 +267,7 @@ const initialSessions = [
 
 /* ─── Helpers ─── */
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ZAR' }).format(amount);
 }
 
 function sessionCost(session) {

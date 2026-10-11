@@ -1,11 +1,10 @@
 /* src/app/guest-portal/check-in/page.jsx */
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   CheckCircle2,
   ChevronRight,
-  User,
   CreditCard,
   Car,
   Clock,
@@ -13,52 +12,50 @@ import {
   Loader2,
   AlertTriangle,
   Info,
-  Upload,
-  Camera,
-  Smartphone,
   KeyRound,
   Bed,
   MapPin,
   Calendar,
-  Phone,
-  Mail,
-  FileCheck,
   QrCode,
-  Wifi,
-  ParkingCircle,
-  Utensils,
-  Sparkles,
-  Check,
-  X,
-  Star,
-  Heart,
-  ThumbsUp,
-  ThumbsDown,
-  ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
-import { guestStays, formatDate, formatCurrency, getStayPhase, canCheckIn } from '../data';
+import { formatDate } from '../../../lib/guest-utils';
+import {
+  useStayDetails,
+  useCheckIn,
+  useUpdatePreferences,
+  getGuestToken,
+} from '../../../hooks/useGuestPortalData';
 import { StepIndicator, FileUploadZone } from '../components';
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function GuestCheckInPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const stayId = searchParams.get('stay');
-
-  const stay = guestStays.find((s) => s.id === stayId);
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay, isLoading, isError } = useStayDetails();
+  const checkIn = useCheckIn();
+  const updatePreferences = useUpdatePreferences();
 
   const [step, setStep] = useState(0); // 0: intro, 1: id, 2: vehicle, 3: preferences, 4: payment, 5: review, 6: complete
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Form data
   const [idUploaded, setIdUploaded] = useState(false);
   const [idPreview, setIdPreview] = useState(null);
+  const [idDocument, setIdDocument] = useState(null);
   const [vehicleInfo, setVehicleInfo] = useState({ plate: '', make: '', model: '', color: '' });
   const [hasVehicle, setHasVehicle] = useState(false);
   const [preferences, setPreferences] = useState({
-    earlyCheckIn: false,
-    lateCheckOut: false,
     roomLocation: 'high-floor',
     pillowType: 'firm',
     temperature: 68,
@@ -78,23 +75,51 @@ export default function GuestCheckInPage() {
     'Service animal',
   ];
 
-  useEffect(() => {
-    if (stay && !canCheckIn(stay)) {
-      // Can't check in yet, show message
-    }
-  }, [stay]);
-
-  if (!stay) {
+  if (!hasToken) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <AlertTriangle className="h-10 w-10 text-warning mb-3" />
-        <p className="text-sm text-text-muted">Reservation not found</p>
+        <p className="text-sm text-text-muted">Please verify your reservation first</p>
+        <Button className="mt-4" onClick={() => navigate('/guest-portal/auth/login')}>
+          Verify Reservation
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your stay…</p>
+      </div>
+    );
+  }
+
+  if (isError || !stay) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">Reservation not found or session expired</p>
         <Button
           variant="outline"
           className="mt-4"
-          onClick={() => navigate('/guest-portal/booking')}
+          onClick={() => navigate('/guest-portal/auth/login')}
         >
-          Back to Reservations
+          Verify again
+        </Button>
+      </div>
+    );
+  }
+
+  if (stay.checkedIn && step < 6) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <CheckCircle2 className="h-10 w-10 text-accent mb-3" />
+        <h2 className="text-lg font-semibold text-text-primary">You're already checked in</h2>
+        <p className="text-sm text-text-muted mt-1">Room {stay.roomNumber}</p>
+        <Button className="mt-4" onClick={() => navigate('/guest-portal')}>
+          Go to Dashboard
         </Button>
       </div>
     );
@@ -106,25 +131,51 @@ export default function GuestCheckInPage() {
         return idUploaded;
       case 2:
         return !hasVehicle || (vehicleInfo.plate && vehicleInfo.make);
-      case 3:
-        return true;
       case 4:
         return paymentVerified && termsAccepted;
-      case 5:
-        return true;
       default:
         return true;
     }
   };
 
+  const buildPreferencesPayload = () => {
+    const payload = {
+      roomLocation: preferences.roomLocation,
+      pillowType: preferences.pillowType,
+      temperature: String(preferences.temperature),
+    };
+    if (preferences.dietary.length) payload.dietary = preferences.dietary.join(', ');
+    if (preferences.accessibility.length)
+      payload.accessibility = preferences.accessibility.join(', ');
+    if (preferences.specialRequests.trim())
+      payload.specialRequests = preferences.specialRequests.trim();
+    if (hasVehicle && vehicleInfo.plate) {
+      payload.vehiclePlate = vehicleInfo.plate;
+      payload.vehicle = [vehicleInfo.make, vehicleInfo.model, vehicleInfo.color]
+        .filter(Boolean)
+        .join(' ');
+    }
+    if (digitalKey) payload.digitalKeyRequested = 'true';
+    return payload;
+  };
+
   const handleNext = async () => {
-    if (step === 5) {
-      setIsSubmitting(true);
-      await new Promise((r) => setTimeout(r, 2000));
-      setIsSubmitting(false);
-      setStep(6);
-    } else {
+    if (step !== 5) {
       setStep(step + 1);
+      return;
+    }
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      await updatePreferences.mutateAsync(buildPreferencesPayload());
+      await checkIn.mutateAsync({ idDocument: idDocument ?? undefined });
+      setStep(6);
+    } catch (err) {
+      setSubmitError(
+        err?.message ?? 'Check-in failed. Please try again or contact the front desk.'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,7 +210,7 @@ export default function GuestCheckInPage() {
         <div>
           <h1 className="text-lg font-semibold text-text-primary">Pre-Check-In</h1>
           <p className="text-xs text-text-muted">
-            {stay.confirmationNumber} · {stay.property.name}
+            {stay.guestName} · Room {stay.roomNumber}
           </p>
         </div>
       </div>
@@ -171,43 +222,23 @@ export default function GuestCheckInPage() {
       {step === 0 && (
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="h-32 bg-background relative">
-              <img
-                src={stay.property.images[0]}
-                alt={stay.property.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4">
-                <h2 className="text-white font-semibold text-lg">{stay.property.name}</h2>
-                <p className="text-white/80 text-xs flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {stay.property.address.city}, {stay.property.address.state}
-                </p>
-              </div>
-            </div>
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-medium text-text-primary">{stay.room.type}</p>
-                  <p className="text-xs text-text-muted">{stay.dates.nights} nights</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-text-primary">
-                    {formatCurrency(stay.rate.total)}
-                  </p>
+                  <p className="text-sm font-medium text-text-primary">Room {stay.roomNumber}</p>
+                  <p className="text-xs text-text-muted">{stay.guestName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-xs text-text-secondary">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-text-muted" />
                   <span>
-                    {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)}
+                    {formatDate(stay.arrivalDate)} – {formatDate(stay.departureDate)}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 text-text-muted" />
-                  <span>{stay.dates.arrivalTime} check-in</span>
+                  <MapPin className="h-3.5 w-3.5 text-text-muted" />
+                  <span>Contactless check-in available</span>
                 </div>
               </div>
             </div>
@@ -279,9 +310,10 @@ export default function GuestCheckInPage() {
 
             {!idUploaded ? (
               <FileUploadZone
-                onUpload={(files) => {
+                onUpload={async (files) => {
                   if (files.length > 0) {
                     setIdPreview(URL.createObjectURL(files[0]));
+                    setIdDocument(await fileToBase64(files[0]));
                     setIdUploaded(true);
                   }
                 }}
@@ -310,6 +342,7 @@ export default function GuestCheckInPage() {
                   onClick={() => {
                     setIdUploaded(false);
                     setIdPreview(null);
+                    setIdDocument(null);
                   }}
                   className="text-xs text-secondary hover:underline"
                 >
@@ -626,12 +659,12 @@ export default function GuestCheckInPage() {
                   <CreditCard className="h-5 w-5 text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-text-primary">Visa ending in 4242</p>
-                  <p className="text-xs text-text-muted">Expires 12/27</p>
+                  <p className="text-sm font-medium text-text-primary">Card on file</p>
+                  <p className="text-xs text-text-muted">Managed by the property</p>
                 </div>
                 <span className="inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Verified
+                  On file
                 </span>
               </div>
             </div>
@@ -735,7 +768,7 @@ export default function GuestCheckInPage() {
               <div className="flex items-center justify-between py-2">
                 <span className="text-text-secondary">Payment</span>
                 <span className="text-accent flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4" /> Verified
+                  <CheckCircle2 className="h-4 w-4" /> Confirmed
                 </span>
               </div>
             </div>
@@ -754,8 +787,20 @@ export default function GuestCheckInPage() {
             </label>
           </div>
 
+          {submitError && (
+            <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
+              <p className="text-xs text-danger">{submitError}</p>
+            </div>
+          )}
+
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={handleBack}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={handleBack}
+              disabled={isSubmitting}
+            >
               Back
             </Button>
             <Button className="flex-1" onClick={handleNext} disabled={isSubmitting}>
@@ -783,8 +828,7 @@ export default function GuestCheckInPage() {
           </div>
           <h3 className="text-xl font-semibold text-text-primary mb-2">Pre-Check-In Complete!</h3>
           <p className="text-sm text-text-secondary max-w-sm mx-auto">
-            You're all set for your stay at {stay.property.name}. Your digital key will be activated
-            on {formatDate(stay.dates.arrival)}.
+            You're all set. Your digital key will be activated on {formatDate(stay.arrivalDate)}.
           </p>
 
           <div className="rounded-xl border border-border bg-surface p-4 text-left max-w-sm mx-auto">
@@ -804,10 +848,8 @@ export default function GuestCheckInPage() {
                 <Clock className="h-5 w-5 text-secondary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-text-primary">Check-in Time</p>
-                <p className="text-xs text-text-muted">
-                  {stay.dates.arrivalTime} on {formatDate(stay.dates.arrival)}
-                </p>
+                <p className="text-sm font-medium text-text-primary">Arrival</p>
+                <p className="text-xs text-text-muted">{formatDate(stay.arrivalDate)}</p>
               </div>
             </div>
           </div>

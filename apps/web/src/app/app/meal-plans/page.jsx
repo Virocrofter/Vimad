@@ -88,7 +88,7 @@ const initialMealPlans = [
     code: 'BB-STD',
     boardBasis: 'BB',
     price: 25,
-    currency: 'USD',
+    currency: 'ZAR',
     taxInclusive: true,
     autoPost: true,
     postFrequency: 'daily',
@@ -112,7 +112,7 @@ const initialMealPlans = [
     code: 'HB-PREM',
     boardBasis: 'HB',
     price: 65,
-    currency: 'USD',
+    currency: 'ZAR',
     taxInclusive: true,
     autoPost: true,
     postFrequency: 'daily',
@@ -136,7 +136,7 @@ const initialMealPlans = [
     code: 'FB-FAM',
     boardBasis: 'FB',
     price: 89,
-    currency: 'USD',
+    currency: 'ZAR',
     taxInclusive: true,
     autoPost: true,
     postFrequency: 'daily',
@@ -166,7 +166,7 @@ const initialMealPlans = [
     code: 'AI-RESORT',
     boardBasis: 'AI',
     price: 129,
-    currency: 'USD',
+    currency: 'ZAR',
     taxInclusive: true,
     autoPost: true,
     postFrequency: 'daily',
@@ -196,7 +196,7 @@ const initialMealPlans = [
     code: 'RO-NONE',
     boardBasis: 'RO',
     price: 0,
-    currency: 'USD',
+    currency: 'ZAR',
     taxInclusive: true,
     autoPost: false,
     postFrequency: null,
@@ -220,7 +220,7 @@ const initialMealPlans = [
     code: 'HB-WIN',
     boardBasis: 'HB',
     price: 55,
-    currency: 'USD',
+    currency: 'ZAR',
     taxInclusive: true,
     autoPost: true,
     postFrequency: 'daily',
@@ -365,7 +365,7 @@ const roomTypes = [
 ];
 
 /* ─── Helpers ─── */
-function formatCurrency(amount, currency = 'USD') {
+function formatCurrency(amount, currency = 'ZAR') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
 }
 
@@ -437,7 +437,7 @@ function MealPlanModal({ plan, onClose, onSave }) {
     code: plan?.code || '',
     boardBasis: plan?.boardBasis || 'BB',
     price: plan?.price || 0,
-    currency: plan?.currency || 'USD',
+    currency: plan?.currency || 'ZAR',
     taxInclusive: plan?.taxInclusive ?? true,
     autoPost: plan?.autoPost ?? true,
     postFrequency: plan?.postFrequency || 'daily',

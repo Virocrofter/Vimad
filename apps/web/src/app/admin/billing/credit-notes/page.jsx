@@ -95,7 +95,7 @@ const typeMeta = {
 };
 
 /* ─── Helpers ─── */
-function formatCurrency(amount, currency = 'USD') {
+function formatCurrency(amount, currency = 'ZAR') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
 }
 
@@ -119,7 +119,7 @@ function normalizeCreditNote(n) {
     tenantName: n.tenantName ?? n.tenantId ?? 'Unknown',
     invoiceId: n.invoiceId ?? null,
     amount,
-    currency: n.currency ?? 'USD',
+    currency: n.currency ?? 'ZAR',
     reason: n.reason ?? 'goodwill',
     reasonDetail: n.reasonDetail ?? n.description ?? '',
     status: n.status ?? 'issued',
@@ -222,7 +222,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onCreate, tenants, saving }) {
       tenantName: tenant?.name || form.tenantId,
       invoiceId: form.invoiceId || null,
       amount: parseFloat(form.amount) || 0,
-      currency: 'USD',
+      currency: 'ZAR',
       reason: form.reason,
       reasonDetail: form.reasonDetail,
       type: form.type,

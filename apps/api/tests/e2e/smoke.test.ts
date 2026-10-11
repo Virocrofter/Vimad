@@ -62,7 +62,7 @@ describe.skipIf(!RUN_DB_TESTS)('E2E Smoke Test: Full Guest Journey', () => {
         name: 'Smoke Property',
         code: 'SMOKE-01',
         timezone: 'UTC',
-        currency: 'USD',
+        currency: 'ZAR',
       });
 
     expect(propertyRes.status).toBe(201);

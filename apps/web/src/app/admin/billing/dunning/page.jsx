@@ -108,7 +108,7 @@ const failureReasonMeta = {
 };
 
 /* ─── Helpers ─── */
-function formatCurrency(amount, currency = 'USD') {
+function formatCurrency(amount, currency = 'ZAR') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
 }
 
@@ -143,7 +143,7 @@ function normalizeDunningRecord(r) {
     invoiceId: r.invoiceId ?? '',
     invoiceAmount: r.invoiceAmount ?? r.amountDue ?? r.amount ?? 0,
     amountDue: r.amountDue ?? r.amount ?? 0,
-    currency: r.currency ?? 'USD',
+    currency: r.currency ?? 'ZAR',
     status: statusMap[rawStatus] ?? rawStatus,
     stage: r.stage ?? r.currentStage ?? 0,
     maxStages: r.maxStages ?? 4,

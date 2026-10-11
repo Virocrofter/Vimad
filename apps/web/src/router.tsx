@@ -1,9 +1,9 @@
 /* src/router.tsx */
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 import GuestAuthGuard from './components/router/GuestAuthGuard';
 import { RouterError } from './components/router/RouterError';
 
-// Layouts
+// Layouts stay eager — they are the shared shell every route renders inside.
 import MarketingLayout from './app/marketing/layout';
 import AuthLayout from './app/auth/layout';
 import AppLayout from './app/app/layout';
@@ -11,216 +11,36 @@ import GuestLayout from './app/guest-portal/layout';
 import GuestAuthLayout from './app/guest-portal/auth/layout';
 import AdminLayout from './app/admin/layout';
 
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Auth)
-// ═══════════════════════════════════════════════════
-import GuestLogin from './app/guest-portal/auth/login/page';
-import GuestRegister from './app/guest-portal/auth/register/page';
-import GuestVerify from './app/guest-portal/auth/verify/page';
+/**
+ * Route-level code splitting. Every leaf page loads as its own chunk on
+ * first navigation instead of inflating the entry bundle (was ~3.9 MB).
+ * Same mechanism the A4 booking routes already used.
+ */
+const page = (loader: () => Promise<any>) => ({
+  lazy: async () => ({ Component: (await loader()).default }),
+});
 
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Dashboard & Booking)
-// ═══════════════════════════════════════════════════
-import GuestDashboard from './app/guest-portal/page';
-import GuestBooking from './app/guest-portal/booking/page';
-import GuestBookingModify from './app/guest-portal/booking/modify/page';
-import GuestBookingCancel from './app/guest-portal/booking/cancel/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Check-in & Keys)
-// ═══════════════════════════════════════════════════
-import GuestCheckIn from './app/guest-portal/check-in/page';
-import GuestDigitalKeySetup from './app/guest-portal/check-in/digital-key/page';
-import GuestKeys from './app/guest-portal/keys/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Stay Services)
-// ═══════════════════════════════════════════════════
-import GuestStay from './app/guest-portal/stay/page';
-import GuestRoomService from './app/guest-portal/stay/room-service/page';
-import GuestHousekeeping from './app/guest-portal/stay/housekeeping/page';
-import GuestConcierge from './app/guest-portal/stay/concierge/page';
-import GuestIssues from './app/guest-portal/stay/issues/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Billing)
-// ═══════════════════════════════════════════════════
-import GuestBilling from './app/guest-portal/billing/page';
-import GuestInvoice from './app/guest-portal/billing/invoice/page';
-import GuestSplitBill from './app/guest-portal/billing/split/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Loyalty)
-// ═══════════════════════════════════════════════════
-import GuestLoyalty from './app/guest-portal/loyalty/page';
-import GuestRewards from './app/guest-portal/loyalty/rewards/page';
-import GuestLoyaltyHistory from './app/guest-portal/loyalty/history/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Messages)
-// ═══════════════════════════════════════════════════
-import GuestMessages from './app/guest-portal/messages/page';
-import GuestNotifications from './app/guest-portal/messages/notifications/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Profile)
-// ═══════════════════════════════════════════════════
-import GuestProfile from './app/guest-portal/profile/page';
-import GuestPreferences from './app/guest-portal/profile/preferences/page';
-import GuestDocuments from './app/guest-portal/profile/documents/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Reviews)
-// ═══════════════════════════════════════════════════
-import GuestReviews from './app/guest-portal/reviews/page';
-import GuestReviewHistory from './app/guest-portal/reviews/history/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Support)
-// ═══════════════════════════════════════════════════
-import GuestSupport from './app/guest-portal/support/page';
-import GuestTickets from './app/guest-portal/support/tickets/page';
-import GuestContact from './app/guest-portal/support/contact/page';
-
-// ═══════════════════════════════════════════════════
-// GUEST PORTAL — Pages (Public Status)
-// ═══════════════════════════════════════════════════
-import GuestStatus from './app/guest-portal/status/page';
-import GuestPublicAnnouncements from './app/guest-portal/status/announcements/page';
-
-// Marketing pages
-import MarketingHome from './app/marketing/page';
-import AboutPage from './app/marketing/about/page';
-import FeaturesPage from './app/marketing/features/page';
-import PricingPage from './app/marketing/pricing/page';
-import ContactPage from './app/marketing/contact/page';
-import DemoPage from './app/marketing/demo/page';
-import BlogPage from './app/marketing/blog/page';
-import CaseStudiesPage from './app/marketing/case-studies/page';
-import IntegrationsPage from './app/marketing/integrations/page';
-import PartnersPage from './app/marketing/partners/page';
-import ApiDocsPage from './app/marketing/api-docs/page';
-import HelpPage from './app/marketing/help/page';
-import StatusPage from './app/marketing/status/page';
-import SecurityPage from './app/marketing/security/page';
-import PrivacyPage from './app/marketing/privacy/page';
-import TermsPage from './app/marketing/terms/page';
-import GdprPage from './app/marketing/gdpr/page';
-import PciDssPage from './app/marketing/pci-dss/page';
-import SystemRequirementsPage from './app/marketing/system-requirements/page';
-import CloudbedsAlt from './app/marketing/alternatives/cloudbeds/page';
-import HiltonOnqAlt from './app/marketing/alternatives/hilton-onq/page';
-import Opera5Alt from './app/marketing/alternatives/opera-5/page';
-import BoutiqueHotels from './app/marketing/solutions/boutique-hotels/page';
-import HotelChains from './app/marketing/solutions/hotel-chains/page';
-import ContactlessCheckin from './app/marketing/solutions/contactless-checkin/page';
-import AiRevenue from './app/marketing/solutions/ai-revenue-management/page';
-
-// Auth pages
-import LoginPage from './app/auth/login/page';
-import RegisterPage from './app/auth/register/page';
-import ForgotPasswordPage from './app/auth/forgot-password/page';
-
-// App (PMS) pages
-import AppDashboard from './app/app/dashboard/page';
-import ReservationsPage from './app/app/reservations/page';
-import ReservationDetailPage from './app/app/reservations/detail/page';
-import FrontDeskPage from './app/app/reservations/front-desk/page';
-import NewReservationPage from './app/app/reservations/new/page';
-import RoomPlanPage from './app/app/room-plan/page';
-import BillingPage from './app/app/billing/page';
-import BillingDashboardPage from './app/app/billing/dashboard/page';
-import RatesPage from './app/app/rates/page';
-import InventoryPage from './app/app/inventory/page';
-import GuestsPage from './app/app/guests/page';
-import HousekeepingPage from './app/app/housekeeping/page';
-import NightAuditPage from './app/app/night-audit/page';
-import ReportsPage from './app/app/reports/page';
-import OnboardingPage from './app/app/onboarding/page';
-import ChannelManagerPage from './app/app/channel-manager/page';
-import LoyaltyPage from './app/app/loyalty/page';
-import SettingsPage from './app/app/settings/page';
-import SupportPage from './app/app/support/page';
-
-// Sales & Catering
-import SalesCateringPage from './app/app/sales-catering/page';
-import SalesCateringBeosPage from './app/app/sales-catering/beos/page';
-import SalesCateringClientsPage from './app/app/sales-catering/clients/page';
-import SalesCateringEventsPage from './app/app/sales-catering/events/page';
-
-// AR, VCC, Meal Plans
-import AccountsReceivablePage from './app/app/ar/page';
-import VCCPage from './app/app/vcc/page';
-import MealPlansPage from './app/app/meal-plans/page';
-
-// Groups
-import GroupsPage from './app/app/groups/page';
-import GroupDetailPage from './app/app/groups/details/page';
-import NewBlockPage from './app/app/groups/new/page';
-
-// Keys
-import KeysPage from './app/app/keys/page';
-import KeysRackPage from './app/app/keys/rack/page';
-import KeysDigitalPage from './app/app/keys/digital/page';
-import KeysMasterPage from './app/app/keys/master/page';
-
-// Parking
-import ParkingPage from './app/app/parking/page';
-import ParkingSpotsPage from './app/app/parking/spots/page';
-import ParkingValetPage from './app/app/parking/valet/page';
-import ParkingVehiclesPage from './app/app/parking/vehicles/page';
-import ParkingEVChargingPage from './app/app/parking/ev-charging/page';
-
-// Marketing app pages
-import MarketingAnalyticsPage from './app/app/marketing/analytics';
-import AutomationListPage from './app/app/marketing/automation-list';
-import AutomationBuilderPage from './app/app/marketing/automation';
-import TemplatesPage from './app/app/marketing/templates';
-
-// Guest portal pages (legacy /guest/*)
-import GuestPage from './app/guest-portal/page';
-import GuestBookingLegacy from './app/guest-portal/booking/page';
-import GuestCheckinLegacy from './app/guest-portal/check-in/page';
-import GuestCheckoutLegacy from './app/guest-portal/check-out/page';
-import GuestFolioLegacy from './app/guest-portal/billing/page';
-import GuestLoyaltyLegacy from './app/guest-portal/loyalty/page';
-import GuestMessagingLegacy from './app/guest-portal/messages/page';
-import GuestReservationLegacy from './app/guest-portal/booking/page';
-
-// Admin — Tenants / core
-import AdminDashboard from './app/admin/page';
-import AuditTrailPage from './app/app/audit-trail/page';
-import UsersPage from './app/app/users/page';
-
-// Admin — Super Admin console
-import AdminOverviewDashboard from './app/admin/dashboard/page';
-import AdminAnalyticsPage from './app/admin/analytics/page';
-import AdminAnnouncementsPage from './app/admin/announcements/page';
-import AdminAuditPage from './app/admin/audit/page';
-import AdminBackupsPage from './app/admin/backups/page';
-import AdminBillingDashboard from './app/admin/billing/page';
-import AdminCreditNotesPage from './app/admin/billing/credit-notes/page';
-import AdminDunningPage from './app/admin/billing/dunning/page';
-import AdminInvoicesPage from './app/admin/billing/invoices/page';
-import AdminRevenuePage from './app/admin/billing/revenue/page';
-import AdminSubscriptionsPage from './app/admin/billing/subscriptions/page';
-import AdminDataExportPage from './app/admin/data-export/page';
-import AdminDemoAccessPage from './app/admin/demo-access/page';
-import AdminFeatureFlagsPage from './app/admin/feature-flags/FeatureFlagModal';
-import AdminFeedbackPage from './app/admin/feedback/page';
-import AdminFinancesPage from './app/admin/finances/page';
-import AdminHealthPage from './app/admin/health/page';
-import AdminIntegrationsPage from './app/admin/integrations/page';
-import AdminOnboardingPage from './app/admin/onboarding/page';
-import AdminProfilerPage from './app/admin/profiler/page';
-import AdminQuotasPage from './app/admin/quotas/page';
-import AdminRbacPage from './app/admin/rbac/page';
-import AdminRegionsPage from './app/admin/regions/page';
-import AdminReportsPage from './app/admin/reports/page';
-import AdminSecurityPage from './app/admin/security/page';
-import AdminSettingsPage from './app/admin/settings/page';
-import AdminShadowPage from './app/admin/shadow/page';
-import AdminTicketsPage from './app/admin/ticket/page';
+// ─── Debug 404 (temporary — prints the missed path so we can diagnose
+// the Back-Forward Cache redirect; revert to <Navigate to="/" replace /> once fixed)
+function NotFoundDebug() {
+  const { pathname, search } = useLocation();
+  return (
+    <div style={{ padding: 48, fontFamily: 'monospace', color: '#fff' }}>
+      <h1 style={{ fontSize: 20, fontWeight: 700 }}>No route matched (debug)</h1>
+      <p style={{ marginTop: 12 }}>
+        pathname: <strong>{pathname}</strong>
+      </p>
+      <p>
+        search: <strong>{search || '(none)'}</strong>
+      </p>
+      <p style={{ marginTop: 16 }}>
+        <a href="/app/dashboard" style={{ color: '#7c8cf8' }}>
+          → Go to dashboard
+        </a>
+      </p>
+    </div>
+  );
+}
 
 export const router = createBrowserRouter([
   /* ─── Marketing Website ─── */
@@ -229,33 +49,69 @@ export const router = createBrowserRouter([
     element: <MarketingLayout />,
     errorElement: <RouterError />,
     children: [
-      { index: true, element: <MarketingHome /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'features', element: <FeaturesPage /> },
-      { path: 'pricing', element: <PricingPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: 'demo', element: <DemoPage /> },
-      { path: 'blog', element: <BlogPage /> },
-      { path: 'case-studies', element: <CaseStudiesPage /> },
-      { path: 'integrations', element: <IntegrationsPage /> },
-      { path: 'partners', element: <PartnersPage /> },
-      { path: 'api-docs', element: <ApiDocsPage /> },
-      { path: 'help', element: <HelpPage /> },
-      { path: 'status', element: <StatusPage /> },
-      { path: 'security', element: <SecurityPage /> },
-      { path: 'privacy', element: <PrivacyPage /> },
-      { path: 'terms', element: <TermsPage /> },
-      { path: 'gdpr', element: <GdprPage /> },
-      { path: 'pci-dss', element: <PciDssPage /> },
-      { path: 'system-requirements', element: <SystemRequirementsPage /> },
-      { path: 'alternative/cloudbeds', element: <CloudbedsAlt /> },
-      { path: 'alternative/hilton-onq', element: <HiltonOnqAlt /> },
-      { path: 'alternative/opera-5', element: <Opera5Alt /> },
-      { path: 'solutions/boutique-hotels', element: <BoutiqueHotels /> },
-      { path: 'solutions/hotel-chains', element: <HotelChains /> },
-      { path: 'solutions/contactless-checkin', element: <ContactlessCheckin /> },
-      { path: 'solutions/ai-revenue-management', element: <AiRevenue /> },
+      { index: true, ...page(() => import('./app/marketing/page')) },
+      { path: 'about', ...page(() => import('./app/marketing/about/page')) },
+      { path: 'features', ...page(() => import('./app/marketing/features/page')) },
+      { path: 'pricing', ...page(() => import('./app/marketing/pricing/page')) },
+      { path: 'contact', ...page(() => import('./app/marketing/contact/page')) },
+      { path: 'demo', ...page(() => import('./app/marketing/demo/page')) },
+      { path: 'blog', ...page(() => import('./app/marketing/blog/page')) },
+      { path: 'case-studies', ...page(() => import('./app/marketing/case-studies/page')) },
+      { path: 'integrations', ...page(() => import('./app/marketing/integrations/page')) },
+      { path: 'partners', ...page(() => import('./app/marketing/partners/page')) },
+      { path: 'api-docs', ...page(() => import('./app/marketing/api-docs/page')) },
+      { path: 'help', ...page(() => import('./app/marketing/help/page')) },
+      { path: 'status', ...page(() => import('./app/marketing/status/page')) },
+      { path: 'security', ...page(() => import('./app/marketing/security/page')) },
+      { path: 'privacy', ...page(() => import('./app/marketing/privacy/page')) },
+      { path: 'terms', ...page(() => import('./app/marketing/terms/page')) },
+      { path: 'gdpr', ...page(() => import('./app/marketing/gdpr/page')) },
+      { path: 'pci-dss', ...page(() => import('./app/marketing/pci-dss/page')) },
+      {
+        path: 'system-requirements',
+        ...page(() => import('./app/marketing/system-requirements/page')),
+      },
+      {
+        path: 'alternative/cloudbeds',
+        ...page(() => import('./app/marketing/alternatives/cloudbeds/page')),
+      },
+      {
+        path: 'alternative/hilton-onq',
+        ...page(() => import('./app/marketing/alternatives/hilton-onq/page')),
+      },
+      {
+        path: 'alternative/opera-5',
+        ...page(() => import('./app/marketing/alternatives/opera-5/page')),
+      },
+      {
+        path: 'solutions/boutique-hotels',
+        ...page(() => import('./app/marketing/solutions/boutique-hotels/page')),
+      },
+      {
+        path: 'solutions/hotel-chains',
+        ...page(() => import('./app/marketing/solutions/hotel-chains/page')),
+      },
+      {
+        path: 'solutions/contactless-checkin',
+        ...page(() => import('./app/marketing/solutions/contactless-checkin/page')),
+      },
+      {
+        path: 'solutions/ai-revenue-management',
+        ...page(() => import('./app/marketing/solutions/ai-revenue-management/page')),
+      },
     ],
+  },
+
+  /* ─── Public Booking Engine (A4) — standalone, no site layout ─── */
+  {
+    path: '/book/:code',
+    lazy: async () => ({ Component: (await import('./app/booking/page')).default }),
+    errorElement: <RouterError />,
+  },
+  {
+    path: '/booking/cancel',
+    lazy: async () => ({ Component: (await import('./app/booking/cancel/page')).default }),
+    errorElement: <RouterError />,
   },
 
   /* ─── Auth ─── */
@@ -264,9 +120,9 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     errorElement: <RouterError />,
     children: [
-      { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
-      { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'login', ...page(() => import('./app/auth/login/page')) },
+      { path: 'register', ...page(() => import('./app/auth/register/page')) },
+      { path: 'forgot-password', ...page(() => import('./app/auth/forgot-password/page')) },
     ],
   },
 
@@ -277,85 +133,100 @@ export const router = createBrowserRouter([
     errorElement: <RouterError />,
     children: [
       { index: true, element: <Navigate to="dashboard" replace /> },
-      { path: 'dashboard', element: <AppDashboard /> },
+      { path: 'dashboard', ...page(() => import('./app/app/dashboard/page')) },
       {
         path: 'reservations',
         children: [
-          { index: true, element: <ReservationsPage /> },
-          { path: 'front-desk', element: <FrontDeskPage /> },
-          { path: 'new', element: <NewReservationPage /> },
-          { path: 'detail', element: <ReservationDetailPage /> },
-          { path: ':id', element: <ReservationDetailPage /> },
+          { index: true, ...page(() => import('./app/app/reservations/page')) },
+          { path: 'front-desk', ...page(() => import('./app/app/reservations/front-desk/page')) },
+          { path: 'new', ...page(() => import('./app/app/reservations/new/page')) },
+          { path: 'detail', ...page(() => import('./app/app/reservations/detail/page')) },
+          { path: ':id', ...page(() => import('./app/app/reservations/detail/page')) },
         ],
       },
-      { path: 'room-plan', element: <RoomPlanPage /> },
+      { path: 'room-plan', ...page(() => import('./app/app/room-plan/page')) },
       {
         path: 'billing',
         children: [
-          { index: true, element: <BillingPage /> },
-          { path: 'dashboard', element: <BillingDashboardPage /> },
+          { index: true, ...page(() => import('./app/app/billing/page')) },
+          { path: 'dashboard', ...page(() => import('./app/app/billing/dashboard/page')) },
+          { path: 'payments', ...page(() => import('./app/app/billing/payments/page')) },
+          {
+            path: 'payment-requests',
+            ...page(() => import('./app/app/billing/payment-requests/page')),
+          },
+          { path: 'invoices', ...page(() => import('./app/app/billing/invoices/page')) },
         ],
       },
-      { path: 'rates', element: <RatesPage /> },
-      { path: 'inventory', element: <InventoryPage /> },
-      { path: 'guests', element: <GuestsPage /> },
-      { path: 'housekeeping', element: <HousekeepingPage /> },
-      { path: 'night-audit', element: <NightAuditPage /> },
-      { path: 'reports', element: <ReportsPage /> },
-      { path: 'onboarding', element: <OnboardingPage /> },
-      { path: 'channel-manager', element: <ChannelManagerPage /> },
-      { path: 'loyalty', element: <LoyaltyPage /> },
-      { path: 'settings', element: <SettingsPage /> },
-      { path: 'support', element: <SupportPage /> },
+      { path: 'rates', ...page(() => import('./app/app/rates/page')) },
+      { path: 'inventory', ...page(() => import('./app/app/inventory/page')) },
+      { path: 'guests', ...page(() => import('./app/app/guests/page')) },
+      { path: 'guests/:id', ...page(() => import('./app/app/guests/detail/page')) },
+      { path: 'housekeeping', ...page(() => import('./app/app/housekeeping/page')) },
+      { path: 'night-audit', ...page(() => import('./app/app/night-audit/page')) },
+      { path: 'reports', ...page(() => import('./app/app/reports/page')) },
+      { path: 'onboarding', ...page(() => import('./app/app/onboarding/page')) },
+      { path: 'channel-manager', ...page(() => import('./app/app/channel-manager/page')) },
+      { path: 'loyalty', ...page(() => import('./app/app/loyalty/page')) },
+      { path: 'settings', ...page(() => import('./app/app/settings/page')) },
+      { path: 'settings/email', ...page(() => import('./app/app/settings/email/page')) },
+      { path: 'support', ...page(() => import('./app/app/support/page')) },
       {
         path: 'sales-catering',
         children: [
-          { index: true, element: <SalesCateringPage /> },
-          { path: 'beos', element: <SalesCateringBeosPage /> },
-          { path: 'clients', element: <SalesCateringClientsPage /> },
-          { path: 'events', element: <SalesCateringEventsPage /> },
+          { index: true, ...page(() => import('./app/app/sales-catering/page')) },
+          { path: 'beos', ...page(() => import('./app/app/sales-catering/beos/page')) },
+          { path: 'clients', ...page(() => import('./app/app/sales-catering/clients/page')) },
+          { path: 'events', ...page(() => import('./app/app/sales-catering/events/page')) },
         ],
       },
-      { path: 'audit-trail', element: <AuditTrailPage /> },
-      { path: 'users', element: <UsersPage /> },
-      { path: 'ar', element: <AccountsReceivablePage /> },
-      { path: 'vcc', element: <VCCPage /> },
-      { path: 'meal-plans', element: <MealPlansPage /> },
+      { path: 'audit-trail', ...page(() => import('./app/app/audit-trail/page')) },
+      { path: 'users', ...page(() => import('./app/app/users/page')) },
+      { path: 'ar', ...page(() => import('./app/app/ar/page')) },
+      { path: 'vcc', ...page(() => import('./app/app/vcc/page')) },
+      { path: 'meal-plans', ...page(() => import('./app/app/meal-plans/page')) },
       {
         path: 'groups',
         children: [
-          { index: true, element: <GroupsPage /> },
-          { path: 'new', element: <NewBlockPage /> },
-          { path: 'detail', element: <GroupDetailPage /> },
+          { index: true, ...page(() => import('./app/app/groups/page')) },
+          { path: 'new', ...page(() => import('./app/app/groups/new/page')) },
+          { path: 'detail', ...page(() => import('./app/app/groups/details/page')) },
         ],
       },
       {
         path: 'keys',
         children: [
-          { index: true, element: <KeysPage /> },
-          { path: 'rack', element: <KeysRackPage /> },
-          { path: 'digital', element: <KeysDigitalPage /> },
-          { path: 'master', element: <KeysMasterPage /> },
+          { index: true, ...page(() => import('./app/app/keys/page')) },
+          { path: 'rack', ...page(() => import('./app/app/keys/rack/page')) },
+          { path: 'digital', ...page(() => import('./app/app/keys/digital/page')) },
+          { path: 'master', ...page(() => import('./app/app/keys/master/page')) },
         ],
       },
       {
         path: 'parking',
         children: [
-          { index: true, element: <ParkingPage /> },
-          { path: 'spots', element: <ParkingSpotsPage /> },
-          { path: 'valet', element: <ParkingValetPage /> },
-          { path: 'vehicles', element: <ParkingVehiclesPage /> },
-          { path: 'ev-charging', element: <ParkingEVChargingPage /> },
+          { index: true, ...page(() => import('./app/app/parking/page')) },
+          { path: 'spots', ...page(() => import('./app/app/parking/spots/page')) },
+          { path: 'valet', ...page(() => import('./app/app/parking/valet/page')) },
+          { path: 'vehicles', ...page(() => import('./app/app/parking/vehicles/page')) },
+          { path: 'ev-charging', ...page(() => import('./app/app/parking/ev-charging/page')) },
         ],
       },
       {
         path: 'marketing',
         children: [
           { index: true, element: <Navigate to="analytics" replace /> },
-          { path: 'analytics', element: <MarketingAnalyticsPage /> },
-          { path: 'automation', element: <AutomationBuilderPage /> },
-          { path: 'automation-list', element: <AutomationListPage workflows={[]} /> },
-          { path: 'templates', element: <TemplatesPage /> },
+          { path: 'analytics', ...page(() => import('./app/app/marketing/analytics')) },
+          { path: 'automation', ...page(() => import('./app/app/marketing/automation')) },
+          {
+            path: 'automation-list',
+            lazy: async () => {
+              const mod = await import('./app/app/marketing/automation-list');
+              const AutomationListPage = mod.default;
+              return { Component: () => <AutomationListPage workflows={[]} /> };
+            },
+          },
+          { path: 'templates', ...page(() => import('./app/app/marketing/templates')) },
         ],
       },
     ],
@@ -368,12 +239,12 @@ export const router = createBrowserRouter([
   /* ─── Public Status Pages (no auth required) ─── */
   {
     path: '/guest-portal/status',
-    element: <GuestStatus />,
+    ...page(() => import('./app/guest-portal/status/page')),
     errorElement: <RouterError />,
   },
   {
     path: '/guest-portal/status/announcements',
-    element: <GuestPublicAnnouncements />,
+    ...page(() => import('./app/guest-portal/status/announcements/page')),
     errorElement: <RouterError />,
   },
 
@@ -384,9 +255,9 @@ export const router = createBrowserRouter([
     errorElement: <RouterError />,
     children: [
       { index: true, element: <Navigate to="login" replace /> },
-      { path: 'login', element: <GuestLogin /> },
-      { path: 'register', element: <GuestRegister /> },
-      { path: 'verify', element: <GuestVerify /> },
+      { path: 'login', ...page(() => import('./app/guest-portal/auth/login/page')) },
+      { path: 'register', ...page(() => import('./app/guest-portal/auth/register/page')) },
+      { path: 'verify', ...page(() => import('./app/guest-portal/auth/verify/page')) },
       { path: 'forgot-password', element: <Navigate to="/auth/forgot-password" replace /> },
     ],
   },
@@ -405,54 +276,99 @@ export const router = createBrowserRouter([
         element: <GuestLayout />,
         children: [
           /* Dashboard */
-          { index: true, element: <GuestDashboard /> },
+          { index: true, ...page(() => import('./app/guest-portal/page')) },
 
           /* Booking */
-          { path: 'booking', element: <GuestBooking /> },
-          { path: 'booking/modify', element: <GuestBookingModify /> },
-          { path: 'booking/cancel', element: <GuestBookingCancel /> },
+          { path: 'booking', ...page(() => import('./app/guest-portal/booking/page')) },
+          {
+            path: 'booking/modify',
+            ...page(() => import('./app/guest-portal/booking/modify/page')),
+          },
+          {
+            path: 'booking/cancel',
+            ...page(() => import('./app/guest-portal/booking/cancel/page')),
+          },
 
           /* Check-in */
-          { path: 'check-in', element: <GuestCheckIn /> },
-          { path: 'check-in/digital-key', element: <GuestDigitalKeySetup /> },
+          { path: 'check-in', ...page(() => import('./app/guest-portal/check-in/page')) },
+          {
+            path: 'check-in/digital-key',
+            ...page(() => import('./app/guest-portal/check-in/digital-key/page')),
+          },
 
           /* Stay Services */
-          { path: 'stay', element: <GuestStay /> },
-          { path: 'stay/room-service', element: <GuestRoomService /> },
-          { path: 'stay/housekeeping', element: <GuestHousekeeping /> },
-          { path: 'stay/concierge', element: <GuestConcierge /> },
-          { path: 'stay/issues', element: <GuestIssues /> },
+          { path: 'stay', ...page(() => import('./app/guest-portal/stay/page')) },
+          {
+            path: 'stay/room-service',
+            ...page(() => import('./app/guest-portal/stay/room-service/page')),
+          },
+          {
+            path: 'stay/housekeeping',
+            ...page(() => import('./app/guest-portal/stay/housekeeping/page')),
+          },
+          {
+            path: 'stay/concierge',
+            ...page(() => import('./app/guest-portal/stay/concierge/page')),
+          },
+          { path: 'stay/issues', ...page(() => import('./app/guest-portal/stay/issues/page')) },
 
           /* Keys */
-          { path: 'keys', element: <GuestKeys /> },
+          { path: 'keys', ...page(() => import('./app/guest-portal/keys/page')) },
 
           /* Billing */
-          { path: 'billing', element: <GuestBilling /> },
-          { path: 'billing/invoice', element: <GuestInvoice /> },
-          { path: 'billing/split', element: <GuestSplitBill /> },
+          { path: 'billing', ...page(() => import('./app/guest-portal/billing/page')) },
+          {
+            path: 'billing/invoice',
+            ...page(() => import('./app/guest-portal/billing/invoice/page')),
+          },
+          { path: 'billing/split', ...page(() => import('./app/guest-portal/billing/split/page')) },
 
           /* Loyalty */
-          { path: 'loyalty', element: <GuestLoyalty /> },
-          { path: 'loyalty/rewards', element: <GuestRewards /> },
-          { path: 'loyalty/history', element: <GuestLoyaltyHistory /> },
+          { path: 'loyalty', ...page(() => import('./app/guest-portal/loyalty/page')) },
+          {
+            path: 'loyalty/rewards',
+            ...page(() => import('./app/guest-portal/loyalty/rewards/page')),
+          },
+          {
+            path: 'loyalty/history',
+            ...page(() => import('./app/guest-portal/loyalty/history/page')),
+          },
 
           /* Messages */
-          { path: 'messages', element: <GuestMessages /> },
-          { path: 'messages/notifications', element: <GuestNotifications /> },
+          { path: 'messages', ...page(() => import('./app/guest-portal/messages/page')) },
+          {
+            path: 'messages/notifications',
+            ...page(() => import('./app/guest-portal/messages/notifications/page')),
+          },
 
           /* Profile */
-          { path: 'profile', element: <GuestProfile /> },
-          { path: 'profile/preferences', element: <GuestPreferences /> },
-          { path: 'profile/documents', element: <GuestDocuments /> },
+          { path: 'profile', ...page(() => import('./app/guest-portal/profile/page')) },
+          {
+            path: 'profile/preferences',
+            ...page(() => import('./app/guest-portal/profile/preferences/page')),
+          },
+          {
+            path: 'profile/documents',
+            ...page(() => import('./app/guest-portal/profile/documents/page')),
+          },
 
           /* Reviews */
-          { path: 'reviews', element: <GuestReviews /> },
-          { path: 'reviews/history', element: <GuestReviewHistory /> },
+          { path: 'reviews', ...page(() => import('./app/guest-portal/reviews/page')) },
+          {
+            path: 'reviews/history',
+            ...page(() => import('./app/guest-portal/reviews/history/page')),
+          },
 
           /* Support */
-          { path: 'support', element: <GuestSupport /> },
-          { path: 'support/tickets', element: <GuestTickets /> },
-          { path: 'support/contact', element: <GuestContact /> },
+          { path: 'support', ...page(() => import('./app/guest-portal/support/page')) },
+          {
+            path: 'support/tickets',
+            ...page(() => import('./app/guest-portal/support/tickets/page')),
+          },
+          {
+            path: 'support/contact',
+            ...page(() => import('./app/guest-portal/support/contact/page')),
+          },
         ],
       },
     ],
@@ -464,14 +380,14 @@ export const router = createBrowserRouter([
     element: <GuestLayout />,
     errorElement: <RouterError />,
     children: [
-      { index: true, element: <GuestPage /> },
-      { path: 'booking', element: <GuestBookingLegacy /> },
-      { path: 'checkin', element: <GuestCheckinLegacy /> },
-      { path: 'checkout', element: <GuestCheckoutLegacy /> },
-      { path: 'folio', element: <GuestFolioLegacy /> },
-      { path: 'loyalty', element: <GuestLoyaltyLegacy /> },
-      { path: 'messaging', element: <GuestMessagingLegacy /> },
-      { path: 'reservation', element: <GuestReservationLegacy /> },
+      { index: true, ...page(() => import('./app/guest-portal/page')) },
+      { path: 'booking', ...page(() => import('./app/guest-portal/booking/page')) },
+      { path: 'checkin', ...page(() => import('./app/guest-portal/check-in/page')) },
+      { path: 'checkout', ...page(() => import('./app/guest-portal/check-out/page')) },
+      { path: 'folio', ...page(() => import('./app/guest-portal/billing/page')) },
+      { path: 'loyalty', ...page(() => import('./app/guest-portal/loyalty/page')) },
+      { path: 'messaging', ...page(() => import('./app/guest-portal/messages/page')) },
+      { path: 'reservation', ...page(() => import('./app/guest-portal/booking/page')) },
     ],
   },
 
@@ -481,43 +397,54 @@ export const router = createBrowserRouter([
     element: <AdminLayout />,
     errorElement: <RouterError />,
     children: [
-      { index: true, element: <AdminDashboard /> },
-      { path: 'dashboard', element: <AdminOverviewDashboard /> },
-      { path: 'analytics', element: <AdminAnalyticsPage /> },
-      { path: 'announcements', element: <AdminAnnouncementsPage /> },
-      { path: 'audit', element: <AdminAuditPage /> },
-      { path: 'backups', element: <AdminBackupsPage /> },
+      { index: true, ...page(() => import('./app/admin/page')) },
+      { path: 'dashboard', ...page(() => import('./app/admin/dashboard/page')) },
+      { path: 'analytics', ...page(() => import('./app/admin/analytics/page')) },
+      { path: 'announcements', ...page(() => import('./app/admin/announcements/page')) },
+      { path: 'audit', ...page(() => import('./app/admin/audit/page')) },
+      { path: 'backups', ...page(() => import('./app/admin/backups/page')) },
       {
         path: 'billing',
         children: [
-          { index: true, element: <AdminBillingDashboard /> },
-          { path: 'credit-notes', element: <AdminCreditNotesPage /> },
-          { path: 'dunning', element: <AdminDunningPage /> },
-          { path: 'invoices', element: <AdminInvoicesPage /> },
-          { path: 'revenue', element: <AdminRevenuePage /> },
-          { path: 'subscriptions', element: <AdminSubscriptionsPage /> },
+          { index: true, ...page(() => import('./app/admin/billing/page')) },
+          { path: 'credit-notes', ...page(() => import('./app/admin/billing/credit-notes/page')) },
+          { path: 'dunning', ...page(() => import('./app/admin/billing/dunning/page')) },
+          { path: 'invoices', ...page(() => import('./app/admin/billing/invoices/page')) },
+          { path: 'revenue', ...page(() => import('./app/admin/billing/revenue/page')) },
+          {
+            path: 'subscriptions',
+            ...page(() => import('./app/admin/billing/subscriptions/page')),
+          },
+          { path: 'payments', ...page(() => import('./app/app/billing/payments/page')) },
+          {
+            path: 'payment-requests',
+            ...page(() => import('./app/app/billing/payment-requests/page')),
+          },
         ],
       },
-      { path: 'data-export', element: <AdminDataExportPage /> },
-      { path: 'demo-access', element: <AdminDemoAccessPage /> },
-      { path: 'feature-flags', element: <AdminFeatureFlagsPage /> },
-      { path: 'feedback', element: <AdminFeedbackPage /> },
-      { path: 'finances', element: <AdminFinancesPage /> },
-      { path: 'health', element: <AdminHealthPage /> },
-      { path: 'integrations', element: <AdminIntegrationsPage /> },
-      { path: 'onboarding', element: <AdminOnboardingPage /> },
-      { path: 'profiler', element: <AdminProfilerPage /> },
-      { path: 'quotas', element: <AdminQuotasPage /> },
-      { path: 'rbac', element: <AdminRbacPage /> },
-      { path: 'regions', element: <AdminRegionsPage /> },
-      { path: 'reports', element: <AdminReportsPage /> },
-      { path: 'security', element: <AdminSecurityPage /> },
-      { path: 'settings', element: <AdminSettingsPage /> },
-      { path: 'shadow', element: <AdminShadowPage /> },
-      { path: 'ticket', element: <AdminTicketsPage /> },
+      { path: 'data-export', ...page(() => import('./app/admin/data-export/page')) },
+      { path: 'demo-access', ...page(() => import('./app/admin/demo-access/page')) },
+      {
+        path: 'feature-flags',
+        ...page(() => import('./app/admin/feature-flags/FeatureFlagModal')),
+      },
+      { path: 'feedback', ...page(() => import('./app/admin/feedback/page')) },
+      { path: 'finances', ...page(() => import('./app/admin/finances/page')) },
+      { path: 'health', ...page(() => import('./app/admin/health/page')) },
+      { path: 'integrations', ...page(() => import('./app/admin/integrations/page')) },
+      { path: 'onboarding', ...page(() => import('./app/admin/onboarding/page')) },
+      { path: 'profiler', ...page(() => import('./app/admin/profiler/page')) },
+      { path: 'quotas', ...page(() => import('./app/admin/quotas/page')) },
+      { path: 'rbac', ...page(() => import('./app/admin/rbac/page')) },
+      { path: 'regions', ...page(() => import('./app/admin/regions/page')) },
+      { path: 'reports', ...page(() => import('./app/admin/reports/page')) },
+      { path: 'security', ...page(() => import('./app/admin/security/page')) },
+      { path: 'settings', ...page(() => import('./app/admin/settings/page')) },
+      { path: 'shadow', ...page(() => import('./app/admin/shadow/page')) },
+      { path: 'ticket', ...page(() => import('./app/admin/ticket/page')) },
     ],
   },
 
-  /* ─── 404 Catch-all ─── */
-  { path: '*', element: <Navigate to="/" replace /> },
+  /* ─── 404 Catch-all (DEBUG — revert to <Navigate to="/" replace /> after diagnosis) ─── */
+  { path: '*', element: <NotFoundDebug /> },
 ]);

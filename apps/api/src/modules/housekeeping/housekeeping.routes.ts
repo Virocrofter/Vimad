@@ -1,102 +1,172 @@
+/* apps/api/src/modules/housekeeping/housekeeping.routes.ts */
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
-import { paginationSchema } from '../../common/pagination.js';
+import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import {
-  ErrorResponseSchema,
-  IdParamSchema,
-  PaginatedResponseSchema,
-} from '../../common/openapi-schemas.js';
-import {
-  assignTask,
-  completeTask,
-  createTask,
-  deleteTask,
-  getTask,
-  inspectTask,
   listTasks,
-  taskCreateSchema,
-  taskUpdateSchema,
+  getTask,
+  createTask,
   updateTask,
-  type TaskCreateInput,
-  type TaskUpdateInput,
+  deleteTask,
+  assignTask,
+  startTask,
+  completeTask,
+  inspectTask,
+  skipTask,
+  bulkAssign,
+  getStats,
+  getStaff,
+  createTaskSchema,
+  updateTaskSchema,
+  assignTaskSchema,
+  completeTaskSchema,
+  inspectTaskSchema,
+  bulkAssignSchema,
+  listTasksQuerySchema,
 } from './housekeeping.service.js';
 
 extendZodWithOpenApi(z);
 
 export const registry = new OpenAPIRegistry();
 
-const taskQuerySchema = paginationSchema
-  .extend({
-    propertyId: z.string().optional(),
-    roomId: z.string().optional(),
-    assigneeId: z.string().optional(),
-    status: z.enum(['pending', 'in_progress', 'completed', 'inspected', 'skipped']).optional(),
-    priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
-    date: z.string().optional(),
-  })
-  .openapi('TaskQuery');
-const TaskCreateInputSchema = taskCreateSchema.openapi('TaskCreateInput');
-const TaskUpdateInputSchema = taskUpdateSchema.openapi('TaskUpdateInput');
-const AssignTaskInputSchema = z.object({ assigneeId: z.string() }).openapi('AssignTaskInput');
-const CompleteTaskInputSchema = z
-  .object({
-    notes: z.string().optional(),
-    issues: z.array(z.string()).optional(),
-  })
-  .openapi('CompleteTaskInput');
-const InspectTaskInputSchema = z
-  .object({
-    passed: z.boolean(),
-    notes: z.string().optional(),
-  })
-  .openapi('InspectTaskInput');
+// ─── Schemas for OpenAPI ───
 
-const TaskItemSchema = z
+const TaskSchema = z
   .object({
     id: z.string(),
+    tenantId: z.string(),
     propertyId: z.string(),
     roomId: z.string(),
-    type: z.enum(['cleaning', 'inspection', 'maintenance', 'turndown', 'deep_clean']),
-    status: z.enum(['pending', 'in_progress', 'completed', 'inspected', 'skipped', 'verified']),
-    priority: z.enum(['low', 'normal', 'high', 'urgent']),
-    scheduledAt: z.date().or(z.string()),
-    estimatedDuration: z.number().int().optional(),
-    notes: z.string().optional(),
-    checklist: z.array(z.string()).optional(),
-    createdAt: z.date().or(z.string()).optional(),
-    updatedAt: z.date().or(z.string()).optional(),
+    type: z.string(),
+    priority: z.string(),
+    status: z.string(),
+    scheduledAt: z.string(),
+    startedAt: z.string().nullable(),
+    completedAt: z.string().nullable(),
+    verifiedAt: z.string().nullable(),
+    estimatedDuration: z.number().nullable(),
+    actualDuration: z.number().nullable(),
+    notes: z.string().nullable(),
+    checklist: z.array(z.string()),
+    assigneeId: z.string().nullable(),
+    inspectorId: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+    room: z
+      .object({
+        id: z.string(),
+        number: z.string(),
+        floor: z.string().nullable(),
+        housekeepingStatus: z.string(),
+        roomType: z.object({ id: z.string(), name: z.string(), code: z.string() }),
+      })
+      .optional(),
+    assignee: z
+      .object({
+        id: z.string(),
+        firstName: z.string().nullable(),
+        lastName: z.string().nullable(),
+        email: z.string(),
+        role: z.string(),
+      })
+      .nullable()
+      .optional(),
+    inspector: z
+      .object({
+        id: z.string(),
+        firstName: z.string().nullable(),
+        lastName: z.string().nullable(),
+      })
+      .nullable()
+      .optional(),
   })
-  .openapi('TaskItem');
+  .openapi('HousekeepingTask');
 
-const TaskResponseSchema = z.object({ data: TaskItemSchema }).openapi('TaskResponse');
-const TaskListResponseSchema = PaginatedResponseSchema(TaskItemSchema).openapi('TaskListResponse');
+const TaskListResponseSchema = z
+  .object({
+    data: z.array(TaskSchema),
+    meta: z.object({
+      page: z.number(),
+      pageSize: z.number(),
+      total: z.number(),
+      totalPages: z.number(),
+    }),
+  })
+  .openapi('HousekeepingTaskListResponse');
+
+const TaskResponseSchema = z
+  .object({
+    data: TaskSchema,
+  })
+  .openapi('HousekeepingTaskResponse');
+
+const StatsResponseSchema = z
+  .object({
+    data: z.object({
+      today: z.object({
+        total: z.number(),
+        pending: z.number(),
+        inProgress: z.number(),
+        completed: z.number(),
+        inspected: z.number(),
+        completionRate: z.number(),
+      }),
+      overdue: z.number(),
+      staffOnDuty: z.number(),
+      avgCleaningDuration: z.number(),
+      byPriority: z.array(z.object({ priority: z.string(), count: z.number() })),
+      byType: z.array(z.object({ type: z.string(), count: z.number() })),
+      recentCompleted: z.array(
+        z.object({
+          id: z.string(),
+          room: z.object({ number: z.string() }),
+          assignee: z
+            .object({ firstName: z.string().nullable(), lastName: z.string().nullable() })
+            .nullable(),
+          completedAt: z.string().nullable(),
+        })
+      ),
+    }),
+  })
+  .openapi('HousekeepingStatsResponse');
+
+const StaffResponseSchema = z
+  .object({
+    data: z.array(
+      z.object({
+        id: z.string(),
+        firstName: z.string().nullable(),
+        lastName: z.string().nullable(),
+        email: z.string(),
+        role: z.string(),
+        todayTaskCount: z.number(),
+      })
+    ),
+  })
+  .openapi('HousekeepingStaffResponse');
+
+// ─── Router ───
 
 export const housekeepingRouter = Router();
 
 housekeepingRouter.use(authMiddleware, tenantScope);
 
+/* ─── GET /housekeeping ─── */
 registry.registerPath({
   method: 'get',
-  path: '/',
+  path: '/housekeeping',
   tags: ['Housekeeping'],
-  description: 'List housekeeping tasks',
-  request: {
-    query: taskQuerySchema,
-  },
+  description: 'List housekeeping tasks with filters',
   responses: {
     200: {
-      description: 'Paginated list of tasks',
+      description: 'Task list',
       content: { 'application/json': { schema: TaskListResponseSchema } },
     },
     401: {
       description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
   },
@@ -105,21 +175,12 @@ registry.registerPath({
 housekeepingRouter.get(
   '/',
   requirePermission('housekeeping', 'read'),
-  validateQuery(taskQuerySchema),
+  validateQuery(listTasksQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await listTasks(
         req.tenantId,
-        req.validatedQuery as {
-          page: number;
-          pageSize: number;
-          propertyId?: string;
-          roomId?: string;
-          assigneeId?: string;
-          status?: string;
-          priority?: string;
-          date?: string;
-        }
+        req.validatedQuery as z.infer<typeof listTasksQuerySchema>
       );
       res.json(result);
     } catch (err) {
@@ -128,29 +189,111 @@ housekeepingRouter.get(
   }
 );
 
+/* ─── GET /housekeeping/stats ─── */
 registry.registerPath({
   method: 'get',
-  path: '/{id}',
+  path: '/housekeeping/stats',
   tags: ['Housekeeping'],
-  description: 'Get a housekeeping task by ID',
-  request: {
-    params: IdParamSchema,
+  description: 'Get housekeeping dashboard stats',
+  responses: {
+    200: { description: 'Stats', content: { 'application/json': { schema: StatsResponseSchema } } },
+    401: {
+      description: 'Unauthorized',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
   },
+});
+
+housekeepingRouter.get(
+  '/stats',
+  requirePermission('housekeeping', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await getStats(
+        req.tenantId,
+        req.query.propertyId as string,
+        req.query.date as string
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── GET /housekeeping/staff ─── */
+registry.registerPath({
+  method: 'get',
+  path: '/housekeeping/staff',
+  tags: ['Housekeeping'],
+  description: 'Get available staff for assignment',
   responses: {
     200: {
-      description: 'Task details',
-      content: { 'application/json': { schema: TaskResponseSchema } },
+      description: 'Staff list',
+      content: { 'application/json': { schema: StaffResponseSchema } },
     },
     401: {
       description: 'Unauthorized',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
-    403: {
-      description: 'Forbidden',
+  },
+});
+
+housekeepingRouter.get(
+  '/staff',
+  requirePermission('housekeeping', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await getStaff(req.tenantId);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── POST /housekeeping/bulk-assign ─── */
+registry.registerPath({
+  method: 'post',
+  path: '/housekeeping/bulk-assign',
+  tags: ['Housekeeping'],
+  description: 'Bulk assign tasks to a staff member',
+  responses: {
+    200: { description: 'Bulk assign result' },
+    401: {
+      description: 'Unauthorized',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
+  },
+});
+
+housekeepingRouter.post(
+  '/bulk-assign',
+  requirePermission('housekeeping', 'assign'),
+  validateBody(bulkAssignSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await bulkAssign(
+        req.tenantId,
+        req.validatedBody as z.infer<typeof bulkAssignSchema>
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── GET /housekeeping/:id ─── */
+registry.registerPath({
+  method: 'get',
+  path: '/housekeeping/{id}',
+  tags: ['Housekeeping'],
+  description: 'Get a single task',
+  responses: {
+    200: { description: 'Task', content: { 'application/json': { schema: TaskResponseSchema } } },
     404: {
-      description: 'Task not found',
+      description: 'Not found',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
   },
@@ -169,32 +312,19 @@ housekeepingRouter.get(
   }
 );
 
+/* ─── POST /housekeeping ─── */
 registry.registerPath({
   method: 'post',
-  path: '/',
+  path: '/housekeeping',
   tags: ['Housekeeping'],
-  description: 'Create a housekeeping task',
-  request: {
-    body: {
-      description: 'Task payload',
-      content: { 'application/json': { schema: TaskCreateInputSchema } },
-    },
-  },
+  description: 'Create a new task',
   responses: {
     201: {
-      description: 'Task created',
+      description: 'Created',
       content: { 'application/json': { schema: TaskResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Room not found',
+    400: {
+      description: 'Validation error',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
   },
@@ -202,11 +332,14 @@ registry.registerPath({
 
 housekeepingRouter.post(
   '/',
-  requirePermission('housekeeping', 'create'),
-  validateBody(taskCreateSchema),
+  requirePermission('housekeeping', 'assign'),
+  validateBody(createTaskSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await createTask(req.tenantId, req.validatedBody as TaskCreateInput);
+      const result = await createTask(
+        req.tenantId,
+        req.validatedBody as z.infer<typeof createTaskSchema>
+      );
       res.status(201).json({ data: result });
     } catch (err) {
       next(err);
@@ -214,48 +347,17 @@ housekeepingRouter.post(
   }
 );
 
-registry.registerPath({
-  method: 'patch',
-  path: '/{id}',
-  tags: ['Housekeeping'],
-  description: 'Update a housekeeping task',
-  request: {
-    params: IdParamSchema,
-    body: {
-      description: 'Task update payload',
-      content: { 'application/json': { schema: TaskUpdateInputSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Task updated',
-      content: { 'application/json': { schema: TaskResponseSchema } },
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Task not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
-
+/* ─── PATCH /housekeeping/:id ─── */
 housekeepingRouter.patch(
   '/:id',
   requirePermission('housekeeping', 'update'),
-  validateBody(taskUpdateSchema),
+  validateBody(updateTaskSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await updateTask(
         req.tenantId,
         req.params.id,
-        req.validatedBody as TaskUpdateInput
+        req.validatedBody as z.infer<typeof updateTaskSchema>
       );
       res.json({ data: result });
     } catch (err) {
@@ -264,48 +366,31 @@ housekeepingRouter.patch(
   }
 );
 
-registry.registerPath({
-  method: 'post',
-  path: '/{id}/assign',
-  tags: ['Housekeeping'],
-  description: 'Assign a task to a user',
-  request: {
-    params: IdParamSchema,
-    body: {
-      description: 'Assignee payload',
-      content: { 'application/json': { schema: AssignTaskInputSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Task assigned',
-      content: { 'application/json': { schema: TaskResponseSchema } },
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Task or assignee not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
+/* ─── DELETE /housekeeping/:id ─── */
+housekeepingRouter.delete(
+  '/:id',
+  requirePermission('housekeeping', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await deleteTask(req.tenantId, req.params.id);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
+/* ─── POST /housekeeping/:id/assign ─── */
 housekeepingRouter.post(
   '/:id/assign',
-  requirePermission('housekeeping', 'update'),
-  validateBody(z.object({ assigneeId: z.string() })),
+  requirePermission('housekeeping', 'assign'),
+  validateBody(assignTaskSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await assignTask(
         req.tenantId,
         req.params.id,
-        (req.validatedBody as { assigneeId: string }).assigneeId
+        (req.validatedBody as z.infer<typeof assignTaskSchema>).assigneeId
       );
       res.json({ data: result });
     } catch (err) {
@@ -314,52 +399,31 @@ housekeepingRouter.post(
   }
 );
 
-registry.registerPath({
-  method: 'post',
-  path: '/{id}/complete',
-  tags: ['Housekeeping'],
-  description: 'Complete a housekeeping task',
-  request: {
-    params: IdParamSchema,
-    body: {
-      description: 'Completion notes',
-      content: { 'application/json': { schema: CompleteTaskInputSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Task completed',
-      content: { 'application/json': { schema: TaskResponseSchema } },
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Task not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Task cannot be completed',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
+/* ─── POST /housekeeping/:id/start ─── */
+housekeepingRouter.post(
+  '/:id/start',
+  requirePermission('housekeeping', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await startTask(req.tenantId, req.params.id);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
+/* ─── POST /housekeeping/:id/complete ─── */
 housekeepingRouter.post(
   '/:id/complete',
   requirePermission('housekeeping', 'update'),
-  validateBody(z.object({ notes: z.string().optional(), issues: z.array(z.string()).optional() })),
+  validateBody(completeTaskSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await completeTask(
         req.tenantId,
         req.params.id,
-        req.validatedBody as { notes?: string; issues?: string[] }
+        req.validatedBody as z.infer<typeof completeTaskSchema>
       );
       res.json({ data: result });
     } catch (err) {
@@ -368,52 +432,19 @@ housekeepingRouter.post(
   }
 );
 
-registry.registerPath({
-  method: 'post',
-  path: '/{id}/inspect',
-  tags: ['Housekeeping'],
-  description: 'Inspect a completed housekeeping task',
-  request: {
-    params: IdParamSchema,
-    body: {
-      description: 'Inspection result',
-      content: { 'application/json': { schema: InspectTaskInputSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Task inspected',
-      content: { 'application/json': { schema: TaskResponseSchema } },
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Task not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Task must be completed before inspection',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
-
+/* ─── POST /housekeeping/:id/inspect ─── */
 housekeepingRouter.post(
   '/:id/inspect',
   requirePermission('housekeeping', 'update'),
-  validateBody(z.object({ passed: z.boolean(), notes: z.string().optional() })),
+  validateBody(inspectTaskSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const authReq = req as any;
       const result = await inspectTask(
         req.tenantId,
         req.params.id,
-        req.validatedBody as { passed: boolean; notes?: string }
+        authReq.auth.user.id,
+        req.validatedBody as z.infer<typeof inspectTaskSchema>
       );
       res.json({ data: result });
     } catch (err) {
@@ -422,40 +453,19 @@ housekeepingRouter.post(
   }
 );
 
-registry.registerPath({
-  method: 'delete',
-  path: '/{id}',
-  tags: ['Housekeeping'],
-  description: 'Delete a housekeeping task',
-  request: {
-    params: IdParamSchema,
-  },
-  responses: {
-    204: {
-      description: 'Task deleted',
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Task not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
-
-housekeepingRouter.delete(
-  '/:id',
-  requirePermission('housekeeping', 'delete'),
+/* ─── POST /housekeeping/:id/skip ─── */
+housekeepingRouter.post(
+  '/:id/skip',
+  requirePermission('housekeeping', 'update'),
+  validateBody(z.object({ reason: z.string().optional() })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await deleteTask(req.tenantId, req.params.id);
-      res.status(204).send();
+      const result = await skipTask(
+        req.tenantId,
+        req.params.id,
+        (req.validatedBody as { reason?: string }).reason
+      );
+      res.json({ data: result });
     } catch (err) {
       next(err);
     }

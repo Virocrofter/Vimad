@@ -6,19 +6,19 @@ export function Topbar() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
-      <div className="flex items-center gap-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Vimad PMS</h2>
+    <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-6">
+      <div className="flex items-center gap-4 pl-10 lg:pl-0">
+        <h2 className="text-lg font-semibold text-text-primary">Command Center</h2>
       </div>
 
       <div className="flex items-center gap-4">
         {user && (
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-text-primary">
                 {user.firstName ?? ''} {user.lastName ?? ''}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+              <p className="text-xs capitalize text-text-muted">{user.role}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
               Logout

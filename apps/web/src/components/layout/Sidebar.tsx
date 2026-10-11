@@ -1,20 +1,107 @@
 /* apps/web/src/components/layout/Sidebar.tsx */
 import { NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
+import {
+  LayoutDashboard,
+  CalendarDays,
+  ConciergeBell,
+  BedDouble,
+  Users,
+  UsersRound,
+  Brush,
+  MoonStar,
+  KeyRound,
+  SquareParking,
+  Boxes,
+  Tag,
+  UtensilsCrossed,
+  CreditCard,
+  HandCoins,
+  Mail,
+  Landmark,
+  WalletCards,
+  Megaphone,
+  Gem,
+  Briefcase,
+  Radio,
+  BarChart3,
+  ShieldCheck,
+  LifeBuoy,
+  Settings,
+  Menu,
+  X,
+} from 'lucide-react';
+import { ThemeToggle } from '../theme/themeToggle';
 
 interface SidebarProps {
   collapsed?: boolean;
 }
 
-const NAV_ITEMS = [
-  { to: '/app/dashboard', label: 'Dashboard', icon: '📊' },
-  { to: '/app/reservations', label: 'Reservations', icon: '📅' },
-  { to: '/app/room-plan', label: 'Room Plan', icon: '🏨' },
-  { to: '/app/guests', label: 'Guests', icon: '👥' },
-  { to: '/app/housekeeping', label: 'Housekeeping', icon: '🧹' },
-  { to: '/app/billing', label: 'Billing', icon: '💳' },
-  { to: '/app/reports', label: 'Reports', icon: '📈' },
-  { to: '/app/settings', label: 'Settings', icon: '⚙️' },
+interface NavItem {
+  to: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  end?: boolean;
+}
+
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    title: 'Operations',
+    items: [
+      { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/app/reservations', label: 'Reservations', icon: CalendarDays, end: true },
+      { to: '/app/reservations/front-desk', label: 'Front Desk', icon: ConciergeBell },
+      { to: '/app/room-plan', label: 'Room Plan', icon: BedDouble },
+      { to: '/app/guests', label: 'Guests', icon: Users },
+      { to: '/app/groups', label: 'Groups', icon: UsersRound, end: true },
+    ],
+  },
+  {
+    title: 'Property',
+    items: [
+      { to: '/app/housekeeping', label: 'Housekeeping', icon: Brush },
+      { to: '/app/night-audit', label: 'Night Audit', icon: MoonStar },
+      { to: '/app/keys', label: 'Keys', icon: KeyRound, end: true },
+      { to: '/app/parking', label: 'Parking', icon: SquareParking, end: true },
+      { to: '/app/inventory', label: 'Inventory', icon: Boxes },
+      { to: '/app/rates', label: 'Rates', icon: Tag },
+      { to: '/app/meal-plans', label: 'Meal Plans', icon: UtensilsCrossed },
+    ],
+  },
+  {
+    title: 'Finance',
+    items: [
+      { to: '/app/billing', label: 'Billing', icon: CreditCard, end: true },
+      { to: '/app/billing/payment-requests', label: 'Payment Requests', icon: HandCoins },
+      { to: '/app/ar', label: 'Accounts Receivable', icon: Landmark },
+      { to: '/app/vcc', label: 'Virtual Cards', icon: WalletCards },
+    ],
+  },
+  {
+    title: 'Growth',
+    items: [
+      { to: '/app/marketing', label: 'Marketing', icon: Megaphone, end: true },
+      { to: '/app/loyalty', label: 'Loyalty', icon: Gem },
+      { to: '/app/sales-catering', label: 'Sales & Catering', icon: Briefcase, end: true },
+      { to: '/app/channel-manager', label: 'Channel Manager', icon: Radio },
+    ],
+  },
+  {
+    title: 'Administration',
+    items: [
+      { to: '/app/reports', label: 'Reports', icon: BarChart3 },
+      { to: '/app/users', label: 'Users', icon: ShieldCheck },
+      { to: '/app/audit-trail', label: 'Audit Trail', icon: ShieldCheck },
+      { to: '/app/support', label: 'Support', icon: LifeBuoy },
+      { to: '/app/settings', label: 'Settings', icon: Settings },
+      { to: '/app/settings/email', label: 'Email Center', icon: Mail },
+    ],
+  },
 ];
 
 export default function Sidebar({ collapsed = false }: SidebarProps) {
@@ -22,33 +109,79 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile toggle */}
       <button
         type="button"
-        className="sidebar-mobile-toggle"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label="Toggle navigation"
+        className="fixed left-4 top-4 z-50 rounded-md border border-border bg-surface p-2 text-text-primary lg:hidden"
       >
-        ☰
+        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       <aside
-        className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${mobileOpen ? 'sidebar--open' : ''}`}
+        className={`
+          fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-surface
+          transition-all duration-200
+          ${collapsed ? 'w-16' : 'w-64'}
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:static lg:translate-x-0
+        `}
       >
-        <nav className="sidebar__nav">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
-              }
-              onClick={() => setMobileOpen(false)}
-            >
-              <span className="sidebar__icon">{item.icon}</span>
-              {!collapsed && <span className="sidebar__label">{item.label}</span>}
-            </NavLink>
+        <div className="flex h-16 shrink-0 items-center border-b border-border px-4">
+          {!collapsed && <span className="text-lg font-bold text-text-primary">Vimad PMS</span>}
+        </div>
+
+        <nav className="flex-1 space-y-5 overflow-y-auto p-3">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title}>
+              {!collapsed && (
+                <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                  {section.title}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => setMobileOpen(false)}
+                      title={collapsed ? item.label : undefined}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
+                        }`
+                      }
+                    >
+                      <Icon className="h-4.5 w-4.5 shrink-0" />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </nav>
+
+        {/* Theme toggle — pinned to the sidebar footer */}
+        <div className="shrink-0 border-t border-border p-3">
+          <div className={collapsed ? 'flex justify-center' : 'px-1'}>
+            <ThemeToggle showLabel={!collapsed} />
+          </div>
+        </div>
       </aside>
     </>
   );

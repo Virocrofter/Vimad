@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { extendZodWithOpenApi, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import { requirePermission } from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { paginationSchema } from '../../common/pagination.js';
 import {

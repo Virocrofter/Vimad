@@ -5,7 +5,7 @@ vi.mock('../../common/prisma.js', () => ({
   prisma: {
     property: { findFirst: vi.fn() },
     ratePlan: { findMany: vi.fn() },
-    reservationStay: { count: vi.fn() },
+    reservationStay: { count: vi.fn(), groupBy: vi.fn() },
     reservation: { findUnique: vi.fn(), create: vi.fn() },
     channelConnection: {
       findMany: vi.fn(),
@@ -204,10 +204,17 @@ describe('pushAvailability', () => {
     mockProperty.findFirst.mockResolvedValue({
       id: 'p1',
       roomTypes: [{ id: 'rt1', code: 'DLXK' }],
-      rooms: [{ roomTypeId: 'rt1' }, { roomTypeId: 'rt1' }],
+      rooms: [
+        { id: 'room1', roomTypeId: 'rt1' },
+        { id: 'room2', roomTypeId: 'rt1' },
+      ],
     });
     mockConnection.findMany.mockResolvedValue([connection]);
-    mockStay.count.mockResolvedValue(1); // 1 occupied each day
+    // One occupied room on each of the two days (groupBy by ['date','roomId'])
+    mockStay.groupBy.mockResolvedValue([
+      { date: new Date('2026-09-10T00:00:00.000Z'), roomId: 'room1', _count: { _all: 1 } },
+      { date: new Date('2026-09-11T00:00:00.000Z'), roomId: 'room1', _count: { _all: 1 } },
+    ]);
     mockConnection.update.mockResolvedValue({});
     fetchMock.mockImplementation(() => httpOk());
 
@@ -233,10 +240,10 @@ describe('pushAvailability', () => {
     mockProperty.findFirst.mockResolvedValue({
       id: 'p1',
       roomTypes: [{ id: 'rt1', code: 'DLXK' }],
-      rooms: [{ roomTypeId: 'rt1' }],
+      rooms: [{ id: 'room1', roomTypeId: 'rt1' }],
     });
     mockConnection.findMany.mockResolvedValue([connection]);
-    mockStay.count.mockResolvedValue(0);
+    mockStay.groupBy.mockResolvedValue([]);
     mockConnection.update.mockResolvedValue({});
     fetchMock.mockImplementation(() => httpError(500, 'upstream down'));
 
@@ -267,7 +274,7 @@ describe('pushRates', () => {
         code: 'BAR',
         roomTypeId: 'rt1',
         baseRate: 100,
-        currency: 'USD',
+        currency: 'ZAR',
         roomType: { id: 'rt1', code: 'DLXK' },
       },
     ]);
@@ -282,7 +289,7 @@ describe('pushRates', () => {
       ratePlanId: 'rp1',
       roomTypeCode: 'DLXK',
       rate: 100,
-      currency: 'USD',
+      currency: 'ZAR',
     });
 
     // The channel received the multiplied rate (100 × 1.2 = 120)

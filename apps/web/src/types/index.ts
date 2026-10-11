@@ -25,6 +25,10 @@ export interface Reservation {
   propertyId: string;
   guestId: string;
   guestName: string;
+  guestEmail?: string | null;
+  roomNumber?: string | null;
+  roomTypeName?: string | null;
+  rate?: number;
   confirmationNumber: string;
   status: string;
   source: string;
@@ -38,6 +42,46 @@ export interface Reservation {
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  guest?: {
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    vipStatus?: string;
+    nationality?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    passportNumber?: string;
+  };
+  property?: { id: string; name: string; code: string; currency?: string };
+  stays?: Array<{
+    id: string;
+    roomId: string;
+    date: string;
+    rate: number;
+    room?: {
+      id: string;
+      number: string;
+      roomType?: { id?: string; name?: string; code?: string };
+    };
+  }>;
+  folio?: {
+    id: string;
+    status: string;
+    totalCharges?: number;
+    totalPayments?: number;
+    balance: number;
+    items?: Array<{
+      id: string;
+      type: string;
+      description: string;
+      amount: number;
+      quantity?: number;
+      postedAt: string;
+    }>;
+  } | null;
 }
 
 export interface Room {

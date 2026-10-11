@@ -13,16 +13,13 @@ vi.mock('../../common/prisma.js', () => ({
       delete: vi.fn(),
     },
     property: { findFirst: vi.fn() },
-    roomType: { findFirst: vi.fn() },
+    roomType: { findFirst: vi.fn(), findMany: vi.fn() },
+    room: { findMany: vi.fn() },
+    reservationStay: { findMany: vi.fn() },
   },
 }));
 
-vi.mock('../audit/audit.events.js', () => ({
-  broadcastAuditEvent: vi.fn(),
-}));
-
 import { prisma } from '../../common/prisma.js';
-import { broadcastAuditEvent } from '../audit/audit.events.js';
 import {
   listRatePlans,
   getRatePlan,
@@ -35,7 +32,6 @@ import {
 const mockRatePlan = prisma.ratePlan as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const mockProperty = prisma.property as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const mockRoomType = prisma.roomType as unknown as Record<string, ReturnType<typeof vi.fn>>;
-const mockBroadcast = broadcastAuditEvent as unknown as ReturnType<typeof vi.fn>;
 
 const ratePlan = {
   id: 'rp1',
@@ -45,7 +41,7 @@ const ratePlan = {
   name: 'BAR',
   code: 'BAR',
   baseRate: 150,
-  currency: 'USD',
+  currency: 'ZAR',
   status: 'active',
 };
 
@@ -70,11 +66,11 @@ describe('listRatePlans', () => {
     expect(result.meta.total).toBe(2);
   });
 
-  it('maps the active filter to a status filter', async () => {
+  it('passes propertyId and status filters through to the where clause', async () => {
     mockRatePlan.count.mockResolvedValue(0);
     mockRatePlan.findMany.mockResolvedValue([]);
 
-    await listRatePlans('t1', { page: 1, pageSize: 20, propertyId: 'p1', active: true });
+    await listRatePlans('t1', { page: 1, pageSize: 20, propertyId: 'p1', status: 'active' });
 
     expect(mockRatePlan.findMany.mock.calls[0][0].where).toEqual({
       tenantId: 't1',
@@ -83,11 +79,11 @@ describe('listRatePlans', () => {
     });
   });
 
-  it('maps active=false to status inactive', async () => {
+  it('maps status=inactive through to the where clause', async () => {
     mockRatePlan.count.mockResolvedValue(0);
     mockRatePlan.findMany.mockResolvedValue([]);
 
-    await listRatePlans('t1', { page: 1, pageSize: 20, active: false });
+    await listRatePlans('t1', { page: 1, pageSize: 20, status: 'inactive' });
 
     expect(mockRatePlan.findMany.mock.calls[0][0].where.status).toBe('inactive');
   });
@@ -117,25 +113,24 @@ describe('createRatePlan', () => {
     });
   });
 
-  it('throws 404 when the room type does not belong to the property', async () => {
+  it('throws 404 when the room type does not belong to the tenant', async () => {
     mockProperty.findFirst.mockResolvedValue({ id: 'p1' });
     mockRoomType.findFirst.mockResolvedValue(null);
 
     await expect(createRatePlan('t1', createInput)).rejects.toMatchObject({
       statusCode: 404,
-      message: 'Room type not found for this property',
+      message: 'Room type not found',
     });
     expect(mockRoomType.findFirst.mock.calls[0][0].where).toEqual({
       id: 'rt1',
       tenantId: 't1',
-      propertyId: 'p1',
     });
   });
 
   it('rejects a duplicate plan code for the property', async () => {
     mockProperty.findFirst.mockResolvedValue({ id: 'p1' });
     mockRoomType.findFirst.mockResolvedValue({ id: 'rt1' });
-    mockRatePlan.findUnique.mockResolvedValue(ratePlan);
+    mockRatePlan.findFirst.mockResolvedValue(ratePlan);
 
     await expect(createRatePlan('t1', createInput)).rejects.toMatchObject({
       statusCode: 409,
@@ -144,10 +139,10 @@ describe('createRatePlan', () => {
     expect(mockRatePlan.create).not.toHaveBeenCalled();
   });
 
-  it('creates the plan and broadcasts a low-severity audit event', async () => {
+  it('creates the plan with schema defaults', async () => {
     mockProperty.findFirst.mockResolvedValue({ id: 'p1' });
     mockRoomType.findFirst.mockResolvedValue({ id: 'rt1' });
-    mockRatePlan.findUnique.mockResolvedValue(null);
+    mockRatePlan.findFirst.mockResolvedValue(null);
     mockRatePlan.create.mockResolvedValue(ratePlan);
 
     const result = await createRatePlan('t1', createInput);
@@ -158,15 +153,13 @@ describe('createRatePlan', () => {
       roomTypeId: 'rt1',
       code: 'BAR',
       baseRate: 150,
-      currency: 'USD',
+      currency: 'ZAR',
+      calculationMethod: 'fixed',
+      status: 'active',
       closeToArrival: false,
       closeToDeparture: false,
     });
     expect(result).toEqual(ratePlan);
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'create', category: 'rate_plan' },
-      severity: 'low',
-    });
   });
 });
 
@@ -179,7 +172,7 @@ describe('updateRatePlan', () => {
     expect(mockRatePlan.update).not.toHaveBeenCalled();
   });
 
-  it('updates the plan and reports changed fields', async () => {
+  it('updates the plan', async () => {
     mockRatePlan.findFirst.mockResolvedValue(ratePlan);
     mockRatePlan.update.mockResolvedValue({ ...ratePlan, baseRate: 200 });
 
@@ -189,7 +182,6 @@ describe('updateRatePlan', () => {
       where: { id: 'rp1' },
       data: { baseRate: 200 },
     });
-    expect(mockBroadcast.mock.calls[0][0].metadata).toEqual({ changedFields: ['baseRate'] });
   });
 });
 
@@ -200,7 +192,7 @@ describe('deleteRatePlan', () => {
     expect(mockRatePlan.delete).not.toHaveBeenCalled();
   });
 
-  it('deletes the plan and broadcasts a medium-severity event', async () => {
+  it('deletes the plan', async () => {
     mockRatePlan.findFirst.mockResolvedValue(ratePlan);
     mockRatePlan.delete.mockResolvedValue(ratePlan);
 
@@ -208,9 +200,5 @@ describe('deleteRatePlan', () => {
 
     expect(mockRatePlan.delete).toHaveBeenCalledWith({ where: { id: 'rp1' } });
     expect(result).toEqual(ratePlan);
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'delete', category: 'rate_plan' },
-      severity: 'medium',
-    });
   });
 });

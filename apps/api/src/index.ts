@@ -1,4 +1,3 @@
-/* apps/api/src/index.ts */
 import 'dotenv/config';
 import './common/zod.js';
 import { createServer } from 'http';
@@ -29,11 +28,20 @@ import {
 import { closeQueues } from './common/queue.js';
 import { queueDashboardMiddleware } from './jobs/dashboard.js';
 import { emailWorker } from './jobs/email.worker.js';
-import { nightAuditWorker } from './jobs/night-audit.job.js';
+import { startNightAuditScheduler } from './jobs/night-audit.job.js';
 import { billingWorker } from './jobs/billing.job.js';
 import { reportWorker } from './jobs/report.job.js';
 import { gdprWorker } from './jobs/gdpr.job.js';
 import { deadLetterWorker, attachDeadLetterHandler } from './jobs/dead-letter.handler.js';
+// [PAYMENTS] Paystack payment worker (webhook → folio side effects)
+import { paymentWorker } from './jobs/payment.job.js';
+// [DEPOSIT-AUTOMATION] payment request reminders + expiry/auto-cancel
+import { paymentRequestWorker, startPaymentRequestScheduler } from './jobs/payment-request.job.js';
+// [A3] transactional email — pre-arrival scanner
+import {
+  transactionalEmailWorker,
+  startTransactionalEmailScheduler,
+} from './jobs/transactional-email.job.js';
 
 import { healthRouter } from './modules/health/health.routes.js';
 import { authRouter } from './modules/auth/auth.routes.js';
@@ -44,16 +52,29 @@ import { roomsRouter } from './modules/rooms/rooms.routes.js';
 import { roomTypesRouter } from './modules/room-types/room-types.routes.js';
 import { ratesRouter } from './modules/rates/rates.routes.js';
 import { foliosRouter } from './modules/folios/folios.routes.js';
+import { loyaltyRouter } from './modules/loyalty/loyalty.routes.js';
 import { channelRouter } from './modules/channel/channel.routes.js';
 import { housekeepingRouter } from './modules/housekeeping/housekeeping.routes.js';
 import { nightAuditRouter } from './modules/night-audit/night-audit.routes.js';
 import { smsRouter } from './modules/sms/sms.routes.js';
 import { guestPortalRouter } from './modules/guest-portal/guest-portal.routes.js';
 import { notificationRouter } from './modules/notifications/notification.routes.js';
+// [A3] transactional email center (email logs + manual triggers)
+import { transactionalEmailRouter } from './modules/notifications/transactional.routes.js';
 import { apiKeysRouter } from './modules/rbac/api-key.routes.js';
 import { rbacRouter } from './modules/rbac/rbac.routes.js';
 import { pushRouter } from './modules/push/push.routes.js';
 import { adminRouter } from './modules/admin/admin.routes.js';
+import { dashboardRouter } from './modules/dashboard/dashboard.routes.js';
+// [PAYMENTS] Paystack payments router + public webhook router
+import { paymentsRouter } from './modules/payments/payments.routes.js';
+import { paymentsWebhookRouter } from './modules/payments/payments.webhook.js';
+// [DEPOSIT-AUTOMATION] payment requests router
+import { paymentRequestsRouter } from './modules/payments/payment-requests.routes.js';
+// [A4] public booking engine (no auth — rate limited at mount)
+import { publicRouter } from './modules/public/public.routes.js';
+// [A5] SARS-compliant tax invoices & receipts
+import { invoicesRouter } from './modules/invoices/invoices.routes.js';
 
 const app = express();
 const server = createServer(app);
@@ -62,11 +83,14 @@ const PORT = env.PORT;
 // Workers start on import (module-level createWorker) — track them for shutdown
 const activeWorkers = [
   emailWorker,
-  nightAuditWorker,
+
   billingWorker,
   reportWorker,
   gdprWorker,
   deadLetterWorker,
+  paymentWorker, // [PAYMENTS]
+  paymentRequestWorker, // [DEPOSIT-AUTOMATION]
+  transactionalEmailWorker, // [A3]
 ];
 
 async function bootstrap() {
@@ -128,7 +152,16 @@ async function bootstrap() {
   app.use(metricsMiddleware);
 
   // Body parsing
-  app.use(express.json({ limit: '10mb' }));
+  // [PAYMENTS] `verify` captures the raw body so the Paystack webhook can
+  // verify its HMAC-SHA512 signature against the untouched payload.
+  app.use(
+    express.json({
+      limit: '10mb',
+      verify: (req: any, _res: any, buf: Buffer) => {
+        req.rawBody = buf;
+      },
+    })
+  );
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Input sanitization
@@ -144,7 +177,11 @@ async function bootstrap() {
   app.use((req: any, res, next) => {
     res.on('finish', () => {
       if (req.tenantId) {
-        recordApiUsage(req.tenantId, req.method, req.path, res.statusCode);
+        recordApiUsage(req.tenantId, 1, {
+          method: req.method,
+          path: req.path,
+          status: res.statusCode,
+        });
       }
     });
     next();
@@ -157,6 +194,9 @@ async function bootstrap() {
   const tieredLimiter = createTieredRateLimiter();
   const strictLimiter = createStrictRateLimiter();
   const apiLimiter = createApiRateLimiter();
+  // [A4] Public booking endpoints — guests have no login, so limit per IP.
+  // 30 req/min/IP: generous for a real guest flow, hostile to scraping/carding.
+  const publicLimiter = createStrictRateLimiter(60 * 1000, 30);
 
   app.use(apiLimiter);
 
@@ -209,7 +249,24 @@ async function bootstrap() {
   app.use('/auth', authRouter);
 
   // ─── Versioned API Routes (per-plan tiered rate limits) ───
+  // Single mount point per router — the legacy non-versioned duplicates were
+  // cut: they doubled rate-limit passes, doubled the API surface, and
+  // /invoices was even mounted three times in total.
   app.use('/v1', tieredLimiter);
+
+  // [PAYMENTS] Webhook is PUBLIC (HMAC-signed, no JWT) — must mount BEFORE
+  // the auth'd payments router, otherwise it would 401.
+  app.use('/v1/payments/webhook', paymentsWebhookRouter);
+  app.use('/v1/payments', paymentsRouter);
+  // [DEPOSIT-AUTOMATION] Payment requests (auth'd)
+  app.use('/v1/payment-requests', paymentRequestsRouter);
+  // [A3] Transactional email center (auth'd)
+  app.use('/v1/communications', transactionalEmailRouter);
+  // [A4] Public booking engine (unauthenticated, per-IP rate limited)
+  app.use('/v1/public', publicLimiter, publicRouter);
+  // [A5] Tax invoices & receipts (auth'd)
+  app.use('/v1/invoices', invoicesRouter);
+
   app.use('/v1/properties', propertiesRouter);
   app.use('/v1/guests', guestsRouter);
   app.use('/v1/reservations', reservationsRouter);
@@ -217,8 +274,11 @@ async function bootstrap() {
   app.use('/v1/room-types', roomTypesRouter);
   app.use('/v1/rates', ratesRouter);
   app.use('/v1/folios', foliosRouter);
+  // Loyalty — previously built but never mounted (frontend Loyalty page 404'd)
+  app.use('/v1/loyalty', loyaltyRouter);
   app.use('/v1/channel', channelRouter);
   app.use('/v1/housekeeping', housekeepingRouter);
+  app.use('/v1/dashboard', dashboardRouter);
   app.use('/v1/night-audit', nightAuditRouter);
   app.use('/v1/sms', smsRouter);
   app.use('/v1/notifications', notificationRouter);
@@ -226,45 +286,6 @@ async function bootstrap() {
   app.use('/v1/rbac', rbacRouter);
   app.use('/v1/push', pushRouter);
   app.use('/v1/guest-portal', guestPortalRouter);
-
-  // Legacy non-versioned routes (same tiered limits)
-  app.use(
-    [
-      '/properties',
-      '/guests',
-      '/reservations',
-      '/rooms',
-      '/room-types',
-      '/rates',
-      '/folios',
-      '/channel',
-      '/housekeeping',
-      '/night-audit',
-      '/sms',
-      '/notifications',
-      '/api-keys',
-      '/rbac',
-      '/push',
-      '/guest-portal',
-    ],
-    tieredLimiter
-  );
-  app.use('/properties', propertiesRouter);
-  app.use('/guests', guestsRouter);
-  app.use('/reservations', reservationsRouter);
-  app.use('/rooms', roomsRouter);
-  app.use('/room-types', roomTypesRouter);
-  app.use('/rates', ratesRouter);
-  app.use('/folios', foliosRouter);
-  app.use('/channel', channelRouter);
-  app.use('/housekeeping', housekeepingRouter);
-  app.use('/night-audit', nightAuditRouter);
-  app.use('/sms', smsRouter);
-  app.use('/notifications', notificationRouter);
-  app.use('/api-keys', apiKeysRouter);
-  app.use('/rbac', rbacRouter);
-  app.use('/push', pushRouter);
-  app.use('/guest-portal', guestPortalRouter);
 
   // ─── Admin (platform admin: KPIs, health, alerts, reports, jobs) ───
   app.use('/admin', adminRouter);
@@ -276,12 +297,29 @@ async function bootstrap() {
   app.use(sentryErrorHandler);
   app.use(errorHandler);
 
+  // ─── Test mode: the app stays fully mounted for supertest, but listeners,
+  // schedulers, signal handlers and worker wiring are skipped — importing
+  // this module under vitest must never bind a port or register SIGTERM/SIGINT
+  // handlers (that caused EADDRINUSE + "w.close is not a function" crashes).
+  if (process.env.VITEST === 'true') {
+    return;
+  }
+
   // ─── Dead-letter handlers ───
   attachDeadLetterHandler('email');
   attachDeadLetterHandler('night-audit');
   attachDeadLetterHandler('billing');
   attachDeadLetterHandler('report');
   attachDeadLetterHandler('gdpr');
+  // [PAYMENTS] payment side-effects (webhook → folio) retry into the DLQ too
+  attachDeadLetterHandler('payments');
+  // [DEPOSIT-AUTOMATION] reminder/expire jobs retry into the DLQ too
+  attachDeadLetterHandler('payment-requests');
+  // [A3] pre-arrival jobs retry into the DLQ too
+  attachDeadLetterHandler('transactional-email');
+  void startNightAuditScheduler(); // cron-driven scheduled audits (node-cron, every minute)
+  void startPaymentRequestScheduler(); // [DEPOSIT-AUTOMATION] reminders + expiry (every 5 min)
+  void startTransactionalEmailScheduler(); // [A3] pre-arrival scan (every hour)
 
   // ─── Graceful Shutdown ───
   const shutdown = async (signal: string) => {

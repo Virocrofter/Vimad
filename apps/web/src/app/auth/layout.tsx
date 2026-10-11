@@ -1,11 +1,8 @@
 /* apps/web/src/app/auth/layout.tsx */
 import { Outlet } from 'react-router-dom';
-import GuestAuthGuard from '../../components/router/GuestAuthGuard';
 
 export default function AuthLayout() {
-  return (
-    <GuestAuthGuard>
-      <Outlet />
-    </GuestAuthGuard>
-  );
+  // Staff auth pages must be public — never wrap in GuestAuthGuard,
+  // which redirects to /guest-portal/auth/login.
+  return <Outlet />;
 }

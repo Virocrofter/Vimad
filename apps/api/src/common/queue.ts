@@ -33,6 +33,9 @@ export const QUEUE_NAMES = [
   'night-audit',
   'billing',
   'gdpr',
+  'payments', // [PAYMENTS]
+  'payment-requests', // [DEPOSIT-AUTOMATION]
+  'transactional-email', // [A3]
   'dead-letter',
 ] as const;
 export type QueueName = (typeof QUEUE_NAMES)[number];

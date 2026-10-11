@@ -30,6 +30,12 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   SENDGRID_API_KEY: z.string().optional(),
 
+  // Paystack (cards tokenized — numbers never touch our servers)
+  PAYSTACK_SECRET_KEY: z.string().optional(),
+  PAYSTACK_PUBLIC_KEY: z.string().optional(),
+  PAYSTACK_WEBHOOK_SECRET: z.string().optional(),
+  PAYSTACK_CURRENCY: z.string().length(3).default('ZAR'),
+
   // Error tracking
   SENTRY_DSN: z.string().optional(),
 

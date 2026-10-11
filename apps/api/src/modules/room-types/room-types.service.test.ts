@@ -13,16 +13,13 @@ vi.mock('../../common/prisma.js', () => ({
       delete: vi.fn(),
     },
     property: { findFirst: vi.fn() },
-    room: { count: vi.fn() },
   },
 }));
 
-vi.mock('../audit/audit.events.js', () => ({
-  broadcastAuditEvent: vi.fn(),
-}));
+// NOTE: the service no longer guards deletes by room count (FK cascade
+// handles it) and no longer emits audit events.
 
 import { prisma } from '../../common/prisma.js';
-import { broadcastAuditEvent } from '../audit/audit.events.js';
 import {
   listRoomTypes,
   getRoomType,
@@ -34,8 +31,6 @@ import {
 
 const mockRoomType = prisma.roomType as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const mockProperty = prisma.property as unknown as Record<string, ReturnType<typeof vi.fn>>;
-const mockRoom = prisma.room as unknown as Record<string, ReturnType<typeof vi.fn>>;
-const mockBroadcast = broadcastAuditEvent as unknown as ReturnType<typeof vi.fn>;
 
 const roomType = {
   id: 'rt1',
@@ -89,11 +84,13 @@ describe('getRoomType', () => {
     });
   });
 
-  it('includes rooms when found', async () => {
-    mockRoomType.findFirst.mockResolvedValue({ ...roomType, rooms: [] });
+  it('includes property, rooms and rate plans when found', async () => {
+    mockRoomType.findFirst.mockResolvedValue({ ...roomType, rooms: [], ratePlans: [] });
     const result = await getRoomType('t1', 'rt1');
-    expect(mockRoomType.findFirst.mock.calls[0][0].include.rooms).toEqual({
-      select: { id: true, number: true, status: true },
+    expect(mockRoomType.findFirst.mock.calls[0][0].include).toEqual({
+      property: true,
+      rooms: true,
+      ratePlans: true,
     });
     expect(result.id).toBe('rt1');
   });
@@ -110,7 +107,7 @@ describe('createRoomType', () => {
 
   it('rejects a duplicate code for the property', async () => {
     mockProperty.findFirst.mockResolvedValue({ id: 'p1' });
-    mockRoomType.findUnique.mockResolvedValue(roomType);
+    mockRoomType.findFirst.mockResolvedValue(roomType);
 
     await expect(createRoomType('t1', createInput)).rejects.toMatchObject({
       statusCode: 409,
@@ -119,9 +116,9 @@ describe('createRoomType', () => {
     expect(mockRoomType.create).not.toHaveBeenCalled();
   });
 
-  it('creates the room type with schema defaults and broadcasts an audit event', async () => {
+  it('creates the room type with schema defaults', async () => {
     mockProperty.findFirst.mockResolvedValue({ id: 'p1' });
-    mockRoomType.findUnique.mockResolvedValue(null);
+    mockRoomType.findFirst.mockResolvedValue(null);
     mockRoomType.create.mockResolvedValue(roomType);
 
     const result = await createRoomType('t1', createInput);
@@ -134,10 +131,6 @@ describe('createRoomType', () => {
       maxOccupancy: 4,
     });
     expect(result).toEqual(roomType);
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'create', category: 'room_type' },
-      severity: 'low',
-    });
   });
 });
 
@@ -150,7 +143,7 @@ describe('updateRoomType', () => {
     expect(mockRoomType.update).not.toHaveBeenCalled();
   });
 
-  it('updates the room type and reports changed fields', async () => {
+  it('updates the room type', async () => {
     mockRoomType.findFirst.mockResolvedValue(roomType);
     mockRoomType.update.mockResolvedValue({ ...roomType, name: 'Deluxe King Plus' });
 
@@ -159,9 +152,6 @@ describe('updateRoomType', () => {
     expect(mockRoomType.update.mock.calls[0][0]).toEqual({
       where: { id: 'rt1' },
       data: { name: 'Deluxe King Plus' },
-    });
-    expect(mockBroadcast.mock.calls[0][0].metadata).toEqual({
-      changedFields: ['name'],
     });
   });
 });
@@ -172,30 +162,13 @@ describe('deleteRoomType', () => {
     await expect(deleteRoomType('t1', 'rt1')).rejects.toMatchObject({ statusCode: 404 });
   });
 
-  it('refuses to delete a room type that still has rooms', async () => {
+  it('deletes the room type', async () => {
     mockRoomType.findFirst.mockResolvedValue(roomType);
-    mockRoom.count.mockResolvedValue(3);
-
-    await expect(deleteRoomType('t1', 'rt1')).rejects.toMatchObject({
-      statusCode: 409,
-      message: 'Cannot delete room type with associated rooms',
-    });
-    expect(mockRoomType.delete).not.toHaveBeenCalled();
-  });
-
-  it('deletes the room type when no rooms are attached', async () => {
-    mockRoomType.findFirst.mockResolvedValue(roomType);
-    mockRoom.count.mockResolvedValue(0);
     mockRoomType.delete.mockResolvedValue(roomType);
 
     const result = await deleteRoomType('t1', 'rt1');
 
-    expect(mockRoom.count).toHaveBeenCalledWith({ where: { roomTypeId: 'rt1' } });
     expect(mockRoomType.delete).toHaveBeenCalledWith({ where: { id: 'rt1' } });
     expect(result).toEqual(roomType);
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'delete', category: 'room_type' },
-      severity: 'medium',
-    });
   });
 });

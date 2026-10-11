@@ -25,7 +25,8 @@ import {
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
-import { tierMeta, mockMembers, pointsTransactions } from './data';
+import { tierMeta } from './data';
+import { useLoyaltyMembers, useLoyaltyTransactions } from '../../../hooks/useloyalty';
 import { TierBadge, StatCard, TierProgressBar } from './components';
 import { MemberDetailDrawer } from './MemberDetailDrawer';
 import { LTVPredictiveModal } from './LTVPredictiveModal';
@@ -47,28 +48,34 @@ export default function LoyaltyPage() {
   const [showPredictive, setShowPredictive] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
+  /* Real data */
+  const { data: membersResp, isLoading } = useLoyaltyMembers({ page: 1, pageSize: 500 });
+  const { data: txResp } = useLoyaltyTransactions({ page: 1, pageSize: 6 });
+  const members = useMemo(() => membersResp?.data ?? [], [membersResp]);
+  const transactions = useMemo(() => txResp?.data ?? [], [txResp]);
+
   /* Stats */
   const stats = useMemo(() => {
-    const totalMembers = mockMembers.length;
-    const totalPoints = mockMembers.reduce((s, m) => s + m.points, 0);
-    const totalLTV = mockMembers.reduce((s, m) => s + m.lifetimeValue, 0);
-    const avgPoints = Math.round(totalPoints / totalMembers);
-    const redemptions = pointsTransactions.filter((t) => t.type === 'redemption').length;
+    const totalMembers = members.length;
+    const totalPoints = members.reduce((s, m) => s + m.points, 0);
+    const totalLTV = members.reduce((s, m) => s + m.lifetimeValue, 0);
+    const avgPoints = totalMembers > 0 ? Math.round(totalPoints / totalMembers) : 0;
+    const redemptions = transactions.filter((t) => t.type === 'redemption').length;
     return { totalMembers, totalPoints, totalLTV, avgPoints, redemptions };
-  }, []);
+  }, [members, transactions]);
 
   /* Tier distribution */
   const tierDistribution = useMemo(() => {
     const dist = { platinum: 0, gold: 0, silver: 0, bronze: 0, none: 0 };
-    mockMembers.forEach((m) => {
+    members.forEach((m) => {
       dist[m.tier] = (dist[m.tier] || 0) + 1;
     });
     return dist;
-  }, []);
+  }, [members]);
 
   /* Filtered & sorted members */
   const filteredMembers = useMemo(() => {
-    let result = mockMembers.filter((m) => {
+    let result = members.filter((m) => {
       const matchesQuery =
         m.name.toLowerCase().includes(query.toLowerCase()) ||
         m.email.toLowerCase().includes(query.toLowerCase()) ||
@@ -88,7 +95,7 @@ export default function LoyaltyPage() {
     });
 
     return result;
-  }, [query, tierFilter, sortBy]);
+  }, [members, query, tierFilter, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -113,6 +120,12 @@ export default function LoyaltyPage() {
         </div>
       </div>
 
+      {isLoading && (
+        <div className="rounded-xl border border-border bg-surface p-8 text-center text-sm text-text-muted">
+          Loading loyalty data…
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
@@ -129,7 +142,7 @@ export default function LoyaltyPage() {
         />
         <StatCard
           label="Avg. Member LTV"
-          value={`$${formatNumber(stats.totalLTV / stats.totalMembers)}`}
+          value={`$${formatNumber(stats.totalMembers > 0 ? stats.totalLTV / stats.totalMembers : 0)}`}
           icon={DollarSign}
           color="text-info"
         />
@@ -152,6 +165,7 @@ export default function LoyaltyPage() {
           {Object.entries(tierDistribution).map(([tier, count]) => {
             if (count === 0) return null;
             const meta = tierMeta[tier];
+            if (!meta) return null;
             const pct = (count / stats.totalMembers) * 100;
             return (
               <div
@@ -167,6 +181,7 @@ export default function LoyaltyPage() {
           {Object.entries(tierDistribution).map(([tier, count]) => {
             if (count === 0) return null;
             const meta = tierMeta[tier];
+            if (!meta) return null;
             return (
               <div key={tier} className="flex items-center gap-2">
                 <span className={cn('h-2.5 w-2.5 rounded-full', meta.dot)} />
@@ -258,32 +273,32 @@ export default function LoyaltyPage() {
                 <option value="bronze">Bronze</option>
               </select>
             </div>
-            <div className="flex items-end">
-              <button
-                onClick={() => {
-                  setTierFilter('all');
-                  setQuery('');
-                }}
-                className="h-10 rounded-md border border-border bg-background px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
-              >
-                Reset Filters
-              </button>
-            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setTierFilter('all');
+                setQuery('');
+              }}
+            >
+              Reset
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Results Count */}
-      <p className="text-sm text-text-muted">
+      {/* Results count */}
+      <p className="text-xs text-text-muted">
         Showing <span className="font-medium text-text-primary">{filteredMembers.length}</span> of{' '}
-        {mockMembers.length} members
+        {members.length} members
       </p>
 
       {/* Grid View */}
       {viewMode === 'grid' && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredMembers.map((member) => {
-            const meta = tierMeta[member.tier];
             const nextTier = Object.entries(tierMeta).find(([_, m]) => m.req > member.points);
             return (
               <button
@@ -468,7 +483,7 @@ export default function LoyaltyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {pointsTransactions.slice(0, 6).map((tx) => (
+              {transactions.map((tx) => (
                 <tr key={tx.id} className="hover:bg-background/50 transition-colors">
                   <td className="px-4 py-3 text-text-secondary text-xs font-mono">{tx.date}</td>
                   <td className="px-4 py-3 text-text-primary font-medium">{tx.memberName}</td>
@@ -500,6 +515,13 @@ export default function LoyaltyPage() {
                   </td>
                 </tr>
               ))}
+              {transactions.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-text-muted">
+                    No points activity yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -509,14 +531,14 @@ export default function LoyaltyPage() {
       {selectedMember && (
         <MemberDetailDrawer
           member={selectedMember}
-          transactions={pointsTransactions}
+          transactions={transactions}
           onClose={() => setSelectedMember(null)}
         />
       )}
 
       {/* Predictive LTV Modal */}
       {showPredictive && (
-        <LTVPredictiveModal members={mockMembers} onClose={() => setShowPredictive(false)} />
+        <LTVPredictiveModal members={members} onClose={() => setShowPredictive(false)} />
       )}
     </div>
   );

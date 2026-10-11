@@ -2,77 +2,74 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  MessageSquare,
   Send,
-  Paperclip,
-  Phone,
   Bell,
   ChevronLeft,
-  Clock,
   CheckCheck,
-  MoreVertical,
-  Image,
-  Mic,
-  Smile,
   Shield,
-  User,
   Headphones,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { useGuestStore } from '../store';
-import { mockMessages, mockStaff, formatMessageTime } from './data';
+import { useServiceRequest, getGuestToken } from '../../../hooks/useGuestPortalData';
 
+function formatMessageTime(iso) {
+  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * v1 messaging: guest messages are delivered to the front desk as real
+ * service requests (type "concierge"). There is no two-way chat endpoint yet,
+ * so: no fake staff replies, no typing simulation. Sent messages are shown
+ * for the current session only.
+ */
 export default function MessagesPage() {
   const navigate = useNavigate();
-  const { guest, addMessage } = useGuestStore();
-  const [messages, setMessages] = useState(mockMessages);
+  const hasToken = Boolean(getGuestToken());
+  const serviceRequest = useServiceRequest();
+
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
+  const [sendError, setSendError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const staff = mockStaff;
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  if (!hasToken) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">Please verify your reservation first</p>
+        <button
+          onClick={() => navigate('/guest-portal/auth/login')}
+          className="mt-4 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white hover:bg-secondary/90"
+        >
+          Verify Reservation
+        </button>
+      </div>
+    );
+  }
 
-    const newMessage = {
-      id: `msg-${Date.now()}`,
-      sender: 'guest',
-      text: input.trim(),
-      timestamp: new Date().toISOString(),
-      status: 'sent',
-      attachments: [],
-    };
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || serviceRequest.isPending) return;
 
-    setMessages((prev) => [...prev, newMessage]);
-    addMessage(newMessage);
+    const id = `msg-${Date.now()}`;
+    const timestamp = new Date().toISOString();
+    setMessages((prev) => [...prev, { id, sender: 'guest', text, timestamp, status: 'sending' }]);
     setInput('');
+    setSendError(null);
 
-    // Simulate staff typing
-    setTimeout(() => setIsTyping(true), 800);
-    setTimeout(() => {
-      setIsTyping(false);
-      const autoReply = {
-        id: `msg-${Date.now()}-staff`,
-        sender: 'staff',
-        staffId: 'staff-001',
-        text: 'Thank you for your message. A member of our team will assist you shortly. Is there anything specific we can help you with regarding your stay?',
-        timestamp: new Date().toISOString(),
-        status: 'delivered',
-        attachments: [],
-      };
-      setMessages((prev) => [...prev, autoReply]);
-    }, 3000);
+    try {
+      await serviceRequest.mutateAsync({ type: 'concierge', message: text });
+      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: 'delivered' } : m)));
+    } catch {
+      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: 'failed' } : m)));
+      setSendError('Message could not be delivered. Try again or call the front desk.');
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -81,17 +78,6 @@ export default function MessagesPage() {
       handleSend();
     }
   };
-
-  const groupedMessages = messages.reduce((groups, msg) => {
-    const date = new Date(msg.timestamp).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric',
-    });
-    if (!groups[date]) groups[date] = [];
-    groups[date].push(msg);
-    return groups;
-  }, {});
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)]">
@@ -103,153 +89,62 @@ export default function MessagesPage() {
         >
           <ChevronLeft className="h-5 w-5 text-text-secondary" />
         </button>
-        <div className="relative">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
-            <Headphones className="h-5 w-5 text-secondary" />
-          </div>
-          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-accent border-2 border-surface" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
+          <Headphones className="h-5 w-5 text-secondary" />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-sm font-semibold text-text-primary">Front Desk</h2>
-          <p className="text-xs text-accent flex items-center gap-1">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            Online
-          </p>
+          <p className="text-xs text-text-muted">Messages are delivered to the property staff</p>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => navigate('/guest-portal/messages/notifications')}
-            className="relative p-2 rounded-lg hover:bg-surface-elevated"
-          >
-            <Bell className="h-5 w-5 text-text-secondary" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-danger" />
-          </button>
-          <button className="p-2 rounded-lg hover:bg-surface-elevated">
-            <Phone className="h-5 w-5 text-text-secondary" />
-          </button>
-        </div>
+        <button
+          onClick={() => navigate('/guest-portal/messages/notifications')}
+          className="p-2 rounded-lg hover:bg-surface-elevated"
+        >
+          <Bell className="h-5 w-5 text-text-secondary" />
+        </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
-        {/* Welcome */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-surface-elevated border border-border px-4 py-2">
             <Shield className="h-4 w-4 text-accent" />
             <span className="text-xs text-text-secondary">
-              Messages are encrypted and monitored for your safety
+              Messages go directly to the front desk team
             </span>
           </div>
         </div>
 
-        {Object.entries(groupedMessages).map(([date, msgs]) => (
-          <div key={date} className="space-y-3">
-            <div className="flex items-center justify-center">
-              <span className="text-[10px] text-text-muted bg-surface-elevated border border-border rounded-full px-3 py-1">
-                {date}
-              </span>
+        {messages.length === 0 && (
+          <div className="py-12 text-center">
+            <Headphones className="h-8 w-8 text-text-muted mx-auto mb-2" />
+            <p className="text-sm text-text-muted">No messages yet</p>
+            <p className="text-xs text-text-muted mt-1">
+              Send a message and the front desk will be notified.
+            </p>
+          </div>
+        )}
+
+        {messages.map((msg) => (
+          <div key={msg.id} className="flex gap-2 max-w-[85%] ml-auto flex-row-reverse">
+            <div className="space-y-1 items-end">
+              <div className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-secondary text-white rounded-br-md">
+                {msg.text}
+              </div>
+              <div className="flex items-center gap-1 justify-end mr-1 text-[10px] text-text-muted">
+                <span>{formatMessageTime(msg.timestamp)}</span>
+                {msg.status === 'sending' && <span>· Sending…</span>}
+                {msg.status === 'delivered' && <CheckCheck className="h-3 w-3 text-accent" />}
+                {msg.status === 'failed' && <span className="text-danger">· Not delivered</span>}
+              </div>
             </div>
-            {msgs.map((msg, idx) => {
-              const isGuest = msg.sender === 'guest';
-              const showAvatar = idx === 0 || msgs[idx - 1].sender !== msg.sender;
-              const staffMember = isGuest ? null : staff.find((s) => s.id === msg.staffId);
-
-              return (
-                <div
-                  key={msg.id}
-                  className={cn(
-                    'flex gap-2 max-w-[85%]',
-                    isGuest ? 'ml-auto flex-row-reverse' : ''
-                  )}
-                >
-                  {!isGuest && showAvatar && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                      {staffMember?.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </div>
-                  )}
-                  {!isGuest && !showAvatar && <div className="w-8 shrink-0" />}
-
-                  <div className={cn('space-y-1', isGuest ? 'items-end' : 'items-start')}>
-                    {!isGuest && showAvatar && (
-                      <p className="text-[10px] text-text-muted ml-1">{staffMember?.name}</p>
-                    )}
-                    <div
-                      className={cn(
-                        'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-                        isGuest
-                          ? 'bg-secondary text-white rounded-br-md'
-                          : 'bg-surface-elevated border border-border text-text-primary rounded-bl-md'
-                      )}
-                    >
-                      {msg.text}
-                      {msg.attachments?.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          {msg.attachments.map((att) => (
-                            <div
-                              key={att.id}
-                              className={cn(
-                                'flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
-                                isGuest ? 'bg-white/10' : 'bg-background'
-                              )}
-                            >
-                              {att.type === 'image' ? (
-                                <Image className="h-4 w-4" />
-                              ) : (
-                                <Paperclip className="h-4 w-4" />
-                              )}
-                              <span className="truncate">{att.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className={cn(
-                        'flex items-center gap-1 text-[10px] text-text-muted',
-                        isGuest ? 'justify-end mr-1' : 'ml-1'
-                      )}
-                    >
-                      <span>{formatMessageTime(msg.timestamp)}</span>
-                      {isGuest && (
-                        <CheckCheck
-                          className={cn(
-                            'h-3 w-3',
-                            msg.status === 'read' ? 'text-accent' : 'text-text-muted'
-                          )}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         ))}
 
-        {isTyping && (
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10">
-              <Headphones className="h-4 w-4 text-secondary" />
-            </div>
-            <div className="bg-surface-elevated border border-border rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex items-center gap-1">
-                <span
-                  className="h-2 w-2 rounded-full bg-text-muted animate-bounce"
-                  style={{ animationDelay: '0ms' }}
-                />
-                <span
-                  className="h-2 w-2 rounded-full bg-text-muted animate-bounce"
-                  style={{ animationDelay: '150ms' }}
-                />
-                <span
-                  className="h-2 w-2 rounded-full bg-text-muted animate-bounce"
-                  style={{ animationDelay: '300ms' }}
-                />
-              </div>
-            </div>
+        {sendError && (
+          <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
+            <p className="text-xs text-danger">{sendError}</p>
           </div>
         )}
 
@@ -259,37 +154,13 @@ export default function MessagesPage() {
       {/* Input */}
       <div className="border-t border-border bg-surface px-4 py-3 shrink-0">
         <div className="flex items-end gap-2">
-          <div className="relative">
-            <button
-              onClick={() => setAttachmentMenuOpen(!attachmentMenuOpen)}
-              className="p-2.5 rounded-xl hover:bg-surface-elevated text-text-muted transition-colors"
-            >
-              <Paperclip className="h-5 w-5" />
-            </button>
-            {attachmentMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setAttachmentMenuOpen(false)} />
-                <div className="absolute bottom-full left-0 mb-2 z-50 rounded-xl border border-border bg-surface-elevated shadow-xl p-2 space-y-1 w-48">
-                  <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-background text-sm text-text-secondary">
-                    <Image className="h-4 w-4 text-secondary" /> Photo
-                  </button>
-                  <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-background text-sm text-text-secondary">
-                    <Mic className="h-4 w-4 text-secondary" /> Voice Message
-                  </button>
-                  <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-background text-sm text-text-secondary">
-                    <Smile className="h-4 w-4 text-secondary" /> Sticker
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
           <div className="flex-1 relative">
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
+              placeholder="Type a message to the front desk..."
               rows={1}
               className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary resize-none max-h-32"
               style={{ minHeight: '44px' }}
@@ -297,10 +168,10 @@ export default function MessagesPage() {
           </div>
           <button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || serviceRequest.isPending}
             className={cn(
               'p-3 rounded-xl transition-all',
-              input.trim()
+              input.trim() && !serviceRequest.isPending
                 ? 'bg-secondary text-white hover:bg-secondary/90 shadow-md'
                 : 'bg-surface-elevated text-text-muted'
             )}

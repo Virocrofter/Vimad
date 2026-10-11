@@ -558,7 +558,7 @@ function NewTenantModal({ onClose, onCreate }) {
     ownerPhone: '',
     location: '',
     timezone: 'America/New_York',
-    currency: 'USD',
+    currency: 'ZAR',
   });
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
@@ -752,7 +752,7 @@ function NewTenantModal({ onClose, onCreate }) {
                 onChange={(e) => update('currency', e.target.value)}
                 className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <option value="USD">USD ($)</option>
+                <option value="ZAR">ZAR ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
                 <option value="CAD">CAD (C$)</option>

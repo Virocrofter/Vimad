@@ -11,28 +11,35 @@ datasource db {
 // ─── Tenant & Identity ───
 
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  plan      String   @default("trial")
-  status    String   @default("active")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String               @id @default(cuid())
+  name                String
+  slug                String               @unique
+  plan                String               @default("trial")
+  status              String               @default("active")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 
-  properties        Property[]
-  users             User[]
-  guests            Guest[]
-  reservations      Reservation[]
-  roomTypes         RoomType[]
-  rooms             Room[]
-  ratePlans         RatePlan[]
-  auditLogs         AuditLog[]
-  notifications     Notification[]
-  invoices          Invoice[]
-  pushSubscriptions PushSubscription[]
-  channelConnections ChannelConnection[]
-  housekeepingTasks HousekeepingTask[]
-  nightAudits       NightAudit[]
+  properties          Property[]
+  users               User[]
+  guests              Guest[]
+  reservations        Reservation[]
+  roomTypes           RoomType[]
+  rooms               Room[]
+  ratePlans           RatePlan[]
+  auditLogs           AuditLog[]
+  notifications       Notification[]
+  invoices            Invoice[]
+  taxInvoices         TaxInvoice[]
+  invoiceCounters     InvoiceCounter[]
+  pushSubscriptions   PushSubscription[]
+  channelConnections  ChannelConnection[]
+  housekeepingTasks   HousekeepingTask[]
+  nightAudits         NightAudit[]
+  nightAuditSchedules NightAuditSchedule[]
+  payments              Payment[]
+  guestPaymentMethods   GuestPaymentMethod[]
+  paymentRequests       PaymentRequest[]
+  emailLogs             EmailLog[]
 
   @@map("tenants")
 }
@@ -57,6 +64,7 @@ model User {
   inspectedTasks    HousekeepingTask[] @relation("InspectedTasks")
   refreshTokens     RefreshToken[]
   passwordResets    PasswordReset[]
+  guestNotes        GuestNote[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -108,20 +116,23 @@ model Property {
   address             String?
   city                String?
   country             String?
+  vatNumber          String?        // SARS VAT vendor number — printed on tax invoices
   timezone            String   @default("UTC")
-  currency            String   @default("USD")
+  currency            String   @default("ZAR")
   status              String   @default("active")
   currentBusinessDate DateTime @default(now()) @db.Date
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  roomTypes         RoomType[]
-  rooms             Room[]
-  ratePlans         RatePlan[]
-  reservations      Reservation[]
-  channelConnections ChannelConnection[]
-  housekeepingTasks HousekeepingTask[]
-  nightAudits       NightAudit[]
+  roomTypes           RoomType[]
+  rooms               Room[]
+  ratePlans           RatePlan[]
+  reservations        Reservation[]
+  channelConnections  ChannelConnection[]
+  housekeepingTasks   HousekeepingTask[]
+  nightAudits         NightAudit[]
+  nightAuditSchedules NightAuditSchedule[]
+  taxInvoices         TaxInvoice[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -178,26 +189,30 @@ model Room {
 }
 
 model RatePlan {
-  id          String    @id @default(cuid())
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId  String
-  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  roomTypeId  String
-  roomType    RoomType  @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
-  name        String
-  code        String
-  baseRate    Decimal   @db.Decimal(10, 2)
-  currency    String    @default("USD")
-  startDate   DateTime?
-  endDate     DateTime?
-  minStay     Int?
-  maxStay     Int?
-  closeToArrival Boolean @default(false)
-  closeToDeparture Boolean @default(false)
-  status      String    @default("active")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId        String
+  property          Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomTypeId        String
+  roomType          RoomType  @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  name              String
+  code              String
+  description       String?
+  baseRate          Decimal   @db.Decimal(10, 2)
+  currency          String    @default("ZAR")
+  calculationMethod String    @default("fixed") // fixed | percent | amount
+  calculationValue  Decimal?  @db.Decimal(10, 2)
+  advanceDays       Int?
+  startDate         DateTime?
+  endDate           DateTime?
+  minStay           Int?
+  maxStay           Int?
+  closeToArrival    Boolean   @default(false)
+  closeToDeparture  Boolean   @default(false)
+  status            String    @default("active")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@unique([propertyId, code])
   @@index([tenantId])
@@ -209,28 +224,36 @@ model RatePlan {
 // ─── Guests ───
 
 model Guest {
-  id             String   @id @default(cuid())
-  tenantId       String
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  firstName      String
-  lastName       String
-  email          String?
-  phone          String?
-  dateOfBirth    DateTime?
-  nationality    String?
-  address        String?
-  city           String?
-  country        String?
-  passportNumber String?
-  loyaltyPoints  Int      @default(0)
-  vipStatus      String?
-  notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String?
+  dateOfBirth     DateTime?
+  nationality     String?
+  address         String?
+  city            String?
+  country         String?
+  passportNumber  String?
+  loyaltyPoints   Int       @default(0)
+  vipStatus       String?
+  doNotDisturb    Boolean   @default(false)
+  blacklisted     Boolean   @default(false)
+  blacklistReason String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  reservations  Reservation[]
-  preferences   GuestPreference[]
-  documents     GuestDocument[]
+  reservations        Reservation[]
+  preferences         GuestPreference[]
+  documents           GuestDocument[]
+  guestNotes          GuestNote[]
+  loyaltyTransactions LoyaltyTransaction[]
+  payments            Payment[]
+  paymentMethods      GuestPaymentMethod[]
+  taxInvoices         TaxInvoice[]
 
   @@index([tenantId])
   @@index([email])
@@ -251,19 +274,32 @@ model GuestPreference {
 }
 
 model GuestDocument {
-  id        String    @id @default(cuid())
-  guestId   String
-  guest     Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  type      String
-  number    String?
-  issuedBy  String?
-  issueDate DateTime?
+  id         String    @id @default(cuid())
+  guestId    String
+  guest      Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  type       String
+  number     String?
+  issuedBy   String?
+  issueDate  DateTime?
   expiryDate DateTime?
-  fileUrl   String?
-  createdAt DateTime  @default(now())
+  fileUrl    String?
+  createdAt  DateTime  @default(now())
 
   @@index([guestId])
   @@map("guest_documents")
+}
+
+model GuestNote {
+  id        String   @id @default(cuid())
+  guestId   String
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([guestId])
+  @@map("guest_notes")
 }
 
 // ─── Reservations ───
@@ -285,6 +321,7 @@ model Reservation {
   adults             Int      @default(1)
   children           Int      @default(0)
   notes              String?
+  preArrivalSentAt   DateTime?
   totalAmount        Decimal  @db.Decimal(10, 2)
   balance            Decimal  @db.Decimal(10, 2)
   createdAt          DateTime @default(now())
@@ -292,6 +329,9 @@ model Reservation {
 
   stays ReservationStay[]
   folio Folio?
+  payments              Payment[]
+  paymentRequests       PaymentRequest[]
+  taxInvoices         TaxInvoice[]
 
   @@index([tenantId])
   @@index([propertyId])
@@ -324,7 +364,7 @@ model ReservationStay {
 
 model Folio {
   id            String      @id @default(cuid())
-  reservationId String    @unique
+  reservationId String      @unique
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   tenantId      String
   status        String      @default("open")
@@ -334,7 +374,9 @@ model Folio {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  items FolioItem[]
+  items    FolioItem[]
+  payments Payment[]
+  taxInvoices         TaxInvoice[]
 
   @@index([status])
   @@index([tenantId, status, createdAt])
@@ -357,23 +399,23 @@ model FolioItem {
 }
 
 model Invoice {
-  id           String   @id @default(cuid())
-  tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customerId   String?
-  periodStart  DateTime @db.Date
-  periodEnd    DateTime @db.Date
-  dueDate      DateTime @db.Date
-  plan         String
-  baseAmount   Decimal  @db.Decimal(10, 2)
-  overageAmount Decimal @default(0) @db.Decimal(10, 2)
-  totalAmount  Decimal  @db.Decimal(10, 2)
-  currency     String   @default("USD")
-  status       String   @default("draft")
-  paidAt       DateTime?
-  items        Json?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId    String?
+  periodStart   DateTime  @db.Date
+  periodEnd     DateTime  @db.Date
+  dueDate       DateTime  @db.Date
+  plan          String
+  baseAmount    Decimal   @db.Decimal(10, 2)
+  overageAmount Decimal   @default(0) @db.Decimal(10, 2)
+  totalAmount   Decimal   @db.Decimal(10, 2)
+  currency      String    @default("ZAR")
+  status        String    @default("draft")
+  paidAt        DateTime?
+  items         Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([tenantId])
   @@index([status])
@@ -384,24 +426,24 @@ model Invoice {
 // ─── Channel Manager ───
 
 model ChannelConnection {
-  id              String   @id @default(cuid())
-  tenantId        String
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId      String
-  property        Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  provider        String
-  hotelId         String
-  apiKey          String
-  apiSecret       String?
-  endpoint        String?
-  settings        Json     @default("{}")
-  status          String   @default("pending")
-  lastSyncStatus  String?
-  lastSyncAt      DateTime?
-  connectedAt     DateTime?
-  disconnectedAt  DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId     String
+  property       Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  provider       String
+  hotelId        String
+  apiKey         String
+  apiSecret      String?
+  endpoint       String?
+  settings       Json      @default("{}")
+  status         String    @default("pending")
+  lastSyncStatus String?
+  lastSyncAt     DateTime?
+  connectedAt    DateTime?
+  disconnectedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   mappings ChannelMapping[]
 
@@ -430,30 +472,30 @@ model ChannelMapping {
 // ─── Housekeeping ───
 
 model HousekeepingTask {
-  id                String   @id @default(cuid())
+  id                String    @id @default(cuid())
   tenantId          String
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId        String
-  property          Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property          Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   roomId            String
-  room              Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  type              String   @default("cleaning")
-  priority          String   @default("normal")
-  status            String   @default("pending")
-  scheduledAt       DateTime @default(now())
+  room              Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  type              String    @default("cleaning")
+  priority          String    @default("normal")
+  status            String    @default("pending")
+  scheduledAt       DateTime  @default(now())
   startedAt         DateTime?
   completedAt       DateTime?
   verifiedAt        DateTime?
   estimatedDuration Int?
   actualDuration    Int?
   notes             String?
-  checklist         String[] @default([])
-  assigneeId      String?
-  assignee        User?    @relation("AssignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
+  checklist         String[]  @default([])
+  assigneeId        String?
+  assignee          User?     @relation("AssignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
   inspectorId       String?
-  inspector         User?    @relation("InspectedTasks", fields: [inspectorId], references: [id], onDelete: SetNull)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  inspector         User?     @relation("InspectedTasks", fields: [inspectorId], references: [id], onDelete: SetNull)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@index([propertyId])
   @@index([roomId])
@@ -466,20 +508,20 @@ model HousekeepingTask {
 // ─── Night Audit ───
 
 model NightAudit {
-  id            String   @id @default(cuid())
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId    String
-  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  auditDate     DateTime @db.Date
-  status        String   @default("in_progress")
-  runBy         String
-  steps         Json     @default("{}")
-  results       Json?
-  errorMessage  String?
-  completedAt   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String    @id @default(cuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  auditDate    DateTime  @db.Date
+  status       String    @default("in_progress")
+  runBy        String
+  steps        Json      @default("{}")
+  results      Json?
+  errorMessage String?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@unique([tenantId, propertyId, auditDate])
   @@index([tenantId])
@@ -487,6 +529,32 @@ model NightAudit {
   @@index([auditDate])
   @@index([status])
   @@map("night_audits")
+}
+
+// ─── Night Audit Automation ───
+
+model NightAuditSchedule {
+  id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId    String
+  property      Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  scheduledTime String    @default("02:00") // HH:MM format
+  timezone      String    @default("UTC")
+  isActive      Boolean   @default(true)
+  autoRun       Boolean   @default(false) // if false, sends reminder only
+  steps         Json      @default("{}")
+  notifyEmails  String[]  @default([])
+  lastRunAt     DateTime?
+  nextRunAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([nextRunAt])
+  @@index([isActive])
+  @@map("night_audit_schedules")
 }
 
 // ─── Audit & Ops ───
@@ -511,30 +579,30 @@ model AuditLog {
 // ─── Notifications ───
 
 model Notification {
-  id           String   @id @default(cuid())
-  tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  userId       String?
-  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type         String
-  category     String
+  type     String
+  category String
 
-  title        String
-  message      String
+  title   String
+  message String
 
-  actionUrl    String?
-  actionLabel  String?
+  actionUrl   String?
+  actionLabel String?
 
-  entityType   String?
-  entityId     String?
+  entityType String?
+  entityId   String?
 
-  read         Boolean  @default(false)
-  readAt       DateTime?
+  read   Boolean   @default(false)
+  readAt DateTime?
 
   deliveredVia String[] @default([])
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([tenantId])
   @@index([userId])
@@ -546,15 +614,15 @@ model Notification {
 // ─── Push Subscriptions (for Web Push) ───
 
 model PushSubscription {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  endpoint  String
-  p256dh    String
-  auth      String
+  endpoint String
+  p256dh   String
+  auth     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -587,11 +655,11 @@ model Role {
 // ─── RBAC: Permissions (Resource + Action Matrix) ───
 
 model Permission {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   resource    String
   action      String
   description String?
-  category    String @default("general")
+  category    String  @default("general")
 
   rolePermissions RolePermission[]
 
@@ -638,24 +706,24 @@ model RoleAssignment {
 // ─── API Keys with Scoped Permissions ───
 
 model ApiKey {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   tenantId     String
   name         String
   keyHash      String
   keyPrefix    String
   scopes       String[]
-  status       String   @default("active")
-  environment  String   @default("production")
-  rateLimit    String   @default("1000/min")
+  status       String    @default("active")
+  environment  String    @default("production")
+  rateLimit    String    @default("1000/min")
   expiresAt    DateTime?
   lastUsedAt   DateTime?
-  usageCount   Int      @default(0)
+  usageCount   Int       @default(0)
   createdBy    String?
   revokedAt    DateTime?
   revokedBy    String?
   revokeReason String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([tenantId])
   @@index([keyPrefix])
@@ -669,14 +737,14 @@ model IdempotencyKey {
   id          String   @id @default(cuid())
   key         String   @unique
   scope       String
-  requestPath String?  // ADD THIS
-  requestBody Json?    // ADD THIS
+  requestPath String?
+  requestBody Json?
   payload     Json?
   response    Json?
   status      String   @default("pending")
   expiresAt   DateTime
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt  // ADD THIS
+  updatedAt   DateTime @updatedAt
 
   @@index([key])
   @@index([scope])
@@ -688,7 +756,7 @@ model IdempotencyKey {
 
 model ReportTemplate {
   id          String   @id @default(cuid())
-  tenantId    String?  // null = system template
+  tenantId    String? // null = system template
   name        String
   description String?
   category    String   @default("custom")
@@ -699,26 +767,26 @@ model ReportTemplate {
   updatedAt   DateTime @updatedAt
 
   scheduledReports ScheduledReport[]
-  reportRuns         ReportRun[]
+  reportRuns       ReportRun[]
 
   @@index([tenantId])
   @@map("report_templates")
 }
 
 model ScheduledReport {
-  id         String   @id @default(cuid())
+  id         String         @id @default(cuid())
   templateId String
   template   ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
   name       String
-  frequency  String   // daily | weekly | monthly | quarterly
+  frequency  String // daily | weekly | monthly | quarterly
   recipients String[]
-  format     String   // pdf | csv | excel
-  parameters Json     @default("{}")
+  format     String // pdf | csv | excel
+  parameters Json           @default("{}")
   nextRunAt  DateTime
   lastRunAt  DateTime?
-  status     String   @default("active") // active | paused | error
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status     String         @default("active") // active | paused | error
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
 
   @@index([templateId])
   @@index([nextRunAt])
@@ -726,17 +794,17 @@ model ScheduledReport {
 }
 
 model ReportRun {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   reportId    String
   template    ReportTemplate @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  status      String   @default("pending") // pending | running | completed | failed
-  startedAt   DateTime @default(now())
+  status      String         @default("pending") // pending | running | completed | failed
+  startedAt   DateTime       @default(now())
   completedAt DateTime?
-  rowCount    Int      @default(0)
-  fileKey     String?  // storage key for generated file
-  fileUrl     String?  // signed download URL (transient)
+  rowCount    Int            @default(0)
+  fileKey     String? // storage key for generated file
+  fileUrl     String? // signed download URL (transient)
   error       String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime       @default(now())
 
   @@index([reportId])
   @@index([status])
@@ -746,18 +814,18 @@ model ReportRun {
 // ─── Dead Letter Queue Persistence ───
 
 model FailedJob {
-  id             String   @id @default(cuid())
-  queue          String
-  jobId          String
-  jobName        String
-  payload        Json?
-  failReason     String
-  attemptCount   Int      @default(0)
-  status         String   @default("pending") // pending | retried | resolved | abandoned
-  retriedAt      DateTime?
-  resolvedAt     DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String    @id @default(cuid())
+  queue        String
+  jobId        String
+  jobName      String
+  payload      Json?
+  failReason   String
+  attemptCount Int       @default(0)
+  status       String    @default("pending") // pending | retried | resolved | abandoned
+  retriedAt    DateTime?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@unique([queue, jobId])
   @@index([status])
@@ -769,7 +837,7 @@ model FailedJob {
 model UsageRecord {
   id         String   @id @default(cuid())
   tenantId   String
-  metric     String   // api_calls | storage_bytes | sms_sent | emails_sent | reports_generated
+  metric     String // api_calls | storage_bytes | sms_sent | emails_sent | reports_generated
   quantity   Int      @default(1)
   recordedAt DateTime @default(now())
   metadata   Json?
@@ -779,3 +847,236 @@ model UsageRecord {
   @@map("usage_records")
 }
 
+model LoyaltyTransaction {
+  id          String   @id @default(cuid())
+  tenantId    String
+  guestId     String
+  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  type        String // accrual | redemption | bonus | adjustment
+  amount      Int // always positive; sign is derived from type
+  balance     Int // member's points balance after this transaction
+  description String
+  source      String   @default("Manual")
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([guestId])
+  @@index([tenantId, createdAt])
+  @@map("loyalty_transactions")
+}
+
+// ─── Payments (Paystack) ───
+
+model Payment {
+  id            String       @id @default(cuid())
+  tenantId      String
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId    String?
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  guestId       String?
+  guest         Guest?       @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  folioId       String?
+  folio         Folio?       @relation(fields: [folioId], references: [id], onDelete: SetNull)
+
+  reference         String  @unique
+  paystackId        Int?
+  authorizationCode String?
+  channel           String  @default("card")
+  cardLast4         String?
+  cardBrand         String?
+
+  amountMinor   Int // minor units (kobo/cents)
+  currency      String @default("ZAR")
+  feeMinor      Int    @default(0)
+  refundedMinor Int    @default(0)
+
+  type           String // deposit | balance_charge | no_show_fee | vcc_charge | refund
+  status         String    @default("pending")
+  idempotencyKey String?   @unique
+  failureReason  String?
+  metadata       Json?
+  postedToFolio     Boolean  @default(false)
+  postedAt          DateTime?
+  createdById       String?
+  paymentRequest    PaymentRequest?
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status, type])
+  @@index([reservationId])
+  @@index([guestId])
+  @@index([folioId])
+  @@map("payments")
+}
+
+model GuestPaymentMethod {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  guestId              String
+  guest                Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  paystackCustomerCode String?
+  authorizationCode    String
+  cardType             String?
+  cardLast4            String
+  cardExpMonth         String?
+  cardExpYear          String?
+  bank                 String?
+  channel              String   @default("card")
+  reusable             Boolean  @default(true)
+  isDefault            Boolean  @default(false)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+
+  @@unique([guestId, authorizationCode])
+  @@index([tenantId])
+  @@index([guestId])
+  @@map("guest_payment_methods")
+}
+
+// ─── Payment Requests (deposit automation — RoomRaccoon parity) ───
+
+model PaymentRequest {
+  id            String       @id @default(cuid())
+  tenantId      String
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  guestId       String?
+  folioId       String?
+  paymentId     String?      @unique
+  payment       Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  reference           String  @unique
+  paystackRequestCode String?
+  paystackOfflineRef  String?
+  hostedUrl           String?
+
+  amountMinor Int
+  currency    String  @default("ZAR")
+  status      String  @default("pending") // pending | sent | paid | expired | cancelled
+  description String?
+
+  depositPercent       Int       @default(50)
+  dueDate              DateTime
+  sentAt               DateTime?
+  paidAt               DateTime?
+  remindersSent        Int       @default(0)
+  nextReminderAt       DateTime?
+  reminderOffsetsHours Int[]     @default([])
+
+  autoCancelEnabled    Boolean   @default(false)
+  autoCancelAt         DateTime?
+  reservationCancelled Boolean   @default(false)
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+  @@index([nextReminderAt])
+  @@index([reservationId])
+  @@map("payment_requests")
+}
+
+// ─── Transactional email log (A3 — every guest touchpoint, visible) ───
+
+model EmailLog {
+  id          String    @id @default(cuid())
+  tenantId    String?
+  tenant      Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  to          String
+  subject     String
+  template    String
+  payload     Json?
+  status      String    @default("queued") // queued | sent | failed
+  error       String?
+  relatedType String? // reservation | payment
+  relatedId   String?
+  createdAt   DateTime  @default(now())
+  sentAt      DateTime?
+
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@index([relatedType, relatedId])
+  @@map("email_logs")
+}
+
+// [A5] SARS-compliant tax invoices & receipts
+model TaxInvoice {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id])
+  folioId       String?
+  folio         Folio?   @relation(fields: [folioId], references: [id])
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  guestId       String?
+  guest         Guest?   @relation(fields: [guestId], references: [id])
+  paymentId     String?  @unique // [A5] one receipt per payment — idempotency
+  originalId    String?  // [A5-v2] credit note → original tax invoice
+  original      TaxInvoice?  @relation("CreditNotes", fields: [originalId], references: [id])
+  creditNotes   TaxInvoice[] @relation("CreditNotes")
+  originalNumber String? // snapshot — later edits never rewrite issued documents
+  reason        String?  // credit note reason (SARS requires one)
+
+  number        String   // INV-000123 / RCP-000045 — sequential per tenant
+  type          String   // tax_invoice | receipt
+  status        String   @default("open") // open | paid | partially_paid | cancelled
+  currency      String   @default("ZAR")
+
+  subtotalExVat Decimal  @db.Decimal(12, 2) // sum of lines excl VAT
+  vatRate       Decimal  @default(15.00) @db.Decimal(5, 2)
+  vatAmount     Decimal  @db.Decimal(12, 2)
+  totalInclVat  Decimal  @db.Decimal(12, 2)
+  amountPaid    Decimal  @default(0) @db.Decimal(12, 2)
+
+  // Snapshots at issue time — later property edits never rewrite issued documents
+  propertyName  String
+  propertyVatNo String?
+  guestName     String
+  guestEmail    String?
+
+  issueDate     DateTime @default(now())
+  pdfPath       String?
+  sentAt        DateTime?
+
+  items         TaxInvoiceItem[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, number])
+  @@index([folioId])
+  @@index([reservationId])
+  @@map("tax_invoices")
+}
+
+model TaxInvoiceItem {
+  id          String     @id @default(cuid())
+  invoiceId   String
+  invoice     TaxInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Decimal    @default(1) @db.Decimal(10, 2)
+  unitPriceEx Decimal    @db.Decimal(12, 2) // unit price EXCLUDING VAT
+  vatRate     Decimal    @default(15.00) @db.Decimal(5, 2)
+  amountEx    Decimal    @db.Decimal(12, 2) // line total excl VAT (rounded)
+
+  @@map("tax_invoice_items")
+}
+
+// [A5] Sequential numbering — one row per tenant, atomic increment
+model InvoiceCounter {
+  tenantId   String   @id
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@map("invoice_counters")
+}

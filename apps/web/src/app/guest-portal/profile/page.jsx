@@ -1,60 +1,127 @@
 /* src/app/guest-portal/profile/page.jsx */
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   User,
   Mail,
   Phone,
-  Globe,
-  Calendar,
+  Bell,
   Shield,
   CreditCard,
   Edit3,
   Check,
   X,
-  Camera,
   Loader2,
-  Crown,
-  MapPin,
   ChevronRight,
-  Bell,
   Lock,
   FileText,
   HelpCircle,
   Settings,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
-import { guestProfile, tierBenefits, formatDate } from '../data';
-import { TierBadge, FormInput, FormSelect, SectionHeader } from '../components';
-import { languageOptions } from '../data';
+import { FlagGate } from '@/components/FlagGate';
+import { flags } from '../../../lib/flags';
+import { formatDate } from '../../../lib/guest-utils';
+import {
+  useStayDetails,
+  useUpdatePreferences,
+  getGuestToken,
+} from '../../../hooks/useGuestPortalData';
+import { FormInput, FormSelect, SectionHeader } from '../components';
+
+const languageOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'pt', label: 'Português' },
+  { value: 'zh', label: '中文' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'ar', label: 'العربية' },
+];
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay, isLoading, isError, refetch } = useStayDetails();
+  const updatePreferences = useUpdatePreferences();
+
   const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    firstName: guestProfile.firstName,
-    lastName: guestProfile.lastName,
-    email: guestProfile.email,
-    phone: guestProfile.phone,
-    language: guestProfile.language,
+  const [saveMessage, setSaveMessage] = useState(null);
+  const [form, setForm] = useState({ language: 'en' });
+  const [notifications, setNotifications] = useState({
+    email: true,
+    sms: true,
+    push: true,
   });
-  const [avatar, setAvatar] = useState(guestProfile.avatar);
+
+  if (!hasToken) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">Please verify your reservation first</p>
+        <Button className="mt-4" onClick={() => navigate('/guest-portal/auth/login')}>
+          Verify Reservation
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your profile…</p>
+      </div>
+    );
+  }
+
+  if (isError || !stay) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">We couldn’t load your profile.</p>
+        <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  // Stay API returns guestName as "Last, First"
+  const [lastName, firstName] = stay.guestName?.includes(',')
+    ? stay.guestName.split(',').map((s) => s.trim())
+    : ['', stay.guestName ?? ''];
 
   const handleSave = async () => {
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setSaving(false);
-    setEditing(false);
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setAvatar(ev.target.result);
-      reader.readAsDataURL(file);
+    setSaveMessage(null);
+    try {
+      await updatePreferences.mutateAsync({
+        language: form.language,
+        notifyEmail: String(notifications.email),
+        notifySms: String(notifications.sms),
+        notifyPush: String(notifications.push),
+      });
+      setEditing(false);
+      setSaveMessage('Preferences saved.');
+    } catch (err) {
+      setSaveMessage(err?.message ?? 'Could not save. Please try again.');
     }
   };
+
+  const toggleNotification = (key) =>
+    setNotifications((p) => {
+      const next = { ...p, [key]: !p[key] };
+      // Persist immediately — these are standalone preferences
+      updatePreferences.mutate({
+        [`notify${key[0].toUpperCase()}${key.slice(1)}`]: String(next[key]),
+      });
+      return next;
+    });
 
   const menuItems = [
     { icon: User, label: 'Personal Information', href: '#', active: true },
@@ -62,7 +129,6 @@ export default function ProfilePage() {
     { icon: FileText, label: 'Documents & IDs', href: '/guest-portal/profile/documents' },
     { icon: CreditCard, label: 'Payment Methods', href: '/guest-portal/billing' },
     { icon: Bell, label: 'Notifications', href: '/guest-portal/messages/notifications' },
-    { icon: Lock, label: 'Security & Password', href: '#' },
     { icon: HelpCircle, label: 'Help & Support', href: '/guest-portal/support' },
   ];
 
@@ -70,19 +136,19 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <SectionHeader
         title="My Profile"
-        subtitle="Manage your personal information and account settings"
+        subtitle="Manage your personal information and preferences"
         action={
           !editing ? (
             <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-              <Edit3 className="mr-1.5 h-4 w-4" /> Edit Profile
+              <Edit3 className="mr-1.5 h-4 w-4" /> Edit Preferences
             </Button>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
                 <X className="mr-1.5 h-4 w-4" /> Cancel
               </Button>
-              <Button size="sm" onClick={handleSave} disabled={saving}>
-                {saving ? (
+              <Button size="sm" onClick={handleSave} disabled={updatePreferences.isPending}>
+                {updatePreferences.isPending ? (
                   <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                 ) : (
                   <Check className="mr-1.5 h-4 w-4" />
@@ -94,78 +160,47 @@ export default function ProfilePage() {
         }
       />
 
+      {saveMessage && (
+        <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-2 text-sm text-accent">
+          {saveMessage}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left Column — Avatar & Quick Info */}
+        {/* Left Column — Identity & Menu */}
         <div className="space-y-4 lg:col-span-1">
-          {/* Avatar Card */}
+          {/* Identity Card */}
           <div className="rounded-xl border border-border bg-surface p-5 text-center">
-            <div className="relative mx-auto h-24 w-24">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary/10 overflow-hidden">
-                {avatar ? (
-                  <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <User className="h-10 w-10 text-secondary" />
-                )}
-              </div>
-              {editing && (
-                <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-secondary text-white shadow-md hover:bg-secondary/90">
-                  <Camera className="h-4 w-4" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={handleAvatarChange}
-                  />
-                </label>
-              )}
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-secondary/10">
+              <span className="text-2xl font-bold text-secondary">
+                {[firstName, lastName]
+                  .filter(Boolean)
+                  .map((n) => n[0])
+                  .join('')}
+              </span>
             </div>
             <h3 className="mt-3 text-lg font-bold text-text-primary">
-              {guestProfile.firstName} {guestProfile.lastName}
+              {firstName} {lastName}
             </h3>
-            <p className="text-xs text-text-muted">{guestProfile.email}</p>
-            <div className="mt-2 flex justify-center">
-              <TierBadge tier={guestProfile.tier} />
-            </div>
+            <p className="text-xs text-text-muted">Room {stay.roomNumber}</p>
             <p className="mt-2 text-xs text-text-muted">
-              Member since {formatDate(guestProfile.memberSince)}
+              Stay: {formatDate(stay.arrivalDate)} – {formatDate(stay.departureDate)}
             </p>
           </div>
 
-          {/* Loyalty Summary */}
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-semibold text-text-primary">Loyalty Status</h4>
-              <Crown className="h-4 w-4 text-yellow-500" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-secondary">Points Balance</span>
-                <span className="font-mono font-bold text-text-primary">
-                  {guestProfile.points.toLocaleString()}
-                </span>
+          {/* Loyalty — flag-gated */}
+          {flags.loyalty && (
+            <FlagGate flag="loyalty">
+              <div className="rounded-xl border border-border bg-surface p-4">
+                <a
+                  href="/guest-portal/loyalty"
+                  className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
+                >
+                  View loyalty dashboard <ChevronRight className="h-3 w-3" />
+                </a>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-secondary">To Next Tier</span>
-                <span className="font-mono font-bold text-text-primary">
-                  {guestProfile.pointsToNextTier.toLocaleString()}
-                </span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-border overflow-hidden mt-2">
-                <div
-                  className="h-full rounded-full bg-yellow-500"
-                  style={{
-                    width: `${(guestProfile.points / (guestProfile.points + guestProfile.pointsToNextTier)) * 100}%`,
-                  }}
-                />
-              </div>
-            </div>
-            <a
-              href="/guest-portal/loyalty"
-              className="mt-3 inline-flex items-center gap-1 text-xs text-secondary hover:underline"
-            >
-              View full loyalty dashboard <ChevronRight className="h-3 w-3" />
-            </a>
-          </div>
+            </FlagGate>
+          )}
 
           {/* Navigation Menu */}
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
@@ -189,9 +224,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Right Column — Form */}
+        {/* Right Column */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Personal Info */}
+          {/* Personal Info — read-only, owned by the reservation */}
           <div className="rounded-xl border border-border bg-surface p-5">
             <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
               <User className="h-4 w-4 text-secondary" /> Personal Information
@@ -199,33 +234,11 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormInput
                 label="First Name"
-                value={form.firstName}
-                onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
-                disabled={!editing}
-                required
+                value={firstName}
+                disabled
+                helper="Name changes are handled by the front desk"
               />
-              <FormInput
-                label="Last Name"
-                value={form.lastName}
-                onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
-                disabled={!editing}
-                required
-              />
-              <FormInput
-                label="Email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                disabled={!editing}
-                required
-              />
-              <FormInput
-                label="Phone"
-                type="tel"
-                value={form.phone}
-                onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                disabled={!editing}
-              />
+              <FormInput label="Last Name" value={lastName} disabled />
               <FormSelect
                 label="Language"
                 value={form.language}
@@ -233,101 +246,78 @@ export default function ProfilePage() {
                 options={languageOptions}
                 disabled={!editing}
               />
-              <FormInput
-                label="Currency"
-                value={guestProfile.currency}
-                disabled
-                helper="Currency is set based on your property location"
-              />
             </div>
           </div>
 
-          {/* Contact Preferences */}
+          {/* Contact Preferences — real, persisted */}
           <div className="rounded-xl border border-border bg-surface p-5">
             <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Bell className="h-4 w-4 text-secondary" /> Contact Preferences
             </h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-text-muted" />
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">Email Notifications</p>
-                    <p className="text-xs text-text-muted">
-                      Booking confirmations, offers, updates
-                    </p>
+              {[
+                {
+                  key: 'email',
+                  icon: Mail,
+                  label: 'Email Notifications',
+                  desc: 'Booking confirmations, offers, updates',
+                },
+                {
+                  key: 'sms',
+                  icon: Phone,
+                  label: 'SMS Notifications',
+                  desc: 'Check-in reminders, room ready alerts',
+                },
+                {
+                  key: 'push',
+                  icon: Bell,
+                  label: 'Push Notifications',
+                  desc: 'Real-time updates on your mobile device',
+                },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => toggleNotification(item.key)}
+                  className="w-full flex items-center justify-between rounded-lg border border-border bg-background p-3 text-left hover:bg-surface-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <item.icon className="h-4 w-4 text-text-muted" />
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">{item.label}</p>
+                      <p className="text-xs text-text-muted">{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-medium text-accent">
-                  <Check className="h-3 w-3" /> Enabled
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-text-muted" />
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">SMS Notifications</p>
-                    <p className="text-xs text-text-muted">Check-in reminders, room ready alerts</p>
-                  </div>
-                </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-medium text-accent">
-                  <Check className="h-3 w-3" /> Enabled
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-4 w-4 text-text-muted" />
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">Push Notifications</p>
-                    <p className="text-xs text-text-muted">
-                      Real-time updates on your mobile device
-                    </p>
-                  </div>
-                </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-medium text-accent">
-                  <Check className="h-3 w-3" /> Enabled
-                </span>
-              </div>
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border',
+                      notifications[item.key]
+                        ? 'bg-accent/10 border-accent/20 text-accent'
+                        : 'bg-surface-elevated border-border text-text-muted'
+                    )}
+                  >
+                    {notifications[item.key] && <Check className="h-3 w-3" />}
+                    {notifications[item.key] ? 'Enabled' : 'Off'}
+                  </span>
+                </button>
+              ))}
             </div>
-            <a
-              href="/guest-portal/messages/notifications"
-              className="mt-3 inline-flex items-center gap-1 text-xs text-secondary hover:underline"
-            >
-              Manage notification settings <ChevronRight className="h-3 w-3" />
-            </a>
           </div>
 
-          {/* Security */}
+          {/* Security — honest about the token model */}
           <div className="rounded-xl border border-border bg-surface p-5">
             <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Shield className="h-4 w-4 text-secondary" /> Security
             </h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
-                <div className="flex items-center gap-3">
-                  <Lock className="h-4 w-4 text-text-muted" />
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">Password</p>
-                    <p className="text-xs text-text-muted">Last changed 3 months ago</p>
-                  </div>
+            <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
+              <div className="flex items-center gap-3">
+                <Lock className="h-4 w-4 text-text-muted" />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Secure Access Link</p>
+                  <p className="text-xs text-text-muted">
+                    You're signed in via your reservation verification — no password needed. Your
+                    session ends when you close this browser tab.
+                  </p>
                 </div>
-                <Button variant="outline" size="sm">
-                  Change
-                </Button>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-4 w-4 text-text-muted" />
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">
-                      Two-Factor Authentication
-                    </p>
-                    <p className="text-xs text-text-muted">Add an extra layer of security</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Enable
-                </Button>
               </div>
             </div>
           </div>

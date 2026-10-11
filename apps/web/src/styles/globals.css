@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@plugin 'tailwindcss-animate';
+@plugin '@tailwindcss/typography';
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -51,6 +53,7 @@
 
 @import './themes/light.css';
 @import './themes/dark.css';
+@import './components.css';
 
 html {
   scroll-behavior: smooth;

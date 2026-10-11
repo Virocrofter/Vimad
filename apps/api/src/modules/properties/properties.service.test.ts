@@ -15,12 +15,9 @@ vi.mock('../../common/prisma.js', () => ({
   },
 }));
 
-vi.mock('../audit/audit.events.js', () => ({
-  broadcastAuditEvent: vi.fn(),
-}));
+// NOTE: the service no longer emits audit events — no audit mock needed.
 
 import { prisma } from '../../common/prisma.js';
-import { broadcastAuditEvent } from '../audit/audit.events.js';
 import {
   listProperties,
   getProperty,
@@ -31,7 +28,6 @@ import {
 } from './properties.service.js';
 
 const mockProperty = prisma.property as unknown as Record<string, ReturnType<typeof vi.fn>>;
-const mockBroadcast = broadcastAuditEvent as unknown as ReturnType<typeof vi.fn>;
 
 const property = {
   id: 'p1',
@@ -39,7 +35,7 @@ const property = {
   name: 'Grand Hotel',
   code: 'GH-01',
   timezone: 'UTC',
-  currency: 'USD',
+  currency: 'ZAR',
 };
 
 beforeEach(() => vi.clearAllMocks());
@@ -75,13 +71,20 @@ describe('getProperty', () => {
     });
   });
 
-  it('returns the property with room types and rooms', async () => {
-    mockProperty.findFirst.mockResolvedValue({ ...property, roomTypes: [], rooms: [] });
+  it('returns the property with room types, rooms, rate plans and reservation count', async () => {
+    mockProperty.findFirst.mockResolvedValue({
+      ...property,
+      roomTypes: [],
+      rooms: [],
+      ratePlans: [],
+    });
     const result = await getProperty('t1', 'p1');
     expect(result.id).toBe('p1');
     expect(mockProperty.findFirst.mock.calls[0][0].include).toEqual({
       roomTypes: true,
-      rooms: true,
+      rooms: { include: { roomType: true } },
+      ratePlans: { include: { roomType: true } },
+      _count: { select: { reservations: true } },
     });
   });
 });
@@ -90,7 +93,7 @@ describe('createProperty', () => {
   const input = propertyCreateSchema.parse({ name: 'Grand Hotel', code: 'GH-01' });
 
   it('rejects a duplicate code within the tenant', async () => {
-    mockProperty.findUnique.mockResolvedValue(property);
+    mockProperty.findFirst.mockResolvedValue(property);
     await expect(createProperty('t1', input)).rejects.toMatchObject({
       statusCode: 409,
       code: 'CONFLICT',
@@ -98,8 +101,8 @@ describe('createProperty', () => {
     expect(mockProperty.create).not.toHaveBeenCalled();
   });
 
-  it('creates the property and broadcasts a medium-severity audit event', async () => {
-    mockProperty.findUnique.mockResolvedValue(null);
+  it('creates the property', async () => {
+    mockProperty.findFirst.mockResolvedValue(null);
     mockProperty.create.mockResolvedValue(property);
 
     const result = await createProperty('t1', input);
@@ -109,14 +112,9 @@ describe('createProperty', () => {
       name: 'Grand Hotel',
       code: 'GH-01',
       timezone: 'UTC',
-      currency: 'USD',
+      currency: 'ZAR',
     });
     expect(result).toEqual(property);
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'create', category: 'property' },
-      target: { type: 'property', id: 'p1' },
-      severity: 'medium',
-    });
   });
 });
 
@@ -129,7 +127,7 @@ describe('updateProperty', () => {
     expect(mockProperty.update).not.toHaveBeenCalled();
   });
 
-  it('updates and reports the changed fields', async () => {
+  it('updates the property', async () => {
     mockProperty.findFirst.mockResolvedValue(property);
     mockProperty.update.mockResolvedValue({ ...property, name: 'Grand Hotel renamed' });
 
@@ -138,11 +136,6 @@ describe('updateProperty', () => {
     expect(mockProperty.update.mock.calls[0][0]).toEqual({
       where: { id: 'p1' },
       data: { name: 'Grand Hotel renamed' },
-    });
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'update', category: 'property' },
-      severity: 'low',
-      metadata: { changedFields: ['name'] },
     });
   });
 });
@@ -154,7 +147,7 @@ describe('deleteProperty', () => {
     expect(mockProperty.delete).not.toHaveBeenCalled();
   });
 
-  it('deletes the property and broadcasts a high-severity event', async () => {
+  it('deletes the property', async () => {
     mockProperty.findFirst.mockResolvedValue(property);
     mockProperty.delete.mockResolvedValue(property);
 
@@ -162,9 +155,5 @@ describe('deleteProperty', () => {
 
     expect(mockProperty.delete).toHaveBeenCalledWith({ where: { id: 'p1' } });
     expect(result).toEqual(property);
-    expect(mockBroadcast.mock.calls[0][0]).toMatchObject({
-      action: { type: 'delete', category: 'property' },
-      severity: 'high',
-    });
   });
 });

@@ -30,7 +30,7 @@ describe.skipIf(!RUN_DB_TESTS)('Housekeeping API', () => {
     const prop = await request(app)
       .post('/v1/properties')
       .set('Authorization', `Bearer ${auth.token}`)
-      .send({ name: 'Test Hotel', code: 'TH-01', timezone: 'UTC', currency: 'USD' });
+      .send({ name: 'Test Hotel', code: 'TH-01', timezone: 'UTC', currency: 'ZAR' });
     propertyId = prop.body.data.id;
 
     const rt = await request(app)

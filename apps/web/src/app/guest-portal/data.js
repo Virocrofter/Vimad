@@ -9,7 +9,7 @@ export const guestProfile = {
   phone: '+1555-0101',
   avatar: 'https://cdn.vimad.io/avatars/g-1001.jpg',
   language: 'en',
-  currency: 'USD',
+  currency: 'ZAR',
   tier: 'gold',
   points: 12500,
   pointsToNextTier: 3500,
@@ -97,7 +97,7 @@ export const guestStays = [
       total: 567,
       taxes: 56.7,
       fees: 25,
-      currency: 'USD',
+      currency: 'ZAR',
       breakdown: [
         { date: '2026-08-12', rate: 189 },
         { date: '2026-08-13', rate: 189 },
@@ -244,7 +244,7 @@ export const guestStays = [
       total: 1445,
       taxes: 144.5,
       fees: 50,
-      currency: 'USD',
+      currency: 'ZAR',
       breakdown: [
         { date: '2026-09-20', rate: 289 },
         { date: '2026-09-21', rate: 289 },
@@ -288,7 +288,7 @@ export const pastStays = [
     status: 'checked_out',
     property: { name: 'Grand Hotel Boston', brand: 'Vimad Collection' },
     dates: { arrival: '2026-06-10', departure: '2026-06-14', nights: 4 },
-    rate: { total: 756, currency: 'USD' },
+    rate: { total: 756, currency: 'ZAR' },
     folio: { total: 892.4, paid: 892.4, balance: 0 },
     pointsEarned: 892,
   },
@@ -298,7 +298,7 @@ export const pastStays = [
     status: 'checked_out',
     property: { name: 'Seaside Resort Miami', brand: 'Vimad Collection' },
     dates: { arrival: '2026-04-20', departure: '2026-04-25', nights: 5 },
-    rate: { total: 1245, currency: 'USD' },
+    rate: { total: 1245, currency: 'ZAR' },
     folio: { total: 1450.8, paid: 1450.8, balance: 0 },
     pointsEarned: 1451,
   },
@@ -308,7 +308,7 @@ export const pastStays = [
     status: 'checked_out',
     property: { name: 'Urban Hotel NYC', brand: 'Vimad Collection' },
     dates: { arrival: '2026-02-14', departure: '2026-02-16', nights: 2 },
-    rate: { total: 520, currency: 'USD' },
+    rate: { total: 520, currency: 'ZAR' },
     folio: { total: 612.3, paid: 612.3, balance: 0 },
     pointsEarned: 612,
   },
@@ -843,7 +843,7 @@ export const languageOptions = [
 ];
 
 /* ─── Helpers ─── */
-export function formatCurrency(amount, currency = 'USD') {
+export function formatCurrency(amount, currency = 'ZAR') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
 }
 

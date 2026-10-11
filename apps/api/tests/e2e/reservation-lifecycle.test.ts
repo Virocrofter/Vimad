@@ -46,7 +46,7 @@ describe.skipIf(!RUN_DB_TESTS)('Reservation Lifecycle E2E', () => {
         name: 'E2E Test Hotel',
         code: 'E2E-01',
         timezone: 'America/New_York',
-        currency: 'USD',
+        currency: 'ZAR',
       });
     expect(propRes.status).toBe(201);
     propertyId = propRes.body.data.id;

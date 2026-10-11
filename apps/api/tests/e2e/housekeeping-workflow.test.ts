@@ -32,7 +32,7 @@ describe.skipIf(!RUN_DB_TESTS)('Housekeeping Workflow E2E', () => {
     const propRes = await request(app)
       .post('/v1/properties')
       .set('Authorization', `Bearer ${auth.token}`)
-      .send({ name: 'HK Hotel', code: 'HK-01', timezone: 'UTC', currency: 'USD' });
+      .send({ name: 'HK Hotel', code: 'HK-01', timezone: 'UTC', currency: 'ZAR' });
     propertyId = propRes.body.data.id;
 
     const rtRes = await request(app)

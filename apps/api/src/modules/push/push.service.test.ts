@@ -1,124 +1,131 @@
+/* apps/api/src/modules/push/push.service.test.ts */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../common/prisma.js', () => ({
+  prisma: {
+    pushSubscription: {
+      upsert: vi.fn(),
+      findUnique: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+  },
+}));
+
+vi.mock('web-push', () => ({
+  default: {
+    setVapidDetails: vi.fn(),
+    sendNotification: vi.fn(),
+  },
+}));
+
+import webPush from 'web-push';
 import { prisma } from '../../common/prisma.js';
-import { logger } from '../../common/logger.js';
-import webpush from 'web-push';
-import { env } from '../../common/env.js';
+import {
+  saveSubscription,
+  getSubscription,
+  removeSubscription,
+  sendPushToUser,
+  pushSubscriptionSchema,
+} from './push.service.js';
 
-// Configure web-push with VAPID keys
-if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
-}
+const mockSubscription = prisma.pushSubscription as unknown as Record<
+  string,
+  ReturnType<typeof vi.fn>
+>;
 
-export async function subscribeToPush(
-  userId: string,
-  tenantId: string,
-  subscription: {
-    endpoint: string;
-    keys: {
-      p256dh: string;
-      auth: string;
-    };
-  }
-) {
-  return prisma.pushSubscription.upsert({
-    where: { userId },
-    update: {
-      endpoint: subscription.endpoint,
-      p256dh: subscription.keys.p256dh,
-      auth: subscription.keys.auth,
-    },
-    create: {
-      userId,
-      tenantId,
-      endpoint: subscription.endpoint,
-      p256dh: subscription.keys.p256dh,
-      auth: subscription.keys.auth,
-    },
-  });
-}
+const subscription = {
+  id: 'sub1',
+  userId: 'u1',
+  tenantId: 't1',
+  endpoint: 'https://push.example/endpoint',
+  p256dh: 'key',
+  auth: 'auth',
+};
 
-export async function unsubscribeFromPush(userId: string) {
-  return prisma.pushSubscription.deleteMany({
-    where: { userId },
-  });
-}
+const input = pushSubscriptionSchema.parse({
+  endpoint: 'https://push.example/endpoint',
+  keys: { p256dh: 'key', auth: 'auth' },
+});
 
-export async function sendPushToUser(
-  userId: string,
-  payload: {
-    title: string;
-    body: string;
-    icon?: string;
-    badge?: string;
-    data?: Record<string, unknown>;
-  }
-) {
-  const subscription = await prisma.pushSubscription.findUnique({
-    where: { userId },
-  });
+beforeEach(() => vi.clearAllMocks());
 
-  if (!subscription) {
-    logger.warn({ userId }, 'No push subscription found for user');
-    return { sent: false, reason: 'no_subscription' };
-  }
+describe('saveSubscription', () => {
+  it('upserts by userId, replacing any previous endpoint', async () => {
+    mockSubscription.upsert.mockResolvedValue(subscription);
 
-  try {
-    await webpush.sendNotification(
-      {
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: subscription.p256dh,
-          auth: subscription.auth,
-        },
+    await saveSubscription('u1', 't1', input);
+
+    expect(mockSubscription.upsert.mock.calls[0][0]).toEqual({
+      where: { userId: 'u1' },
+      update: {
+        endpoint: input.endpoint,
+        p256dh: 'key',
+        auth: 'auth',
+        tenantId: 't1',
       },
+      create: {
+        userId: 'u1',
+        tenantId: 't1',
+        endpoint: input.endpoint,
+        p256dh: 'key',
+        auth: 'auth',
+      },
+    });
+  });
+});
+
+describe('getSubscription', () => {
+  it('looks up by userId', async () => {
+    mockSubscription.findUnique.mockResolvedValue(subscription);
+
+    const result = await getSubscription('u1');
+
+    expect(mockSubscription.findUnique).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+    expect(result).toEqual(subscription);
+  });
+});
+
+describe('removeSubscription', () => {
+  it('deletes every subscription row for the user', async () => {
+    mockSubscription.deleteMany.mockResolvedValue({ count: 1 });
+
+    await removeSubscription('u1');
+
+    expect(mockSubscription.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+  });
+});
+
+describe('sendPushToUser', () => {
+  const payload = { title: 'New reservation', body: 'RSV-1 was created', data: { id: 'n1' } };
+
+  it('is a no-op when the user has no subscription', async () => {
+    mockSubscription.findUnique.mockResolvedValue(null);
+
+    await sendPushToUser('u1', payload);
+
+    expect(webPush.sendNotification).not.toHaveBeenCalled();
+  });
+
+  it('sends the JSON-serialised payload to the stored endpoint', async () => {
+    mockSubscription.findUnique.mockResolvedValue(subscription);
+    (webPush.sendNotification as any).mockResolvedValue({});
+
+    await sendPushToUser('u1', payload);
+
+    expect(webPush.sendNotification).toHaveBeenCalledWith(
+      { endpoint: subscription.endpoint, keys: { p256dh: 'key', auth: 'auth' } },
       JSON.stringify(payload)
     );
-    return { sent: true };
-  } catch (err) {
-    logger.error({ err, userId }, 'Failed to send push notification');
-
-    // If subscription is invalid (410 Gone), remove it
-    if ((err as { statusCode?: number }).statusCode === 410) {
-      await unsubscribeFromPush(userId);
-      return { sent: false, reason: 'subscription_expired' };
-    }
-
-    return { sent: false, reason: 'send_failed' };
-  }
-}
-
-export async function sendPushToTenant(
-  tenantId: string,
-  payload: {
-    title: string;
-    body: string;
-    icon?: string;
-    badge?: string;
-    data?: Record<string, unknown>;
-  }
-) {
-  const subscriptions = await prisma.pushSubscription.findMany({
-    where: { tenantId },
   });
 
-  const results = await Promise.allSettled(
-    subscriptions.map((sub) =>
-      webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
-        },
-        JSON.stringify(payload)
-      )
-    )
-  );
+  it('prunes a gone (410) subscription and rethrows', async () => {
+    mockSubscription.findUnique.mockResolvedValue(subscription);
+    const gone = Object.assign(new Error('gone'), { statusCode: 410 });
+    (webPush.sendNotification as any).mockRejectedValue(gone);
+    mockSubscription.deleteMany.mockResolvedValue({ count: 1 });
 
-  const sent = results.filter((r) => r.status === 'fulfilled').length;
-  const failed = results.filter((r) => r.status === 'rejected').length;
+    await expect(sendPushToUser('u1', payload)).rejects.toThrow('gone');
 
-  logger.info({ tenantId, sent, failed }, 'Push notifications sent to tenant');
-
-  return { sent, failed };
-}
+    expect(mockSubscription.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+  });
+});

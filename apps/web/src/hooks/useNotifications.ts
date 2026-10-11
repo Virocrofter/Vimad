@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useSocket } from './useSocket';
-import { api } from './useApiFetch';
 
 // ─── Types ───
 
@@ -260,9 +259,11 @@ export function useNotifications() {
   // ─── Initial Fetch ───
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isAuthenticated) return;
+    const t = setTimeout(() => {
       fetchNotifications();
-    }
+    }, 0);
+    return () => clearTimeout(t);
   }, [isAuthenticated, fetchNotifications]);
 
   return {

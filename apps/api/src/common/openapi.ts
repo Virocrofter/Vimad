@@ -21,6 +21,19 @@ import * as rbacModule from '../modules/rbac/rbac.routes.js';
 import * as pushModule from '../modules/push/push.routes.js';
 import * as filesModule from '../modules/files/files.routes.js';
 import * as adminModule from '../modules/admin/admin.routes.js';
+// [A1] Payments (Paystack) + public webhook
+import * as paymentsModule from '../modules/payments/payments.routes.js';
+import * as paymentsWebhookModule from '../modules/payments/payments.webhook.js';
+// [A2] Payment requests (deposit automation)
+import * as paymentRequestsModule from '../modules/payments/payment-requests.routes.js';
+// [A3] Transactional email center
+import * as transactionalEmailModule from '../modules/notifications/transactional.routes.js';
+// [A4] Public booking engine
+import * as publicModule from '../modules/public/public.routes.js';
+// [A5] SARS-compliant tax invoices & receipts
+import * as invoicesModule from '../modules/invoices/invoices.routes.js';
+// Dashboard (registry existed but was never wired into the document)
+import * as dashboardModule from '../modules/dashboard/dashboard.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -81,6 +94,14 @@ export function generateOpenAPIDocument() {
     healthModule,
     filesModule,
     adminModule,
+    // A1–A5 + dashboard — previously missing from the generated document
+    paymentsModule,
+    paymentsWebhookModule,
+    paymentRequestsModule,
+    transactionalEmailModule,
+    publicModule,
+    invoicesModule,
+    dashboardModule,
   ];
 
   const allDefinitions: any[] = [];
@@ -130,6 +151,12 @@ export function generateOpenAPIDocument() {
       { name: 'Push', description: 'Web Push subscriptions & notifications' },
       { name: 'Files', description: 'File downloads and storage' },
       { name: 'Admin', description: 'Platform admin dashboard endpoints' },
+      { name: 'Dashboard', description: 'Property dashboard stats, alerts & activity' },
+      { name: 'Payments', description: 'Paystack payments (A1) + webhook receiver' },
+      { name: 'Payment Requests', description: 'Deposit automation pay-now links (A2)' },
+      { name: 'Communications', description: 'Transactional email center (A3)' },
+      { name: 'Public Booking', description: 'Unauthenticated booking engine (A4)' },
+      { name: 'Invoices', description: 'SARS-compliant tax invoices & receipts (A5)' },
     ],
   });
 }

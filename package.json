@@ -10,6 +10,10 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test --filter=@unified-pms/web --filter=@unified-pms/shared",
     "test:all": "turbo run test",
     "test:api": "cd apps/api && npx vitest run",
@@ -32,10 +36,5 @@
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
-  },
-  "dependencies": {
-    "lint": "^1.2.2",
-    "npm": "^11.19.1",
-    "run": "^2.1.4"
   }
 }

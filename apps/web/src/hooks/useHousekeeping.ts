@@ -6,8 +6,13 @@ import {
   updateTask,
   deleteTask,
   assignTask,
+  startTask,
   completeTask,
   inspectTask,
+  skipTask,
+  bulkAssign,
+  getStats,
+  getStaff,
 } from '../api/housekeeping';
 import type { CreateTaskInput, UpdateTaskInput } from '../api/housekeeping';
 import type { PaginationParams } from '../api/types';
@@ -21,13 +26,17 @@ export function useHousekeepingList(
     assigneeId?: string;
     status?: string;
     priority?: string;
-    date?: string;
+    type?: string;
+    floor?: string;
+    dateFrom?: string;
+    dateTo?: string;
   }
 ) {
   return useQuery({
     queryKey: [HK_KEY, 'list', params],
     queryFn: () => listTasks(params),
     staleTime: 1000 * 15,
+    refetchInterval: 1000 * 30, // Poll every 30s for real-time feel
   });
 }
 
@@ -39,12 +48,29 @@ export function useHousekeepingTask(id: string) {
   });
 }
 
+export function useHousekeepingStats(propertyId?: string, date?: string) {
+  return useQuery({
+    queryKey: [HK_KEY, 'stats', propertyId, date],
+    queryFn: () => getStats(propertyId, date),
+    staleTime: 1000 * 30,
+    refetchInterval: 1000 * 60,
+  });
+}
+
+export function useHousekeepingStaff() {
+  return useQuery({
+    queryKey: [HK_KEY, 'staff'],
+    queryFn: () => getStaff(),
+    staleTime: 1000 * 60,
+  });
+}
+
 export function useCreateHousekeepingTask() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateTaskInput) => createTask(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY] });
     },
   });
 }
@@ -56,6 +82,7 @@ export function useUpdateHousekeepingTask() {
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: [HK_KEY, vars.id] });
       queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'stats'] });
     },
   });
 }
@@ -65,7 +92,7 @@ export function useDeleteHousekeepingTask() {
   return useMutation({
     mutationFn: (id: string) => deleteTask(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY] });
     },
   });
 }
@@ -82,14 +109,34 @@ export function useAssignHousekeepingTask() {
   });
 }
 
+export function useStartHousekeepingTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => startTask(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, id] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'stats'] });
+    },
+  });
+}
+
 export function useCompleteHousekeepingTask() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, notes, issues }: { id: string; notes?: string; issues?: string[] }) =>
-      completeTask(id, { notes, issues }),
+    mutationFn: ({
+      id,
+      notes,
+      actualDuration,
+    }: {
+      id: string;
+      notes?: string;
+      actualDuration?: number;
+    }) => completeTask(id, { notes, actualDuration }),
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: [HK_KEY, vars.id] });
       queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'stats'] });
     },
   });
 }
@@ -102,6 +149,29 @@ export function useInspectHousekeepingTask() {
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: [HK_KEY, vars.id] });
       queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'stats'] });
+    },
+  });
+}
+
+export function useSkipHousekeepingTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => skipTask(id, reason),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, vars.id] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+    },
+  });
+}
+
+export function useBulkAssignHousekeeping() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskIds, assigneeId }: { taskIds: string[]; assigneeId: string }) =>
+      bulkAssign(taskIds, assigneeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HK_KEY] });
     },
   });
 }

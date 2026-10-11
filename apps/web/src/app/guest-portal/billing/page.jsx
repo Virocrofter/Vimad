@@ -1,9 +1,8 @@
 /* src/app/guest-portal/billing/page.jsx */
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Receipt,
-  Download,
   ArrowRight,
   Hotel,
   UtensilsCrossed,
@@ -16,7 +15,9 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
-import { guestStay, formatCurrency, formatDate, folioCategoryMeta } from '../data';
+import { FlagGate } from '@/components/FlagGate';
+import { formatCurrency, formatDate, folioCategoryMeta } from '../../../lib/guest-utils';
+import { guestStay } from '../data';
 
 const categoryIcons = {
   room: Hotel,
@@ -25,7 +26,21 @@ const categoryIcons = {
   services: ConciergeBell,
 };
 
+/**
+ * Guest billing is gated behind `flags.guestBilling` (NEXT_PUBLIC_FLAG_GUEST_BILLING).
+ * There is no guest-facing folio endpoint in v1 — the folios module is staff-authed.
+ * When that endpoint lands, BillingPageInner swaps `guestStay` for a real query
+ * and the `../data` import gets deleted.
+ */
 export default function BillingPage() {
+  return (
+    <FlagGate flag="guestBilling">
+      <BillingPageInner />
+    </FlagGate>
+  );
+}
+
+function BillingPageInner() {
   const navigate = useNavigate();
   const { folio, rate, property, dates } = guestStay;
 

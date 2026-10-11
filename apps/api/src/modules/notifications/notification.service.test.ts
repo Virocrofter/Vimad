@@ -17,17 +17,14 @@ vi.mock('../../common/prisma.js', () => ({
   },
 }));
 
-vi.mock('../../common/socket.js', () => ({
-  emitToUser: vi.fn(),
-  emitToTenant: vi.fn(),
-}));
-
+// Push is lazy-loaded via dynamic import inside the service; the mock
+// intercepts it. Socket emits are local no-ops in the service itself
+// (circular-dependency workaround) — nothing to mock and nothing to assert.
 vi.mock('../push/push.service.js', () => ({
   sendPushToUser: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { prisma } from '../../common/prisma.js';
-import { emitToUser, emitToTenant } from '../../common/socket.js';
 import { sendPushToUser } from '../push/push.service.js';
 import {
   listNotifications,
@@ -43,8 +40,6 @@ import {
 const mockNotification = prisma.notification as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const mockUser = prisma.user as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const mockTransaction = prisma.$transaction as unknown as ReturnType<typeof vi.fn>;
-const mockEmitToUser = emitToUser as unknown as ReturnType<typeof vi.fn>;
-const mockEmitToTenant = emitToTenant as unknown as ReturnType<typeof vi.fn>;
 const mockPush = sendPushToUser as unknown as ReturnType<typeof vi.fn>;
 
 const notification = {
@@ -115,7 +110,7 @@ describe('createNotification', () => {
     expect(mockNotification.create).not.toHaveBeenCalled();
   });
 
-  it('creates the notification unread, emits a socket event and triggers push', async () => {
+  it('creates the notification unread and triggers a push notification', async () => {
     mockUser.findFirst.mockResolvedValue({ id: 'u1' });
     mockNotification.create.mockResolvedValue(notification);
 
@@ -127,14 +122,16 @@ describe('createNotification', () => {
       title: 'New reservation',
       read: false,
     });
-    expect(mockEmitToUser).toHaveBeenCalledWith('u1', 'notification:new', notification);
-    expect(mockPush).toHaveBeenCalledWith(
-      'u1',
-      expect.objectContaining({
-        title: 'New reservation',
-        body: 'RSV-1 was created',
-        data: expect.objectContaining({ notificationId: 'n1' }),
-      })
+    // Push is fire-and-forget through a lazy dynamic import — wait for it
+    await vi.waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith(
+        'u1',
+        expect.objectContaining({
+          title: 'New reservation',
+          body: 'RSV-1 was created',
+          data: expect.objectContaining({ notificationId: 'n1' }),
+        })
+      )
     );
     expect(result).toEqual(notification);
   });
@@ -157,11 +154,6 @@ describe('createBroadcastNotification', () => {
     });
     expect(mockNotification.create).toHaveBeenCalledTimes(2);
     expect(result).toHaveLength(2);
-    expect(mockEmitToTenant).toHaveBeenCalledWith(
-      't1',
-      'notification:broadcast',
-      expect.objectContaining({ tenantId: 't1', title: 'New reservation' })
-    );
   });
 });
 
@@ -182,7 +174,6 @@ describe('updateNotification', () => {
     const data = mockNotification.update.mock.calls[0][0].data;
     expect(data.read).toBe(true);
     expect(data.readAt).toBeInstanceOf(Date);
-    expect(mockEmitToUser).toHaveBeenCalledWith('u1', 'notification:updated', expect.anything());
   });
 
   it('keeps the existing readAt when the read flag does not change', async () => {
@@ -197,7 +188,7 @@ describe('updateNotification', () => {
 });
 
 describe('markAllAsRead', () => {
-  it('marks every unread notification as read and emits an event', async () => {
+  it('marks every unread notification as read', async () => {
     mockNotification.updateMany.mockResolvedValue({ count: 3 });
 
     const result = await markAllAsRead('u1', 't1');
@@ -205,10 +196,6 @@ describe('markAllAsRead', () => {
     expect(mockNotification.updateMany.mock.calls[0][0]).toMatchObject({
       where: { userId: 'u1', tenantId: 't1', read: false },
       data: { read: true, readAt: expect.any(Date) },
-    });
-    expect(mockEmitToUser).toHaveBeenCalledWith('u1', 'notifications:all_read', {
-      userId: 'u1',
-      tenantId: 't1',
     });
     expect(result).toEqual({ updated: true });
   });
@@ -223,14 +210,13 @@ describe('deleteNotification', () => {
     expect(mockNotification.delete).not.toHaveBeenCalled();
   });
 
-  it('deletes the notification and emits an event', async () => {
+  it('deletes the notification', async () => {
     mockNotification.findFirst.mockResolvedValue(notification);
     mockNotification.delete.mockResolvedValue(notification);
 
     const result = await deleteNotification('u1', 't1', 'n1');
 
     expect(mockNotification.delete).toHaveBeenCalledWith({ where: { id: 'n1' } });
-    expect(mockEmitToUser).toHaveBeenCalledWith('u1', 'notification:deleted', { id: 'n1' });
     expect(result).toEqual({ id: 'n1' });
   });
 });

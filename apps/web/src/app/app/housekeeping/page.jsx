@@ -1,673 +1,754 @@
+/* apps/web/src/app/app/housekeeping/page.jsx */
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  BedDouble,
-  Sparkles,
-  AlertTriangle,
-  Wrench,
-  CheckCircle2,
-  Search,
-  Filter,
-  Calendar,
+  useHousekeepingList,
+  useHousekeepingStats,
+  useHousekeepingStaff,
+  useStartHousekeepingTask,
+  useCompleteHousekeepingTask,
+  useInspectHousekeepingTask,
+  useSkipHousekeepingTask,
+  useAssignHousekeepingTask,
+  useBulkAssignHousekeeping,
+} from '../../../hooks/useHousekeeping';
+import { useRooms } from '../../../hooks/useRooms';
+import { useProperties } from '../../../hooks/useProperties';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../../components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../components/ui/dialog';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { LoadingSkeleton } from '../../../components/ui/LoadingSkeleton';
+import { ErrorState } from '../../../components/ui/ErrorState';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
+import { toast } from '../../../hooks/use-toast';
+import { cn } from '../../../lib/utils';
+import {
+  ClipboardList,
   Clock,
-  User,
-  ChevronDown,
-  Plus,
-  ArrowUpDown,
+  CheckCircle2,
+  AlertTriangle,
+  Users,
+  Filter,
   LayoutGrid,
   List,
+  BarChart3,
+  Play,
+  CheckCircle,
+  Eye,
+  SkipForward,
+  UserPlus,
+  Calendar,
+  Timer,
+  ArrowRight,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '../../../components/ui/input';
 
-/* ─── Mock Data ─── */
-const initialRooms = [
-  // Floor 1
-  {
-    id: '101',
-    floor: 1,
-    type: 'Standard King',
-    status: 'clean',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '102',
-    floor: 1,
-    type: 'Standard King',
-    status: 'occupied',
-    guest: 'John Smith',
-    vip: false,
-    arrival: '2026-08-12',
-    departure: '2026-08-15',
-  },
-  {
-    id: '103',
-    floor: 1,
-    type: 'Deluxe Queen',
-    status: 'dirty',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '104',
-    floor: 1,
-    type: 'Accessible',
-    status: 'inspected',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '105',
-    floor: 1,
-    type: 'Standard Twin',
-    status: 'ooo',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-    oooReason: 'HVAC Repair',
-  },
-  // Floor 2
-  {
-    id: '201',
-    floor: 2,
-    type: 'Deluxe King',
-    status: 'clean',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '202',
-    floor: 2,
-    type: 'Deluxe King',
-    status: 'occupied',
-    guest: 'Sarah Chen',
-    vip: true,
-    arrival: '2026-08-11',
-    departure: '2026-08-14',
-  },
-  {
-    id: '203',
-    floor: 2,
-    type: 'Suite',
-    status: 'dirty',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '204',
-    floor: 2,
-    type: 'Deluxe King',
-    status: 'occupied',
-    guest: 'Mike Brown',
-    vip: false,
-    arrival: '2026-08-10',
-    departure: '2026-08-13',
-  },
-  {
-    id: '205',
-    floor: 2,
-    type: 'Standard Queen',
-    status: 'clean',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  // Floor 3
-  {
-    id: '301',
-    floor: 3,
-    type: 'Suite',
-    status: 'inspected',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '302',
-    floor: 3,
-    type: 'Deluxe King',
-    status: 'occupied',
-    guest: 'Emily Davis',
-    vip: true,
-    arrival: '2026-08-12',
-    departure: '2026-08-16',
-  },
-  {
-    id: '303',
-    floor: 3,
-    type: 'Standard Twin',
-    status: 'dirty',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
-  {
-    id: '304',
-    floor: 3,
-    type: 'Deluxe Queen',
-    status: 'ooo',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-    oooReason: 'Plumbing',
-  },
-  {
-    id: '305',
-    floor: 3,
-    type: 'Suite',
-    status: 'clean',
-    guest: null,
-    vip: false,
-    arrival: null,
-    departure: null,
-  },
+// ─── Constants ───
+
+const STATUS_COLUMNS = [
+  { key: 'pending', label: 'Pending', color: 'bg-yellow-500', icon: Clock },
+  { key: 'in_progress', label: 'In Progress', color: 'bg-blue-500', icon: Play },
+  { key: 'completed', label: 'Completed', color: 'bg-green-500', icon: CheckCircle },
+  { key: 'inspected', label: 'Inspected', color: 'bg-purple-500', icon: Eye },
 ];
 
-const attendants = [
-  {
-    id: 1,
-    name: 'Maria G.',
-    initials: 'MG',
-    shift: '7:00 AM - 3:00 PM',
-    assigned: ['101', '103', '201', '203', '303'],
-    completed: ['101', '201'],
-  },
-  {
-    id: 2,
-    name: 'James L.',
-    initials: 'JL',
-    shift: '7:00 AM - 3:00 PM',
-    assigned: ['102', '104', '202', '204', '205'],
-    completed: ['104', '205'],
-  },
-  {
-    id: 3,
-    name: 'Priya K.',
-    initials: 'PK',
-    shift: '3:00 PM - 11:00 PM',
-    assigned: ['301', '302', '303', '304', '305'],
-    completed: ['301'],
-  },
-];
-
-const statusMeta = {
-  clean: {
-    label: 'Clean',
-    class: 'bg-accent/10 text-accent border-accent/20',
-    dot: 'bg-accent',
-    icon: CheckCircle2,
-  },
-  dirty: {
-    label: 'Dirty',
-    class: 'bg-danger/10 text-danger border-danger/20',
-    dot: 'bg-danger',
-    icon: AlertTriangle,
-  },
-  inspected: {
-    label: 'Inspected',
-    class: 'bg-info/10 text-info border-info/20',
-    dot: 'bg-info',
-    icon: Sparkles,
-  },
-  ooo: {
-    label: 'OOO',
-    class: 'bg-warning/10 text-warning border-warning/20',
-    dot: 'bg-warning',
-    icon: Wrench,
-  },
-  occupied: {
-    label: 'Occupied',
-    class: 'bg-secondary/10 text-secondary border-secondary/20',
-    dot: 'bg-secondary',
-    icon: BedDouble,
-  },
+const PRIORITY_COLORS = {
+  urgent: 'bg-red-500',
+  high: 'bg-orange-500',
+  normal: 'bg-blue-500',
+  low: 'bg-gray-400',
 };
 
-const floors = [1, 2, 3];
+const TYPE_LABELS = {
+  cleaning: 'Cleaning',
+  deep_clean: 'Deep Clean',
+  inspection: 'Inspection',
+  turndown: 'Turndown',
+  maintenance: 'Maintenance',
+};
 
-/* ─── Components ─── */
-function RoomCard({ room, onStatusChange, isDragging, onDragStart, onDragEnd, onDrop }) {
-  const meta = statusMeta[room.status];
-  const StatusIcon = meta.icon;
+// ─── Helpers ───
+
+function formatTime(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function isOverdue(task) {
+  if (task.status === 'completed' || task.status === 'inspected') return false;
+  return new Date(task.scheduledAt) < new Date();
+}
+
+function getInitials(first, last) {
+  return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase() || '?';
+}
+
+// ─── Sub-components ───
+
+function StatsCards({ stats }) {
+  if (!stats) return <LoadingSkeleton className="h-32" count={4} />;
+  const { today, overdue, staffOnDuty, avgCleaningDuration } = stats;
+
+  const cards = [
+    { label: 'Total Today', value: today.total, icon: ClipboardList, color: 'text-blue-600' },
+    { label: 'Pending', value: today.pending, icon: Clock, color: 'text-yellow-600' },
+    { label: 'In Progress', value: today.inProgress, icon: Play, color: 'text-blue-600' },
+    {
+      label: 'Completed',
+      value: today.completed + today.inspected,
+      icon: CheckCircle2,
+      color: 'text-green-600',
+    },
+    { label: 'Overdue', value: overdue, icon: AlertTriangle, color: 'text-red-600' },
+    { label: 'Staff On Duty', value: staffOnDuty, icon: Users, color: 'text-purple-600' },
+    {
+      label: 'Avg Duration',
+      value: `${avgCleaningDuration}m`,
+      icon: Timer,
+      color: 'text-gray-600',
+    },
+    {
+      label: 'Completion',
+      value: `${today.completionRate}%`,
+      icon: BarChart3,
+      color: 'text-emerald-600',
+    },
+  ];
 
   return (
-    <div
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData('roomId', room.id);
-        onDragStart(room.id);
-      }}
-      onDragEnd={onDragEnd}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        const fromId = e.dataTransfer.getData('roomId');
-        if (fromId && fromId !== room.id) {
-          onDrop(fromId, room.id);
-        }
-      }}
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      {cards.map((c) => (
+        <Card key={c.label} className="p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <c.icon className={cn('h-4 w-4', c.color)} />
+            <span className="text-xs text-muted-foreground">{c.label}</span>
+          </div>
+          <div className="text-2xl font-bold">{c.value}</div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function TaskCard({ task, onStart, onComplete, onInspect, onSkip, onAssign, staff }) {
+  const overdue = isOverdue(task);
+  const roomNum = task.room?.number ?? '—';
+  const roomType = task.room?.roomType?.name ?? '';
+
+  return (
+    <Card
       className={cn(
-        'group relative rounded-xl border p-4 transition-all cursor-grab active:cursor-grabbing hover:shadow-md',
-        meta.class,
-        isDragging && 'opacity-50 scale-95',
-        'bg-surface'
+        'p-3 cursor-pointer hover:shadow-md transition-shadow',
+        overdue && 'border-red-300 bg-red-50'
       )}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-lg font-bold text-text-primary">{room.id}</span>
-        <span className={cn('h-2.5 w-2.5 rounded-full', meta.dot)} />
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <div className="font-semibold text-sm">Room {roomNum}</div>
+          <div className="text-xs text-muted-foreground">{roomType}</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Badge className={cn('text-xs', PRIORITY_COLORS[task.priority])}>{task.priority}</Badge>
+          {overdue && <AlertTriangle className="h-3.5 w-3.5 text-red-500" />}
+        </div>
       </div>
-      <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-        {room.type}
-      </p>
 
-      {room.guest && (
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-text-secondary">
-          <User className="h-3 w-3" />
-          <span className="truncate">{room.guest}</span>
-          {room.vip && (
-            <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold text-warning">
-              VIP
-            </span>
+      <div className="text-xs text-muted-foreground mb-2">
+        {TYPE_LABELS[task.type]} · Est. {task.estimatedDuration}m
+      </div>
+
+      {task.assignee ? (
+        <div className="flex items-center gap-1.5 mb-2">
+          <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">
+            {getInitials(task.assignee.firstName, task.assignee.lastName)}
+          </div>
+          <span className="text-xs">
+            {task.assignee.firstName} {task.assignee.lastName}
+          </span>
+        </div>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 text-xs mb-2"
+          onClick={() => onAssign(task)}
+        >
+          <UserPlus className="h-3 w-3 mr-1" /> Assign
+        </Button>
+      )}
+
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">
+          <Clock className="h-3 w-3 inline mr-1" />
+          {formatTime(task.scheduledAt)}
+        </span>
+        <div className="flex gap-1">
+          {task.status === 'pending' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 text-xs"
+              onClick={() => onStart(task.id)}
+            >
+              <Play className="h-3 w-3" />
+            </Button>
+          )}
+          {task.status === 'in_progress' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 text-xs"
+              onClick={() => onComplete(task.id)}
+            >
+              <CheckCircle className="h-3 w-3" />
+            </Button>
+          )}
+          {task.status === 'completed' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 text-xs"
+              onClick={() => onInspect(task.id)}
+            >
+              <Eye className="h-3 w-3" />
+            </Button>
           )}
         </div>
-      )}
-
-      {room.oooReason && (
-        <p className="mt-1.5 text-[10px] font-medium text-warning">{room.oooReason}</p>
-      )}
-
-      <div className="mt-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {Object.keys(statusMeta).map(
-          (s) =>
-            s !== room.status && (
-              <button
-                key={s}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onStatusChange(room.id, s);
-                }}
-                className={cn(
-                  'h-6 w-6 rounded-full border flex items-center justify-center transition-colors',
-                  statusMeta[s].class
-                )}
-                title={`Mark ${statusMeta[s].label}`}
-              >
-                <div className={cn('h-2 w-2 rounded-full', statusMeta[s].dot)} />
-              </button>
-            )
-        )}
       </div>
-    </div>
+    </Card>
   );
 }
 
-function StatusColumn({
-  status,
-  rooms,
-  onStatusChange,
-  onDragStart,
-  onDragEnd,
-  onDrop,
-  draggedRoom,
-}) {
-  const meta = statusMeta[status];
-  const StatusIcon = meta.icon;
+function KanbanBoard({ tasks, onStart, onComplete, onInspect, onSkip, onAssign, staff }) {
+  const grouped = useMemo(() => {
+    const g = { pending: [], in_progress: [], completed: [], inspected: [] };
+    tasks.forEach((t) => {
+      if (g[t.status]) g[t.status].push(t);
+    });
+    return g;
+  }, [tasks]);
 
   return (
-    <div
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        const roomId = e.dataTransfer.getData('roomId');
-        if (roomId) onDrop(roomId, status);
-      }}
-      className={cn(
-        'rounded-xl border-2 border-dashed p-3 transition-colors min-h-50',
-        draggedRoom ? 'border-border bg-background' : 'border-transparent'
-      )}
-    >
-      <div className="flex items-center gap-2 mb-3 px-1">
-        <StatusIcon className={cn('h-4 w-4', meta.class.split(' ')[1])} />
-        <span className="text-sm font-semibold text-text-primary">{meta.label}</span>
-        <span className="ml-auto rounded-full bg-background px-2 py-0.5 text-xs font-medium text-text-muted border border-border">
-          {rooms.length}
-        </span>
-      </div>
-      <div className="space-y-2">
-        {rooms.map((room) => (
-          <RoomCard
-            key={room.id}
-            room={room}
-            onStatusChange={onStatusChange}
-            isDragging={draggedRoom === room.id}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onDrop={onDrop}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {STATUS_COLUMNS.map((col) => (
+        <div key={col.key} className="space-y-3">
+          <div
+            className="flex items-center gap-2 pb-2 border-b-2"
+            style={{ borderColor: col.color.replace('bg-', '#') }}
+          >
+            <col.icon className="h-4 w-4" />
+            <span className="font-medium text-sm">{col.label}</span>
+            <Badge variant="secondary" className="ml-auto">
+              {grouped[col.key]?.length ?? 0}
+            </Badge>
+          </div>
+          <div className="space-y-2 min-h-50">
+            {grouped[col.key]?.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onStart={onStart}
+                onComplete={onComplete}
+                onInspect={onInspect}
+                onSkip={onSkip}
+                onAssign={onAssign}
+                staff={staff}
+              />
+            ))}
+            {grouped[col.key]?.length === 0 && (
+              <div className="text-center text-muted-foreground text-xs py-8 border border-dashed rounded-lg">
+                No tasks
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
+
+function TaskListView({ tasks, onStart, onComplete, onInspect, onAssign, staff }) {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Room</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Priority</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Assignee</TableHead>
+          <TableHead>Scheduled</TableHead>
+          <TableHead>Duration</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {tasks.map((task) => (
+          <TableRow key={task.id} className={cn(isOverdue(task) && 'bg-red-50')}>
+            <TableCell className="font-medium">{task.room?.number}</TableCell>
+            <TableCell>{TYPE_LABELS[task.type]}</TableCell>
+            <TableCell>
+              <Badge className={PRIORITY_COLORS[task.priority]}>{task.priority}</Badge>
+            </TableCell>
+            <TableCell>
+              <Badge variant="outline">{task.status.replace('_', ' ')}</Badge>
+            </TableCell>
+            <TableCell>
+              {task.assignee ? `${task.assignee.firstName} ${task.assignee.lastName}` : '—'}
+            </TableCell>
+            <TableCell>{formatTime(task.scheduledAt)}</TableCell>
+            <TableCell>
+              {task.actualDuration
+                ? `${task.actualDuration}m`
+                : task.estimatedDuration
+                  ? `~${task.estimatedDuration}m`
+                  : '—'}
+            </TableCell>
+            <TableCell>
+              <div className="flex gap-1">
+                {task.status === 'pending' && (
+                  <Button size="sm" variant="outline" onClick={() => onStart(task.id)}>
+                    Start
+                  </Button>
+                )}
+                {task.status === 'in_progress' && (
+                  <Button size="sm" variant="outline" onClick={() => onComplete(task.id)}>
+                    Complete
+                  </Button>
+                )}
+                {task.status === 'completed' && (
+                  <Button size="sm" variant="outline" onClick={() => onInspect(task.id)}>
+                    Inspect
+                  </Button>
+                )}
+                {!task.assignee && (
+                  <Button size="sm" variant="ghost" onClick={() => onAssign(task)}>
+                    Assign
+                  </Button>
+                )}
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+function ReportsView({ stats }) {
+  if (!stats) return <LoadingSkeleton className="h-64" />;
+  const { today, byPriority, byType, recentCompleted } = stats;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Today's Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[
+              { label: 'Pending', value: today.pending, color: 'bg-yellow-500' },
+              { label: 'In Progress', value: today.inProgress, color: 'bg-blue-500' },
+              { label: 'Completed', value: today.completed, color: 'bg-green-500' },
+              { label: 'Inspected', value: today.inspected, color: 'bg-purple-500' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3">
+                <div className={cn('h-3 w-3 rounded-full', item.color)} />
+                <span className="text-sm w-24">{item.label}</span>
+                <div className="flex-1 bg-muted rounded-full h-2">
+                  <div
+                    className={cn('h-2 rounded-full', item.color)}
+                    style={{ width: `${today.total > 0 ? (item.value / today.total) * 100 : 0}%` }}
+                  />
+                </div>
+                <span className="text-sm font-medium w-8 text-right">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">By Type</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {byType.map((t) => (
+              <div key={t.type} className="flex justify-between text-sm">
+                <span>{TYPE_LABELS[t.type] ?? t.type}</span>
+                <Badge variant="secondary">{t.count}</Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">By Priority</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {byPriority.map((p) => (
+              <div key={p.priority} className="flex justify-between text-sm">
+                <span className="capitalize">{p.priority}</span>
+                <Badge className={PRIORITY_COLORS[p.priority]}>{p.count}</Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Recently Completed</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {recentCompleted.map((r) => (
+              <div key={r.id} className="flex items-center justify-between text-sm">
+                <span>Room {r.room.number}</span>
+                <span className="text-muted-foreground">
+                  {r.assignee ? `${r.assignee.firstName} ${r.assignee.lastName}` : '—'} ·{' '}
+                  {formatTime(r.completedAt)}
+                </span>
+              </div>
+            ))}
+            {recentCompleted.length === 0 && (
+              <p className="text-muted-foreground text-sm">No completed tasks yet</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Main Page ───
 
 export default function HousekeepingPage() {
-  const [rooms, setRooms] = useState(initialRooms);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'board'
-  const [floorFilter, setFloorFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [query, setQuery] = useState('');
-  const [draggedRoom, setDraggedRoom] = useState(null);
-  const [scheduleDate, setScheduleDate] = useState('2026-08-12');
+  const [view, setView] = useState('board');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [assigneeFilter, setAssigneeFilter] = useState('');
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [bulkSelected, setBulkSelected] = useState([]);
 
-  const stats = useMemo(() => {
-    const total = rooms.length;
-    const clean = rooms.filter((r) => r.status === 'clean').length;
-    const dirty = rooms.filter((r) => r.status === 'dirty').length;
-    const inspected = rooms.filter((r) => r.status === 'inspected').length;
-    const ooo = rooms.filter((r) => r.status === 'ooo').length;
-    const occupied = rooms.filter((r) => r.status === 'occupied').length;
-    return { total, clean, dirty, inspected, ooo, occupied };
-  }, [rooms]);
+  const { data: properties } = useProperties();
+  const propertyId = properties?.[0]?.id;
 
-  const filteredRooms = useMemo(() => {
-    return rooms.filter((r) => {
-      const matchesFloor = floorFilter === 'all' || r.floor === parseInt(floorFilter);
-      const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-      const matchesQuery =
-        !query ||
-        r.id.includes(query) ||
-        r.type.toLowerCase().includes(query.toLowerCase()) ||
-        (r.guest && r.guest.toLowerCase().includes(query.toLowerCase()));
-      return matchesFloor && matchesStatus && matchesQuery;
-    });
-  }, [rooms, floorFilter, statusFilter, query]);
+  const { data: stats } = useHousekeepingStats(propertyId);
+  const { data: staff } = useHousekeepingStaff();
 
-  const handleStatusChange = (roomId, newStatus) => {
-    setRooms((prev) => prev.map((r) => (r.id === roomId ? { ...r, status: newStatus } : r)));
+  const {
+    data: tasksData,
+    isLoading,
+    error,
+    refetch,
+  } = useHousekeepingList({
+    propertyId,
+    status: statusFilter || undefined,
+    priority: priorityFilter || undefined,
+    type: typeFilter || undefined,
+    assigneeId: assigneeFilter || undefined,
+    pageSize: 100,
+  });
+
+  const tasks = tasksData?.data ?? [];
+
+  // Mutations
+  const { mutate: startTask } = useStartHousekeepingTask();
+  const { mutate: completeTask } = useCompleteHousekeepingTask();
+  const { mutate: inspectTask } = useInspectHousekeepingTask();
+  const { mutate: skipTask } = useSkipHousekeepingTask();
+  const { mutate: assignTask } = useAssignHousekeepingTask();
+  const { mutate: bulkAssign } = useBulkAssignHousekeeping();
+
+  const handleStart = (id) => {
+    startTask(id, { onSuccess: () => toast({ title: 'Task started' }) });
   };
 
-  const handleDropToStatus = (roomId, newStatus) => {
-    handleStatusChange(roomId, newStatus);
-    setDraggedRoom(null);
+  const handleComplete = (id) => {
+    completeTask({ id }, { onSuccess: () => toast({ title: 'Task completed' }) });
   };
 
-  const handleDropSwap = (fromId, toId) => {
-    // Simple swap for demo
-    setRooms((prev) => {
-      const fromIndex = prev.findIndex((r) => r.id === fromId);
-      const toIndex = prev.findIndex((r) => r.id === toId);
-      if (fromIndex === -1 || toIndex === -1) return prev;
-      const next = [...prev];
-      const tempFloor = next[fromIndex].floor;
-      next[fromIndex] = { ...next[fromIndex], floor: next[toIndex].floor };
-      next[toIndex] = { ...next[toIndex], floor: tempFloor };
-      return next;
-    });
-    setDraggedRoom(null);
+  const handleInspect = (id) => {
+    inspectTask(
+      { id, passed: true },
+      { onSuccess: () => toast({ title: 'Task inspected & verified' }) }
+    );
   };
+
+  const handleAssign = (task) => {
+    setSelectedTask(task);
+    setAssignModalOpen(true);
+  };
+
+  const handleAssignSubmit = (assigneeId) => {
+    if (selectedTask) {
+      assignTask(
+        { id: selectedTask.id, assigneeId },
+        {
+          onSuccess: () => {
+            toast({ title: 'Task assigned' });
+            setAssignModalOpen(false);
+            setSelectedTask(null);
+          },
+        }
+      );
+    }
+  };
+
+  if (error) return <ErrorState message="Failed to load housekeeping data" onRetry={refetch} />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Housekeeping</h1>
-          <p className="text-sm text-text-secondary">
-            Room status, schedules, and attendant assignments
-          </p>
+          <h1 className="text-2xl font-bold">Housekeeping</h1>
+          <p className="text-muted-foreground">Manage room cleaning and maintenance tasks</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setViewMode(viewMode === 'grid' ? 'board' : 'grid')}
-          >
-            {viewMode === 'grid' ? (
-              <List className="mr-1.5 h-4 w-4" />
-            ) : (
-              <LayoutGrid className="mr-1.5 h-4 w-4" />
-            )}
-            {viewMode === 'grid' ? 'Board View' : 'Grid View'}
-          </Button>
-          <Button size="sm">
-            <Plus className="mr-1.5 h-4 w-4" /> Schedule Task
-          </Button>
+          <Tabs value={view} onValueChange={setView}>
+            <TabsList>
+              <TabsTrigger value="board">
+                <LayoutGrid className="h-4 w-4 mr-1" /> Board
+              </TabsTrigger>
+              <TabsTrigger value="list">
+                <List className="h-4 w-4 mr-1" /> List
+              </TabsTrigger>
+              <TabsTrigger value="reports">
+                <BarChart3 className="h-4 w-4 mr-1" /> Reports
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {[
-          { label: 'Total', value: stats.total, color: 'text-text-primary', bg: 'bg-surface' },
-          { label: 'Clean', value: stats.clean, color: 'text-accent', bg: 'bg-accent/10' },
-          { label: 'Dirty', value: stats.dirty, color: 'text-danger', bg: 'bg-danger/10' },
-          { label: 'Inspected', value: stats.inspected, color: 'text-info', bg: 'bg-info/10' },
-          { label: 'OOO', value: stats.ooo, color: 'text-warning', bg: 'bg-warning/10' },
-          {
-            label: 'Occupied',
-            value: stats.occupied,
-            color: 'text-secondary',
-            bg: 'bg-secondary/10',
-          },
-        ].map((s) => (
-          <div key={s.label} className={cn('rounded-xl border border-border p-4', s.bg)}>
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
-              {s.label}
-            </p>
-            <p className={cn('mt-1 text-2xl font-bold', s.color)}>{s.value}</p>
-          </div>
-        ))}
-      </div>
+      <StatsCards stats={stats?.data} />
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search room, type, guest..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </div>
-        <div className="flex gap-2">
-          <select
-            value={floorFilter}
-            onChange={(e) => setFloorFilter(e.target.value)}
-            className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">All Floors</option>
-            {floors.map((f) => (
-              <option key={f} value={f}>
-                Floor {f}
-              </option>
+      <div className="flex flex-wrap items-center gap-3">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="inspected">Inspected</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Priorities</SelectItem>
+            <SelectItem value="urgent">Urgent</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="normal">Normal</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Types</SelectItem>
+            <SelectItem value="cleaning">Cleaning</SelectItem>
+            <SelectItem value="deep_clean">Deep Clean</SelectItem>
+            <SelectItem value="inspection">Inspection</SelectItem>
+            <SelectItem value="turndown">Turndown</SelectItem>
+            <SelectItem value="maintenance">Maintenance</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Assignee" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Staff</SelectItem>
+            {staff?.data?.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.firstName} {s.lastName}
+              </SelectItem>
             ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">All Statuses</option>
-            {Object.entries(statusMeta).map(([key, meta]) => (
-              <option key={key} value={key}>
-                {meta.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Grid View */}
-      {viewMode === 'grid' && (
-        <div className="space-y-6">
-          {floors.map((floor) => {
-            const floorRooms = filteredRooms.filter((r) => r.floor === floor);
-            if (floorRooms.length === 0) return null;
-            return (
-              <div key={floor}>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-muted">
-                  Floor {floor}
-                </h3>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                  {floorRooms.map((room) => (
-                    <RoomCard
-                      key={room.id}
-                      room={room}
-                      onStatusChange={handleStatusChange}
-                      isDragging={draggedRoom === room.id}
-                      onDragStart={setDraggedRoom}
-                      onDragEnd={() => setDraggedRoom(null)}
-                      onDrop={handleDropSwap}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          {filteredRooms.length === 0 && (
-            <div className="rounded-xl border border-border bg-surface p-12 text-center">
-              <p className="text-text-muted">No rooms match your filters.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Board View (Kanban-style) */}
-      {viewMode === 'board' && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {Object.keys(statusMeta).map((status) => (
-            <StatusColumn
-              key={status}
-              status={status}
-              rooms={filteredRooms.filter((r) => r.status === status)}
-              onStatusChange={handleStatusChange}
-              onDragStart={setDraggedRoom}
-              onDragEnd={() => setDraggedRoom(null)}
-              onDrop={handleDropToStatus}
-              draggedRoom={draggedRoom}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Schedule Board */}
-      <div className="rounded-xl border border-border bg-surface p-6">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-secondary" /> Attendant Schedule
-          </h3>
-          <input
-            type="date"
-            value={scheduleDate}
-            onChange={(e) => setScheduleDate(e.target.value)}
-            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-text-primary"
-          />
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-background border-b border-border">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Attendant</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Shift</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">
-                  Assigned Rooms
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Progress</th>
-                <th className="px-4 py-3 text-right font-medium text-text-secondary">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {attendants.map((a) => {
-                const progress = Math.round((a.completed.length / a.assigned.length) * 100);
-                return (
-                  <tr key={a.id} className="hover:bg-background/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                          {a.initials}
-                        </div>
-                        <span className="font-medium text-text-primary">{a.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-text-secondary">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 text-text-muted" />
-                        {a.shift}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {a.assigned.map((roomId) => {
-                          const isDone = a.completed.includes(roomId);
-                          const room = rooms.find((r) => r.id === roomId);
-                          return (
-                            <span
-                              key={roomId}
-                              className={cn(
-                                'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border',
-                                isDone
-                                  ? 'bg-accent/10 text-accent border-accent/20'
-                                  : 'bg-background text-text-secondary border-border'
-                              )}
-                            >
-                              {roomId}
-                              {isDone && <CheckCircle2 className="ml-1 h-3 w-3" />}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 flex-1 max-w-30 rounded-full bg-border overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-secondary transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium text-text-secondary">{progress}%</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={cn(
-                          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border',
-                          progress === 100
-                            ? 'bg-accent/10 text-accent border-accent/20'
-                            : 'bg-warning/10 text-warning border-warning/20'
-                        )}
-                      >
-                        {progress === 100 ? 'Complete' : 'In Progress'}
-                      </span>
-                    </td>
-                  </tr>
+          </SelectContent>
+        </Select>
+        {bulkSelected.length > 0 && (
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-sm text-muted-foreground">{bulkSelected.length} selected</span>
+            <Select
+              onValueChange={(v) => {
+                bulkAssign(
+                  { taskIds: bulkSelected, assigneeId: v },
+                  {
+                    onSuccess: () => {
+                      toast({ title: 'Bulk assigned' });
+                      setBulkSelected([]);
+                    },
+                  }
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Assign to…" />
+              </SelectTrigger>
+              <SelectContent>
+                {staff?.data?.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.firstName} {s.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="ghost" size="sm" onClick={() => setBulkSelected([])}>
+              Clear
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Content */}
+      {isLoading ? (
+        <LoadingSkeleton className="h-96" count={3} />
+      ) : tasks.length === 0 ? (
+        <EmptyState
+          icon={ClipboardList}
+          title="No tasks found"
+          description="Try adjusting your filters or create a new task."
+        />
+      ) : (
+        <Tabs value={view} onValueChange={setView}>
+          <TabsContent value="board" className="mt-4">
+            <KanbanBoard
+              tasks={tasks}
+              onStart={handleStart}
+              onComplete={handleComplete}
+              onInspect={handleInspect}
+              onSkip={(id) => skipTask({ id, reason: 'Skipped from board' })}
+              onAssign={handleAssign}
+              staff={staff?.data}
+            />
+          </TabsContent>
+          <TabsContent value="list" className="mt-4">
+            <div className="rounded-md border">
+              <TaskListView
+                tasks={tasks}
+                onStart={handleStart}
+                onComplete={handleComplete}
+                onInspect={handleInspect}
+                onAssign={handleAssign}
+                staff={staff?.data}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="reports" className="mt-4">
+            <ReportsView stats={stats?.data} />
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {/* Assign Modal */}
+      <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Task — Room {selectedTask?.room?.number}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Staff Member</label>
+              <Select onValueChange={handleAssignSubmit}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select staff member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {staff?.data?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>
+                          {s.firstName} {s.lastName}
+                        </span>
+                        <Badge variant="secondary" className="ml-2">
+                          {s.todayTaskCount} tasks today
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedTask && (
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>Type: {TYPE_LABELS[selectedTask.type]}</p>
+                <p>
+                  Priority:{' '}
+                  <Badge className={PRIORITY_COLORS[selectedTask.priority]}>
+                    {selectedTask.priority}
+                  </Badge>
+                </p>
+                <p>
+                  Scheduled: {formatDate(selectedTask.scheduledAt)} at{' '}
+                  {formatTime(selectedTask.scheduledAt)}
+                </p>
+                {selectedTask.estimatedDuration && (
+                  <p>Est. duration: {selectedTask.estimatedDuration} min</p>
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAssignModalOpen(false);
+                setSelectedTask(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

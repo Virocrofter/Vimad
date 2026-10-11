@@ -23,23 +23,61 @@ const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
 
 // ─── DropdownMenu Trigger ───
 
+type TriggerChildProps = {
+  className?: string;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  ref?: React.Ref<HTMLButtonElement>;
+};
+
 const DropdownMenuTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
     asChild?: boolean;
   }
->(({ className, children, onClick, ...props }, ref) => {
+>(({ className, children, onClick, asChild = false, ...props }, ref) => {
   const { open, setOpen } = React.useContext(DropdownMenuContext);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setOpen(!open);
+    onClick?.(e);
+  };
+
+  // asChild: merge props INTO the child instead of wrapping it in a <button>
+  // (prevents illegal <button> inside <button> when the child is a Button)
+  if (asChild && React.isValidElement<TriggerChildProps>(children)) {
+    const childProps = children.props;
+
+    const setRefs = (node: HTMLButtonElement | null) => {
+      // Only handle the forwarded ref — do not attempt to merge with child ref
+      // Merging with children.props.ref violates React Compiler immutability rules
+      // Child components that need ref access should use forwardRef at their call site
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref && typeof ref === 'object') {
+        (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node;
+      }
+    };
+
+    return React.cloneElement(
+      children as React.ReactElement<Record<string, unknown>>,
+      {
+        ...props,
+        ref: setRefs,
+        className: cn('inline-flex justify-center', className, childProps.className),
+        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+          childProps.onClick?.(e);
+          handleClick(e);
+        },
+      } as React.Attributes & Record<string, unknown>
+    );
+  }
 
   return (
     <button
       ref={ref}
       type="button"
       className={cn('inline-flex justify-center', className)}
-      onClick={(e) => {
-        setOpen(!open);
-        onClick?.(e);
-      }}
+      onClick={handleClick}
       {...props}
     >
       {children}
@@ -84,8 +122,11 @@ const DropdownMenuContent = React.forwardRef<
     <div
       ref={(node) => {
         contentRef.current = node;
-        if (typeof ref === 'function') ref(node);
-        else if (ref) ref.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref && typeof ref === 'object') {
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        }
       }}
       className={cn(
         'absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',

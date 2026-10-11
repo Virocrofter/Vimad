@@ -122,7 +122,7 @@ export const billingWorker = createWorker<InvoiceJobData>(BILLING_QUEUE, async (
         baseAmount: baseRate,
         overageAmount: overageFee,
         totalAmount: total,
-        currency: 'USD',
+        currency: 'ZAR',
         status: 'sent',
         items: {
           plan: tenant.plan,
@@ -158,7 +158,7 @@ export const billingWorker = createWorker<InvoiceJobData>(BILLING_QUEUE, async (
 
   // Send email notification
   if (owner) {
-    await sendInvoiceEmail(owner.email, invoice.id, total, 'USD');
+    await sendInvoiceEmail(owner.email, invoice.id, total, 'ZAR');
   }
 
   logger.info(

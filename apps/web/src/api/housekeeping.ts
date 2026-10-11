@@ -10,19 +10,63 @@ export interface HousekeepingTask {
   priority: 'low' | 'normal' | 'high' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'inspected' | 'skipped';
   scheduledAt: string;
-  startedAt?: string;
-  completedAt?: string;
-  verifiedAt?: string;
-  estimatedDuration?: number;
-  actualDuration?: number;
-  notes?: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  verifiedAt?: string | null;
+  estimatedDuration?: number | null;
+  actualDuration?: number | null;
+  notes?: string | null;
   checklist: string[];
-  assigneeId?: string;
-  inspectorId?: string;
+  assigneeId?: string | null;
+  inspectorId?: string | null;
   createdAt: string;
   updatedAt: string;
-  room?: { id: string; number: string };
-  assignee?: { id: string; firstName: string; lastName: string };
+  room?: {
+    id: string;
+    number: string;
+    floor?: string | null;
+    housekeepingStatus: string;
+    roomType: { id: string; name: string; code: string };
+  };
+  assignee?: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string;
+    role: string;
+  } | null;
+  inspector?: { id: string; firstName: string | null; lastName: string | null } | null;
+}
+
+export interface HousekeepingStats {
+  today: {
+    total: number;
+    pending: number;
+    inProgress: number;
+    completed: number;
+    inspected: number;
+    completionRate: number;
+  };
+  overdue: number;
+  staffOnDuty: number;
+  avgCleaningDuration: number;
+  byPriority: { priority: string; count: number }[];
+  byType: { type: string; count: number }[];
+  recentCompleted: {
+    id: string;
+    room: { number: string };
+    assignee: { firstName: string | null; lastName: string | null } | null;
+    completedAt: string | null;
+  }[];
+}
+
+export interface HousekeepingStaff {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  role: string;
+  todayTaskCount: number;
 }
 
 export interface CreateTaskInput {
@@ -34,6 +78,7 @@ export interface CreateTaskInput {
   estimatedDuration?: number;
   notes?: string;
   checklist?: string[];
+  assigneeId?: string;
 }
 
 export type UpdateTaskInput = Partial<CreateTaskInput>;
@@ -45,7 +90,10 @@ export async function listTasks(
     assigneeId?: string;
     status?: string;
     priority?: string;
-    date?: string;
+    type?: string;
+    floor?: string;
+    dateFrom?: string;
+    dateTo?: string;
   }
 ): Promise<PaginatedResponse<HousekeepingTask>> {
   const response = await apiClient.get<PaginatedResponse<HousekeepingTask>>('/housekeeping', {
@@ -86,9 +134,14 @@ export async function assignTask(
   return response.data;
 }
 
+export async function startTask(id: string): Promise<{ data: HousekeepingTask }> {
+  const response = await apiClient.post<{ data: HousekeepingTask }>(`/housekeeping/${id}/start`);
+  return response.data;
+}
+
 export async function completeTask(
   id: string,
-  input?: { notes?: string; issues?: string[] }
+  input?: { notes?: string; actualDuration?: number }
 ): Promise<{ data: HousekeepingTask }> {
   const response = await apiClient.post<{ data: HousekeepingTask }>(
     `/housekeeping/${id}/complete`,
@@ -105,5 +158,38 @@ export async function inspectTask(
     `/housekeeping/${id}/inspect`,
     input
   );
+  return response.data;
+}
+
+export async function skipTask(id: string, reason?: string): Promise<{ data: HousekeepingTask }> {
+  const response = await apiClient.post<{ data: HousekeepingTask }>(`/housekeeping/${id}/skip`, {
+    reason,
+  });
+  return response.data;
+}
+
+export async function bulkAssign(
+  taskIds: string[],
+  assigneeId: string
+): Promise<{ data: { updated: number } }> {
+  const response = await apiClient.post<{ data: { updated: number } }>(
+    '/housekeeping/bulk-assign',
+    { taskIds, assigneeId }
+  );
+  return response.data;
+}
+
+export async function getStats(
+  propertyId?: string,
+  date?: string
+): Promise<{ data: HousekeepingStats }> {
+  const response = await apiClient.get<{ data: HousekeepingStats }>('/housekeeping/stats', {
+    params: { propertyId, date },
+  });
+  return response.data;
+}
+
+export async function getStaff(): Promise<{ data: HousekeepingStaff[] }> {
+  const response = await apiClient.get<{ data: HousekeepingStaff[] }>('/housekeeping/staff');
   return response.data;
 }

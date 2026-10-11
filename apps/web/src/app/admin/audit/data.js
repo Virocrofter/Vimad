@@ -212,7 +212,7 @@ export const initialAuditLogs = [
     tamperProof: { hash: 'f2c5b8...e0d3', signature: 'SHA-256-RSA', previousHash: 'e1b4a7...d9c2' },
     sessionId: 'sess_def456',
     shadowSession: false,
-    metadata: { amount: 499.0, currency: 'USD', items: ['Professional Plan', 'API Overage'] },
+    metadata: { amount: 499.0, currency: 'ZAR', items: ['Professional Plan', 'API Overage'] },
   },
   {
     id: 'AUD-2026-0816-005',
@@ -404,7 +404,7 @@ export const initialAuditLogs = [
     shadowSession: false,
     metadata: {
       amount: 199.0,
-      currency: 'USD',
+      currency: 'ZAR',
       reason: 'service_interruption',
       approvedBy: 'Robert Chen',
     },

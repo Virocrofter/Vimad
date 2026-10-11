@@ -45,7 +45,7 @@ import { Input } from '../../../../components/ui/input';
 
 /* ─── Helpers ─── */
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ZAR' }).format(amount || 0);
 }
 
 function calculateBeoTotal(beo) {

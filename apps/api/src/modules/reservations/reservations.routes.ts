@@ -10,6 +10,8 @@ import {
   PaginatedResponseSchema,
 } from '../../common/openapi-schemas.js';
 import {
+  assignRoom,
+  assignRoomSchema,
   createReservation,
   deleteReservation,
   getReservation,
@@ -20,7 +22,7 @@ import {
   cancelReservation,
   reservationCreateSchema,
   reservationUpdateSchema,
-  type ReservationCreateInput,
+  type ReservationListQuery,
 } from './reservations.service.js';
 
 extendZodWithOpenApi(z);
@@ -30,15 +32,22 @@ export const registry = new OpenAPIRegistry();
 const reservationQuerySchema = paginationSchema
   .extend({
     status: z.enum(['confirmed', 'checked_in', 'checked_out', 'cancelled', 'no_show']).optional(),
+    source: z.enum(['direct', 'bookingcom', 'expedia', 'walkin', 'phone', 'email']).optional(),
     propertyId: z.string().optional(),
     guestId: z.string().optional(),
-    arrivalDate: z.string().optional(),
-    departureDate: z.string().optional(),
+    search: z.string().optional(),
+    arrivalFrom: z.string().optional(),
+    arrivalTo: z.string().optional(),
+    departureFrom: z.string().optional(),
+    departureTo: z.string().optional(),
+    from: z.string().optional(),
+    to: z.string().optional(),
   })
   .openapi('ReservationQuery');
 
 const ReservationCreateInputSchema = reservationCreateSchema.openapi('ReservationCreateInput');
 const ReservationUpdateInputSchema = reservationUpdateSchema.openapi('ReservationUpdateInput');
+const AssignRoomInputSchema = assignRoomSchema.openapi('AssignRoomInput');
 
 const ReservationGuestSchema = z.object({
   id: z.string(),
@@ -100,31 +109,44 @@ const ReservationResponseSchema = z
 const ReservationListResponseSchema =
   PaginatedResponseSchema(ReservationItemSchema).openapi('ReservationListResponse');
 
+const unauthorized = {
+  description: 'Unauthorized',
+  content: { 'application/json': { schema: ErrorResponseSchema } },
+} as const;
+
+const forbidden = {
+  description: 'Forbidden',
+  content: { 'application/json': { schema: ErrorResponseSchema } },
+} as const;
+
+const notFound = {
+  description: 'Not found',
+  content: { 'application/json': { schema: ErrorResponseSchema } },
+} as const;
+
+const conflict = {
+  description: 'Conflict',
+  content: { 'application/json': { schema: ErrorResponseSchema } },
+} as const;
+
 export const reservationsRouter = Router();
 
 reservationsRouter.use(authMiddleware, tenantScope);
 
+// GET / — list
 registry.registerPath({
   method: 'get',
   path: '/',
   tags: ['Reservations'],
-  description: 'List reservations',
-  request: {
-    query: reservationQuerySchema,
-  },
+  description: 'List reservations with filters',
+  request: { query: reservationQuerySchema },
   responses: {
     200: {
       description: 'Paginated list of reservations',
       content: { 'application/json': { schema: ReservationListResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
   },
 });
 
@@ -136,15 +158,7 @@ reservationsRouter.get(
     try {
       const result = await listReservations(
         req.tenantId,
-        req.validatedQuery as {
-          page: number;
-          pageSize: number;
-          status?: string;
-          propertyId?: string;
-          guestId?: string;
-          arrivalDate?: string;
-          departureDate?: string;
-        }
+        req.validatedQuery as ReservationListQuery
       );
       res.json(result);
     } catch (err) {
@@ -153,31 +167,21 @@ reservationsRouter.get(
   }
 );
 
+// GET /:id
 registry.registerPath({
   method: 'get',
   path: '/{id}',
   tags: ['Reservations'],
   description: 'Get a reservation by ID',
-  request: {
-    params: IdParamSchema,
-  },
+  request: { params: IdParamSchema },
   responses: {
     200: {
       description: 'Reservation details',
       content: { 'application/json': { schema: ReservationResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Reservation not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
   },
 });
 
@@ -194,6 +198,7 @@ reservationsRouter.get(
   }
 );
 
+// POST / — create
 registry.registerPath({
   method: 'post',
   path: '/',
@@ -214,22 +219,8 @@ registry.registerPath({
       description: 'Validation error',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Property or guest not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Duplicate confirmation number',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
   },
 });
 
@@ -239,10 +230,7 @@ reservationsRouter.post(
   validateBody(reservationCreateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await createReservation(
-        req.tenantId,
-        req.validatedBody as ReservationCreateInput
-      );
+      const result = await createReservation(req.tenantId, req.body);
       res.status(201).json({ data: result });
     } catch (err) {
       next(err);
@@ -250,6 +238,7 @@ reservationsRouter.post(
   }
 );
 
+// PATCH /:id — update (dates, guests, notes, room moves, rate)
 registry.registerPath({
   method: 'patch',
   path: '/{id}',
@@ -271,18 +260,10 @@ registry.registerPath({
       description: 'Validation error',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Reservation not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
   },
 });
 
@@ -292,11 +273,7 @@ reservationsRouter.patch(
   validateBody(reservationUpdateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await updateReservation(
-        req.tenantId,
-        req.params.id,
-        req.validatedBody as z.infer<typeof reservationUpdateSchema>
-      );
+      const result = await updateReservation(req.tenantId, req.params.id, req.body);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -304,35 +281,90 @@ reservationsRouter.patch(
   }
 );
 
+// DELETE /:id
+registry.registerPath({
+  method: 'delete',
+  path: '/{id}',
+  tags: ['Reservations'],
+  description: 'Delete a reservation',
+  request: { params: IdParamSchema },
+  responses: {
+    204: { description: 'Reservation deleted' },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
+  },
+});
+
+reservationsRouter.delete(
+  '/:id',
+  requirePermission('reservation', 'delete'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await deleteReservation(req.tenantId, req.params.id);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/assign-room
+registry.registerPath({
+  method: 'post',
+  path: '/{id}/assign-room',
+  tags: ['Reservations'],
+  description: 'Assign a room to a reservation',
+  request: {
+    params: IdParamSchema,
+    body: {
+      description: 'Room assignment payload',
+      content: { 'application/json': { schema: AssignRoomInputSchema } },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Room assigned',
+      content: { 'application/json': { schema: ReservationResponseSchema } },
+    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
+  },
+});
+
+reservationsRouter.post(
+  '/:id/assign-room',
+  requirePermission('reservation', 'update'),
+  validateBody(assignRoomSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await assignRoom(req.tenantId, req.params.id, req.body);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/check-in
 registry.registerPath({
   method: 'post',
   path: '/{id}/check-in',
   tags: ['Reservations'],
   description: 'Check in a reservation',
-  request: {
-    params: IdParamSchema,
-  },
+  request: { params: IdParamSchema },
   responses: {
     200: {
       description: 'Checked in',
       content: { 'application/json': { schema: ReservationResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Reservation not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Already checked in or invalid status',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
   },
 });
 
@@ -349,35 +381,22 @@ reservationsRouter.post(
   }
 );
 
+// POST /:id/check-out
 registry.registerPath({
   method: 'post',
   path: '/{id}/check-out',
   tags: ['Reservations'],
   description: 'Check out a reservation',
-  request: {
-    params: IdParamSchema,
-  },
+  request: { params: IdParamSchema },
   responses: {
     200: {
       description: 'Checked out',
       content: { 'application/json': { schema: ReservationResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Reservation not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Not checked in or invalid status',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
   },
 });
 
@@ -394,6 +413,7 @@ reservationsRouter.post(
   }
 );
 
+// POST /:id/cancel
 registry.registerPath({
   method: 'post',
   path: '/{id}/cancel',
@@ -401,82 +421,34 @@ registry.registerPath({
   description: 'Cancel a reservation',
   request: {
     params: IdParamSchema,
+    body: {
+      description: 'Cancellation payload',
+      content: {
+        'application/json': {
+          schema: z.object({ reason: z.string().optional() }).openapi('CancelInput'),
+        },
+      },
+    },
   },
   responses: {
     200: {
       description: 'Cancelled',
       content: { 'application/json': { schema: ReservationResponseSchema } },
     },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Reservation not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Already cancelled or checked out',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
   },
 });
 
 reservationsRouter.post(
   '/:id/cancel',
-  requirePermission('reservation', 'delete'),
+  requirePermission('reservation', 'cancel'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await cancelReservation(req.tenantId, req.params.id);
+      const result = await cancelReservation(req.tenantId, req.params.id, req.body?.reason);
       res.json({ data: result });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
-registry.registerPath({
-  method: 'delete',
-  path: '/{id}',
-  tags: ['Reservations'],
-  description: 'Delete a reservation',
-  request: {
-    params: IdParamSchema,
-  },
-  responses: {
-    204: {
-      description: 'Reservation deleted',
-    },
-    401: {
-      description: 'Unauthorized',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    403: {
-      description: 'Forbidden',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    404: {
-      description: 'Reservation not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-    409: {
-      description: 'Cannot delete checked-in reservation',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
-    },
-  },
-});
-
-reservationsRouter.delete(
-  '/:id',
-  requirePermission('reservation', 'delete'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await deleteReservation(req.tenantId, req.params.id);
-      res.status(204).send();
     } catch (err) {
       next(err);
     }

@@ -4,12 +4,24 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'eslint.config.js', 'prisma', 'coverage'],
+    ignores: ['dist', 'node_modules', 'eslint.config.js', 'prisma', 'coverage', 'tests/load'],
   },
   {
     files: ['**/*.{js,ts}'],
     languageOptions: {
-      globals: globals.node,
+      globals: {
+        ...globals.node,
+        // Node 18+ fetch/undici globals — types exist via @types/node but the
+        // `globals` package doesn't list them; without this, type-only usages
+        // like `RequestInit` in annotations trip no-undef (false positive —
+        // TS already resolves them, tsc build passes).
+        RequestInit: 'readonly',
+        RequestInfo: 'readonly',
+        Response: 'readonly',
+        Request: 'readonly',
+        Headers: 'readonly',
+        fetch: 'readonly',
+      },
       parser: tseslint.parser,
       parserOptions: {
         ecmaVersion: 'latest',

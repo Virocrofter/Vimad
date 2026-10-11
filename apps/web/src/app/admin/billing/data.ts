@@ -110,7 +110,7 @@ export function calculateProration(
   };
 }
 
-export function formatCurrency(amount: number, currency = 'USD') {
+export function formatCurrency(amount: number, currency = 'ZAR') {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,

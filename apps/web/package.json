@@ -17,7 +17,8 @@
     "@hookform/resolvers": "^5.7.1",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-toast": "^1.2.23",
-    "@sentry/react": "^10.73.0",
+    "@sentry/react": "^10.75.3",
+    "@tailwindcss/typography": "^0.5.20",
     "@tanstack/react-query": "^5.52.0",
     "@tanstack/react-table": "^9.1.2",
     "axios": "^1.7.4",
@@ -33,11 +34,13 @@
     "recharts": "^3.10.1",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.7.0",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@sentry/vite-plugin": "^5.4.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

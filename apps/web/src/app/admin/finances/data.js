@@ -370,7 +370,7 @@ export const planDistribution = [
 export function formatCurrency(amount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'ZAR',
     maximumFractionDigits: 0,
   }).format(amount);
 }
@@ -378,7 +378,7 @@ export function formatCurrency(amount) {
 export function formatCompactCurrency(amount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'ZAR',
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(amount);

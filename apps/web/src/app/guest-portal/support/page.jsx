@@ -5,23 +5,24 @@ import {
   HelpCircle,
   Search,
   MessageSquare,
-  Phone,
-  Mail,
   ChevronRight,
-  BookOpen,
-  Shield,
   CreditCard,
   KeyRound,
   Wifi,
   Utensils,
-  Clock,
-  MapPin,
   Sparkles,
   FileText,
-  ExternalLink,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
+
+/**
+ * Help Center. FAQ copy is static content (real information, not mock data).
+ * Contact paths route to real features: in-app messaging (delivered to the
+ * front desk) and ticket creation. Property-specific details (Wi-Fi name,
+ * phone numbers) intentionally generic — the property surfaces those at
+ * check-in / in-room.
+ */
 
 const faqCategories = [
   {
@@ -35,11 +36,11 @@ const faqCategories = [
       },
       {
         q: 'How do I use my digital key?',
-        a: 'Your digital key is accessible through the Keys section of this app. Ensure Bluetooth is enabled on your device, then tap "Unlock" when near your room door.',
+        a: 'Your digital key is in the Keys section of this app. Once it activates on arrival day, show the key code at the door reader or to the front desk.',
       },
       {
         q: 'I forgot my room number',
-        a: 'Your room number is displayed on your stay dashboard. You can also find it in your booking confirmation email or contact the front desk.',
+        a: 'Your room number is displayed on your stay dashboard. You can also find it in your booking confirmation or ask the front desk.',
       },
     ],
   },
@@ -58,7 +59,7 @@ const faqCategories = [
       },
       {
         q: 'Are resort fees included?',
-        a: 'Resort fees, if applicable, will be clearly displayed during booking and on your folio. They are typically charged per night.',
+        a: 'Resort fees, if applicable, are clearly displayed during booking and on your folio. They are typically charged per night.',
       },
     ],
   },
@@ -69,11 +70,11 @@ const faqCategories = [
     articles: [
       {
         q: 'How do I connect to WiFi?',
-        a: 'Select the network "GrandHotel_Guest" and enter your room number and last name as the password. Premium high-speed WiFi is complimentary for all guests.',
+        a: 'Guest Wi-Fi details are provided at check-in and displayed in your room. If you can’t find them, message the front desk from the Messages section.',
       },
       {
         q: 'The WiFi is slow',
-        a: 'Try disconnecting and reconnecting. If issues persist, contact our IT support through the messaging feature or dial 0 from your room phone.',
+        a: 'Try disconnecting and reconnecting. If issues persist, report it through the Issues section or message the front desk.',
       },
     ],
   },
@@ -84,11 +85,11 @@ const faqCategories = [
     articles: [
       {
         q: 'What are the room service hours?',
-        a: 'Room service is available 24/7. Breakfast items are served from 6:00 AM to 11:00 AM, with all-day dining from 11:00 AM to 11:00 PM.',
+        a: 'Room service hours are shown on the menu in the Room Service section. Breakfast and all-day dining windows are listed per category.',
       },
       {
-        q: 'Can I accommodate dietary restrictions?',
-        a: 'Absolutely. Please note any dietary requirements in your profile preferences or mention them when ordering. Our kitchen can accommodate vegetarian, vegan, gluten-free, and most allergen requests.',
+        q: 'Can you accommodate dietary restrictions?',
+        a: 'Absolutely. Note dietary requirements in your profile preferences or when ordering. The kitchen can accommodate vegetarian, vegan, gluten-free, and most allergen requests.',
       },
     ],
   },
@@ -98,36 +99,14 @@ const faqCategories = [
     icon: Sparkles,
     articles: [
       {
-        q: 'What time is the gym open?',
-        a: 'Our fitness center is open 24 hours with key card access. Pool hours are 6:00 AM to 10:00 PM. Spa appointments can be booked through the Concierge.',
+        q: 'What time are the gym and pool open?',
+        a: 'Current amenity hours are listed in the Status section of the app, which reflects any maintenance closures.',
       },
       {
         q: 'Is parking included?',
-        a: 'Parking fees vary by property and room type. Please check your booking details or contact the front desk for current rates.',
+        a: 'Parking fees vary by property and room type. Check your booking details or ask the front desk for current rates.',
       },
     ],
-  },
-];
-
-const quickLinks = [
-  { label: 'Contact Front Desk', icon: Phone, href: 'tel:+16175550100', desc: '24/7 availability' },
-  {
-    label: 'Live Chat',
-    icon: MessageSquare,
-    href: '/guest-portal/messages',
-    desc: 'Typically responds in 2 min',
-  },
-  {
-    label: 'Email Support',
-    icon: Mail,
-    href: 'mailto:support@grandhotel.com',
-    desc: 'Response within 24 hours',
-  },
-  {
-    label: 'View Tickets',
-    icon: FileText,
-    href: '/guest-portal/support/tickets',
-    desc: 'Track your requests',
   },
 ];
 
@@ -136,6 +115,21 @@ export default function SupportPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [expandedArticle, setExpandedArticle] = useState(null);
+
+  const quickLinks = [
+    {
+      label: 'Message Front Desk',
+      icon: MessageSquare,
+      href: '/guest-portal/messages',
+      desc: 'Delivered directly to staff',
+    },
+    {
+      label: 'Create Ticket',
+      icon: FileText,
+      href: '/guest-portal/support/tickets',
+      desc: 'Track your requests',
+    },
+  ];
 
   const filteredCategories = faqCategories
     .map((cat) => ({
@@ -174,21 +168,17 @@ export default function SupportPage() {
       <div className="grid grid-cols-2 gap-3">
         {quickLinks.map((link) => {
           const Icon = link.icon;
-          const isExternal = link.href.startsWith('tel:') || link.href.startsWith('mailto:');
           return (
             <button
               key={link.label}
-              onClick={() => (isExternal ? window.open(link.href, '_blank') : navigate(link.href))}
+              onClick={() => navigate(link.href)}
               className="flex flex-col items-start gap-2 rounded-xl border border-border bg-surface p-4 text-left transition-all hover:shadow-md hover:border-secondary/30"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
                 <Icon className="h-5 w-5 text-secondary" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary flex items-center gap-1">
-                  {link.label}
-                  {isExternal && <ExternalLink className="h-3 w-3 text-text-muted" />}
-                </p>
+                <p className="text-sm font-semibold text-text-primary">{link.label}</p>
                 <p className="text-xs text-text-muted">{link.desc}</p>
               </div>
             </button>
@@ -257,7 +247,7 @@ export default function SupportPage() {
                           />
                         </button>
                         {expandedArticle === `${cat.id}-${idx}` && (
-                          <p className="mt-2 text-sm text-text-secondary leading-relaxed pl-0">
+                          <p className="mt-2 text-sm text-text-secondary leading-relaxed">
                             {article.a}
                           </p>
                         )}
@@ -283,11 +273,11 @@ export default function SupportPage() {
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
         <h3 className="text-sm font-semibold text-text-primary mb-2">Still need help?</h3>
         <p className="text-xs text-text-secondary mb-4">
-          Our guest services team is available 24/7 to assist you
+          Our guest services team is available around the clock
         </p>
         <div className="flex gap-3 justify-center">
           <Button variant="outline" size="sm" onClick={() => navigate('/guest-portal/messages')}>
-            <MessageSquare className="mr-1.5 h-4 w-4" /> Start Chat
+            <MessageSquare className="mr-1.5 h-4 w-4" /> Message Front Desk
           </Button>
           <Button size="sm" onClick={() => navigate('/guest-portal/support/tickets')}>
             <FileText className="mr-1.5 h-4 w-4" /> Create Ticket

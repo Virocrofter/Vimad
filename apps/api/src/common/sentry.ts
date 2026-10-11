@@ -1,39 +1,50 @@
 /* apps/api/src/common/sentry.ts */
 import * as Sentry from '@sentry/node';
-import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
-import { env } from './env.js';
-import { logger } from './logger.js';
+import type { ErrorRequestHandler, Request } from 'express';
 
-// Sentry is optional — without SENTRY_DSN everything is a no-op.
+const dsn = process.env.SENTRY_DSN;
+const enabled = Boolean(dsn);
 
-export function initSentry(): void {
-  if (!env.SENTRY_DSN) return;
-
+if (enabled) {
   Sentry.init({
-    dsn: env.SENTRY_DSN,
-    environment: env.NODE_ENV,
-    tracesSampleRate: env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    dsn,
+    environment: process.env.NODE_ENV ?? 'development',
+    tracesSampleRate: 1.0,
+    beforeSend(event) {
+      const status = (event.contexts?.response?.status_code as number | undefined) ?? 0;
+      if (status === 401 || status === 403 || status === 404) return null;
+      return event;
+    },
   });
-
-  logger.info('Sentry initialized');
+} else {
+  console.warn('[sentry] SENTRY_DSN not set — error reporting disabled');
 }
 
+type ReqWithUser = Request & { user?: { id?: string } };
+
 /**
- * Express error handler that reports to Sentry, then passes the error on to
- * the app's own errorHandler. Mount BEFORE errorHandler:
- *   app.use(sentryErrorHandler);
- *   app.use(errorHandler);
+ * Express error-reporting middleware. Wired in server.ts AFTER all routes,
+ * BEFORE errorHandler — do not move it. Reports to Sentry with request
+ * context, then hands off to errorHandler so JSON error shape is preserved.
  */
-export const sentryErrorHandler: ErrorRequestHandler = (
-  err: Error,
-  _req: Request,
-  _res: Response,
-  next: NextFunction
-) => {
-  if (env.SENTRY_DSN) {
-    Sentry.captureException(err);
+export const sentryErrorHandler: ErrorRequestHandler = (err, req, _res, next) => {
+  if (enabled) {
+    Sentry.withScope((scope) => {
+      scope.setTag('path', req.originalUrl ?? req.url);
+      scope.setContext('http', {
+        method: req.method,
+        url: req.originalUrl,
+        query: req.query,
+        params: req.params,
+        'user-agent': req.headers['user-agent'],
+      });
+      const user = (req as ReqWithUser).user;
+      if (user?.id) scope.setUser({ id: user.id });
+      if (req.tenantId) scope.setTag('tenantId', req.tenantId);
+      Sentry.captureException(err);
+    });
   }
   next(err);
 };
 
-export { Sentry };
+export default Sentry;

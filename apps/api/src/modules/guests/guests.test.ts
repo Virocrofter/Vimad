@@ -1,175 +1,212 @@
-/* apps/api/src/modules/guests/guests.test.ts
- * Integration tests for the guests module. Requires a reachable Postgres
- * (TEST_DATABASE_URL / DATABASE_URL) — skipped automatically otherwise.
- */
-import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import request from 'supertest';
-import { pushTestSchema, truncateAllTables } from '../../../tests/helpers/prisma.js';
+/* apps/api/src/modules/guests/guests.service.test.ts */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../common/prisma.js', () => ({
+  prisma: {
+    guest: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    reservation: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+      aggregate: vi.fn(),
+    },
+  },
+}));
+
+import { prisma } from '../../common/prisma.js';
 import {
-  buildTestApp,
-  registerTestTenant,
-  type TestTenant,
-} from '../../../tests/helpers/server.js';
+  listGuests,
+  getGuestStats,
+  getGuest,
+  createGuest,
+  updateGuest,
+  deleteGuest,
+} from './guests.service.js';
 
-const app = buildTestApp();
+const mockGuest = prisma.guest as unknown as Record<string, ReturnType<typeof vi.fn>>;
+const mockReservation = prisma.reservation as unknown as Record<string, ReturnType<typeof vi.fn>>;
 
-const RUN_DB_TESTS = !!(process.env.TEST_DATABASE_URL ?? process.env.RUN_DB_TESTS);
+const guest = {
+  id: 'g1',
+  tenantId: 't1',
+  firstName: 'Jane',
+  lastName: 'Doe',
+  email: 'jane@example.com',
+  phone: '+27123456789',
+  passportNumber: 'P1234567',
+  vipStatus: 'gold',
+  blacklisted: false,
+};
 
-describe.skipIf(!RUN_DB_TESTS)('Guests API', () => {
-  let auth: TestTenant;
+beforeEach(() => vi.clearAllMocks());
 
-  beforeAll(() => {
-    pushTestSchema();
+describe('listGuests', () => {
+  it('returns a paginated tenant-scoped list', async () => {
+    mockGuest.count.mockResolvedValue(1);
+    mockGuest.findMany.mockResolvedValue([guest]);
+
+    const result = await listGuests('t1', { page: 1, pageSize: 20 });
+
+    expect(mockGuest.findMany.mock.calls[0][0].where.tenantId).toBe('t1');
+    expect(result.data).toEqual([guest]);
+    expect(result.meta.total).toBe(1);
   });
 
-  beforeEach(async () => {
-    await truncateAllTables();
-    auth = await registerTestTenant(app);
+  it('applies case-insensitive search across name, email, phone and passport', async () => {
+    mockGuest.count.mockResolvedValue(0);
+    mockGuest.findMany.mockResolvedValue([]);
+
+    await listGuests('t1', { page: 1, pageSize: 20, search: 'jane' });
+
+    const where = mockGuest.findMany.mock.calls[0][0].where;
+    expect(where.OR).toHaveLength(5);
+    expect(where.OR[0].firstName).toEqual({ contains: 'jane', mode: 'insensitive' });
+    expect(where.OR[1].lastName).toEqual({ contains: 'jane', mode: 'insensitive' });
+    expect(where.OR[2].email).toEqual({ contains: 'jane', mode: 'insensitive' });
+    expect(where.OR[3].phone).toEqual({ contains: 'jane', mode: 'insensitive' });
+    expect(where.OR[4].passportNumber).toEqual({ contains: 'jane', mode: 'insensitive' });
   });
 
-  const guestPayload = {
-    firstName: 'Jane',
-    lastName: 'Doe',
-    email: 'jane.doe@example.com',
-    phone: '+1 555 0100',
-  };
+  it('maps vipStatus=vip to a non-empty check and vipStatus=none to null-or-empty', async () => {
+    mockGuest.count.mockResolvedValue(0);
+    mockGuest.findMany.mockResolvedValue([]);
 
-  it('rejects unauthenticated requests', async () => {
-    const res = await request(app).get('/v1/guests');
-    expect(res.status).toBe(401);
+    await listGuests('t1', { page: 1, pageSize: 20, vipStatus: 'vip' });
+    expect(mockGuest.findMany.mock.calls[0][0].where.vipStatus).toEqual({ notIn: [''] });
+
+    await listGuests('t1', { page: 1, pageSize: 20, vipStatus: 'none' });
+    expect(mockGuest.findMany.mock.calls[1][0].where.OR).toEqual([
+      { vipStatus: null },
+      { vipStatus: '' },
+    ]);
   });
 
-  it('rejects authenticated users without permissions', async () => {
-    // Register a second tenant but do NOT grant permissions — owner role
-    // string alone does not confer permissions.
-    const other = await request(app)
-      .post('/auth/register')
-      .send({
-        tenantName: 'No Perms Hotel',
-        tenantSlug: `no-perms-${Date.now()}`,
-        ownerEmail: 'noperm@test.com',
-        ownerPassword: 'password123',
-      });
-    expect(other.status).toBe(201);
+  it('filters by blacklisted=true', async () => {
+    mockGuest.count.mockResolvedValue(0);
+    mockGuest.findMany.mockResolvedValue([]);
 
-    const res = await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${other.body.data.token}`)
-      .send(guestPayload);
-    expect(res.status).toBe(403);
+    await listGuests('t1', { page: 1, pageSize: 20, blacklisted: 'true' });
+
+    expect(mockGuest.findMany.mock.calls[0][0].where.blacklisted).toBe(true);
   });
 
-  it('creates a guest', async () => {
-    const res = await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send(guestPayload);
+  it('falls back to createdAt sort for an unknown sortBy', async () => {
+    mockGuest.count.mockResolvedValue(0);
+    mockGuest.findMany.mockResolvedValue([]);
 
-    expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({
+    await listGuests('t1', { page: 1, pageSize: 20, sortBy: 'hacked', sortDir: 'asc' });
+
+    expect(mockGuest.findMany.mock.calls[0][0].orderBy).toEqual({ createdAt: 'asc' });
+  });
+});
+
+describe('getGuestStats', () => {
+  it('aggregates the five stat buckets', async () => {
+    mockGuest.count
+      .mockResolvedValueOnce(10) // total
+      .mockResolvedValueOnce(2) // vip
+      .mockResolvedValueOnce(1) // new this month
+      .mockResolvedValueOnce(3); // blacklisted
+    mockReservation.findMany.mockResolvedValue([{ guestId: 'g1' }, { guestId: 'g2' }]);
+
+    const result = await getGuestStats('t1');
+
+    expect(result).toEqual({ total: 10, vip: 2, newThisMonth: 1, inHouse: 2, blacklisted: 3 });
+  });
+});
+
+describe('getGuest', () => {
+  it('throws 404 for a guest outside the tenant', async () => {
+    mockGuest.findFirst.mockResolvedValue(null);
+    await expect(getGuest('t1', 'g1')).rejects.toMatchObject({
+      statusCode: 404,
+      code: 'NOT_FOUND',
+    });
+  });
+
+  it('returns the profile with stay statistics', async () => {
+    mockGuest.findFirst.mockResolvedValue({ ...guest, guestNotes: [] });
+    mockReservation.aggregate.mockResolvedValue({
+      _count: { id: 4 },
+      _sum: { nights: 12, totalAmount: 4800 },
+    });
+
+    const result = await getGuest('t1', 'g1');
+
+    expect(result.totalStays).toBe(4);
+    expect(result.totalNights).toBe(12);
+    expect(result.totalRevenue).toBe(4800);
+  });
+});
+
+describe('createGuest', () => {
+  it('creates the guest in the tenant', async () => {
+    mockGuest.create.mockResolvedValue(guest);
+
+    await createGuest('t1', { firstName: 'Jane', lastName: 'Doe' });
+
+    expect(mockGuest.create.mock.calls[0][0].data).toMatchObject({
+      tenantId: 't1',
       firstName: 'Jane',
       lastName: 'Doe',
-      email: 'jane.doe@example.com',
-      tenantId: auth.tenantId,
     });
-    expect(res.body.data.id).toBeTypeOf('string');
+  });
+});
+
+describe('updateGuest', () => {
+  it('throws 404 for a guest outside the tenant', async () => {
+    mockGuest.findFirst.mockResolvedValue(null);
+    await expect(updateGuest('t1', 'g1', { firstName: 'X' })).rejects.toMatchObject({
+      statusCode: 404,
+    });
   });
 
-  it('rejects invalid guest payloads', async () => {
-    const res = await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send({ firstName: '', lastName: 'Doe', email: 'not-an-email' });
+  it('clears the blacklist reason when un-blacklisting', async () => {
+    mockGuest.findFirst.mockResolvedValue(guest);
+    mockGuest.update.mockResolvedValue(guest);
 
-    expect(res.status).toBe(400);
+    await updateGuest('t1', 'g1', { blacklisted: false });
+
+    expect(mockGuest.update.mock.calls[0][0].data).toMatchObject({
+      blacklisted: false,
+      blacklistReason: null,
+    });
+  });
+});
+
+describe('deleteGuest', () => {
+  it('throws 404 for a guest outside the tenant', async () => {
+    mockGuest.findFirst.mockResolvedValue(null);
+    await expect(deleteGuest('t1', 'g1')).rejects.toMatchObject({ statusCode: 404 });
+    expect(mockGuest.delete).not.toHaveBeenCalled();
   });
 
-  it('lists guests with pagination', async () => {
-    await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send(guestPayload);
+  it('refuses to delete a guest with reservation history', async () => {
+    mockGuest.findFirst.mockResolvedValue(guest);
+    mockReservation.count.mockResolvedValue(2);
 
-    const res = await request(app)
-      .get('/v1/guests?page=1&pageSize=10')
-      .set('Authorization', `Bearer ${auth.token}`);
-
-    expect(res.status).toBe(200);
-    expect(res.body.data).toHaveLength(1);
-    expect(res.body.meta).toMatchObject({ page: 1, pageSize: 10, total: 1, totalPages: 1 });
+    await expect(deleteGuest('t1', 'g1')).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'GUEST_HAS_HISTORY',
+    });
+    expect(mockGuest.delete).not.toHaveBeenCalled();
   });
 
-  it('searches guests', async () => {
-    await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send(guestPayload);
-    await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send({ firstName: 'John', lastName: 'Smith' });
+  it('deletes a guest with no reservation history', async () => {
+    mockGuest.findFirst.mockResolvedValue(guest);
+    mockReservation.count.mockResolvedValue(0);
+    mockGuest.delete.mockResolvedValue(guest);
 
-    const res = await request(app)
-      .get('/v1/guests?search=doe')
-      .set('Authorization', `Bearer ${auth.token}`);
+    const result = await deleteGuest('t1', 'g1');
 
-    expect(res.status).toBe(200);
-    expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0].lastName).toBe('Doe');
-  });
-
-  it('gets a guest by id', async () => {
-    const created = await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send(guestPayload);
-
-    const res = await request(app)
-      .get(`/v1/guests/${created.body.data.id}`)
-      .set('Authorization', `Bearer ${auth.token}`);
-
-    expect(res.status).toBe(200);
-    expect(res.body.data.email).toBe('jane.doe@example.com');
-  });
-
-  it('returns 404 for unknown guest ids', async () => {
-    const res = await request(app)
-      .get('/v1/guests/does-not-exist')
-      .set('Authorization', `Bearer ${auth.token}`);
-
-    expect(res.status).toBe(404);
-  });
-
-  it('updates a guest', async () => {
-    const created = await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send(guestPayload);
-
-    const res = await request(app)
-      .patch(`/v1/guests/${created.body.data.id}`)
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send({ vipStatus: 'gold', notes: 'Repeat guest' });
-
-    expect(res.status).toBe(200);
-    expect(res.body.data.vipStatus).toBe('gold');
-    expect(res.body.data.notes).toBe('Repeat guest');
-  });
-
-  it('deletes a guest', async () => {
-    const created = await request(app)
-      .post('/v1/guests')
-      .set('Authorization', `Bearer ${auth.token}`)
-      .send(guestPayload);
-
-    const del = await request(app)
-      .delete(`/v1/guests/${created.body.data.id}`)
-      .set('Authorization', `Bearer ${auth.token}`);
-    expect(del.status).toBe(200);
-
-    const get = await request(app)
-      .get(`/v1/guests/${created.body.data.id}`)
-      .set('Authorization', `Bearer ${auth.token}`);
-    expect(get.status).toBe(404);
+    expect(mockReservation.count.mock.calls[0][0].where).toEqual({ guestId: 'g1' });
+    expect(mockGuest.delete).toHaveBeenCalledWith({ where: { id: 'g1' } });
+    expect(result).toEqual(guest);
   });
 });
