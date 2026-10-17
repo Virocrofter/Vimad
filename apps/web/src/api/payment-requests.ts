@@ -31,7 +31,7 @@ export interface PaymentRequestRow {
 
 export const paymentRequestsApi = {
   list: (params: Record<string, unknown>) =>
-    apiGet('/v1/payment-requests', { params }) as Promise<{
+    apiGet('/v1/payment-requests', params) as Promise<{
       data: PaymentRequestRow[];
       meta: { page: number; pageSize: number; total: number; totalPages: number };
     }>,

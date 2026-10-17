@@ -181,6 +181,7 @@ export default function NewReservationPage() {
         adults: Number(values.adults) || 1,
         children: Number(values.children) || 0,
         rate: values.rate ? Number(values.rate) : undefined,
+        roomId: values.roomId || undefined, // ← ADD: the room picked in the wizard
         source: values.source,
         notes: values.specialRequests?.trim() || undefined,
       });

@@ -16,7 +16,7 @@ export interface EmailLogRow {
 
 export const communicationsApi = {
   logs: (params: Record<string, unknown>) =>
-    apiGet('/v1/communications/email-logs', { params }) as Promise<{
+    apiGet('/v1/communications/email-logs', params) as Promise<{
       data: EmailLogRow[];
       meta: { page: number; pageSize: number; total: number; totalPages: number };
     }>,

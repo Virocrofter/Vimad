@@ -12,6 +12,7 @@ export interface Property {
   timezone: string;
   currency: string;
   status: string;
+  chainId?: string | null; // C1
   currentBusinessDate?: string;
   createdAt?: string;
   updatedAt?: string;

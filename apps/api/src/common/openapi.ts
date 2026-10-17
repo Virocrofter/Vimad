@@ -34,6 +34,15 @@ import * as publicModule from '../modules/public/public.routes.js';
 import * as invoicesModule from '../modules/invoices/invoices.routes.js';
 // Dashboard (registry existed but was never wired into the document)
 import * as dashboardModule from '../modules/dashboard/dashboard.routes.js';
+import * as crmModule from '../modules/crm/crm.routes.js';
+// [S&C] Sales & Catering
+import * as salesCateringModule from '../modules/sales-catering/sales-catering.routes.js';
+// [I1] Sellable room inventory
+import * as inventoryModule from '../modules/inventory/inventory.routes.js';
+// [T7] Meal plans — board-basis packages, restaurants, covers & posting log
+import * as mealsModule from '../modules/meals/meals.routes.js';
+// [SUPPORT] Guest support tickets — SLA, escalation, CSAT
+import * as ticketsModule from '../modules/tickets/tickets.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -102,6 +111,16 @@ export function generateOpenAPIDocument() {
     publicModule,
     invoicesModule,
     dashboardModule,
+    // [S&C] Sales & Catering
+    salesCateringModule,
+    // [CRM]
+    crmModule,
+    // [I1] Sellable room inventory
+    inventoryModule,
+    // [T7] Meal plans
+    mealsModule,
+    // [SUPPORT] Support tickets
+    ticketsModule,
   ];
 
   const allDefinitions: any[] = [];
@@ -157,6 +176,25 @@ export function generateOpenAPIDocument() {
       { name: 'Communications', description: 'Transactional email center (A3)' },
       { name: 'Public Booking', description: 'Unauthenticated booking engine (A4)' },
       { name: 'Invoices', description: 'SARS-compliant tax invoices & receipts (A5)' },
+      {
+        name: 'Sales & Catering',
+        description: 'Events pipeline, clients, BEOs, catering catalogs (S&C)',
+      },
+      { name: 'CRM', description: 'Guest 360, segments, follow-ups, corporate accounts' },
+      {
+        name: 'Inventory',
+        description:
+          'Sellable room inventory — availability grid, holds, restrictions, overbooking (I1)',
+      },
+      {
+        name: 'Meal Plans',
+        description:
+          'Board-basis meal packages, restaurants, covers forecast & folio auto-posting (T7)',
+      },
+      {
+        name: 'Support',
+        description: 'Guest support tickets — SLA, escalation, CSAT (staff desk + guest portal)',
+      },
     ],
   });
 }

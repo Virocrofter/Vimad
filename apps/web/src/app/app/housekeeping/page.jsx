@@ -17,6 +17,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
+import SupervisorBoard from './SupervisorBoard';
+import MinibarModal from './MinibarModal';
 import {
   Select,
   SelectContent,
@@ -63,6 +65,8 @@ import {
   Calendar,
   Timer,
   ArrowRight,
+  ShieldCheck,
+  Wine,
 } from 'lucide-react';
 
 // ─── Constants ───
@@ -465,6 +469,7 @@ export default function HousekeepingPage() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [bulkSelected, setBulkSelected] = useState([]);
+  const [minibarOpen, setMinibarOpen] = useState(false);
 
   const { data: properties } = useProperties();
   const propertyId = properties?.[0]?.id;
@@ -533,6 +538,15 @@ export default function HousekeepingPage() {
 
   if (error) return <ErrorState message="Failed to load housekeeping data" onRetry={refetch} />;
 
+  // Derive the assignee filter's display label from data we already hold —
+  // never rely on Radix's selected-item text copy (it drops async-item labels).
+  const selectedAssignee = assigneeFilter
+    ? staff?.data?.find((s) => s.id === assigneeFilter)
+    : null;
+  const assigneeFilterLabel = selectedAssignee
+    ? `${selectedAssignee.firstName} ${selectedAssignee.lastName}`
+    : 'All Staff';
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -542,6 +556,9 @@ export default function HousekeepingPage() {
           <p className="text-muted-foreground">Manage room cleaning and maintenance tasks</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setMinibarOpen(true)}>
+            <Wine className="h-4 w-4 mr-1" /> Log minibar
+          </Button>
           <Tabs value={view} onValueChange={setView}>
             <TabsList>
               <TabsTrigger value="board">
@@ -553,6 +570,9 @@ export default function HousekeepingPage() {
               <TabsTrigger value="reports">
                 <BarChart3 className="h-4 w-4 mr-1" /> Reports
               </TabsTrigger>
+              <TabsTrigger value="supervisor">
+                <ShieldCheck className="h-4 w-4 mr-1" /> Supervisor
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -561,129 +581,147 @@ export default function HousekeepingPage() {
       {/* Stats */}
       <StatsCards stats={stats?.data} />
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="inspected">Inspected</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All Priorities</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="normal">Normal</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All Types</SelectItem>
-            <SelectItem value="cleaning">Cleaning</SelectItem>
-            <SelectItem value="deep_clean">Deep Clean</SelectItem>
-            <SelectItem value="inspection">Inspection</SelectItem>
-            <SelectItem value="turndown">Turndown</SelectItem>
-            <SelectItem value="maintenance">Maintenance</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Assignee" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All Staff</SelectItem>
-            {staff?.data?.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.firstName} {s.lastName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {bulkSelected.length > 0 && (
-          <div className="flex items-center gap-2 ml-auto">
-            <span className="text-sm text-muted-foreground">{bulkSelected.length} selected</span>
-            <Select
-              onValueChange={(v) => {
-                bulkAssign(
-                  { taskIds: bulkSelected, assigneeId: v },
-                  {
-                    onSuccess: () => {
-                      toast({ title: 'Bulk assigned' });
-                      setBulkSelected([]);
-                    },
-                  }
-                );
-              }}
-            >
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Assign to…" />
-              </SelectTrigger>
-              <SelectContent>
-                {staff?.data?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.firstName} {s.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="ghost" size="sm" onClick={() => setBulkSelected([])}>
-              Clear
-            </Button>
-          </div>
-        )}
-      </div>
+      {/* Filters — hidden on supervisor tab (board has its own) */}
+      {view !== 'supervisor' && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="inspected">Inspected</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Priorities</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="cleaning">Cleaning</SelectItem>
+              <SelectItem value="deep_clean">Deep Clean</SelectItem>
+              <SelectItem value="inspection">Inspection</SelectItem>
+              <SelectItem value="turndown">Turndown</SelectItem>
+              <SelectItem value="maintenance">Maintenance</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={assigneeFilter || 'all'}
+            onValueChange={(v) => setAssigneeFilter(v === 'all' ? '' : v)}
+          >
+            <SelectTrigger className="w-40">
+              <span className="truncate">{assigneeFilterLabel}</span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Staff</SelectItem>
+              {staff?.data?.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.firstName} {s.lastName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {bulkSelected.length > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="text-sm text-muted-foreground">{bulkSelected.length} selected</span>
+              <Select
+                onValueChange={(v) => {
+                  bulkAssign(
+                    { taskIds: bulkSelected, assigneeId: v },
+                    {
+                      onSuccess: () => {
+                        toast({ title: 'Bulk assigned' });
+                        setBulkSelected([]);
+                      },
+                    }
+                  );
+                }}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Assign to…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {staff?.data?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.firstName} {s.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="sm" onClick={() => setBulkSelected([])}>
+                Clear
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Content */}
       {isLoading ? (
         <LoadingSkeleton className="h-96" count={3} />
-      ) : tasks.length === 0 ? (
-        <EmptyState
-          icon={ClipboardList}
-          title="No tasks found"
-          description="Try adjusting your filters or create a new task."
-        />
       ) : (
         <Tabs value={view} onValueChange={setView}>
           <TabsContent value="board" className="mt-4">
-            <KanbanBoard
-              tasks={tasks}
-              onStart={handleStart}
-              onComplete={handleComplete}
-              onInspect={handleInspect}
-              onSkip={(id) => skipTask({ id, reason: 'Skipped from board' })}
-              onAssign={handleAssign}
-              staff={staff?.data}
-            />
-          </TabsContent>
-          <TabsContent value="list" className="mt-4">
-            <div className="rounded-md border">
-              <TaskListView
+            {tasks.length === 0 ? (
+              <EmptyState
+                icon={ClipboardList}
+                title="No tasks found"
+                description="Try adjusting your filters or create a new task."
+              />
+            ) : (
+              <KanbanBoard
                 tasks={tasks}
                 onStart={handleStart}
                 onComplete={handleComplete}
                 onInspect={handleInspect}
+                onSkip={(id) => skipTask({ id, reason: 'Skipped from board' })}
                 onAssign={handleAssign}
                 staff={staff?.data}
               />
-            </div>
+            )}
+          </TabsContent>
+          <TabsContent value="list" className="mt-4">
+            {tasks.length === 0 ? (
+              <EmptyState
+                icon={ClipboardList}
+                title="No tasks found"
+                description="Try adjusting your filters or create a new task."
+              />
+            ) : (
+              <div className="rounded-md border">
+                <TaskListView
+                  tasks={tasks}
+                  onStart={handleStart}
+                  onComplete={handleComplete}
+                  onInspect={handleInspect}
+                  onAssign={handleAssign}
+                  staff={staff?.data}
+                />
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="reports" className="mt-4">
             <ReportsView stats={stats?.data} />
+          </TabsContent>
+          <TabsContent value="supervisor" className="mt-4">
+            <SupervisorBoard />
           </TabsContent>
         </Tabs>
       )}
@@ -749,6 +787,9 @@ export default function HousekeepingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* T2: Minibar logging */}
+      <MinibarModal open={minibarOpen} onClose={() => setMinibarOpen(false)} />
     </div>
   );
 }

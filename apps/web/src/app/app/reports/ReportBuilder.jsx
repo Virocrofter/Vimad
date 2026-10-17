@@ -1,5 +1,5 @@
-/* src/app/admin/reports/ReportBuilder.jsx */
-import { useState, useMemo } from 'react';
+/* src/app/app/reports/ReportBuilder.jsx — fed by real reservations */
+import { useState, useMemo, useEffect } from 'react';
 import {
   Filter,
   List,
@@ -26,11 +26,21 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { builderFields, builderMockData } from './data';
+import { apiClient } from '../../../api/client';
 import { ThemeTooltip } from './components';
 import { useChartTheme } from './useChartTheme';
 
+const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '');
+
+/* reportsApi adapter — only place /admin/reports shapes live */
+const reportsApi = {
+  saveTemplate: (body) => apiClient.post('/admin/reports/templates', body).then((r) => r.data),
+};
+
 export default function ReportBuilder() {
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [selectedFields, setSelectedFields] = useState(
     new Set(['guestName', 'arrival', 'departure', 'roomType', 'status', 'rate'])
   );
@@ -44,19 +54,78 @@ export default function ReportBuilder() {
   const [groupBy, setGroupBy] = useState('none');
   const [chartType, setChartType] = useState('table');
   const [reportName, setReportName] = useState('');
+  const [saveState, setSaveState] = useState(null); // 'saving' | 'saved' | error string
   const colors = useChartTheme();
 
-  const toggleField = (key) => {
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const r = await apiClient.get('/v1/reservations', { params: { pageSize: 500 } });
+        const rows = (r.data?.data ?? []).map((res) => ({
+          id: res.id,
+          confirmation: res.confirmationNumber,
+          guestName: res.guest ? `${res.guest.firstName} ${res.guest.lastName}` : '—',
+          arrival: fmtDate(res.arrivalDate),
+          departure: fmtDate(res.departureDate),
+          roomType: res.roomType?.name ?? res.stays?.[0]?.room?.roomType?.name ?? '—',
+          status: res.status,
+          source: res.source,
+          rate: res.nights ? Math.round(Number(res.totalAmount) / res.nights) : 0,
+          roomRevenue: Number(res.totalAmount ?? 0),
+          adults: res.adults,
+          children: res.children,
+          loyaltyTier: res.guest?.vipStatus ?? '—',
+        }));
+        setReservations(rows);
+      } catch (err) {
+        setLoadError(err?.response?.data?.error?.message || 'Failed to load reservations');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const toggleField = (key) =>
     setSelectedFields((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
       return next;
     });
-  };
+
+  const builderFields = [
+    {
+      category: 'Reservation',
+      fields: [
+        { key: 'confirmation', label: 'Confirmation #' },
+        { key: 'guestName', label: 'Guest' },
+        { key: 'arrival', label: 'Arrival' },
+        { key: 'departure', label: 'Departure' },
+        { key: 'status', label: 'Status' },
+        { key: 'source', label: 'Source' },
+      ],
+    },
+    {
+      category: 'Revenue',
+      fields: [
+        { key: 'rate', label: 'Avg nightly rate' },
+        { key: 'roomRevenue', label: 'Room revenue' },
+      ],
+    },
+    {
+      category: 'Party',
+      fields: [
+        { key: 'adults', label: 'Adults' },
+        { key: 'children', label: 'Children' },
+        { key: 'roomType', label: 'Room type' },
+        { key: 'loyaltyTier', label: 'Loyalty tier' },
+      ],
+    },
+  ];
 
   const filteredData = useMemo(() => {
-    return builderMockData.filter((row) => {
+    return reservations.filter((row) => {
       if (filters.status !== 'all' && row.status !== filters.status) return false;
       if (filters.roomType !== 'all' && row.roomType !== filters.roomType) return false;
       if (filters.source !== 'all' && row.source !== filters.source) return false;
@@ -64,7 +133,7 @@ export default function ReportBuilder() {
       if (filters.to && row.departure > filters.to) return false;
       return true;
     });
-  }, [filters]);
+  }, [reservations, filters]);
 
   const groupedData = useMemo(() => {
     if (groupBy === 'none') return filteredData;
@@ -78,10 +147,16 @@ export default function ReportBuilder() {
     return Object.values(groups);
   }, [filteredData, groupBy]);
 
-  const activeFields = useMemo(() => {
-    const all = builderFields.flatMap((c) => c.fields);
-    return all.filter((f) => selectedFields.has(f.key));
-  }, [selectedFields]);
+  const activeFields = useMemo(
+    () => builderFields.flatMap((c) => c.fields).filter((f) => selectedFields.has(f.key)),
+    [selectedFields]
+  );
+
+  const roomTypes = useMemo(
+    () => [...new Set(reservations.map((r) => r.roomType))],
+    [reservations]
+  );
+  const sources = useMemo(() => [...new Set(reservations.map((r) => r.source))], [reservations]);
 
   const exportCsv = () => {
     const dataToExport = groupBy === 'none' ? filteredData : groupedData;
@@ -105,11 +180,27 @@ export default function ReportBuilder() {
     URL.revokeObjectURL(url);
   };
 
+  const saveReport = async () => {
+    setSaveState('saving');
+    try {
+      await reportsApi.saveTemplate({
+        name: reportName,
+        description: `Custom builder report — fields: ${activeFields.map((f) => f.key).join(', ')}`,
+        category: 'custom',
+        config: { fields: [...selectedFields], filters, groupBy },
+      });
+      setSaveState('saved');
+    } catch (err) {
+      setSaveState(
+        err?.response?.data?.error?.message || 'Save failed — check /admin/reports shape (Gate 4)'
+      );
+    }
+  };
+
   const previewChartData = groupedData;
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      {/* Sidebar */}
       <div className="lg:col-span-3 space-y-6">
         <div className="rounded-xl border border-border bg-surface p-4">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
@@ -143,9 +234,18 @@ export default function ReportBuilder() {
         </div>
       </div>
 
-      {/* Center */}
       <div className="lg:col-span-6 space-y-6">
-        {/* Filters */}
+        {loadError && (
+          <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 text-sm text-danger">
+            {loadError}
+          </div>
+        )}
+        {loading && (
+          <div className="rounded-xl border border-border bg-surface p-8 text-center text-text-muted">
+            Loading reservations…
+          </div>
+        )}
+
         <div className="rounded-xl border border-border bg-surface p-4">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="h-4 w-4 text-secondary" />
@@ -162,10 +262,11 @@ export default function ReportBuilder() {
                 className="mt-1 h-9 w-full rounded-md border border-border bg-background px-2 text-xs text-text-primary"
               >
                 <option value="all">All</option>
-                <option value="checked_in">Checked In</option>
-                <option value="checked_out">Checked Out</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="no_show">No-Show</option>
+                {['confirmed', 'checked_in', 'checked_out', 'cancelled', 'no_show'].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -176,10 +277,11 @@ export default function ReportBuilder() {
                 className="mt-1 h-9 w-full rounded-md border border-border bg-background px-2 text-xs text-text-primary"
               >
                 <option value="all">All</option>
-                <option value="Deluxe King">Deluxe King</option>
-                <option value="Standard Twin">Standard Twin</option>
-                <option value="Suite">Suite</option>
-                <option value="Standard Queen">Standard Queen</option>
+                {roomTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -190,10 +292,11 @@ export default function ReportBuilder() {
                 className="mt-1 h-9 w-full rounded-md border border-border bg-background px-2 text-xs text-text-primary"
               >
                 <option value="all">All</option>
-                <option value="Direct">Direct</option>
-                <option value="Booking.com">Booking.com</option>
-                <option value="Expedia">Expedia</option>
-                <option value="Walk-in">Walk-in</option>
+                {sources.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -213,7 +316,6 @@ export default function ReportBuilder() {
           </div>
         </div>
 
-        {/* Preview */}
         <div className="rounded-xl border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
@@ -258,8 +360,8 @@ export default function ReportBuilder() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredData.map((row, i) => (
-                    <tr key={i} className="hover:bg-background/50">
+                  {filteredData.map((row) => (
+                    <tr key={row.id} className="hover:bg-background/50">
                       {activeFields.map((f) => (
                         <td key={f.key} className="px-3 py-2 text-text-primary whitespace-nowrap">
                           {row[f.key]}
@@ -267,7 +369,7 @@ export default function ReportBuilder() {
                       ))}
                     </tr>
                   ))}
-                  {filteredData.length === 0 && (
+                  {filteredData.length === 0 && !loading && (
                     <tr>
                       <td
                         colSpan={activeFields.length}
@@ -333,21 +435,32 @@ export default function ReportBuilder() {
         </div>
       </div>
 
-      {/* Right Sidebar */}
       <div className="lg:col-span-3 space-y-4">
         <div className="rounded-xl border border-border bg-surface p-4">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
             Save Report
           </h3>
           <Input
-            placeholder="Report name..."
+            placeholder="Report name…"
             value={reportName}
             onChange={(e) => setReportName(e.target.value)}
             className="mb-3"
           />
-          <Button className="w-full" size="sm" disabled={!reportName || activeFields.length === 0}>
-            <Save className="mr-1.5 h-4 w-4" /> Save to Library
+          <Button
+            className="w-full"
+            size="sm"
+            disabled={!reportName || activeFields.length === 0 || saveState === 'saving'}
+            onClick={saveReport}
+          >
+            <Save className="mr-1.5 h-4 w-4" />{' '}
+            {saveState === 'saving' ? 'Saving…' : 'Save to Library'}
           </Button>
+          {saveState === 'saved' && (
+            <p className="mt-2 text-xs text-accent">Saved to report templates.</p>
+          )}
+          {saveState && saveState !== 'saving' && saveState !== 'saved' && (
+            <p className="mt-2 text-xs text-danger">{saveState}</p>
+          )}
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-4">
@@ -380,7 +493,7 @@ export default function ReportBuilder() {
             <div className="flex justify-between text-text-secondary">
               <span>Revenue</span>
               <span className="font-mono font-medium text-text-primary">
-                ${filteredData.reduce((s, r) => s + (r.roomRevenue || 0), 0).toLocaleString()}
+                R{filteredData.reduce((s, r) => s + (r.roomRevenue || 0), 0).toLocaleString()}
               </span>
             </div>
           </div>

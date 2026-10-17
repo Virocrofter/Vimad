@@ -1,5 +1,5 @@
-/* src/app/admin/reports/ReportLibrary.jsx */
-import { useState, useMemo } from 'react';
+/* src/app/app/reports/ReportLibrary.jsx — real data for core reports, sample fallback preserved */
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Search,
   Clock,
@@ -8,26 +8,97 @@ import {
   Eye,
   BarChart3,
   ArrowLeft,
-  BedDouble,
-  DollarSign,
-  Users,
-  TrendingUp,
-  FileText,
+  Download,
+  Database,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
+import { apiClient } from '../../../api/client';
 import { libraryReports, generateReportData, reportTableColumns } from './data';
 import { ExportToolbar, ReportDataTable, ReportChartRenderer } from './components';
+import LiveReportChart from './LiveReportChart';
 import { useChartTheme } from './useChartTheme';
 
-/* ─── Icon Map (string → component) ─── */
-const iconMap = {
-  BedDouble,
-  DollarSign,
-  Users,
-  TrendingUp,
-  FileText,
-};
+const iconMap = {/* unchanged icon map if your data.js uses string icons */};
+
+const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '');
+
+/* Real dataset fetchers — endpoints confirmed mounted in apps/api/src/index.ts */
+async function fetchRealDataset(report, from, to) {
+  const params = { pageSize: 500 };
+  if (from) params.startDate = from;
+  if (to) params.endDate = to;
+  const key = `${report.category || ''} ${report.title}`.toLowerCase();
+
+  if (key.includes('revenue') || key.includes('financial')) {
+    const r = await apiClient.get('/v1/reservations', { params }).catch(() => null);
+    const rows = (r?.data?.data ?? []).map((res) => ({
+      confirmation: res.confirmationNumber,
+      guest: res.guest ? `${res.guest.firstName} ${res.guest.lastName}` : '—',
+      arrival: fmtDate(res.arrivalDate),
+      departure: fmtDate(res.departureDate),
+      nights: res.nights,
+      total: Number(res.totalAmount ?? 0),
+      balance: Number(res.balance ?? 0),
+      status: res.status,
+    }));
+    return {
+      rows,
+      columns: [
+        { key: 'confirmation', label: 'Confirmation' },
+        { key: 'guest', label: 'Guest' },
+        { key: 'arrival', label: 'Arrival' },
+        { key: 'departure', label: 'Departure' },
+        { key: 'nights', label: 'Nights' },
+        { key: 'total', label: 'Total' },
+        { key: 'balance', label: 'Balance' },
+        { key: 'status', label: 'Status' },
+      ],
+      real: true,
+    };
+  }
+  if (key.includes('occupancy') || key.includes('room')) {
+    const r = await apiClient.get('/v1/rooms', { params: { pageSize: 500 } }).catch(() => null);
+    const rows = (r?.data?.data ?? []).map((room) => ({
+      room: room.number,
+      type: room.roomType?.name ?? room.roomTypeId ?? '—',
+      status: room.status,
+      housekeeping: room.housekeepingStatus,
+    }));
+    return {
+      rows,
+      columns: [
+        { key: 'room', label: 'Room' },
+        { key: 'type', label: 'Type' },
+        { key: 'status', label: 'Status' },
+        { key: 'housekeeping', label: 'Housekeeping' },
+      ],
+      real: true,
+    };
+  }
+  if (key.includes('guest') || key.includes('crm') || key.includes('loyalty')) {
+    const r = await apiClient.get('/v1/guests', { params }).catch(() => null);
+    const rows = (r?.data?.data ?? []).map((g) => ({
+      name: `${g.firstName} ${g.lastName}`,
+      email: g.email ?? '',
+      phone: g.phone ?? '',
+      points: g.loyaltyPoints ?? 0,
+      vip: g.vipStatus ?? '',
+    }));
+    return {
+      rows,
+      columns: [
+        { key: 'name', label: 'Guest' },
+        { key: 'email', label: 'Email' },
+        { key: 'phone', label: 'Phone' },
+        { key: 'points', label: 'Points' },
+        { key: 'vip', label: 'VIP' },
+      ],
+      real: true,
+    };
+  }
+  return null; // → sample fallback below
+}
 
 export default function ReportLibrary({ onOpenBuilder }) {
   const [query, setQuery] = useState('');
@@ -36,7 +107,11 @@ export default function ReportLibrary({ onOpenBuilder }) {
   const [favorites, setFavorites] = useState(
     () => new Set(libraryReports.filter((r) => r.favorite).map((r) => r.id))
   );
-  const [dateRange, setDateRange] = useState({ from: '2026-08-01', to: '2026-08-14' });
+  const today = new Date();
+  const twoWeeksAgo = new Date(today.getTime() - 14 * 86400000);
+  const [dateRange, setDateRange] = useState({ from: fmtDate(twoWeeksAgo), to: fmtDate(today) });
+  const [dataset, setDataset] = useState(null); // { rows, columns, real }
+  const [loadingData, setLoadingData] = useState(false);
   const colors = useChartTheme();
 
   const categories = ['all', ...Array.from(new Set(libraryReports.map((r) => r.category)))];
@@ -51,21 +126,39 @@ export default function ReportLibrary({ onOpenBuilder }) {
     });
   }, [query, categoryFilter]);
 
-  const toggleFavorite = (id) => {
+  const toggleFavorite = (id) =>
     setFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+
+  const runReport = useCallback(async (report, from, to) => {
+    setLoadingData(true);
+    try {
+      const real = await fetchRealDataset(report, from, to);
+      if (real) {
+        setDataset(real);
+      } else {
+        setDataset({
+          rows: generateReportData(report.id),
+          columns: reportTableColumns[report.id] || [],
+          real: false,
+        });
+      }
+    } finally {
+      setLoadingData(false);
+    }
+  }, []);
+
+  const openReport = (report) => {
+    setSelectedReport(report);
+    runReport(report, dateRange.from, dateRange.to);
   };
 
-  const reportData = useMemo(() => {
-    if (!selectedReport) return [];
-    return generateReportData(selectedReport.id);
-  }, [selectedReport]);
-
-  const columns = selectedReport ? reportTableColumns[selectedReport.id] || [] : [];
+  const reportData = dataset?.rows ?? [];
+  const columns = dataset?.columns ?? [];
 
   const exportCsv = () => {
     if (!reportData.length) return;
@@ -85,14 +178,13 @@ export default function ReportLibrary({ onOpenBuilder }) {
 
   return (
     <div className="space-y-6">
-      {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="relative sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
-              placeholder="Search reports..."
+              placeholder="Search reports…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -115,10 +207,9 @@ export default function ReportLibrary({ onOpenBuilder }) {
         </Button>
       </div>
 
-      {/* Report Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filtered.map((report) => {
-          const Icon = iconMap[report.icon] || BarChart3;
+          const Icon = BarChart3;
           const isFav = favorites.has(report.id);
           return (
             <div
@@ -156,11 +247,11 @@ export default function ReportLibrary({ onOpenBuilder }) {
                   variant="outline"
                   size="sm"
                   className="flex-1"
-                  onClick={() => setSelectedReport(report)}
+                  onClick={() => openReport(report)}
                 >
                   <Eye className="mr-1.5 h-3.5 w-3.5" /> View
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
+                <Button variant="ghost" size="sm" onClick={() => openReport(report)}>
                   <BarChart3 className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -175,7 +266,6 @@ export default function ReportLibrary({ onOpenBuilder }) {
         )}
       </div>
 
-      {/* Report Detail Drawer */}
       {selectedReport && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div
@@ -183,7 +273,6 @@ export default function ReportLibrary({ onOpenBuilder }) {
             onClick={() => setSelectedReport(null)}
           />
           <div className="relative w-full max-w-4xl bg-background shadow-2xl overflow-auto animate-in slide-in-from-right duration-300">
-            {/* Drawer Header */}
             <div className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-md px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -194,7 +283,19 @@ export default function ReportLibrary({ onOpenBuilder }) {
                     <ArrowLeft className="h-5 w-5" />
                   </button>
                   <div>
-                    <h2 className="text-lg font-bold text-text-primary">{selectedReport.title}</h2>
+                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                      {selectedReport.title}
+                      {dataset && !dataset.real && (
+                        <span className="rounded-full bg-warning/10 border border-warning/20 px-2 py-0.5 text-[10px] font-semibold text-warning">
+                          Sample data
+                        </span>
+                      )}
+                      {dataset?.real && (
+                        <span className="rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] font-semibold text-accent flex items-center gap-1">
+                          <Database className="h-3 w-3" /> Live
+                        </span>
+                      )}
+                    </h2>
                     <p className="text-xs text-text-muted">{selectedReport.description}</p>
                   </div>
                 </div>
@@ -204,8 +305,6 @@ export default function ReportLibrary({ onOpenBuilder }) {
                   onPdf={() => window.print()}
                 />
               </div>
-
-              {/* Date Filter */}
               <div className="mt-3 flex items-center gap-2">
                 <input
                   type="date"
@@ -220,26 +319,53 @@ export default function ReportLibrary({ onOpenBuilder }) {
                   onChange={(e) => setDateRange((p) => ({ ...p, to: e.target.value }))}
                   className="h-8 rounded-md border border-border bg-background px-2 text-xs text-text-primary"
                 />
-                <Button variant="outline" size="sm" className="ml-2">
-                  <Clock className="mr-1.5 h-3 w-3" /> Run
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-2"
+                  onClick={() => runReport(selectedReport, dateRange.from, dateRange.to)}
+                  disabled={loadingData}
+                >
+                  <Clock className="mr-1.5 h-3 w-3" /> {loadingData ? 'Running…' : 'Run'}
                 </Button>
               </div>
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Chart */}
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <ReportChartRenderer report={selectedReport} data={reportData} colors={colors} />
-              </div>
-
-              {/* Data Table */}
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-text-primary">Report Data</h3>
-                  <span className="text-xs text-text-muted">{reportData.length} rows</span>
+              {loadingData ? (
+                <div className="rounded-xl border border-border bg-surface p-12 text-center text-text-muted">
+                  Loading report data…
                 </div>
-                <ReportDataTable columns={columns} data={reportData} reportId={selectedReport.id} />
-              </div>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-border bg-surface p-4">
+                    <div className="rounded-xl border border-border bg-surface p-4">
+                      <LiveReportChart data={reportData} columns={columns} colors={colors} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-text-primary">Report Data</h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-text-muted">{reportData.length} rows</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportCsv}
+                          disabled={!reportData.length}
+                        >
+                          <Download className="mr-1.5 h-3.5 w-3.5" /> CSV
+                        </Button>
+                      </div>
+                    </div>
+                    <ReportDataTable
+                      columns={columns}
+                      data={reportData}
+                      reportId={selectedReport.id}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

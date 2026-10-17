@@ -297,6 +297,31 @@ function renderTemplate(
          invoice will be refunded to the original card within 5–7 business days.</p>
     `
       ),
+    'group-confirmation': (p) => `
+      <div style="font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1a1a2e;">
+        <h1 style="font-size:22px;">Group block confirmed</h1>
+        <p>Hi ${p.contactName},</p>
+        <p>Your group block <strong>${p.groupCode}</strong> (${p.groupName}) at
+           <strong>${p.propertyName}</strong> is confirmed.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+          <tr><td style="padding:8px 0;color:#888;">Arrival</td>
+              <td style="padding:8px 0;text-align:right;font-weight:600;">${p.arrival}</td></tr>
+          <tr><td style="padding:8px 0;color:#888;">Departure</td>
+              <td style="padding:8px 0;text-align:right;font-weight:600;">${p.departure}</td></tr>
+          <tr><td style="padding:8px 0;color:#888;">Room cut-off</td>
+              <td style="padding:8px 0;text-align:right;font-weight:600;">${p.cutOff}</td></tr>
+          <tr><td style="padding:8px 0;color:#888;">Block type</td>
+              <td style="padding:8px 0;text-align:right;font-weight:600;">${p.blockType}</td></tr>
+        </table>
+        <p style="white-space:pre-line;background:#f8f7fc;border-radius:8px;padding:14px 18px;">${p.blockLines}</p>
+        <p style="font-size:13px;color:#555;">Rooms not picked up by the cut-off date may be
+           released back to general inventory per the block agreement. To add guests to the
+           rooming list, reply to this email or contact the property directly.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:28px 0;" />
+        <p style="font-size:12px;color:#888;">Sent by ${env.EMAIL_FROM ?? 'your property management system'}.
+           Please do not reply to this automated message.</p>
+      </div>
+    `,
     maintenance: (p) => `
       <h1>Scheduled Maintenance</h1>
       <p><strong>${p.maintenanceTitle}</strong></p>

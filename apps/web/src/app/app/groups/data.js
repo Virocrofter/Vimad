@@ -1,128 +1,4 @@
-/* src/app/app/groups/data.js */
-
-/* ─── Mock Data ─── */
-export const initialGroups = [
-  {
-    id: 'GRP-1001',
-    name: 'Smith Wedding',
-    company: 'Smith Family Events',
-    contact: 'Jane Smith',
-    email: 'jane@smithwedding.com',
-    phone: '+1 555-0201',
-    arrival: '2026-08-20',
-    departure: '2026-08-22',
-    status: 'definite',
-    blockType: 'courtesy',
-    roomsBlocked: 12,
-    roomsPickedUp: 8,
-    rate: 149,
-    cutOffDate: '2026-08-13',
-    eventSpace: 'Grand Ballroom',
-    notes: 'Welcome bags at check-in. Late checkout approved for bridal suite.',
-    color: 'bg-secondary/20 border-secondary/30',
-    textColor: 'text-secondary',
-  },
-  {
-    id: 'GRP-1002',
-    name: 'TechConf 2026',
-    company: 'DevSummit Inc.',
-    contact: 'Michael Chen',
-    email: 'm.chen@devsummit.io',
-    phone: '+1 555-0202',
-    arrival: '2026-09-15',
-    departure: '2026-09-18',
-    status: 'tentative',
-    blockType: 'negotiated',
-    roomsBlocked: 45,
-    roomsPickedUp: 12,
-    rate: 189,
-    cutOffDate: '2026-09-01',
-    eventSpace: 'Conference Center A + B',
-    notes: 'Requires AV setup in all rooms. Breakfast included.',
-    color: 'bg-accent/20 border-accent/30',
-    textColor: 'text-accent',
-  },
-  {
-    id: 'GRP-1003',
-    name: 'Johnson Family Reunion',
-    company: null,
-    contact: 'Robert Johnson',
-    email: 'r.johnson@email.com',
-    phone: '+1 555-0203',
-    arrival: '2026-08-25',
-    departure: '2026-08-28',
-    status: 'definite',
-    blockType: 'courtesy',
-    roomsBlocked: 8,
-    roomsPickedUp: 8,
-    rate: 135,
-    cutOffDate: '2026-08-18',
-    eventSpace: null,
-    notes: 'Connecting rooms preferred. Kids welcome amenity.',
-    color: 'bg-info/20 border-info/30',
-    textColor: 'text-info',
-  },
-  {
-    id: 'GRP-1004',
-    name: 'Acme Corp Q3 Meeting',
-    company: 'Acme Corporation',
-    contact: 'Sarah Williams',
-    email: 's.williams@acme.com',
-    phone: '+1 555-0204',
-    arrival: '2026-10-05',
-    departure: '2026-10-07',
-    status: 'prospect',
-    blockType: 'negotiated',
-    roomsBlocked: 25,
-    roomsPickedUp: 0,
-    rate: 165,
-    cutOffDate: '2026-09-20',
-    eventSpace: 'Boardroom + Breakout 1',
-    notes: 'Waiting on contract signature. Comp room for organizer.',
-    color: 'bg-warning/20 border-warning/30',
-    textColor: 'text-warning',
-  },
-  {
-    id: 'GRP-1005',
-    name: 'Regional Sales Kickoff',
-    company: 'Nexus Pharma',
-    contact: 'David Park',
-    email: 'd.park@nexuspharma.com',
-    phone: '+1 555-0205',
-    arrival: '2026-11-10',
-    departure: '2026-11-14',
-    status: 'definite',
-    blockType: 'contract',
-    roomsBlocked: 60,
-    roomsPickedUp: 45,
-    rate: 205,
-    cutOffDate: '2026-10-27',
-    eventSpace: 'Grand Ballroom + Terrace',
-    notes: 'Master billing. VIP arrivals on 11/10. Ground transportation arranged.',
-    color: 'bg-secondary/20 border-secondary/30',
-    textColor: 'text-secondary',
-  },
-  {
-    id: 'GRP-1006',
-    name: 'Youth Soccer Tournament',
-    company: 'State Youth Soccer League',
-    contact: 'Coach Martinez',
-    email: 'coach.m@sysl.org',
-    phone: '+1 555-0206',
-    arrival: '2026-08-14',
-    departure: '2026-08-16',
-    status: 'cancelled',
-    blockType: 'courtesy',
-    roomsBlocked: 20,
-    roomsPickedUp: 0,
-    rate: 119,
-    cutOffDate: '2026-08-07',
-    eventSpace: null,
-    notes: 'Cancelled due to venue change. Release all rooms.',
-    color: 'bg-danger/10 border-danger/20',
-    textColor: 'text-danger',
-  },
-];
+/* src/app/app/groups/data.js — metadata only (G1: all data now from the API) */
 
 export const roomingListTemplate = [
   [
@@ -141,8 +17,8 @@ export const roomingListTemplate = [
     'john@email.com',
     '+15550101',
     'Deluxe King',
-    '2026-08-20',
-    '2026-08-22',
+    '2026-11-20',
+    '2026-11-22',
     'High floor',
   ],
   [
@@ -151,46 +27,12 @@ export const roomingListTemplate = [
     'jane@email.com',
     '+15550102',
     'Deluxe King',
-    '2026-08-20',
-    '2026-08-22',
+    '2026-11-20',
+    '2026-11-22',
     'Adjoining to John',
   ],
 ];
 
-export const floorPlan = [
-  {
-    floor: 1,
-    rooms: [
-      { id: '101', type: 'Standard Twin', status: 'available' },
-      { id: '102', type: 'Standard Twin', status: 'occupied' },
-      { id: '103', type: 'Standard Queen', status: 'available' },
-      { id: '104', type: 'Deluxe King', status: 'available' },
-      { id: '105', type: 'Suite', status: 'available' },
-    ],
-  },
-  {
-    floor: 2,
-    rooms: [
-      { id: '201', type: 'Deluxe King', status: 'available' },
-      { id: '202', type: 'Deluxe King', status: 'available' },
-      { id: '203', type: 'Suite', status: 'available' },
-      { id: '204', type: 'Deluxe King', status: 'occupied' },
-      { id: '205', type: 'Standard Queen', status: 'available' },
-    ],
-  },
-  {
-    floor: 3,
-    rooms: [
-      { id: '301', type: 'Suite', status: 'available' },
-      { id: '302', type: 'Deluxe King', status: 'occupied' },
-      { id: '303', type: 'Standard Twin', status: 'available' },
-      { id: '304', type: 'Deluxe Queen', status: 'available' },
-      { id: '305', type: 'Suite', status: 'available' },
-    ],
-  },
-];
-
-/* ─── Metadata ─── */
 export const statusMeta = {
   definite: { label: 'Definite', class: 'bg-accent/10 text-accent border-accent/20' },
   tentative: { label: 'Tentative', class: 'bg-warning/10 text-warning border-warning/20' },
@@ -205,9 +47,19 @@ export const blockTypeMeta = {
   contract: { label: 'Contract', class: 'bg-accent/10 text-accent border-accent/20' },
 };
 
-/* ─── Helpers ─── */
+export const groupColor = (blockType) =>
+  ({
+    courtesy: { color: 'bg-secondary/20 border-secondary/30', textColor: 'text-secondary' },
+    negotiated: { color: 'bg-info/20 border-info/30', textColor: 'text-info' },
+    contract: { color: 'bg-accent/20 border-accent/30', textColor: 'text-accent' },
+  })[blockType] ?? { color: 'bg-secondary/20 border-secondary/30', textColor: 'text-secondary' };
+
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ZAR' }).format(amount);
+  return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(amount ?? 0);
+}
+
+export function fmtDate(d) {
+  return d ? String(d).slice(0, 10) : '—';
 }
 
 export function downloadTemplate() {
@@ -219,4 +71,53 @@ export function downloadTemplate() {
   a.download = 'rooming-list-template.csv';
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// Minimal CSV parser for the rooming-list import (handles quoted commas).
+export function parseRoomingCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"' && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (c === '"') inQuotes = false;
+      else cell += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell);
+      cell = '';
+      if (row.some((v) => v.trim() !== '')) rows.push(row);
+      row = [];
+    } else cell += c;
+  }
+  row.push(cell);
+  if (row.some((v) => v.trim() !== '')) rows.push(row);
+  if (rows.length < 2) return [];
+  const headers = rows[0].map((h) => h.trim().toLowerCase());
+  const pick = (r, ...names) => {
+    for (const n of names) {
+      const i = headers.indexOf(n);
+      if (i >= 0 && r[i]) return r[i].trim();
+    }
+    return undefined;
+  };
+  return rows.slice(1).map((r) => ({
+    firstName: pick(r, 'first name', 'firstname') || '',
+    lastName: pick(r, 'last name', 'lastname') || '',
+    email: pick(r, 'email'),
+    phone: pick(r, 'phone'),
+    roomTypeName: pick(r, 'room type', 'roomtype'),
+    arrivalDate: pick(r, 'arrival', 'arrivaldate'),
+    departureDate: pick(r, 'departure', 'departuredate'),
+    notes: pick(r, 'special requests', 'requests', 'notes'),
+  }));
 }

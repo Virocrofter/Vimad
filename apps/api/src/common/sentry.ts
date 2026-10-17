@@ -40,7 +40,7 @@ export const sentryErrorHandler: ErrorRequestHandler = (err, req, _res, next) =>
       });
       const user = (req as ReqWithUser).user;
       if (user?.id) scope.setUser({ id: user.id });
-      if (req.tenantId) scope.setTag('tenantId', req.tenantId);
+      if (req.auth?.tenantId) scope.setTag('tenantId', req.auth.tenantId);
       Sentry.captureException(err);
     });
   }

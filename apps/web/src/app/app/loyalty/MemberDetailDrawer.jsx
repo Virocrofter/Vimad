@@ -18,7 +18,7 @@ import {
   Crown,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { tierMeta, benefitIcons } from './data';
+import { tierMeta, benefitIcons } from './tierMeta';
 import { TierBadge, TierProgressBar } from './components';
 
 const iconComponents = {
@@ -42,7 +42,9 @@ export function MemberDetailDrawer({ member, transactions, onClose }) {
   const nextTierReq = nextTier ? nextTier[1].req : member.points;
   const progress = Math.min(100, (member.points / nextTierReq) * 100);
 
-  const memberTxns = transactions.filter((t) => t.memberId === member.id);
+  const memberTransactions = (member.transactions ?? transactions ?? []).filter(
+    (t) => (t.guestId ?? t.memberId) === member.id
+  );
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -192,10 +194,12 @@ export function MemberDetailDrawer({ member, transactions, onClose }) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-text-primary">Transaction History</h3>
-                <span className="text-xs text-text-muted">{memberTxns.length} transactions</span>
+                <span className="text-xs text-text-muted">
+                  {memberTransactions.length} transactions
+                </span>
               </div>
               <div className="space-y-3">
-                {memberTxns.map((tx) => (
+                {memberTransactions.map((tx) => (
                   <div
                     key={tx.id}
                     className="flex items-center justify-between rounded-xl border border-border bg-surface p-4"
@@ -237,7 +241,7 @@ export function MemberDetailDrawer({ member, transactions, onClose }) {
                     </span>
                   </div>
                 ))}
-                {memberTxns.length === 0 && (
+                {memberTransactions.length === 0 && (
                   <div className="text-center py-8 text-text-muted text-sm">
                     No transactions yet.
                   </div>

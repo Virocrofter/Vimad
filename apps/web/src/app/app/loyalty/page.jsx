@@ -1,545 +1,622 @@
-/* src/app/app/loyalty/page.jsx */
+/* src/app/app/loyalty/page.jsx — democked: live /v1/loyalty data, wired actions */
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Search,
-  Filter,
-  Download,
-  Plus,
-  Crown,
-  Star,
-  Gem,
-  Award,
   Users,
   TrendingUp,
   DollarSign,
-  Zap,
-  ArrowUpDown,
-  LayoutGrid,
-  List,
-  ChevronRight,
-  MoreHorizontal,
-  BarChart3,
+  Award,
+  Search,
+  Download,
+  Plus,
   X,
+  ChevronRight,
+  RefreshCw,
+  AlertTriangle,
+  Check,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { tierMeta } from './data';
-import { useLoyaltyMembers, useLoyaltyTransactions } from '../../../hooks/useloyalty';
-import { TierBadge, StatCard, TierProgressBar } from './components';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
+import { useLoyaltyMembers } from '../../../hooks/useloyalty';
+const timeAgo = (iso) => {
+  if (!iso) return 'Never';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+};
+
+const formatCurrency = (n) =>
+  `R${Number(n || 0).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`;
 import { MemberDetailDrawer } from './MemberDetailDrawer';
 import { LTVPredictiveModal } from './LTVPredictiveModal';
+import { apiClient } from '../../../api/client';
 
-/* ─── Helpers ─── */
-function formatNumber(num) {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
-  return num.toString();
+const tierConfig = {
+  platinum: {
+    label: 'Platinum',
+    color: '#863bff',
+    bg: 'bg-purple-500/10',
+    text: 'text-purple-500',
+    border: 'border-purple-500/20',
+  },
+  gold: {
+    label: 'Gold',
+    color: '#eab308',
+    bg: 'bg-warning/10',
+    text: 'text-warning',
+    border: 'border-warning/20',
+  },
+  silver: {
+    label: 'Silver',
+    color: '#64748b',
+    bg: 'bg-neutral/10',
+    text: 'text-text-secondary',
+    border: 'border-border',
+  },
+  bronze: {
+    label: 'Bronze',
+    color: '#b45309',
+    bg: 'bg-orange-500/10',
+    text: 'text-orange-500',
+    border: 'border-orange-500/20',
+  },
+};
+
+function TierBadge({ tier }) {
+  const config = tierConfig[tier?.toLowerCase()] || tierConfig.bronze;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        config.bg,
+        config.text,
+        config.border
+      )}
+    >
+      {config.label}
+    </span>
+  );
 }
 
-/* ─── Main Page ─── */
+function TierDonut({ data }) {
+  const total = data.reduce((s, d) => s + d.value, 0);
+  return (
+    <div className="flex items-center gap-6">
+      <ResponsiveContainer width={180} height={180}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius={55}
+            outerRadius={80}
+            paddingAngle={2}
+          >
+            {data.map((d) => (
+              <Cell key={d.name} fill={d.color} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="flex-1 space-y-2.5">
+        {data.map((d) => (
+          <div key={d.name} className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+              <span className="text-text-secondary">{d.name}</span>
+            </div>
+            <div className="text-right">
+              <span className="font-medium text-text-primary">{d.value}</span>
+              <span className="ml-2 text-xs text-text-muted">
+                {total ? Math.round((d.value / total) * 100) : 0}%
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Enroll / Adjust Points modal ─── */
+function AdjustPointsModal({ open, members, onClose, onDone }) {
+  const [form, setForm] = useState({ guestId: '', amount: '', description: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [done, setDone] = useState(false);
+
+  if (!open) return null;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await apiClient.post('/v1/loyalty/adjust', {
+        guestId: form.guestId,
+        type: 'adjustment',
+        amount: Number(form.amount),
+        description: form.description,
+        source: 'Front Desk',
+      });
+
+      setDone(true);
+      setTimeout(() => {
+        setDone(false);
+        setForm({ guestId: '', amount: '', description: '' });
+        onClose();
+        onDone();
+      }, 900);
+    } catch (err) {
+      setError(
+        err?.response?.data?.error?.message ||
+          err?.message ||
+          String(err?.code || err) ||
+          'Adjustment failed'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-text-primary">Enroll / Adjust Points</h3>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-surface-elevated text-text-muted"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {done ? (
+          <div className="py-8 text-center">
+            <Check className="mx-auto h-10 w-10 text-accent mb-2" />
+            <p className="text-sm text-text-primary">Points adjusted</p>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Member
+              </label>
+              <select
+                required
+                value={form.guestId}
+                onChange={(e) => setForm({ ...form, guestId: e.target.value })}
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
+              >
+                <option value="">Select a member…</option>
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.firstName} {m.lastName} ·{' '}
+                    {tierConfig[m.tier?.toLowerCase()]?.label ?? m.tier} · {m.points} pts
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Points (+ / −)
+              </label>
+              <input
+                required
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                placeholder="e.g. 500 or -200"
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
+                Reason
+              </label>
+              <input
+                required
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="e.g. Welcome bonus, complaint recovery, stay accrual"
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
+              />
+            </div>
+            {error && <p className="text-xs text-danger">{error}</p>}
+            <div className="flex justify-end gap-2 pt-1">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="secondary" disabled={saving}>
+                {saving ? 'Saving…' : 'Apply Adjustment'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Page ─── */
 export default function LoyaltyPage() {
-  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
-  const [sortBy, setSortBy] = useState('points');
   const [selectedMember, setSelectedMember] = useState(null);
-  const [showPredictive, setShowPredictive] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showAdjust, setShowAdjust] = useState(false);
+  const [showLTV, setShowLTV] = useState(false);
+  const [notice, setNotice] = useState(null);
 
-  /* Real data */
-  const { data: membersResp, isLoading } = useLoyaltyMembers({ page: 1, pageSize: 500 });
-  const { data: txResp } = useLoyaltyTransactions({ page: 1, pageSize: 6 });
-  const members = useMemo(() => membersResp?.data ?? [], [membersResp]);
-  const transactions = useMemo(() => txResp?.data ?? [], [txResp]);
+  const loyaltyQuery = useLoyaltyMembers({
+    search: search || undefined,
+    tier: tierFilter === 'all' ? undefined : tierFilter,
+    page: 1,
+    pageSize: 500,
+  });
 
-  /* Stats */
+  const members = useMemo(() => {
+    const d = loyaltyQuery?.data?.data ?? loyaltyQuery?.data ?? [];
+    const raw = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
+    return raw.map((m) => ({
+      ...m,
+      firstName: m.firstName ?? m.name?.split(' ')[0] ?? '',
+      lastName: m.lastName ?? m.name?.split(' ').slice(1).join(' ') ?? '',
+      totalSpent: m.totalSpent ?? m.lifetimeValue ?? 0,
+      stays: m.stays ?? m.totalStays ?? 0,
+      lastActivity: m.lastActivity ?? m.lastStay ?? null,
+    }));
+  }, [loyaltyQuery]);
+
+  const loading = loyaltyQuery?.isLoading ?? false;
+  const refetch = loyaltyQuery?.refetch ?? (() => {});
+
+  /* ─── Stats from live data ─── */
   const stats = useMemo(() => {
-    const totalMembers = members.length;
-    const totalPoints = members.reduce((s, m) => s + m.points, 0);
-    const totalLTV = members.reduce((s, m) => s + m.lifetimeValue, 0);
-    const avgPoints = totalMembers > 0 ? Math.round(totalPoints / totalMembers) : 0;
-    const redemptions = transactions.filter((t) => t.type === 'redemption').length;
-    return { totalMembers, totalPoints, totalLTV, avgPoints, redemptions };
-  }, [members, transactions]);
-
-  /* Tier distribution */
-  const tierDistribution = useMemo(() => {
-    const dist = { platinum: 0, gold: 0, silver: 0, bronze: 0, none: 0 };
-    members.forEach((m) => {
-      dist[m.tier] = (dist[m.tier] || 0) + 1;
-    });
-    return dist;
+    const total = members.length;
+    const totalRevenue = members.reduce((s, m) => s + (Number(m.totalSpent) || 0), 0);
+    const avgValue = total ? Math.round(totalRevenue / total) : 0;
+    const thirtyDaysAgo = Date.now() - 30 * 86400000;
+    const active = members.filter(
+      (m) => m.lastActivity && new Date(m.lastActivity).getTime() >= thirtyDaysAgo
+    ).length;
+    const tierCounts = members.reduce((acc, m) => {
+      const t = (m.tier ?? 'bronze').toLowerCase();
+      acc[t] = (acc[t] ?? 0) + 1;
+      return acc;
+    }, {});
+    return { total, totalRevenue, avgValue, active, tierCounts };
   }, [members]);
 
-  /* Filtered & sorted members */
-  const filteredMembers = useMemo(() => {
-    let result = members.filter((m) => {
-      const matchesQuery =
-        m.name.toLowerCase().includes(query.toLowerCase()) ||
-        m.email.toLowerCase().includes(query.toLowerCase()) ||
-        m.phone.includes(query) ||
-        m.id.toLowerCase().includes(query.toLowerCase());
-      const matchesTier = tierFilter === 'all' || m.tier === tierFilter;
-      return matchesQuery && matchesTier;
-    });
+  const tierDistribution = useMemo(
+    () =>
+      Object.entries(tierConfig).map(([key, cfg]) => ({
+        name: cfg.label,
+        value: stats.tierCounts[key] ?? 0,
+        color: cfg.color,
+      })),
+    [stats]
+  );
 
-    result.sort((a, b) => {
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'points') return b.points - a.points;
-      if (sortBy === 'ltv') return b.lifetimeValue - a.lifetimeValue;
-      if (sortBy === 'stays') return b.totalStays - a.totalStays;
-      if (sortBy === 'recent') return new Date(b.lastStay) - new Date(a.lastStay);
-      return 0;
-    });
+  /* Revenue by tier — replaces the old mock trend chart with live sums */
+  const revenueByTier = useMemo(
+    () =>
+      Object.entries(tierConfig).map(([key, cfg]) => ({
+        name: cfg.label,
+        revenue: members
+          .filter((m) => (m.tier ?? '').toLowerCase() === key)
+          .reduce((s, m) => s + (Number(m.totalSpent) || 0), 0),
+      })),
+    [members]
+  );
 
-    return result;
-  }, [members, query, tierFilter, sortBy]);
+  const exportCsv = () => {
+    const header = 'Name,Email,Tier,Points,Lifetime Points,Stays,Spent,Last Activity';
+    const rows = members.map((m) =>
+      [
+        `${m.firstName ?? ''} ${m.lastName ?? ''}`,
+        m.email ?? '',
+        m.tier ?? '',
+        m.points ?? 0,
+        m.lifetimePoints ?? 0,
+        m.stays ?? 0,
+        m.totalSpent ?? 0,
+        m.lastActivity ? timeAgo(m.lastActivity) : '',
+      ]
+        .map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`)
+        .join(',')
+    );
+    const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `loyalty-members-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAdjusted = () => {
+    setNotice('Points adjusted — member data refreshed');
+    refetch?.();
+    setTimeout(() => setNotice(null), 4000);
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Loyalty & Rewards</h1>
-          <p className="text-sm text-text-secondary">
-            Membership tiers, points balance, and guest retention
-          </p>
+          <h1 className="text-2xl font-bold text-text-primary">Loyalty Program</h1>
+          <p className="text-sm text-text-secondary">Manage members, tiers, and engagement</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowPredictive(true)}>
-            <BarChart3 className="mr-1.5 h-4 w-4" /> Predictive LTV
+          <Button variant="outline" size="sm" onClick={() => refetch?.()}>
+            <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={exportCsv} disabled={members.length === 0}>
             <Download className="mr-1.5 h-4 w-4" /> Export
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShowAdjust(true)}>
             <Plus className="mr-1.5 h-4 w-4" /> Enroll Member
           </Button>
         </div>
       </div>
 
-      {isLoading && (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center text-sm text-text-muted">
-          Loading loyalty data…
+      {notice && (
+        <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 text-sm text-accent flex items-center gap-2">
+          <Check className="h-4 w-4" /> {notice}
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard
-          label="Total Members"
-          value={stats.totalMembers}
-          icon={Users}
-          color="text-secondary"
-        />
-        <StatCard
-          label="Points in Circulation"
-          value={formatNumber(stats.totalPoints)}
-          icon={Zap}
-          color="text-accent"
-        />
-        <StatCard
-          label="Avg. Member LTV"
-          value={`$${formatNumber(stats.totalMembers > 0 ? stats.totalLTV / stats.totalMembers : 0)}`}
-          icon={DollarSign}
-          color="text-info"
-        />
-        <StatCard
-          label="Redemptions"
-          value={stats.redemptions}
-          icon={TrendingUp}
-          color="text-warning"
-          subtext="This month"
-        />
-      </div>
-
-      {/* Tier Distribution Bar */}
-      <div className="rounded-xl border border-border bg-surface p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-text-primary">Tier Distribution</h3>
-          <span className="text-xs text-text-muted">{stats.totalMembers} enrolled</span>
-        </div>
-        <div className="flex h-4 w-full overflow-hidden rounded-full">
-          {Object.entries(tierDistribution).map(([tier, count]) => {
-            if (count === 0) return null;
-            const meta = tierMeta[tier];
-            if (!meta) return null;
-            const pct = (count / stats.totalMembers) * 100;
-            return (
-              <div
-                key={tier}
-                className={cn('h-full first:rounded-l-full last:rounded-r-full', meta.dot)}
-                style={{ width: `${pct}%` }}
-                title={`${meta.label}: ${count}`}
-              />
-            );
-          })}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-4">
-          {Object.entries(tierDistribution).map(([tier, count]) => {
-            if (count === 0) return null;
-            const meta = tierMeta[tier];
-            if (!meta) return null;
-            return (
-              <div key={tier} className="flex items-center gap-2">
-                <span className={cn('h-2.5 w-2.5 rounded-full', meta.dot)} />
-                <span className="text-xs text-text-secondary">{meta.label}</span>
-                <span className="text-xs font-mono font-medium text-text-primary">{count}</span>
+      {/* Program stats — live */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {[
+          {
+            label: 'Total Members',
+            value: stats.total.toLocaleString(),
+            icon: Users,
+            color: 'text-text-primary',
+          },
+          {
+            label: 'Active (30d)',
+            value: stats.active.toLocaleString(),
+            icon: Users,
+            color: 'text-accent',
+          },
+          {
+            label: 'Platinum',
+            value: (stats.tierCounts.platinum ?? 0).toLocaleString(),
+            icon: Award,
+            color: 'text-purple-500',
+          },
+          {
+            label: 'Gold',
+            value: (stats.tierCounts.gold ?? 0).toLocaleString(),
+            icon: Award,
+            color: 'text-warning',
+          },
+          {
+            label: 'Total Revenue',
+            value: formatCurrency(stats.totalRevenue),
+            icon: DollarSign,
+            color: 'text-secondary',
+          },
+          {
+            label: 'Avg Lifetime Value',
+            value: formatCurrency(stats.avgValue),
+            icon: TrendingUp,
+            color: 'text-info',
+          },
+        ].map((s) => (
+          <div key={s.label} className="rounded-xl border border-border bg-surface p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+                  {s.label}
+                </p>
+                <p className={cn('mt-1 text-xl font-bold truncate', s.color)}>{s.value}</p>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Search & Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search members by name, email, ID..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(
-              'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
-              showFilters
-                ? 'border-secondary bg-secondary/10 text-secondary'
-                : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-            )}
-          >
-            <Filter className="h-4 w-4" /> Filters
-          </button>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="points">Sort by Points</option>
-            <option value="ltv">Sort by LTV</option>
-            <option value="stays">Sort by Stays</option>
-            <option value="recent">Sort by Recent</option>
-            <option value="name">Sort by Name</option>
-          </select>
-          <div className="flex rounded-md border border-border bg-surface p-0.5">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={cn(
-                'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'grid'
-                  ? 'bg-secondary text-white'
-                  : 'text-text-muted hover:text-text-primary'
-              )}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={cn(
-                'inline-flex h-8 w-8 items-center justify-center rounded transition-colors',
-                viewMode === 'table'
-                  ? 'bg-secondary text-white'
-                  : 'text-text-muted hover:text-text-primary'
-              )}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Drawer */}
-      {showFilters && (
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-secondary">Loyalty Tier</label>
-              <select
-                value={tierFilter}
-                onChange={(e) => setTierFilter(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="all">All Tiers</option>
-                <option value="platinum">Platinum</option>
-                <option value="gold">Gold</option>
-                <option value="silver">Silver</option>
-                <option value="bronze">Bronze</option>
-              </select>
+              <s.icon className={cn('h-5 w-5 shrink-0', s.color)} />
             </div>
           </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setTierFilter('all');
-                setQuery('');
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
 
-      {/* Results count */}
-      <p className="text-xs text-text-muted">
-        Showing <span className="font-medium text-text-primary">{filteredMembers.length}</span> of{' '}
-        {members.length} members
-      </p>
-
-      {/* Grid View */}
-      {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredMembers.map((member) => {
-            const nextTier = Object.entries(tierMeta).find(([_, m]) => m.req > member.points);
-            return (
-              <button
-                key={member.id}
-                onClick={() => setSelectedMember(member)}
-                className="group rounded-xl border border-border bg-surface p-5 text-left transition-all hover:border-secondary/50 hover:shadow-md"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10 text-sm font-bold text-secondary">
-                    {member.avatar}
-                  </div>
-                  <TierBadge tier={member.tier} size="sm" />
-                </div>
-
-                <h3 className="mt-3 text-base font-semibold text-text-primary group-hover:text-secondary transition-colors">
-                  {member.name}
-                </h3>
-                <p className="text-xs text-text-muted">{member.id}</p>
-
-                <div className="mt-3 space-y-1.5">
-                  <div className="flex items-center gap-2 text-xs text-text-secondary">
-                    <Zap className="h-3.5 w-3.5 text-text-muted" />
-                    <span className="font-mono font-medium text-text-primary">
-                      {member.points.toLocaleString()}
-                    </span>{' '}
-                    pts
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-text-secondary">
-                    <DollarSign className="h-3.5 w-3.5 text-text-muted" />
-                    <span className="font-mono font-medium text-text-primary">
-                      ${member.lifetimeValue.toLocaleString()}
-                    </span>{' '}
-                    LTV
-                  </div>
-                </div>
-
-                {nextTier && (
-                  <div className="mt-4">
-                    <TierProgressBar
-                      current={member.points}
-                      nextTierReq={nextTier[1].req}
-                      tier={member.tier}
-                    />
-                    <p className="mt-1 text-[10px] text-text-muted">
-                      {(nextTier[1].req - member.points).toLocaleString()} pts to{' '}
-                      {nextTier[1].label}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-text-muted">Stays</p>
-                    <p className="text-sm font-bold text-text-primary">{member.totalStays}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-text-muted">Nights</p>
-                    <p className="text-sm font-bold text-text-primary">{member.totalNights}</p>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-          {filteredMembers.length === 0 && (
-            <div className="col-span-full rounded-xl border border-border bg-surface p-12 text-center">
-              <Users className="mx-auto h-10 w-10 text-text-muted mb-3" />
-              <p className="text-text-muted">No members match your search.</p>
-            </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+            Tier Distribution
+          </h3>
+          {members.length > 0 ? (
+            <TierDonut data={tierDistribution} />
+          ) : (
+            <p className="py-8 text-center text-sm text-text-muted">
+              {loading ? 'Loading…' : 'No members yet'}
+            </p>
           )}
         </div>
-      )}
+        <div className="rounded-xl border border-border bg-surface p-6">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+            Revenue by Tier
+          </h3>
+          {members.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={revenueByTier}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="name" fontSize={12} className="text-text-secondary" />
+                <YAxis
+                  fontSize={12}
+                  className="text-text-secondary"
+                  tickFormatter={(v) => `R${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip formatter={(v) => [formatCurrency(v), 'Revenue']} />
+                <Bar dataKey="revenue" fill="#863bff" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="py-8 text-center text-sm text-text-muted">
+              {loading ? 'Loading…' : 'No members yet'}
+            </p>
+          )}
+        </div>
+      </div>
 
-      {/* Table View */}
-      {viewMode === 'table' && (
-        <div className="rounded-xl border border-border bg-surface overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-background border-b border-border">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium text-text-secondary">Member</th>
-                  <th className="px-4 py-3 text-left font-medium text-text-secondary">Tier</th>
-                  <th className="px-4 py-3 text-right font-medium text-text-secondary">Points</th>
-                  <th className="px-4 py-3 text-right font-medium text-text-secondary">LTV</th>
-                  <th className="px-4 py-3 text-right font-medium text-text-secondary">Stays</th>
-                  <th className="px-4 py-3 text-left font-medium text-text-secondary">Last Stay</th>
-                  <th className="px-4 py-3 text-left font-medium text-text-secondary">Progress</th>
-                  <th className="px-4 py-3 w-16"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredMembers.map((member) => {
-                  const nextTier = Object.entries(tierMeta).find(([_, m]) => m.req > member.points);
-                  return (
-                    <tr
-                      key={member.id}
-                      onClick={() => setSelectedMember(member)}
-                      className="hover:bg-background/50 transition-colors cursor-pointer"
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                            {member.avatar}
-                          </div>
-                          <div>
-                            <p className="font-medium text-text-primary">{member.name}</p>
-                            <p className="text-xs text-text-muted">{member.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <TierBadge tier={member.tier} size="sm" />
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
-                        {member.points.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-medium text-text-primary">
-                        ${member.lifetimeValue.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-text-primary">
-                        {member.totalStays}
-                      </td>
-                      <td className="px-4 py-3 text-text-secondary text-xs">{member.lastStay}</td>
-                      <td className="px-4 py-3">
-                        {nextTier ? (
-                          <div className="w-24">
-                            <TierProgressBar
-                              current={member.points}
-                              nextTierReq={nextTier[1].req}
-                              tier={member.tier}
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-xs text-accent font-medium">Max Tier</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <ChevronRight className="h-4 w-4 text-text-muted" />
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredMembers.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
-                      No members match your search.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* Members table */}
+      <div className="rounded-xl border border-border bg-surface overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-sm font-semibold text-text-primary">Members</h3>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search members…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
+              />
+            </div>
+            <select
+              value={tierFilter}
+              onChange={(e) => setTierFilter(e.target.value)}
+              className="h-9 rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+            >
+              <option value="all">All Tiers</option>
+              {Object.entries(tierConfig).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-      )}
 
-      {/* Recent Points Activity */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="border-b border-border bg-background px-6 py-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary">Recent Points Activity</h3>
-          <Button variant="ghost" size="sm">
-            <ArrowUpDown className="mr-1.5 h-3.5 w-3.5" /> View All
-          </Button>
-        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-background border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Member
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                  Type
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Tier
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase">
-                  Description
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Points
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase">
-                  Amount
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Stays
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Total Spent
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Last Activity
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-background/50 transition-colors">
-                  <td className="px-4 py-3 text-text-secondary text-xs font-mono">{tx.date}</td>
-                  <td className="px-4 py-3 text-text-primary font-medium">{tx.memberName}</td>
+              {members.map((member) => (
+                <tr
+                  key={member.id}
+                  onClick={() => setSelectedMember(member)}
+                  className="cursor-pointer hover:bg-background/50 transition-colors"
+                >
                   <td className="px-4 py-3">
-                    <span
-                      className={cn(
-                        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase',
-                        tx.type === 'accrual'
-                          ? 'bg-accent/10 text-accent border-accent/20'
-                          : tx.type === 'bonus'
-                            ? 'bg-secondary/10 text-secondary border-secondary/20'
-                            : 'bg-danger/10 text-danger border-danger/20'
-                      )}
-                    >
-                      {tx.type}
-                    </span>
+                    <p className="font-medium text-text-primary">
+                      {member.firstName} {member.lastName}
+                    </p>
+                    <p className="text-xs text-text-muted">{member.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs max-w-xs truncate">
-                    {tx.description}
+                  <td className="px-4 py-3">
+                    <TierBadge tier={member.tier} />
                   </td>
-                  <td
-                    className={cn(
-                      'px-4 py-3 text-right font-mono font-medium',
-                      tx.type === 'redemption' ? 'text-danger' : 'text-accent'
-                    )}
-                  >
-                    {tx.type === 'redemption' ? '' : '+'}
-                    {tx.amount.toLocaleString()}
+                  <td className="px-4 py-3 font-mono text-text-primary">
+                    {(member.points ?? 0).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary">{member.stays ?? 0}</td>
+                  <td className="px-4 py-3 text-text-primary">
+                    {formatCurrency(member.totalSpent ?? 0)}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-text-secondary">
+                    {member.lastActivity ? timeAgo(member.lastActivity) : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <ChevronRight className="ml-auto h-4 w-4 text-text-muted" />
                   </td>
                 </tr>
               ))}
-              {transactions.length === 0 && (
+              {!loading && members.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-text-muted">
-                    No points activity yet.
+                  <td colSpan={7} className="px-4 py-12 text-center">
+                    <Users className="mx-auto h-10 w-10 text-text-muted mb-3" />
+                    <p className="text-text-muted">
+                      {search || tierFilter !== 'all'
+                        ? 'No members match your filters.'
+                        : 'No loyalty members yet — enroll your first member.'}
+                    </p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        <div className="border-t border-border px-4 py-2.5 text-xs text-text-muted">
+          {loading
+            ? 'Loading members…'
+            : `Showing ${members.length} member${members.length !== 1 ? 's' : ''}`}
+        </div>
       </div>
 
-      {/* Member Detail Drawer */}
+      {/* Drawer + modals */}
       {selectedMember && (
         <MemberDetailDrawer
           member={selectedMember}
-          transactions={transactions}
           onClose={() => setSelectedMember(null)}
+          onPredict={() => setShowLTV(true)}
         />
       )}
 
-      {/* Predictive LTV Modal */}
-      {showPredictive && (
-        <LTVPredictiveModal members={members} onClose={() => setShowPredictive(false)} />
+      {showLTV && (
+        <LTVPredictiveModal
+          members={members.map((m) => ({
+            name: `${m.firstName ?? ''} ${m.lastName ?? ''}`.trim(),
+            totalStays: m.stays ?? 0,
+            lifetimeValue: m.totalSpent ?? 0,
+            points: m.points ?? 0,
+            tier: m.tier ?? 'bronze',
+          }))}
+          onClose={() => setShowLTV(false)}
+        />
       )}
+
+      <AdjustPointsModal
+        open={showAdjust}
+        members={members}
+        onClose={() => setShowAdjust(false)}
+        onDone={handleAdjusted}
+      />
     </div>
   );
 }

@@ -162,7 +162,20 @@ export const router = createBrowserRouter([
       { path: 'inventory', ...page(() => import('./app/app/inventory/page')) },
       { path: 'guests', ...page(() => import('./app/app/guests/page')) },
       { path: 'guests/:id', ...page(() => import('./app/app/guests/detail/page')) },
+      // [CRM] Guest 360, segments, follow-ups, corporate accounts
+      {
+        path: 'crm',
+        children: [
+          { index: true, ...page(() => import('./app/app/crm/page')) },
+          { path: 'guests/:id', ...page(() => import('./app/app/crm/guests/[id]/page')) },
+          { path: 'segments', ...page(() => import('./app/app/crm/segments/page')) },
+          { path: 'corporate', ...page(() => import('./app/app/crm/corporate/page')) },
+        ],
+      },
       { path: 'housekeeping', ...page(() => import('./app/app/housekeeping/page')) },
+      { path: 'tasks', ...page(() => import('./app/app/tasks/page')) },
+      // [T3] Concierge board — transfers, wake-up calls, bookings, upsells
+      { path: 'concierge', ...page(() => import('./app/app/concierge/page')) },
       { path: 'night-audit', ...page(() => import('./app/app/night-audit/page')) },
       { path: 'reports', ...page(() => import('./app/app/reports/page')) },
       { path: 'onboarding', ...page(() => import('./app/app/onboarding/page')) },
@@ -181,7 +194,11 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'audit-trail', ...page(() => import('./app/app/audit-trail/page')) },
+      // [C1] Administration → Properties (chains + switcher dashboard)
+      { path: 'properties', ...page(() => import('./app/app/properties/Page')) },
       { path: 'users', ...page(() => import('./app/app/users/page')) },
+      { path: 'users/details', ...page(() => import('./app/app/users/details/page')) },
+      { path: 'users/roles', ...page(() => import('./app/app/users/roles/page')) },
       { path: 'ar', ...page(() => import('./app/app/ar/page')) },
       { path: 'vcc', ...page(() => import('./app/app/vcc/page')) },
       { path: 'meal-plans', ...page(() => import('./app/app/meal-plans/page')) },

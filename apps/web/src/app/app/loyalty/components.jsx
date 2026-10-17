@@ -1,6 +1,6 @@
 import { Gem, Award, Star, Crown } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { tierMeta } from './data';
+import { tierMeta } from './tierMeta';
 
 const iconMap = { Gem, Award, Star, Crown };
 

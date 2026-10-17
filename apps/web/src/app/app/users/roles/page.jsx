@@ -1,12 +1,10 @@
-/* src/app/app/users/roles/page.jsx */
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+/* src/app/app/users/roles/page.jsx — democked against /v1/rbac */
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Shield,
   Plus,
   Search,
   X,
-  Check,
   Edit3,
   Trash2,
   Copy,
@@ -15,199 +13,103 @@ import {
   Users,
   Lock,
   Unlock,
-  AlertTriangle,
   Save,
   Ban,
   CheckCircle2,
-  MoreHorizontal,
   Eye,
   FileText,
   DollarSign,
-  BedDouble,
+  Sparkles,
   TrendingUp,
   Settings,
   ClipboardList,
   User,
   Monitor,
-  Sparkles,
   Briefcase,
   Database,
   Globe,
+  RefreshCw,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
+import { apiClient } from '../../../../api/client';
+import { usersApi } from '../../../../api/users';
 
-/* ─── Mock Data ─── */
-const initialRoles = [
-  {
-    id: 'ROLE-001',
-    name: 'Super Admin',
-    description: 'Full system access. Can manage users, roles, settings, and all property data.',
-    userCount: 2,
-    isSystem: true,
-    permissions: {
-      reservations: { read: true, write: true, delete: true, approve: true },
-      billing: { read: true, write: true, delete: true, approve: true },
-      housekeeping: { read: true, write: true, delete: true, approve: true },
-      rates: { read: true, write: true, delete: true, approve: true },
-      reports: { read: true, write: true, delete: true, approve: true },
-      users: { read: true, write: true, delete: true, approve: true },
-      settings: { read: true, write: true, delete: true, approve: true },
-      auditLogs: { read: true, write: true, delete: true, approve: true },
-      groups: { read: true, write: true, delete: true, approve: true },
-      inventory: { read: true, write: true, delete: true, approve: true },
-      channelManager: { read: true, write: true, delete: true, approve: true },
-      marketing: { read: true, write: true, delete: true, approve: true },
-    },
-  },
-  {
-    id: 'ROLE-002',
-    name: 'General Manager',
-    description: 'Property-level oversight. Can view all reports and approve overrides.',
-    userCount: 1,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: true, delete: true, approve: true },
-      billing: { read: true, write: true, delete: false, approve: true },
-      housekeeping: { read: true, write: true, delete: false, approve: true },
-      rates: { read: true, write: true, delete: false, approve: true },
-      reports: { read: true, write: true, delete: false, approve: true },
-      users: { read: true, write: true, delete: false, approve: false },
-      settings: { read: true, write: true, delete: false, approve: false },
-      auditLogs: { read: true, write: false, delete: false, approve: false },
-      groups: { read: true, write: true, delete: false, approve: true },
-      inventory: { read: true, write: true, delete: false, approve: false },
-      channelManager: { read: true, write: true, delete: false, approve: true },
-      marketing: { read: true, write: true, delete: false, approve: true },
-    },
-  },
-  {
-    id: 'ROLE-003',
-    name: 'Front Desk Manager',
-    description: 'Manages front desk operations, reservations, and guest services.',
-    userCount: 3,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: true, delete: true, approve: true },
-      billing: { read: true, write: true, delete: false, approve: false },
-      housekeeping: { read: true, write: true, delete: false, approve: false },
-      rates: { read: true, write: false, delete: false, approve: false },
-      reports: { read: true, write: false, delete: false, approve: false },
-      users: { read: true, write: false, delete: false, approve: false },
-      settings: { read: false, write: false, delete: false, approve: false },
-      auditLogs: { read: false, write: false, delete: false, approve: false },
-      groups: { read: true, write: true, delete: false, approve: false },
-      inventory: { read: true, write: false, delete: false, approve: false },
-      channelManager: { read: true, write: false, delete: false, approve: false },
-      marketing: { read: true, write: false, delete: false, approve: false },
-    },
-  },
-  {
-    id: 'ROLE-004',
-    name: 'Front Desk Agent',
-    description: 'Handles check-ins, check-outs, and basic reservation tasks.',
-    userCount: 8,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: true, delete: false, approve: false },
-      billing: { read: true, write: true, delete: false, approve: false },
-      housekeeping: { read: true, write: false, delete: false, approve: false },
-      rates: { read: true, write: false, delete: false, approve: false },
-      reports: { read: false, write: false, delete: false, approve: false },
-      users: { read: false, write: false, delete: false, approve: false },
-      settings: { read: false, write: false, delete: false, approve: false },
-      auditLogs: { read: false, write: false, delete: false, approve: false },
-      groups: { read: true, write: false, delete: false, approve: false },
-      inventory: { read: true, write: false, delete: false, approve: false },
-      channelManager: { read: false, write: false, delete: false, approve: false },
-      marketing: { read: false, write: false, delete: false, approve: false },
-    },
-  },
-  {
-    id: 'ROLE-005',
-    name: 'Night Auditor',
-    description: 'Overnight operations including audit, billing reconciliation, and reports.',
-    userCount: 2,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: true, delete: false, approve: false },
-      billing: { read: true, write: true, delete: false, approve: false },
-      housekeeping: { read: true, write: false, delete: false, approve: false },
-      rates: { read: true, write: false, delete: false, approve: false },
-      reports: { read: true, write: false, delete: false, approve: false },
-      users: { read: false, write: false, delete: false, approve: false },
-      settings: { read: false, write: false, delete: false, approve: false },
-      auditLogs: { read: false, write: false, delete: false, approve: false },
-      groups: { read: true, write: false, delete: false, approve: false },
-      inventory: { read: true, write: false, delete: false, approve: false },
-      channelManager: { read: true, write: false, delete: false, approve: false },
-      marketing: { read: false, write: false, delete: false, approve: false },
-    },
-  },
-  {
-    id: 'ROLE-006',
-    name: 'Revenue Manager',
-    description: 'Manages pricing, rate plans, and channel distribution.',
-    userCount: 1,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: false, delete: false, approve: false },
-      billing: { read: true, write: false, delete: false, approve: false },
-      housekeeping: { read: true, write: false, delete: false, approve: false },
-      rates: { read: true, write: true, delete: false, approve: true },
-      reports: { read: true, write: true, delete: false, approve: false },
-      users: { read: false, write: false, delete: false, approve: false },
-      settings: { read: true, write: false, delete: false, approve: false },
-      auditLogs: { read: true, write: false, delete: false, approve: false },
-      groups: { read: true, write: false, delete: false, approve: false },
-      inventory: { read: true, write: false, delete: false, approve: false },
-      channelManager: { read: true, write: true, delete: false, approve: true },
-      marketing: { read: true, write: true, delete: false, approve: false },
-    },
-  },
-  {
-    id: 'ROLE-007',
-    name: 'Housekeeping Supervisor',
-    description: 'Manages room status, cleaning schedules, and maintenance requests.',
-    userCount: 2,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: false, delete: false, approve: false },
-      billing: { read: false, write: false, delete: false, approve: false },
-      housekeeping: { read: true, write: true, delete: false, approve: true },
-      rates: { read: false, write: false, delete: false, approve: false },
-      reports: { read: true, write: false, delete: false, approve: false },
-      users: { read: false, write: false, delete: false, approve: false },
-      settings: { read: false, write: false, delete: false, approve: false },
-      auditLogs: { read: false, write: false, delete: false, approve: false },
-      groups: { read: false, write: false, delete: false, approve: false },
-      inventory: { read: true, write: true, delete: false, approve: false },
-      channelManager: { read: false, write: false, delete: false, approve: false },
-      marketing: { read: false, write: false, delete: false, approve: false },
-    },
-  },
-  {
-    id: 'ROLE-008',
-    name: 'Read-Only',
-    description: 'View-only access to reports and basic property data.',
-    userCount: 0,
-    isSystem: false,
-    permissions: {
-      reservations: { read: true, write: false, delete: false, approve: false },
-      billing: { read: true, write: false, delete: false, approve: false },
-      housekeeping: { read: true, write: false, delete: false, approve: false },
-      rates: { read: true, write: false, delete: false, approve: false },
-      reports: { read: true, write: false, delete: false, approve: false },
-      users: { read: false, write: false, delete: false, approve: false },
-      settings: { read: false, write: false, delete: false, approve: false },
-      auditLogs: { read: false, write: false, delete: false, approve: false },
-      groups: { read: true, write: false, delete: false, approve: false },
-      inventory: { read: true, write: false, delete: false, approve: false },
-      channelManager: { read: true, write: false, delete: false, approve: false },
-      marketing: { read: true, write: false, delete: false, approve: false },
-    },
-  },
-];
+/* ─── rbacApi adapter: the ONLY place /v1/rbac endpoint shapes live ─── */
+const rbacApi = {
+  listRoles: () =>
+    apiClient.get('/v1/rbac/roles').then((r) => {
+      const payload = r.data?.data ?? r.data ?? [];
+      return Array.isArray(payload) ? payload : (payload.roles ?? []);
+    }),
+  listPermissions: () =>
+    apiClient.get('/v1/rbac/permissions').then((r) => {
+      const payload = r.data?.data ?? r.data ?? [];
+      return Array.isArray(payload) ? payload : (payload.permissions ?? []);
+    }),
+  createRole: (body) => apiClient.post('/v1/rbac/roles', body).then((r) => r.data?.data ?? r.data),
+  updateRole: (id, body) =>
+    apiClient.put(`/v1/rbac/roles/${id}`, body).then((r) => r.data?.data ?? r.data),
+  deleteRole: (id) => apiClient.delete(`/v1/rbac/roles/${id}`),
+  setPermissions: (id, permissionIds) =>
+    apiClient.put(`/v1/rbac/roles/${id}/permissions`, { permissionIds }).then((r) => r.data),
+};
+
+/* Map backend Permission { resource, action } rows onto the UI matrix modules. */
+const RESOURCE_TO_MODULE = {
+  reservation: 'reservations',
+  folio: 'billing',
+  billing: 'billing',
+  housekeeping: 'housekeeping',
+  rate_plan: 'rates',
+  rates: 'rates',
+  report: 'reports',
+  reports: 'reports',
+  user: 'users',
+  users: 'users',
+  setting: 'settings',
+  settings: 'settings',
+  audit: 'auditLogs',
+  audit_log: 'auditLogs',
+  inventory: 'inventory',
+  room: 'inventory',
+  channel: 'channelManager',
+  channel_manager: 'channelManager',
+  sms: 'marketing',
+  notification: 'marketing',
+  loyalty: 'marketing',
+  guest: 'marketing',
+  task: 'operations',
+  task_rule: 'operations',
+  property: 'settings',
+  api_key: 'settings',
+  night_audit: 'operations',
+  sms_template: 'marketing',
+};
+const ACTION_TO_PERM = {
+  read: 'read',
+  view: 'read',
+  list: 'read',
+  create: 'write',
+  update: 'write',
+  edit: 'write',
+  manage: 'write',
+  send: 'write',
+  run: 'write',
+  sync: 'write',
+  assign: 'write',
+  enroll: 'write',
+  post: 'write',
+  delete: 'delete',
+  export: 'approve',
+  payment: 'approve',
+  refund: 'approve',
+  checkin: 'approve',
+  checkout: 'approve',
+  override: 'approve',
+  inspect: 'approve',
+};
 
 const moduleMeta = {
   reservations: {
@@ -236,7 +138,18 @@ const moduleMeta = {
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
   },
-  marketing: { label: 'Marketing', icon: Monitor, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+  marketing: {
+    label: 'Marketing & CRM',
+    icon: Monitor,
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
+  },
+  operations: {
+    label: 'Operations & Tasks',
+    icon: ClipboardList,
+    color: 'text-cyan-500',
+    bg: 'bg-cyan-500/10',
+  },
 };
 
 const permLabels = {
@@ -246,11 +159,45 @@ const permLabels = {
   approve: { label: 'Approve', short: 'A', color: 'text-warning', bg: 'bg-warning/10' },
 };
 
-/* ─── Components ─── */
+const emptyMatrix = () =>
+  Object.fromEntries(
+    Object.keys(moduleMeta).map((k) => [
+      k,
+      { read: false, write: false, delete: false, approve: false },
+    ])
+  );
+
+/** permission rows → UI matrix */
+function toMatrix(permissions) {
+  const matrix = emptyMatrix();
+  for (const p of permissions ?? []) {
+    const mod = RESOURCE_TO_MODULE[p.resource];
+    const perm = ACTION_TO_PERM[p.action];
+    if (mod && perm && matrix[mod]) matrix[mod][perm] = true;
+  }
+  return matrix;
+}
+
+/** UI matrix → permission id list (diff against full permission catalogue) */
+function toPermissionIds(matrix, allPermissions) {
+  const wanted = new Set();
+  for (const [modKey, perms] of Object.entries(matrix)) {
+    for (const [permKey, enabled] of Object.entries(perms)) {
+      if (!enabled) continue;
+      for (const p of allPermissions) {
+        if (RESOURCE_TO_MODULE[p.resource] === modKey && ACTION_TO_PERM[p.action] === permKey)
+          wanted.add(p.id);
+      }
+    }
+  }
+  return [...wanted];
+}
+
 function PermissionCell({ enabled, onToggle, label, disabled = false }) {
   const meta = permLabels[label];
   return (
     <button
+      type="button"
       onClick={onToggle}
       disabled={disabled}
       className={cn(
@@ -269,17 +216,16 @@ function PermissionCell({ enabled, onToggle, label, disabled = false }) {
 
 function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate }) {
   const totalPerms = Object.values(role.permissions).reduce(
-    (sum, mod) => sum + Object.values(mod).filter(Boolean).length,
+    (s, m) => s + Object.values(m).filter(Boolean).length,
     0
   );
   const maxPerms = Object.keys(role.permissions).length * 4;
   const coverage = Math.round((totalPerms / maxPerms) * 100);
-
   return (
     <div
       onClick={onSelect}
       className={cn(
-        'rounded-xl border p-5 cursor-pointer transition-all hover:shadow-md',
+        'group rounded-xl border p-5 cursor-pointer transition-all hover:shadow-md',
         isSelected
           ? 'border-secondary bg-secondary/5 ring-1 ring-secondary/20'
           : 'border-border bg-surface hover:border-secondary/30'
@@ -292,18 +238,16 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
           </div>
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{role.name}</h3>
-            <p className="text-xs text-text-muted">{role.id}</p>
+            <p className="text-xs text-text-muted">{role.userCount ?? 0} users</p>
           </div>
         </div>
-        {role.isSystem && (
+        {role.isLocked && (
           <span className="inline-flex items-center rounded-full bg-info/10 border border-info/20 px-2 py-0.5 text-[10px] font-semibold text-info">
             System
           </span>
         )}
       </div>
-
       <p className="text-xs text-text-secondary line-clamp-2 mb-3">{role.description}</p>
-
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Permission Coverage</span>
@@ -326,11 +270,10 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
           />
         </div>
       </div>
-
       <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs text-text-secondary">
           <Users className="h-3.5 w-3.5 text-text-muted" />
-          {role.userCount} users
+          {role.userCount ?? 0} users
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
@@ -353,11 +296,11 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
           >
             <Copy className="h-3.5 w-3.5" />
           </button>
-          {!role.isSystem && (
+          {!role.isLocked && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(role.id);
+                onDelete(role);
               }}
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
               title="Delete"
@@ -371,35 +314,24 @@ function RoleCard({ role, isSelected, onSelect, onEdit, onDelete, onDuplicate })
   );
 }
 
-/* ─── Role Editor Modal ─── */
-function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
+function RoleEditorModal({ role, allPermissions, locked, onClose, onSave, isNew = false }) {
   const [form, setForm] = useState({
     name: role?.name || '',
     description: role?.description || '',
-    permissions:
-      role?.permissions ||
-      Object.fromEntries(
-        Object.keys(moduleMeta).map((key) => [
-          key,
-          { read: false, write: false, delete: false, approve: false },
-        ])
-      ),
+    permissions: role?.permissions || emptyMatrix(),
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handlePermToggle = (module, perm) => {
+  const handlePermToggle = (module, perm) =>
     setForm((prev) => ({
       ...prev,
       permissions: {
         ...prev.permissions,
-        [module]: {
-          ...prev.permissions[module],
-          [perm]: !prev.permissions[module][perm],
-        },
+        [module]: { ...prev.permissions[module], [perm]: !prev.permissions[module][perm] },
       },
     }));
-  };
-
-  const handleSetAll = (module, value) => {
+  const handleSetAll = (module, value) =>
     setForm((prev) => ({
       ...prev,
       permissions: {
@@ -407,16 +339,35 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
         [module]: { read: value, write: value, delete: value, approve: value },
       },
     }));
-  };
+  const setAllModules = (fn) =>
+    setForm((prev) => ({
+      ...prev,
+      permissions: Object.fromEntries(Object.keys(moduleMeta).map((k) => [k, fn()])),
+    }));
 
-  const handleSubmit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    onSave({
-      ...role,
-      ...form,
-      id: role?.id || `ROLE-${1009 + Math.floor(Math.random() * 900)}`,
-    });
-    onClose();
+    setSaving(true);
+    setError(null);
+    try {
+      const permissionIds = toPermissionIds(form.permissions, allPermissions);
+      const saved = role?.id
+        ? await rbacApi.updateRole(role.id, { name: form.name, description: form.description })
+        : await rbacApi.createRole({
+            name: form.name,
+            description: form.description,
+            type: 'custom',
+          });
+      const roleId = saved?.id ?? role?.id;
+      if (roleId && !locked) await rbacApi.setPermissions(roleId, permissionIds);
+      onSave();
+    } catch (err) {
+      setError(
+        err?.response?.data?.error?.message || 'Save failed (check /v1/rbac shapes — Gate 3)'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -438,8 +389,7 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Basic Info */}
+        <form onSubmit={submit} className="p-6 space-y-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-text-secondary uppercase tracking-wider">
@@ -450,8 +400,7 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Front Desk Manager"
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
               />
             </div>
             <div>
@@ -462,13 +411,11 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                 type="text"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Brief description of this role..."
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
               />
             </div>
           </div>
 
-          {/* Permission Matrix */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-semibold text-text-primary">Permission Matrix</h4>
@@ -490,7 +437,12 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                 ))}
               </div>
             </div>
-
+            {locked && (
+              <p className="mb-3 text-xs text-warning flex items-center gap-1">
+                <AlertTriangle className="h-3.5 w-3.5" /> System role — permissions are locked;
+                name/description only.
+              </p>
+            )}
             <div className="rounded-xl border border-border overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-border">
@@ -498,18 +450,14 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                     <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       Module
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
-                      Read
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
-                      Write
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
-                      Delete
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
-                      Approve
-                    </th>
+                    {['read', 'write', 'delete', 'approve'].map((p) => (
+                      <th
+                        key={p}
+                        className="px-4 py-3 text-center text-xs font-medium text-text-secondary uppercase tracking-wider w-16"
+                      >
+                        {permLabels[p].label}
+                      </th>
+                    ))}
                     <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-28">
                       Actions
                     </th>
@@ -519,8 +467,6 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                   {Object.entries(form.permissions).map(([moduleKey, perms]) => {
                     const meta = moduleMeta[moduleKey];
                     const Icon = meta.icon;
-                    const allEnabled = Object.values(perms).every(Boolean);
-                    const noneEnabled = Object.values(perms).every((v) => !v);
                     return (
                       <tr key={moduleKey} className="hover:bg-background/50">
                         <td className="px-4 py-3">
@@ -542,6 +488,7 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                           <td key={permKey} className="px-4 py-3 text-center">
                             <PermissionCell
                               enabled={perms[permKey]}
+                              disabled={locked}
                               onToggle={() => handlePermToggle(moduleKey, permKey)}
                               label={permKey}
                             />
@@ -574,7 +521,6 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
             </div>
           </div>
 
-          {/* Quick Presets */}
           <div className="rounded-lg border border-border bg-surface p-4">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
               Quick Presets
@@ -584,15 +530,9 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  const allTrue = Object.fromEntries(
-                    Object.keys(moduleMeta).map((k) => [
-                      k,
-                      { read: true, write: true, delete: true, approve: true },
-                    ])
-                  );
-                  setForm((prev) => ({ ...prev, permissions: allTrue }));
-                }}
+                onClick={() =>
+                  setAllModules(() => ({ read: true, write: true, delete: true, approve: true }))
+                }
               >
                 <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Grant All
               </Button>
@@ -600,15 +540,9 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  const allRead = Object.fromEntries(
-                    Object.keys(moduleMeta).map((k) => [
-                      k,
-                      { read: true, write: false, delete: false, approve: false },
-                    ])
-                  );
-                  setForm((prev) => ({ ...prev, permissions: allRead }));
-                }}
+                onClick={() =>
+                  setAllModules(() => ({ read: true, write: false, delete: false, approve: false }))
+                }
               >
                 <Eye className="mr-1.5 h-3.5 w-3.5" /> Read-Only All
               </Button>
@@ -616,27 +550,29 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  const allFalse = Object.fromEntries(
-                    Object.keys(moduleMeta).map((k) => [
-                      k,
-                      { read: false, write: false, delete: false, approve: false },
-                    ])
-                  );
-                  setForm((prev) => ({ ...prev, permissions: allFalse }));
-                }}
+                onClick={() =>
+                  setAllModules(() => ({
+                    read: false,
+                    write: false,
+                    delete: false,
+                    approve: false,
+                  }))
+                }
               >
                 <Ban className="mr-1.5 h-3.5 w-3.5" /> Revoke All
               </Button>
             </div>
           </div>
 
+          {error && <p className="text-xs text-danger">{error}</p>}
+
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="secondary">
-              <Save className="mr-1.5 h-4 w-4" /> {isNew ? 'Create Role' : 'Save Changes'}
+            <Button type="submit" variant="secondary" disabled={saving}>
+              <Save className="mr-1.5 h-4 w-4" />{' '}
+              {saving ? 'Saving…' : isNew ? 'Create Role' : 'Save Changes'}
             </Button>
           </div>
         </form>
@@ -645,42 +581,81 @@ function RoleEditorModal({ role, onClose, onSave, isNew = false }) {
   );
 }
 
-/* ─── Main Page ─── */
+/* ─── Page ─── */
 export default function RolesPage() {
-  const [roles, setRoles] = useState(initialRoles);
+  const [roles, setRoles] = useState([]);
+  const [allPermissions, setAllPermissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [expandedModules, setExpandedModules] = useState(new Set());
 
-  const filteredRoles = useMemo(() => {
-    return roles.filter(
-      (r) =>
-        r.name.toLowerCase().includes(query.toLowerCase()) ||
-        r.description.toLowerCase().includes(query.toLowerCase()) ||
-        r.id.toLowerCase().includes(query.toLowerCase())
-    );
-  }, [roles, query]);
-
-  const handleSaveRole = (roleData) => {
-    if (editingRole) {
-      setRoles((prev) => prev.map((r) => (r.id === roleData.id ? roleData : r)));
-    } else {
-      setRoles((prev) => [...prev, { ...roleData, userCount: 0, isSystem: false }]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const [rawRoles, perms, usersRes] = await Promise.all([
+        rbacApi.listRoles(),
+        rbacApi.listPermissions().catch(() => []),
+        usersApi.list({ page: 1, pageSize: 500 }).catch(() => ({ data: [] })),
+      ]);
+      setAllPermissions(perms);
+      // userCount per role from role assignments in the users list
+      const countByRole = {};
+      for (const u of usersRes.data ?? []) {
+        for (const r of u.roles ?? []) countByRole[r.id] = (countByRole[r.id] ?? 0) + 1;
+      }
+      const shaped = rawRoles.map((r) => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        isLocked: Boolean(r.isLocked),
+        userCount: countByRole[r.id] ?? 0,
+        permissions: toMatrix(r.permissions ?? r.rolePermissions?.map((rp) => rp.permission) ?? []),
+      }));
+      setRoles(shaped);
+      setSelectedRole((prev) => shaped.find((r) => r.id === prev?.id) ?? null);
+    } catch (err) {
+      setLoadError(
+        err?.response?.data?.error?.message ||
+          'Failed to load roles — check /v1/rbac shapes (Gate 3)'
+      );
+    } finally {
+      setLoading(false);
     }
-    setEditingRole(null);
-    setShowEditor(false);
-  };
+  }, []);
 
-  const handleDeleteRole = (id) => {
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const filteredRoles = useMemo(
+    () =>
+      roles.filter(
+        (r) =>
+          r.name.toLowerCase().includes(query.toLowerCase()) ||
+          (r.description ?? '').toLowerCase().includes(query.toLowerCase())
+      ),
+    [roles, query]
+  );
+
+  const handleDeleteRole = async (id) => {
     const role = roles.find((r) => r.id === id);
     if (role?.userCount > 0) {
       alert(`Cannot delete role with ${role.userCount} assigned users. Reassign users first.`);
       return;
     }
-    setRoles((prev) => prev.filter((r) => r.id !== id));
-    if (selectedRole?.id === id) setSelectedRole(null);
+    if (!window.confirm(`Delete role "${role?.name}"?`)) return;
+    try {
+      await rbacApi.deleteRole(id);
+      setRoles((prev) => prev.filter((r) => r.id !== id));
+      if (selectedRole?.id === id) setSelectedRole(null);
+    } catch (err) {
+      alert(err?.response?.data?.error?.message || 'Delete failed');
+    }
   };
 
   const handleDuplicateRole = (role) => {
@@ -689,33 +664,31 @@ export default function RolesPage() {
       id: null,
       name: `${role.name} (Copy)`,
       userCount: 0,
-      isSystem: false,
+      isLocked: false,
     });
     setShowEditor(true);
   };
 
-  const toggleModule = (moduleKey) => {
+  const toggleModule = (moduleKey) =>
     setExpandedModules((prev) => {
       const next = new Set(prev);
       if (next.has(moduleKey)) next.delete(moduleKey);
       else next.add(moduleKey);
       return next;
     });
-  };
 
   const stats = useMemo(
     () => ({
       total: roles.length,
-      system: roles.filter((r) => r.isSystem).length,
-      custom: roles.filter((r) => !r.isSystem).length,
-      totalUsers: roles.reduce((s, r) => s + r.userCount, 0),
+      system: roles.filter((r) => r.isLocked).length,
+      custom: roles.filter((r) => !r.isLocked).length,
+      totalUsers: roles.reduce((s, r) => s + (r.userCount ?? 0), 0),
     }),
     [roles]
   );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Role Management</h1>
@@ -723,68 +696,78 @@ export default function RolesPage() {
             Create and manage user roles with granular permissions
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingRole(null);
-            setShowEditor(true);
-          }}
-        >
-          <Plus className="mr-1.5 h-4 w-4" /> Create Role
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={load}>
+            <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
+          </Button>
+          <Button
+            onClick={() => {
+              setEditingRole(null);
+              setShowEditor(true);
+            }}
+          >
+            <Plus className="mr-1.5 h-4 w-4" /> Create Role
+          </Button>
+        </div>
       </div>
 
-      {/* Stats */}
+      {loadError && (
+        <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 text-sm text-danger">
+          {loadError}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           { label: 'Total Roles', value: stats.total, icon: Shield, color: 'text-secondary' },
           { label: 'System Roles', value: stats.system, icon: Lock, color: 'text-info' },
           { label: 'Custom Roles', value: stats.custom, icon: Unlock, color: 'text-accent' },
           { label: 'Assigned Users', value: stats.totalUsers, icon: Users, color: 'text-warning' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-xl border border-border bg-surface p-4">
+        ].map((s) => (
+          <div key={s.label} className="rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
-                  {stat.label}
+                  {s.label}
                 </p>
-                <p className={cn('mt-1 text-2xl font-bold', stat.color)}>{stat.value}</p>
+                <p className={cn('mt-1 text-2xl font-bold', s.color)}>{s.value}</p>
               </div>
-              <stat.icon className={cn('h-6 w-6', stat.color)} />
+              <s.icon className={cn('h-6 w-6', s.color)} />
             </div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Role List */}
         <div className="lg:col-span-1 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
-              placeholder="Search roles..."
+              placeholder="Search roles…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-surface pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
-
           <div className="space-y-3">
-            {filteredRoles.map((role) => (
-              <RoleCard
-                key={role.id}
-                role={role}
-                isSelected={selectedRole?.id === role.id}
-                onSelect={() => setSelectedRole(role)}
-                onEdit={(r) => {
-                  setEditingRole(r);
-                  setShowEditor(true);
-                }}
-                onDelete={handleDeleteRole}
-                onDuplicate={handleDuplicateRole}
-              />
-            ))}
-            {filteredRoles.length === 0 && (
+            {loading && <p className="text-sm text-text-muted text-center py-8">Loading roles…</p>}
+            {!loading &&
+              filteredRoles.map((role) => (
+                <RoleCard
+                  key={role.id}
+                  role={role}
+                  isSelected={selectedRole?.id === role.id}
+                  onSelect={() => setSelectedRole(role)}
+                  onEdit={(r) => {
+                    setEditingRole(r);
+                    setShowEditor(true);
+                  }}
+                  onDelete={handleDeleteRole}
+                  onDuplicate={handleDuplicateRole}
+                />
+              ))}
+            {!loading && filteredRoles.length === 0 && (
               <div className="rounded-xl border border-border bg-surface p-8 text-center">
                 <Shield className="mx-auto h-8 w-8 text-text-muted mb-2" />
                 <p className="text-text-muted text-sm">No roles match your search.</p>
@@ -793,11 +776,9 @@ export default function RolesPage() {
           </div>
         </div>
 
-        {/* Role Detail */}
         <div className="lg:col-span-2">
           {selectedRole ? (
             <div className="space-y-6">
-              {/* Role Header */}
               <div className="rounded-xl border border-border bg-surface p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -807,14 +788,14 @@ export default function RolesPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h2 className="text-lg font-bold text-text-primary">{selectedRole.name}</h2>
-                        {selectedRole.isSystem && (
+                        {selectedRole.isLocked && (
                           <span className="inline-flex items-center rounded-full bg-info/10 border border-info/20 px-2 py-0.5 text-[10px] font-semibold text-info">
                             System Role
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-text-muted">
-                        {selectedRole.id} · {selectedRole.userCount} users assigned
+                        {selectedRole.userCount} users assigned
                       </p>
                     </div>
                   </div>
@@ -826,24 +807,21 @@ export default function RolesPage() {
                     >
                       <Copy className="mr-1.5 h-3.5 w-3.5" /> Duplicate
                     </Button>
-                    {!selectedRole.isSystem && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingRole(selectedRole);
-                          setShowEditor(true);
-                        }}
-                      >
-                        <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingRole(selectedRole);
+                        setShowEditor(true);
+                      }}
+                    >
+                      <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit
+                    </Button>
                   </div>
                 </div>
                 <p className="mt-3 text-sm text-text-secondary">{selectedRole.description}</p>
               </div>
 
-              {/* Permission Breakdown */}
               <div className="rounded-xl border border-border bg-surface p-6">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
                   Permission Breakdown
@@ -854,7 +832,6 @@ export default function RolesPage() {
                     const Icon = meta.icon;
                     const permCount = Object.values(perms).filter(Boolean).length;
                     const isExpanded = expandedModules.has(moduleKey);
-
                     return (
                       <div
                         key={moduleKey}
@@ -906,7 +883,6 @@ export default function RolesPage() {
                             )}
                           </div>
                         </button>
-
                         {isExpanded && (
                           <div className="border-t border-border bg-background px-4 py-3">
                             <div className="grid grid-cols-4 gap-2">
@@ -950,7 +926,6 @@ export default function RolesPage() {
                 </div>
               </div>
 
-              {/* Permission Summary Chart */}
               <div className="rounded-xl border border-border bg-surface p-6">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
                   Access Summary
@@ -992,7 +967,7 @@ export default function RolesPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-border bg-surface p-12 text-center">
-              <Shield className="mx-auto h-12 w-12 text-text-muted mb-3" />
+              <Shield className="mx-auto h-12 h-12 w-12 text-text-muted mb-3" />
               <p className="text-text-muted font-medium">Select a role to view details</p>
               <p className="text-xs text-text-muted mt-1">Click on any role card from the list</p>
             </div>
@@ -1000,16 +975,17 @@ export default function RolesPage() {
         </div>
       </div>
 
-      {/* Editor Modal */}
       {showEditor && (
         <RoleEditorModal
           role={editingRole}
+          allPermissions={allPermissions}
+          locked={Boolean(editingRole?.isLocked)}
           isNew={!editingRole?.id}
-          onClose={() => {
+          onClose={() => setShowEditor(false)}
+          onSave={() => {
             setShowEditor(false);
-            setEditingRole(null);
+            load();
           }}
-          onSave={handleSaveRole}
         />
       )}
     </div>

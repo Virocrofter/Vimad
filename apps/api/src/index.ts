@@ -42,6 +42,17 @@ import {
   transactionalEmailWorker,
   startTransactionalEmailScheduler,
 } from './jobs/transactional-email.job.js';
+// [T1] universal task model + rules engine (+ [T3] concierge generators)
+import { taskWorker, startTaskScheduler } from './jobs/tasks.job.js';
+// [T3] Wake-up call digest — morning email to the desk
+import { startWakeUpDigestScheduler } from './jobs/wakeup-digest.job.js';
+// [T5] WhatsApp/SMS task push — one-tap tokenized links to staff phones
+import { taskPushWorker, startTaskPushScheduler } from './jobs/task-push.job.js';
+// [G1] Groups — cutoff release / washout worker + scheduler
+import { groupsWorker, startGroupsScheduler } from './jobs/groups.job.js';
+// [T7] Meal plans — board-basis auto-posting worker + scheduler
+import { mealsWorker, startMealPostingScheduler } from './jobs/meals.job.js';
+// [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
 
 import { healthRouter } from './modules/health/health.routes.js';
 import { authRouter } from './modules/auth/auth.routes.js';
@@ -75,6 +86,42 @@ import { paymentRequestsRouter } from './modules/payments/payment-requests.route
 import { publicRouter } from './modules/public/public.routes.js';
 // [A5] SARS-compliant tax invoices & receipts
 import { invoicesRouter } from './modules/invoices/invoices.routes.js';
+// [T1] tasks + rules engine
+import { tasksRouter } from './modules/tasks/tasks.routes.js';
+// [T5] task push — staff trigger + public one-tap page (mounted before tasksRouter)
+import { taskPushStaffRouter } from './modules/tasks/task-push.routes.js';
+import { tasksPublicRouter } from './modules/tasks/task-push.public.routes.js';
+// [T2] Minibar logging + housekeeping supervisor surface
+import { minibarRouter } from './modules/minibar/minibar.routes.js';
+import { housekeepingSupervisorRouter } from './modules/housekeeping/housekeeping.supervisor.routes.js';
+// [T3] Concierge board (transfers, wake-up calls, bookings, upsells)
+import { conciergeRouter } from './modules/concierge/concierge.routes.js';
+import { conciergeGuestRouter } from './modules/concierge/concierge.guest.routes.js';
+// [T6] Parking board (bays, valet, transactions)
+import { parkingRouter } from './modules/parking/parking.routes.js';
+// [C1] Chains + property switcher
+import { chainsRouter } from './modules/chains/chains.routes.js';
+// [USERS] tenant staff user management (list/create/update/suspend/audit)
+import { usersRouter } from './modules/users/users.routes.js';
+// [AUDIT] tenant-scoped audit trail (users > audit logs)
+import { auditLogsRouter } from './modules/audit/audit.routes.js';
+// [G1] Groups module — group blocks, rooming list, master folio
+import { groupsRouter } from './modules/groups/groups.routes.js';
+// [S&C] Sales & Catering — events pipeline, clients, BEOs, catering catalogs
+import { salesCateringRouter } from './modules/sales-catering/sales-catering.routes.js';
+// [CRM] Guest 360, segments, follow-ups, corporate accounts
+import { crmRouter } from './modules/crm/index.js';
+// [I1] Inventory — sellable room inventory engine (grid, holds, restrictions, overbooking)
+import { inventoryRouter } from './modules/inventory/inventory.routes.js';
+// [I1] Nightly inventory cache refresh (03:40)
+import { startInventoryCacheScheduler } from './modules/inventory/inventory.cache.js';
+import { startOverbookingAlertScheduler } from './modules/inventory/inventory.cache.js';
+// [T7] Meal plans — board-basis packages, restaurants, covers & posting log
+import { mealsRouter } from './modules/meals/meals.routes.js';
+// [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
+import { ticketsRouter } from './modules/tickets/tickets.routes.js';
+import { ticketsGuestRouter } from './modules/tickets/tickets.guest.routes.js';
+import { ticketWorker, startTicketScheduler } from './jobs/tickets.job.js';
 
 const app = express();
 const server = createServer(app);
@@ -91,6 +138,11 @@ const activeWorkers = [
   paymentWorker, // [PAYMENTS]
   paymentRequestWorker, // [DEPOSIT-AUTOMATION]
   transactionalEmailWorker, // [A3]
+  taskWorker, // [T1] + [T3] concierge-generate jobs
+  taskPushWorker, // [T5]
+  groupsWorker, // [G1]
+  mealsWorker, // [T7]
+  ticketWorker, // [SUPPORT] SLA breach scans
 ];
 
 async function bootstrap() {
@@ -139,6 +191,7 @@ async function bootstrap() {
         'x-request-id',
         'x-api-version',
         'idempotency-key',
+        'x-property-id', // [C1] property switcher
       ],
       exposedHeaders: ['x-request-id', 'x-api-version', 'RateLimit-*', 'Idempotency-Key'],
       maxAge: 86400,
@@ -176,8 +229,8 @@ async function bootstrap() {
   // ─── Usage metering: record API calls per tenant ───
   app.use((req: any, res, next) => {
     res.on('finish', () => {
-      if (req.tenantId) {
-        recordApiUsage(req.tenantId, 1, {
+      if (req.auth?.tenantId) {
+        recordApiUsage(req.auth.tenantId, 1, {
           method: req.method,
           path: req.path,
           status: res.statusCode,
@@ -268,6 +321,8 @@ async function bootstrap() {
   app.use('/v1/invoices', invoicesRouter);
 
   app.use('/v1/properties', propertiesRouter);
+  // [C1] Chains + property switcher scope (auth'd)
+  app.use('/v1/chains', chainsRouter);
   app.use('/v1/guests', guestsRouter);
   app.use('/v1/reservations', reservationsRouter);
   app.use('/v1/rooms', roomsRouter);
@@ -284,8 +339,48 @@ async function bootstrap() {
   app.use('/v1/notifications', notificationRouter);
   app.use('/v1/api-keys', apiKeysRouter);
   app.use('/v1/rbac', rbacRouter);
+  // [USERS] tenant staff management — sits next to RBAC (roles come from /v1/rbac)
+  app.use('/v1/users', usersRouter);
+  // [AUDIT] tenant-scoped audit trail (auth'd — report:read or audit:read)
+  app.use('/v1/audit-logs', auditLogsRouter);
   app.use('/v1/push', pushRouter);
+  // [SUPPORT] Guest-facing support tickets (portal-token auth, path-scoped).
+  // MUST mount BEFORE /v1/guest-portal — the main portal router would intercept.
+  app.use('/v1/guest-portal/support', ticketsGuestRouter);
   app.use('/v1/guest-portal', guestPortalRouter);
+  // [T5] Public one-tap task links (tokenized capability URL, per-IP limited).
+  // MUST mount BEFORE /v1/tasks — the staff routers' auth would 401 it.
+  app.use('/v1/tasks/t', publicLimiter, tasksPublicRouter);
+  // [T5] Staff push trigger — only owns POST /:id/push, falls through otherwise
+  app.use('/v1/tasks', taskPushStaffRouter);
+  // [T1] Tasks + rules engine (auth'd)
+  app.use('/v1/tasks', tasksRouter);
+  // [T2] Minibar checks (photo proof → folio charge)
+  app.use('/v1/minibar', minibarRouter);
+  // [T2] Supervisor board: reassign / override / SLA / unassigned pool.
+  // Mounted AFTER the base housekeeping router so /v1/housekeeping/* spine
+  // routes keep priority; supervisor lives at /v1/housekeeping/supervisor/*.
+  app.use('/v1/housekeeping/supervisor', housekeepingSupervisorRouter);
+  // [T3] Guest-facing concierge endpoints (portal-token auth, not staff auth).
+  // MUST mount BEFORE /v1/concierge — the staff router's authMiddleware would
+  // otherwise intercept /guest/* paths and reject portal tokens.
+  app.use('/v1/concierge/guest', conciergeGuestRouter);
+  // [T3] Concierge board — the department is a revenue surface
+  app.use('/v1/concierge', conciergeRouter);
+  // [T6] Parking (auth'd)
+  app.use('/v1/parking', parkingRouter);
+  // [G1] Groups — room blocks, rooming list, master folio (auth'd)
+  app.use('/v1/groups', groupsRouter);
+  // [S&C] Sales & Catering — pipeline, clients, BEOs, catering catalogs (auth'd)
+  app.use('/v1/sales-catering', salesCateringRouter);
+  // [CRM] Guest 360, segments, follow-ups, corporate accounts (auth'd)
+  app.use('/v1/crm', crmRouter);
+  // [I1] Inventory — sellable room inventory (auth'd)
+  app.use('/v1/inventory', inventoryRouter);
+  // [T7] Meal plans — plans, restaurants, assignments, covers, posting log
+  app.use('/v1/meal-plans', mealsRouter);
+  // [SUPPORT] Staff Support Desk (auth'd)
+  app.use('/v1/tickets', ticketsRouter);
 
   // ─── Admin (platform admin: KPIs, health, alerts, reports, jobs) ───
   app.use('/admin', adminRouter);
@@ -317,9 +412,28 @@ async function bootstrap() {
   attachDeadLetterHandler('payment-requests');
   // [A3] pre-arrival jobs retry into the DLQ too
   attachDeadLetterHandler('transactional-email');
+  // [T1] task-rule evaluation jobs retry into the DLQ too
+  attachDeadLetterHandler('tasks');
+  // [T5] task push retries into the DLQ too
+  attachDeadLetterHandler('task-push');
+  // [G1] group cutoff release retries into the DLQ too
+  attachDeadLetterHandler('groups');
+
+  // [T7] meal posting retries into the DLQ too
+  attachDeadLetterHandler('meals');
+  // [SUPPORT] SLA scans retry into the DLQ too
+  attachDeadLetterHandler('tickets');
   void startNightAuditScheduler(); // cron-driven scheduled audits (node-cron, every minute)
   void startPaymentRequestScheduler(); // [DEPOSIT-AUTOMATION] reminders + expiry (every 5 min)
   void startTransactionalEmailScheduler(); // [A3] pre-arrival scan (every hour)
+  void startTaskScheduler(); // [T1] rule scan + SLA flags (every min) · [T3] concierge generators (every 15 min)
+  void startWakeUpDigestScheduler(); // [T3] 05:00 property-local wake-up digest
+  void startTaskPushScheduler(); // [T5] auto-push scan (every min)
+  void startGroupsScheduler(); // [G1] cutoff release scan (every 30 min)
+  void startInventoryCacheScheduler(); // [I1] nightly inventory cache refresh (03:40)
+  void startOverbookingAlertScheduler(); // [I1] walk-plan alerts (08:00 + 14:00)
+  void startMealPostingScheduler(); // [T7] meal auto-post scan (every 15 min)
+  void startTicketScheduler(); // [SUPPORT] SLA breach scan + escalation (every 5 min)
 
   // ─── Graceful Shutdown ───
   const shutdown = async (signal: string) => {

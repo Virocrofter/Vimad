@@ -8,6 +8,8 @@ import {
   setTokens,
   useAuthStore,
 } from '../stores/authStores';
+import { getCurrentPropertyId } from '../stores/propertyStore';
+import { installOfflineInterceptors } from '../lib/offline/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
@@ -87,13 +89,13 @@ function normalizeApiVersion(config: InternalAxiosRequestConfig): void {
   const url = config.url;
   if (!url) return;
   if (/^https?:\/\//i.test(url)) return; // absolute URL — leave alone
-  if (url.startsWith('/v1')) return; // already versioned
+  if (url.startsWith('/v1') || url.startsWith('/admin')) return; // already versioned, or platform-admin (mounted outside /v1)
   if (UNVERSIONED_PATH_PATTERNS.some((re) => re.test(url))) return; // /auth/*
   config.url = `/v1${url.startsWith('/') ? url : `/${url}`}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Request Interceptor: Versioning + Attach JWT + Pre-emptive Refresh
+// Request Interceptor: Versioning + Attach JWT + Property scope + Pre-emptive Refresh
 // ─────────────────────────────────────────────────────────────────────────────
 
 apiClient.interceptors.request.use(
@@ -130,6 +132,13 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // [C1] Property switcher — every authenticated request carries the
+    // selected property so chain-scoped endpoints can filter server-side.
+    const propertyId = getCurrentPropertyId();
+    if (propertyId && config.headers) {
+      config.headers['x-property-id'] = propertyId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -138,6 +147,21 @@ apiClient.interceptors.request.use(
 // ─────────────────────────────────────────────────────────────────────────────
 // Response Interceptor: Handle 401 → Refresh → Retry
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Guest portal traffic rides the scoped portal token (sessionStorage), not
+// the staff access token. A 401 there (guest dashboard probing staff
+// endpoints, expired portal token, etc.) must NEVER trigger the staff
+// refresh/logout flow or the redirect to /auth/login — that machinery
+// logging a guest out of the portal was the bounce bug. Portal pages using
+// apiClient get a plain rejected promise and handle it locally.
+function isGuestPortalRequest(config: InternalAxiosRequestConfig): boolean {
+  const url = config.url ?? '';
+  if (url.includes('/guest-portal') || url.includes('/concierge/guest')) return true;
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/guest-portal')) {
+    return true;
+  }
+  return false;
+}
 
 apiClient.interceptors.response.use(
   (response) => response,
@@ -149,6 +173,10 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isGuestPortalRequest(originalRequest)) {
+        return Promise.reject(error);
+      }
+
       if (originalRequest.url?.includes('/auth/refresh')) {
         await handleLogout('session_expired');
         return Promise.reject(error);
@@ -189,6 +217,14 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A6 OFFLINE LAYER — installed AFTER the auth interceptors above.
+// Request: queues mutating /v1 calls while offline (adapter swap → 202).
+// Response: mirrors GET snapshots into IndexedDB; serves them on ERR_NETWORK.
+// ─────────────────────────────────────────────────────────────────────────────
+
+installOfflineInterceptors(apiClient);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Token refresh logic
@@ -244,6 +280,7 @@ async function performTokenRefresh(): Promise<string> {
 async function handleLogout(reason: 'session_expired' | 'auth_error' = 'session_expired') {
   clearTokens();
   useAuthStore.getState().clearAuth();
+  usePropertyStore.getState().clear();
 
   broadcastAuthEvent({ type: 'logout' });
 
@@ -337,8 +374,11 @@ function handleAuthBroadcast(message: AuthBroadcastMessage): void {
     case 'logout': {
       clearTokens();
       useAuthStore.getState().clearAuth();
+      usePropertyStore.getState().clear();
       const currentPath = window.location.pathname;
-      if (!currentPath.startsWith('/auth/')) {
+      // Never redirect a guest-portal tab to the staff login — the guest
+      // session lives in sessionStorage and is unrelated to staff auth.
+      if (!currentPath.startsWith('/auth/') && !currentPath.startsWith('/guest-portal')) {
         window.location.replace('/auth/login?reason=session_expired');
       }
       break;
@@ -374,6 +414,22 @@ export async function apiDelete<T>(url: string): Promise<T> {
   const response = await apiClient.delete(url);
   return response.data;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A6 exports — consumed by lib/offline init in main.tsx
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Fresh auth headers for the offline flush (queue replays outside axios). */
+export function getAuthHeaders(): Record<string, string> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const propertyId = getCurrentPropertyId();
+  if (propertyId) headers['x-property-id'] = propertyId;
+  return headers;
+}
+
+/** Authenticated GET used to re-pull snapshots after sync / conflicts. */
+export const apiFetchForRefresh = (path: string): Promise<unknown> => apiGet(path);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ApiError — normalized error with status + server code

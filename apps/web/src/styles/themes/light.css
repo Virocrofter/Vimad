@@ -1,3 +1,4 @@
+/* apps/web/src/styles/themes/light.css */
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -7,27 +8,31 @@
   --popover-foreground: #0f172a;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --input: #e2e8f0;
+
+  /* App tokens — consumed via @theme in globals.css */
   --surface: #ffffff;
-  --surface-elevated: #ffffff;
+  --surface-elevated: #f1f5f9;
   --border: #e2e8f0;
-  --ring: #3b82f6;
-  --radius: 0.5rem;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --primary: #0f172a;
-  --primary-foreground: #f8fafc;
-  --secondary: #3b82f6;
+
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #4338ca;
   --secondary-foreground: #ffffff;
-  --accent: #10b981;
-  --accent-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #0f172a;
-  --danger: #ef4444;
+  --accent: #eef2ff;
+  --accent-foreground: #4338ca;
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --danger: #dc2626;
   --danger-foreground: #ffffff;
-  --info: #6366f1;
+  --info: #2563eb;
   --info-foreground: #ffffff;
   --neutral: #64748b;
   --neutral-foreground: #ffffff;
+
+  --ring: #4f46e5;
+  --input: #cbd5e1;
+  --radius: 0.5rem;
 }

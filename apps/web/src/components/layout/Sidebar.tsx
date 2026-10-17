@@ -10,6 +10,7 @@ import {
   UsersRound,
   Brush,
   MoonStar,
+  ListTodo,
   KeyRound,
   SquareParking,
   Boxes,
@@ -23,11 +24,14 @@ import {
   Megaphone,
   Gem,
   Briefcase,
+  HeartHandshake,
   Radio,
   BarChart3,
   ShieldCheck,
   LifeBuoy,
   Settings,
+  Sparkles,
+  Building2,
   Menu,
   X,
 } from 'lucide-react';
@@ -59,6 +63,8 @@ const NAV_SECTIONS: NavSection[] = [
       { to: '/app/room-plan', label: 'Room Plan', icon: BedDouble },
       { to: '/app/guests', label: 'Guests', icon: Users },
       { to: '/app/groups', label: 'Groups', icon: UsersRound, end: true },
+      { to: '/app/tasks', label: 'Tasks', icon: ListTodo },
+      { to: '/app/concierge', label: 'Concierge', icon: Sparkles },
     ],
   },
   {
@@ -87,6 +93,8 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { to: '/app/marketing', label: 'Marketing', icon: Megaphone, end: true },
       { to: '/app/loyalty', label: 'Loyalty', icon: Gem },
+      // [CRM] Guest 360, segments, follow-ups, corporate accounts
+      { to: '/app/crm', label: 'CRM', icon: HeartHandshake, end: true },
       { to: '/app/sales-catering', label: 'Sales & Catering', icon: Briefcase, end: true },
       { to: '/app/channel-manager', label: 'Channel Manager', icon: Radio },
     ],
@@ -94,13 +102,20 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Administration',
     items: [
+      // [C1] Chains + property dashboard
+      { to: '/app/properties', label: 'Properties', icon: Building2 },
       { to: '/app/reports', label: 'Reports', icon: BarChart3 },
       { to: '/app/users', label: 'Users', icon: ShieldCheck },
       { to: '/app/audit-trail', label: 'Audit Trail', icon: ShieldCheck },
-      { to: '/app/support', label: 'Support', icon: LifeBuoy },
       { to: '/app/settings', label: 'Settings', icon: Settings },
       { to: '/app/settings/email', label: 'Email Center', icon: Mail },
     ],
+  },
+  {
+    // [SUPPORT] Last section, separated from ops/admin — this is the
+    // "I'm stuck" entry, not a config surface. Keep it at the bottom.
+    title: 'Help',
+    items: [{ to: '/app/support', label: 'Support', icon: LifeBuoy, end: true }],
   },
 ];
 
@@ -133,7 +148,7 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
           transition-all duration-200
           ${collapsed ? 'w-16' : 'w-64'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:static lg:translate-x-0
+          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:self-start
         `}
       >
         <div className="flex h-16 shrink-0 items-center border-b border-border px-4">

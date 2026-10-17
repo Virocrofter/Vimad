@@ -1,6 +1,8 @@
 /* apps/web/src/components/layout/Topbar.tsx */
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/button';
+import { PropertySwitcher } from './PropertySwitcher';
+import { ThemeToggle } from '../theme/themeToggle';
 
 export function Topbar() {
   const { user, logout } = useAuth();
@@ -12,13 +14,15 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <PropertySwitcher />
         {user && (
           <div className="flex items-center gap-3">
             <div className="text-right">
               <p className="text-sm font-medium text-text-primary">
                 {user.firstName ?? ''} {user.lastName ?? ''}
               </p>
-              <p className="text-xs capitalize text-text-muted">{user.role}</p>
+              <p className="text-xs capitalize text-text-muted">{user.role.replace(/_/g, ' ')}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
               Logout

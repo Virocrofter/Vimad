@@ -157,7 +157,7 @@ export const nightAuditRouter = Router();
 
 nightAuditRouter.use(authMiddleware, tenantScope);
 
-/* ─── GET /pre-checks ─── */
+/* --- GET /pre-checks --- */
 registry.registerPath({
   method: 'get',
   path: '/pre-checks',
@@ -195,7 +195,7 @@ nightAuditRouter.get(
   }
 );
 
-/* ─── GET /status ─── */
+/* --- GET /status --- */
 registry.registerPath({
   method: 'get',
   path: '/status',
@@ -233,7 +233,7 @@ nightAuditRouter.get(
   }
 );
 
-/* ─── POST /run ─── */
+/* --- POST /run --- */
 registry.registerPath({
   method: 'post',
   path: '/run',
@@ -288,7 +288,7 @@ nightAuditRouter.post(
   }
 );
 
-/* ─── POST /:id/rollback ─── */
+/* --- POST /:id/rollback --- */
 registry.registerPath({
   method: 'post',
   path: '/{id}/rollback',
@@ -337,7 +337,7 @@ nightAuditRouter.post(
   }
 );
 
-/* ─── GET /history ─── */
+/* --- GET /history --- */
 registry.registerPath({
   method: 'get',
   path: '/history',
@@ -383,7 +383,7 @@ nightAuditRouter.get(
   }
 );
 
-/* ─── GET /:id/report ─── */
+/* --- GET /:id/report --- */
 registry.registerPath({
   method: 'get',
   path: '/{id}/report',
@@ -423,7 +423,7 @@ nightAuditRouter.get(
   }
 );
 
-/* ─── GET /schedule ─── */
+/* --- GET /schedule --- */
 registry.registerPath({
   method: 'get',
   path: '/schedule',
@@ -461,7 +461,7 @@ nightAuditRouter.get(
   }
 );
 
-/* ─── PUT /schedule ─── */
+/* --- PUT /schedule --- */
 registry.registerPath({
   method: 'put',
   path: '/schedule',

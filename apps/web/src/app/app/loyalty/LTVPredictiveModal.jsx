@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { X, TrendingUp, AlertTriangle, Zap } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '../../../lib/utils';
-import { tierMeta } from './data';
+import { tierMeta } from './tierMeta';
 import { StatCard } from './components';
 
 export function LTVPredictiveModal({ members, onClose }) {

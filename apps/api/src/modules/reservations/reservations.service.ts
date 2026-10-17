@@ -5,6 +5,7 @@ import { logger } from '../../common/logger.js';
 import { paginate, paginationSchema, skipTake } from '../../common/pagination.js';
 import { broadcastAuditEvent } from '../audit/audit.events.js';
 import { sendReservationConfirmation } from '../notifications/transactional.service.js';
+import { assertSellable } from '../inventory/inventory.service.js';
 import {
   broadcastReservationCreated,
   broadcastReservationUpdated,
@@ -307,6 +308,41 @@ async function rebuildStays(
   ]);
 }
 
+/* ─── [I1] Room-type level inventory enforcement (front-desk parity with the
+ * public engine): group holds, stop-sell dates and overbooking caps block
+ * reservations even when a physical room looks free. Desk override: raise the
+ * manual adjustment on the Inventory page — that raises the sellable total. ─── */
+async function enforceTypeInventory(
+  tenantId: string,
+  propertyId: string,
+  roomTypeId: string,
+  arrival: Date,
+  departure: Date,
+  excludeReservationId?: string
+) {
+  try {
+    await assertSellable(
+      tenantId,
+      propertyId,
+      roomTypeId,
+      arrival,
+      departure,
+      excludeReservationId
+    );
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'INVENTORY_SOLD_OUT') {
+      throw new AppError(
+        409,
+        'Inventory is blocked for these dates (stop-sell, group hold, or overbooking cap). ' +
+          String(err.message) +
+          ' — raise the adjustment on the Inventory page to override.',
+        'INVENTORY_BLOCKED'
+      );
+    }
+    throw err;
+  }
+}
+
 export async function createReservation(tenantId: string, input: ReservationCreateInput) {
   if (input.departureDate <= input.arrivalDate) {
     throw new AppError(400, 'Departure date must be after arrival date', 'VALIDATION_ERROR');
@@ -339,6 +375,30 @@ export async function createReservation(tenantId: string, input: ReservationCrea
       rate = Number(room.roomType.ratePlans[0]?.baseRate ?? 0);
     }
     await assertRoomFree(tenantId, input.roomId, input.arrivalDate, input.nights, null);
+    await enforceTypeInventory(
+      tenantId,
+      property.id,
+      room.roomType.id,
+      input.arrivalDate,
+      input.departureDate
+    );
+  }
+
+  // [I1] reservation without a pre-assigned room still consumes room-type inventory
+  if (!input.roomId && input.roomTypeId) {
+    const requestedType = await prisma.roomType.findFirst({
+      where: { id: input.roomTypeId, propertyId: property.id },
+    });
+    if (!requestedType) {
+      throw new AppError(404, 'Room type not found in this property', 'NOT_FOUND');
+    }
+    await enforceTypeInventory(
+      tenantId,
+      property.id,
+      requestedType.id,
+      input.arrivalDate,
+      input.departureDate
+    );
   }
 
   const confirmationNumber = generateConfirmationNumber();
@@ -420,6 +480,14 @@ export async function assignRoom(tenantId: string, id: string, input: AssignRoom
   }
 
   await assertRoomFree(tenantId, input.roomId, reservation.arrivalDate, reservation.nights, id);
+  await enforceTypeInventory(
+    tenantId,
+    reservation.propertyId,
+    room.roomTypeId,
+    reservation.arrivalDate,
+    reservation.departureDate,
+    id
+  );
 
   const rate =
     input.rate ??

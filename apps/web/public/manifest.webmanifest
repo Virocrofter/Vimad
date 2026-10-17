@@ -1,0 +1,12 @@
+{
+  "name": "Vimad PMS",
+  "short_name": "Vimad",
+  "description": "Offline-tolerant hotel property management",
+  "start_url": "/app/front-desk",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#863bff",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

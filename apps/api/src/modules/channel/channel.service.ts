@@ -270,23 +270,74 @@ export async function pushAvailability(
     occupiedByTypeAndDate.set(k, (occupiedByTypeAndDate.get(k) ?? 0) + row._count._all);
   }
 
+  // ─── I1: holds, manual adjustments, stop-sell, overbooking caps ───
+  const [holds, restrictions, obLimits] = await Promise.all([
+    (prisma as any).inventoryAllocation.groupBy({
+      by: ['roomTypeId', 'date'],
+      where: {
+        propertyId: input.propertyId,
+        status: 'active',
+        date: { gte: dateFrom, lte: dateTo },
+      },
+      _sum: { quantity: true },
+    }),
+    (prisma as any).inventoryRestriction.findMany({
+      where: { propertyId: input.propertyId, date: { gte: dateFrom, lte: dateTo } },
+    }),
+    (prisma as any).inventoryOverbooking.findMany({
+      where: { roomType: { propertyId: input.propertyId } },
+    }),
+  ]);
+  const heldByTypeDate = new Map<string, number>(
+    holds.map(
+      (h: { roomTypeId: string; date: Date; _sum: { quantity: number | null } }) =>
+        [`${h.roomTypeId}:${h.date.toISOString().split('T')[0]}`, h._sum.quantity ?? 0] as [
+          string,
+          number,
+        ]
+    )
+  );
+  const restrByTypeDate = new Map<string, { stopSell: boolean; adjustment: number }>(
+    restrictions.map(
+      (r: { roomTypeId: string; date: Date; stopSell: boolean; adjustment: number }) =>
+        [`${r.roomTypeId}:${r.date.toISOString().split('T')[0]}`, r] as [
+          string,
+          { stopSell: boolean; adjustment: number },
+        ]
+    )
+  );
+  const obByType = new Map<string, number>(
+    obLimits.map(
+      (o: { roomTypeId: string; limit: number }) => [o.roomTypeId, o.limit] as [string, number]
+    )
+  );
+  const UNSALEABLE_ROOM_STATUSES = ['inactive', 'ooo', 'out_of_order'];
+
   const availability = [];
 
   for (const roomType of property.roomTypes.filter((rt) =>
     input.roomTypes ? input.roomTypes.includes(rt.id) : true
   )) {
     const rooms = property.rooms.filter((r) => r.roomTypeId === roomType.id);
-    const totalRooms = rooms.length;
+    const totalRooms = rooms.filter((r) => !UNSALEABLE_ROOM_STATUSES.includes(r.status)).length;
 
     for (let d = new Date(dateFrom); d <= dateTo; d.setDate(d.getDate() + 1)) {
       const dateKey = d.toISOString().split('T')[0];
       const occupied = occupiedByTypeAndDate.get(`${roomType.id}:${dateKey}`) ?? 0;
+      const restr = restrByTypeDate.get(`${roomType.id}:${dateKey}`);
+      const held = heldByTypeDate.get(`${roomType.id}:${dateKey}`) ?? 0;
+      const obLimit = obByType.get(roomType.id) ?? 0;
+      // Stop-sell pushes as zero rooms-to-sell; holds subtract; adjustments
+      // add; the overbooking cap adds on top — identical math to the grid.
+      const available = restr?.stopSell
+        ? 0
+        : Math.max(totalRooms - occupied - held + (restr?.adjustment ?? 0), 0) + obLimit;
 
       availability.push({
         date: dateKey,
         roomTypeId: roomType.id,
         roomTypeCode: roomType.code,
-        available: totalRooms - occupied,
+        available,
         total: totalRooms,
       });
     }
@@ -874,7 +925,7 @@ async function tenantForConnection(conn: ChannelConnectionLike): Promise<string>
 
 // ─── send/fetch entry points (same signatures as the old stubs) ───
 
-async function sendToChannel(
+export async function sendToChannel(
   connection: ChannelConnectionLike,
   type: string,
   data: unknown

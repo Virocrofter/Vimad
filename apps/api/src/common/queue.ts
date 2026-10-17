@@ -36,6 +36,11 @@ export const QUEUE_NAMES = [
   'payments', // [PAYMENTS]
   'payment-requests', // [DEPOSIT-AUTOMATION]
   'transactional-email', // [A3]
+  'tasks', // [T1] task rules engine
+  'task-push', // [T5] WhatsApp/SMS task push
+  'groups', // [G1] group cutoff release / washout
+  'tickets', // [SUPPORT] SLA breach scan / escalation
+  'meals', // [T7] meal plan auto-posting
   'dead-letter',
 ] as const;
 export type QueueName = (typeof QUEUE_NAMES)[number];

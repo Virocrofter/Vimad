@@ -265,7 +265,7 @@ export async function createGuestNote(
   if (!guest) throw new AppError(404, 'Guest not found', 'NOT_FOUND');
 
   return prisma.guestNote.create({
-    data: { guestId, authorId, body: input.body },
+    data: { guestId, authorId, body: input.body, tenantId },
     include: { author: { select: { id: true, firstName: true, lastName: true } } },
   });
 }
@@ -397,6 +397,7 @@ export async function mergeGuests(
     await tx.guestNote.create({
       data: {
         guestId: targetGuestId,
+        tenantId,
         authorId,
         body: `Merged duplicate profile "${source.firstName} ${source.lastName}" (ID: ${source.id.slice(-8)}) into this profile. Moved ${reservations.count} reservation(s), ${notes.count} note(s), ${preferences.count} preference(s), ${documents.count} document(s), ${loyaltyTransactions.count} loyalty transaction(s). Loyalty points combined to ${combinedPoints}.`,
       },

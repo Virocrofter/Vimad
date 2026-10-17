@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
 import { Topbar } from '../../components/layout/Topbar';
+import { OfflineBanner } from '../../components/OfflineBanner';
 
 export default function AppLayout() {
   const [collapsed] = useState(false);
@@ -13,6 +14,7 @@ export default function AppLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
         <main className="flex-1 overflow-y-auto p-6">
+          <OfflineBanner />
           <Outlet />
         </main>
       </div>

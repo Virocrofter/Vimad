@@ -28,6 +28,7 @@ import {
   RevenueChart,
   RoomBoard,
 } from './components';
+import CrmPulse from './CrmPulse';
 import { ErrorState } from '../../../components/ui/ErrorState';
 
 export default function AppDashboard() {
@@ -217,6 +218,8 @@ export default function AppDashboard() {
           </Link>
         </div>
       )}
+
+      <CrmPulse />
 
       <QuickActionsFab />
     </div>

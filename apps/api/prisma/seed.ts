@@ -76,6 +76,22 @@ const PERMISSIONS = [
   { resource: 'room', action: 'update', category: 'inventory', description: 'Update room status' },
   { resource: 'room', action: 'delete', category: 'inventory', description: 'Remove rooms' },
 
+  // Room type permissions
+  { resource: 'room_type', action: 'create', category: 'inventory', description: 'Add room types' },
+  { resource: 'room_type', action: 'read', category: 'inventory', description: 'View room types' },
+  {
+    resource: 'room_type',
+    action: 'update',
+    category: 'inventory',
+    description: 'Update room types',
+  },
+  {
+    resource: 'room_type',
+    action: 'delete',
+    category: 'inventory',
+    description: 'Remove room types',
+  },
+
   // Folio/Billing permissions
   { resource: 'folio', action: 'create', category: 'billing', description: 'Create folio charges' },
   { resource: 'folio', action: 'read', category: 'billing', description: 'View folios' },
@@ -220,6 +236,149 @@ const PERMISSIONS = [
     category: 'operations',
     description: 'Assign housekeeping tasks',
   },
+  // Task permissions (T1)
+  { resource: 'task', action: 'create', category: 'operations', description: 'Create tasks' },
+  { resource: 'task', action: 'read', category: 'operations', description: 'View tasks' },
+  {
+    resource: 'task',
+    action: 'update',
+    category: 'operations',
+    description: 'Update/complete tasks',
+  },
+  { resource: 'task', action: 'delete', category: 'operations', description: 'Cancel tasks' },
+  {
+    resource: 'task',
+    action: 'assign',
+    category: 'operations',
+    description: 'Assign tasks to staff',
+  },
+  { resource: 'task_rule', action: 'read', category: 'operations', description: 'View task rules' },
+  {
+    resource: 'task_rule',
+    action: 'manage',
+    category: 'operations',
+    description: 'Create/edit task rules',
+  },
+
+  // Group permissions (G1)
+  {
+    resource: 'group',
+    action: 'create',
+    category: 'reservations',
+    description: 'Create group blocks',
+  },
+  {
+    resource: 'group',
+    action: 'read',
+    category: 'reservations',
+    description: 'View groups and rooming lists',
+  },
+  {
+    resource: 'group',
+    action: 'update',
+    category: 'reservations',
+    description: 'Edit group blocks and members',
+  },
+  { resource: 'group', action: 'delete', category: 'reservations', description: 'Cancel groups' },
+
+  // Sales & Catering permissions (S&C)
+  {
+    resource: 'sc_client',
+    action: 'create',
+    category: 'sales_catering',
+    description: 'Create S&C clients',
+  },
+  {
+    resource: 'sc_client',
+    action: 'read',
+    category: 'sales_catering',
+    description: 'View S&C clients',
+  },
+  {
+    resource: 'sc_client',
+    action: 'update',
+    category: 'sales_catering',
+    description: 'Edit S&C clients',
+  },
+  {
+    resource: 'sc_client',
+    action: 'delete',
+    category: 'sales_catering',
+    description: 'Delete S&C clients',
+  },
+  {
+    resource: 'sc_event',
+    action: 'create',
+    category: 'sales_catering',
+    description: 'Create events/leads',
+  },
+  { resource: 'sc_event', action: 'read', category: 'sales_catering', description: 'View events' },
+  {
+    resource: 'sc_event',
+    action: 'update',
+    category: 'sales_catering',
+    description: 'Edit events / move pipeline',
+  },
+  {
+    resource: 'sc_event',
+    action: 'delete',
+    category: 'sales_catering',
+    description: 'Delete events',
+  },
+  { resource: 'sc_beo', action: 'read', category: 'sales_catering', description: 'View BEOs' },
+  {
+    resource: 'sc_beo',
+    action: 'manage',
+    category: 'sales_catering',
+    description: 'Create/edit/submit BEOs',
+  },
+  {
+    resource: 'sc_beo',
+    action: 'approve',
+    category: 'sales_catering',
+    description: 'Approve BEOs',
+  },
+  { resource: 'sc_beo', action: 'sign', category: 'sales_catering', description: 'Sign BEOs' },
+  {
+    resource: 'sc_catalog',
+    action: 'manage',
+    category: 'sales_catering',
+    description: 'Manage venues, menus, AV, setups, decor',
+  },
+
+  // CRM permissions
+  {
+    resource: 'crm',
+    action: 'read',
+    category: 'crm',
+    description: 'View CRM guest 360, segments, follow-ups',
+  },
+  {
+    resource: 'crm',
+    action: 'manage',
+    category: 'crm',
+    description: 'Edit CRM tags, notes, segments, follow-ups, corporate accounts',
+  },
+
+  // Support permissions
+  {
+    resource: 'ticket',
+    action: 'read',
+    category: 'support',
+    description: 'View support tickets and threads',
+  },
+  {
+    resource: 'ticket',
+    action: 'update',
+    category: 'support',
+    description: 'Reply, change status, assign tickets',
+  },
+  {
+    resource: 'ticket',
+    action: 'manage',
+    category: 'support',
+    description: 'Create/edit/delete tickets, internal notes',
+  },
 ];
 
 // ─── Role Definitions with Permission Sets ───
@@ -254,6 +413,10 @@ const ROLES = [
       'room:read',
       'room:update',
       'room:delete',
+      'room_type:create',
+      'room_type:read',
+      'room_type:update',
+      'room_type:delete',
       'folio:create',
       'folio:read',
       'folio:update',
@@ -289,6 +452,19 @@ const ROLES = [
       'housekeeping:read',
       'housekeeping:update',
       'housekeeping:assign',
+      'task:create',
+      'task:read',
+      'task:update',
+      'task:delete',
+      'task:assign',
+      'task_rule:read',
+      'task_rule:manage',
+      'group:create',
+      'group:read',
+      'group:update',
+      'group:delete',
+      'crm:read',
+      'crm:manage',
     ],
   },
   {
@@ -326,6 +502,15 @@ const ROLES = [
       'housekeeping:read',
       'housekeeping:update',
       'housekeeping:assign',
+      'task:read',
+      'task:update',
+      'task:assign',
+      'task_rule:read',
+      'group:create',
+      'group:read',
+      'group:update',
+      'crm:read',
+      'crm:manage',
     ],
   },
   {
@@ -351,6 +536,14 @@ const ROLES = [
       'housekeeping:read',
       'housekeeping:update',
       'notification:read',
+      'housekeeping:read',
+      'housekeeping:update',
+      'task:read',
+      'task:update',
+      'loyalty:read',
+      'loyalty:update',
+      'group:read',
+      'crm:read',
     ],
   },
   {
@@ -1099,7 +1292,7 @@ async function main() {
         guestNotes: guestNotes
           ? {
               deleteMany: {},
-              create: guestNotes.map((body) => ({ body })),
+              create: guestNotes.map((body) => ({ body, tenantId: tenant.id })),
             }
           : undefined,
       },
@@ -1109,7 +1302,7 @@ async function main() {
         ...(createdAt ? { createdAt } : {}),
         preferences: { create: preferences ?? [] },
         documents: { create: documents ?? [] },
-        guestNotes: { create: (guestNotes ?? []).map((body) => ({ body })) },
+        guestNotes: { create: (guestNotes ?? []).map((body) => ({ body, tenantId: tenant.id })) },
       },
     });
 
@@ -1385,6 +1578,764 @@ async function main() {
       completedAt: new Date(),
     },
   });
+
+  // ─── T1: Task rules engine — 20 seeded generators (rows, not code) ───
+  const TASK_RULES = [
+    {
+      key: 'dirty-room-on-departure',
+      name: 'Dirty room on departure',
+      department: 'housekeeping',
+      trigger: { type: 'schedule', everyMinutes: 5 },
+      action: {
+        title: 'Clean room {{roomNumber}} (departed {{guestName}})',
+        priority: 'normal',
+        slaMinutes: 240,
+        dedupe: 'open',
+      },
+    },
+    {
+      key: 'arrival-not-inspected-by-12',
+      name: 'Arrival not inspected by 12:00',
+      department: 'housekeeping',
+      trigger: { type: 'schedule', everyMinutes: 60 },
+      action: {
+        title: 'Inspect room {{roomNumber}} — {{guestName}} checked in uninspected',
+        priority: 'high',
+        slaMinutes: 120,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'dnd-decision-16',
+      name: 'DND decision at 16:00',
+      department: 'housekeeping',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title: 'DND decision — room {{roomNumber}} ({{guestName}}): service or skip?',
+        priority: 'normal',
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'no-show-call',
+      name: 'No-show call',
+      department: 'front_desk',
+      trigger: { type: 'schedule', everyMinutes: 60 },
+      action: {
+        title: 'Call no-show guest {{guestName}} ({{confirmationNumber}}) — {{guestPhone}}',
+        priority: 'high',
+        slaMinutes: 180,
+        dedupe: 'open',
+      },
+    },
+    {
+      key: 'unassigned-room-16',
+      name: 'Unassigned room at 16:00',
+      department: 'front_desk',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title: 'Assign room — {{guestName}} arriving today ({{confirmationNumber}}) has no room',
+        priority: 'urgent',
+        slaMinutes: 60,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'deposit-t3-payment-request',
+      name: 'Deposit T-3 payment request',
+      department: 'front_desk',
+      trigger: { type: 'schedule', everyMinutes: 360 },
+      action: {
+        title:
+          'Send T-3 deposit request — {{guestName}} ({{confirmationNumber}}), balance R{{balance}}',
+        description: 'Open Payment Requests and send the A2 hosted pay-now link.',
+        priority: 'high',
+        slaMinutes: 720,
+        dedupe: 'open',
+      },
+    },
+    {
+      key: 'folio-settle-at-checkout',
+      name: 'Folio settle at checkout',
+      department: 'front_desk',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title:
+          'Settle folio — {{guestName}} ({{confirmationNumber}}) departed with R{{folioBalance}} balance',
+        priority: 'high',
+        slaMinutes: 120,
+        dedupe: 'open',
+      },
+    },
+    {
+      key: 'complaint-30min-sla',
+      name: 'Complaint 30-min SLA (manual)',
+      department: 'management',
+      description:
+        'Template — create the task manually (or via API) with slaMinutes=30 when a complaint lands.',
+      trigger: { type: 'manual' },
+      action: { title: 'Complaint — 30 min SLA', priority: 'urgent', slaMinutes: 30 },
+    },
+    {
+      key: 'key-active-without-checkin',
+      name: 'Key active without check-in',
+      department: 'security',
+      trigger: { type: 'schedule', everyMinutes: 15 },
+      action: {
+        title:
+          'SECURITY: key active, no check-in — room {{roomNumber}} ({{guestName}}, {{confirmationNumber}})',
+        priority: 'urgent',
+        slaMinutes: 30,
+        dedupe: 'open',
+      },
+    },
+    {
+      key: 'preventive-maintenance',
+      name: 'Preventive maintenance round',
+      department: 'maintenance',
+      trigger: { type: 'schedule', everyMinutes: 1440 },
+      action: {
+        title:
+          'Preventive maintenance — {{propertyName}} (generator, fire, lifts, loadshedding gear)',
+        priority: 'normal',
+        slaMinutes: 4320,
+        dedupe: 'once',
+      },
+    },
+    {
+      key: 'night-audit-not-rolled-04',
+      name: 'Night audit not rolled (04:00)',
+      department: 'management',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title:
+          'Business date NOT rolled — {{propertyName}} has no completed night audit for {{businessDate}}',
+        priority: 'urgent',
+        slaMinutes: 60,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'compliance-cert-expiry',
+      name: 'Compliance certificate expiry',
+      department: 'management',
+      trigger: { type: 'schedule', everyMinutes: 1440 },
+      config: {
+        certs: [
+          {
+            name: 'Fire safety certificate',
+            expiryDate: new Date(Date.now() + 21 * 86400_000).toISOString().slice(0, 10),
+          },
+          {
+            name: 'Liquor licence',
+            expiryDate: new Date(Date.now() + 45 * 86400_000).toISOString().slice(0, 10),
+          },
+          {
+            name: 'Health certificate',
+            expiryDate: new Date(Date.now() + 12 * 86400_000).toISOString().slice(0, 10),
+          },
+        ],
+      },
+      action: {
+        title: 'Renew {{certName}} — expires {{expiryDate}}',
+        priority: 'high',
+        slaMinutes: 10080,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'overbooking-decision',
+      name: 'Overbooking decision to GM',
+      department: 'management',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title:
+          'OVERBOOKED: {{propertyName}} — {{arrivalsTonight}} arrivals vs {{roomsAvailable}} rooms tonight',
+        priority: 'urgent',
+        slaMinutes: 120,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'special-request-prep',
+      name: 'Special-request prep',
+      department: 'concierge',
+      trigger: { type: 'schedule', everyMinutes: 360 },
+      action: {
+        title: 'Prep special request — {{guestName}} ({{confirmationNumber}}): {{specialRequest}}',
+        priority: 'normal',
+        slaMinutes: 720,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'repeat-vip-prep',
+      name: 'Repeat-VIP prep',
+      department: 'concierge',
+      trigger: { type: 'schedule', everyMinutes: 360 },
+      action: {
+        title:
+          'VIP prep — {{guestName}} ({{vipStatus}}, {{previousStays}} prior stays) arrives tomorrow',
+        priority: 'high',
+        slaMinutes: 720,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'post-stay-recovery',
+      name: 'Post-stay recovery',
+      department: 'management',
+      trigger: { type: 'schedule', everyMinutes: 720 },
+      action: {
+        title: 'Recovery call — {{guestName}} ({{confirmationNumber}}) departed unhappy',
+        description: 'Folio carried a complaint marker. Call {{guestEmail}} and log outcome.',
+        priority: 'high',
+        slaMinutes: 1440,
+        dedupe: 'once',
+      },
+    },
+    {
+      key: 'corporate-credit-limit-review',
+      name: 'Corporate credit-limit review',
+      department: 'management',
+      trigger: { type: 'schedule', everyMinutes: 10080 },
+      action: {
+        title:
+          'Credit review — {{guestName}}: {{openBalances}} open balances, R{{outstandingTotal}} outstanding',
+        priority: 'normal',
+        slaMinutes: 2880,
+        dedupe: 'daily',
+      },
+    },
+    {
+      key: 'card-retry-failure',
+      name: 'Card retry failure',
+      department: 'front_desk',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title: 'Card failed — {{guestName}} ({{confirmationNumber}}): {{failureReason}}',
+        priority: 'high',
+        slaMinutes: 240,
+        dedupe: 'once',
+      },
+    },
+    {
+      key: 'hk-dirty-3h-escalation',
+      name: 'HK dirty-3h escalation',
+      department: 'housekeeping',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title: 'ESCALATED: room {{roomNumber}} dirty >3h at {{propertyName}}',
+        priority: 'urgent',
+        slaMinutes: 60,
+        dedupe: 'open',
+      },
+    },
+    {
+      key: 'inspection-fail-reclean',
+      name: 'Inspection fail → re-clean',
+      department: 'housekeeping',
+      trigger: { type: 'schedule', everyMinutes: 30 },
+      action: {
+        title: 'Re-clean room {{roomNumber}} — inspection FAILED ({{inspectionNotes}})',
+        priority: 'high',
+        slaMinutes: 90,
+        dedupe: 'daily',
+      },
+    },
+  ];
+
+  for (const r of TASK_RULES) {
+    await prisma.taskRule.upsert({
+      where: { tenantId_key: { tenantId: tenant.id, key: r.key } },
+      update: {
+        name: r.name,
+        department: r.department,
+        description: (r as { description?: string }).description ?? null,
+        trigger: r.trigger as object,
+        action: r.action as object,
+        ...(r.config ? { config: r.config as object } : {}),
+      },
+      create: {
+        tenantId: tenant.id,
+        key: r.key,
+        name: r.name,
+        department: r.department,
+        description: (r as { description?: string }).description ?? null,
+        trigger: r.trigger as object,
+        conditions: {},
+        action: r.action as object,
+        ...(r.config ? { config: r.config as object } : {}),
+      },
+    });
+  }
+  console.log(`Seeded ${TASK_RULES.length} task rules.`);
+
+  // ─── T4: Parking — bays, guest vehicles, one arrival today with a car ───
+  const PARKING_BAYS: { label: string; zone: string; evCharger?: boolean }[] = [
+    ...Array.from({ length: 12 }, (_, i) => ({
+      label: `A-${String(i + 1).padStart(2, '0')}`,
+      zone: 'standard',
+    })),
+    ...Array.from({ length: 6 }, (_, i) => ({
+      label: `B-${String(i + 1).padStart(2, '0')}`,
+      zone: 'standard',
+    })),
+    ...Array.from({ length: 3 }, (_, i) => ({ label: `EV-${i + 1}`, zone: 'ev', evCharger: true })),
+    ...Array.from({ length: 2 }, (_, i) => ({ label: `ACC-${i + 1}`, zone: 'accessible' })),
+    { label: 'VAL-1', zone: 'valet' },
+  ];
+  for (const b of PARKING_BAYS) {
+    await prisma.parkingBay.upsert({
+      where: { propertyId_label: { propertyId: property.id, label: b.label } },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        propertyId: property.id,
+        label: b.label,
+        zone: b.zone,
+        evCharger: b.evCharger ?? false,
+      },
+    });
+  }
+
+  const VEHICLE_SEEDS = [
+    {
+      guestKey: 'demo-guest-john',
+      plate: 'ND 123 456',
+      make: 'Toyota',
+      model: 'Corolla',
+      color: 'Silver',
+      isPrimary: true,
+    },
+    {
+      guestKey: 'demo-guest-013',
+      plate: 'CA 789 012',
+      make: 'VW',
+      model: 'Golf GTI',
+      color: 'Blue',
+      isPrimary: true,
+    },
+    {
+      guestKey: 'demo-guest-003',
+      plate: 'CLM 45 67',
+      make: 'BMW',
+      model: 'X3',
+      color: 'White',
+      isPrimary: true,
+      isElectric: true,
+    },
+    {
+      guestKey: 'demo-guest-015',
+      plate: 'KA 55 890',
+      make: 'Hyundai',
+      model: 'Kona EV',
+      color: 'Red',
+      isPrimary: true,
+      isElectric: true,
+    },
+  ];
+  for (const v of VEHICLE_SEEDS) {
+    const guest = guestMap.get(v.guestKey);
+    if (!guest) continue;
+    const { guestKey, ...veh } = v;
+    await prisma.guestVehicle.upsert({
+      where: { tenantId_plate: { tenantId: tenant.id, plate: v.plate } },
+      update: { guestId: guest.id },
+      create: { tenantId: tenant.id, guestId: guest.id, ...veh },
+    });
+  }
+
+  // Same-day arrival with a vehicle on file — makes the board light up
+  // immediately (auto-assign has something to assign).
+  const parkGuest = await prisma.guest.upsert({
+    where: { id: 'demo-guest-park-1' },
+    update: {},
+    create: {
+      id: 'demo-guest-park-1',
+      tenantId: tenant.id,
+      firstName: 'Nandi',
+      lastName: 'Dlamini',
+      email: 'nandi.d@example.co.za',
+      phone: '+27 84 555 0999',
+    },
+  });
+  await prisma.guestVehicle.upsert({
+    where: { tenantId_plate: { tenantId: tenant.id, plate: 'NPN 2468' } },
+    update: { guestId: parkGuest.id },
+    create: {
+      tenantId: tenant.id,
+      guestId: parkGuest.id,
+      plate: 'NPN 2468',
+      make: 'Audi',
+      model: 'A3',
+      color: 'Grey',
+      isPrimary: true,
+    },
+  });
+  await prisma.reservation.upsert({
+    where: { confirmationNumber: 'DEMO-PARK-1' },
+    update: {
+      arrivalDate: daysFromNow(0),
+      departureDate: daysFromNow(2),
+      status: 'confirmed',
+    },
+    create: {
+      tenantId: tenant.id,
+      propertyId: property.id,
+      guestId: parkGuest.id,
+      confirmationNumber: 'DEMO-PARK-1',
+      status: 'confirmed',
+      source: 'direct',
+      arrivalDate: daysFromNow(0),
+      departureDate: daysFromNow(2),
+      nights: 2,
+      adults: 2,
+      totalAmount: 378,
+      balance: 378,
+    },
+  });
+  console.log('Seeded parking bays, guest vehicles and a same-day arrival.');
+
+  // ─── C1: Chains + chain-admin — one login sees a 4-property group ───
+  const CHAIN_ADMIN_PERMS = [
+    'property:read',
+    'property:create',
+    'property:update',
+    'reservation:create',
+    'reservation:read',
+    'reservation:update',
+    'reservation:checkin',
+    'reservation:checkout',
+    'guest:create',
+    'guest:read',
+    'guest:update',
+    'room:read',
+    'room:update',
+    'folio:create',
+    'folio:read',
+    'folio:payment',
+    'rate_plan:read',
+    'housekeeping:read',
+    'housekeeping:update',
+    'task:read',
+    'task:update',
+    'report:read',
+    'night_audit:read',
+    'notification:read',
+    'loyalty:read',
+    'channel:read',
+    'sms:read',
+  ];
+
+  let chainAdminRole = await prisma.role.findFirst({
+    where: { name: 'Chain Admin', tenantId: null },
+  });
+  if (!chainAdminRole) {
+    chainAdminRole = await prisma.role.create({
+      data: {
+        name: 'Chain Admin',
+        description:
+          'Operates every property in a chain from one login. Full operations access across properties; no user or settings admin.',
+        type: 'system',
+        isDefault: false,
+        isLocked: true,
+      },
+    });
+  }
+  for (const key of CHAIN_ADMIN_PERMS) {
+    const [resource, action] = key.split(':');
+    const perm = await prisma.permission.findUnique({
+      where: { resource_action: { resource, action } },
+    });
+    if (perm) {
+      await prisma.rolePermission.upsert({
+        where: { roleId_permissionId: { roleId: chainAdminRole.id, permissionId: perm.id } },
+        update: {},
+        create: { roleId: chainAdminRole.id, permissionId: perm.id },
+      });
+    }
+  }
+  console.log('Chain Admin role seeded.');
+
+  // Demo chain: Demo Coast Group — 4 properties around Durban
+  const chain = await prisma.chain.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: 'demo-coast' } },
+    update: {},
+    create: { tenantId: tenant.id, name: 'Demo Coast Group', slug: 'demo-coast' },
+  });
+
+  const CHAIN_PROPERTIES = [
+    { name: 'Umhlanga Sands Hotel', code: 'DEMO-02', city: 'Umhlanga' },
+    { name: 'Ballito Bay Lodge', code: 'DEMO-03', city: 'Ballito' },
+    { name: 'Durban North Terrace', code: 'DEMO-04', city: 'Durban North' },
+    { name: 'Glenwood Guest House', code: 'DEMO-05', city: 'Glenwood' },
+  ];
+  const chainPropertyIds: string[] = [];
+  for (const p of CHAIN_PROPERTIES) {
+    const prop = await prisma.property.upsert({
+      where: { tenantId_code: { tenantId: tenant.id, code: p.code } },
+      update: { chainId: chain.id },
+      create: {
+        tenantId: tenant.id,
+        chainId: chain.id,
+        name: p.name,
+        code: p.code,
+        city: p.city,
+        country: 'ZA',
+        timezone: 'Africa/Johannesburg',
+        currency: 'ZAR',
+      },
+    });
+    chainPropertyIds.push(prop.id);
+  }
+  console.log(`Chain "${chain.name}" seeded with ${chainPropertyIds.length} properties.`);
+
+  // Chain admin user — one login, all 4 sites
+  const chainAdminPasswordHash = await bcrypt.hash('chainadmin123', 10);
+  const chainAdminUser = await prisma.user.upsert({
+    where: { tenantId_email: { tenantId: tenant.id, email: 'chainadmin@demo.com' } },
+    update: { passwordHash: chainAdminPasswordHash, lastPropertyId: chainPropertyIds[0] },
+    create: {
+      tenantId: tenant.id,
+      email: 'chainadmin@demo.com',
+      passwordHash: chainAdminPasswordHash,
+      firstName: 'Chain',
+      lastName: 'Admin',
+      role: 'chain_admin',
+      lastPropertyId: chainPropertyIds[0],
+    },
+  });
+  const existingAssignment = await prisma.roleAssignment.findFirst({
+    where: { userId: chainAdminUser.id, roleId: chainAdminRole.id, propertyId: null },
+  });
+  if (!existingAssignment) {
+    await prisma.roleAssignment.create({
+      data: { userId: chainAdminUser.id, roleId: chainAdminRole.id, propertyId: null },
+    });
+  }
+  console.log('Chain admin user seeded (chainadmin@demo.com / chainadmin123).');
+
+  // ─── S&C: demo catalog + one client/event/BEO chain ───
+  const venue = await prisma.venue.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'BALLROOM' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      propertyId: property.id,
+      name: 'Grand Ballroom',
+      code: 'BALLROOM',
+      capacity: 300,
+      areaSqm: 465,
+      rentalPrice: 2500,
+      features: ['Stage', 'Dance Floor', 'Natural Light'],
+    },
+  });
+  const menu = await prisma.menuPackage.upsert({
+    where: { id: 'demo-sc-menu-plated' },
+    update: {},
+    create: {
+      id: 'demo-sc-menu-plated',
+      tenantId: tenant.id,
+      name: 'Plated Premium',
+      pricePerPerson: 85,
+      description: '3-course plated dinner with premium proteins',
+      courses: [
+        { course: 'First', items: ['Heirloom Tomato Salad (V)', 'Shrimp Cocktail'] },
+        { course: 'Main', items: ['Filet Mignon', 'Pan-Seared Salmon'] },
+        { course: 'Dessert', items: ['Chocolate Lava Cake'] },
+      ],
+      includes: ['Coffee & Tea', 'Dinner Rolls', 'Service Staff'],
+    },
+  });
+  const av = await prisma.avPackage.upsert({
+    where: { id: 'demo-sc-av-std' },
+    update: {},
+    create: {
+      id: 'demo-sc-av-std',
+      tenantId: tenant.id,
+      name: 'Standard AV',
+      price: 600,
+      description: 'Dual projectors, screens, 2 wireless mics, podium',
+      items: [
+        'Dual Projectors & Screens',
+        '2 Wireless Microphones',
+        'Enhanced Sound System',
+        'Podium with Mic',
+      ],
+    },
+  });
+  const setup = await prisma.setupStyle.upsert({
+    where: { id: 'demo-sc-setup-banquet' },
+    update: {},
+    create: {
+      id: 'demo-sc-setup-banquet',
+      tenantId: tenant.id,
+      name: 'Banquet Rounds',
+      price: 200,
+    },
+  });
+  await prisma.decorOption.upsert({
+    where: { id: 'demo-sc-decor-center' },
+    update: {},
+    create: {
+      id: 'demo-sc-decor-center',
+      tenantId: tenant.id,
+      name: 'Floral Centerpieces',
+      price: 45,
+      unit: 'each',
+    },
+  });
+
+  const scClient = await prisma.scClient.upsert({
+    where: { id: 'demo-sc-client-1' },
+    update: {},
+    create: {
+      id: 'demo-sc-client-1',
+      tenantId: tenant.id,
+      name: 'Acme Corporation',
+      type: 'corporate',
+      primaryContact: 'Sarah Williams',
+      email: 's.williams@acme.com',
+      tags: ['Repeat Client', 'Net-30'],
+    },
+  });
+  const scEvent = await prisma.scEvent.upsert({
+    where: { id: 'demo-sc-event-1' },
+    update: {},
+    create: {
+      id: 'demo-sc-event-1',
+      tenantId: tenant.id,
+      propertyId: property.id,
+      clientId: scClient.id,
+      name: 'Q4 Leadership Offsite',
+      type: 'corporate',
+      status: 'quoted',
+      eventDate: daysFromNow(21),
+      guestCount: 40,
+      budget: 12800,
+      probability: 60,
+    },
+  });
+  await prisma.beo.upsert({
+    where: { id: 'demo-sc-beo-1' },
+    update: {},
+    create: {
+      id: 'demo-sc-beo-1',
+      tenantId: tenant.id,
+      eventId: scEvent.id,
+      version: 1,
+      status: 'draft',
+      title: 'Q4 Leadership Offsite — BEO',
+      eventDate: daysFromNow(21),
+      startTime: '09:00',
+      endTime: '17:00',
+      guestCount: 40,
+      venueId: venue.id,
+      setupId: setup.id,
+      menuId: menu.id,
+      avId: av.id,
+    },
+  });
+  console.log('S&C catalog + demo chain seeded.');
+
+  // ─── T7: Meal plans + restaurants — matches the Meal Plans page seed data ───
+  const restaurant = await prisma.restaurant.upsert({
+    where: { propertyId_name: { propertyId: property.id, name: 'The Garden Restaurant' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      propertyId: property.id,
+      name: 'The Garden Restaurant',
+      type: 'main',
+      cuisine: 'International',
+      capacity: 120,
+      operatingHours: '06:00 - 22:00',
+    },
+  });
+
+  const MEAL_PLAN_SEEDS = [
+    {
+      name: 'Standard Breakfast',
+      code: 'BB-STD',
+      boardBasis: 'BB',
+      price: 25,
+      description: 'Continental and hot breakfast buffet',
+      inclusions: ['Continental buffet', 'Hot station', 'Coffee & tea', 'Fresh juice'],
+      exclusions: ['Alcoholic beverages', 'Room service'],
+      postTime: '06:00',
+    },
+    {
+      name: 'Half Board Premium',
+      code: 'HB-PREM',
+      boardBasis: 'HB',
+      price: 65,
+      description: 'Breakfast buffet + 3-course dinner',
+      inclusions: ['Breakfast buffet', '3-course dinner', 'House wine with dinner', 'Coffee & tea'],
+      exclusions: ['Premium spirits', 'Room service', 'Minibar'],
+      postTime: '18:00',
+    },
+    {
+      name: 'Full Board Family',
+      code: 'FB-FAM',
+      boardBasis: 'FB',
+      price: 89,
+      description: 'All meals included — perfect for families',
+      inclusions: [
+        'Breakfast buffet',
+        'Lunch buffet',
+        'Dinner buffet',
+        'Soft drinks with meals',
+        'Kids menu',
+      ],
+      exclusions: ['Alcoholic beverages', 'Room service', 'Minibar'],
+      postTime: '12:00',
+    },
+  ];
+
+  for (const mp of MEAL_PLAN_SEEDS) {
+    await prisma.mealPlan.upsert({
+      where: { propertyId_code: { propertyId: property.id, code: mp.code } },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        propertyId: property.id,
+        restaurantId: restaurant.id,
+        autoPost: true,
+        childUnder6: 'free',
+        childUnder12: '50',
+        childUnder16: '75',
+        ...mp,
+      },
+    });
+  }
+  console.log(`Seeded ${MEAL_PLAN_SEEDS.length} meal plans + 1 restaurant.`);
+
+  // Attach BB-STD to the in-house breakfast guest so the board lights up.
+  const breakfastPlan = await prisma.mealPlan.findUnique({
+    where: { propertyId_code: { propertyId: property.id, code: 'BB-STD' } },
+  });
+  const johnInHouse = await prisma.reservation.findUnique({
+    where: { confirmationNumber: 'DEMO-4101' },
+  });
+  if (breakfastPlan && johnInHouse) {
+    await prisma.mealPlanAssignment.upsert({
+      where: { id: 'demo-meal-assign-1' },
+      update: {},
+      create: {
+        id: 'demo-meal-assign-1',
+        tenantId: tenant.id,
+        reservationId: johnInHouse.id,
+        mealPlanId: breakfastPlan.id,
+        startDate: johnInHouse.arrivalDate,
+        endDate: johnInHouse.departureDate,
+        adults: johnInHouse.adults,
+        children: johnInHouse.children,
+        dailyRate: 25 * johnInHouse.adults,
+      },
+    });
+  }
+  console.log('meals have been seeded.');
 
   console.log('Seed completed.');
 }

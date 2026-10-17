@@ -2,8 +2,7 @@
 import { apiGet, apiPost, apiClient } from './client';
 
 export const invoicesApi = {
-  list: (params: Record<string, unknown> = {}) =>
-    apiGet('/v1/invoices', { params }) as Promise<any[]>,
+  list: (params: Record<string, unknown> = {}) => apiGet('/v1/invoices', params) as Promise<any[]>,
   issue: (folioId: string, send = false) =>
     apiPost('/v1/invoices', { folioId, send }) as Promise<any>,
   send: (id: string) => apiPost(`/v1/invoices/${id}/send`, {}) as Promise<{ sent: boolean }>,

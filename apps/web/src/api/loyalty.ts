@@ -60,7 +60,7 @@ export async function listLoyaltyMembers(
   if (params?.pageSize) queryParams.pageSize = String(params.pageSize);
   if (params?.search) queryParams.search = params.search;
   if (params?.tier) queryParams.tier = params.tier;
-  return client.get('/v1/loyalty/members', queryParams);
+  return client.get('/v1/loyalty/members', { params: queryParams });
 }
 
 export async function getLoyaltyMember(id: string): Promise<LoyaltyMember> {
@@ -75,7 +75,7 @@ export async function listLoyaltyTransactions(
   if (params?.pageSize) queryParams.pageSize = String(params.pageSize);
   if (params?.guestId) queryParams.guestId = params.guestId;
   if (params?.type) queryParams.type = params.type;
-  return client.get('/v1/loyalty/transactions', queryParams);
+  return client.get('/v1/loyalty/transactions', { params: queryParams });
 }
 
 export async function getLoyaltyStats(): Promise<LoyaltyStats> {

@@ -28,6 +28,8 @@ import {
   useAssignRoom,
 } from '../../../../hooks/useReservations';
 import { useRooms } from '../../../../hooks/useRooms';
+import { hasQueuedMutationFor } from '../../../../lib/offline';
+import { useToast } from '../../../../hooks/use-toast';
 
 type Tab = 'arrivals' | 'inhouse' | 'departures';
 
@@ -64,9 +66,17 @@ function avatarColor(name: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-const day = (d?: string) => (d ?? '').slice(0, 10);
+const day = (d?: string) => (d ?? new Date().toISOString().slice(0, 10)).slice(0, 10);
 const isInHouse = (r: Reservation) => r.status === 'checked_in';
-const isActive = (r: Reservation) => r.status !== 'cancelled' && r.status !== 'no_show';
+// Arrivals = still-expected guests only. checked_out/cancelled/no_show must
+// never reappear here with a Check-In button (that produced the 409s).
+const isArrival = (r: Reservation) => r.status === 'confirmed' && day(r.arrivalDate) === day();
+// Departures = due out today (checked_in) OR already departed (checked_out,
+// departure today or future — covers early departures, which the old
+// checked_in-only filter hid from every tab).
+const isDeparture = (r: Reservation) =>
+  (r.status === 'checked_in' && day(r.departureDate) === day()) ||
+  (r.status === 'checked_out' && day(r.departureDate) >= day());
 
 function formatDates(r: Reservation) {
   const a = r.arrivalDate ? new Date(r.arrivalDate) : null;
@@ -77,7 +87,7 @@ function formatDates(r: Reservation) {
 
 const money = (v?: number | string) => {
   const n = typeof v === 'string' ? Number(v) : v;
-  return Number.isFinite(n as number) ? `$${(n as number).toFixed(0)}` : '—';
+  return Number.isFinite(n as number) ? `R${(n as number).toFixed(0)}` : '—';
 };
 
 export default function FrontDeskPage() {
@@ -88,6 +98,7 @@ export default function FrontDeskPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [assignFor, setAssignFor] = useState<Reservation | null>(null);
   const [assignRoomId, setAssignRoomId] = useState('');
+  const { toast } = useToast();
 
   const { reservations, isLoading, error, refetch } = useReservations({ pageSize: 200 });
   const { rooms } = useRooms();
@@ -104,26 +115,22 @@ export default function FrontDeskPage() {
 
   const counts = useMemo(
     () => ({
-      arrivals: reservations.filter(
-        (r) => isActive(r) && !isInHouse(r) && day(r.arrivalDate) === today
-      ).length,
-      departures: reservations.filter((r) => isInHouse(r) && day(r.departureDate) === today).length,
+      arrivals: reservations.filter(isArrival).length,
+      departures: reservations.filter(isDeparture).length,
       inhouse: reservations.filter(isInHouse).length,
     }),
-    [reservations, today]
+    [reservations]
   );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     let base: Reservation[];
     if (tab === 'arrivals') {
-      base = reservations.filter(
-        (r) => isActive(r) && !isInHouse(r) && day(r.arrivalDate) === today
-      );
+      base = reservations.filter(isArrival);
     } else if (tab === 'inhouse') {
       base = reservations.filter(isInHouse);
     } else {
-      base = reservations.filter((r) => isInHouse(r) && day(r.departureDate) === today);
+      base = reservations.filter(isDeparture);
     }
     if (!q) return base;
     return base.filter((r) => {
@@ -132,15 +139,23 @@ export default function FrontDeskPage() {
       const conf = (r.confirmationNumber ?? '').toLowerCase();
       return name.includes(q) || room.includes(q) || conf.includes(q);
     });
-  }, [reservations, tab, search, today]);
+  }, [reservations, tab, search]);
 
   const run = (fn: () => void) => {
     setActionError(null);
     fn();
   };
 
-  const doCheckIn = (r: Reservation) => {
-    if ((r.stays?.length ?? 0) === 0 && !r.roomNumber) {
+  const doCheckIn = async (r: Reservation) => {
+    // Offline, the queue is FIFO: a queued assign lands before a queued
+    // check-in, so the "no room" guard would reject a flow that actually
+    // works. Skip it when offline or when any mutation for this reservation
+    // is already queued.
+    const hasRoom = (r.stays?.length ?? 0) > 0 || Boolean(r.roomNumber);
+    const willHaveRoom =
+      hasRoom || !navigator.onLine || (await hasQueuedMutationFor(`/reservations/${r.id}`));
+
+    if (!willHaveRoom) {
       setActionError(`${r.confirmationNumber} has no room assigned — assign a room first.`);
       setAssignFor(r);
       return;
@@ -148,6 +163,16 @@ export default function FrontDeskPage() {
     setBusyId(r.id);
     checkIn.mutate(r.id, {
       onSettled: () => setBusyId(null),
+      onSuccess: (data: { queued?: boolean; data?: Reservation } | undefined) => {
+        if (data?.queued) {
+          toast({
+            title: 'Queued — will sync',
+            description: `${r.confirmationNumber}: check-in is queued and will sync when the connection returns.`,
+          });
+        } else {
+          toast({ title: 'Checked in', description: r.confirmationNumber });
+        }
+      },
       onError: (e: Error) => setActionError(`${r.confirmationNumber}: ${e.message}`),
     });
   };
@@ -156,6 +181,16 @@ export default function FrontDeskPage() {
     setBusyId(r.id);
     checkOut.mutate(r.id, {
       onSettled: () => setBusyId(null),
+      onSuccess: (data: { queued?: boolean; data?: Reservation } | undefined) => {
+        if (data?.queued) {
+          toast({
+            title: 'Queued — will sync',
+            description: `${r.confirmationNumber}: check-out is queued and will sync when the connection returns.`,
+          });
+        } else {
+          toast({ title: 'Checked out', description: r.confirmationNumber });
+        }
+      },
       onError: (e: Error) => setActionError(`${r.confirmationNumber}: ${e.message}`),
     });
   };
@@ -167,15 +202,31 @@ export default function FrontDeskPage() {
 
   const doAssign = () => {
     if (!assignFor || !assignRoomId) return;
-    setBusyId(assignFor.id);
+    const target = assignFor;
+    setBusyId(target.id);
     assignRoom.mutate(
-      { id: assignFor.id, input: { roomId: assignRoomId } },
+      { id: target.id, input: { roomId: assignRoomId } },
       {
         onSettled: () => {
           setBusyId(null);
           setAssignFor(null);
         },
-        onError: (e: Error) => setActionError(`${assignFor.confirmationNumber}: ${e.message}`),
+        onSuccess: (data: { queued?: boolean; data?: Reservation } | undefined) => {
+          if (data?.queued) {
+            toast({
+              title: 'Queued — will sync',
+              description: `${target.confirmationNumber}: room assignment is queued and will sync when the connection returns.`,
+            });
+          } else {
+            toast({
+              title: 'Room assigned',
+              description: `${target.confirmationNumber} → Room ${
+                rooms.find((rm) => rm.id === assignRoomId)?.number ?? ''
+              }`,
+            });
+          }
+        },
+        onError: (e: Error) => setActionError(`${target.confirmationNumber}: ${e.message}`),
       }
     );
   };
@@ -352,6 +403,7 @@ export default function FrontDeskPage() {
           const { range, nights } = formatDates(r);
           const roomNo = r.roomNumber;
           const inHouse = isInHouse(r);
+          const departed = r.status === 'checked_out';
           const rowBusy = busyId === r.id;
           return (
             <div
@@ -389,14 +441,26 @@ export default function FrontDeskPage() {
                 <span
                   className={cn(
                     'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                    inHouse ? 'bg-emerald-500/15 text-emerald-400' : 'bg-sky-500/15 text-sky-400'
+                    inHouse
+                      ? 'bg-emerald-500/15 text-emerald-400'
+                      : departed
+                        ? 'bg-text-muted/15 text-text-muted'
+                        : 'bg-sky-500/15 text-sky-400'
                   )}
                 >
-                  {inHouse ? 'In-House' : tab === 'departures' ? 'Due Out' : 'Arrival'}
+                  {inHouse
+                    ? 'In-House'
+                    : departed
+                      ? 'Departed'
+                      : tab === 'departures'
+                        ? 'Due Out'
+                        : 'Arrival'}
                 </span>
               </div>
               <div className="flex items-center gap-2 pl-12 md:pl-0">
-                {inHouse ? (
+                {departed ? (
+                  <span className="text-xs text-text-muted">—</span>
+                ) : inHouse ? (
                   <Button
                     size="sm"
                     variant="outline"

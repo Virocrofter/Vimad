@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { extendZodWithOpenApi, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { requirePermission } from '../auth/auth.middleware.js';
+import { authMiddleware, requirePermission, tenantScope } from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { paginationSchema } from '../../common/pagination.js';
 import {
@@ -50,7 +50,11 @@ const PropertyListResponseSchema =
 
 export const propertiesRouter = Router();
 
-// propertiesRouter.use(authMiddleware, tenantScope);
+// EVERY route on this router requires auth + tenant scoping. Commenting this
+// out doesn't just leak data — Prisma treats undefined tenantId as "no
+// filter", returning ALL tenants' properties, and GET routes become fully
+// unauthenticated. Do not remove.
+propertiesRouter.use(authMiddleware, tenantScope);
 
 registry.registerPath({
   method: 'get',

@@ -24,7 +24,7 @@ export interface StoredFile {
   contentType: string;
 }
 
-const SAFE_KEY = /^[a-zA-Z0-9][a-zA-Z0-9/_-]*\.(json|csv|pdf)$/;
+const SAFE_KEY = /^[a-zA-Z0-9][a-zA-Z0-9/_-]*\.(json|csv|pdf|jpg|jpeg|png|webp)$/;
 
 function assertSafeKey(key: string): void {
   if (!SAFE_KEY.test(key) || key.includes('..')) {
