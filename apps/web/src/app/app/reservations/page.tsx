@@ -21,12 +21,15 @@ import {
   BedDouble,
   ArrowLeftToLine,
   ListChecks,
+  AlertTriangle,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
+import { cn, formatCurrency } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton, SkeletonText } from '../../../components/ui/skeleton';
 import type { Reservation } from '../../../types';
 import { useReservations, useCheckIn, useCancelReservation } from '../../../hooks/useReservations';
+
+const zar = (v: unknown) => formatCurrency(Number(v ?? 0));
 
 const statusMeta: Record<string, { label: string; class: string }> = {
   confirmed: { label: 'Confirmed', class: 'bg-accent/10 text-accent border-accent/20' },
@@ -60,7 +63,7 @@ interface InlineActionsProps {
 
 function InlineActions({ status, disabled, onView, onCheckIn, onCancel }: InlineActionsProps) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
       <button
         onClick={onView}
         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
@@ -127,13 +130,11 @@ export default function ReservationsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  /* Debounce search input */
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(t);
   }, [query]);
 
-  /* Reset page + selection whenever the filters change (adjust-during-render, no effect) */
   const resetKey = `${tab}|${statusFilter}|${sourceFilter}|${dateFrom}|${dateTo}|${debouncedQuery}`;
   const [prevResetKey, setPrevResetKey] = useState(resetKey);
   if (prevResetKey !== resetKey) {
@@ -142,7 +143,6 @@ export default function ReservationsPage() {
     setSelected(new Set());
   }
 
-  /* Server-side params */
   const params = useMemo(() => {
     const p: Record<string, string | number> = { page, pageSize: 25 };
     Object.assign(p, TAB_PARAMS[tab]);
@@ -156,7 +156,6 @@ export default function ReservationsPage() {
 
   const { reservations, meta, isLoading, error, refetch } = useReservations(params);
 
-  /* Tab counts — tiny pageSize:1 queries, cached by react-query */
   const arrivalsQ = useReservations({
     pageSize: 1,
     status: 'confirmed',
@@ -184,9 +183,7 @@ export default function ReservationsPage() {
   const handleCheckIn = (r: Reservation) => {
     setActionError(null);
     if (!r.roomNumber) {
-      setActionError(
-        `${r.confirmationNumber} has no room assigned. Open the reservation and assign a room first.`
-      );
+      navigate(`/app/reservations/${r.id}`);
       return;
     }
     checkIn.mutate(r.id, {
@@ -200,7 +197,6 @@ export default function ReservationsPage() {
     cancel.mutate({ id: r.id }, { onError: (e: Error) => setActionError(e.message) });
   };
 
-  /* Selection */
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -215,7 +211,6 @@ export default function ReservationsPage() {
   };
   const clearSelection = () => setSelected(new Set());
 
-  /* Bulk actions */
   const bulkCheckIn = async () => {
     const targets = reservations.filter(
       (r: Reservation) => selected.has(r.id) && r.status === 'confirmed' && r.roomNumber
@@ -291,10 +286,10 @@ export default function ReservationsPage() {
         String(r.balance),
       ]),
     ];
-    const csv = rows
-      .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const csv =
+      '﻿' +
+      rows.map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `reservations-${today()}.csv`;
@@ -312,9 +307,15 @@ export default function ReservationsPage() {
   const totalPages = meta?.totalPages ?? 1;
   const mutationPending = checkIn.isPending || cancel.isPending || busy;
 
+  const pageWindow = useMemo(() => {
+    const win: number[] = [];
+    const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+    for (let i = start; i <= Math.min(totalPages, start + 4); i++) win.push(i);
+    return win;
+  }, [page, totalPages]);
+
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-text-primary">Reservations</h2>
@@ -330,7 +331,6 @@ export default function ReservationsPage() {
         </Link>
       </div>
 
-      {/* Search */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
@@ -356,7 +356,6 @@ export default function ReservationsPage() {
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="inline-flex rounded-lg border border-border bg-surface p-1">
         {viewTabs.map(({ key, label, icon: Icon }) => (
           <button
@@ -382,7 +381,6 @@ export default function ReservationsPage() {
         ))}
       </div>
 
-      {/* Advanced filters */}
       {filtersOpen && (
         <div className="rounded-xl border border-border bg-surface p-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -452,7 +450,6 @@ export default function ReservationsPage() {
         </div>
       )}
 
-      {/* Action error banner */}
       {actionError && (
         <div className="flex items-center justify-between rounded-lg border border-danger/20 bg-danger/5 px-4 py-2.5">
           <p className="text-sm text-danger">{actionError}</p>
@@ -465,7 +462,6 @@ export default function ReservationsPage() {
         </div>
       )}
 
-      {/* Bulk actions */}
       {selected.size > 0 && (
         <div className="flex items-center justify-between rounded-lg border border-secondary/20 bg-secondary/5 px-4 py-2.5">
           <div className="flex items-center gap-3">
@@ -494,7 +490,6 @@ export default function ReservationsPage() {
         </div>
       )}
 
-      {/* Error state */}
       {error && (
         <div className="rounded-xl border border-danger/20 bg-danger/5 p-8 text-center">
           <p className="text-sm font-medium text-danger">Failed to load reservations</p>
@@ -505,26 +500,23 @@ export default function ReservationsPage() {
         </div>
       )}
 
-      {/* Loading */}
       {isLoading && (
         <div className="rounded-xl border border-border bg-surface p-4">
           <div className="space-y-3">
-            <div className="flex gap-4">
-              <Skeleton className="h-8 w-8" />
-              <div className="flex-1 space-y-2">
-                <SkeletonText className="w-1/4" />
-                <SkeletonText className="w-1/3" />
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <SkeletonText className="w-1/4" />
+                  <SkeletonText className="w-1/3" />
+                </div>
               </div>
-            </div>
-            <SkeletonText />
-            <SkeletonText />
-            <SkeletonText />
-            <SkeletonText />
+            ))}
           </div>
         </div>
       )}
 
-      {/* Table */}
       {!isLoading && !error && (
         <div className="rounded-xl border border-border bg-surface overflow-hidden">
           <div className="overflow-x-auto">
@@ -558,15 +550,18 @@ export default function ReservationsPage() {
               <tbody className="divide-y divide-border">
                 {reservations.map((r: Reservation) => {
                   const guestName = guestNameOf(r);
+                  const needsRoom =
+                    r.status === 'confirmed' && fmtDate(r.arrivalDate) <= today() && !r.roomNumber;
                   return (
                     <tr
                       key={r.id}
+                      onClick={() => navigate(`/app/reservations/${r.id}`)}
                       className={cn(
-                        'transition-colors hover:bg-background',
+                        'cursor-pointer transition-colors hover:bg-background',
                         selected.has(r.id) && 'bg-secondary/5'
                       )}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => toggleSelect(r.id)}
                           className="text-text-muted hover:text-text-primary"
@@ -606,7 +601,9 @@ export default function ReservationsPage() {
                             <p className="text-xs text-text-muted">{r.roomTypeName ?? ''}</p>
                           </div>
                         ) : (
-                          <span className="text-xs text-text-muted">Unassigned</span>
+                          <span className="inline-flex items-center gap-1 text-xs text-warning">
+                            <AlertTriangle className="h-3 w-3" /> Unassigned
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -620,12 +617,15 @@ export default function ReservationsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={r.status} />
+                        {needsRoom && (
+                          <p className="mt-1 text-[10px] font-medium text-warning">Needs room</p>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-text-primary">
-                        ${Number(r.rate ?? 0).toFixed(0)}
+                        {r.rate != null ? zar(r.rate) : '—'}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-text-primary">
-                        ${Number(r.totalAmount).toFixed(2)}
+                        {zar(r.totalAmount)}
                       </td>
                       <td
                         className={cn(
@@ -633,7 +633,7 @@ export default function ReservationsPage() {
                           Number(r.balance) > 0 ? 'text-danger' : 'text-accent'
                         )}
                       >
-                        ${Number(r.balance).toFixed(2)}
+                        {zar(r.balance)}
                       </td>
                       <td className="px-4 py-3 text-text-secondary">{r.source}</td>
                       <td className="px-4 py-3">
@@ -659,28 +659,41 @@ export default function ReservationsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {meta && meta.total > 0 && (
             <div className="flex items-center justify-between border-t border-border bg-background px-4 py-3">
               <p className="text-xs text-text-muted">
                 Page {meta.page} of {totalPages} · {meta.total} total
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={page <= 1 || isLoading}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  <ChevronLeft className="mr-1 h-3.5 w-3.5" /> Prev
+                  <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
+                {pageWindow.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={cn(
+                      'h-8 min-w-8 rounded-md px-2 text-sm font-medium',
+                      p === page
+                        ? 'bg-secondary text-white'
+                        : 'text-text-secondary hover:bg-surface-elevated'
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={page >= totalPages || isLoading}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Next <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>

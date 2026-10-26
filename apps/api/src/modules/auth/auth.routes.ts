@@ -296,3 +296,32 @@ authRouter.post(
     }
   }
 );
+
+/* ─── Session Permissions (authenticated) — D3 fix ───
+ * authMiddleware already resolves the user's permission keys per request
+ * (requirePermission consumes them); this exposes them to the client so
+ * usePermission() UX gating works for non-owner roles.
+ */
+registry.registerPath({
+  method: 'get',
+  path: '/permissions',
+  tags: ['Auth'],
+  description: "Current session's resolved permission keys",
+  responses: {
+    200: {
+      description: 'Permission keys',
+      content: {
+        'application/json': { schema: z.object({ data: z.array(z.string()) }) },
+      },
+    },
+    401: {
+      description: 'Unauthorized',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+authRouter.get('/permissions', authMiddleware, (req, res) => {
+  const authReq = req as any;
+  res.json({ data: authReq.auth.user.permissions ?? [] });
+});

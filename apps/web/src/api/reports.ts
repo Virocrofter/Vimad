@@ -1,259 +1,195 @@
-import { apiClient } from './client';
+import { api } from './client';
 
-// ─── Types ───
-
-export interface ReportTemplate {
-  id: string;
+export interface ReportColumn {
+  key: string;
+  label: string;
+  format?: 'text' | 'number' | 'currency' | 'percent' | 'date';
+}
+export interface ReportParamDef {
+  key: string;
+  label: string;
+  type: 'date' | 'select';
+  required?: boolean;
+  options?: { value: string; label: string }[];
+  dynamicOptions?: 'properties';
+}
+export interface ReportDefinition {
+  key: string;
   name: string;
-  description?: string;
+  description: string;
   category: string;
-  type: 'system' | 'custom';
-  config: Record<string, unknown>;
-  fields: Array<{
-    name: string;
-    type: string;
-    label: string;
-    required: boolean;
-  }>;
-  createdAt: string;
-  updatedAt: string;
+  params: ReportParamDef[];
+  columns: ReportColumn[];
 }
-
-export interface ScheduledReport {
+export interface ReportRunItem {
   id: string;
-  templateId: string;
+  definitionKey: string;
   name: string;
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
-  recipients: string[];
-  format: 'pdf' | 'csv' | 'excel';
-  parameters: Record<string, unknown>;
-  nextRunAt: string;
-  lastRunAt?: string;
-  status: 'active' | 'paused' | 'error';
-  createdAt: string;
-}
-
-export interface ReportRun {
-  id: string;
-  reportId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  startedAt: string;
-  completedAt?: string;
+  params: Record<string, string>;
   rowCount: number;
+  status: string;
+  error: string | null;
   createdAt: string;
+  result?: {
+    columns: ReportColumn[];
+    rows: Record<string, unknown>[];
+    summary: { label: string; value: number; format: string }[];
+    truncated: boolean;
+  };
 }
-
-export interface ReportDashboard {
-  totalReports: number;
-  scheduledActive: number;
-  runsThisMonth: number;
-  averageRuntime: number;
-  popularTemplates: Array<{
-    id: string;
-    name: string;
-    runCount: number;
-  }>;
-}
-
-export interface BuildReportRequest {
+export interface ScheduledReportItem {
+  id: string;
+  definitionKey: string;
   name: string;
-  description?: string;
-  category?: string;
-  fields: Array<{
-    name: string;
-    type: string;
-    label: string;
-    required: boolean;
-  }>;
-  config: Record<string, unknown>;
-}
-
-export interface CreateTemplateRequest {
-  name: string;
-  description?: string;
-  category?: string;
-  type?: 'system' | 'custom';
-  config: Record<string, unknown>;
-  fields: Array<{
-    name: string;
-    type: string;
-    label: string;
-    required: boolean;
-  }>;
-}
-
-export interface CreateScheduledReportRequest {
-  templateId: string;
-  name: string;
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+  params: Record<string, string>;
+  frequency: string;
+  dayOfWeek: number | null;
+  dayOfMonth: number | null;
+  timeOfDay: string;
   recipients: string[];
-  format: 'pdf' | 'csv' | 'excel';
-  parameters: Record<string, unknown>;
-  nextRunAt: string;
+  isActive: boolean;
+  lastRunAt: string | null;
+  nextRunAt: string | null;
 }
 
-export interface UpdateScheduledReportRequest {
-  name?: string;
-  frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly';
-  recipients?: string[];
-  format?: 'pdf' | 'csv' | 'excel';
-  parameters?: Record<string, unknown>;
-  nextRunAt?: string;
-  status?: 'active' | 'paused' | 'error';
+const unwrap = (r: any) =>
+  r && typeof r === 'object' && 'data' in r && r.data !== undefined ? (r.data?.data ?? r.data) : r;
+
+export const getDefinitions = () =>
+  api.get('/v1/reports/definitions').then((r: any) => unwrap(r) as ReportDefinition[]);
+export const runReport = (definitionKey: string, params: Record<string, string>) =>
+  api
+    .post('/v1/reports/run', { definitionKey, params })
+    .then((r: any) => unwrap(r) as ReportRunItem);
+export const getRuns = (page = 1, definitionKey?: string) =>
+  api
+    .get('/v1/reports/runs', { params: { page, limit: 20, definitionKey } })
+    .then((r: any) => unwrap(r) as { items: ReportRunItem[]; total: number; page: number });
+export const getRun = (id: string) =>
+  api.get(`/v1/reports/runs/${id}`).then((r: any) => unwrap(r) as ReportRunItem);
+export const getSchedules = () =>
+  api.get('/v1/reports/schedules').then((r: any) => unwrap(r) as ScheduledReportItem[]);
+export const createSchedule = (body: Partial<ScheduledReportItem>) =>
+  api.post('/v1/reports/schedules', body).then((r: any) => unwrap(r) as ScheduledReportItem);
+export const updateSchedule = (id: string, body: Partial<ScheduledReportItem>) =>
+  api.patch(`/v1/reports/schedules/${id}`, body).then((r: any) => unwrap(r) as ScheduledReportItem);
+export const deleteSchedule = (id: string) => api.delete(`/v1/reports/schedules/${id}`);
+export const getProperties = () =>
+  api
+    .get('/v1/properties')
+    .then((r: any) => unwrap(r) as { id: string; name: string }[])
+    .catch(() => [] as { id: string; name: string }[]);
+
+async function downloadBlob(id: string, ext: string) {
+  const out: any = await api.get(`/v1/reports/runs/${id}/export?as=json`);
+  const payload = unwrap(out) as { filename?: string; content?: string };
+  if (!payload?.content) throw new Error('Export failed: empty response');
+  const blob = new Blob([payload.content], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = payload.filename ?? `report-${id}.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
-// ─── API Functions ───
+export const downloadRunCsv = (id: string) => downloadBlob(id, 'csv');
 
-const BASE_PATH = '/admin/reports';
+// ─── Admin reports surface (template-centric aliases) ───
+// The admin Reports & Analytics page speaks in "templates"; the backend speaks
+// in "definitions + runs + schedules". These aliases bridge the two vocabularies
+// so both surfaces share one set of real endpoints.
 
-export async function getReportDashboard(): Promise<ReportDashboard> {
-  const response = await apiClient.get<{ data: ReportDashboard }>(`${BASE_PATH}/dashboard`);
-  return response.data.data;
-}
+export const getReportDashboard = () =>
+  api.get('/v1/reports/dashboard').then((r: any) => unwrap(r) as Record<string, number>);
 
-export async function getTemplates(params?: {
-  page?: number;
-  pageSize?: number;
+export const getTemplates = () => getDefinitions().then((defs) => ({ items: defs }));
+
+export const getScheduledReports = () =>
+  getSchedules().then((list) => ({
+    items: list.map((s) => ({
+      id: s.id,
+      templateId: s.definitionKey,
+      name: s.name,
+      params: s.params,
+      frequency: s.frequency,
+      format: 'csv',
+      recipients: s.recipients ?? [],
+      status: s.isActive ? 'active' : 'paused',
+      nextRunAt: s.nextRunAt,
+      lastRunAt: s.lastRunAt,
+    })),
+  }));
+
+export const getReportRuns = (page = 1, templateId?: string) =>
+  getRuns(page, templateId).then((r) => ({
+    items: r.items.map((run) => ({
+      id: run.id,
+      templateId: run.definitionKey,
+      name: run.name,
+      status: run.status,
+      rows: run.result?.rows ?? [],
+      rowCount: run.rowCount,
+      createdAt: run.createdAt,
+      error: run.error,
+    })),
+    total: r.total,
+    page: r.page,
+  }));
+
+export const createTemplate = (body: {
+  name: string;
+  description?: string;
   category?: string;
-}): Promise<{
-  data: ReportTemplate[];
-  meta: { page: number; pageSize: number; total: number; totalPages: number };
-}> {
-  const response = await apiClient.get<{
-    data: ReportTemplate[];
-    meta: { page: number; pageSize: number; total: number; totalPages: number };
-  }>(`${BASE_PATH}/templates`, { params });
-  return response.data;
-}
+  fields?: { name: string; label: string }[];
+  config?: Record<string, unknown>;
+}) => api.post('/v1/reports/definitions', body).then((r: any) => unwrap(r) as ReportDefinition);
 
-export async function getTemplate(id: string): Promise<ReportTemplate> {
-  const response = await apiClient.get<{ data: ReportTemplate }>(`${BASE_PATH}/templates/${id}`);
-  return response.data.data;
-}
+export const buildCustomReport = (report: {
+  id?: string;
+  definitionKey?: string;
+  params?: Record<string, string>;
+}) => {
+  const key = report?.definitionKey ?? report?.id;
+  if (!key) return Promise.reject(new Error('Save the template before running a custom report'));
+  return runReport(key, report?.params ?? {});
+};
 
-export async function createTemplate(data: CreateTemplateRequest): Promise<ReportTemplate> {
-  const response = await apiClient.post<{ data: ReportTemplate }>(`${BASE_PATH}/templates`, data);
-  return response.data.data;
-}
+export const createScheduledReport = ({ report, schedule }: any) =>
+  createSchedule({
+    definitionKey: report?.id ?? report?.definitionKey,
+    name: schedule?.name ?? report?.name,
+    params: report?.params ?? {},
+    frequency: schedule?.frequency ?? 'DAILY',
+    dayOfWeek: schedule?.dayOfWeek,
+    dayOfMonth: schedule?.dayOfMonth,
+    timeOfDay: schedule?.timeOfDay ?? '06:00',
+    recipients: schedule?.recipients ?? [],
+    isActive: schedule?.enabled ?? true,
+  } as Partial<ScheduledReportItem>);
 
-export async function updateTemplate(
-  id: string,
-  data: Partial<CreateTemplateRequest>
-): Promise<ReportTemplate> {
-  const response = await apiClient.patch<{ data: ReportTemplate }>(
-    `${BASE_PATH}/templates/${id}`,
-    data
-  );
-  return response.data.data;
-}
+export const updateScheduledReport = (id: string, { report, schedule }: any) =>
+  updateSchedule(id, {
+    definitionKey: report?.id ?? report?.definitionKey,
+    name: schedule?.name ?? report?.name,
+    params: report?.params ?? {},
+    frequency: schedule?.frequency,
+    dayOfWeek: schedule?.dayOfWeek,
+    dayOfMonth: schedule?.dayOfMonth,
+    timeOfDay: schedule?.timeOfDay,
+    recipients: schedule?.recipients,
+    isActive: schedule?.enabled,
+  } as Partial<ScheduledReportItem>);
 
-export async function deleteTemplate(id: string): Promise<void> {
-  await apiClient.delete(`${BASE_PATH}/templates/${id}`);
-}
+export const deleteScheduledReport = (id: string) => deleteSchedule(id);
 
-export async function getScheduledReports(params?: {
-  page?: number;
-  pageSize?: number;
-}): Promise<{
-  data: ScheduledReport[];
-  meta: { page: number; pageSize: number; total: number; totalPages: number };
-}> {
-  const response = await apiClient.get<{
-    data: ScheduledReport[];
-    meta: { page: number; pageSize: number; total: number; totalPages: number };
-  }>(`${BASE_PATH}/scheduled`, { params });
-  return response.data;
-}
+export const runScheduledReport = (id: string) =>
+  api.post(`/v1/reports/schedules/${id}/run`).then((r: any) => unwrap(r) as ReportRunItem);
 
-export async function createScheduledReport(
-  data: CreateScheduledReportRequest
-): Promise<ScheduledReport> {
-  const response = await apiClient.post<{ data: ScheduledReport }>(`${BASE_PATH}/scheduled`, data);
-  return response.data.data;
-}
+export const executeReport = (templateId: string, params: Record<string, string> = {}) =>
+  runReport(templateId, params).then((run) => ({ ...run, rows: run.result?.rows ?? [] }));
 
-export async function updateScheduledReport(
-  id: string,
-  data: UpdateScheduledReportRequest
-): Promise<ScheduledReport> {
-  const response = await apiClient.patch<{ data: ScheduledReport }>(
-    `${BASE_PATH}/scheduled/${id}`,
-    data
-  );
-  return response.data.data;
-}
-
-export async function deleteScheduledReport(id: string): Promise<void> {
-  await apiClient.delete(`${BASE_PATH}/scheduled/${id}`);
-}
-
-export async function runScheduledReport(id: string): Promise<ReportRun> {
-  const response = await apiClient.post<{ data: ReportRun }>(`${BASE_PATH}/scheduled/${id}/run`);
-  return response.data.data;
-}
-
-export async function getReportRuns(params?: {
-  page?: number;
-  pageSize?: number;
-  reportId?: string;
-}): Promise<{
-  data: ReportRun[];
-  meta: { page: number; pageSize: number; total: number; totalPages: number };
-}> {
-  const response = await apiClient.get<{
-    data: ReportRun[];
-    meta: { page: number; pageSize: number; total: number; totalPages: number };
-  }>(`${BASE_PATH}/runs`, { params });
-  return response.data;
-}
-
-export async function getReportRun(id: string): Promise<ReportRun> {
-  const response = await apiClient.get<{ data: ReportRun }>(`${BASE_PATH}/runs/${id}`);
-  return response.data.data;
-}
-
-export async function executeReport(data: {
-  templateId: string;
-  parameters: Record<string, unknown>;
-}): Promise<ReportRun> {
-  const response = await apiClient.post<{ data: ReportRun }>(`${BASE_PATH}/execute`, data);
-  return response.data.data;
-}
-
-export async function buildCustomReport(data: BuildReportRequest): Promise<ReportRun> {
-  const response = await apiClient.post<{ data: ReportRun }>(`${BASE_PATH}/build`, data);
-  return response.data.data;
-}
-
-export async function exportReport(
-  id: string,
-  format: 'pdf' | 'csv' | 'excel'
-): Promise<{ downloadUrl: string }> {
-  const response = await apiClient.post<{ data: { downloadUrl: string } }>(
-    `${BASE_PATH}/runs/${id}/export`,
-    { format }
-  );
-  return response.data.data;
-}
-
-export async function shareReport(id: string, emails: string[]): Promise<{ shared: boolean }> {
-  const response = await apiClient.post<{ data: { shared: boolean } }>(
-    `${BASE_PATH}/runs/${id}/share`,
-    { emails }
-  );
-  return response.data.data;
-}
-
-export async function getCategories(): Promise<string[]> {
-  const response = await apiClient.get<{ data: string[] }>(`${BASE_PATH}/categories`);
-  return response.data.data;
-}
-
-export async function getDataSources(): Promise<
-  Array<{ id: string; name: string; description: string }>
-> {
-  const response = await apiClient.get<{
-    data: Array<{ id: string; name: string; description: string }>;
-  }>(`${BASE_PATH}/data-sources`);
-  return response.data.data;
-}
+export const exportReport = (runId: string, _format = 'csv') =>
+  downloadBlob(runId, 'csv').then(() => ({}));

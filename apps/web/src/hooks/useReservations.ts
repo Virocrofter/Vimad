@@ -1,4 +1,3 @@
-/* apps/web/src/hooks/useReservations.ts */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listReservations,
@@ -10,10 +9,21 @@ import {
   checkInReservation,
   checkOutReservation,
   cancelReservation,
+  noShowReservation,
+  resendConfirmation,
+  updateStayRate,
+  listTraces,
+  createTrace,
+  resolveTrace,
+  listCompanions,
+  addCompanion,
+  removeCompanion,
   type CreateReservationInput,
   type UpdateReservationInput,
   type AssignRoomInput,
   type ReservationListParams,
+  type CreateTraceInput,
+  type AddCompanionInput,
 } from '../api/api-reservations';
 
 export interface UseReservationsParams extends ReservationListParams {}
@@ -36,7 +46,6 @@ export function useReservations(params?: UseReservationsParams) {
   };
 }
 
-// Alias for pages that expect the List-suffixed name
 export const useReservationsList = useReservations;
 
 export function useReservation(id: string) {
@@ -117,5 +126,96 @@ export function useCancelReservation() {
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => cancelReservation(id, reason),
     onSuccess: invalidate,
+  });
+}
+
+export function useNoShow() {
+  const invalidate = useInvalidateReservations();
+  return useMutation({
+    mutationFn: (id: string) => noShowReservation(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useResendConfirmation() {
+  const invalidate = useInvalidateReservations();
+  return useMutation({
+    mutationFn: (id: string) => resendConfirmation(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateStayRate() {
+  const invalidate = useInvalidateReservations();
+  return useMutation({
+    mutationFn: ({ stayId, rate }: { stayId: string; rate: number }) =>
+      updateStayRate(stayId, rate),
+    onSuccess: invalidate,
+  });
+}
+
+/* ─── Traces ─── */
+export function useTraces(reservationId: string) {
+  const query = useQuery({
+    queryKey: ['reservations', 'traces', reservationId],
+    queryFn: () => listTraces(reservationId),
+    enabled: !!reservationId,
+  });
+  return {
+    traces: query.data?.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
+}
+
+export function useCreateTrace(reservationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateTraceInput) => createTrace(reservationId, input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['reservations', 'traces', reservationId] }),
+  });
+}
+
+export function useResolveTrace(reservationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (traceId: string) => resolveTrace(traceId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['reservations', 'traces', reservationId] }),
+  });
+}
+
+/* ─── Companions ─── */
+export function useCompanions(reservationId: string) {
+  const query = useQuery({
+    queryKey: ['reservations', 'companions', reservationId],
+    queryFn: () => listCompanions(reservationId),
+    enabled: !!reservationId,
+  });
+  return {
+    companions: query.data?.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
+}
+
+export function useAddCompanion(reservationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AddCompanionInput) => addCompanion(reservationId, input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['reservations', 'companions', reservationId] }),
+  });
+}
+
+export function useRemoveCompanion(reservationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (companionId: string) => removeCompanion(companionId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['reservations', 'companions', reservationId] }),
   });
 }

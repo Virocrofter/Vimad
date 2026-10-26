@@ -1,9 +1,10 @@
-// Socket emits disabled to break circular dependency: socket.js → auth.service.ts → prisma.js
-// TODO: re-enable after socket.js is decoupled from auth.service.ts
-
-function emitToAdmin(_event: string, _payload: unknown): void {
-  // no-op
-}
+/* apps/api/src/modules/audit/audit.events.ts
+ * Emits are live again — socket.js no longer depends on auth.service.ts
+ * (see common/socket-auth.ts). Every audited mutation funnels through
+ * logAuditEvent() → broadcastAuditEvent(), so `ops:mutation` is the single
+ * tenant-scoped event the whole ops UI can subscribe to for live refreshes.
+ */
+import { emitToAdmin, emitToTenant } from '../../common/socket.js';
 
 export interface AuditEventPayload {
   id: string;
@@ -35,6 +36,17 @@ export function broadcastAuditEvent(payload: AuditEventPayload): void {
     ...payload,
     receivedAt: new Date().toISOString(),
   });
+
+  // Tenant-scoped live pulse — dashboards/boards refetch on this.
+  if (payload.target.tenantId) {
+    emitToTenant(payload.target.tenantId, 'ops:mutation', {
+      action: payload.action.type,
+      entity: payload.target.type,
+      entityId: payload.target.id,
+      severity: payload.severity,
+      at: new Date().toISOString(),
+    });
+  }
 
   if (payload.severity === 'critical' || payload.severity === 'high') {
     emitToAdmin('audit:critical', payload);

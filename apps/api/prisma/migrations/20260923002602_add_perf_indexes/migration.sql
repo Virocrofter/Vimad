@@ -1,17 +1,17 @@
 -- DropIndex
-DROP INDEX "audit_logs_createdAt_idx";
+DROP INDEX IF EXISTS "audit_logs_createdAt_idx";
 
 -- DropIndex
-DROP INDEX "audit_logs_tenantId_idx";
+DROP INDEX IF EXISTS "audit_logs_tenantId_idx";
 
 -- DropIndex
-DROP INDEX "folios_tenantId_idx";
+DROP INDEX IF EXISTS "folios_tenantId_idx";
 
 -- DropIndex
-DROP INDEX "housekeeping_tasks_tenantId_idx";
+DROP INDEX IF EXISTS "housekeeping_tasks_tenantId_idx";
 
 -- DropIndex
-DROP INDEX "usage_records_tenantId_metric_idx";
+DROP INDEX IF EXISTS "usage_records_tenantId_metric_idx";
 
 -- CreateIndex
 CREATE INDEX "audit_logs_tenantId_createdAt_idx" ON "audit_logs"("tenantId", "createdAt");

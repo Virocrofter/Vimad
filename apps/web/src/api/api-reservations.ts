@@ -32,6 +32,12 @@ export interface CreateReservationInput {
   roomId?: string;
   source?: string;
   notes?: string;
+  ratePlanId?: string;
+  eta?: string;
+  specialRequests?: string;
+  marketSegment?: string;
+  guaranteed?: boolean;
+  houseUse?: boolean;
 }
 
 export interface UpdateReservationInput {
@@ -44,11 +50,56 @@ export interface UpdateReservationInput {
   source?: string;
   roomId?: string;
   rate?: number;
+  ratePlanId?: string;
+  eta?: string;
+  specialRequests?: string;
+  marketSegment?: string;
+  guaranteed?: boolean;
+  houseUse?: boolean;
+  doNotMove?: boolean;
+  fixedRoom?: boolean;
 }
 
 export interface AssignRoomInput {
   roomId: string;
   rate?: number;
+}
+
+export interface ReservationTrace {
+  id: string;
+  reservationId: string;
+  body: string;
+  department: string;
+  dueAt?: string | null;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  createdById?: string | null;
+  createdAt: string;
+}
+
+export interface ReservationCompanion {
+  id: string;
+  reservationId: string;
+  guestId?: string | null;
+  firstName: string;
+  lastName: string;
+  relationship?: string | null;
+  sharesFolio: boolean;
+  createdAt: string;
+}
+
+export interface CreateTraceInput {
+  body: string;
+  department?: string;
+  dueAt?: string;
+}
+
+export interface AddCompanionInput {
+  guestId?: string;
+  firstName: string;
+  lastName: string;
+  relationship?: string;
+  sharesFolio?: boolean;
 }
 
 export async function listReservations(
@@ -112,5 +163,76 @@ export async function cancelReservation(
   const response = await apiClient.post<{ data: Reservation }>(`/reservations/${id}/cancel`, {
     reason,
   });
+  return response.data;
+}
+
+export async function noShowReservation(id: string): Promise<{ data: Reservation }> {
+  const response = await apiClient.post<{ data: Reservation }>(`/reservations/${id}/no-show`);
+  return response.data;
+}
+
+export async function resendConfirmation(id: string): Promise<{ success: boolean }> {
+  const response = await apiClient.post<{ success: boolean }>(
+    `/reservations/${id}/resend-confirmation`
+  );
+  return response.data;
+}
+
+export async function updateStayRate(stayId: string, rate: number): Promise<{ data: Reservation }> {
+  const response = await apiClient.patch<{ data: Reservation }>(`/reservations/stays/${stayId}`, {
+    rate,
+  });
+  return response.data;
+}
+
+export async function listTraces(reservationId: string): Promise<{ data: ReservationTrace[] }> {
+  const response = await apiClient.get<{ data: ReservationTrace[] }>(
+    `/reservations/${reservationId}/traces`
+  );
+  return response.data;
+}
+
+export async function createTrace(
+  reservationId: string,
+  input: CreateTraceInput
+): Promise<{ data: ReservationTrace }> {
+  const response = await apiClient.post<{ data: ReservationTrace }>(
+    `/reservations/${reservationId}/traces`,
+    input
+  );
+  return response.data;
+}
+
+export async function resolveTrace(traceId: string): Promise<{ data: ReservationTrace }> {
+  const response = await apiClient.post<{ data: ReservationTrace }>(
+    `/reservations/traces/${traceId}/resolve`
+  );
+  return response.data;
+}
+
+export async function listCompanions(
+  reservationId: string
+): Promise<{ data: ReservationCompanion[] }> {
+  const response = await apiClient.get<{ data: ReservationCompanion[] }>(
+    `/reservations/${reservationId}/companions`
+  );
+  return response.data;
+}
+
+export async function addCompanion(
+  reservationId: string,
+  input: AddCompanionInput
+): Promise<{ data: ReservationCompanion }> {
+  const response = await apiClient.post<{ data: ReservationCompanion }>(
+    `/reservations/${reservationId}/companions`,
+    input
+  );
+  return response.data;
+}
+
+export async function removeCompanion(companionId: string): Promise<{ success: boolean }> {
+  const response = await apiClient.delete<{ success: boolean }>(
+    `/reservations/companions/${companionId}`
+  );
   return response.data;
 }

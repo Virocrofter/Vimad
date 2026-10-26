@@ -117,7 +117,9 @@ export default function TicketsPage() {
   const [tickets, setTickets] = useState(initialTickets);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState<(typeof initialTickets)[number] | null>(
+    null
+  );
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTicket, setNewTicket] = useState({
     subject: '',
@@ -152,7 +154,7 @@ export default function TicketsPage() {
     setNewTicket({ subject: '', category: 'General', priority: 'medium', message: '' });
   };
 
-  const handleReply = (ticketId, text) => {
+  const handleReply = (ticketId: string, text: string) => {
     setTickets((prev) =>
       prev.map((t) => {
         if (t.id !== ticketId) return t;
@@ -172,7 +174,7 @@ export default function TicketsPage() {
         <TicketDetail
           ticket={selectedTicket}
           onClose={() => setSelectedTicket(null)}
-          onReply={(text) => handleReply(selectedTicket.id, text)}
+          onReply={(text: string) => handleReply(selectedTicket.id, text)}
         />
       </div>
     );
@@ -227,7 +229,7 @@ export default function TicketsPage() {
         {['all', 'open', 'in_progress', 'resolved'].map((status) => {
           const count =
             status === 'all' ? tickets.length : tickets.filter((t) => t.status === status).length;
-          const meta = ticketStatusMeta[status] || {
+          const meta = ticketStatusMeta[status as keyof typeof ticketStatusMeta] || {
             label: 'All',
             color: 'text-text-primary',
             dot: 'bg-text-muted',

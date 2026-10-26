@@ -14,7 +14,7 @@ import { versionMiddleware } from './common/versioning.js';
 import { metricsMiddleware, metricsHandler, recordApiUsage } from './common/metrics.js';
 import { sentryErrorHandler } from './common/sentry.js';
 import { generateOpenAPIDocument } from './common/openapi.js';
-// import { createSocketServer } from './common/socket.js'; // TODO: re-enable after socket.js is decoupled from auth.service.ts
+import { createSocketServer } from './common/socket.js';
 import { idempotencyMiddleware } from './common/idempotency.js';
 import {
   initRateLimitRedis,
@@ -52,6 +52,10 @@ import { taskPushWorker, startTaskPushScheduler } from './jobs/task-push.job.js'
 import { groupsWorker, startGroupsScheduler } from './jobs/groups.job.js';
 // [T7] Meal plans — board-basis auto-posting worker + scheduler
 import { mealsWorker, startMealPostingScheduler } from './jobs/meals.job.js';
+// [AR] Accounts Receivable dunning — overdue reminders
+import { arWorker, startArScheduler } from './jobs/ar.job.js';
+// [REPORTS] tenant-scoped reports — due-schedule runner
+import { startReportsScheduler } from './jobs/reports.job.js';
 // [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
 
 import { healthRouter } from './modules/health/health.routes.js';
@@ -101,6 +105,8 @@ import { conciergeGuestRouter } from './modules/concierge/concierge.guest.routes
 import { parkingRouter } from './modules/parking/parking.routes.js';
 // [C1] Chains + property switcher
 import { chainsRouter } from './modules/chains/chains.routes.js';
+import { chainDashboardRouter } from './modules/chain-dashboard/chain-dashboard.routes.js';
+import { guestIdentityRouter } from './modules/guest-identity/guest-identity.routes.js';
 // [USERS] tenant staff user management (list/create/update/suspend/audit)
 import { usersRouter } from './modules/users/users.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
@@ -122,6 +128,14 @@ import { mealsRouter } from './modules/meals/meals.routes.js';
 import { ticketsRouter } from './modules/tickets/tickets.routes.js';
 import { ticketsGuestRouter } from './modules/tickets/tickets.guest.routes.js';
 import { ticketWorker, startTicketScheduler } from './jobs/tickets.job.js';
+import { tenantSettingsRouter } from './modules/tenant-settings/tenant-settings.routes.js';
+// [AR] Accounts Receivable — corporate ledger
+import { arRouter } from './modules/ar/ar.routes.js';
+// [MARKETING] campaigns, analytics, automation workflows, templates, segments
+import { marketingRouter } from './modules/marketing/marketing.routes.js';
+// [REPORTS] tenant-scoped reporting — library, builder, scheduler, history
+import { reportsRouter } from './modules/reports/reports.routes.js';
+import roomPlanRoutes from './modules/room-plan/room-plan.routes.js';
 
 const app = express();
 const server = createServer(app);
@@ -143,6 +157,7 @@ const activeWorkers = [
   groupsWorker, // [G1]
   mealsWorker, // [T7]
   ticketWorker, // [SUPPORT] SLA breach scans
+  arWorker, // [AR] overdue dunning
 ];
 
 async function bootstrap() {
@@ -323,8 +338,11 @@ async function bootstrap() {
   app.use('/v1/properties', propertiesRouter);
   // [C1] Chains + property switcher scope (auth'd)
   app.use('/v1/chains', chainsRouter);
+  app.use('/v1/chain-dashboard', chainDashboardRouter);
+  app.use('/v1/guest-identity', guestIdentityRouter);
   app.use('/v1/guests', guestsRouter);
   app.use('/v1/reservations', reservationsRouter);
+  app.use('/v1/room-plan', roomPlanRoutes);
   app.use('/v1/rooms', roomsRouter);
   app.use('/v1/room-types', roomTypesRouter);
   app.use('/v1/rates', ratesRouter);
@@ -381,6 +399,13 @@ async function bootstrap() {
   app.use('/v1/meal-plans', mealsRouter);
   // [SUPPORT] Staff Support Desk (auth'd)
   app.use('/v1/tickets', ticketsRouter);
+  app.use('/v1/tenant', tenantSettingsRouter);
+  // [AR] Accounts Receivable — corporate ledger (auth'd)
+  app.use('/v1/ar', arRouter);
+  // [MARKETING] marketing module (auth'd)
+  app.use('/v1/marketing', marketingRouter);
+  // [REPORTS] tenant-scoped reports — library, builder, scheduler, history
+  app.use('/v1/reports', reportsRouter);
 
   // ─── Admin (platform admin: KPIs, health, alerts, reports, jobs) ───
   app.use('/admin', adminRouter);
@@ -423,6 +448,8 @@ async function bootstrap() {
   attachDeadLetterHandler('meals');
   // [SUPPORT] SLA scans retry into the DLQ too
   attachDeadLetterHandler('tickets');
+  // [AR] dunning jobs retry into the DLQ too
+  attachDeadLetterHandler('ar');
   void startNightAuditScheduler(); // cron-driven scheduled audits (node-cron, every minute)
   void startPaymentRequestScheduler(); // [DEPOSIT-AUTOMATION] reminders + expiry (every 5 min)
   void startTransactionalEmailScheduler(); // [A3] pre-arrival scan (every hour)
@@ -434,6 +461,8 @@ async function bootstrap() {
   void startOverbookingAlertScheduler(); // [I1] walk-plan alerts (08:00 + 14:00)
   void startMealPostingScheduler(); // [T7] meal auto-post scan (every 15 min)
   void startTicketScheduler(); // [SUPPORT] SLA breach scan + escalation (every 5 min)
+  void startArScheduler(); // [AR] overdue dunning scan (every 6h)
+  void startReportsScheduler(); // [REPORTS] due scheduled reports (every min)
 
   // ─── Graceful Shutdown ───
   const shutdown = async (signal: string) => {
@@ -448,8 +477,9 @@ async function bootstrap() {
   process.on('SIGINT', () => void shutdown('SIGINT'));
 
   // ─── Real-time Layer ───
-  // TODO: re-enable after socket.js is decoupled from auth.service.ts
-  // createSocketServer(server);
+  // D2: socket.js verifies tokens standalone (common/socket-auth.ts) -
+  // the auth.service -> prisma circular dependency is broken.
+  createSocketServer(server);
 
   // ─── Start Server ───
   server.listen(PORT, () => {

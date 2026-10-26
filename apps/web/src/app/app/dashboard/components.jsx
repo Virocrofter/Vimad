@@ -1,6 +1,6 @@
 /* apps/web/src/app/app/dashboard/components.jsx */
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Area,
   AreaChart,
@@ -21,19 +21,23 @@ import {
   DollarSign,
   Info,
   LogIn,
+  Minus,
   MoonStar,
   Plus,
   RefreshCw,
+  TrendingDown,
   TrendingUp,
   Users,
   X,
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { cn, formatCurrency } from '../../../lib/utils';
+import { activityTarget, LINKS, reservationUrl } from './dashLinks';
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 
-export function KpiCard({ label, value, sub, icon: Icon, iconClass, loading }) {
+// D1.1 — `to` makes the whole card navigate; D3 — `delta` shows trend vs yesterday.
+export function KpiCard({ label, value, sub, icon: Icon, iconClass, loading, to, delta }) {
   if (loading) {
     return (
       <div className="rounded-xl border border-border bg-surface p-5">
@@ -45,12 +49,29 @@ export function KpiCard({ label, value, sub, icon: Icon, iconClass, loading }) {
       </div>
     );
   }
-  return (
+  const DeltaIcon =
+    delta?.trend === 'up' ? TrendingUp : delta?.trend === 'down' ? TrendingDown : Minus;
+  const card = (
     <div className="rounded-xl border border-border bg-surface p-5 transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
           <p className="mt-1.5 truncate text-2xl font-bold text-text-primary">{value}</p>
+          {delta && (
+            <p
+              className={cn(
+                'mt-1 flex items-center gap-1 text-xs font-medium',
+                delta.trend === 'flat'
+                  ? 'text-text-muted'
+                  : delta.good
+                    ? 'text-accent'
+                    : 'text-danger'
+              )}
+            >
+              <DeltaIcon className="h-3 w-3" />
+              {delta.text}
+            </p>
+          )}
           {sub && <p className="mt-1 truncate text-xs text-text-secondary">{sub}</p>}
         </div>
         {Icon && (
@@ -60,6 +81,15 @@ export function KpiCard({ label, value, sub, icon: Icon, iconClass, loading }) {
         )}
       </div>
     </div>
+  );
+  if (!to) return card;
+  return (
+    <Link
+      to={to}
+      className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+    >
+      {card}
+    </Link>
   );
 }
 
@@ -143,6 +173,8 @@ const severityMeta = {
   success: { icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10', dot: 'bg-accent' },
 };
 
+// Dismissal persistence is owned by page.jsx (per business date, localStorage);
+// this panel keeps its original props contract.
 export function AlertsPanel({ alerts, loading, onDismiss, onDismissAll }) {
   const [open, setOpen] = useState(true);
   const active = alerts.filter((a) => !a.acknowledged);
@@ -243,10 +275,13 @@ export function AlertsPanel({ alerts, loading, onDismiss, onDismissAll }) {
 
 // ─── Arrivals / Departures ────────────────────────────────────────────────────
 
+// D1.1 — the whole row is a door into the reservation.
 function GuestMovementRow({ item, type, currency }) {
-  const isArrival = type === 'arrival';
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5">
+    <Link
+      to={reservationUrl(item.id)}
+      className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:border-secondary/40"
+    >
       <div className="min-w-0">
         <p className="truncate text-sm font-medium text-text-primary">{item.guestName}</p>
         <p className="text-xs text-text-secondary">
@@ -272,7 +307,7 @@ function GuestMovementRow({ item, type, currency }) {
           {item.status.replace('_', ' ')}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -334,14 +369,17 @@ export function roomState(room) {
   return 'ready';
 }
 
+const roomFilters = [
+  ['all', 'All'],
+  ['occupied', 'Occupied'],
+  ['dirty', 'Dirty'],
+  ['ready', 'Ready'],
+  ['out_of_order', 'Out of order'],
+];
+
+// D3 — floor-grouped, click-to-filter room board. Cells keep their D1 links.
 export function RoomBoard({ rooms, loading }) {
-  if (loading) {
-    return (
-      <div className="rounded-xl border border-border bg-surface p-5">
-        <div className="h-48 animate-pulse rounded-lg bg-surface-elevated" />
-      </div>
-    );
-  }
+  const [filter, setFilter] = useState('all');
 
   const counts = rooms.reduce(
     (acc, r) => {
@@ -352,52 +390,111 @@ export function RoomBoard({ rooms, loading }) {
     { occupied: 0, dirty: 0, ready: 0, out_of_order: 0 }
   );
 
+  const floors = useMemo(() => {
+    const sorted = [...rooms].sort(
+      (a, b) =>
+        String(a.floor ?? '').localeCompare(String(b.floor ?? ''), undefined, { numeric: true }) ||
+        a.number.localeCompare(b.number, undefined, { numeric: true })
+    );
+    const map = new Map();
+    for (const r of sorted) {
+      const f = r.floor ? `Floor ${r.floor}` : 'Unassigned';
+      if (!map.has(f)) map.set(f, []);
+      map.get(f).push(r);
+    }
+    return [...map.entries()];
+  }, [rooms]);
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-border bg-surface p-5">
+        <div className="h-48 animate-pulse rounded-lg bg-surface-elevated" />
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BedDouble className="h-4 w-4 text-secondary" />
           <h3 className="text-sm font-semibold text-text-primary">Room Board</h3>
         </div>
         <Link
-          to="/app/room-plan"
+          to={LINKS.roomPlan}
           className="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
         >
           Tape chart <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px]">
-        {[
-          ['occupied', 'Occupied'],
-          ['dirty', 'Dirty'],
-          ['ready', 'Ready'],
-          ['out_of_order', 'Out of order'],
-        ].map(([key, label]) => (
-          <span key={key} className="flex items-center gap-1.5 text-text-secondary">
-            <span className={cn('h-2 w-2 rounded-full border', roomStateStyles[key])} />
-            {label} ({counts[key] ?? 0})
-          </span>
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {roomFilters.map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
+              filter === key
+                ? 'border-secondary/50 bg-secondary/10 text-secondary'
+                : 'border-border text-text-secondary hover:bg-surface-elevated'
+            )}
+          >
+            <span
+              className={cn(
+                'h-2 w-2 rounded-full border',
+                roomStateStyles[key] ?? 'border-border bg-surface-elevated'
+              )}
+            />
+            {label}
+            <span className="text-text-muted">
+              ({key === 'all' ? rooms.length : (counts[key] ?? 0)})
+            </span>
+          </button>
         ))}
       </div>
 
-      <div className="grid max-h-64 grid-cols-4 gap-2 overflow-auto sm:grid-cols-6 lg:grid-cols-8">
-        {rooms.map((room) => {
-          const state = roomState(room);
+      <div className="max-h-72 space-y-4 overflow-auto pr-1">
+        {floors.map(([floor, floorRooms]) => {
+          const visible = floorRooms.filter((r) => filter === 'all' || roomState(r) === filter);
+          if (visible.length === 0) return null;
           return (
-            <div
-              key={room.id}
-              title={
-                room.currentGuest
-                  ? `Room ${room.number} — ${room.currentGuest.firstName} ${room.currentGuest.lastName}`
-                  : `Room ${room.number} — ${state.replace('_', ' ')}`
-              }
-              className={cn(
-                'flex h-11 items-center justify-center rounded-lg border text-xs font-semibold capitalize',
-                roomStateStyles[state]
-              )}
-            >
-              {room.number}
+            <div key={floor}>
+              <div className="mb-1.5 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                  {floor}
+                </p>
+                <p className="text-[10px] text-text-muted">
+                  {visible.filter((r) => roomState(r) === 'occupied').length} occ ·{' '}
+                  {visible.filter((r) => roomState(r) === 'dirty').length} dirty ·{' '}
+                  {visible.filter((r) => roomState(r) === 'ready').length} ready
+                </p>
+              </div>
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+                {visible.map((room) => {
+                  const state = roomState(room);
+                  const cellTo = room.currentReservation
+                    ? reservationUrl(room.currentReservation.id)
+                    : LINKS.housekeeping;
+                  return (
+                    <Link
+                      key={room.id}
+                      to={cellTo}
+                      title={
+                        room.currentGuest
+                          ? `Room ${room.number} — ${room.currentGuest.firstName} ${room.currentGuest.lastName}`
+                          : `Room ${room.number} — ${state.replace('_', ' ')}`
+                      }
+                      className={cn(
+                        'flex h-11 items-center justify-center rounded-lg border text-xs font-semibold capitalize transition-opacity hover:opacity-75',
+                        roomStateStyles[state]
+                      )}
+                    >
+                      {room.number}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
@@ -417,12 +514,22 @@ const entityIcons = {
   night_audit: MoonStar,
 };
 
+// D1.1 — feed rows deep-link via dashLinks.activityTarget (entity + entityId
+// from the API). Unmapped entities render non-clickable, never a dead link.
 export function ActivityFeed({ items, loading }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <RefreshCw className="h-4 w-4 text-secondary" />
-        <h3 className="text-sm font-semibold text-text-primary">Recent Activity</h3>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4 text-secondary" />
+          <h3 className="text-sm font-semibold text-text-primary">Recent Activity</h3>
+        </div>
+        <Link
+          to={LINKS.auditTrail}
+          className="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
+        >
+          View all <ArrowRight className="h-3 w-3" />
+        </Link>
       </div>
       {loading ? (
         <div className="space-y-3">
@@ -436,17 +543,15 @@ export function ActivityFeed({ items, loading }) {
         <div className="max-h-72 space-y-1 overflow-auto pr-1">
           {items.map((item) => {
             const Icon = entityIcons[item.entity] ?? Info;
+            const to = activityTarget(item);
             let time;
             try {
               time = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
             } catch {
               time = item.time;
             }
-            return (
-              <div
-                key={item.id}
-                className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-background"
-              >
+            const row = (
+              <div className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-background">
                 <div className="rounded-md bg-surface-elevated p-1.5">
                   <Icon className="h-3.5 w-3.5 text-text-secondary" />
                 </div>
@@ -465,6 +570,17 @@ export function ActivityFeed({ items, loading }) {
                 </div>
               </div>
             );
+            return to ? (
+              <Link
+                key={item.id}
+                to={to}
+                className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+              >
+                {row}
+              </Link>
+            ) : (
+              <div key={item.id}>{row}</div>
+            );
           })}
         </div>
       )}
@@ -482,13 +598,15 @@ const reservationStatusStyles = {
   no_show: 'bg-warning/10 text-warning',
 };
 
+// D1.1 — rows open the reservation detail.
 export function RecentReservations({ reservations, currency, loading }) {
+  const navigate = useNavigate();
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-text-primary">Latest Reservations</h3>
         <Link
-          to="/app/reservations"
+          to={LINKS.reservations}
           className="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
         >
           View all <ArrowRight className="h-3 w-3" />
@@ -517,7 +635,11 @@ export function RecentReservations({ reservations, currency, loading }) {
             </thead>
             <tbody className="divide-y divide-border">
               {reservations.map((r) => (
-                <tr key={r.id} className="hover:bg-background">
+                <tr
+                  key={r.id}
+                  onClick={() => navigate(reservationUrl(r.id))}
+                  className="cursor-pointer hover:bg-background"
+                >
                   <td className="py-2.5 pr-4 font-medium text-text-primary">{r.guestName}</td>
                   <td className="py-2.5 pr-4 text-text-secondary">{r.confirmationNumber}</td>
                   <td className="py-2.5 pr-4 text-text-secondary">
@@ -547,7 +669,7 @@ export function RecentReservations({ reservations, currency, loading }) {
   );
 }
 
-// ─── Quick actions FAB ────────────────────────────────────────────────────────
+// ─── Quick actions FAB (mobile-only — D3 moved quick actions to the header) ──
 
 const quickActions = [
   { label: 'New Reservation', icon: CalendarCheck, to: '/app/reservations/new' },
@@ -559,7 +681,7 @@ const quickActions = [
 export function QuickActionsFab() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 md:hidden">
       {open && (
         <div className="mb-2 flex flex-col items-end gap-2">
           {quickActions.map((action) => (

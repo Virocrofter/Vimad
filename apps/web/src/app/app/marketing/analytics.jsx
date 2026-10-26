@@ -204,7 +204,7 @@ function formatNumber(num) {
 }
 
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-ZA', {
     style: 'currency',
     currency: 'ZAR',
     maximumFractionDigits: 0,

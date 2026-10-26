@@ -5,11 +5,10 @@ import { z } from 'zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
-import { cn } from '../../../../lib/utils';
+import { cn, formatCurrency } from '../../../../lib/utils';
 import {
   Calendar,
   BedDouble,
-  DollarSign,
   User,
   Check,
   ChevronRight,
@@ -51,7 +50,6 @@ export default function NewReservationPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [submitError, setSubmitError] = useState(null);
 
-  /* Guest selection state */
   const [guestSearch, setGuestSearch] = useState('');
   const [debouncedGuestSearch, setDebouncedGuestSearch] = useState('');
   const [selectedGuest, setSelectedGuest] = useState(null);
@@ -67,7 +65,6 @@ export default function NewReservationPage() {
     return () => clearTimeout(t);
   }, [guestSearch]);
 
-  /* Preselect guest when arriving from a guest profile (?guestId=) */
   const { data: preselectedGuest } = useGuest(preselectedGuestId ?? undefined);
   useEffect(() => {
     if (preselectedGuest && !selectedGuest) {
@@ -77,7 +74,6 @@ export default function NewReservationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preselectedGuest]);
 
-  /* Data */
   const { properties, isLoading: propertiesLoading } = useProperties();
   const propertyId = properties[0]?.id ?? null;
 
@@ -128,8 +124,9 @@ export default function NewReservationPage() {
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   })();
 
-  const nightlyRate = values.rate ? Number(values.rate) : null;
-  const estimatedTotal = nightlyRate ? nightlyRate * nights : null;
+  const baseRate = selectedRoomType?.baseRate != null ? Number(selectedRoomType.baseRate) : null;
+  const nightlyRate = values.rate ? Number(values.rate) : baseRate;
+  const estimatedTotal = nightlyRate && nights > 0 ? nightlyRate * nights : null;
 
   const validateStep = async () => {
     const fields = [];
@@ -181,7 +178,7 @@ export default function NewReservationPage() {
         adults: Number(values.adults) || 1,
         children: Number(values.children) || 0,
         rate: values.rate ? Number(values.rate) : undefined,
-        roomId: values.roomId || undefined, // ← ADD: the room picked in the wizard
+        roomId: values.roomId || undefined,
         source: values.source,
         notes: values.specialRequests?.trim() || undefined,
       });
@@ -274,7 +271,11 @@ export default function NewReservationPage() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold text-text-primary">{room.name}</h4>
-                      <span className="text-xs text-text-muted">{room.code}</span>
+                      <span className="text-sm font-medium text-text-primary">
+                        {room.baseRate != null
+                          ? `${formatCurrency(Number(room.baseRate))}/night`
+                          : room.code}
+                      </span>
                     </div>
                     <p className="text-xs text-text-secondary mt-0.5">
                       Base occupancy {room.baseOccupancy} · Max {room.maxOccupancy}
@@ -309,13 +310,10 @@ export default function NewReservationPage() {
                   </select>
                 </div>
                 <Input
-                  label="Nightly Rate (optional — leave blank to use the rate plan)"
+                  label={`Nightly Rate (optional — defaults to ${selectedRoomType?.name ?? 'room type'} base rate)`}
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder={
-                    selectedRoomType ? `e.g. standard rate for ${selectedRoomType.name}` : ''
-                  }
                   {...register('rate')}
                 />
               </div>
@@ -326,7 +324,6 @@ export default function NewReservationPage() {
       case 2:
         return (
           <div className="space-y-4">
-            {/* Preselected guest from profile */}
             {selectedGuest && preselectedGuestId === selectedGuest.id && (
               <div className="flex items-center gap-3 rounded-lg border border-secondary/30 bg-secondary/5 px-4 py-3">
                 <UserCheck className="h-4 w-4 text-secondary shrink-0" />
@@ -347,7 +344,6 @@ export default function NewReservationPage() {
               </div>
             )}
 
-            {/* Search existing guest */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-text-primary">Find existing guest</label>
               <div className="relative">
@@ -399,7 +395,6 @@ export default function NewReservationPage() {
               )}
             </div>
 
-            {/* Or create new guest */}
             {!selectedGuest && (
               <div className="space-y-4 rounded-xl border border-border bg-background p-4">
                 <p className="text-xs font-medium text-text-muted">OR CREATE A NEW GUEST</p>
@@ -426,7 +421,7 @@ export default function NewReservationPage() {
                   <Input
                     label="Phone"
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+27 82 000 0000"
                     value={newGuest.phone}
                     onChange={(e) => setNewGuest((g) => ({ ...g, phone: e.target.value }))}
                   />
@@ -483,7 +478,9 @@ export default function NewReservationPage() {
                 <div>
                   <p className="text-text-muted text-xs uppercase tracking-wider">Rate</p>
                   <p className="font-medium text-text-primary">
-                    {nightlyRate ? `$${nightlyRate.toFixed(2)}/night` : 'Rate plan default'}
+                    {nightlyRate != null
+                      ? `${formatCurrency(nightlyRate)}/night`
+                      : 'Rate plan default'}
                   </p>
                 </div>
                 <div>
@@ -518,10 +515,11 @@ export default function NewReservationPage() {
 
               <div className="border-t border-border pt-3 flex items-center justify-between">
                 <span className="text-sm text-text-secondary">
-                  Total Estimated{estimatedTotal === null && ' (rate plan will apply)'}
+                  Total Estimated
+                  {estimatedTotal === null && ' (rate plan will apply)'}
                 </span>
                 <span className="text-2xl font-bold text-text-primary">
-                  {estimatedTotal !== null ? `$${estimatedTotal.toFixed(2)}` : '—'}
+                  {estimatedTotal !== null ? formatCurrency(estimatedTotal) : '—'}
                 </span>
               </div>
             </div>
@@ -557,7 +555,6 @@ export default function NewReservationPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-          {/* Stepper */}
           <div className="mb-8 flex items-center px-2">
             {steps.map((step, idx) => {
               const StepIcon = step.icon;

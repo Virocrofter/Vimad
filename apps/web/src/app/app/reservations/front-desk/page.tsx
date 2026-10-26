@@ -17,7 +17,7 @@ import {
   UserPlus,
   X,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+import { cn, formatCurrency } from '../../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import type { Reservation } from '../../../../types';
@@ -68,12 +68,7 @@ function avatarColor(name: string) {
 
 const day = (d?: string) => (d ?? new Date().toISOString().slice(0, 10)).slice(0, 10);
 const isInHouse = (r: Reservation) => r.status === 'checked_in';
-// Arrivals = still-expected guests only. checked_out/cancelled/no_show must
-// never reappear here with a Check-In button (that produced the 409s).
 const isArrival = (r: Reservation) => r.status === 'confirmed' && day(r.arrivalDate) === day();
-// Departures = due out today (checked_in) OR already departed (checked_out,
-// departure today or future — covers early departures, which the old
-// checked_in-only filter hid from every tab).
 const isDeparture = (r: Reservation) =>
   (r.status === 'checked_in' && day(r.departureDate) === day()) ||
   (r.status === 'checked_out' && day(r.departureDate) >= day());
@@ -85,10 +80,8 @@ function formatDates(r: Reservation) {
   return { range: `${a ? fmt(a) : '—'} → ${d ? fmt(d) : '—'}`, nights: r.nights };
 }
 
-const money = (v?: number | string) => {
-  const n = typeof v === 'string' ? Number(v) : v;
-  return Number.isFinite(n as number) ? `R${(n as number).toFixed(0)}` : '—';
-};
+const money = (v?: number | string) =>
+  Number.isFinite(Number(v ?? NaN)) ? formatCurrency(Number(v)) : '—';
 
 export default function FrontDeskPage() {
   const navigate = useNavigate();
@@ -105,8 +98,6 @@ export default function FrontDeskPage() {
   const checkIn = useCheckIn();
   const checkOut = useCheckOut();
   const assignRoom = useAssignRoom();
-
-  const today = new Date().toISOString().slice(0, 10);
 
   const availableRooms = useMemo(
     () => rooms.filter((r) => (r.status ?? '') !== 'occupied').length,
@@ -147,10 +138,6 @@ export default function FrontDeskPage() {
   };
 
   const doCheckIn = async (r: Reservation) => {
-    // Offline, the queue is FIFO: a queued assign lands before a queued
-    // check-in, so the "no room" guard would reject a flow that actually
-    // works. Skip it when offline or when any mutation for this reservation
-    // is already queued.
     const hasRoom = (r.stays?.length ?? 0) > 0 || Boolean(r.roomNumber);
     const willHaveRoom =
       hasRoom || !navigator.onLine || (await hasQueuedMutationFor(`/reservations/${r.id}`));
@@ -281,7 +268,6 @@ export default function FrontDeskPage() {
 
   return (
     <div className="p-6 flex flex-col gap-5">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Front Desk</h1>
@@ -294,7 +280,6 @@ export default function FrontDeskPage() {
         </Button>
       </div>
 
-      {/* Error banner */}
       {actionError && (
         <div className="flex items-center justify-between rounded-lg border border-danger/20 bg-danger/5 px-4 py-2.5">
           <p className="text-sm text-danger">{actionError}</p>
@@ -317,7 +302,6 @@ export default function FrontDeskPage() {
         </div>
       )}
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, icon: Icon, color }) => (
           <div
@@ -333,7 +317,6 @@ export default function FrontDeskPage() {
         ))}
       </div>
 
-      {/* Quick actions */}
       <div className="flex flex-wrap gap-2">
         {quickActions.map(({ label, icon: Icon, onClick }) => (
           <button
@@ -346,7 +329,6 @@ export default function FrontDeskPage() {
         ))}
       </div>
 
-      {/* Tabs + search */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="inline-flex rounded-lg border border-border bg-surface p-1">
           {tabs.map(({ key, label, count, icon: Icon }) => (
@@ -383,7 +365,6 @@ export default function FrontDeskPage() {
         </div>
       </div>
 
-      {/* Guest list */}
       <div className="rounded-xl border border-border bg-surface overflow-hidden">
         <div className="hidden md:grid grid-cols-[2fr_0.75fr_1.5fr_0.75fr_1fr_auto] gap-4 px-5 py-3 border-b border-border text-xs font-medium tracking-wide text-text-muted">
           <span>Guest</span>
@@ -492,7 +473,6 @@ export default function FrontDeskPage() {
         })}
       </div>
 
-      {/* Assign room modal */}
       {assignFor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg">

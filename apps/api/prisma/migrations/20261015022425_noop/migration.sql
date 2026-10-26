@@ -1,2 +1,2 @@
 -- DropIndex
-DROP INDEX "reservations_groupId_idx";
+DROP INDEX IF EXISTS "reservations_groupId_idx";

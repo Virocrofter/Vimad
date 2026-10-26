@@ -328,6 +328,20 @@ function renderTemplate(
       <p>Start: ${p.startTime}</p>
       <p>Affected: ${(p.affectedServices as unknown as string[]).join(', ')}</p>
     `,
+    'ar-overdue-reminder': (p) => `
+      <div style="font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1a1a2e;">
+        <h1 style="font-size:22px;">Payment reminder</h1>
+        <p>Dear ${p.accountName},</p>
+        <p>Our records show invoice <strong>${p.invoiceNumber}</strong> for
+           <strong>${p.currency} ${p.amount}</strong> was due on
+           <strong>${p.dueDate}</strong> and remains outstanding.</p>
+        <p>Please arrange payment at your earliest convenience. If payment is
+           already on its way, please disregard this reminder.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:28px 0;" />
+        <p style="font-size:12px;color:#888;">Sent by ${env.EMAIL_FROM ?? 'your property management system'}.
+           Please do not reply to this automated message.</p>
+      </div>
+    `,
     generic: (p) => `<p>${p.message ?? 'Notification from Vimad'}</p>`,
   };
 

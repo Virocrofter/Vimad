@@ -32,6 +32,8 @@ import {
   Settings,
   Sparkles,
   Building2,
+  Network,
+  Fingerprint,
   Menu,
   X,
 } from 'lucide-react';
@@ -104,6 +106,8 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       // [C1] Chains + property dashboard
       { to: '/app/properties', label: 'Properties', icon: Building2 },
+      { to: '/app/chain-dashboard', label: 'Chain Dashboard', icon: Network },
+      { to: '/app/guest-identity', label: 'Shared Guests', icon: Fingerprint },
       { to: '/app/reports', label: 'Reports', icon: BarChart3 },
       { to: '/app/users', label: 'Users', icon: ShieldCheck },
       { to: '/app/audit-trail', label: 'Audit Trail', icon: ShieldCheck },

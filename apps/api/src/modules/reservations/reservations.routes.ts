@@ -20,8 +20,20 @@ import {
   checkInReservation,
   checkOutReservation,
   cancelReservation,
+  markNoShow,
+  resendConfirmation,
+  updateStayRate,
+  listTraces,
+  createTrace,
+  resolveTrace,
+  listCompanions,
+  addCompanion,
+  removeCompanion,
   reservationCreateSchema,
   reservationUpdateSchema,
+  createTraceSchema,
+  addCompanionSchema,
+  type AuditActor,
   type ReservationListQuery,
 } from './reservations.service.js';
 
@@ -47,7 +59,6 @@ const reservationQuerySchema = paginationSchema
 
 const ReservationCreateInputSchema = reservationCreateSchema.openapi('ReservationCreateInput');
 const ReservationUpdateInputSchema = reservationUpdateSchema.openapi('ReservationUpdateInput');
-const AssignRoomInputSchema = assignRoomSchema.openapi('AssignRoomInput');
 
 const ReservationGuestSchema = z.object({
   id: z.string(),
@@ -132,6 +143,20 @@ const conflict = {
 export const reservationsRouter = Router();
 
 reservationsRouter.use(authMiddleware, tenantScope);
+
+// B2 fix: real user attribution — derive actor from the authed request
+function actorOf(req: Request): AuditActor {
+  const u = (
+    req as unknown as {
+      auth?: { user?: { id: string; firstName?: string; lastName?: string; role?: string } };
+    }
+  ).auth?.user;
+  return {
+    id: u?.id ?? 'system',
+    name: u ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.id : 'System',
+    role: u?.role ?? 'system',
+  };
+}
 
 // GET / — list
 registry.registerPath({
@@ -230,7 +255,7 @@ reservationsRouter.post(
   validateBody(reservationCreateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await createReservation(req.tenantId, req.body);
+      const result = await createReservation(req.tenantId, req.body, actorOf(req));
       res.status(201).json({ data: result });
     } catch (err) {
       next(err);
@@ -238,7 +263,7 @@ reservationsRouter.post(
   }
 );
 
-// PATCH /:id — update (dates, guests, notes, room moves, rate)
+// PATCH /:id — update
 registry.registerPath({
   method: 'patch',
   path: '/{id}',
@@ -273,7 +298,7 @@ reservationsRouter.patch(
   validateBody(reservationUpdateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await updateReservation(req.tenantId, req.params.id, req.body);
+      const result = await updateReservation(req.tenantId, req.params.id, req.body, actorOf(req));
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -282,27 +307,12 @@ reservationsRouter.patch(
 );
 
 // DELETE /:id
-registry.registerPath({
-  method: 'delete',
-  path: '/{id}',
-  tags: ['Reservations'],
-  description: 'Delete a reservation',
-  request: { params: IdParamSchema },
-  responses: {
-    204: { description: 'Reservation deleted' },
-    401: unauthorized,
-    403: forbidden,
-    404: notFound,
-    409: conflict,
-  },
-});
-
 reservationsRouter.delete(
   '/:id',
   requirePermission('reservation', 'delete'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await deleteReservation(req.tenantId, req.params.id);
+      await deleteReservation(req.tenantId, req.params.id, actorOf(req));
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -311,37 +321,13 @@ reservationsRouter.delete(
 );
 
 // POST /:id/assign-room
-registry.registerPath({
-  method: 'post',
-  path: '/{id}/assign-room',
-  tags: ['Reservations'],
-  description: 'Assign a room to a reservation',
-  request: {
-    params: IdParamSchema,
-    body: {
-      description: 'Room assignment payload',
-      content: { 'application/json': { schema: AssignRoomInputSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Room assigned',
-      content: { 'application/json': { schema: ReservationResponseSchema } },
-    },
-    401: unauthorized,
-    403: forbidden,
-    404: notFound,
-    409: conflict,
-  },
-});
-
 reservationsRouter.post(
   '/:id/assign-room',
   requirePermission('reservation', 'update'),
   validateBody(assignRoomSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await assignRoom(req.tenantId, req.params.id, req.body);
+      const result = await assignRoom(req.tenantId, req.params.id, req.body, actorOf(req));
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -350,30 +336,12 @@ reservationsRouter.post(
 );
 
 // POST /:id/check-in
-registry.registerPath({
-  method: 'post',
-  path: '/{id}/check-in',
-  tags: ['Reservations'],
-  description: 'Check in a reservation',
-  request: { params: IdParamSchema },
-  responses: {
-    200: {
-      description: 'Checked in',
-      content: { 'application/json': { schema: ReservationResponseSchema } },
-    },
-    401: unauthorized,
-    403: forbidden,
-    404: notFound,
-    409: conflict,
-  },
-});
-
 reservationsRouter.post(
   '/:id/check-in',
   requirePermission('reservation', 'checkin'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await checkInReservation(req.tenantId, req.params.id);
+      const result = await checkInReservation(req.tenantId, req.params.id, actorOf(req));
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -382,30 +350,12 @@ reservationsRouter.post(
 );
 
 // POST /:id/check-out
-registry.registerPath({
-  method: 'post',
-  path: '/{id}/check-out',
-  tags: ['Reservations'],
-  description: 'Check out a reservation',
-  request: { params: IdParamSchema },
-  responses: {
-    200: {
-      description: 'Checked out',
-      content: { 'application/json': { schema: ReservationResponseSchema } },
-    },
-    401: unauthorized,
-    403: forbidden,
-    404: notFound,
-    409: conflict,
-  },
-});
-
 reservationsRouter.post(
   '/:id/check-out',
   requirePermission('reservation', 'checkout'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await checkOutReservation(req.tenantId, req.params.id);
+      const result = await checkOutReservation(req.tenantId, req.params.id, actorOf(req));
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -447,8 +397,180 @@ reservationsRouter.post(
   requirePermission('reservation', 'cancel'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await cancelReservation(req.tenantId, req.params.id, req.body?.reason);
+      const result = await cancelReservation(
+        req.tenantId,
+        req.params.id,
+        req.body?.reason,
+        actorOf(req)
+      );
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/no-show
+registry.registerPath({
+  method: 'post',
+  path: '/{id}/no-show',
+  tags: ['Reservations'],
+  description: 'Mark a confirmed reservation as no-show (frees the room)',
+  request: { params: IdParamSchema },
+  responses: {
+    200: {
+      description: 'Marked no-show',
+      content: { 'application/json': { schema: ReservationResponseSchema } },
+    },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
+  },
+});
+
+reservationsRouter.post(
+  '/:id/no-show',
+  requirePermission('reservation', 'no_show'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await markNoShow(req.tenantId, req.params.id, actorOf(req));
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/resend-confirmation
+registry.registerPath({
+  method: 'post',
+  path: '/{id}/resend-confirmation',
+  tags: ['Reservations'],
+  description: 'Resend the confirmation email to the guest',
+  request: { params: IdParamSchema },
+  responses: {
+    200: { description: 'Confirmation queued' },
+    401: unauthorized,
+    403: forbidden,
+    404: notFound,
+    409: conflict,
+  },
+});
+
+reservationsRouter.post(
+  '/:id/resend-confirmation',
+  requirePermission('reservation', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await resendConfirmation(req.tenantId, req.params.id, actorOf(req));
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// PATCH /stays/:stayId — per-night rate editing
+reservationsRouter.patch(
+  '/stays/:stayId',
+  requirePermission('reservation', 'update'),
+  validateBody(z.object({ rate: z.number().min(0) })),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await updateStayRate(
+        req.tenantId,
+        req.params.stayId,
+        req.body.rate,
+        actorOf(req)
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// GET /:id/traces
+reservationsRouter.get(
+  '/:id/traces',
+  requirePermission('reservation', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await listTraces(req.tenantId, req.params.id);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/traces
+reservationsRouter.post(
+  '/:id/traces',
+  requirePermission('reservation', 'trace'),
+  validateBody(createTraceSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await createTrace(req.tenantId, req.params.id, req.body, actorOf(req));
+      res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /traces/:traceId/resolve
+reservationsRouter.post(
+  '/traces/:traceId/resolve',
+  requirePermission('reservation', 'trace'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await resolveTrace(req.tenantId, req.params.traceId, actorOf(req));
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// GET /:id/companions
+reservationsRouter.get(
+  '/:id/companions',
+  requirePermission('reservation', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await listCompanions(req.tenantId, req.params.id);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /:id/companions
+reservationsRouter.post(
+  '/:id/companions',
+  requirePermission('reservation', 'update'),
+  validateBody(addCompanionSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await addCompanion(req.tenantId, req.params.id, req.body, actorOf(req));
+      res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// DELETE /companions/:companionId
+reservationsRouter.delete(
+  '/companions/:companionId',
+  requirePermission('reservation', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await removeCompanion(req.tenantId, req.params.companionId, actorOf(req));
+      res.json(result);
     } catch (err) {
       next(err);
     }

@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { cn } from '../../../../lib/utils';
+import { cn, formatCurrency } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 import {
   ArrowLeft,
   Calendar,
   User,
   BedDouble,
-  DollarSign,
   Clock,
   MessageSquare,
   FileText,
@@ -16,13 +15,19 @@ import {
   LogIn,
   LogOut,
   Printer,
-  Edit3,
   Phone,
   Mail,
   MapPin,
   Send,
   X,
   UserPlus,
+  UserX,
+  BellRing,
+  CheckCircle2,
+  Plus,
+  Trash2,
+  Pencil,
+  MailCheck,
 } from 'lucide-react';
 import {
   useReservation,
@@ -31,6 +36,15 @@ import {
   useCancelReservation,
   useAssignRoom,
   useUpdateReservation,
+  useNoShow,
+  useResendConfirmation,
+  useUpdateStayRate,
+  useTraces,
+  useCreateTrace,
+  useResolveTrace,
+  useCompanions,
+  useAddCompanion,
+  useRemoveCompanion,
 } from '../../../../hooks/useReservations';
 import { useRooms } from '../../../../hooks/useRooms';
 import PaymentRequestsPanel from '../components/PaymentRequestsPanel';
@@ -47,10 +61,13 @@ const statusMeta = {
 const tabs = [
   { id: 'details', label: 'Details', icon: FileText },
   { id: 'folio', label: 'Folio', icon: CreditCard },
+  { id: 'traces', label: 'Traces', icon: BellRing },
   { id: 'guest', label: 'Guest', icon: User },
   { id: 'history', label: 'History', icon: History },
   { id: 'notes', label: 'Notes', icon: MessageSquare },
 ];
+
+const TRACE_DEPARTMENTS = ['front_desk', 'housekeeping', 'maintenance', 'concierge', 'management'];
 
 function StatusBadge({ status }) {
   const meta = statusMeta[status] || statusMeta.confirmed;
@@ -66,9 +83,9 @@ function StatusBadge({ status }) {
   );
 }
 
-const fmt = (iso) => (iso ? new Date(iso).toLocaleString() : '—');
+const fmt = (iso) => (iso ? new Date(iso).toLocaleString() : null);
 const fmtDay = (iso) => (iso ?? '').slice(0, 10);
-const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
+const money = (v) => formatCurrency(Number(v ?? 0));
 
 function TimelineItem({ event, isLast }) {
   return (
@@ -93,10 +110,21 @@ export default function ReservationDetailPage() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('details');
   const [actionError, setActionError] = useState(null);
-  const [emailNotice, setEmailNotice] = useState(null);
+  const [actionNotice, setActionNotice] = useState(null);
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignRoomId, setAssignRoomId] = useState('');
   const [notesDraft, setNotesDraft] = useState(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [noShowOpen, setNoShowOpen] = useState(false);
+  const [editingStay, setEditingStay] = useState(null);
+  const [stayRateDraft, setStayRateDraft] = useState('');
+  const [traceDraft, setTraceDraft] = useState({ body: '', department: 'front_desk', dueAt: '' });
+  const [companionDraft, setCompanionDraft] = useState({
+    firstName: '',
+    lastName: '',
+    relationship: '',
+  });
 
   const { reservation: r, isLoading, error, refetch } = useReservation(id);
   const { rooms } = useRooms();
@@ -105,13 +133,25 @@ export default function ReservationDetailPage() {
   const cancel = useCancelReservation();
   const assignRoom = useAssignRoom();
   const update = useUpdateReservation();
+  const noShow = useNoShow();
+  const resend = useResendConfirmation();
+  const updateStayRate = useUpdateStayRate();
+  const { traces, isLoading: tracesLoading } = useTraces(id);
+  const createTrace = useCreateTrace(id);
+  const resolveTrace = useResolveTrace(id);
+  const { companions } = useCompanions(id);
+  const addCompanion = useAddCompanion(id);
+  const removeCompanion = useRemoveCompanion(id);
 
   const mutationPending =
     checkIn.isPending ||
     checkOut.isPending ||
     cancel.isPending ||
     assignRoom.isPending ||
-    update.isPending;
+    update.isPending ||
+    noShow.isPending ||
+    resend.isPending ||
+    updateStayRate.isPending;
 
   if (isLoading) {
     return (
@@ -148,23 +188,64 @@ export default function ReservationDetailPage() {
     r.guestName || `${guest.firstName ?? ''} ${guest.lastName ?? ''}`.trim() || 'Unnamed Guest';
   const folio = r.folio;
   const folioItems = folio?.items ?? [];
+  const totalCharges = folio ? Number(folio.totalCharges) : 0;
+  const totalPayments = folio ? Number(folio.totalPayments) : 0;
   const balance = folio ? Number(folio.balance) : Number(r.balance ?? 0);
   const stays = r.stays ?? [];
+  const tracesList = r.traces ?? traces;
+  const companionsList = r.companions ?? companions;
   const roomNumber = r.roomNumber ?? stays[0]?.room?.number ?? null;
   const roomTypeName = r.roomTypeName ?? stays[0]?.room?.roomType?.name ?? null;
 
+  const notify = (msg) => {
+    setActionNotice(msg);
+    setTimeout(() => setActionNotice(null), 4000);
+  };
+
   const doCheckIn = () => {
     setActionError(null);
-    checkIn.mutate(r.id, { onError: (e) => setActionError(e.message) });
+    checkIn.mutate(r.id, {
+      onSuccess: () => notify('Guest checked in'),
+      onError: (e) => setActionError(e.message),
+    });
   };
   const doCheckOut = () => {
     setActionError(null);
-    checkOut.mutate(r.id, { onError: (e) => setActionError(e.message) });
+    checkOut.mutate(r.id, {
+      onSuccess: () => notify('Guest checked out'),
+      onError: (e) => setActionError(e.message),
+    });
   };
   const doCancel = () => {
-    if (!window.confirm(`Cancel reservation ${r.confirmationNumber}?`)) return;
+    if (!cancelReason.trim()) return;
     setActionError(null);
-    cancel.mutate({ id: r.id }, { onError: (e) => setActionError(e.message) });
+    cancel.mutate(
+      { id: r.id, reason: cancelReason.trim() },
+      {
+        onSuccess: () => {
+          setCancelOpen(false);
+          notify('Reservation cancelled');
+        },
+        onError: (e) => setActionError(e.message),
+      }
+    );
+  };
+  const doNoShow = () => {
+    setActionError(null);
+    noShow.mutate(r.id, {
+      onSuccess: () => {
+        setNoShowOpen(false);
+        notify('Marked as no-show — room released');
+      },
+      onError: (e) => setActionError(e.message),
+    });
+  };
+  const doResend = () => {
+    setActionError(null);
+    resend.mutate(r.id, {
+      onSuccess: () => notify('Confirmation email resent'),
+      onError: (e) => setActionError(e.message),
+    });
   };
   const doAssign = () => {
     if (!assignRoomId) return;
@@ -172,7 +253,62 @@ export default function ReservationDetailPage() {
     assignRoom.mutate(
       { id: r.id, input: { roomId: assignRoomId } },
       {
-        onSuccess: () => setAssignOpen(false),
+        onSuccess: () => {
+          setAssignOpen(false);
+          notify('Room assigned');
+        },
+        onError: (e) => setActionError(e.message),
+      }
+    );
+  };
+
+  const startEditStay = (s) => {
+    setEditingStay(s.id);
+    setStayRateDraft(String(Number(s.rate)));
+  };
+  const saveStayRate = () => {
+    const rate = Number(stayRateDraft);
+    if (!Number.isFinite(rate) || rate < 0 || !editingStay) return;
+    setActionError(null);
+    updateStayRate.mutate(
+      { stayId: editingStay, rate },
+      {
+        onSuccess: () => {
+          setEditingStay(null);
+          notify('Night rate updated');
+        },
+        onError: (e) => setActionError(e.message),
+      }
+    );
+  };
+
+  const submitTrace = () => {
+    if (!traceDraft.body.trim()) return;
+    setActionError(null);
+    createTrace.mutate(
+      {
+        body: traceDraft.body.trim(),
+        department: traceDraft.department,
+        dueAt: traceDraft.dueAt || undefined,
+      },
+      {
+        onSuccess: () => setTraceDraft({ body: '', department: 'front_desk', dueAt: '' }),
+        onError: (e) => setActionError(e.message),
+      }
+    );
+  };
+
+  const submitCompanion = () => {
+    if (!companionDraft.firstName.trim() || !companionDraft.lastName.trim()) return;
+    setActionError(null);
+    addCompanion.mutate(
+      {
+        firstName: companionDraft.firstName.trim(),
+        lastName: companionDraft.lastName.trim(),
+        relationship: companionDraft.relationship.trim() || undefined,
+      },
+      {
+        onSuccess: () => setCompanionDraft({ firstName: '', lastName: '', relationship: '' }),
         onError: (e) => setActionError(e.message),
       }
     );
@@ -180,10 +316,9 @@ export default function ReservationDetailPage() {
 
   const emailFolio = async () => {
     setActionError(null);
-    setEmailNotice(null);
     try {
       await communicationsApi.sendFolio(r.id);
-      setEmailNotice('Folio email queued — check the Email Center or MailHog.');
+      notify('Folio email queued — check the Email Center or MailHog.');
     } catch (e) {
       setActionError(e instanceof Error ? e.message : 'Failed to send folio email');
     }
@@ -196,7 +331,14 @@ export default function ReservationDetailPage() {
     );
   };
 
-  /* Derive a timeline from real data */
+  const lifecycle = [
+    { label: 'Created', time: r.createdAt },
+    { label: 'Checked in', time: r.checkedInAt },
+    { label: 'Checked out', time: r.checkedOutAt },
+    { label: 'Cancelled', time: r.cancelledAt },
+    { label: 'No-show', time: r.noShowAt },
+  ].filter((e) => e.time);
+
   const historyEvents = [
     {
       id: 'created',
@@ -204,6 +346,12 @@ export default function ReservationDetailPage() {
       action: 'Reservation created',
       detail: `Source: ${r.source}`,
     },
+    ...(r.checkedInAt ? [{ id: 'ci', time: r.checkedInAt, action: 'Guest checked in' }] : []),
+    ...(r.checkedOutAt ? [{ id: 'co', time: r.checkedOutAt, action: 'Guest checked out' }] : []),
+    ...(r.cancelledAt
+      ? [{ id: 'cx', time: r.cancelledAt, action: 'Reservation cancelled', detail: r.cancelReason }]
+      : []),
+    ...(r.noShowAt ? [{ id: 'ns', time: r.noShowAt, action: 'Marked no-show' }] : []),
     ...(stays.length
       ? [{ id: 'room', time: r.updatedAt, action: 'Room assigned', detail: `Room ${roomNumber}` }]
       : []),
@@ -261,15 +409,32 @@ export default function ReservationDetailPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-text-muted">Rate</label>
-                    <p className="text-sm font-medium text-text-primary flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-secondary" />
+                    <p className="text-sm font-medium text-text-primary">
                       {r.rate != null ? `${money(r.rate)}/night` : 'Rate plan default'}
                     </p>
                   </div>
+                  {r.eta && (
+                    <div className="space-y-1">
+                      <label className="text-xs text-text-muted">ETA</label>
+                      <p className="text-sm font-medium text-text-primary">{r.eta}</p>
+                    </div>
+                  )}
+                  {r.marketSegment && (
+                    <div className="space-y-1">
+                      <label className="text-xs text-text-muted">Market Segment</label>
+                      <p className="text-sm font-medium text-text-primary">{r.marketSegment}</p>
+                    </div>
+                  )}
                 </div>
+                {r.specialRequests && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <label className="text-xs text-text-muted">Special Requests</label>
+                    <p className="mt-1 text-sm text-text-secondary">{r.specialRequests}</p>
+                  </div>
+                )}
                 {r.notes && (
                   <div className="mt-4 pt-4 border-t border-border">
-                    <label className="text-xs text-text-muted">Notes</label>
+                    <label className="text-xs text-text-muted">Internal Notes</label>
                     <p className="mt-1 text-sm text-text-secondary">{r.notes}</p>
                   </div>
                 )}
@@ -277,9 +442,12 @@ export default function ReservationDetailPage() {
 
               {stays.length > 0 && (
                 <div className="rounded-xl border border-border bg-surface p-6">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
-                    Room Stays ({stays.length} nights)
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                      Room Stays ({stays.length} nights)
+                    </h3>
+                    <span className="text-xs text-text-muted">Click a rate to edit per-night</span>
+                  </div>
                   <div className="space-y-2">
                     {stays.map((s) => (
                       <div
@@ -289,9 +457,41 @@ export default function ReservationDetailPage() {
                         <span className="text-sm text-text-primary">
                           {fmtDay(s.date)} — Room {s.room?.number ?? '—'}
                         </span>
-                        <span className="text-sm font-mono text-text-secondary">
-                          {money(s.rate)}
-                        </span>
+                        {editingStay === s.id ? (
+                          <span className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={stayRateDraft}
+                              onChange={(e) => setStayRateDraft(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && saveStayRate()}
+                              className="w-24 rounded-md border border-border bg-surface px-2 py-1 text-right text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              autoFocus
+                            />
+                            <button
+                              onClick={saveStayRate}
+                              className="text-xs font-medium text-accent hover:underline"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingStay(null)}
+                              className="text-xs text-text-muted hover:underline"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => startEditStay(s)}
+                            className="group inline-flex items-center gap-1.5 text-sm font-mono text-text-secondary hover:text-secondary"
+                            title="Edit night rate"
+                          >
+                            {money(s.rate)}
+                            <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100" />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -299,28 +499,77 @@ export default function ReservationDetailPage() {
               )}
 
               <div className="rounded-xl border border-border bg-surface p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
-                  Booking Details
-                </h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1">
-                    <label className="text-xs text-text-muted">Confirmation #</label>
-                    <p className="text-sm font-mono font-medium text-text-primary">
-                      {r.confirmationNumber}
-                    </p>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                    Companions ({companionsList.length})
+                  </h3>
+                </div>
+                {companionsList.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {companionsList.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-2.5"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
+                            {(c.firstName[0] + (c.lastName[0] ?? '')).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-text-primary">
+                              {c.firstName} {c.lastName}
+                            </p>
+                            {c.relationship && (
+                              <p className="text-xs text-text-muted">{c.relationship}</p>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeCompanion.mutate(c.id)}
+                          className="text-text-muted hover:text-danger"
+                          title="Remove companion"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-text-muted">Source</label>
-                    <p className="text-sm font-medium text-text-primary">{r.source}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-text-muted">Created</label>
-                    <p className="text-sm text-text-secondary">{fmt(r.createdAt)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-text-muted">Last Updated</label>
-                    <p className="text-sm text-text-secondary">{fmt(r.updatedAt)}</p>
-                  </div>
+                )}
+                <div className="flex flex-wrap items-end gap-2">
+                  <input
+                    placeholder="First name"
+                    value={companionDraft.firstName}
+                    onChange={(e) =>
+                      setCompanionDraft((d) => ({ ...d, firstName: e.target.value }))
+                    }
+                    className="h-9 w-32 rounded-md border border-border bg-background px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <input
+                    placeholder="Last name"
+                    value={companionDraft.lastName}
+                    onChange={(e) => setCompanionDraft((d) => ({ ...d, lastName: e.target.value }))}
+                    className="h-9 w-32 rounded-md border border-border bg-background px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <input
+                    placeholder="Relationship (optional)"
+                    value={companionDraft.relationship}
+                    onChange={(e) =>
+                      setCompanionDraft((d) => ({ ...d, relationship: e.target.value }))
+                    }
+                    className="h-9 w-40 rounded-md border border-border bg-background px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={submitCompanion}
+                    disabled={
+                      !companionDraft.firstName.trim() ||
+                      !companionDraft.lastName.trim() ||
+                      addCompanion.isPending
+                    }
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" /> Add
+                  </Button>
                 </div>
               </div>
             </div>
@@ -342,6 +591,15 @@ export default function ReservationDetailPage() {
                       <UserPlus className="mr-1.5 h-4 w-4" /> Assign Room
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                    onClick={doResend}
+                    disabled={resend.isPending}
+                  >
+                    <MailCheck className="mr-1.5 h-4 w-4" /> Resend Confirmation
+                  </Button>
                   <Button
                     variant="outline"
                     className="w-full"
@@ -371,12 +629,23 @@ export default function ReservationDetailPage() {
                       <LogOut className="mr-1.5 h-4 w-4" /> Check Out
                     </Button>
                   )}
+                  {r.status === 'confirmed' && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                      onClick={() => setNoShowOpen(true)}
+                      disabled={mutationPending}
+                    >
+                      <UserX className="mr-1.5 h-4 w-4" /> Mark No-Show
+                    </Button>
+                  )}
                   {(r.status === 'confirmed' || r.status === 'checked_in') && (
                     <Button
                       variant="danger"
                       className="w-full"
                       size="sm"
-                      onClick={doCancel}
+                      onClick={() => setCancelOpen(true)}
                       disabled={mutationPending}
                     >
                       Cancel Reservation
@@ -398,6 +667,22 @@ export default function ReservationDetailPage() {
                   {balance > 0 ? 'Outstanding balance' : 'Fully paid'}
                 </p>
               </div>
+
+              {lifecycle.length > 0 && (
+                <div className="rounded-xl border border-border bg-surface p-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                    Lifecycle
+                  </h3>
+                  <div className="space-y-2">
+                    {lifecycle.map((e) => (
+                      <div key={e.label} className="flex items-center justify-between text-sm">
+                        <span className="text-text-secondary">{e.label}</span>
+                        <span className="text-xs text-text-muted">{fmt(e.time)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -454,23 +739,142 @@ export default function ReservationDetailPage() {
                         </td>
                       </tr>
                     ))}
-                    <tr className="bg-background font-semibold">
+                  </tbody>
+                  <tfoot className="bg-background border-t border-border font-semibold">
+                    <tr>
+                      <td className="px-4 py-2 text-xs text-text-muted" colSpan={2}>
+                        Totals
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono text-text-primary">
+                        {money(totalCharges)}
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono text-accent">
+                        {money(totalPayments)}
+                      </td>
+                    </tr>
+                    <tr>
                       <td className="px-4 py-3 text-text-primary" colSpan={2}>
                         Balance
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-text-primary" colSpan={2}>
+                      <td className="px-4 py-3 text-right font-mono" colSpan={2}>
                         <span className={balance > 0 ? 'text-danger' : 'text-accent'}>
                           {money(balance)}
                         </span>
                       </td>
                     </tr>
-                  </tbody>
+                  </tfoot>
                 </table>
               </div>
             )}
 
-            {/* Deposit requests — emailed pay-now links, reminders, auto-cancel status */}
             <PaymentRequestsPanel reservationId={r.id} />
+          </div>
+        );
+
+      case 'traces':
+        return (
+          <div className="space-y-6">
+            <div className="rounded-xl border border-border bg-surface p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                Add Trace
+              </h3>
+              <div className="space-y-3">
+                <textarea
+                  value={traceDraft.body}
+                  onChange={(e) => setTraceDraft((d) => ({ ...d, body: e.target.value }))}
+                  placeholder="e.g. VIP arrival — champagne ready, airport transfer at 14:00"
+                  rows={2}
+                  className="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="space-y-1">
+                    <label className="text-xs text-text-muted">Department</label>
+                    <select
+                      value={traceDraft.department}
+                      onChange={(e) => setTraceDraft((d) => ({ ...d, department: e.target.value }))}
+                      className="h-9 rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {TRACE_DEPARTMENTS.map((d) => (
+                        <option key={d} value={d}>
+                          {d.replace('_', ' ')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-text-muted">Due (optional)</label>
+                    <input
+                      type="datetime-local"
+                      value={traceDraft.dueAt}
+                      onChange={(e) => setTraceDraft((d) => ({ ...d, dueAt: e.target.value }))}
+                      className="h-9 rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={submitTrace}
+                    disabled={!traceDraft.body.trim() || createTrace.isPending}
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" /> Add Trace
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4">
+                Traces ({tracesList.length})
+              </h3>
+              {tracesLoading ? (
+                <p className="text-sm text-text-muted">Loading...</p>
+              ) : tracesList.length === 0 ? (
+                <p className="text-sm text-text-muted">
+                  No traces. Traces are internal alarm notes — they never go to the guest.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {tracesList.map((t) => (
+                    <div
+                      key={t.id}
+                      className={cn(
+                        'flex items-start justify-between gap-4 rounded-lg border px-4 py-3',
+                        t.resolvedAt
+                          ? 'border-border bg-background opacity-60'
+                          : t.dueAt && new Date(t.dueAt) < new Date()
+                            ? 'border-danger/30 bg-danger/5'
+                            : 'border-border bg-background'
+                      )}
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-medium text-secondary">
+                            {t.department?.replace('_', ' ')}
+                          </span>
+                          {t.resolvedAt ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-accent">
+                              <CheckCircle2 className="h-3.5 w-3.5" /> Resolved
+                            </span>
+                          ) : t.dueAt ? (
+                            <span className="text-xs text-text-muted">
+                              Due {new Date(t.dueAt).toLocaleString()}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-1.5 text-sm text-text-primary">{t.body}</p>
+                      </div>
+                      {!t.resolvedAt && (
+                        <button
+                          onClick={() => resolveTrace.mutate(t.id)}
+                          className="shrink-0 text-xs font-medium text-accent hover:underline"
+                        >
+                          Resolve
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         );
 
@@ -491,6 +895,12 @@ export default function ReservationDetailPage() {
                 {guest.vipStatus && (
                   <p className="text-sm text-text-secondary">{guest.vipStatus}</p>
                 )}
+                <Link
+                  to={`/app/guests/${guest.id}`}
+                  className="mt-3 inline-block text-xs text-secondary hover:underline"
+                >
+                  Open full guest profile →
+                </Link>
               </div>
             </div>
             <div className="lg:col-span-2 space-y-6">
@@ -584,7 +994,6 @@ export default function ReservationDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -619,9 +1028,19 @@ export default function ReservationDetailPage() {
             </Button>
           )}
           {r.status === 'confirmed' && (
-            <Button size="sm" onClick={doCheckIn} disabled={mutationPending}>
-              <LogIn className="mr-1.5 h-4 w-4" /> Check In
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setNoShowOpen(true)}
+                disabled={mutationPending}
+              >
+                <UserX className="mr-1.5 h-4 w-4" /> No-Show
+              </Button>
+              <Button size="sm" onClick={doCheckIn} disabled={mutationPending}>
+                <LogIn className="mr-1.5 h-4 w-4" /> Check In
+              </Button>
+            </>
           )}
           {r.status === 'checked_in' && (
             <Button size="sm" onClick={doCheckOut} disabled={mutationPending}>
@@ -630,12 +1049,12 @@ export default function ReservationDetailPage() {
           )}
         </div>
       </div>
-      {/* Email notice */}
-      {emailNotice && (
+
+      {actionNotice && (
         <div className="flex items-center justify-between rounded-lg border border-accent/20 bg-accent/5 px-4 py-2.5">
-          <p className="text-sm text-accent">{emailNotice}</p>
+          <p className="text-sm text-accent">{actionNotice}</p>
           <button
-            onClick={() => setEmailNotice(null)}
+            onClick={() => setActionNotice(null)}
             className="text-xs text-text-muted hover:text-text-primary"
           >
             Dismiss
@@ -643,7 +1062,6 @@ export default function ReservationDetailPage() {
         </div>
       )}
 
-      {/* Action error */}
       {actionError && (
         <div className="flex items-center justify-between rounded-lg border border-danger/20 bg-danger/5 px-4 py-2.5">
           <p className="text-sm text-danger">{actionError}</p>
@@ -656,7 +1074,6 @@ export default function ReservationDetailPage() {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="border-b border-border">
         <div className="flex gap-1">
           {tabs.map((tab) => {
@@ -681,10 +1098,8 @@ export default function ReservationDetailPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div>{renderTabContent()}</div>
 
-      {/* Assign room modal */}
       {assignOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg">
@@ -724,6 +1139,77 @@ export default function ReservationDetailPage() {
               </Button>
               <Button size="sm" onClick={doAssign} disabled={!assignRoomId || assignRoom.isPending}>
                 Assign Room
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">
+                Cancel {r.confirmationNumber}
+              </h3>
+              <button
+                onClick={() => setCancelOpen(false)}
+                className="text-text-muted hover:text-text-primary"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-sm text-text-secondary mb-3">
+              This will release the room and mark the reservation cancelled.
+            </p>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Reason for cancellation (required)..."
+              rows={3}
+              className="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setCancelOpen(false)}>
+                Keep Reservation
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={doCancel}
+                disabled={!cancelReason.trim() || cancel.isPending}
+              >
+                Confirm Cancellation
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {noShowOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">
+                Mark No-Show — {r.confirmationNumber}
+              </h3>
+              <button
+                onClick={() => setNoShowOpen(false)}
+                className="text-text-muted hover:text-text-primary"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-sm text-text-secondary mb-3">
+              {guestName} did not arrive. The room will be released and the reservation marked
+              no-show. A no-show fee can be charged from the folio.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setNoShowOpen(false)}>
+                Keep Reservation
+              </Button>
+              <Button variant="danger" size="sm" onClick={doNoShow} disabled={noShow.isPending}>
+                Confirm No-Show
               </Button>
             </div>
           </div>

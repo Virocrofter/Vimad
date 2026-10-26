@@ -41,6 +41,7 @@ export const QUEUE_NAMES = [
   'groups', // [G1] group cutoff release / washout
   'tickets', // [SUPPORT] SLA breach scan / escalation
   'meals', // [T7] meal plan auto-posting
+  'ar', // [AR] overdue reminders / dunning
   'dead-letter',
 ] as const;
 export type QueueName = (typeof QUEUE_NAMES)[number];

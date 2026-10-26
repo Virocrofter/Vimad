@@ -95,6 +95,6 @@ export interface AuditStats {
 }
 
 export async function fetchAuditStats(): Promise<AuditStats> {
-  const res = await apiClient.get<{ data: AuditStats }>('/admin/audit-logs/stats');
+  const res = await apiClient.get<AuditStats>('/admin/audit-logs/stats');
   return res.data;
 }

@@ -10,6 +10,8 @@ import {
   getDashboardStats,
   getFrontDeskSnapshot,
 } from './dashboard.service.js';
+import { getOpsToday } from './ops-today.service.js';
+import { getKpiDeltas } from './dashboard-deltas.service.js';
 
 extendZodWithOpenApi(z);
 
@@ -30,16 +32,16 @@ const StatsSchema = z
     revpar: z.number(),
     totalRevenue: z.number(),
     monthToDateRevenue: z.number(),
-    arrivalsToday: z.number().int(),
-    departuresToday: z.number().int(),
-    inHouseGuests: z.number().int(),
-    availableRooms: z.number().int(),
-    occupiedRooms: z.number().int(),
-    outOfOrderRooms: z.number().int(),
-    dirtyRooms: z.number().int(),
-    totalRooms: z.number().int(),
-    pendingTasks: z.number().int(),
-    newReservationsToday: z.number().int(),
+    arrivalsToday: z.number(),
+    departuresToday: z.number(),
+    inHouseGuests: z.number(),
+    availableRooms: z.number(),
+    occupiedRooms: z.number(),
+    outOfOrderRooms: z.number(),
+    dirtyRooms: z.number(),
+    totalRooms: z.number(),
+    pendingTasks: z.number(),
+    newReservationsToday: z.number(),
     nightAudit: z.object({ status: z.string(), completedAt: z.string().nullable() }).nullable(),
     revenueByDay: z.array(z.object({ date: z.string(), revenue: z.number() })),
     recentReservations: z.array(
@@ -101,6 +103,60 @@ const FrontDeskSnapshotSchema = z
     ),
   })
   .openapi('FrontDeskSnapshot');
+
+const OpsTodaySchema = z
+  .object({
+    businessDate: z.string(),
+    arrivals: z.object({ total: z.number().int(), done: z.number().int() }),
+    departures: z.object({ total: z.number().int(), done: z.number().int() }),
+    rooms: z.object({
+      turnedToday: z.number().int(),
+      dirty: z.number().int(),
+      inspected: z.number().int(),
+      turnaroundTarget: z.number().int(),
+    }),
+    tasks: z.object({
+      open: z.number().int(),
+      inProgress: z.number().int(),
+      slaBreached: z.number().int(),
+      byDepartment: z.array(
+        z.object({ department: z.string(), count: z.number().int(), slaBreached: z.number().int() })
+      ),
+      top: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string(),
+          department: z.string(),
+          priority: z.string(),
+        })
+      ),
+    }),
+    vipArrivals: z.array(
+      z.object({
+        id: z.string(),
+        confirmationNumber: z.string(),
+        guestName: z.string(),
+        vipStatus: z.string().nullable(),
+        roomType: z.string().nullable(),
+        notes: z.string().nullable(),
+        status: z.string(),
+      })
+    ),
+    unsettledDepartures: z.object({
+      count: z.number().int(),
+      totalBalance: z.number(),
+      items: z.array(
+        z.object({
+          id: z.string(),
+          confirmationNumber: z.string(),
+          guestName: z.string(),
+          roomNumber: z.string().nullable(),
+          balance: z.number(),
+        })
+      ),
+    }),
+  })
+  .openapi('DashboardOpsToday');
 
 const ActivityFeedSchema = z
   .object({
@@ -215,6 +271,39 @@ dashboardRouter.get(
   }
 );
 
+// GET /ops-today — D2: today strip, tasks snapshot, VIP arrivals, un-settled departures
+registry.registerPath({
+  method: 'get',
+  path: '/dashboard/ops-today',
+  tags: ['Dashboard'],
+  description:
+    "Today's operational progress: check-ins, check-outs, room turnaround, tasks, VIP arrivals, un-settled departures",
+  request: { query: PropertyQuerySchema },
+  responses: {
+    200: {
+      description: 'Ops-today snapshot',
+      content: { 'application/json': { schema: OpsTodaySchema } },
+    },
+    401: unauthorized,
+    403: forbidden,
+  },
+});
+
+dashboardRouter.get(
+  '/ops-today',
+  requirePermission('report', 'read'),
+  validateQuery(PropertyQuerySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { propertyId } = req.validatedQuery as { propertyId?: string };
+      const data = await getOpsToday(req.tenantId, propertyId);
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // GET /activity
 registry.registerPath({
   method: 'get',
@@ -280,4 +369,50 @@ dashboardRouter.get(
     }
   }
 );
-``;
+
+// ─── D3: KPI deltas vs yesterday + 7-day averages ───────────────────────────
+
+const DeltasSchema = z
+  .object({
+    yesterday: z.object({
+      date: z.string(),
+      occupancyRate: z.number().nullable(),
+      revenue: z.number(),
+    }),
+    averages: z.object({
+      occupancyRate7d: z.number().nullable(),
+      revenue7d: z.number().nullable(),
+    }),
+  })
+  .openapi('DashboardKpiDeltas');
+
+registry.registerPath({
+  method: 'get',
+  path: '/dashboard/deltas',
+  tags: ['Dashboard'],
+  description: 'KPI comparison data: yesterday and 7-day averages (frontend computes deltas)',
+  request: { query: PropertyQuerySchema },
+  responses: {
+    200: {
+      description: 'KPI deltas source data',
+      content: { 'application/json': { schema: DeltasSchema } },
+    },
+    401: unauthorized,
+    403: forbidden,
+  },
+});
+
+dashboardRouter.get(
+  '/deltas',
+  requirePermission('report', 'read'),
+  validateQuery(PropertyQuerySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { propertyId } = req.validatedQuery as { propertyId?: string };
+      const data = await getKpiDeltas(req.tenantId, propertyId);
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+);

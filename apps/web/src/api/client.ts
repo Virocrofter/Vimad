@@ -8,7 +8,7 @@ import {
   setTokens,
   useAuthStore,
 } from '../stores/authStores';
-import { getCurrentPropertyId } from '../stores/propertyStore';
+import { getCurrentPropertyId, usePropertyStore } from '../stores/propertyStore';
 import { installOfflineInterceptors } from '../lib/offline/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';

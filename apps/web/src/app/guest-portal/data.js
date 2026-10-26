@@ -844,7 +844,7 @@ export const languageOptions = [
 
 /* ─── Helpers ─── */
 export function formatCurrency(amount, currency = 'ZAR') {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  return new Intl.NumberFormat('en-ZA', { style: 'currency', currency }).format(amount);
 }
 
 export function formatPoints(points) {

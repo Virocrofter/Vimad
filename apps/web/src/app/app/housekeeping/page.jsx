@@ -72,10 +72,16 @@ import {
 // ─── Constants ───
 
 const STATUS_COLUMNS = [
-  { key: 'pending', label: 'Pending', color: 'bg-yellow-500', icon: Clock },
-  { key: 'in_progress', label: 'In Progress', color: 'bg-blue-500', icon: Play },
-  { key: 'completed', label: 'Completed', color: 'bg-green-500', icon: CheckCircle },
-  { key: 'inspected', label: 'Inspected', color: 'bg-purple-500', icon: Eye },
+  { key: 'pending', label: 'Pending', color: 'bg-yellow-500', hex: '#eab308', icon: Clock },
+  { key: 'in_progress', label: 'In Progress', color: 'bg-blue-500', hex: '#3b82f6', icon: Play },
+  {
+    key: 'completed',
+    label: 'Completed',
+    color: 'bg-green-500',
+    hex: '#22c55e',
+    icon: CheckCircle,
+  },
+  { key: 'inspected', label: 'Inspected', color: 'bg-purple-500', hex: '#a855f7', icon: Eye },
 ];
 
 const PRIORITY_COLORS = {
@@ -261,13 +267,10 @@ function KanbanBoard({ tasks, onStart, onComplete, onInspect, onSkip, onAssign, 
   }, [tasks]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       {STATUS_COLUMNS.map((col) => (
         <div key={col.key} className="space-y-3">
-          <div
-            className="flex items-center gap-2 pb-2 border-b-2"
-            style={{ borderColor: col.color.replace('bg-', '#') }}
-          >
+          <div className="flex items-center gap-2 pb-2 border-b-2" style={{ borderColor: col.hex }}>
             <col.icon className="h-4 w-4" />
             <span className="font-medium text-sm">{col.label}</span>
             <Badge variant="secondary" className="ml-auto">
@@ -550,12 +553,12 @@ export default function HousekeepingPage() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Housekeeping</h1>
           <p className="text-muted-foreground">Manage room cleaning and maintenance tasks</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={() => setMinibarOpen(true)}>
             <Wine className="h-4 w-4 mr-1" /> Log minibar
           </Button>

@@ -145,6 +145,8 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'room-plan', ...page(() => import('./app/app/room-plan/page')) },
+      { path: 'chain-dashboard', ...page(() => import('./app/app/chain-dashboard/page')) },
+      { path: 'guest-identity', ...page(() => import('./app/app/guest-identity/page')) },
       {
         path: 'billing',
         children: [
@@ -235,14 +237,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="analytics" replace /> },
           { path: 'analytics', ...page(() => import('./app/app/marketing/analytics')) },
           { path: 'automation', ...page(() => import('./app/app/marketing/automation')) },
-          {
-            path: 'automation-list',
-            lazy: async () => {
-              const mod = await import('./app/app/marketing/automation-list');
-              const AutomationListPage = mod.default;
-              return { Component: () => <AutomationListPage workflows={[]} /> };
-            },
-          },
+          { path: 'automation-list', ...page(() => import('./app/app/marketing/automation-list')) },
           { path: 'templates', ...page(() => import('./app/app/marketing/templates')) },
         ],
       },

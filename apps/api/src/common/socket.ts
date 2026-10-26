@@ -1,12 +1,12 @@
 import type { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, type Socket } from 'socket.io';
-import { verifyToken, type TokenPayload } from '../modules/auth/auth.service.js';
+import { verifySocketToken, type SocketTokenPayload } from './socket-auth.js';
 import { logger } from './logger.js';
 import { env } from './env.js';
 
 let io: SocketIOServer | null = null;
 
-export interface SocketUser extends TokenPayload {}
+export interface SocketUser extends SocketTokenPayload {}
 
 export interface AuthenticatedSocket extends Socket {
   user: SocketUser;
@@ -33,7 +33,7 @@ function socketAuthMiddleware(socket: Socket, next: (err?: Error) => void): void
   }
 
   try {
-    const payload = verifyToken(token);
+    const payload = verifySocketToken(token);
     (socket as AuthenticatedSocket).user = payload;
     next();
   } catch {

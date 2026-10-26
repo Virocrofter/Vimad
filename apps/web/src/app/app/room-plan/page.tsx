@@ -1,59 +1,66 @@
-/* apps/web/src/app/app/room-plan/page.tsx */
-import { useMemo } from 'react';
-import { format, addDays, subDays, startOfDay } from 'date-fns';
-import { useReservations } from '../../../hooks/useReservations';
-import { useRooms } from '../../../hooks/useRooms';
-import { useRoomTypes } from '../../../hooks/useRoomTypes';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchRoomPlan } from '../../../api/room-plan';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import TapeChart from '../../../components/room-plan/TapeChart';
 
-const RANGE_DAYS = 30;
+function toKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate()
+  ).padStart(2, '0')}`;
+}
+
+function addDays(key: string, n: number): string {
+  const d = new Date(`${key}T00:00:00`);
+  d.setDate(d.getDate() + n);
+  return toKey(d);
+}
 
 export default function RoomPlanPage() {
-  // Load reservations overlapping a rolling window around today so the tape
-  // chart always has data regardless of which view mode is selected.
-  const rangeParams = useMemo(() => {
-    const today = startOfDay(new Date());
-    return {
-      from: format(subDays(today, 7), 'yyyy-MM-dd'),
-      to: format(addDays(today, RANGE_DAYS), 'yyyy-MM-dd'),
-      pageSize: 200,
-    };
-  }, []);
+  const scope = usePropertyScope();
+  const properties = scope.properties ?? [];
+  const propertyId = scope.current?.id ?? properties[0]?.id ?? null;
 
-  const {
-    reservations,
-    isLoading: reservationsLoading,
-    isFetching: reservationsFetching,
-    error: reservationsError,
-    refetch: refetchReservations,
-  } = useReservations(rangeParams);
+  const [range, setRange] = useState(14);
+  const [anchor, setAnchor] = useState<string>(() => toKey(new Date()));
 
-  const { rooms, isLoading: roomsLoading, error: roomsError, refetch: refetchRooms } = useRooms();
-  const { roomTypes, isLoading: roomTypesLoading } = useRoomTypes();
+  const from = addDays(anchor, -Math.floor(range / 4));
+  const to = addDays(from, range);
 
-  if (reservationsLoading || roomsLoading || roomTypesLoading) {
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ['room-plan', propertyId, from, to],
+    queryFn: () => fetchRoomPlan({ propertyId: propertyId as string, from, to }),
+    enabled: !!propertyId,
+    staleTime: 20_000,
+    refetchInterval: 60_000,
+  });
+
+  const navigate = (dir: -1 | 1) => setAnchor((a) => addDays(a, dir * range));
+  const goToday = () => setAnchor(toKey(new Date()));
+
+  if (!propertyId) {
     return (
-      <div className="flex h-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-secondary border-t-transparent" />
-          <p className="text-sm text-text-muted">Loading room plan…</p>
-        </div>
+      <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+        No property selected. Choose a property in the switcher.
       </div>
     );
   }
 
-  if (reservationsError || roomsError) {
-    const err = (reservationsError || roomsError) as Error;
+  if (isLoading) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 bg-background p-8 text-center">
-        <p className="text-sm text-danger">{err?.message || 'Failed to load the room plan'}</p>
+      <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+        Loading room plan…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center gap-2 text-sm">
+        <span className="text-destructive">Failed to load the room plan.</span>
         <button
-          type="button"
-          onClick={() => {
-            refetchReservations();
-            refetchRooms();
-          }}
-          className="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-white hover:bg-secondary/90"
+          onClick={() => refetch()}
+          className="rounded-md border px-3 py-1 text-xs hover:bg-accent"
         >
           Retry
         </button>
@@ -62,13 +69,24 @@ export default function RoomPlanPage() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-background">
-      <TapeChart
-        rooms={rooms}
-        roomTypes={roomTypes}
-        reservations={reservations}
-        isFetching={reservationsFetching}
-      />
-    </div>
+    <TapeChart
+      property={data.property}
+      rooms={data.rooms}
+      roomTypes={data.roomTypes}
+      reservations={data.reservations}
+      stays={data.stays}
+      blocks={data.blocks}
+      restrictions={data.restrictions}
+      holds={data.holds}
+      dayStats={data.dayStats}
+      from={from}
+      to={to}
+      range={range}
+      onRangeChange={setRange}
+      onNavigate={navigate}
+      onToday={goToday}
+      isFetching={isFetching}
+      onRefetch={() => refetch()}
+    />
   );
 }

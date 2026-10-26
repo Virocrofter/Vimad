@@ -13,7 +13,7 @@ export function formatCurrency(
   opts: Intl.NumberFormatOptions = {}
 ) {
   if (value == null || isNaN(value)) return '—';
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-ZA', {
     style: 'currency',
     currency,
     maximumFractionDigits: 2,
@@ -80,4 +80,9 @@ export function formatBytes(bytes: number | null | undefined) {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
+export function extractList<T = unknown>(payload: unknown): T[] {
+  const data = (payload as { data?: unknown } | null | undefined)?.data ?? payload;
+  return Array.isArray(data) ? (data as T[]) : [];
 }

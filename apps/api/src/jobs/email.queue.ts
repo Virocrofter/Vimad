@@ -24,7 +24,8 @@ export type EmailTemplate =
   | 'booking-cancelled'
   | 'tax-invoice'
   | 'receipt'
-  | 'credit-note';
+  | 'credit-note'
+  | 'ar-overdue-reminder';
 
 export interface EmailJobData {
   to: string;

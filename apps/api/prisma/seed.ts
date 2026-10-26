@@ -379,6 +379,20 @@ const PERMISSIONS = [
     category: 'support',
     description: 'Create/edit/delete tickets, internal notes',
   },
+
+  // AR permissions
+  {
+    resource: 'ar',
+    action: 'read',
+    category: 'billing',
+    description: 'View AR accounts, invoices, payments, aging',
+  },
+  {
+    resource: 'ar',
+    action: 'manage',
+    category: 'billing',
+    description: 'Create/edit AR invoices, record payments',
+  },
 ];
 
 // ─── Role Definitions with Permission Sets ───
@@ -2336,6 +2350,105 @@ async function main() {
     });
   }
   console.log('meals have been seeded.');
+
+  // ─── AR: two corporate accounts with live invoices + a payment ───
+  const arAccount1 = await prisma.corporateAccount.upsert({
+    where: { id: 'demo-ar-acct-1' },
+    update: {},
+    create: {
+      id: 'demo-ar-acct-1',
+      tenantId: tenant.id,
+      name: 'Horizon Logistics (Pty) Ltd',
+      contactName: 'Michael Chen',
+      email: 'ap@horizonlogistics.co.za',
+      billingEmail: 'ap@horizonlogistics.co.za',
+      taxNumber: '4123456789',
+      creditLimit: 50000,
+      paymentTermsDays: 30,
+    },
+  });
+  await prisma.corporateAccount.upsert({
+    where: { id: 'demo-ar-acct-2' },
+    update: {},
+    create: {
+      id: 'demo-ar-acct-2',
+      tenantId: tenant.id,
+      name: 'Blue Crane Events',
+      contactName: 'Naledi Dube',
+      email: 'finance@bluecrane.co.za',
+      billingEmail: 'finance@bluecrane.co.za',
+      creditLimit: 15000,
+      paymentTermsDays: 14,
+    },
+  });
+
+  const arInvoiceSeeds = [
+    {
+      id: 'demo-ar-inv-1',
+      accountId: arAccount1.id,
+      number: 'AR-INV-000001',
+      subtotal: 8200,
+      dueOffset: -45, // overdue → 45 days past due, lands in 31–60 bucket
+      items: [
+        { description: 'Corporate room block — Oct (12 rooms × 5 nights)', amount: 7500 },
+        { description: 'Conference room hire — 3 days', amount: 700 },
+      ],
+    },
+    {
+      id: 'demo-ar-inv-2',
+      accountId: arAccount1.id,
+      number: 'AR-INV-000002',
+      subtotal: 3240,
+      dueOffset: 10, // not yet due
+      items: [{ description: 'Master folio — DEMO-4401 group incidentals', amount: 3240 }],
+    },
+    {
+      id: 'demo-ar-inv-3',
+      accountId: 'demo-ar-acct-2',
+      number: 'AR-INV-000003',
+      subtotal: 1895,
+      dueOffset: -20, // partially paid, 20 days past due
+      items: [{ description: 'Wedding block — BEO catering balance', amount: 1895 }],
+    },
+  ];
+
+  for (const s of arInvoiceSeeds) {
+    const vat = Math.round(s.subtotal * 0.15 * 100) / 100;
+    const total = Math.round((s.subtotal + vat) * 100) / 100;
+    await prisma.arInvoice.upsert({
+      where: { id: s.id },
+      update: {},
+      create: {
+        id: s.id,
+        tenantId: tenant.id,
+        corporateAccountId: s.accountId,
+        number: s.number,
+        status: 'sent',
+        subtotal: s.subtotal,
+        vatRate: 15,
+        vatAmount: vat,
+        total,
+        amountPaid: s.id === 'demo-ar-inv-3' ? 1000 : 0,
+        ...(s.id === 'demo-ar-inv-3' ? { status: 'partially_paid' } : {}),
+        issueDate: new Date(Date.now() - 30 * 86400_000),
+        dueDate: new Date(Date.now() + s.dueOffset * 86400_000),
+        sentAt: new Date(Date.now() - 30 * 86400_000),
+        items: {
+          create: s.items.map((i) => ({
+            description: i.description,
+            amount: i.amount,
+            date: new Date(Date.now() - 30 * 86400_000),
+          })),
+        },
+      },
+    });
+  }
+  await prisma.arInvoiceCounter.upsert({
+    where: { tenantId: tenant.id },
+    update: { lastNumber: 3 },
+    create: { tenantId: tenant.id, lastNumber: 3 },
+  });
+  console.log('AR accounts + invoices seeded.');
 
   console.log('Seed completed.');
 }
