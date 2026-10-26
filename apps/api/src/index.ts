@@ -107,6 +107,7 @@ import { parkingRouter } from './modules/parking/parking.routes.js';
 import { chainsRouter } from './modules/chains/chains.routes.js';
 import { chainDashboardRouter } from './modules/chain-dashboard/chain-dashboard.routes.js';
 import { guestIdentityRouter } from './modules/guest-identity/guest-identity.routes.js';
+import { centralReservationsRouter } from './modules/central-reservations/central-reservations.routes.js';
 // [USERS] tenant staff user management (list/create/update/suspend/audit)
 import { usersRouter } from './modules/users/users.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
@@ -340,6 +341,7 @@ async function bootstrap() {
   app.use('/v1/chains', chainsRouter);
   app.use('/v1/chain-dashboard', chainDashboardRouter);
   app.use('/v1/guest-identity', guestIdentityRouter);
+  app.use('/v1/central-reservations', centralReservationsRouter);
   app.use('/v1/guests', guestsRouter);
   app.use('/v1/reservations', reservationsRouter);
   app.use('/v1/room-plan', roomPlanRoutes);

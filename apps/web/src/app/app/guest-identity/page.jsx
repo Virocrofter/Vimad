@@ -151,15 +151,19 @@ function MergeModal({ open, onClose, onMerged }) {
   );
 }
 
-function GroupDetail({ groupId }) {
+function GroupDetail({ groupId, onClose }) {
   const queryClient = useQueryClient();
+  const [showAllStays, setShowAllStays] = useState(false);
   const detailQuery = useQuery({
     queryKey: ['guest-identity', 'group', groupId],
     queryFn: () => getGroup(groupId),
   });
   const removeMutation = useMutation({
     mutationFn: (guestId) => removeMember(groupId, guestId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guest-identity'] }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['guest-identity'] });
+      if (res?.groupDeleted && onClose) onClose();
+    },
   });
 
   if (detailQuery.isLoading)
@@ -173,6 +177,12 @@ function GroupDetail({ groupId }) {
   }
   const g = detailQuery.data;
   const p = g.profile;
+  const hiddenStays = g.stays.filter(
+    (s) => s.status === 'cancelled' || s.status === 'no_show'
+  ).length;
+  const visibleStays = showAllStays
+    ? g.stays
+    : g.stays.filter((s) => s.status !== 'cancelled' && s.status !== 'no_show');
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-surface p-4">
@@ -260,10 +270,22 @@ function GroupDetail({ groupId }) {
       </div>
 
       <div>
-        <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
-          <BedDouble className="h-3.5 w-3.5" /> Stay history across properties
-        </h4>
-        {g.stays.length === 0 ? (
+        <div className="mb-2 flex items-center justify-between">
+          <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
+            <BedDouble className="h-3.5 w-3.5" /> Stay history across properties
+          </h4>
+          {hiddenStays > 0 && (
+            <button
+              onClick={() => setShowAllStays(!showAllStays)}
+              className="text-[11px] text-primary hover:underline"
+            >
+              {showAllStays
+                ? `Hide ${hiddenStays} cancelled/no-show`
+                : `Show all (${g.stays.length})`}
+            </button>
+          )}
+        </div>
+        {visibleStays.length === 0 ? (
           <p className="text-xs text-text-muted">No stays recorded.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -280,7 +302,7 @@ function GroupDetail({ groupId }) {
                 </tr>
               </thead>
               <tbody>
-                {g.stays.map((s) => (
+                {visibleStays.map((s) => (
                   <tr key={s.id} className="border-b border-border/50">
                     <td className="py-1.5 pr-3">
                       <Link
@@ -329,6 +351,31 @@ function GroupDetail({ groupId }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function GroupDetailModal({ groupId, onClose }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-h-[85vh] w-full max-w-4xl overflow-y-auto rounded-lg border border-border bg-surface"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-3 top-3 z-10 rounded-full bg-surface-elevated p-1.5 text-text-muted hover:text-text-primary"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <div className="p-4">
+          <GroupDetail groupId={groupId} onClose={onClose} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -419,7 +466,7 @@ function DedupeTab() {
           </div>
         ))
       )}
-      {selected && <GroupDetail groupId={selected} />}
+      {selected && <GroupDetailModal groupId={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }
@@ -531,7 +578,9 @@ export default function GuestIdentityPage() {
                 </p>
               </button>
             ))}
-            {selectedGroup && <GroupDetail groupId={selectedGroup} />}
+            {selectedGroup && (
+              <GroupDetailModal groupId={selectedGroup} onClose={() => setSelectedGroup(null)} />
+            )}
           </div>
         )
       ) : (

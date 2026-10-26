@@ -148,6 +148,10 @@ export const router = createBrowserRouter([
       { path: 'chain-dashboard', ...page(() => import('./app/app/chain-dashboard/page')) },
       { path: 'guest-identity', ...page(() => import('./app/app/guest-identity/page')) },
       {
+        path: 'central-reservations',
+        ...page(() => import('./app/app/central-reservations/page')),
+      },
+      {
         path: 'billing',
         children: [
           { index: true, ...page(() => import('./app/app/billing/page')) },
