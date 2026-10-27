@@ -54,6 +54,7 @@ import {
   Upload,
   Eye,
 } from 'lucide-react';
+import { Hotel } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
   formatCurrency,
@@ -849,6 +850,7 @@ export function BottomNav() {
     { icon: UtensilsCrossed, label: 'Services', href: '/guest-portal/stay' },
     { icon: MessageCircle, label: 'Chat', href: '/guest-portal/messages' },
     { icon: User, label: 'Profile', href: '/guest-portal/profile' },
+    { icon: Hotel, label: 'Stays', href: '/guest-portal/my-stays' },
   ];
 
   return (

@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Hotel, Calendar, Star, Award, TrendingUp, Clock, MapPin } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { Button } from '../../../../components/ui/button';
+import { cn } from '../../../lib/utils';
+import { Button } from '../../../components/ui/button';
 
 const API_BASE = import.meta.env?.VITE_API_URL ?? '/api/v1';
 
