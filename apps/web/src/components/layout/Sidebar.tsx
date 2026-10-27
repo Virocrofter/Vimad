@@ -38,6 +38,8 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+import { Smartphone } from 'lucide-react';
+import { SlidersHorizontal, LayoutGrid } from 'lucide-react';
 import { ThemeToggle } from '../theme/themeToggle';
 
 interface SidebarProps {
@@ -74,6 +76,10 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Property',
     items: [
       { to: '/app/housekeeping', label: 'Housekeeping', icon: Brush },
+      { to: '/app/housekeeping/space-status', label: 'Space Status', icon: LayoutGrid },
+      { to: '/app/housekeeping/rules', label: 'HK Rules', icon: SlidersHorizontal },
+      { to: '/app/housekeeping/activity', label: 'HK Activity', icon: BarChart3 },
+      { to: '/app/housekeeping/mobile', label: 'HK Mobile', icon: Smartphone },
       { to: '/app/night-audit', label: 'Night Audit', icon: MoonStar },
       { to: '/app/keys', label: 'Keys', icon: KeyRound, end: true },
       { to: '/app/parking', label: 'Parking', icon: SquareParking, end: true },

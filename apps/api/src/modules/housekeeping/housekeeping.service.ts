@@ -327,7 +327,7 @@ export async function inspectTask(
     throw new AppError(409, 'Task must be completed before inspection', 'CONFLICT');
 
   const newStatus = input.passed ? 'inspected' : 'pending';
-  const roomStatus = input.passed ? 'clean' : 'dirty';
+  const roomStatus = input.passed ? 'inspected' : 'dirty';
 
   const [updated] = await prisma.$transaction([
     prisma.housekeepingTask.update({

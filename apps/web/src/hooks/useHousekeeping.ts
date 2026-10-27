@@ -175,3 +175,39 @@ export function useBulkAssignHousekeeping() {
     },
   });
 }
+
+// ─── T2+ Space Status hooks ───
+import { getSpaceStatus, transitionRoomStatus, runHkRuleNow } from '../api/housekeeping';
+import type { RoomStatusTransitionInput } from '../api/housekeeping';
+
+export function useSpaceStatus(propertyId?: string, date?: string) {
+  return useQuery({
+    queryKey: [HK_KEY, 'space', propertyId, date],
+    queryFn: () => getSpaceStatus(propertyId, date),
+    staleTime: 1000 * 15,
+    refetchInterval: 1000 * 30,
+  });
+}
+
+export function useRoomStatusTransition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: RoomStatusTransitionInput }) =>
+      transitionRoomStatus(id, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'space'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'stats'] });
+    },
+  });
+}
+
+export function useRunHkRule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (key: string) => runHkRuleNow(key),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [HK_KEY, 'space'] });
+    },
+  });
+}

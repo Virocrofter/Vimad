@@ -39,7 +39,10 @@ export async function refreshInventoryCache(propertyId?: string): Promise<number
         }),
         prisma.room.groupBy({
           by: ['roomTypeId'],
-          where: { propertyId: property.id, status: { in: ['ooo', 'out_of_order'] } },
+          where: {
+            propertyId: property.id,
+            OR: [{ status: { in: ['ooo', 'out_of_order'] } }, { serviceStatus: 'ooo' }],
+          },
           _count: { _all: true },
         }),
         prisma.$queryRaw<{ roomTypeId: string; date: string; count: bigint }[]>`
@@ -83,17 +86,39 @@ export async function refreshInventoryCache(propertyId?: string): Promise<number
         restrictions.filter((r) => r.roomTypeId === rt.id).map((r) => [dstr(r.date), r.adjustment])
       );
 
+      const blockRows = await prisma.$queryRaw<{ rt: string; date: string; count: bigint }[]>`
+        SELECT COALESCE(b."roomTypeId", r."roomTypeId") AS rt, s.d::date AS date, COUNT(*)::bigint AS count
+        FROM room_blocks b
+        LEFT JOIN rooms r ON r.id = b."roomId"
+        CROSS JOIN LATERAL generate_series(
+          GREATEST(b."startDate", ${new Date(`${from}T00:00:00.000Z`)}::date),
+          LEAST(b."endDate", ${new Date(`${to}T00:00:00.000Z`)}::date),
+          interval '1 day'
+        ) s(d)
+        WHERE b."propertyId" = ${property.id}
+          AND b.type = 'ooo'
+          AND b.status = 'active'
+        GROUP BY 1, 2
+      `;
+      const blockMap = new Map(
+        blockRows
+          .filter((b) => b.rt === rt.id)
+          .map((b): [string, number] => [dstr(b.date), Number(b.count)])
+      );
+
       const rows = dates.map((date) => {
         const heldCount = heldMap.get(date) ?? 0;
         const adjustment = restrMap.get(date) ?? 0;
-        const sellable = Math.max(total - oooCount - heldCount + adjustment, 0);
+        const blockOoo = blockMap.get(date) ?? 0;
+        const oooForDate = oooCount + blockOoo;
+        const sellable = Math.max(total - oooForDate - heldCount + adjustment, 0);
         const occupied = occMap.get(date) ?? 0;
         return {
           propertyId: property.id,
           roomTypeId: rt.id,
           date: new Date(`${date}T00:00:00.000Z`),
           total,
-          ooo: oooCount,
+          ooo: oooForDate,
           occupied,
           held: heldCount,
           adjustment,

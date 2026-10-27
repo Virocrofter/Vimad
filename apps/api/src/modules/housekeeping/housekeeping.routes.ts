@@ -2,7 +2,12 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import {
+  authMiddleware,
+  tenantScope,
+  requirePermission,
+  type AuthenticatedRequest,
+} from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import {
@@ -298,6 +303,207 @@ registry.registerPath({
     },
   },
 });
+
+/* ─── T2+ Space Status (must register BEFORE /:id) ─── */
+import {
+  transitionSchema,
+  transitionRoom,
+  getSpaceStatus,
+  exportSpaceStatus,
+} from './space-status.service.js';
+import { runHkRule } from './hk-rules.service.js';
+import { Prisma } from '@prisma/client';
+import { prisma } from '../../common/prisma.js';
+
+housekeepingRouter.get(
+  '/space-status',
+  requirePermission('housekeeping', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await getSpaceStatus(
+        req.tenantId!,
+        req.query.propertyId as string,
+        req.query.date as string
+      );
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+housekeepingRouter.get(
+  '/space-status/export',
+  requirePermission('housekeeping', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const csv = await exportSpaceStatus(req.tenantId!, req.query.propertyId as string);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="space-status.csv"');
+      res.send(csv);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+housekeepingRouter.post(
+  '/rooms/:id/status',
+  requirePermission('housekeeping', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = transitionSchema.parse(req.body);
+      if (body.serviceStatus === 'ooo') {
+        const role = (req as AuthenticatedRequest).auth.user.role;
+        if (!['owner', 'admin', 'manager'].includes(role)) {
+          res
+            .status(403)
+            .json({ error: { code: 'FORBIDDEN', message: 'OOO requires a supervisor role' } });
+          return;
+        }
+      }
+      const data = await transitionRoom(
+        req.tenantId!,
+        req.params.id,
+        (req as AuthenticatedRequest).auth.user.id,
+        body
+      );
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+housekeepingRouter.post(
+  '/rules/:key/run',
+  requirePermission('housekeeping', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await runHkRule(req.tenantId!, req.params.key);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* ─── T2+ batch 2: rules management + activity heatmap ─── */
+housekeepingRouter.get(
+  '/rules',
+  requirePermission('housekeeping', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const rules = await prisma.taskRule.findMany({
+        where: { tenantId: req.tenantId!, key: { startsWith: 'hk-' } },
+        select: {
+          key: true,
+          name: true,
+          description: true,
+          isActive: true,
+          conditions: true,
+          action: true,
+          lastRunAt: true,
+          lastRunCount: true,
+        },
+        orderBy: { key: 'asc' },
+      });
+      res.json({ data: rules });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+housekeepingRouter.patch(
+  '/rules/:key',
+  requirePermission('housekeeping', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const existing = await prisma.taskRule.findFirst({
+        where: { tenantId: req.tenantId!, key: req.params.key },
+      });
+      if (!existing) {
+        res.status(404).json({ error: { code: 'NOT_FOUND', message: 'rule not found' } });
+        return;
+      }
+      const body = req.body as { isActive?: boolean; conditions?: Record<string, unknown> };
+      const data = await prisma.taskRule.update({
+        where: { id: existing.id },
+        data: {
+          ...(typeof body.isActive === 'boolean' ? { isActive: body.isActive } : {}),
+          ...(body.conditions
+            ? {
+                conditions: {
+                  ...(existing.conditions as object),
+                  ...body.conditions,
+                } as Prisma.InputJsonValue,
+              }
+            : {}),
+        },
+      });
+      res.json({ data: { key: data.key, isActive: data.isActive, conditions: data.conditions } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+housekeepingRouter.get(
+  '/activity',
+  requirePermission('housekeeping', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const weeks = Math.min(Math.max(Number(req.query.weeks ?? 4) || 4, 1), 12);
+      const since = new Date(Date.now() - weeks * 7 * 86400_000);
+      const where = { tenantId: req.tenantId! };
+
+      const [ins, outs, cleans] = await Promise.all([
+        prisma.reservation.findMany({
+          where: { ...where, checkedInAt: { gte: since } },
+          select: { checkedInAt: true },
+          take: 3000,
+        }),
+        prisma.reservation.findMany({
+          where: { ...where, checkedOutAt: { gte: since } },
+          select: { checkedOutAt: true },
+          take: 3000,
+        }),
+        prisma.housekeepingTask.findMany({
+          where: { ...where, completedAt: { gte: since } },
+          select: { completedAt: true },
+          take: 5000,
+        }),
+      ]);
+
+      const bucket = (dates: (Date | null)[], shift = 0) => {
+        const m: Record<string, number> = {};
+        for (const d of dates) {
+          if (!d) continue;
+          const dt = new Date(d.getTime() + shift * 3600_000);
+          const k = `${dt.getDay()}-${dt.getHours()}`;
+          m[k] = (m[k] ?? 0) + 1;
+        }
+        return Object.entries(m).map(([k, count]) => {
+          const [dow, hour] = k.split('-').map(Number);
+          return { dow, hour, count };
+        });
+      };
+
+      res.json({
+        data: {
+          weeks,
+          days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+          checkins: bucket(ins.map((r) => r.checkedInAt)),
+          checkouts: bucket(outs.map((r) => r.checkedOutAt)),
+          cleanings: bucket(cleans.map((t) => t.completedAt)),
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 housekeepingRouter.get(
   '/:id',

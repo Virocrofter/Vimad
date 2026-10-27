@@ -193,3 +193,69 @@ export async function getStaff(): Promise<{ data: HousekeepingStaff[] }> {
   const response = await apiClient.get<{ data: HousekeepingStaff[] }>('/housekeeping/staff');
   return response.data;
 }
+
+// ─── T2+ Space Status ───
+export interface SpaceStatusRoom {
+  id: string;
+  number: string;
+  floor?: string | null;
+  housekeepingStatus: string;
+  serviceStatus: string;
+  serviceReason?: string | null;
+  statusChangedAt?: string | null;
+  parentRoomId?: string | null;
+  roomType: { code: string; name: string };
+  _count: { childRooms: number };
+}
+
+export interface SpaceStatusGrid {
+  stats: {
+    total: number;
+    byHousekeeping: Record<string, number>;
+    byService: Record<string, number>;
+  };
+  cards: { arrivals: number; departures: number; stayovers: number };
+  rooms: SpaceStatusRoom[];
+}
+
+export interface RoomStatusTransitionInput {
+  housekeepingStatus?: 'clean' | 'dirty' | 'inspected' | 'in_progress' | 'ready';
+  serviceStatus?: 'active' | 'ooo' | 'oos';
+  reason?: string;
+  note?: string;
+}
+
+export async function getSpaceStatus(
+  propertyId?: string,
+  date?: string
+): Promise<{ data: SpaceStatusGrid }> {
+  const response = await apiClient.get<{ data: SpaceStatusGrid }>('/housekeeping/space-status', {
+    params: { propertyId, date },
+  });
+  return response.data;
+}
+
+export async function transitionRoomStatus(roomId: string, input: RoomStatusTransitionInput) {
+  const response = await apiClient.post(`/housekeeping/rooms/${roomId}/status`, input);
+  return response.data;
+}
+
+export async function runHkRuleNow(key: string): Promise<{ data: { flipped: number } }> {
+  const response = await apiClient.post(`/housekeeping/rules/${key}/run`);
+  return response.data;
+}
+
+export async function downloadSpaceStatus(propertyId?: string): Promise<void> {
+  const response = await apiClient.get('/housekeeping/space-status/export', {
+    params: { propertyId },
+    responseType: 'blob',
+  });
+  const url = URL.createObjectURL(response.data);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'space-status.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}

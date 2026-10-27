@@ -66,6 +66,7 @@ interface CellFacts {
   types: { id: string; name: string; code: string }[];
   totalMap: Map<string, number>;
   oooMap: Map<string, number>;
+  oooBlockMap: Map<string, number>; // `${roomTypeId}|${date}` — dated room_blocks type='ooo'
   occMap: Map<string, number>; // `${roomTypeId}|${date}`
   heldMap: Map<string, number>;
   restrMap: Map<
@@ -102,7 +103,7 @@ async function loadCellFacts(
     }),
     prisma.room.groupBy({
       by: ['roomTypeId'],
-      where: { propertyId, status: { in: OOO_STATUSES } },
+      where: { propertyId, OR: [{ status: { in: OOO_STATUSES } }, { serviceStatus: 'ooo' }] },
       _count: { _all: true },
     }),
     prisma.$queryRaw<{ roomTypeId: string; date: string; count: bigint }[]>`
@@ -153,12 +154,28 @@ async function loadCellFacts(
   );
   const obMap = new Map(overbooking.map((o) => [o.roomTypeId, o.limit]));
 
-  return { dates, types, totalMap, oooMap, occMap, heldMap, restrMap, obMap };
+  const oooBlocks = await prisma.$queryRaw<{ rt: string; date: string; count: bigint }[]>`
+    SELECT COALESCE(b."roomTypeId", r."roomTypeId") AS rt, s.d::date AS date, COUNT(*)::bigint AS count
+    FROM room_blocks b
+    LEFT JOIN rooms r ON r.id = b."roomId"
+    CROSS JOIN LATERAL generate_series(
+      GREATEST(b."startDate", ${parseDate(from)}::date),
+      LEAST(b."endDate", ${parseDate(to)}::date),
+      interval '1 day'
+    ) s(d)
+    WHERE b."propertyId" = ${propertyId}
+      AND b.type = 'ooo'
+      AND b.status = 'active'
+    GROUP BY 1, 2
+  `;
+  const oooBlockMap = new Map(oooBlocks.map((b) => [`${b.rt}|${dstr(b.date)}`, Number(b.count)]));
+
+  return { dates, types, totalMap, oooMap, oooBlockMap, occMap, heldMap, restrMap, obMap };
 }
 
 function buildCell(f: CellFacts, roomTypeId: string, date: string) {
   const total = f.totalMap.get(roomTypeId) ?? 0;
-  const ooo = f.oooMap.get(roomTypeId) ?? 0;
+  const ooo = (f.oooMap.get(roomTypeId) ?? 0) + (f.oooBlockMap.get(`${roomTypeId}|${date}`) ?? 0);
   const occupied = f.occMap.get(`${roomTypeId}|${date}`) ?? 0;
   const held = f.heldMap.get(`${roomTypeId}|${date}`) ?? 0;
   const restr = f.restrMap.get(`${roomTypeId}|${date}`);

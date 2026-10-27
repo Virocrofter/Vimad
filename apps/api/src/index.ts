@@ -49,6 +49,7 @@ import { startWakeUpDigestScheduler } from './jobs/wakeup-digest.job.js';
 // [T5] WhatsApp/SMS task push — one-tap tokenized links to staff phones
 import { taskPushWorker, startTaskPushScheduler } from './jobs/task-push.job.js';
 import { startFlightStatusScheduler } from './jobs/flight-status.job.js';
+import { startHousekeepingScheduler } from './jobs/housekeeping.job.js';
 // [G1] Groups — cutoff release / washout worker + scheduler
 import { groupsWorker, startGroupsScheduler } from './jobs/groups.job.js';
 // [T7] Meal plans — board-basis auto-posting worker + scheduler
@@ -467,7 +468,8 @@ async function bootstrap() {
   void startTaskScheduler(); // [T1] rule scan + SLA flags (every min) · [T3] concierge generators (every 15 min)
   void startWakeUpDigestScheduler(); // [T3] 05:00 property-local wake-up digest
   void startTaskPushScheduler();
-  void startFlightStatusScheduler(); // [0.4] flight status hook // [T5] auto-push scan (every min)
+  void startFlightStatusScheduler();
+  void startHousekeepingScheduler(); // [T2+] HK auto-status rules // [0.4] flight status hook // [T5] auto-push scan (every min)
   void startGroupsScheduler(); // [G1] cutoff release scan (every 30 min)
   void startInventoryCacheScheduler(); // [I1] nightly inventory cache refresh (03:40)
   void startOverbookingAlertScheduler(); // [I1] walk-plan alerts (08:00 + 14:00)
