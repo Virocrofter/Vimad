@@ -35,10 +35,10 @@ function folioSummary(f: any) {
     totalCharges: r2(charges),
     totalPayments: r2(payments),
     invariantOk: Math.abs(balance - (charges - payments)) <= 0.005,
-    property: f.reservation.property,
-    guest: f.reservation.guest,
-    confirmationNumber: f.reservation.confirmationNumber,
-    reservationId: f.reservation.id,
+    property: f.reservation!.property,
+    guest: f.reservation!.guest,
+    confirmationNumber: f.reservation!.confirmationNumber,
+    reservationId: f.reservation!.id,
     updatedAt: f.updatedAt,
   };
 }
@@ -73,7 +73,7 @@ export async function listAccounts(tenantId: string) {
     for (const f of folios) {
       const bal = Number(f.balance);
       outstanding = r2(outstanding + bal);
-      const p = f.reservation.property;
+      const p = f.reservation!.property;
       const entry = perProperty.get(p.id) ?? {
         propertyId: p.id,
         propertyName: p.name,
@@ -151,7 +151,7 @@ async function attachPropertyNames(invoices: any[]) {
         select: { id: true, reservation: { select: { property: { select: { name: true } } } } },
       })
     : [];
-  const map = new Map(folios.map((f) => [f.id, f.reservation.property.name]));
+  const map = new Map(folios.map((f) => [f.id, f.reservation!.property.name]));
   return invoices.map((inv) => invoiceMapper(inv, map));
 }
 
@@ -251,10 +251,10 @@ export async function createConsolidatedInvoice(
         },
         items: {
           create: lines.map((l) => ({
-            description: `${l.folio.reservation.property.name} — ${l.folio.reservation.guest.firstName} ${l.folio.reservation.guest.lastName} — ${l.folio.reservation.confirmationNumber}`,
+            description: `${l.folio.reservation!.property.name} — ${l.folio.reservation!.guest.firstName} ${l.folio.reservation!.guest.lastName} — ${l.folio.reservation!.confirmationNumber}`,
             folioId: l.folio.id,
-            reservationId: l.folio.reservation.id,
-            guestId: l.folio.reservation.guestId,
+            reservationId: l.folio.reservation!.id,
+            guestId: l.folio.reservation!.guestId,
             date: to,
             amount: l.amount,
             vatRate: VAT_RATE,
@@ -267,7 +267,7 @@ export async function createConsolidatedInvoice(
         data: {
           folioId: l.folio.id,
           type: 'ar_transfer',
-          description: `Consolidated invoice ${number} — ${l.folio.reservation.property.name}`,
+          description: `Consolidated invoice ${number} — ${l.folio.reservation!.property.name}`,
           amount: -l.amount,
         },
       });
@@ -314,7 +314,7 @@ export async function transferFolio(
       data: {
         folioId: from.id,
         type: 'transfer_out',
-        description: `Transfer to ${to.reservation.property.name} — ${desc}`,
+        description: `Transfer to ${to.reservation!.property.name} — ${desc}`,
         amount: -amount,
       },
     }),
@@ -322,7 +322,7 @@ export async function transferFolio(
       data: {
         folioId: to.id,
         type: 'transfer_in',
-        description: `Transfer from ${from.reservation.property.name} — ${desc}`,
+        description: `Transfer from ${from.reservation!.property.name} — ${desc}`,
         amount,
       },
     }),
@@ -367,8 +367,8 @@ export async function recentTransfers(tenantId: string) {
     amount: Number(i.amount),
     postedAt: i.postedAt,
     folioId: i.folioId,
-    propertyName: i.folio.reservation.property.name,
-    guestName: `${i.folio.reservation.guest.firstName} ${i.folio.reservation.guest.lastName}`,
-    confirmationNumber: i.folio.reservation.confirmationNumber,
+    propertyName: i.folio.reservation!.property.name,
+    guestName: `${i.folio.reservation!.guest.firstName} ${i.folio.reservation!.guest.lastName}`,
+    confirmationNumber: i.folio.reservation!.confirmationNumber,
   }));
 }

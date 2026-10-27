@@ -68,7 +68,10 @@ import { reservationsRouter } from './modules/reservations/reservations.routes.j
 import { roomsRouter } from './modules/rooms/rooms.routes.js';
 import { roomTypesRouter } from './modules/room-types/room-types.routes.js';
 import { ratesRouter } from './modules/rates/rates.routes.js';
+import { pricingRulesRouter } from './modules/rates/pricing-rules.routes.js';
 import { foliosRouter } from './modules/folios/folios.routes.js';
+import { groupBillingRouter } from './modules/folios/group-billing.routes.js';
+import { startGroupBillingScheduler } from './jobs/group-billing.job.js';
 import { loyaltyRouter } from './modules/loyalty/loyalty.routes.js';
 import { channelRouter } from './modules/channel/channel.routes.js';
 import { housekeepingRouter } from './modules/housekeeping/housekeeping.routes.js';
@@ -354,8 +357,10 @@ async function bootstrap() {
   app.use('/v1/room-plan', roomPlanRoutes);
   app.use('/v1/rooms', roomsRouter);
   app.use('/v1/room-types', roomTypesRouter);
+  app.use('/v1/rates', pricingRulesRouter);
   app.use('/v1/rates', ratesRouter);
   app.use('/v1/folios', foliosRouter);
+  app.use('/v1/folios', groupBillingRouter);
   // Loyalty — previously built but never mounted (frontend Loyalty page 404'd)
   app.use('/v1/loyalty', loyaltyRouter);
   app.use('/v1/channel', channelRouter);
@@ -469,7 +474,8 @@ async function bootstrap() {
   void startWakeUpDigestScheduler(); // [T3] 05:00 property-local wake-up digest
   void startTaskPushScheduler();
   void startFlightStatusScheduler();
-  void startHousekeepingScheduler(); // [T2+] HK auto-status rules // [0.4] flight status hook // [T5] auto-push scan (every min)
+  void startHousekeepingScheduler();
+  void startGroupBillingScheduler(); // [T3+] group billing auto-send // [T2+] HK auto-status rules // [0.4] flight status hook // [T5] auto-push scan (every min)
   void startGroupsScheduler(); // [G1] cutoff release scan (every 30 min)
   void startInventoryCacheScheduler(); // [I1] nightly inventory cache refresh (03:40)
   void startOverbookingAlertScheduler(); // [I1] walk-plan alerts (08:00 + 14:00)

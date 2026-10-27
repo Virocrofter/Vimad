@@ -227,6 +227,7 @@ export const router = createBrowserRouter([
           { index: true, ...page(() => import('./app/app/groups/page')) },
           { path: 'new', ...page(() => import('./app/app/groups/new/page')) },
           { path: 'detail', ...page(() => import('./app/app/groups/details/page')) },
+          { path: 'billing', ...page(() => import('./app/app/groups/billing/page')) },
         ],
       },
       {

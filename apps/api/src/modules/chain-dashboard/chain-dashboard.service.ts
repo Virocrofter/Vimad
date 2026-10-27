@@ -83,7 +83,7 @@ export async function getChainTapeChart(
 
   const staysByPropertyRoom = new Map<string, Map<string, typeof stays>>();
   for (const s of stays) {
-    const pid = s.reservation.propertyId;
+    const pid = s.reservation!.propertyId;
     if (!staysByPropertyRoom.has(pid)) staysByPropertyRoom.set(pid, new Map());
     const roomMap = staysByPropertyRoom.get(pid)!;
     if (!roomMap.has(s.roomId)) roomMap.set(s.roomId, []);
@@ -223,7 +223,7 @@ export async function getChainRollup(tenantId: string, chainId: string, from: st
 
   const stayAgg = new Map<string, Map<string, { occupied: number; roomRevenue: number }>>();
   for (const s of stays) {
-    const pid = s.reservation.propertyId;
+    const pid = s.reservation!.propertyId;
     const dk = dayKeyOf(s.date);
     if (!daySet.has(dk)) continue;
     if (!stayAgg.has(pid)) stayAgg.set(pid, new Map());
@@ -236,7 +236,7 @@ export async function getChainRollup(tenantId: string, chainId: string, from: st
 
   const folioRev = new Map<string, number>();
   for (const item of folioItems) {
-    const pid = item.folio.reservation.propertyId;
+    const pid = item.folio.reservation!.propertyId;
     folioRev.set(pid, r2((folioRev.get(pid) ?? 0) + Number(item.amount)));
   }
 
@@ -440,9 +440,9 @@ export async function getChainExceptions(tenantId: string, chainId: string, wind
       status: 'checked_in',
       departureDate: { lt: today },
     };
-    const pastDueCount = await prisma.reservation.count({ where: pastDueWhere });
+    const pastDueCount = await prisma.reservation!.count({ where: pastDueWhere });
     if (pastDueCount > 0) {
-      const samples = await prisma.reservation.findMany({
+      const samples = await prisma.reservation!.findMany({
         where: pastDueWhere,
         take: 3,
         select: {

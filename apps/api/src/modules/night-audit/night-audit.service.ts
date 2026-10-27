@@ -61,7 +61,7 @@ export async function getPreAuditChecks(tenantId: string, propertyId: string) {
     property,
   ] = await Promise.all([
     // Arrivals not yet checked in
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
@@ -70,7 +70,7 @@ export async function getPreAuditChecks(tenantId: string, propertyId: string) {
       },
     }),
     // Departures not yet checked out
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
@@ -79,7 +79,7 @@ export async function getPreAuditChecks(tenantId: string, propertyId: string) {
       },
     }),
     // No-shows from today
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
@@ -257,7 +257,7 @@ export async function getAuditStatus(tenantId: string, propertyId?: string) {
     include: { property: { select: { id: true, name: true, currentBusinessDate: true } } },
   });
 
-  const pendingCheckouts = await prisma.reservation.count({
+  const pendingCheckouts = await prisma.reservation!.count({
     where: {
       tenantId,
       ...(propertyId && { propertyId }),
@@ -280,21 +280,21 @@ export async function getAuditStatus(tenantId: string, propertyId?: string) {
   endOfDay.setHours(23, 59, 59, 999);
 
   const [arrivalsToday, departuresToday, inHouseCount, occupiedRooms] = await Promise.all([
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         ...(propertyId && { propertyId }),
         arrivalDate: { gte: today, lte: endOfDay },
       },
     }),
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         ...(propertyId && { propertyId }),
         departureDate: { gte: today, lte: endOfDay },
       },
     }),
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         ...(propertyId && { propertyId }),
@@ -552,7 +552,7 @@ async function processNoShows(tenantId: string, propertyId: string, auditDate: D
   const endOfDay = new Date(auditDate);
   endOfDay.setHours(23, 59, 59, 999);
 
-  const noShowCandidates = await prisma.reservation.findMany({
+  const noShowCandidates = await prisma.reservation!.findMany({
     where: {
       tenantId,
       propertyId,
@@ -567,7 +567,7 @@ async function processNoShows(tenantId: string, propertyId: string, auditDate: D
 
   for (const reservation of noShowCandidates) {
     // Mark as no_show
-    await prisma.reservation.update({
+    await prisma.reservation!.update({
       where: { id: reservation.id },
       data: { status: 'no_show' },
     });
@@ -635,7 +635,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
   const details: { folioId: string; room: string; amount: number }[] = [];
 
   for (const stay of activeStays) {
-    if (!stay.reservation.folio) {
+    if (!stay.reservation!.folio) {
       skipped++;
       continue;
     }
@@ -643,7 +643,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     // Check if already posted
     const existingCharge = await prisma.folioItem.findFirst({
       where: {
-        folioId: stay.reservation.folio.id,
+        folioId: stay.reservation!.folio.id,
         type: 'room_charge',
         postedAt: { gte: startOfDay, lte: endOfDay },
       },
@@ -656,7 +656,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
 
     await prisma.folioItem.create({
       data: {
-        folioId: stay.reservation.folio.id,
+        folioId: stay.reservation!.folio.id,
         type: 'room_charge',
         description: `Room charge - ${stay.room.number} - Night of ${auditDate.toISOString().split('T')[0]}`,
         amount: stay.rate,
@@ -666,7 +666,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     });
 
     await prisma.folio.update({
-      where: { id: stay.reservation.folio.id },
+      where: { id: stay.reservation!.folio.id },
       data: {
         totalCharges: { increment: stay.rate },
         balance: { increment: stay.rate },
@@ -674,7 +674,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     });
 
     details.push({
-      folioId: stay.reservation.folio.id,
+      folioId: stay.reservation!.folio.id,
       room: stay.room.number,
       amount: Number(stay.rate),
     });
@@ -730,8 +730,8 @@ async function verifyAllBalances(tenantId: string, propertyId: string) {
     } else {
       discrepancies.push({
         folioId: folio.id,
-        confirmationNumber: folio.reservation.confirmationNumber,
-        guestName: `${folio.reservation.guest.firstName} ${folio.reservation.guest.lastName}`,
+        confirmationNumber: folio.reservation!.confirmationNumber,
+        guestName: `${folio.reservation!.guest.firstName} ${folio.reservation!.guest.lastName}`,
         expectedBalance: Math.round(calculatedBalance * 100) / 100,
         actualBalance: Number(folio.balance),
       });
@@ -835,21 +835,21 @@ async function generateDailyReports(tenantId: string, propertyId: string, date: 
     occupancy,
     roomCounts,
   ] = await Promise.all([
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
         arrivalDate: { gte: startOfDay, lte: endOfDay },
       },
     }),
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
         departureDate: { gte: startOfDay, lte: endOfDay },
       },
     }),
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
@@ -880,7 +880,7 @@ async function generateDailyReports(tenantId: string, propertyId: string, date: 
       },
       _sum: { amount: true },
     }),
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
@@ -888,7 +888,7 @@ async function generateDailyReports(tenantId: string, propertyId: string, date: 
         arrivalDate: { gte: startOfDay, lte: endOfDay },
       },
     }),
-    prisma.reservation.count({
+    prisma.reservation!.count({
       where: {
         tenantId,
         propertyId,
@@ -1107,7 +1107,7 @@ export async function rollbackNightAudit(
     const endOfDay = new Date(auditDate);
     endOfDay.setHours(23, 59, 59, 999);
 
-    await prisma.reservation.updateMany({
+    await prisma.reservation!.updateMany({
       where: {
         tenantId,
         propertyId: audit.propertyId,

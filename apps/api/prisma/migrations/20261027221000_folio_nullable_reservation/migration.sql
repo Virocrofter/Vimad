@@ -1,0 +1,1 @@
+ALTER TABLE "folios" ALTER COLUMN "reservationId" DROP NOT NULL;

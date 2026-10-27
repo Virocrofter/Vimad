@@ -192,6 +192,8 @@ model Property {
   timezone            String   @default("UTC")
   currency            String   @default("ZAR")
   status              String   @default("active")
+  billClosingRule     String   @default("always")
+  billClosingWindowHours Int   @default(12)
   currentBusinessDate DateTime @default(now()) @db.Date
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -536,10 +538,14 @@ model ReservationStay {
 
 model Folio {
   id            String      @id @default(cuid())
-  reservationId String      @unique
-  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  reservationId String?     @unique
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   tenantId      String
   status        String      @default("open")
+  closedAt      DateTime?
+  closedBy      String?
+  groupId       String?
+  isMaster      Boolean     @default(false)
   totalCharges  Decimal     @default(0) @db.Decimal(10, 2)
   totalPayments Decimal     @default(0) @db.Decimal(10, 2)
   balance       Decimal     @default(0) @db.Decimal(10, 2)
@@ -565,6 +571,9 @@ model FolioItem {
   quantity    Int      @default(1)
   postedAt    DateTime @default(now())
   createdAt   DateTime @default(now())
+  movedFromFolioId String?
+  movedAt   DateTime?
+  movedBy   String?
 
   @@index([folioId])
   @@map("folio_items")
@@ -2603,4 +2612,38 @@ model LoyaltyConfig {
   updatedAt   DateTime @updatedAt
 
   @@map("loyalty_configs")
+}
+
+model PricingRule {
+  id          String   @id @default(cuid())
+  tenantId    String
+  propertyId  String
+  name        String
+  type        String
+  conditions  Json     @default("{}")
+  adjustment  Json     @default("{}")
+  priority    Int      @default(50)
+  isActive    Boolean  @default(true)
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([propertyId])
+  @@map("pricing_rules")
+}
+
+model RateOverride {
+  id            String   @id @default(cuid())
+  tenantId      String
+  propertyId    String
+  ratePlanId    String
+  date          DateTime @db.Date
+  baseRate      Decimal  @db.Decimal(10, 2)
+  effectiveRate Decimal  @db.Decimal(10, 2)
+  ruleId        String
+  createdAt     DateTime @default(now())
+
+  @@unique([ratePlanId, date])
+  @@index([propertyId, date])
+  @@map("rate_overrides")
 }
