@@ -97,6 +97,15 @@ const envSchema = z.object({
   // Prometheus scrape protection (second layer; prefer network controls)
   METRICS_BEARER_TOKEN: z.string().optional(),
 
+  // 0.4: flight-status hook (FlightAware AeroAPI)
+  FLIGHTAWARE_API_KEY: z.string().optional(),
+  FLIGHT_DELAY_THRESHOLD_MINUTES: z.coerce.number().int().min(5).max(720).default(60),
+  FLIGHT_POLL_CRON: z.string().default('*/10 * * * *'),
+  FLIGHT_SIMULATION_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+
   // ─── Test-only variables ───
   // Not used at runtime; declared so tests/helpers can read them through the
   // same validated env object instead of raw process.env.

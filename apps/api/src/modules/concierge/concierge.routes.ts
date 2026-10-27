@@ -1,4 +1,4 @@
-/* apps/api/src/modules/concierge/concierge.routes.ts — T3 (staff) */
+/* apps/api/src/modules/concierge/concierge.routes.ts — T3 (staff) + 0.4 flight hook */
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -8,7 +8,9 @@ import {
 } from '../auth/auth.middleware.js';
 import { validateBody, validateQuery, validateParams } from '../../common/validate.js';
 import { IdParamSchema } from '../../common/openapi-schemas.js';
+import { env } from '../../common/env.js';
 import { getBoard, createItem, updateItem, postToFolio } from './concierge.service.js';
+import { applyFlightAdjustment, getFlightInfo } from './flight-status.service.js';
 
 export const conciergeRouter = Router();
 
@@ -64,6 +66,12 @@ const boardQuerySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
   propertyId: z.string().optional(),
+});
+
+const simulateSchema = z.object({
+  itemId: z.string().min(1),
+  status: z.enum(['on_time', 'delayed', 'cancelled', 'landed']).default('delayed'),
+  delayMinutes: z.number().int().min(1).max(1440).default(60),
 });
 
 // ─── GET /v1/concierge/board?date=YYYY-MM-DD ───
@@ -135,6 +143,46 @@ conciergeRouter.post(
     try {
       const result = await postToFolio(tenantOf(req), userOf(req), req.params.id);
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── 0.4: flight simulation (dev/demo only — drives the Tambo gate) ───
+conciergeRouter.post(
+  '/flights/simulate',
+  requirePermission('task', 'update'),
+  validateBody(simulateSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (env.NODE_ENV === 'production' && !env.FLIGHT_SIMULATION_ENABLED) {
+        res
+          .status(403)
+          .json({ error: { code: 'FORBIDDEN', message: 'Simulation disabled in production' } });
+        return;
+      }
+      const { itemId, status, delayMinutes } = req.validatedBody as z.infer<typeof simulateSchema>;
+      const result = await applyFlightAdjustment(itemId, delayMinutes, status, 'simulation');
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── 0.4: flight status read-back (staff + gate) ───
+conciergeRouter.get(
+  '/flights/status/:itemId',
+  requirePermission('task', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const info = await getFlightInfo(req.params.itemId);
+      if (!info) {
+        res.status(404).json({ error: { code: 'NOT_FOUND', message: 'concierge item not found' } });
+        return;
+      }
+      res.json({ data: info });
     } catch (err) {
       next(err);
     }

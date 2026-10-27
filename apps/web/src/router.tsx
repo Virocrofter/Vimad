@@ -317,6 +317,7 @@ export const router = createBrowserRouter([
 
           /* Stay Services */
           { path: 'stay', ...page(() => import('./app/guest-portal/stay/page')) },
+          { path: 'my-stays', ...page(() => import('./app/guest-portal/my-stays/page')) },
           {
             path: 'stay/room-service',
             ...page(() => import('./app/guest-portal/stay/room-service/page')),

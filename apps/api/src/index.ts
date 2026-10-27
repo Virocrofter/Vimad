@@ -48,6 +48,7 @@ import { taskWorker, startTaskScheduler } from './jobs/tasks.job.js';
 import { startWakeUpDigestScheduler } from './jobs/wakeup-digest.job.js';
 // [T5] WhatsApp/SMS task push — one-tap tokenized links to staff phones
 import { taskPushWorker, startTaskPushScheduler } from './jobs/task-push.job.js';
+import { startFlightStatusScheduler } from './jobs/flight-status.job.js';
 // [G1] Groups — cutoff release / washout worker + scheduler
 import { groupsWorker, startGroupsScheduler } from './jobs/groups.job.js';
 // [T7] Meal plans — board-basis auto-posting worker + scheduler
@@ -73,6 +74,7 @@ import { housekeepingRouter } from './modules/housekeeping/housekeeping.routes.j
 import { nightAuditRouter } from './modules/night-audit/night-audit.routes.js';
 import { smsRouter } from './modules/sms/sms.routes.js';
 import { guestPortalRouter } from './modules/guest-portal/guest-portal.routes.js';
+import { guestPortalMyStaysRouter } from './modules/guest-portal/my-stays.routes.js';
 import { notificationRouter } from './modules/notifications/notification.routes.js';
 // [A3] transactional email center (email logs + manual triggers)
 import { transactionalEmailRouter } from './modules/notifications/transactional.routes.js';
@@ -371,6 +373,7 @@ async function bootstrap() {
   // [SUPPORT] Guest-facing support tickets (portal-token auth, path-scoped).
   // MUST mount BEFORE /v1/guest-portal — the main portal router would intercept.
   app.use('/v1/guest-portal/support', ticketsGuestRouter);
+  app.use('/v1/guest-portal', guestPortalMyStaysRouter);
   app.use('/v1/guest-portal', guestPortalRouter);
   // [T5] Public one-tap task links (tokenized capability URL, per-IP limited).
   // MUST mount BEFORE /v1/tasks — the staff routers' auth would 401 it.
@@ -463,7 +466,8 @@ async function bootstrap() {
   void startTransactionalEmailScheduler(); // [A3] pre-arrival scan (every hour)
   void startTaskScheduler(); // [T1] rule scan + SLA flags (every min) · [T3] concierge generators (every 15 min)
   void startWakeUpDigestScheduler(); // [T3] 05:00 property-local wake-up digest
-  void startTaskPushScheduler(); // [T5] auto-push scan (every min)
+  void startTaskPushScheduler();
+  void startFlightStatusScheduler(); // [0.4] flight status hook // [T5] auto-push scan (every min)
   void startGroupsScheduler(); // [G1] cutoff release scan (every 30 min)
   void startInventoryCacheScheduler(); // [I1] nightly inventory cache refresh (03:40)
   void startOverbookingAlertScheduler(); // [I1] walk-plan alerts (08:00 + 14:00)
