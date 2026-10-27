@@ -1,0 +1,301 @@
+.ob-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: inherit;
+}
+
+.ob-head h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.ob-sub {
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.ob-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.ob-tab {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.ob-tab:hover {
+  color: #0f172a;
+}
+
+.ob-tab-active {
+  color: #0f172a;
+  border-bottom-color: #0f766e;
+}
+
+.ob-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ob-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.ob-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.ob-hint {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 12px;
+}
+
+.ob-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.ob-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  margin: 10px 0 4px;
+}
+
+.ob-input,
+.ob-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #ffffff;
+  color: #0f172a;
+  box-sizing: border-box;
+}
+
+.ob-input:focus,
+.ob-textarea:focus {
+  outline: 2px solid #99f6e4;
+  border-color: #0f766e;
+}
+
+.ob-textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+}
+
+.ob-btn {
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ob-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ob-btn-primary {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.ob-btn-primary:hover:not(:disabled) {
+  background: #115e59;
+}
+
+.ob-btn-ghost {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.ob-btn-ghost:hover {
+  background: #f8fafc;
+}
+
+.ob-btn-danger {
+  background: #ffffff;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.ob-btn-danger:hover {
+  background: #fef2f2;
+}
+
+.ob-btn-xs {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.ob-file {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.ob-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ob-chip {
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ob-chip-ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.ob-chip-danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.ob-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.ob-table-errors {
+  border-color: #fecaca;
+}
+
+.ob-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ob-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.ob-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ob-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ob-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.ob-badge-ready,
+.ob-badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ob-badge-importing {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.ob-badge-completed,
+.ob-badge-created {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.ob-badge-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.ob-error-text {
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.ob-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.ob-banner {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.ob-banner-ok {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.ob-banner-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.ob-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.ob-apply-box {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 12px;
+}

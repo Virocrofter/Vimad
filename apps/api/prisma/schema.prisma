@@ -76,6 +76,9 @@ model Tenant {
   cannedResponses    CannedResponse[]
   guestIdentityGroups GuestIdentityGroup[]
   supportCases       SupportCase[]
+  onboardingImports OnboardingImport[]
+  propertyTemplates PropertyTemplate[]
+  loyaltyConfig      LoyaltyConfig?
   @@map("tenants")
 }
 
@@ -216,6 +219,7 @@ model Property {
   venues              Venue[]
   scEvents            ScEvent[]
   arInvoices          ArInvoice[]
+  loyaltyTransactions LoyaltyTransaction[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -999,6 +1003,8 @@ model LoyaltyTransaction {
   description String
   source      String   @default("Manual")
   createdById String?
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
 
   @@index([tenantId])
@@ -2504,4 +2510,70 @@ model ReservationCompanion {
 
   @@index([tenantId, reservationId])
   @@map("reservation_companions")
+}
+
+// ─── C6: Bulk onboarding & property templates ───
+
+model OnboardingImport {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type        String   @default("csv")
+  status      String   @default("pending")
+  fileName    String?
+  mapping     Json     @default("{}")
+  stats       Json?
+  errors      Json?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rows OnboardingImportRow[]
+
+  @@index([tenantId, createdAt])
+  @@map("onboarding_imports")
+}
+
+model OnboardingImportRow {
+  id        String           @id @default(cuid())
+  importId  String
+  import    OnboardingImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  rowNumber Int
+  data      Json
+  status    String           @default("pending")
+  error     String?
+  createdAt DateTime         @default(now())
+
+  @@index([importId])
+  @@map("onboarding_import_rows")
+}
+
+model PropertyTemplate {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name            String
+  isChainStandard Boolean  @default(false)
+  config          Json     @default("{}")
+  createdById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("property_templates")
+}
+
+// ─── C7: Chain loyalty config ───
+
+model LoyaltyConfig {
+  tenantId    String   @id
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  chainId     String?
+  earnRate    Decimal  @default(1) @db.Decimal(10, 4)
+  redeemValue Decimal  @default(0.1) @db.Decimal(10, 4)
+  tiers       Json     @default("[]")
+  updatedAt   DateTime @updatedAt
+
+  @@map("loyalty_configs")
 }

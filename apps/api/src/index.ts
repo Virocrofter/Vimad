@@ -108,6 +108,7 @@ import { chainsRouter } from './modules/chains/chains.routes.js';
 import { chainDashboardRouter } from './modules/chain-dashboard/chain-dashboard.routes.js';
 import { guestIdentityRouter } from './modules/guest-identity/guest-identity.routes.js';
 import { centralReservationsRouter } from './modules/central-reservations/central-reservations.routes.js';
+import { chainBillingRouter } from './modules/chain-billing/chain-billing.routes.js';
 // [USERS] tenant staff user management (list/create/update/suspend/audit)
 import { usersRouter } from './modules/users/users.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
@@ -127,6 +128,8 @@ import { startOverbookingAlertScheduler } from './modules/inventory/inventory.ca
 import { mealsRouter } from './modules/meals/meals.routes.js';
 // [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
 import { ticketsRouter } from './modules/tickets/tickets.routes.js';
+import { onboardingRouter } from './modules/onboarding/onboarding.routes.js';
+import { chainLoyaltyRouter } from './modules/chain-loyalty/chain-loyalty.routes.js';
 import { ticketsGuestRouter } from './modules/tickets/tickets.guest.routes.js';
 import { ticketWorker, startTicketScheduler } from './jobs/tickets.job.js';
 import { tenantSettingsRouter } from './modules/tenant-settings/tenant-settings.routes.js';
@@ -342,6 +345,7 @@ async function bootstrap() {
   app.use('/v1/chain-dashboard', chainDashboardRouter);
   app.use('/v1/guest-identity', guestIdentityRouter);
   app.use('/v1/central-reservations', centralReservationsRouter);
+  app.use('/v1/chain-billing', chainBillingRouter);
   app.use('/v1/guests', guestsRouter);
   app.use('/v1/reservations', reservationsRouter);
   app.use('/v1/room-plan', roomPlanRoutes);
@@ -401,6 +405,8 @@ async function bootstrap() {
   app.use('/v1/meal-plans', mealsRouter);
   // [SUPPORT] Staff Support Desk (auth'd)
   app.use('/v1/tickets', ticketsRouter);
+  app.use('/v1/onboarding', onboardingRouter);
+  app.use('/v1/chain-loyalty', chainLoyaltyRouter);
   app.use('/v1/tenant', tenantSettingsRouter);
   // [AR] Accounts Receivable — corporate ledger (auth'd)
   app.use('/v1/ar', arRouter);

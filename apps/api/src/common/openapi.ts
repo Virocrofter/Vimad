@@ -43,6 +43,8 @@ import * as inventoryModule from '../modules/inventory/inventory.routes.js';
 import * as mealsModule from '../modules/meals/meals.routes.js';
 // [SUPPORT] Guest support tickets — SLA, escalation, CSAT
 import * as ticketsModule from '../modules/tickets/tickets.routes.js';
+import * as onboardingModule from '../modules/onboarding/onboarding.routes.js';
+import * as chainLoyaltyModule from '../modules/chain-loyalty/chain-loyalty.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -121,6 +123,8 @@ export function generateOpenAPIDocument() {
     mealsModule,
     // [SUPPORT] Support tickets
     ticketsModule,
+    onboardingModule,
+    chainLoyaltyModule,
   ];
 
   const allDefinitions: any[] = [];

@@ -10,6 +10,7 @@ import AppLayout from './app/app/layout';
 import GuestLayout from './app/guest-portal/layout';
 import GuestAuthLayout from './app/guest-portal/auth/layout';
 import AdminLayout from './app/admin/layout';
+import ChainLoyaltyPage from './app/app/chain-loyalty/page';
 
 /**
  * Route-level code splitting. Every leaf page loads as its own chunk on
@@ -151,6 +152,7 @@ export const router = createBrowserRouter([
         path: 'central-reservations',
         ...page(() => import('./app/app/central-reservations/page')),
       },
+      { path: 'chain-billing', ...page(() => import('./app/app/chain-billing/page')) },
       {
         path: 'billing',
         children: [
@@ -185,6 +187,7 @@ export const router = createBrowserRouter([
       { path: 'night-audit', ...page(() => import('./app/app/night-audit/page')) },
       { path: 'reports', ...page(() => import('./app/app/reports/page')) },
       { path: 'onboarding', ...page(() => import('./app/app/onboarding/page')) },
+      { path: 'chain-loyalty', element: <ChainLoyaltyPage /> },
       { path: 'channel-manager', ...page(() => import('./app/app/channel-manager/page')) },
       { path: 'loyalty', ...page(() => import('./app/app/loyalty/page')) },
       { path: 'settings', ...page(() => import('./app/app/settings/page')) },
