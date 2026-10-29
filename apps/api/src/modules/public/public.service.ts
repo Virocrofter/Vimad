@@ -130,11 +130,20 @@ export async function getAvailability(
           name: true,
           baseOccupancy: true,
           maxOccupancy: true,
-          ratePlans: { where: { status: 'active' }, take: 1, select: { baseRate: true } },
+          ratePlans: { where: { status: 'active' }, take: 1, select: { id: true, baseRate: true } },
         },
       },
     },
   });
+
+  // C1' pricing ledger: rule-derived nightly rates take precedence over base
+  const rateOverrides = await prisma.rateOverride.findMany({
+    where: { propertyId: property.id, date: { gte: day(checkIn), lt: day(checkOut) } },
+    select: { ratePlanId: true, date: true, effectiveRate: true },
+  });
+  const overrideMap = new Map(
+    rateOverrides.map((o) => [`${o.ratePlanId}|${toISODate(o.date)}`, Number(o.effectiveRate)])
+  );
 
   const occupied = await prisma.reservationStay.findMany({
     where: {
@@ -188,6 +197,7 @@ export async function getAvailability(
       total: number;
       free: number;
       rate: number;
+      ratePlanId: string | undefined;
     }
   >();
   for (const room of rooms) {
@@ -199,6 +209,7 @@ export async function getAvailability(
       total: 0,
       free: 0,
       rate: Number(room.roomType.ratePlans[0]?.baseRate ?? 0),
+      ratePlanId: room.roomType.ratePlans[0]?.id,
     };
     entry.total += 1;
     if (!occupiedRoomIds.has(room.id)) entry.free += 1;
@@ -209,6 +220,10 @@ export async function getAvailability(
     .map(([roomTypeId, v]) => {
       // Available-for-sale per night: rooms free for the whole stay, minus
       // holds, plus manual adjustments (floor 0), plus the overbooking cap.
+      const nightlyRates = nightsArr.map((d) => {
+        const o = v.ratePlanId ? overrideMap.get(`${v.ratePlanId}|${toISODate(d)}`) : undefined;
+        return o ?? v.rate;
+      });
       const perNight = nightsArr.map((d) => {
         const key = `${roomTypeId}|${toISODate(d)}`;
         return (
@@ -231,8 +246,8 @@ export async function getAvailability(
         availableRooms,
         ratePerNight: v.rate,
         nights,
-        nightly: nightsArr.map((d) => ({ date: toISODate(d), rate: v.rate })),
-        total: Math.round(v.rate * nights * 100) / 100,
+        nightly: nightsArr.map((d, i) => ({ date: toISODate(d), rate: nightlyRates[i] })),
+        total: Math.round(nightlyRates.reduce((sum, r) => sum + r, 0) * 100) / 100,
         _blocked: blocked || arrivalBlocked,
       };
     })
@@ -336,22 +351,57 @@ export async function createPublicBooking(
 
   // The SAME path the front desk uses: folio, stay rows, inventory assertion,
   // A3 confirmation email to the guest — all automatic.
+  //
+  // B3: the availability re-check and the insert must be atomic, or N concurrent
+  // bookings all pass the check and oversell the type (race test: 10/4). Serialize
+  // per property+roomType with a transaction-scoped advisory lock, re-pick the
+  // room inside the lock, and create on the tx client.
   let reservation;
   try {
-    reservation = await createReservation(tenantId, {
-      propertyId: property.id,
-      guestId: guest.id,
-      arrivalDate: checkIn,
-      departureDate: checkOut,
-      nights,
-      adults: input.adults,
-      children: input.children,
-      notes: input.notes
-        ? `[WEB] ${input.notes.trim()}`
-        : '[WEB] Booked via the website booking engine',
-      roomId: room.id,
-      source: 'direct',
-    });
+    reservation = await prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('public-booking:' || ${property.id} || ':' || ${input.roomTypeId}))`;
+
+        // Re-check occupancy INSIDE the lock — the pre-check above may be stale.
+        const occupiedNow = await tx.reservationStay.findMany({
+          where: {
+            date: { in: nightsArr },
+            reservation: { tenantId, propertyId: property.id, status: { in: ACTIVE_STATUSES } },
+          },
+          select: { roomId: true },
+        });
+        const takenRoomIds = new Set(occupiedNow.map((st) => st.roomId));
+        const roomNow = typeRooms.find((r) => !takenRoomIds.has(r.id));
+        if (!roomNow) {
+          throw new AppError(
+            409,
+            'Sorry — that room type just sold out for your dates.',
+            'SOLD_OUT'
+          );
+        }
+
+        return createReservation(
+          tenantId,
+          {
+            propertyId: property.id,
+            guestId: guest.id,
+            arrivalDate: checkIn,
+            departureDate: checkOut,
+            nights,
+            adults: input.adults,
+            children: input.children,
+            notes: input.notes
+              ? `[WEB] ${input.notes.trim()}`
+              : '[WEB] Booked via the website booking engine',
+            roomId: roomNow.id,
+            source: 'direct',
+          },
+          { id: 'system', name: 'System', role: 'system' },
+          tx
+        );
+      },
+      { maxWait: 15000, timeout: 15000 }
+    );
   } catch (err) {
     // Lost the race between our check and the insert — another booking took the room
     if (err instanceof AppError && err.code === 'ROOM_CONFLICT') {
@@ -375,18 +425,43 @@ export async function createPublicBooking(
   } | null = null;
 
   if (depositAmountMinor > 0) {
-    const payment = await initializePayment(tenantId, 'system:public-booking', {
-      guestId: guest.id,
-      reservationId: reservation.id,
-      email,
-      amountMinor: depositAmountMinor,
-      type: 'deposit',
-      idempotencyKey: `web-${reservation.id}-deposit`,
-      metadata: {
-        channel: 'website',
-        confirmationNumber: reservation.confirmationNumber,
-      },
-    });
+    let payment;
+    try {
+      payment = await initializePayment(tenantId, 'system:public-booking', {
+        guestId: guest.id,
+        reservationId: reservation.id,
+        email,
+        amountMinor: depositAmountMinor,
+        type: 'deposit',
+        idempotencyKey: `web-${reservation.id}-deposit`,
+        metadata: {
+          channel: 'website',
+          confirmationNumber: reservation.confirmationNumber,
+        },
+      });
+    } catch (err) {
+      // Deposit init failed AFTER the reservation committed. An orphan confirmed
+      // booking would consume inventory with no way for the guest to pay — race
+      // test showed exactly that (5 confirmed, zero payment rows). Release it.
+      await prisma.reservation.update({
+        where: { id: reservation.id },
+        data: {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          cancelledBy: 'system:deposit-init',
+          cancelReason: 'deposit_init_failed',
+        },
+      });
+      logger.error(
+        { err, reservationId: reservation.id },
+        'public booking deposit init failed; reservation released'
+      );
+      throw new AppError(
+        502,
+        'Payment could not be initialized. No reservation was held — please try again.',
+        'PAYMENT_INIT_FAILED'
+      );
+    }
     deposit = {
       amountMinor: depositAmountMinor,
       amountLabel: money(ratePerNight, property.currency),

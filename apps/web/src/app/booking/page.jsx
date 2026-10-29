@@ -88,25 +88,33 @@ export default function BookingPage() {
     }
   };
 
+  const [idemKey] = useState(() =>
+    crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()
+  );
+
   const submit = async () => {
     setError(null);
     setSubmitting(true);
     try {
-      const data = await publicBookingApi.book(code, {
-        checkIn,
-        checkOut,
-        adults,
-        children,
-        roomTypeId: selected.roomTypeId,
-        guest: {
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          phone: form.phone,
+      const data = await publicBookingApi.book(
+        code,
+        {
+          checkIn,
+          checkOut,
+          adults,
+          children,
+          roomTypeId: selected.roomTypeId,
+          guest: {
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            phone: form.phone,
+          },
+          notes: form.notes || undefined,
+          website: honeypot || undefined,
         },
-        notes: form.notes || undefined,
-        website: honeypot || undefined,
-      });
+        idemKey
+      );
       setBooking(data);
       setStep('success');
     } catch (e) {

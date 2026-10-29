@@ -86,6 +86,8 @@ export interface AuditActor {
   role: string;
 }
 
+import type { Prisma, PrismaClient } from '@prisma/client';
+
 const SYSTEM_ACTOR: AuditActor = { id: 'system', name: 'System', role: 'system' };
 
 export interface ReservationListQuery {
@@ -254,8 +256,12 @@ export async function listReservations(tenantId: string, query: ReservationListQ
   return paginate(items, total, pagination);
 }
 
-export async function getReservation(tenantId: string, id: string) {
-  const reservation = await prisma.reservation.findFirst({
+export async function getReservation(
+  tenantId: string,
+  id: string,
+  client: Prisma.TransactionClient | PrismaClient = prisma
+) {
+  const reservation = await client.reservation.findFirst({
     where: { id, tenantId },
     include: {
       guest: true,
@@ -305,10 +311,11 @@ async function assertRoomFree(
   roomId: string,
   arrival: Date,
   nights: number,
-  excludeReservationId: string | null
+  excludeReservationId: string | null,
+  client: Prisma.TransactionClient | PrismaClient = prisma
 ) {
   const dates = stayDates(arrival, nights);
-  const conflict = await prisma.reservationStay.findFirst({
+  const conflict = await client.reservationStay.findFirst({
     where: {
       roomId,
       date: { in: dates },
@@ -334,16 +341,17 @@ async function rebuildStays(
   roomId: string,
   arrival: Date,
   nights: number,
-  rate: number
+  rate: number,
+  client: Prisma.TransactionClient | PrismaClient = prisma
 ) {
-  await prisma.$transaction([
-    prisma.reservationStay.deleteMany({ where: { reservationId } }),
-    ...stayDates(arrival, nights).map((d) =>
-      prisma.reservationStay.create({
-        data: { reservationId, roomId, date: d, rate },
-      })
-    ),
-  ]);
+  // Sequential (not the batch-transaction form) so this can run inside an
+  // interactive transaction when the caller holds an inventory lock.
+  await client.reservationStay.deleteMany({ where: { reservationId } });
+  for (const d of stayDates(arrival, nights)) {
+    await client.reservationStay.create({
+      data: { reservationId, roomId, date: d, rate },
+    });
+  }
 }
 
 /* Recalculate reservation total/balance from stay rows + folio payments,
@@ -406,20 +414,21 @@ async function enforceTypeInventory(
 export async function createReservation(
   tenantId: string,
   input: ReservationCreateInput,
-  actor: AuditActor = SYSTEM_ACTOR
+  actor: AuditActor = SYSTEM_ACTOR,
+  client: Prisma.TransactionClient | PrismaClient = prisma
 ) {
   if (input.departureDate <= input.arrivalDate) {
     throw new AppError(400, 'Departure date must be after arrival date', 'VALIDATION_ERROR');
   }
 
-  const property = await prisma.property.findFirst({
+  const property = await client.property.findFirst({
     where: { id: input.propertyId, tenantId },
   });
   if (!property) {
     throw new AppError(404, 'Property not found', 'NOT_FOUND');
   }
 
-  const guest = await prisma.guest.findFirst({
+  const guest = await client.guest.findFirst({
     where: { id: input.guestId, tenantId },
   });
   if (!guest) {
@@ -427,7 +436,7 @@ export async function createReservation(
   }
 
   if (input.ratePlanId) {
-    const ratePlan = await prisma.ratePlan.findFirst({
+    const ratePlan = await client.ratePlan.findFirst({
       where: { id: input.ratePlanId, propertyId: property.id },
     });
     if (!ratePlan) {
@@ -437,7 +446,7 @@ export async function createReservation(
 
   let rate = input.rate ?? 0;
   if (input.roomId) {
-    const room = await prisma.room.findFirst({
+    const room = await client.room.findFirst({
       where: { id: input.roomId, propertyId: property.id, status: { not: 'inactive' } },
       include: { roomType: { include: { ratePlans: { where: { status: 'active' }, take: 1 } } } },
     });
@@ -447,7 +456,7 @@ export async function createReservation(
     if (input.rate === undefined) {
       rate = Number(room.roomType.ratePlans[0]?.baseRate ?? 0);
     }
-    await assertRoomFree(tenantId, input.roomId, input.arrivalDate, input.nights, null);
+    await assertRoomFree(tenantId, input.roomId, input.arrivalDate, input.nights, null, client);
     await enforceTypeInventory(
       tenantId,
       property.id,
@@ -458,7 +467,7 @@ export async function createReservation(
   }
 
   if (!input.roomId && input.roomTypeId) {
-    const requestedType = await prisma.roomType.findFirst({
+    const requestedType = await client.roomType.findFirst({
       where: { id: input.roomTypeId, propertyId: property.id },
     });
     if (!requestedType) {
@@ -476,7 +485,7 @@ export async function createReservation(
   const confirmationNumber = generateConfirmationNumber();
   const totalAmount = Math.round(rate * input.nights * 100) / 100;
 
-  const reservation = await prisma.reservation.create({
+  const reservation = await client.reservation.create({
     data: {
       tenantId,
       propertyId: input.propertyId,
@@ -501,7 +510,7 @@ export async function createReservation(
     },
   });
 
-  await prisma.folio.create({
+  await client.folio.create({
     data: {
       tenantId,
       reservationId: reservation.id,
@@ -513,10 +522,10 @@ export async function createReservation(
   });
 
   if (input.roomId) {
-    await rebuildStays(reservation.id, input.roomId, input.arrivalDate, input.nights, rate);
+    await rebuildStays(reservation.id, input.roomId, input.arrivalDate, input.nights, rate, client);
   }
 
-  const full = await getReservation(tenantId, reservation.id);
+  const full = await getReservation(tenantId, reservation.id, client);
 
   audit(
     `audit-res-create-${reservation.id}`,

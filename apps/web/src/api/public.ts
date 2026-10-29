@@ -24,10 +24,11 @@ async function pubGet(path: string, params?: Record<string, unknown>) {
   return body.data ?? body;
 }
 
-async function pubPost(path: string, payload: unknown) {
+async function pubPost(path: string, payload: unknown, idempotencyKey?: string) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     body: JSON.stringify(payload),
   });
   const body = await res.json().catch(() => ({}));
@@ -38,11 +39,11 @@ async function pubPost(path: string, payload: unknown) {
 }
 
 export const publicBookingApi = {
-  property: (code: string) => pubGet(`/v1/public/properties/${code}`),
+  property: (code: string, idempotencyKey?: string) => pubGet(`/v1/public/properties/${code}`),
   availability: (code: string, params: Record<string, unknown>) =>
     pubGet(`/v1/public/properties/${code}/availability`, params),
-  book: (code: string, payload: unknown) =>
-    pubPost(`/v1/public/properties/${code}/bookings`, payload),
+  book: (code: string, payload: unknown, idempotencyKey?: string) =>
+    pubPost(`/v1/public/properties/${code}/bookings`, payload, idempotencyKey),
   cancel: (payload: { confirmationNumber: string; email: string }) =>
     pubPost('/v1/public/cancellations', payload),
 };
