@@ -419,11 +419,7 @@ export function PriorityWorklist({ arrivals, departures, tasksTop, currency, loa
       isTask: true,
     })),
     ...arrivals.map((i) => ({ ...i, kind: 'Arrival', rank: 3 })),
-  ].sort(
-    (a, b) =>
-      a.rank - a.kind.localeCompare(b.kind) - (b.rank - b.kind.localeCompare(a.kind)) ||
-      a.rank - b.rank
-  );
+  ].sort((a, b) => a.rank - b.rank || a.kind.localeCompare(b.kind));
 
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
