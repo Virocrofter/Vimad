@@ -402,6 +402,7 @@ model Guest {
   reservationCompanions ReservationCompanion[]
   identityMemberships GuestIdentityMember[]
   loyaltyRedemptions  LoyaltyRedemption[]
+  consents            GuestConsent[]
 
   @@index([tenantId])
   @@index([email])
@@ -3050,4 +3051,21 @@ model RoomBlock {
   @@index([roomId, startDate, endDate])
   @@index([roomTypeId, startDate, endDate])
   @@map("room_blocks")
+}
+
+// ─── E5: purpose-specific guest consent (append-only history) ───
+model GuestConsent {
+  id         String   @id @default(cuid())
+  tenantId   String
+  guestId    String
+  purpose    String   @default("marketing") // marketing | newsletter | offers | events
+  channel    String   @default("email")     // email | sms | whatsapp
+  status     String                        // granted | revoked
+  source     String   @default("manual")    // booking | front_desk | guest_portal | import | unsubscribe
+  capturedAt DateTime @default(now())
+  guest      Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([guestId, purpose, channel, capturedAt])
+  @@map("guest_consents")
 }

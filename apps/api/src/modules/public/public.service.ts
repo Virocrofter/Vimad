@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
-import { createReservation } from '../reservations/reservations.service.js';
+import { createReservation, inventoryLockKey } from '../reservations/reservations.service.js';
 import { initializePayment } from '../payments/payments.service.js';
 import { assertSellable } from '../inventory/inventory.service.js';
 import { sendEmail } from '../../jobs/email.queue.js';
@@ -360,7 +360,7 @@ export async function createPublicBooking(
   try {
     reservation = await prisma.$transaction(
       async (tx) => {
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('public-booking:' || ${property.id} || ':' || ${input.roomTypeId}))`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${inventoryLockKey(property.id, input.roomTypeId)}))`;
 
         // Re-check occupancy INSIDE the lock — the pre-check above may be stale.
         const occupiedNow = await tx.reservationStay.findMany({
@@ -537,6 +537,12 @@ export async function cancelPublicBooking(input: z.infer<typeof publicCancellati
       data: { status: 'cancelled' },
     }),
     prisma.reservationStay.deleteMany({ where: { reservationId: reservation.id } }),
+    // Never leave a live deposit request on a cancelled booking — the guest
+    // could still complete checkout for a stay that no longer exists.
+    prisma.payment.updateMany({
+      where: { reservationId: reservation.id, status: 'pending' },
+      data: { status: 'failed', failureReason: 'reservation_cancelled' },
+    }),
   ]);
 
   // Cancellation confirmation email — logged in the Email Center like everything else
@@ -561,4 +567,12 @@ export async function cancelPublicBooking(input: z.infer<typeof publicCancellati
   );
 
   return { cancelled: true, confirmationNumber: reservation.confirmationNumber };
+}
+
+// ─── E5 public unsubscribe (one-click, no login) ───
+export const unsubscribeQuerySchema = z.object({ token: z.string().min(10) });
+
+export async function unsubscribeByToken(token: string) {
+  const { unsubscribeByToken: revoke } = await import('../marketing/marketing.service.js');
+  return revoke(token);
 }

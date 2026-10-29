@@ -3,6 +3,28 @@ import { Router } from 'express';
 // If your export is named differently (authMiddleware / authenticate), change this one import.
 import { authMiddleware } from '../auth/auth.middleware.js';
 import * as ctrl from './marketing.controller.js';
+import * as svc from './marketing.service.js';
+import { HttpError } from './marketing.service.js';
+
+// Same tenant resolution as the controller (auth middleware sets req.auth).
+const tenantOf = (req: any): string => {
+  const t = req.auth?.tenantId ?? req.tenantId ?? req.user?.tenantId;
+  if (!t) throw new HttpError(401, 'UNAUTHORIZED', 'Tenant context missing');
+  return String(t);
+};
+
+const consentHandler =
+  (fn: (req: any) => Promise<unknown>) => async (req: any, res: any, next: any) => {
+    try {
+      res.json({ data: await fn(req) });
+    } catch (err) {
+      if (err instanceof HttpError) {
+        res.status(err.status).json({ error: { code: err.code, message: err.message } });
+        return;
+      }
+      next(err);
+    }
+  };
 
 export const marketingRouter = Router();
 
@@ -40,5 +62,19 @@ marketingRouter.get('/segments', ctrl.listSegments);
 marketingRouter.post('/segments', ctrl.createSegment);
 marketingRouter.post('/segments/:id/refresh', ctrl.refreshSegment);
 marketingRouter.delete('/segments/:id', ctrl.deleteSegment);
+
+// E5 consents — record, history, and the send-time audience gate
+marketingRouter.post(
+  '/consents',
+  consentHandler(async (req) => svc.recordConsent(tenantOf(req), req.body.guestId, req.body))
+);
+marketingRouter.get(
+  '/consents/guest/:guestId',
+  consentHandler(async (req) => svc.consentHistory(tenantOf(req), req.params.guestId))
+);
+marketingRouter.post(
+  '/audience',
+  consentHandler(async (req) => svc.gateAudience(tenantOf(req), req.body))
+);
 
 export default marketingRouter;

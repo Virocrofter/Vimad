@@ -11,6 +11,8 @@ import {
   getAvailability,
   createPublicBooking,
   cancelPublicBooking,
+  unsubscribeQuerySchema,
+  unsubscribeByToken,
 } from './public.service.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 
@@ -60,6 +62,20 @@ publicRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await cancelPublicBooking(req.validatedBody as any);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* GET /marketing/unsubscribe?token= — one-click unsubscribe, no login (E5) */
+publicRouter.get(
+  '/marketing/unsubscribe',
+  validateQuery(unsubscribeQuerySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await unsubscribeByToken((req.validatedQuery as { token: string }).token);
       res.json({ data: result });
     } catch (err) {
       next(err);

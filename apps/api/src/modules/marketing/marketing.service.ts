@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import {
@@ -300,17 +301,34 @@ export async function toggleWorkflow(tenantId: string, id: string) {
  * are intentionally stubbed: wire your providers here. Every execution is recorded
  * as a MarketingWorkflowRun with a full action plan, visible in the UI run history.
  */
-async function executeActions(actions: any[]): Promise<string> {
-  const plan = actions.map((a) => a.type).join(', ');
-  // TODO(provider): dispatch send_email via SendGrid, send_sms via Twilio, etc.
-  return `${actions.length} action(s) dispatched: ${plan}`;
+async function executeActions(actions: any[], tenantId: string): Promise<string> {
+  // TODO(provider): dispatch via SendGrid/Twilio. Recipient lists MUST come from
+  // gateAudience() - it is the single send-time consent gate (E5). Until a
+  // provider is wired, the run log shows exactly who would receive what.
+  const plan: string[] = [];
+  for (const a of actions) {
+    if (a.type === 'send_email' || a.type === 'send_sms' || a.type === 'send_whatsapp') {
+      const purpose = a.consentPurpose ?? 'marketing';
+      const channel =
+        a.type === 'send_email' ? 'email' : a.type === 'send_sms' ? 'sms' : 'whatsapp';
+      const gate = await gateAudience(tenantId, {
+        ...(a.segmentId ? { segmentId: a.segmentId } : {}),
+        purpose,
+        channel,
+      });
+      plan.push(`${a.type} -> ${gate.consented}/${gate.total} consented (${purpose}/${channel})`);
+    } else {
+      plan.push(a.type);
+    }
+  }
+  return `${actions.length} action(s) dispatched: ${plan.join(', ')}`;
 }
 
 export async function runWorkflow(tenantId: string, id: string) {
   const wf = await prisma.marketingWorkflow.findFirst({ where: { id, tenantId } });
   if (!wf) throw new HttpError(404, 'NOT_FOUND', 'Workflow not found');
   const actions = wf.actions as any[];
-  const detail = await executeActions(actions);
+  const detail = await executeActions(actions, tenantId);
   const run = await prisma.marketingWorkflowRun.create({
     data: { tenantId, workflowId: id, status: 'success', detail },
   });
@@ -463,4 +481,159 @@ export async function deleteSegment(tenantId: string, id: string) {
   if (!existing) throw new HttpError(404, 'NOT_FOUND', 'Segment not found');
   await prisma.marketingSegment.delete({ where: { id } });
   return { deleted: true };
+}
+
+// ─── E5: consent — purpose-specific opt-ins, enforced at send time ───
+const CONSENT_PURPOSES = ['marketing', 'newsletter', 'offers', 'events'] as const;
+const CONSENT_CHANNELS = ['email', 'sms', 'whatsapp'] as const;
+
+export async function recordConsent(
+  tenantId: string,
+  guestId: string,
+  input: { purpose?: string; channel?: string; granted: boolean; source?: string }
+) {
+  const purpose = input.purpose ?? 'marketing';
+  const channel = input.channel ?? 'email';
+  if (!(CONSENT_PURPOSES as readonly string[]).includes(purpose)) {
+    throw new HttpError(
+      400,
+      'VALIDATION_ERROR',
+      `purpose must be one of: ${CONSENT_PURPOSES.join(', ')}`
+    );
+  }
+  if (!(CONSENT_CHANNELS as readonly string[]).includes(channel)) {
+    throw new HttpError(
+      400,
+      'VALIDATION_ERROR',
+      `channel must be one of: ${CONSENT_CHANNELS.join(', ')}`
+    );
+  }
+  const guest = await prisma.guest.findFirst({ where: { id: guestId, tenantId } });
+  if (!guest) throw new HttpError(404, 'NOT_FOUND', 'Guest not found');
+  // Append-only: every change is a history row, newest capturedAt wins.
+  return prisma.guestConsent.create({
+    data: {
+      tenantId,
+      guestId,
+      purpose,
+      channel,
+      status: input.granted ? 'granted' : 'revoked',
+      source: input.source ?? 'manual',
+    },
+  });
+}
+
+export async function consentHistory(tenantId: string, guestId: string) {
+  return prisma.guestConsent.findMany({
+    where: { tenantId, guestId },
+    orderBy: { capturedAt: 'desc' },
+  });
+}
+
+/** The send-time gate. Latest row per (guest,purpose,channel) wins; no row at
+ *  all means NO consent - marketing is opt-in, never opt-out-by-default. */
+export async function hasConsent(
+  tenantId: string,
+  guestId: string,
+  purpose = 'marketing',
+  channel = 'email'
+) {
+  const latest = await prisma.guestConsent.findFirst({
+    where: { tenantId, guestId, purpose, channel },
+    orderBy: { capturedAt: 'desc' },
+  });
+  return latest?.status === 'granted';
+}
+
+/** Dry-run audience gate for campaigns/workflows: who may actually be sent to. */
+export async function gateAudience(
+  tenantId: string,
+  input: { segmentId?: string; purpose?: string; channel?: string; guestIds?: string[] }
+) {
+  const purpose = input.purpose ?? 'marketing';
+  const channel = input.channel ?? 'email';
+  let guestIds: string[] = input.guestIds ?? [];
+  if (input.segmentId) {
+    const segment = await prisma.marketingSegment.findFirst({
+      where: { id: input.segmentId, tenantId },
+    });
+    if (!segment) throw new HttpError(404, 'NOT_FOUND', 'Segment not found');
+    const members = await prisma.guestSegmentMembership.findMany({
+      where: { segmentId: input.segmentId, tenantId },
+      select: { guestId: true },
+    });
+    guestIds = members.map((m) => m.guestId);
+  }
+  if (guestIds.length === 0) {
+    return {
+      purpose,
+      channel,
+      total: 0,
+      consented: 0,
+      suppressed: 0,
+      suppressedGuestIds: [] as string[],
+    };
+  }
+  const rows = await prisma.guestConsent.findMany({
+    where: { tenantId, guestId: { in: guestIds }, purpose, channel },
+    orderBy: { capturedAt: 'desc' },
+  });
+  const latest = new Map<string, string>();
+  for (const r of rows) if (!latest.has(r.guestId)) latest.set(r.guestId, r.status);
+  const suppressedIds = guestIds.filter((id) => latest.get(id) !== 'granted');
+  return {
+    purpose,
+    channel,
+    total: guestIds.length,
+    consented: guestIds.length - suppressedIds.length,
+    suppressed: suppressedIds.length,
+    suppressedGuestIds: suppressedIds,
+  };
+}
+
+// ─── One-click unsubscribe (public, no login) ───
+// token = base64url(guestId.purpose.channel.expiresAt) + '.' + base64url(hmac-sha256)
+function unsubscribeSecret(): string {
+  return process.env.JWT_SECRET ?? 'vimad-dev-unsubscribe-secret';
+}
+
+export function signUnsubscribeToken(
+  guestId: string,
+  purpose = 'marketing',
+  channel = 'email'
+): string {
+  const payload = `${guestId}.${purpose}.${channel}.${Math.floor(Date.now() / 1000) + 30 * 24 * 3600}`;
+  const sig = createHmac('sha256', unsubscribeSecret()).update(payload).digest();
+  const b64u = (buf: Buffer) =>
+    buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `${b64u(Buffer.from(payload, 'utf8'))}.${b64u(sig)}`;
+}
+
+export async function unsubscribeByToken(token: string) {
+  const [payloadPart, sigPart] = token.split('.');
+  if (!payloadPart || !sigPart)
+    throw new HttpError(400, 'VALIDATION_ERROR', 'Malformed unsubscribe token');
+  const b64uToBuf = (t: string) => Buffer.from(t.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+  const payload = b64uToBuf(payloadPart).toString('utf8');
+  const expected = createHmac('sha256', unsubscribeSecret()).update(payload).digest();
+  const got = b64uToBuf(sigPart);
+  if (expected.length !== got.length || !timingSafeEqual(expected, got)) {
+    throw new HttpError(400, 'VALIDATION_ERROR', 'Invalid unsubscribe token');
+  }
+  const [guestId, purpose, channel, exp] = payload.split('.');
+  if (Number(exp) < Date.now() / 1000)
+    throw new HttpError(400, 'VALIDATION_ERROR', 'Unsubscribe link expired');
+  const guest = await prisma.guest.findFirst({ where: { id: guestId } });
+  if (!guest) throw new HttpError(404, 'NOT_FOUND', 'Guest not found');
+  await prisma.guestConsent.create({
+    data: {
+      tenantId: guest.tenantId,
+      guestId,
+      purpose,
+      channel,
+      status: 'revoked',
+      source: 'unsubscribe',
+    },
+  });
+  return { unsubscribed: true, purpose, channel };
 }
