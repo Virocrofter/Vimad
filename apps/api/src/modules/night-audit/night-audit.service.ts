@@ -5,6 +5,7 @@ import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
 import { logAuditEvent } from '../audit/audit.service.js';
+import { resolveNightAuditTasks } from '../tasks/tasks.service.js';
 import { sendEmail } from '../../jobs/email.queue.js';
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js';
 
@@ -467,6 +468,14 @@ export async function runNightAudit(
     if (input.closeDay) {
       results.businessDateRolled = await runStep('roll_business_date', () =>
         rollBusinessDate(tenantId, input.propertyId, input.auditDate)
+      );
+    }
+
+    // Step 7b: close stale "Business date NOT rolled" tasks — the roll above
+    // resolved the condition they were raised for
+    if (results.businessDateRolled) {
+      results.auditTasksResolved = await runStep('resolve_audit_tasks', () =>
+        resolveNightAuditTasks(tenantId, input.propertyId)
       );
     }
 

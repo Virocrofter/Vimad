@@ -1029,6 +1029,36 @@ export async function completeTask(tenantId: string, id: string, userId: string)
   return updated;
 }
 
+// ─── Exception lifecycle: stale night-audit tasks ───
+// The 'night-audit-not-rolled-04' rule raises "Business date NOT rolled"
+// tasks while a property's audit is pending. Once the roll succeeds those
+// tasks are stale — close them so the exception layer reflects reality.
+export async function resolveNightAuditTasks(tenantId: string, propertyId: string) {
+  const stale = await prisma.task.findMany({
+    where: {
+      tenantId,
+      propertyId,
+      status: { in: ['open', 'in_progress'] },
+      ruleKey: 'night-audit-not-rolled-04',
+    },
+    select: { id: true },
+  });
+  if (stale.length === 0) return 0;
+
+  await prisma.task.updateMany({
+    where: { id: { in: stale.map((t) => t.id) } },
+    data: { status: 'done', completedAt: new Date(), completedBy: 'system:night-audit' },
+  });
+
+  for (const t of stale) {
+    safeAudit(tenantId, 'system', 'task.auto_resolve', t.id, {
+      ruleKey: 'night-audit-not-rolled-04',
+      reason: 'night_audit_roll_succeeded',
+    });
+  }
+  return stale.length;
+}
+
 export async function cancelTask(tenantId: string, id: string, reason?: string, actorId?: string) {
   const task = await prisma.task.findFirst({ where: { id, tenantId } });
   if (!task) throw new AppError(404, 'Task not found', 'NOT_FOUND');
