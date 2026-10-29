@@ -14,6 +14,14 @@ import {
   setRuleActive,
   evaluate,
   getEffectiveRates,
+  createDerivedPlan,
+  bulkUpdate,
+  createVoucher,
+  listVouchers,
+  getQuote,
+  listSuggestions,
+  applySuggestion,
+  dismissSuggestion,
 } from './pricing-rules.service.js';
 
 export const pricingRulesRouter = Router();
@@ -21,7 +29,7 @@ pricingRulesRouter.use(authMiddleware);
 
 const createSchema = z.object({
   name: z.string().min(2),
-  type: z.enum(['occupancy', 'date_range']),
+  type: z.enum(['occupancy', 'date_range', 'restriction']),
   conditions: z.record(z.string(), z.unknown()).default({}),
   adjustment: z.record(z.string(), z.unknown()).default({}),
   priority: z.number().int().min(0).max(1000).default(50),
@@ -34,6 +42,168 @@ const evaluateSchema = z.object({
 const toggleSchema = z.object({ isActive: z.boolean() });
 
 const ctx = (req: Request) => (req as AuthenticatedRequest).auth;
+
+pricingRulesRouter.post(
+  '/derived-plans',
+  requirePermission('rate_plan', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res
+        .status(201)
+        .json({
+          data: await createDerivedPlan(
+            ctx(req).tenantId,
+            req.query.propertyId as string,
+            req.body as Record<string, unknown>
+          ),
+        });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.post(
+  '/bulk-update',
+  requirePermission('rate_plan', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({
+        data: await bulkUpdate(
+          ctx(req).tenantId,
+          req.query.propertyId as string,
+          ctx(req).user.id,
+          req.body as Record<string, unknown>
+        ),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.post(
+  '/vouchers',
+  requirePermission('rate_plan', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res
+        .status(201)
+        .json({
+          data: await createVoucher(
+            ctx(req).tenantId,
+            req.query.propertyId as string,
+            req.body as Record<string, unknown>
+          ),
+        });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.get(
+  '/vouchers',
+  requirePermission('rate_plan', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await listVouchers(ctx(req).tenantId, req.query.propertyId as string) });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.get(
+  '/quote',
+  requirePermission('rate_plan', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({
+        data: await getQuote(
+          ctx(req).tenantId,
+          req.query.propertyId as string,
+          req.query.roomTypeId as string,
+          req.query.from as string,
+          req.query.to as string,
+          req.query.ratePlanId as string
+        ),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.get(
+  '/restrictions-review',
+  requirePermission('rate_plan', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({
+        data: await listSuggestions(
+          ctx(req).tenantId,
+          req.query.propertyId as string,
+          req.query.from as string,
+          req.query.to as string
+        ),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.post(
+  '/restrictions-review/:id/apply',
+  requirePermission('inventory', 'adjust'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await applySuggestion(ctx(req).tenantId, ctx(req).user.id, req.params.id) });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.post(
+  '/restrictions-review/:id/dismiss',
+  requirePermission('rate_plan', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await dismissSuggestion(ctx(req).tenantId, req.params.id) });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+pricingRulesRouter.put(
+  '/plans/:id/commission',
+  requirePermission('rate_plan', 'update'),
+  validateBody(z.object({ commissionPct: z.number().min(0).max(50) })),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { prisma } = await import('../../common/prisma.js');
+      const auth = (req as AuthenticatedRequest).auth;
+      const body = req.validatedBody as { commissionPct: number };
+      const plan = await prisma.ratePlan.findFirst({
+        where: { id: req.params.id, tenantId: auth.tenantId },
+      });
+      if (!plan) {
+        res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Rate plan not found' } });
+        return;
+      }
+      await prisma.ratePlan.update({
+        where: { id: plan.id },
+        data: { commissionPct: body.commissionPct },
+      });
+      res.json({ data: { id: plan.id, commissionPct: body.commissionPct } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 pricingRulesRouter.get(
   '/plans',
@@ -79,16 +249,14 @@ pricingRulesRouter.post(
   validateBody(createSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      res
-        .status(201)
-        .json({
-          data: await createRule(
-            ctx(req).tenantId,
-            req.query.propertyId as string,
-            ctx(req).user.id,
-            req.validatedBody as Record<string, unknown>
-          ),
-        });
+      res.status(201).json({
+        data: await createRule(
+          ctx(req).tenantId,
+          req.query.propertyId as string,
+          ctx(req).user.id,
+          req.validatedBody as Record<string, unknown>
+        ),
+      });
     } catch (err) {
       next(err);
     }
