@@ -27,6 +27,7 @@ import {
   useCheckOut,
   useAssignRoom,
 } from '../../../../hooks/useReservations';
+import { usePropertyStore } from '../../../../stores/propertyStore';
 import { useDashboardStats } from '../../../../hooks/useDashboard';
 import { useRooms } from '../../../../hooks/useRooms';
 import { hasQueuedMutationFor } from '../../../../lib/offline';
@@ -94,9 +95,14 @@ export default function FrontDeskPage() {
   const [assignRoomId, setAssignRoomId] = useState('');
   const { toast } = useToast();
 
-  const { reservations, isLoading, error, refetch } = useReservations({ pageSize: 200 });
-  const { rooms } = useRooms();
-  const { data: dashStats } = useDashboardStats();
+  const { currentPropertyId } = usePropertyStore();
+  const propertyId = currentPropertyId ?? undefined;
+  const { reservations, isLoading, error, refetch } = useReservations({
+    pageSize: 200,
+    propertyId,
+  });
+  const { rooms } = useRooms({ propertyId });
+  const { data: dashStats } = useDashboardStats(propertyId);
   const checkIn = useCheckIn();
   const checkOut = useCheckOut();
   const assignRoom = useAssignRoom();
