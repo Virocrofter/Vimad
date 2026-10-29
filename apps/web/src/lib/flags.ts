@@ -27,6 +27,7 @@ export const flags = {
 
   loyalty: env('FLAG_LOYALTY'),
   groups: env('FLAG_GROUPS'),
+  todayV2: env('FLAG_DASHBOARD_TODAY_V2'),
   reports: env('FLAG_REPORTS'),
   staffKeys: env('FLAG_STAFF_KEYS'),
   guestReviews: env('FLAG_GUEST_REVIEWS'),

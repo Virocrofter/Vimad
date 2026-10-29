@@ -19,6 +19,22 @@ function addDays(d: Date, n: number): Date {
   return x;
 }
 
+export interface OpsException {
+  id: string;
+  type:
+    | 'night_audit_open'
+    | 'arrivals_without_room'
+    | 'sla_breached_tasks'
+    | 'balance_due_departures'
+    | 'channel_sync_failure';
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  detail: string;
+  count: number;
+  entityType: string;
+  entityId: string | null;
+}
+
 export async function getOpsToday(tenantId: string, propertyId?: string) {
   const property = await prisma.property.findFirst({
     where: propertyId ? { id: propertyId, tenantId } : { tenantId },
@@ -42,6 +58,9 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
     taskRows,
     vipArrivalRows,
     unsettledRows,
+    nightAuditRow,
+    unassignedArrivalCount,
+    channelRows,
   ] = await Promise.all([
     prisma.reservation.groupBy({
       by: ['status'],
@@ -111,6 +130,25 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
       orderBy: { departureDate: 'asc' },
       take: 50,
     }),
+    prisma.nightAudit.findUnique({
+      where: {
+        tenantId_propertyId_auditDate: { tenantId, propertyId: pid, auditDate: bd },
+      },
+      select: { status: true },
+    }),
+    prisma.reservation.count({
+      where: {
+        tenantId,
+        propertyId: pid,
+        arrivalDate: { gte: bd, lt: next },
+        status: 'confirmed',
+        stays: { none: {} },
+      },
+    }),
+    prisma.channelConnection.findMany({
+      where: { tenantId, propertyId: pid, status: 'active' },
+      select: { id: true, provider: true, lastSyncStatus: true, lastSyncAt: true },
+    }),
   ]);
 
   const sum = (rows: { status: string; _count: { _all: number } }[]) =>
@@ -150,6 +188,71 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
     }))
     .sort((a, b) => b.balance - a.balance);
 
+  const exceptions: OpsException[] = [];
+  if (!nightAuditRow || nightAuditRow.status !== 'completed') {
+    exceptions.push({
+      id: 'night-audit',
+      type: 'night_audit_open',
+      severity: 'critical',
+      title: 'Night audit not closed',
+      detail: `No completed night audit for business date ${bd.toISOString().slice(0, 10)}`,
+      count: 1,
+      entityType: 'night_audit',
+      entityId: null,
+    });
+  }
+  if (unassignedArrivalCount > 0) {
+    exceptions.push({
+      id: 'arrivals-without-room',
+      type: 'arrivals_without_room',
+      severity: 'warning',
+      title: 'Arrivals without a room',
+      detail: `${unassignedArrivalCount} arrival(s) today have no room assigned`,
+      count: unassignedArrivalCount,
+      entityType: 'front_desk',
+      entityId: null,
+    });
+  }
+  if (slaBreached.length > 0) {
+    exceptions.push({
+      id: 'sla-breached-tasks',
+      type: 'sla_breached_tasks',
+      severity: 'warning',
+      title: 'SLA-breached tasks',
+      detail: `${slaBreached.length} open task(s) past their SLA`,
+      count: slaBreached.length,
+      entityType: 'tasks',
+      entityId: slaBreached[0]?.id ?? null,
+    });
+  }
+  if (unsettled.length > 0) {
+    exceptions.push({
+      id: 'balance-due-departures',
+      type: 'balance_due_departures',
+      severity: 'warning',
+      title: 'Departures with balance due',
+      detail: `${unsettled.length} departure(s) today carry an outstanding folio balance`,
+      count: unsettled.length,
+      entityType: 'folios',
+      entityId: unsettled[0]?.id ?? null,
+    });
+  }
+  const badChannels = channelRows.filter((c) => c.lastSyncStatus && c.lastSyncStatus !== 'success');
+  if (badChannels.length > 0) {
+    exceptions.push({
+      id: 'channel-sync-failures',
+      type: 'channel_sync_failure',
+      severity: 'critical',
+      title: 'Channel sync failures',
+      detail: badChannels.map((c) => c.provider).join(', ') + ' — last sync did not succeed',
+      count: badChannels.length,
+      entityType: 'channel',
+      entityId: badChannels[0]?.id ?? null,
+    });
+  }
+  const severityRank = { critical: 0, warning: 1, info: 2 } as const;
+  exceptions.sort((a, b) => severityRank[a.severity] - severityRank[b.severity]);
+
   return {
     businessDate: bd.toISOString().slice(0, 10),
     arrivals: { total: arrivalsTotal, done: arrivalsDone },
@@ -186,5 +289,6 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
       totalBalance: Math.round(unsettled.reduce((n, r) => n + r.balance, 0) * 100) / 100,
       items: unsettled.slice(0, 5),
     },
+    exceptions,
   };
 }

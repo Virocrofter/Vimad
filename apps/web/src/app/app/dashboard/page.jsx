@@ -37,12 +37,19 @@ import {
   RevenueChart,
   RoomBoard,
 } from './components';
-import { TodayStrip, TasksMiniBoard, UnsettledDepartures, VipArrivals } from './dashWidgets';
+import {
+  AttentionStrip,
+  TodayStrip,
+  TasksMiniBoard,
+  UnsettledDepartures,
+  VipArrivals,
+} from './dashWidgets';
 import CommandPalette from './CommandPalette';
 import { dismissAlert, filterDismissed, LINKS } from './dashLinks';
 import { cn } from '../../../lib/utils';
 import CrmPulse from './CrmPulse';
 import { ErrorState } from '../../../components/ui/ErrorState';
+import { FlagGate } from '../../../components/FlagGate';
 
 export default function AppDashboard() {
   // D1.3 — respect the chain-admin sticky property (C1 property switcher)
@@ -333,6 +340,11 @@ export default function AppDashboard() {
       </div>
 
       {/* Today strip */}
+      {ops.data?.exceptions && (
+        <FlagGate flag="todayV2">
+          <AttentionStrip exceptions={ops.data.exceptions} loading={ops.isLoading} />
+        </FlagGate>
+      )}
       <TodayStrip ops={ops.data} loading={ops.isLoading} />
 
       {/* Ops core: arrivals + departures */}

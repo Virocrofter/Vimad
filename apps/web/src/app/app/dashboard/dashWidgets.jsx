@@ -310,3 +310,89 @@ export function VipArrivals({ items, loading }) {
     </div>
   );
 }
+
+// ─── Attention strip (Layer B — dashboard.today_v2) ─────────────────────────
+
+const EXCEPTION_LINKS = {
+  night_audit_open: () => LINKS.nightAudit,
+  arrivals_without_room: () => LINKS.arrivalsBoard,
+  sla_breached_tasks: () => LINKS.tasksOpen,
+  balance_due_departures: (e) => (e.entityId ? reservationUrl(e.entityId) : LINKS.billing),
+  channel_sync_failure: () => LINKS.channelManager,
+};
+
+const severityStyles = {
+  critical: {
+    wrap: 'border-danger/50 bg-danger/10',
+    icon: 'text-danger',
+    chip: 'bg-danger text-white',
+  },
+  warning: {
+    wrap: 'border-warning/40 bg-warning/10',
+    icon: 'text-warning',
+    chip: 'bg-warning text-background',
+  },
+  info: {
+    wrap: 'border-border bg-surface',
+    icon: 'text-secondary',
+    chip: 'bg-surface-elevated text-text-primary',
+  },
+};
+
+export function AttentionStrip({ exceptions, loading }) {
+  if (loading) {
+    return <div className="animate-pulse rounded-xl border border-border bg-surface h-[54px]" />;
+  }
+  const items = exceptions ?? [];
+  if (items.length === 0) {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface px-5 py-3">
+        <span className="h-2 w-2 rounded-full bg-success" />
+        <span className="text-xs font-medium text-text-secondary">
+          No critical items — operations are on track for today
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-1.5" role="alert" aria-label="Items needing attention">
+      {items.map((e) => {
+        const st = severityStyles[e.severity] ?? severityStyles.info;
+        const link = (EXCEPTION_LINKS[e.type] ?? (() => null))(e);
+        const body = (
+          <>
+            <AlertTriangle className={`h-4 w-4 shrink-0 ${st.icon}`} />
+            <span className="min-w-0 flex-1 truncate text-sm text-text-primary">
+              <span className="font-semibold">{e.title}</span>
+              <span className="text-text-secondary"> — {e.detail}</span>
+            </span>
+            {e.count > 1 && (
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${st.chip}`}
+              >
+                {e.count}
+              </span>
+            )}
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-muted" />
+          </>
+        );
+        return link ? (
+          <Link
+            key={e.id}
+            to={link}
+            className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 transition-colors hover:bg-surface-elevated ${st.wrap}`}
+          >
+            {body}
+          </Link>
+        ) : (
+          <div
+            key={e.id}
+            className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 ${st.wrap}`}
+          >
+            {body}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
