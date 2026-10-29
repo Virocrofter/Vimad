@@ -45,11 +45,11 @@ export const paymentWorker = createWorker<PaymentJobData>(PAYMENTS_QUEUE, async 
       if (!txId) {
         throw new Error(`no transaction id available to reconcile ${data.reference}`);
       }
-      const txData = await fetchTransaction(txId);
+      const txData = await fetchTransaction(Number(txId));
       if (txData.status === 'success') {
         await prisma.payment.update({
           where: { id: payment.id },
-          data: { status: 'success', feeMinor: txData.fees ?? 0, paystackId: txId },
+          data: { status: 'success', feeMinor: txData.fees ?? 0, paystackId: BigInt(txId) },
         });
       }
     }
@@ -73,7 +73,7 @@ export const paymentWorker = createWorker<PaymentJobData>(PAYMENTS_QUEUE, async 
     const payment = await prisma.payment.findUnique({ where: { reference: data.reference } });
     if (!payment) return;
 
-    const txData = await fetchTransaction(data.transactionId ?? payment.paystackId!);
+    const txData = await fetchTransaction(data.transactionId ?? Number(payment.paystackId));
     const totalRefunded = txData.amount_refunded ?? data.refundedAmount ?? payment.refundedMinor;
     const delta = totalRefunded - payment.refundedMinor;
 

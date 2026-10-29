@@ -115,6 +115,15 @@ export async function postPaymentToFolio(paymentId: string): Promise<void> {
       data: { folioId: folio.id, postedToFolio: true, postedAt: new Date() },
     });
 
+    // depositPaid was a dead column — nothing wrote it, the room plan read it.
+    // A posted deposit IS paid by definition; keep the reservation in sync here.
+    if (payment.type === 'deposit' && payment.reservationId) {
+      await tx.reservation.update({
+        where: { id: payment.reservationId },
+        data: { depositPaid: { increment: amountMajor } },
+      });
+    }
+
     logger.info(
       { paymentId, folioId: folio.id, balance: updated.balance.toString() },
       'payment posted to folio'
@@ -234,7 +243,7 @@ function applyTxSuccess(
     where: { id: payment.id },
     data: {
       status: 'success',
-      paystackId: txData.id,
+      paystackId: BigInt(txData.id),
       authorizationCode: txData.authorization?.authorization_code ?? null,
       cardLast4: txData.authorization?.last4 ?? null,
       cardBrand: txData.authorization?.brand ?? null,
@@ -423,7 +432,7 @@ export async function refundPayment(
   }
 
   const refund = await createRefund({
-    transactionId: payment.paystackId,
+    transactionId: Number(payment.paystackId),
     amountMinor: refundMinor,
   });
 

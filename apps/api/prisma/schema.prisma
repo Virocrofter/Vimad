@@ -1086,7 +1086,7 @@ model Payment {
   folio         Folio?       @relation(fields: [folioId], references: [id], onDelete: SetNull)
 
   reference         String  @unique
-  paystackId        Int?
+  paystackId        BigInt?
   authorizationCode String?
   channel           String  @default("card")
   cardLast4         String?
