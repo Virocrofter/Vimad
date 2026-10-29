@@ -545,6 +545,98 @@ export async function hasConsent(
   return latest?.status === 'granted';
 }
 
+// ─── H3: win-back / rebooking automation ───
+export async function findWinbackCandidates(
+  tenantId: string,
+  opts: { inactiveDays?: number; limit?: number } = {}
+) {
+  const inactiveDays = opts.inactiveDays ?? 90;
+  const cutoff = new Date(Date.now() - inactiveDays * 24 * 3600 * 1000);
+  const today = new Date();
+  const guests = await prisma.guest.findMany({
+    where: {
+      tenantId,
+      blacklisted: false,
+      email: { not: null },
+      reservations: { some: { status: 'checked_out', departureDate: { lt: cutoff } } },
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      reservations: {
+        where: {
+          OR: [{ status: 'checked_in' }, { status: 'confirmed', arrivalDate: { gte: today } }],
+        },
+        select: { id: true },
+        take: 1,
+      },
+    },
+    take: opts.limit ?? 200,
+  });
+  return guests.filter((g) => g.reservations.length === 0);
+}
+
+export async function runWinback(
+  tenantId: string,
+  opts: { inactiveDays?: number; purpose?: string; channel?: string; dryRun?: boolean } = {}
+) {
+  const purpose = opts.purpose ?? 'marketing';
+  const channel = opts.channel ?? 'email';
+  const inactiveDays = opts.inactiveDays ?? 90;
+  const candidates = await findWinbackCandidates(tenantId, { inactiveDays });
+  const guestIds = candidates.map((g) => g.id);
+  const gate = await gateAudience(tenantId, { guestIds, purpose, channel });
+  const byId = new Map(candidates.map((g) => [g.id, g]));
+  const property = await prisma.property.findFirst({ where: { tenantId } });
+
+  const messages = [];
+  for (const id of guestIds.filter((g) => !gate.suppressedGuestIds.includes(g)).slice(0, 5)) {
+    const g = byId.get(id);
+    if (!g || !g.email) continue;
+    messages.push({
+      to: g.email,
+      subject: `We miss you, ${g.firstName} - come back to ${property?.name ?? 'us'}`,
+      body: `Hi ${g.firstName}, it's been a while since your last stay. Book direct at /booking/${property?.code ?? ''} and mention WINBACK for a returning-guest rate.`,
+      unsubscribeUrl: `/v1/public/marketing/unsubscribe?token=${signUnsubscribeToken(id, purpose, channel)}`,
+    });
+  }
+
+  let run = null;
+  if (!opts.dryRun) {
+    const workflow = await prisma.marketingWorkflow.upsert({
+      where: { id: `winback-${tenantId}` },
+      update: { lastRunAt: new Date(), runCount: { increment: 1 } },
+      create: {
+        id: `winback-${tenantId}`,
+        tenantId,
+        name: 'Win-back automation (H3)',
+        trigger: 'manual',
+        actions: { kind: 'winback', inactiveDays },
+      },
+    });
+    run = await prisma.marketingWorkflowRun.create({
+      data: {
+        tenantId,
+        workflowId: workflow.id,
+        status: 'success',
+        detail: `winback: ${gate.consented}/${guestIds.length} consented, ${gate.suppressed} suppressed, ${messages.length} rendered. inactiveDays=${inactiveDays}`,
+      },
+    });
+  }
+
+  return {
+    inactiveDays,
+    dryRun: !!opts.dryRun,
+    candidates: guestIds.length,
+    consented: gate.consented,
+    suppressed: gate.suppressed,
+    sample: messages,
+    runId: run?.id ?? null,
+  };
+}
+
 /** Dry-run audience gate for campaigns/workflows: who may actually be sent to. */
 export async function gateAudience(
   tenantId: string,

@@ -76,5 +76,9 @@ marketingRouter.post(
   '/audience',
   consentHandler(async (req) => svc.gateAudience(tenantOf(req), req.body))
 );
+marketingRouter.post(
+  '/winback/run',
+  consentHandler(async (req) => svc.runWinback(tenantOf(req), req.body))
+);
 
 export default marketingRouter;
