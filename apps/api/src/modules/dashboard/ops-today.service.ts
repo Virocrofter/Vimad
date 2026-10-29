@@ -6,6 +6,7 @@
  */
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
+import { syncExceptionTasks } from '../tasks/tasks.service.js';
 
 function startOfDay(d: Date): Date {
   const x = new Date(d);
@@ -252,6 +253,14 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
   }
   const severityRank = { critical: 0, warning: 1, info: 2 } as const;
   exceptions.sort((a, b) => severityRank[a.severity] - severityRank[b.severity]);
+
+  // Persist exceptions as owned work (idempotent; auto-resolves cleared ones).
+  // Never let a sync failure break the read.
+  try {
+    await syncExceptionTasks(tenantId, pid, exceptions, bd.toISOString().slice(0, 10));
+  } catch (err) {
+    console.warn('exception sync failed (non-fatal):', (err as Error).message);
+  }
 
   return {
     businessDate: bd.toISOString().slice(0, 10),

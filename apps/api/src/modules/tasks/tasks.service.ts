@@ -10,6 +10,7 @@
  * including the acting user when the caller passes actorId.
  */
 import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import { logger } from '../../common/logger.js';
 import { AppError } from '../../common/errors.js';
@@ -1057,6 +1058,73 @@ export async function resolveNightAuditTasks(tenantId: string, propertyId: strin
     });
   }
   return stale.length;
+}
+
+// ─── Exception queue persistence (Phase 4 MVP) ───
+// Dashboard exceptions become owned work: one idempotent task per exception
+// per business date. Ownership/SLA/resolution happen on the existing task
+// lifecycle; exceptions whose condition clears are auto-resolved.
+export interface ExceptionInput {
+  type: string;
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  detail: string;
+  entityType: string;
+  entityId: string | null;
+}
+
+const EXCEPTION_PRIORITY = { critical: 'urgent', warning: 'high', info: 'normal' } as const;
+
+export async function syncExceptionTasks(
+  tenantId: string,
+  propertyId: string,
+  exceptions: ExceptionInput[],
+  businessDate: string
+) {
+  const activeKeys: string[] = [];
+
+  for (const e of exceptions) {
+    const dedupeKey = `exception:${e.type}:${e.entityId ?? 'property'}:${businessDate}`;
+    activeKeys.push(dedupeKey);
+    const priority = EXCEPTION_PRIORITY[e.severity] ?? 'normal';
+
+    await prisma.task.upsert({
+      where: { tenantId_dedupeKey: { tenantId, dedupeKey } },
+      update: {
+        title: e.title,
+        description: e.detail,
+        priority,
+      },
+      create: {
+        tenantId,
+        propertyId,
+        department: 'management',
+        title: e.title,
+        description: e.detail,
+        priority,
+        status: 'open',
+        source: 'exception',
+        ruleKey: `exception:${e.type}`,
+        entityType: e.entityType,
+        entityId: e.entityId,
+        dedupeKey,
+        metadata: { exception: e } as Prisma.InputJsonObject,
+      },
+    });
+  }
+
+  const stale = await prisma.task.updateMany({
+    where: {
+      tenantId,
+      propertyId,
+      status: { in: ['open', 'in_progress'] },
+      ruleKey: { startsWith: 'exception:' },
+      ...(activeKeys.length > 0 ? { dedupeKey: { notIn: activeKeys } } : {}),
+    },
+    data: { status: 'done', completedAt: new Date(), completedBy: 'system:exception-sync' },
+  });
+
+  return { synced: exceptions.length, resolved: stale.count };
 }
 
 export async function cancelTask(tenantId: string, id: string, reason?: string, actorId?: string) {
