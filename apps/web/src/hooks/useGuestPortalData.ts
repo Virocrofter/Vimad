@@ -11,6 +11,8 @@ import {
   clearGuestToken,
   type StayDetails,
   type ServiceRequestResult,
+  type GuestFolio,
+  type GuestDocumentItem,
 } from './guestPortalApi';
 
 export { getGuestToken, setGuestToken, clearGuestToken };
@@ -59,6 +61,8 @@ export function useGuestSignOut() {
     clearGuestToken();
     qc.removeQueries({ queryKey: ['guest-stay'] });
     qc.removeQueries({ queryKey: ['guest-digital-key'] });
+    qc.removeQueries({ queryKey: ['guest-folio'] });
+    qc.removeQueries({ queryKey: ['guest-documents'] });
   };
 }
 
@@ -107,6 +111,7 @@ export function useDigitalKey() {
 
 /** Service request (housekeeping / maintenance / concierge / amenity). */
 export function useServiceRequest() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: {
       type: ServiceRequestResult['type'];
@@ -117,24 +122,124 @@ export function useServiceRequest() {
       if (!token) return Promise.reject(new Error('Not verified'));
       return guestPortalApi.serviceRequest({ token, ...input });
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['guest-requests'] }),
   });
 }
 
 /** Update guest preferences (string map). */
 export function useUpdatePreferences() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (preferences: Record<string, string>) => {
       const token = getGuestToken();
       if (!token) return Promise.reject(new Error('Not verified'));
       return guestPortalApi.updatePreferences(token, preferences);
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['guest-preferences'] }),
   });
 }
 
-/* ─── Removed mock hooks ───
- * useGuestProfile / useGuestStays / useGuestAnnouncements returned mock objects
- * with no real API equivalent in v1. Pages that need them:
- *   - profile  → use StayDetails.guestName + useUpdatePreferences
- *   - stays    → useStayDetails (single active stay)
- *   - announcements / billing → feature-flagged (flags.guestBilling)
- */
+/** Read guest preferences (string map). */
+export function useGuestPreferences() {
+  const token = getGuestToken();
+  return useQuery({
+    queryKey: ['guest-preferences', token],
+    queryFn: () => guestPortalApi.getPreferences(token as string),
+    enabled: Boolean(token),
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+/* ─── G1 · Booking ─── */
+
+export function useCancelQuote(enabled = true) {
+  const token = getGuestToken();
+  return useQuery({
+    queryKey: ['guest-cancel-quote', token],
+    queryFn: () => guestPortalApi.cancelQuote(token as string),
+    enabled: Boolean(token) && enabled,
+    retry: false,
+  });
+}
+
+export function useModifyBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      arrivalDate: string;
+      departureDate: string;
+      adults?: number;
+      children?: number;
+    }) => {
+      const token = getGuestToken();
+      if (!token) return Promise.reject(new Error('Not verified'));
+      return guestPortalApi.modifyBooking({ token, ...input });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['guest-stay'] });
+      qc.invalidateQueries({ queryKey: ['guest-folio'] });
+    },
+  });
+}
+
+export function useCancelBooking() {
+  return useMutation({
+    mutationFn: (reason?: string) => {
+      const token = getGuestToken();
+      if (!token) return Promise.reject(new Error('Not verified'));
+      return guestPortalApi.cancelBooking(token, reason);
+    },
+  });
+}
+
+/* ─── G1 · Billing ─── */
+
+export function useGuestFolio() {
+  const token = getGuestToken();
+  return useQuery<GuestFolio, Error>({
+    queryKey: ['guest-folio', token],
+    queryFn: () => guestPortalApi.folio(token as string),
+    enabled: Boolean(token),
+    staleTime: 30_000,
+    retry: (count, err: any) => err?.status !== 401 && err?.status !== 403 && count < 2,
+  });
+}
+
+export function useGuestInvoice(invoiceId: string | null) {
+  const token = getGuestToken();
+  return useQuery({
+    queryKey: ['guest-invoice', token, invoiceId],
+    queryFn: () => guestPortalApi.invoice(token as string, invoiceId as string),
+    enabled: Boolean(token) && Boolean(invoiceId),
+    retry: false,
+  });
+}
+
+/* ─── G1 · Documents ─── */
+
+export function useGuestDocuments() {
+  const token = getGuestToken();
+  return useQuery<{ token: string; documents: GuestDocumentItem[] }, Error>({
+    queryKey: ['guest-documents', token],
+    queryFn: () => guestPortalApi.documents(token as string),
+    enabled: Boolean(token),
+    staleTime: 60_000,
+    retry: (count, err: any) => err?.status !== 401 && err?.status !== 403 && count < 2,
+  });
+}
+
+export function useAddGuestDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      type: 'passport' | 'national_id' | 'driver_license' | 'other';
+      number: string;
+    }) => {
+      const token = getGuestToken();
+      if (!token) return Promise.reject(new Error('Not verified'));
+      return guestPortalApi.addDocument(token, input);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['guest-documents'] }),
+  });
+}
