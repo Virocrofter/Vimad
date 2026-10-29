@@ -10,7 +10,6 @@
  * including the acting user when the caller passes actorId.
  */
 import { Prisma } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import { logger } from '../../common/logger.js';
 import { AppError } from '../../common/errors.js';
@@ -1108,7 +1107,7 @@ export async function syncExceptionTasks(
         entityType: e.entityType,
         entityId: e.entityId,
         dedupeKey,
-        metadata: { exception: e } as Prisma.InputJsonObject,
+        metadata: { exception: e } as unknown as Prisma.InputJsonObject,
       },
     });
   }
