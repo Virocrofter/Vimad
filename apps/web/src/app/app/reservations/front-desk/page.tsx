@@ -27,6 +27,7 @@ import {
   useCheckOut,
   useAssignRoom,
 } from '../../../../hooks/useReservations';
+import { useDashboardStats } from '../../../../hooks/useDashboard';
 import { useRooms } from '../../../../hooks/useRooms';
 import { hasQueuedMutationFor } from '../../../../lib/offline';
 import { useToast } from '../../../../hooks/use-toast';
@@ -95,22 +96,20 @@ export default function FrontDeskPage() {
 
   const { reservations, isLoading, error, refetch } = useReservations({ pageSize: 200 });
   const { rooms } = useRooms();
+  const { data: dashStats } = useDashboardStats();
   const checkIn = useCheckIn();
   const checkOut = useCheckOut();
   const assignRoom = useAssignRoom();
 
-  const availableRooms = useMemo(
-    () => rooms.filter((r) => (r.status ?? '') !== 'occupied').length,
-    [rooms]
-  );
+  const availableRooms = dashStats?.availableRooms ?? 0;
 
   const counts = useMemo(
     () => ({
-      arrivals: reservations.filter(isArrival).length,
-      departures: reservations.filter(isDeparture).length,
-      inhouse: reservations.filter(isInHouse).length,
+      arrivals: dashStats?.arrivalsToday ?? reservations.filter(isArrival).length,
+      departures: dashStats?.departuresToday ?? reservations.filter(isDeparture).length,
+      inhouse: dashStats?.inHouseGuests ?? reservations.filter(isInHouse).length,
     }),
-    [reservations]
+    [reservations, dashStats]
   );
 
   const filtered = useMemo(() => {
