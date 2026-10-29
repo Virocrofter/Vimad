@@ -396,3 +396,106 @@ export function AttentionStrip({ exceptions, loading }) {
     </div>
   );
 }
+
+// ─── Priority worklist (Layer B — dashboard.today_v2) ───────────────────────
+// One merged, urgency-ordered worklist: balance-due departures first,
+// then urgent tasks, then remaining departures, then arrivals.
+
+const kindMeta = {
+  Departure: { icon: CalendarX, chip: 'bg-info/15 text-info' },
+  Arrival: { icon: CalendarCheck, chip: 'bg-accent/10 text-accent' },
+  Task: { icon: AlertTriangle, chip: 'bg-warning/15 text-warning' },
+};
+
+export function PriorityWorklist({ arrivals, departures, tasksTop, currency, loading, viewAllTo }) {
+  const items = [
+    ...departures.map((i) => ({ ...i, kind: 'Departure', rank: i.balance > 0 ? 0 : 2 })),
+    ...tasksTop.map((t) => ({
+      id: t.id,
+      kind: 'Task',
+      title: t.title,
+      department: t.department,
+      rank: t.priority === 'urgent' ? 1 : 2,
+      isTask: true,
+    })),
+    ...arrivals.map((i) => ({ ...i, kind: 'Arrival', rank: 3 })),
+  ].sort(
+    (a, b) =>
+      a.rank - a.kind.localeCompare(b.kind) - (b.rank - b.kind.localeCompare(a.kind)) ||
+      a.rank - b.rank
+  );
+
+  return (
+    <div className="rounded-xl border border-border bg-surface p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4 text-secondary" />
+          <h3 className="text-sm font-semibold text-text-primary">Priority Worklist</h3>
+          {!loading && (
+            <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] font-semibold text-text-secondary">
+              {items.length}
+            </span>
+          )}
+        </div>
+        <Link
+          to={viewAllTo}
+          className="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
+        >
+          Front desk <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-surface-elevated" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <p className="py-8 text-center text-sm text-text-muted">
+          Nothing needs attention — no movements or flagged tasks right now
+        </p>
+      ) : (
+        <div className="max-h-96 space-y-2 overflow-auto pr-1">
+          {items.map((item) => {
+            const meta = kindMeta[item.kind];
+            const Icon = meta.icon;
+            const to = item.isTask ? LINKS.tasksOpen : reservationUrl(item.id);
+            return (
+              <Link
+                key={item.id}
+                to={to}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:border-secondary/40"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Icon className="h-4 w-4 shrink-0 text-secondary" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-text-primary">
+                      {item.isTask ? item.title : item.guestName}
+                    </p>
+                    <p className="truncate text-xs text-text-secondary">
+                      {item.isTask
+                        ? item.department
+                        : `${item.confirmationNumber}${item.roomNumber ? ` · Room ${item.roomNumber}` : ' · No room assigned'}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {!item.isTask && item.balance > 0 && (
+                    <span className="text-xs font-semibold text-warning">
+                      {formatCurrency(item.balance, currency)} due
+                    </span>
+                  )}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.chip}`}
+                  >
+                    {item.kind}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

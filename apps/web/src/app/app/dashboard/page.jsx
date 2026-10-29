@@ -43,6 +43,7 @@ import {
   TasksMiniBoard,
   UnsettledDepartures,
   VipArrivals,
+  PriorityWorklist,
 } from './dashWidgets';
 import CommandPalette from './CommandPalette';
 import { dismissAlert, filterDismissed, LINKS } from './dashLinks';
@@ -50,6 +51,7 @@ import { cn } from '../../../lib/utils';
 import CrmPulse from './CrmPulse';
 import { ErrorState } from '../../../components/ui/ErrorState';
 import { FlagGate } from '../../../components/FlagGate';
+import { flags } from '../../../lib/flags';
 
 export default function AppDashboard() {
   // D1.3 — respect the chain-admin sticky property (C1 property switcher)
@@ -348,28 +350,38 @@ export default function AppDashboard() {
       <TodayStrip ops={ops.data} loading={ops.isLoading} />
 
       {/* Ops core: arrivals + departures */}
-      {canReadReservations && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <MovementsPanel
-            title="Arrivals Today"
-            icon={LogIn}
-            items={frontDesk.data?.arrivals ?? []}
-            type="arrival"
+      {canReadReservations &&
+        (flags.todayV2 ? (
+          <PriorityWorklist
+            arrivals={frontDesk.data?.arrivals ?? []}
+            departures={frontDesk.data?.departures ?? []}
+            tasksTop={ops.data?.tasks?.top ?? []}
             currency={currency}
-            loading={frontDesk.isLoading}
+            loading={frontDesk.isLoading || ops.isLoading}
             viewAllTo={LINKS.arrivalsBoard}
           />
-          <MovementsPanel
-            title="Departures Today"
-            icon={CalendarX}
-            items={frontDesk.data?.departures ?? []}
-            type="departure"
-            currency={currency}
-            loading={frontDesk.isLoading}
-            viewAllTo={LINKS.arrivalsBoard}
-          />
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <MovementsPanel
+              title="Arrivals Today"
+              icon={LogIn}
+              items={frontDesk.data?.arrivals ?? []}
+              type="arrival"
+              currency={currency}
+              loading={frontDesk.isLoading}
+              viewAllTo={LINKS.arrivalsBoard}
+            />
+            <MovementsPanel
+              title="Departures Today"
+              icon={CalendarX}
+              items={frontDesk.data?.departures ?? []}
+              type="departure"
+              currency={currency}
+              loading={frontDesk.isLoading}
+              viewAllTo={LINKS.arrivalsBoard}
+            />
+          </div>
+        ))}
 
       {/* Ops widgets */}
       {(canReadTasks || canReadFolios || canReadReservations) && (
