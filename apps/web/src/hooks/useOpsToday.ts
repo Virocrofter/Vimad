@@ -32,6 +32,17 @@ export interface OpsToday {
     notes: string | null;
     status: string;
   }>;
+  exceptions?: Array<{
+    id: string;
+    type: string;
+    severity: 'critical' | 'warning' | 'info';
+    title: string;
+    detail: string;
+    count: number;
+    entityType: string;
+    entityId: string | null;
+    taskId?: string | null;
+  }>;
   unsettledDepartures: {
     count: number;
     totalBalance: number;

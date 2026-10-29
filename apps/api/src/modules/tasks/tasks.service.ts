@@ -1072,6 +1072,10 @@ export interface ExceptionInput {
   entityId: string | null;
 }
 
+export function exceptionDedupeKey(e: ExceptionInput, businessDate: string): string {
+  return `exception:${e.type}:${e.entityId ?? 'property'}:${businessDate}`;
+}
+
 const EXCEPTION_PRIORITY = { critical: 'urgent', warning: 'high', info: 'normal' } as const;
 
 export async function syncExceptionTasks(
@@ -1081,13 +1085,14 @@ export async function syncExceptionTasks(
   businessDate: string
 ) {
   const activeKeys: string[] = [];
+  const taskIds = new Map<string, string>();
 
   for (const e of exceptions) {
-    const dedupeKey = `exception:${e.type}:${e.entityId ?? 'property'}:${businessDate}`;
+    const dedupeKey = exceptionDedupeKey(e, businessDate);
     activeKeys.push(dedupeKey);
     const priority = EXCEPTION_PRIORITY[e.severity] ?? 'normal';
 
-    await prisma.task.upsert({
+    const task = await prisma.task.upsert({
       where: { tenantId_dedupeKey: { tenantId, dedupeKey } },
       update: {
         title: e.title,
@@ -1110,6 +1115,7 @@ export async function syncExceptionTasks(
         metadata: { exception: e } as unknown as Prisma.InputJsonObject,
       },
     });
+    taskIds.set(dedupeKey, task.id);
   }
 
   const stale = await prisma.task.updateMany({
@@ -1123,7 +1129,7 @@ export async function syncExceptionTasks(
     data: { status: 'done', completedAt: new Date(), completedBy: 'system:exception-sync' },
   });
 
-  return { synced: exceptions.length, resolved: stale.count };
+  return { synced: exceptions.length, resolved: stale.count, taskIds };
 }
 
 export async function cancelTask(tenantId: string, id: string, reason?: string, actorId?: string) {

@@ -165,6 +165,7 @@ const OpsTodaySchema = z
         count: z.number().int(),
         entityType: z.string(),
         entityId: z.string().nullable(),
+        taskId: z.string().nullable().optional(),
       })
     ),
   })

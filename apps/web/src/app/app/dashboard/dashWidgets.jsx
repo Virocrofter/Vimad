@@ -3,6 +3,9 @@
  * un-settled departures, VIP arrivals. Design tokens match components.jsx.
  */
 import { Link } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { completeTask, updateTask } from '../../../api/tasks';
+import { usePermission } from '../../../hooks/usePermissions';
 import {
   AlertTriangle,
   ArrowRight,
@@ -340,6 +343,19 @@ const severityStyles = {
 };
 
 export function AttentionStrip({ exceptions, loading }) {
+  const queryClient = useQueryClient();
+  const canUpdate = usePermission('task', 'update');
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['dashboard', 'ops-today'] });
+  const ack = useMutation({
+    mutationFn: (id) => updateTask(id, { status: 'in_progress' }),
+    onSuccess: invalidate,
+  });
+  const resolve = useMutation({
+    mutationFn: (id) => completeTask(id),
+    onSuccess: invalidate,
+  });
+  const busy = ack.isPending || resolve.isPending;
+
   if (loading) {
     return <div className="animate-pulse rounded-xl border border-border bg-surface h-[54px]" />;
   }
@@ -359,6 +375,32 @@ export function AttentionStrip({ exceptions, loading }) {
       {items.map((e) => {
         const st = severityStyles[e.severity] ?? severityStyles.info;
         const link = (EXCEPTION_LINKS[e.type] ?? (() => null))(e);
+        const actions = e.taskId && canUpdate && (
+          <span className="flex shrink-0 items-center gap-1" onClick={(ev) => ev.preventDefault()}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                ack.mutate(e.taskId);
+              }}
+              className="rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-text-secondary hover:bg-surface-elevated disabled:opacity-50"
+            >
+              Acknowledge
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                resolve.mutate(e.taskId);
+              }}
+              className="rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-secondary hover:bg-surface-elevated disabled:opacity-50"
+            >
+              Resolve
+            </button>
+          </span>
+        );
         const body = (
           <>
             <AlertTriangle className={`h-4 w-4 shrink-0 ${st.icon}`} />
@@ -373,6 +415,7 @@ export function AttentionStrip({ exceptions, loading }) {
                 {e.count}
               </span>
             )}
+            {actions}
             <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-muted" />
           </>
         );

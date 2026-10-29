@@ -6,7 +6,7 @@
  */
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
-import { syncExceptionTasks } from '../tasks/tasks.service.js';
+import { exceptionDedupeKey, syncExceptionTasks } from '../tasks/tasks.service.js';
 
 function startOfDay(d: Date): Date {
   const x = new Date(d);
@@ -34,6 +34,8 @@ export interface OpsException {
   count: number;
   entityType: string;
   entityId: string | null;
+  /** Persisted exception task (sync may not have run yet). */
+  taskId?: string | null;
 }
 
 export async function getOpsToday(tenantId: string, propertyId?: string) {
@@ -257,7 +259,16 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
   // Persist exceptions as owned work (idempotent; auto-resolves cleared ones).
   // Never let a sync failure break the read.
   try {
-    await syncExceptionTasks(tenantId, pid, exceptions, bd.toISOString().slice(0, 10));
+    const syncResult = await syncExceptionTasks(
+      tenantId,
+      pid,
+      exceptions,
+      bd.toISOString().slice(0, 10)
+    );
+    for (const e of exceptions) {
+      e.taskId =
+        syncResult.taskIds.get(exceptionDedupeKey(e, bd.toISOString().slice(0, 10))) ?? null;
+    }
   } catch (err) {
     console.warn('exception sync failed (non-fatal):', (err as Error).message);
   }
