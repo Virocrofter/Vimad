@@ -42,6 +42,7 @@ export interface OpsToday {
     entityType: string;
     entityId: string | null;
     taskId?: string | null;
+    taskStatus?: string | null;
   }>;
   unsettledDepartures: {
     count: number;

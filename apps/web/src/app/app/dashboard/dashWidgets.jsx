@@ -375,32 +375,49 @@ export function AttentionStrip({ exceptions, loading }) {
       {items.map((e) => {
         const st = severityStyles[e.severity] ?? severityStyles.info;
         const link = (EXCEPTION_LINKS[e.type] ?? (() => null))(e);
-        const actions = e.taskId && canUpdate && (
-          <span className="flex shrink-0 items-center gap-1" onClick={(ev) => ev.preventDefault()}>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={(ev) => {
-                ev.stopPropagation();
-                ack.mutate(e.taskId);
-              }}
-              className="rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-text-secondary hover:bg-surface-elevated disabled:opacity-50"
-            >
-              Acknowledge
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={(ev) => {
-                ev.stopPropagation();
-                resolve.mutate(e.taskId);
-              }}
-              className="rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-secondary hover:bg-surface-elevated disabled:opacity-50"
-            >
-              Resolve
-            </button>
+        const acked = e.taskStatus === 'in_progress';
+        const done = e.taskStatus === 'done';
+        const stateChip = done ? (
+          <span className="shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success">
+            Resolved
           </span>
-        );
+        ) : acked ? (
+          <span className="shrink-0 rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] font-semibold text-text-secondary">
+            Acknowledged
+          </span>
+        ) : null;
+        const actions =
+          e.taskId && canUpdate && !done ? (
+            <span
+              className="flex shrink-0 items-center gap-1"
+              onClick={(ev) => ev.preventDefault()}
+            >
+              {!acked && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    ack.mutate(e.taskId);
+                  }}
+                  className="rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-text-secondary hover:bg-surface-elevated disabled:opacity-50"
+                >
+                  Acknowledge
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={busy}
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  resolve.mutate(e.taskId);
+                }}
+                className="rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-secondary hover:bg-surface-elevated disabled:opacity-50"
+              >
+                Resolve
+              </button>
+            </span>
+          ) : null;
         const body = (
           <>
             <AlertTriangle className={`h-4 w-4 shrink-0 ${st.icon}`} />
@@ -415,6 +432,7 @@ export function AttentionStrip({ exceptions, loading }) {
                 {e.count}
               </span>
             )}
+            {stateChip}
             {actions}
             <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-muted" />
           </>

@@ -166,6 +166,7 @@ const OpsTodaySchema = z
         entityType: z.string(),
         entityId: z.string().nullable(),
         taskId: z.string().nullable().optional(),
+        taskStatus: z.string().optional(),
       })
     ),
   })

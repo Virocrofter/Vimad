@@ -36,6 +36,7 @@ export interface OpsException {
   entityId: string | null;
   /** Persisted exception task (sync may not have run yet). */
   taskId?: string | null;
+  taskStatus?: string | null;
 }
 
 export async function getOpsToday(tenantId: string, propertyId?: string) {
@@ -268,6 +269,8 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
     for (const e of exceptions) {
       e.taskId =
         syncResult.taskIds.get(exceptionDedupeKey(e, bd.toISOString().slice(0, 10))) ?? null;
+      e.taskStatus =
+        syncResult.taskStatuses.get(exceptionDedupeKey(e, bd.toISOString().slice(0, 10))) ?? null;
     }
   } catch (err) {
     console.warn('exception sync failed (non-fatal):', (err as Error).message);

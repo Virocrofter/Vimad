@@ -392,7 +392,8 @@ export async function getFrontDeskSnapshot(
         guest: { select: { firstName: true, lastName: true } },
         folio: { select: { balance: true } },
         stays: {
-          where: { date: today },
+          where: { date: { lte: today } },
+          orderBy: { date: 'desc' },
           take: 1,
           select: { room: { select: { number: true } } },
         },

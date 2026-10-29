@@ -1086,6 +1086,7 @@ export async function syncExceptionTasks(
 ) {
   const activeKeys: string[] = [];
   const taskIds = new Map<string, string>();
+  const taskStatuses = new Map<string, string>();
 
   for (const e of exceptions) {
     const dedupeKey = exceptionDedupeKey(e, businessDate);
@@ -1116,6 +1117,7 @@ export async function syncExceptionTasks(
       },
     });
     taskIds.set(dedupeKey, task.id);
+    taskStatuses.set(dedupeKey, task.status);
   }
 
   const stale = await prisma.task.updateMany({
@@ -1129,7 +1131,7 @@ export async function syncExceptionTasks(
     data: { status: 'done', completedAt: new Date(), completedBy: 'system:exception-sync' },
   });
 
-  return { synced: exceptions.length, resolved: stale.count, taskIds };
+  return { synced: exceptions.length, resolved: stale.count, taskIds, taskStatuses };
 }
 
 export async function cancelTask(tenantId: string, id: string, reason?: string, actorId?: string) {
