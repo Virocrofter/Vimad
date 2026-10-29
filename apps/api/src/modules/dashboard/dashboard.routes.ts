@@ -155,6 +155,18 @@ const OpsTodaySchema = z
         })
       ),
     }),
+    exceptions: z.array(
+      z.object({
+        id: z.string(),
+        type: z.string(),
+        severity: z.enum(['critical', 'warning', 'info']),
+        title: z.string(),
+        detail: z.string(),
+        count: z.number().int(),
+        entityType: z.string(),
+        entityId: z.string().nullable(),
+      })
+    ),
   })
   .openapi('DashboardOpsToday');
 

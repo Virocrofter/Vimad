@@ -371,6 +371,7 @@ export async function getFrontDeskSnapshot(
       orderBy: { createdAt: 'asc' },
       include: {
         guest: { select: { firstName: true, lastName: true } },
+        folio: { select: { balance: true } },
         stays: {
           where: { date: today },
           take: 1,
@@ -389,6 +390,7 @@ export async function getFrontDeskSnapshot(
       orderBy: { createdAt: 'asc' },
       include: {
         guest: { select: { firstName: true, lastName: true } },
+        folio: { select: { balance: true } },
         stays: {
           where: { date: today },
           take: 1,
@@ -427,7 +429,7 @@ export async function getFrontDeskSnapshot(
       roomType: r.stays[0]?.room?.roomType?.name ?? null,
       roomNumber: r.stays[0]?.room?.number ?? null,
       status: r.status,
-      balance: Number(r.balance),
+      balance: Number(r.folio?.balance ?? 0),
     })),
     departures: departures.map((r) => ({
       id: r.id,
@@ -436,7 +438,7 @@ export async function getFrontDeskSnapshot(
       departureDate: dayKey(r.departureDate),
       roomNumber: r.stays[0]?.room?.number ?? null,
       status: r.status,
-      balance: Number(r.balance),
+      balance: Number(r.folio?.balance ?? 0),
     })),
   };
 }
@@ -561,9 +563,9 @@ export async function getAlerts(tenantId: string, propertyId?: string): Promise<
         propertyId: property.id,
         departureDate: today,
         status: { in: ['confirmed', 'checked_in'] },
-        balance: { gt: 0 },
+        folio: { balance: { gt: 0 } },
       },
-      select: { confirmationNumber: true, balance: true },
+      select: { confirmationNumber: true, folio: { select: { balance: true } } },
       take: 5,
     }),
 
@@ -621,7 +623,7 @@ export async function getAlerts(tenantId: string, propertyId?: string): Promise<
   }
 
   if (unpaidDepartures.length > 0) {
-    const total = unpaidDepartures.reduce((s, r) => s + Number(r.balance), 0);
+    const total = unpaidDepartures.reduce((s, r) => s + Number(r.folio?.balance ?? 0), 0);
     alerts.push({
       id: 'unpaid-departures',
       severity: 'critical',
