@@ -21,6 +21,21 @@ interface Ctx {
   tenantId: string;
 }
 
+// P2-C/0.2 fix: date-only report params target @db.Date columns. Postgres
+// floors a timestamp bound to a calendar day when comparing to DATE, so the
+// bound must be UTC midnight of the requested day. `new Date('YYYY-MM-DD')`
+// IS UTC-midnight, but the local setHours in startOfDay/endOfDay shifted it
+// by the server tz offset (leaking the previous day east of UTC via the
+// floor, losing the first day west of UTC). These helpers build UTC-day
+// bounds directly; startOfDay/endOfDay stay untouched for business-date use.
+const parseLocalDate = (s: string) => {
+  const [y, m, d] = s.slice(0, 10).split('-').map(Number);
+  return new Date(Date.UTC(y, (m || 1) - 1, d || 1));
+};
+const parseLocalDateEnd = (s: string) => {
+  return new Date(parseLocalDate(s).getTime() + 86_399_999);
+};
+
 const startOfDay = (d: Date) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -87,9 +102,9 @@ export function normalizeParams(
   }
   if (p.dateFrom && p.dateTo) {
     const span =
-      (startOfDay(new Date(p.dateTo)).getTime() - startOfDay(new Date(p.dateFrom)).getTime()) /
-      86400000;
-    if (span > MAX_RANGE_DAYS) p.dateTo = dayStr(addDays(new Date(p.dateFrom), MAX_RANGE_DAYS));
+      (parseLocalDate(p.dateTo).getTime() - parseLocalDate(p.dateFrom).getTime()) / 86400000;
+    if (span > MAX_RANGE_DAYS)
+      p.dateTo = dayStr(addDays(parseLocalDate(p.dateFrom), MAX_RANGE_DAYS));
   }
   if (p.propertyId === '' || p.propertyId === 'ALL') delete p.propertyId;
   return p;
@@ -103,8 +118,8 @@ const resWhereBase = (ctx: Ctx, p: Record<string, string>): any => {
 
 async function occupancy(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('occupancy')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const roomWhere: any = { tenantId: ctx.tenantId };
   if (p.propertyId) roomWhere.propertyId = p.propertyId;
   const rooms = await ctx.prisma.room.findMany({ where: roomWhere, select: { roomTypeId: true } });
@@ -206,8 +221,8 @@ async function occupancy(ctx: Ctx, p: Record<string, string>): Promise<RunOutput
 
 async function revenue(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('revenue')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const folioWhere: any = { tenantId: ctx.tenantId };
   if (p.propertyId) folioWhere.reservation = { propertyId: p.propertyId };
   const items = await ctx.prisma.folioItem.findMany({
@@ -247,8 +262,8 @@ async function revenue(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> 
 
 async function adrRevpar(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('adr_revpar')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const roomWhere: any = { tenantId: ctx.tenantId };
   if (p.propertyId) roomWhere.propertyId = p.propertyId;
   const avail = await ctx.prisma.room.count({ where: roomWhere });
@@ -300,7 +315,7 @@ async function channelMix(ctx: Ctx, p: Record<string, string>): Promise<RunOutpu
     await ctx.prisma.reservation.findMany({
       where: {
         ...resWhereBase(ctx, p),
-        arrivalDate: { gte: startOfDay(new Date(p.dateFrom)), lte: endOfDay(new Date(p.dateTo)) },
+        arrivalDate: { gte: parseLocalDate(p.dateFrom), lte: parseLocalDateEnd(p.dateTo) },
       },
       select: {
         source: true,
@@ -458,8 +473,8 @@ async function housekeeping(ctx: Ctx, p: Record<string, string>): Promise<RunOut
 
 async function arrivalsDepartures(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('arrivals_departures')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const base = resWhereBase(ctx, p);
   const sel = {
     id: true,
@@ -534,7 +549,7 @@ async function noShowCancellation(ctx: Ctx, p: Record<string, string>): Promise<
     await ctx.prisma.reservation.findMany({
       where: {
         ...resWhereBase(ctx, p),
-        arrivalDate: { gte: startOfDay(new Date(p.dateFrom)), lte: endOfDay(new Date(p.dateTo)) },
+        arrivalDate: { gte: parseLocalDate(p.dateFrom), lte: parseLocalDateEnd(p.dateTo) },
       },
       select: {
         id: true,
@@ -581,7 +596,7 @@ async function guestDemographics(ctx: Ctx, p: Record<string, string>): Promise<R
     await ctx.prisma.reservation.findMany({
       where: {
         ...resWhereBase(ctx, p),
-        arrivalDate: { gte: startOfDay(new Date(p.dateFrom)), lte: endOfDay(new Date(p.dateTo)) },
+        arrivalDate: { gte: parseLocalDate(p.dateFrom), lte: parseLocalDateEnd(p.dateTo) },
       },
       select: { guestId: true, totalAmount: true },
       take: 20000,
@@ -629,8 +644,8 @@ async function guestDemographics(ctx: Ctx, p: Record<string, string>): Promise<R
 
 async function pacePickup(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('pace')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const days = eachDay(from, to);
   const span = Math.max(days.length - 1, 1);
   const compFrom = addDays(from, -span);
@@ -712,8 +727,8 @@ async function pacePickup(ctx: Ctx, p: Record<string, string>): Promise<RunOutpu
 
 async function forecast(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('forecast')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const roomWhere: any = { tenantId: ctx.tenantId };
   if (p.propertyId) roomWhere.propertyId = p.propertyId;
   const rooms = await ctx.prisma.room.findMany({
@@ -770,8 +785,8 @@ async function forecast(ctx: Ctx, p: Record<string, string>): Promise<RunOutput>
 
 async function revenueBreakdown(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('revenue_breakdown')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const folioWhere: any = { tenantId: ctx.tenantId };
   if (p.propertyId) folioWhere.reservation = { propertyId: p.propertyId };
   const items = await ctx.prisma.folioItem.findMany({
@@ -813,7 +828,7 @@ async function marketSegments(ctx: Ctx, p: Record<string, string>): Promise<RunO
     await ctx.prisma.reservation.findMany({
       where: {
         ...resWhereBase(ctx, p),
-        arrivalDate: { gte: startOfDay(new Date(p.dateFrom)), lte: endOfDay(new Date(p.dateTo)) },
+        arrivalDate: { gte: parseLocalDate(p.dateFrom), lte: parseLocalDateEnd(p.dateTo) },
       },
       select: {
         marketSegment: true,
@@ -912,8 +927,8 @@ async function spaceStatus(ctx: Ctx, p: Record<string, string>): Promise<RunOutp
 
 async function cancellationLead(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('cancellation_lead')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const list = await ctx.prisma.reservation.findMany({
     where: {
       ...resWhereBase(ctx, p),
@@ -976,8 +991,8 @@ async function cancellationLead(ctx: Ctx, p: Record<string, string>): Promise<Ru
 
 async function netPricing(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
   const def = getDefinition('net_pricing')!;
-  const from = startOfDay(new Date(p.dateFrom));
-  const to = endOfDay(new Date(p.dateTo));
+  const from = parseLocalDate(p.dateFrom);
+  const to = parseLocalDateEnd(p.dateTo);
   const list = (
     await ctx.prisma.reservation.findMany({
       where: {

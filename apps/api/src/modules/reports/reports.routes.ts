@@ -127,14 +127,24 @@ export const reportsRouter = (() => {
     const parsed = runSchema.safeParse(req.body);
     if (!parsed.success)
       return err(res, 400, 'VALIDATION_ERROR', parsed.error.issues[0]?.message ?? 'Invalid body');
-    const run = await runReport(
-      prisma,
-      tenantOf(req),
-      userOf(req),
-      parsed.data.definitionKey,
-      parsed.data.params
-    );
-    res.status(201).json({ data: run });
+    try {
+      const run = await runReport(
+        prisma,
+        tenantOf(req),
+        userOf(req),
+        parsed.data.definitionKey,
+        parsed.data.params
+      );
+      res.status(201).json({ data: run });
+    } catch (e: any) {
+      // P2-C fix: Unknown report keys must produce a stable 400, not an
+      // unhandled rejection that hangs the client (no response is sent).
+      // Compute errors are already caught into FAILED runs by runReport.
+      if (e?.message?.startsWith('Unknown report')) {
+        return err(res, 400, 'NOT_FOUND', e.message);
+      }
+      return err(res, 500, 'INTERNAL', 'Report run failed');
+    }
   });
 
   router.get('/runs', async (req, res) => {
