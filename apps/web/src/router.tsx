@@ -167,6 +167,7 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'rates', ...page(() => import('./app/app/rates/page')) },
+      { path: 'rates/pricing', ...page(() => import('./app/app/rates/pricing/page')) },
       { path: 'inventory', ...page(() => import('./app/app/inventory/page')) },
       { path: 'guests', ...page(() => import('./app/app/guests/page')) },
       { path: 'guests/:id', ...page(() => import('./app/app/guests/detail/page')) },
@@ -203,6 +204,7 @@ export const router = createBrowserRouter([
       { path: 'settings', ...page(() => import('./app/app/settings/page')) },
       { path: 'settings/email', ...page(() => import('./app/app/settings/email/page')) },
       { path: 'support', ...page(() => import('./app/app/support/page')) },
+      { path: 'comms', ...page(() => import('./app/app/comms/page')) },
       {
         path: 'sales-catering',
         children: [
@@ -324,6 +326,14 @@ export const router = createBrowserRouter([
           {
             path: 'check-in/digital-key',
             ...page(() => import('./app/guest-portal/check-in/digital-key/page')),
+          },
+          {
+            path: 'check-in/online',
+            ...page(() => import('./app/guest-portal/check-in/online/page')),
+          },
+          {
+            path: 'timeline',
+            ...page(() => import('./app/guest-portal/timeline/page')),
           },
 
           /* Stay Services */

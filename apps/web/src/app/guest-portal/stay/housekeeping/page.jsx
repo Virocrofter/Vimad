@@ -3,82 +3,159 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  Bed,
   Sparkles,
   Clock,
   CheckCircle2,
-  AlertCircle,
-  Plus,
-  Minus,
-  Send,
-  Calendar,
   Loader2,
+  Calendar,
   Droplets,
-  Shirt,
+  Bed,
   Moon,
-  Star,
-  Wrench,
-  MessageSquare,
-  ChevronRight,
   EyeOff,
   Eye,
   AlertTriangle,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { useGuestStore } from '../../store';
-import { guestStays, housekeepingServices, timeAgo } from '../../data';
+import { Button } from '../../../../components/ui/button';
+import {
+  useStayDetails,
+  useServiceRequest,
+  getGuestToken,
+} from '../../../../hooks/useGuestPortalData';
+import { timeAgo } from '../../../../lib/guest-utils';
 import { HousekeepingServiceCard } from './components';
+
+const services = [
+  {
+    id: 'standard-cleaning',
+    label: 'Standard Cleaning',
+    description: 'Bed making, vacuuming, and bathroom refresh',
+    estimatedTime: '30 min',
+    icon: 'Sparkles',
+  },
+  {
+    id: 'deep-cleaning',
+    label: 'Deep Cleaning',
+    description: 'Thorough clean including windows and sanitization',
+    estimatedTime: '90 min',
+    icon: 'Sparkles',
+  },
+  {
+    id: 'turndown',
+    label: 'Turndown Service',
+    description: 'Evening bed turn-down and ambient setup',
+    estimatedTime: '15 min',
+    icon: 'Moon',
+  },
+  {
+    id: 'extra-towels',
+    label: 'Extra Towels',
+    description: 'Additional bath and hand towels delivered to your room',
+    estimatedTime: '10 min',
+    icon: 'Droplets',
+  },
+  {
+    id: 'extra-pillows',
+    label: 'Extra Pillows',
+    description: 'Additional pillows delivered to your room',
+    estimatedTime: '10 min',
+    icon: 'Bed',
+  },
+  {
+    id: 'extra-toiletries',
+    label: 'Extra Toiletries',
+    description: 'Refill of toiletries and amenities',
+    estimatedTime: '10 min',
+    icon: 'Droplets',
+  },
+];
+
+const timeSlots = [
+  '08:00 - 10:00',
+  '10:00 - 12:00',
+  '12:00 - 14:00',
+  '14:00 - 16:00',
+  '16:00 - 18:00',
+  '18:00 - 20:00',
+];
 
 export default function HousekeepingPage() {
   const navigate = useNavigate();
-  const stay = guestStays[0];
-  const { dndEnabled, toggleDnd, addRequest, requests, cleaningSchedule, setCleaningSchedule } =
-    useGuestStore();
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay, isLoading } = useStayDetails();
+  const serviceRequest = useServiceRequest();
+
+  const [dndEnabled, setDndEnabled] = useState(false);
+  const [cleaningSchedule, setCleaningSchedule] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [scheduleModal, setScheduleModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [sessionRequests, setSessionRequests] = useState([]);
 
-  const timeSlots = [
-    '08:00 - 10:00',
-    '10:00 - 12:00',
-    '12:00 - 14:00',
-    '14:00 - 16:00',
-    '16:00 - 18:00',
-    '18:00 - 20:00',
-  ];
-
-  const handleRequest = (service) => {
-    if (dndEnabled) return;
-    setSelectedService(service);
-  };
-
-  const handleSubmitRequest = () => {
-    if (!selectedService) return;
-    setLoading(true);
-    setTimeout(() => {
-      const newRequest = {
-        id: `REQ-${Date.now().toString(36).toUpperCase()}`,
-        type: selectedService.type,
-        description: selectedService.label,
+  const submit = async (message, requestedAt) => {
+    const result = await serviceRequest.mutateAsync({
+      type: 'housekeeping',
+      message,
+      requestedAt,
+    });
+    setSessionRequests((prev) => [
+      {
+        id: result.id,
+        description: message,
         status: 'pending',
-        createdAt: new Date().toISOString(),
-        estimatedTime: selectedService.estimatedTime,
-      };
-      addRequest(newRequest);
-      setLoading(false);
-      setSubmitted(true);
-      setSelectedService(null);
-      setTimeout(() => setSubmitted(false), 4000);
-    }, 800);
+        createdAt: result.createdAt,
+      },
+      ...prev,
+    ]);
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 4000);
   };
 
-  const handleScheduleCleaning = (slot) => {
+  const handleSubmitRequest = async () => {
+    if (!selectedService) return;
+    try {
+      await submit(`Housekeeping: ${selectedService.label} — ${selectedService.description}`);
+      setSelectedService(null);
+    } catch {
+      /* error surfaces via serviceRequest.isError */
+    }
+  };
+
+  const handleScheduleCleaning = async (slot) => {
     setCleaningSchedule(slot);
     setScheduleModal(false);
+    try {
+      await submit(`Housekeeping: scheduled cleaning during ${slot}`);
+    } catch {
+      /* keep the local selection even if the request fails */
+    }
   };
 
-  const allRequests = [...stay.requests, ...requests];
+  const toggleDnd = async () => {
+    const next = !dndEnabled;
+    setDndEnabled(next);
+    try {
+      await submit(next ? 'Do Not Disturb: please skip my room today' : 'Do Not Disturb: off');
+    } catch {
+      setDndEnabled(!next);
+    }
+  };
+
+  if (!hasToken) {
+    navigate('/guest-portal/auth/login', { replace: true });
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading…</p>
+      </div>
+    );
+  }
+
+  const roomLabel = stay?.roomNumber ? `Room ${stay.roomNumber}` : 'Your room';
 
   return (
     <div className="space-y-6 pb-20">
@@ -93,7 +170,7 @@ export default function HousekeepingPage() {
         <div className="flex-1">
           <h1 className="text-xl font-bold text-text-primary">Housekeeping</h1>
           <p className="text-xs text-text-muted">
-            Room 204 · Request services or schedule cleaning
+            {roomLabel} · Request services or schedule cleaning
           </p>
         </div>
       </div>
@@ -108,6 +185,14 @@ export default function HousekeepingPage() {
               Our team will attend to your request shortly.
             </p>
           </div>
+        </div>
+      )}
+      {serviceRequest.isError && (
+        <div className="rounded-xl border border-danger/20 bg-danger/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          <p className="text-sm text-danger">
+            {serviceRequest.error?.message ?? 'Could not submit your request. Please try again.'}
+          </p>
         </div>
       )}
 
@@ -138,6 +223,7 @@ export default function HousekeepingPage() {
           </div>
           <button
             onClick={toggleDnd}
+            disabled={serviceRequest.isPending}
             className={cn(
               'relative inline-flex h-7 w-12 items-center rounded-full transition-colors',
               dndEnabled ? 'bg-danger' : 'bg-border'
@@ -171,6 +257,7 @@ export default function HousekeepingPage() {
           </div>
           <button
             onClick={() => setScheduleModal(!scheduleModal)}
+            disabled={serviceRequest.isPending}
             className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-surface-elevated transition-colors"
           >
             {cleaningSchedule ? 'Change' : 'Schedule'}
@@ -217,7 +304,7 @@ export default function HousekeepingPage() {
               </div>
             </div>
             <p className="text-sm text-text-secondary">
-              Request {selectedService.description.toLowerCase()} for Room 204.
+              Request {selectedService.description.toLowerCase()} for {roomLabel}.
             </p>
             <div className="flex items-center gap-2 rounded-lg bg-warning/5 border border-warning/20 p-3">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
@@ -235,10 +322,10 @@ export default function HousekeepingPage() {
               </button>
               <button
                 onClick={handleSubmitRequest}
-                disabled={loading}
+                disabled={serviceRequest.isPending}
                 className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-white hover:bg-secondary/90 transition-colors disabled:opacity-50"
               >
-                {loading ? (
+                {serviceRequest.isPending ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Submitting...
@@ -256,12 +343,12 @@ export default function HousekeepingPage() {
       <div>
         <h2 className="text-sm font-semibold text-text-primary mb-3">Request a Service</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {housekeepingServices.map((service) => (
+          {services.map((service) => (
             <HousekeepingServiceCard
               key={service.id}
               service={service}
               isDnd={dndEnabled}
-              onRequest={handleRequest}
+              onRequest={setSelectedService}
             />
           ))}
         </div>
@@ -270,7 +357,7 @@ export default function HousekeepingPage() {
       {/* Active Requests */}
       <div>
         <h2 className="text-sm font-semibold text-text-primary mb-3">Your Requests</h2>
-        {allRequests.length === 0 ? (
+        {sessionRequests.length === 0 ? (
           <div className="text-center py-8 rounded-xl border border-border bg-surface">
             <Sparkles className="mx-auto h-10 w-10 text-text-muted mb-3" />
             <p className="text-sm text-text-muted">No requests yet</p>
@@ -280,54 +367,21 @@ export default function HousekeepingPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {allRequests.map((req) => (
+            {sessionRequests.map((req) => (
               <div
                 key={req.id}
-                className={cn(
-                  'flex items-center justify-between rounded-xl border border-border bg-surface p-4',
-                  req.status === 'completed' && 'opacity-70'
-                )}
+                className="flex items-center justify-between rounded-xl border border-border bg-surface p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-full',
-                      req.status === 'completed'
-                        ? 'bg-accent/10'
-                        : req.status === 'in-progress'
-                          ? 'bg-info/10'
-                          : 'bg-warning/10'
-                    )}
-                  >
-                    {req.status === 'completed' ? (
-                      <CheckCircle2 className="h-4 w-4 text-accent" />
-                    ) : req.status === 'in-progress' ? (
-                      <Loader2 className="h-4 w-4 text-info animate-spin" />
-                    ) : (
-                      <Clock className="h-4 w-4 text-warning" />
-                    )}
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-warning/10">
+                    <Clock className="h-4 w-4 text-warning" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-text-primary">
-                      {req.description || req.type}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {req.status === 'completed' && req.completedAt
-                        ? `Completed ${timeAgo(req.completedAt)}`
-                        : `Requested ${timeAgo(req.createdAt)}`}
-                    </p>
+                    <p className="text-sm font-medium text-text-primary">{req.description}</p>
+                    <p className="text-xs text-text-muted">Requested {timeAgo(req.createdAt)}</p>
                   </div>
                 </div>
-                <span
-                  className={cn(
-                    'rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize',
-                    req.status === 'completed'
-                      ? 'bg-accent/10 text-accent'
-                      : req.status === 'in-progress'
-                        ? 'bg-info/10 text-info'
-                        : 'bg-warning/10 text-warning'
-                  )}
-                >
+                <span className="rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize bg-warning/10 text-warning">
                   {req.status}
                 </span>
               </div>

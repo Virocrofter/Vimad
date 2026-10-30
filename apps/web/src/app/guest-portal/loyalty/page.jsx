@@ -1,168 +1,158 @@
-import { useMemo } from 'react';
-import { Award, Star, TrendingUp, Gift, Calendar } from 'lucide-react';
+/* src/app/guest-portal/loyalty/page.jsx — G3: real loyalty summary */
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Award, Gift, History, Loader2, AlertTriangle, TrendingUp } from 'lucide-react';
+import { cn } from '../../../lib/utils';
+import { Button } from '../../../components/ui/button';
+import { getGuestToken } from '../../../hooks/guestPortalApi';
+import { useGuestLoyalty, useGuestLoyaltyTransactions } from '../../../hooks/useGuestLoyalty';
+import { formatDate } from '../../../lib/guest-utils';
 
 export default function LoyaltyPage() {
-  // Mock data - in real app this would come from API
-  const guestStay = {
-    id: 'stay-1',
-    propertyName: 'Grand Hotel',
-    checkIn: '2026-09-01',
-    checkOut: '2026-09-05',
-    dates: { nights: 4 },
-  };
+  const navigate = useNavigate();
+  const hasToken = Boolean(getGuestToken());
+  const { data, isLoading, isError, refetch } = useGuestLoyalty();
+  const { data: txData } = useGuestLoyaltyTransactions();
 
-  const pastStays = useMemo(
-    () => [{ id: 'stay-0', propertyName: 'Grand Hotel', dates: { nights: 2 } }],
-    []
-  );
+  useEffect(() => {
+    if (!hasToken) navigate('/guest-portal/auth/login', { replace: true });
+  }, [hasToken, navigate]);
 
-  const pointsHistory = useMemo(
-    () => [
-      { id: 'txn-1', type: 'earned', points: 400, description: 'Room charges', date: '2026-09-05' },
-      { id: 'txn-2', type: 'earned', points: 150, description: 'Dining', date: '2026-09-03' },
-      {
-        id: 'txn-3',
-        type: 'redeemed',
-        points: -200,
-        description: 'Spa credit',
-        date: '2026-09-04',
-      },
-    ],
-    []
-  );
+  if (!hasToken) return null;
 
-  // Stats
-  const totalPointsEarned = useMemo(
-    () => pointsHistory.filter((t) => t.type === 'earned').reduce((s, t) => s + t.points, 0),
-    [pointsHistory]
-  );
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your loyalty account…</p>
+      </div>
+    );
+  }
 
-  const totalNights = useMemo(
-    () => pastStays.reduce((s, st) => s + st.dates.nights, 0) + guestStay.dates.nights,
-    [pastStays, guestStay.dates.nights]
-  );
+  if (isError || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">We couldn't load your loyalty account.</p>
+        <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
-  const currentTier =
-    totalPointsEarned > 1000 ? 'Gold' : totalPointsEarned > 500 ? 'Silver' : 'Bronze';
-  const nextTierThreshold = currentTier === 'Bronze' ? 500 : currentTier === 'Silver' ? 1000 : null;
+  const recent = (txData?.transactions ?? []).slice(0, 5);
+  const progressPct =
+    data.nextTier && data.nextTier.minPoints > data.tier.minPoints
+      ? Math.min(
+          100,
+          Math.round(
+            ((data.balance - data.tier.minPoints) /
+              (data.nextTier.minPoints - data.tier.minPoints)) *
+              100
+          )
+        )
+      : 100;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 pb-20">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate('/guest-portal')}
+          className="rounded-lg border border-border bg-surface p-2 hover:bg-surface-elevated transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-text-primary" />
+        </button>
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Loyalty Program</h1>
-          <p className="text-text-secondary mt-1">Track your points and rewards</p>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-warning/10 text-warning rounded-lg">
-          <Award className="h-5 w-5" />
-          <span className="font-medium">{currentTier} Member</span>
+          <h1 className="text-xl font-bold text-text-primary">Loyalty</h1>
+          <p className="text-xs text-text-muted">Member since {formatDate(data.memberSince)}</p>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-lg border border-border p-6">
-          <div className="flex items-center gap-2 text-text-secondary text-sm mb-2">
-            <Star className="h-4 w-4" />
-            Total Points
+      <div className="rounded-xl border border-secondary/20 bg-gradient-to-br from-secondary/10 to-accent/5 p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-text-muted mb-1">Points balance</p>
+            <p className="text-3xl font-bold font-mono text-text-primary">{data.balance}</p>
           </div>
-          <p className="text-3xl font-bold text-text-primary">
-            {totalPointsEarned.toLocaleString()}
-          </p>
-          <p className="text-sm text-text-secondary mt-1">Lifetime earned</p>
+          <span className="inline-flex items-center gap-1 rounded-full bg-secondary/15 border border-secondary/30 px-3 py-1 text-xs font-semibold text-secondary">
+            <Award className="h-3.5 w-3.5" /> {data.tier.name}
+          </span>
         </div>
-        <div className="rounded-lg border border-border p-6">
-          <div className="flex items-center gap-2 text-text-secondary text-sm mb-2">
-            <Calendar className="h-4 w-4" />
-            Total Nights
-          </div>
-          <p className="text-3xl font-bold text-text-primary">{totalNights}</p>
-          <p className="text-sm text-text-secondary mt-1">Across all stays</p>
-        </div>
-        <div className="rounded-lg border border-border p-6">
-          <div className="flex items-center gap-2 text-text-secondary text-sm mb-2">
-            <TrendingUp className="h-4 w-4" />
-            Next Tier
-          </div>
-          <p className="text-3xl font-bold text-text-primary">
-            {nextTierThreshold
-              ? `${Math.max(0, nextTierThreshold - totalPointsEarned)} pts`
-              : 'Max'}
-          </p>
-          <p className="text-sm text-text-secondary mt-1">
-            {nextTierThreshold
-              ? `to ${currentTier === 'Bronze' ? 'Silver' : 'Gold'}`
-              : 'Tier achieved'}
-          </p>
-        </div>
-      </div>
 
-      {/* Points History */}
-      <div>
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Points History</h2>
-        <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-background-secondary">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">
-                  Description
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-text-secondary">
-                  Points
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {pointsHistory.map((txn) => (
-                <tr key={txn.id}>
-                  <td className="px-4 py-3 text-sm text-text-secondary">{txn.date}</td>
-                  <td className="px-4 py-3 text-sm text-text-primary">{txn.description}</td>
-                  <td
-                    className={`px-4 py-3 text-sm text-right font-medium ${txn.points > 0 ? 'text-accent' : 'text-danger'}`}
-                  >
-                    {txn.points > 0 ? '+' : ''}
-                    {txn.points}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Rewards */}
-      <div>
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Available Rewards</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { name: 'Free Night', points: 1000, icon: Calendar },
-            { name: 'Room Upgrade', points: 500, icon: Star },
-            { name: 'Spa Credit', points: 300, icon: Gift },
-          ].map((reward) => (
-            <div key={reward.name} className="rounded-lg border border-border p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <reward.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-text-primary">{reward.name}</p>
-                  <p className="text-sm text-text-secondary">{reward.points} points</p>
-                </div>
-              </div>
-              <button
-                className="w-full px-4 py-2 border border-border rounded-lg hover:bg-background-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={totalPointsEarned < reward.points}
-              >
-                {totalPointsEarned >= reward.points ? 'Redeem' : 'Not enough points'}
-              </button>
+        {data.nextTier ? (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-[11px] text-text-muted mb-1">
+              <span>{data.tier.name}</span>
+              <span>
+                {data.pointsToNext} pts to {data.nextTier.name}
+              </span>
             </div>
-          ))}
+            <div className="h-2 rounded-full bg-border overflow-hidden">
+              <div
+                className="h-full rounded-full bg-secondary transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="mt-4 text-xs text-accent flex items-center gap-1">
+            <TrendingUp className="h-3.5 w-3.5" /> You've reached our highest tier — enjoy the
+            perks.
+          </p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <p className="text-xs text-text-muted mb-1">Earn rate</p>
+          <p className="text-lg font-bold font-mono text-text-primary">{data.earnRate} pt / R1</p>
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <p className="text-xs text-text-muted mb-1">Point value</p>
+          <p className="text-lg font-bold font-mono text-text-primary">
+            R{data.redeemValue.toFixed(2)} / pt
+          </p>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="outline" onClick={() => navigate('/guest-portal/loyalty/rewards')}>
+          <Gift className="mr-2 h-4 w-4" /> Redeem rewards
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/guest-portal/loyalty/history')}>
+          <History className="mr-2 h-4 w-4" /> Points history
+        </Button>
+      </div>
+
+      {recent.length > 0 && (
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="border-b border-border bg-background px-4 py-3">
+            <h3 className="text-sm font-semibold text-text-primary">Recent activity</h3>
+          </div>
+          <div className="divide-y divide-border">
+            {recent.map((t) => (
+              <div key={t.id} className="flex items-center justify-between px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-text-primary truncate">{t.description}</p>
+                  <p className="text-[10px] text-text-muted">
+                    {formatDate(t.createdAt)} · {t.source}
+                  </p>
+                </div>
+                <span
+                  className={cn(
+                    'text-sm font-mono font-medium shrink-0',
+                    t.type === 'redemption' ? 'text-danger' : 'text-accent'
+                  )}
+                >
+                  {t.type === 'redemption' ? '-' : '+'}
+                  {t.amount}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

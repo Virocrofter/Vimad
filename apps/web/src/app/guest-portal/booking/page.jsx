@@ -10,6 +10,8 @@ import {
   ConciergeBell,
   Loader2,
   XCircle,
+  PencilLine,
+  CalendarX,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
@@ -174,20 +176,39 @@ export default function GuestBookingPage() {
         </div>
       </div>
 
-      {/* Modify / Cancel note — staff-handled in v1 */}
-      <div className="rounded-xl border border-border bg-surface p-4 flex items-start gap-3">
-        <XCircle className="h-5 w-5 text-text-muted shrink-0 mt-0.5" />
-        <div className="text-xs text-text-secondary">
-          <p className="font-medium text-text-primary mb-1">Need to modify or cancel?</p>
-          <p>
-            Changes and cancellations are handled by the front desk so the cancellation policy can
-            be applied correctly. Message them directly and they'll take care of it.
+      {/* Modify / Cancel — self-service with live policy quote */}
+      <div className="rounded-xl border border-border bg-surface overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
+          <p className="text-sm font-semibold text-text-primary">Need to change your plans?</p>
+          <p className="text-xs text-text-muted mt-0.5">
+            Modify your dates or guests, or cancel — the cancellation policy is quoted before you
+            confirm anything.
           </p>
+        </div>
+        <div className="grid grid-cols-2 divide-x divide-border">
           <button
-            onClick={() => navigate('/guest-portal/messages')}
-            className="mt-2 text-secondary hover:underline font-medium"
+            onClick={() => navigate('/guest-portal/booking/modify')}
+            className="flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-elevated transition-colors"
           >
-            Message the front desk →
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-info/10">
+              <PencilLine className="h-4 w-4 text-info" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-text-primary">Modify booking</p>
+              <p className="text-[11px] text-text-muted">Dates &amp; guests</p>
+            </div>
+          </button>
+          <button
+            onClick={() => navigate('/guest-portal/booking/cancel')}
+            className="flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-elevated transition-colors"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-danger/10">
+              <CalendarX className="h-4 w-4 text-danger" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-text-primary">Cancel booking</p>
+              <p className="text-[11px] text-text-muted">See fee first</p>
+            </div>
           </button>
         </div>
       </div>

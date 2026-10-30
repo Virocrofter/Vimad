@@ -1,77 +1,56 @@
-/* src/app/guest-portal/profile/page.jsx */
-import { useState } from 'react';
+/* src/app/guest-portal/profile/page.jsx — G3: real guest profile */
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  User,
-  Mail,
-  Phone,
-  Bell,
-  Shield,
-  CreditCard,
-  Edit3,
-  Check,
-  X,
-  Loader2,
-  ChevronRight,
-  Lock,
+  ArrowLeft,
+  BadgeCheck,
   FileText,
-  HelpCircle,
-  Settings,
+  Loader2,
   AlertTriangle,
+  CheckCircle2,
+  Award,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { Button } from '@/components/ui/button';
-import { FlagGate } from '@/components/FlagGate';
-import { flags } from '../../../lib/flags';
-import { formatDate } from '../../../lib/guest-utils';
+import { Button } from '../../../components/ui/button';
+import { getGuestToken } from '../../../hooks/guestPortalApi';
+import { getGuestLocale, setGuestLocale } from '../../../i18n/guestI18n';
 import {
-  useStayDetails,
-  useUpdatePreferences,
-  getGuestToken,
-} from '../../../hooks/useGuestPortalData';
-import { FormInput, FormSelect, SectionHeader } from '../components';
-
-const languageOptions = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'it', label: 'Italiano' },
-  { value: 'pt', label: 'Português' },
-  { value: 'zh', label: '中文' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'ar', label: 'العربية' },
-];
+  useGuestProfile,
+  useUpdateGuestProfile,
+  useGuestGdprRequest,
+} from '../../../hooks/useGuestProfile';
+import { formatDate } from '../../../lib/guest-utils';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
   const hasToken = Boolean(getGuestToken());
-  const { data: stay, isLoading, isError, refetch } = useStayDetails();
-  const updatePreferences = useUpdatePreferences();
+  const { data, isLoading, isError, refetch } = useGuestProfile();
+  const update = useUpdateGuestProfile();
+  const gdpr = useGuestGdprRequest();
+  const [gdprMsg, setGdprMsg] = useState(null);
 
-  const [editing, setEditing] = useState(false);
-  const [saveMessage, setSaveMessage] = useState(null);
-  const [form, setForm] = useState({ language: 'en' });
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: true,
-    push: true,
-  });
+  const [form, setForm] = useState(null);
+  const [saved, setSaved] = useState(false);
 
-  if (!hasToken) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
-        <p className="text-sm text-text-muted">Please verify your reservation first</p>
-        <Button className="mt-4" onClick={() => navigate('/guest-portal/auth/login')}>
-          Verify Reservation
-        </Button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!hasToken) navigate('/guest-portal/auth/login', { replace: true });
+  }, [hasToken, navigate]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (data?.guest && form === null) {
+      setForm({
+        email: data.guest.email ?? '',
+        phone: data.guest.phone ?? '',
+        nationality: data.guest.nationality ?? '',
+        city: data.guest.city ?? '',
+        country: data.guest.country ?? '',
+      });
+    }
+  }, [data, form]);
+
+  if (!hasToken) return null;
+
+  if (isLoading || !form) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
@@ -80,11 +59,11 @@ export default function ProfilePage() {
     );
   }
 
-  if (isError || !stay) {
+  if (isError || !data) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <AlertTriangle className="h-10 w-10 text-warning mb-3" />
-        <p className="text-sm text-text-muted">We couldn’t load your profile.</p>
+        <p className="text-sm text-text-muted">We couldn't load your profile.</p>
         <Button variant="outline" className="mt-4" onClick={() => refetch()}>
           Retry
         </Button>
@@ -92,237 +71,183 @@ export default function ProfilePage() {
     );
   }
 
-  // Stay API returns guestName as "Last, First"
-  const [lastName, firstName] = stay.guestName?.includes(',')
-    ? stay.guestName.split(',').map((s) => s.trim())
-    : ['', stay.guestName ?? ''];
+  const g = data.guest;
+  const dirty =
+    form.email !== (g.email ?? '') ||
+    form.phone !== (g.phone ?? '') ||
+    form.nationality !== (g.nationality ?? '') ||
+    form.city !== (g.city ?? '') ||
+    form.country !== (g.country ?? '');
 
-  const handleSave = async () => {
-    setSaveMessage(null);
-    try {
-      await updatePreferences.mutateAsync({
-        language: form.language,
-        notifyEmail: String(notifications.email),
-        notifySms: String(notifications.sms),
-        notifyPush: String(notifications.push),
-      });
-      setEditing(false);
-      setSaveMessage('Preferences saved.');
-    } catch (err) {
-      setSaveMessage(err?.message ?? 'Could not save. Please try again.');
+  const handleSave = () => {
+    setSaved(false);
+    const payload = {};
+    for (const k of ['email', 'phone', 'nationality', 'city', 'country']) {
+      if (form[k] !== (g[k] ?? '')) payload[k] = form[k] || undefined;
     }
+    update.mutate(payload, {
+      onSuccess: () => setSaved(true),
+    });
   };
 
-  const toggleNotification = (key) =>
-    setNotifications((p) => {
-      const next = { ...p, [key]: !p[key] };
-      // Persist immediately — these are standalone preferences
-      updatePreferences.mutate({
-        [`notify${key[0].toUpperCase()}${key.slice(1)}`]: String(next[key]),
-      });
-      return next;
-    });
-
-  const menuItems = [
-    { icon: User, label: 'Personal Information', href: '#', active: true },
-    { icon: Settings, label: 'Preferences', href: '/guest-portal/profile/preferences' },
-    { icon: FileText, label: 'Documents & IDs', href: '/guest-portal/profile/documents' },
-    { icon: CreditCard, label: 'Payment Methods', href: '/guest-portal/billing' },
-    { icon: Bell, label: 'Notifications', href: '/guest-portal/messages/notifications' },
-    { icon: HelpCircle, label: 'Help & Support', href: '/guest-portal/support' },
-  ];
+  const field = (label, key, type = 'text') => (
+    <div>
+      <label className="text-xs text-text-muted block mb-1">{label}</label>
+      <input
+        type={type}
+        value={form[key]}
+        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+        className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <SectionHeader
-        title="My Profile"
-        subtitle="Manage your personal information and preferences"
-        action={
-          !editing ? (
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-              <Edit3 className="mr-1.5 h-4 w-4" /> Edit Preferences
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
-                <X className="mr-1.5 h-4 w-4" /> Cancel
-              </Button>
-              <Button size="sm" onClick={handleSave} disabled={updatePreferences.isPending}>
-                {updatePreferences.isPending ? (
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                ) : (
-                  <Check className="mr-1.5 h-4 w-4" />
-                )}
-                Save
-              </Button>
-            </div>
-          )
-        }
-      />
+    <div className="space-y-6 pb-20">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate('/guest-portal')}
+          className="rounded-lg border border-border bg-surface p-2 hover:bg-surface-elevated transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-text-primary" />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-text-primary">Profile</h1>
+          <p className="text-xs text-text-muted">
+            {data.propertyName} · {data.confirmationNumber}
+          </p>
+        </div>
+      </div>
 
-      {saveMessage && (
-        <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-2 text-sm text-accent">
-          {saveMessage}
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-text-primary">
+              {g.firstName} {g.lastName}
+            </p>
+            <p className="text-xs text-text-muted">Guest since {formatDate(g.createdAt)}</p>
+          </div>
+          {g.vipStatus && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 border border-secondary/20 px-2.5 py-0.5 text-[10px] font-medium text-secondary capitalize">
+              <Award className="h-3 w-3" /> {g.vipStatus}
+            </span>
+          )}
+        </div>
+        <p className="text-[11px] text-text-muted flex items-center gap-1">
+          <BadgeCheck className="h-3 w-3" /> Name and date of birth are verified at check-in and
+          can't be changed here.
+        </p>
+      </div>
+
+      {saved && (
+        <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
+          <p className="text-sm text-text-primary">Profile updated.</p>
+        </div>
+      )}
+      {update.isError && (
+        <div className="rounded-xl border border-danger/20 bg-danger/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          <p className="text-sm text-text-primary">
+            {update.error?.message ?? 'Could not save changes.'}
+          </p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left Column — Identity & Menu */}
-        <div className="space-y-4 lg:col-span-1">
-          {/* Identity Card */}
-          <div className="rounded-xl border border-border bg-surface p-5 text-center">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-secondary/10">
-              <span className="text-2xl font-bold text-secondary">
-                {[firstName, lastName]
-                  .filter(Boolean)
-                  .map((n) => n[0])
-                  .join('')}
-              </span>
-            </div>
-            <h3 className="mt-3 text-lg font-bold text-text-primary">
-              {firstName} {lastName}
-            </h3>
-            <p className="text-xs text-text-muted">Room {stay.roomNumber}</p>
-            <p className="mt-2 text-xs text-text-muted">
-              Stay: {formatDate(stay.arrivalDate)} – {formatDate(stay.departureDate)}
-            </p>
-          </div>
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <h3 className="text-sm font-semibold text-text-primary">Contact details</h3>
+        {field('Email', 'email', 'email')}
+        {field('Phone', 'phone', 'tel')}
+        {field('Nationality', 'nationality')}
+        {field('City', 'city')}
+        {field('Country', 'country')}
+        <Button className="w-full" disabled={!dirty || update.isPending} onClick={handleSave}>
+          {update.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Save changes
+        </Button>
+      </div>
 
-          {/* Loyalty — flag-gated */}
-          {flags.loyalty && (
-            <FlagGate flag="loyalty">
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <a
-                  href="/guest-portal/loyalty"
-                  className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
-                >
-                  View loyalty dashboard <ChevronRight className="h-3 w-3" />
-                </a>
-              </div>
-            </FlagGate>
-          )}
-
-          {/* Navigation Menu */}
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            {menuItems.map((item, idx) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 transition-colors',
-                  item.active
-                    ? 'bg-secondary/5 text-secondary'
-                    : 'text-text-secondary hover:bg-surface-elevated',
-                  idx !== menuItems.length - 1 && 'border-b border-border'
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                <span className="text-sm font-medium flex-1">{item.label}</span>
-                <ChevronRight className="h-4 w-4 text-text-muted" />
-              </a>
-            ))}
-          </div>
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <h3 className="text-sm font-semibold text-text-primary">Your data</h3>
+        <p className="text-xs text-text-muted">
+          Download everything we hold about you, or request erasure. We confirm by email within 30
+          days.
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={gdpr.isPending}
+            onClick={() =>
+              gdpr.mutate(
+                { request: 'export' },
+                {
+                  onSuccess: () =>
+                    setGdprMsg('Export requested — check your email within 30 days.'),
+                  onError: (e) => setGdprMsg(e.message),
+                }
+              )
+            }
+          >
+            Download my data
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={gdpr.isPending}
+            onClick={() =>
+              gdpr.mutate(
+                { request: 'erasure' },
+                {
+                  onSuccess: () => setGdprMsg('Erasure requested — we will confirm by email.'),
+                  onError: (e) => setGdprMsg(e.message),
+                }
+              )
+            }
+          >
+            Delete my data
+          </Button>
         </div>
+        {gdprMsg && <p className="text-xs text-text-muted">{gdprMsg}</p>}
+      </div>
 
-        {/* Right Column */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Personal Info — read-only, owned by the reservation */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <User className="h-4 w-4 text-secondary" /> Personal Information
-            </h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormInput
-                label="First Name"
-                value={firstName}
-                disabled
-                helper="Name changes are handled by the front desk"
-              />
-              <FormInput label="Last Name" value={lastName} disabled />
-              <FormSelect
-                label="Language"
-                value={form.language}
-                onChange={(e) => setForm((p) => ({ ...p, language: e.target.value }))}
-                options={languageOptions}
-                disabled={!editing}
-              />
-            </div>
-          </div>
-
-          {/* Contact Preferences — real, persisted */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Bell className="h-4 w-4 text-secondary" /> Contact Preferences
-            </h3>
-            <div className="space-y-3">
-              {[
-                {
-                  key: 'email',
-                  icon: Mail,
-                  label: 'Email Notifications',
-                  desc: 'Booking confirmations, offers, updates',
-                },
-                {
-                  key: 'sms',
-                  icon: Phone,
-                  label: 'SMS Notifications',
-                  desc: 'Check-in reminders, room ready alerts',
-                },
-                {
-                  key: 'push',
-                  icon: Bell,
-                  label: 'Push Notifications',
-                  desc: 'Real-time updates on your mobile device',
-                },
-              ].map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => toggleNotification(item.key)}
-                  className="w-full flex items-center justify-between rounded-lg border border-border bg-background p-3 text-left hover:bg-surface-elevated transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="h-4 w-4 text-text-muted" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">{item.label}</p>
-                      <p className="text-xs text-text-muted">{item.desc}</p>
-                    </div>
-                  </div>
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border',
-                      notifications[item.key]
-                        ? 'bg-accent/10 border-accent/20 text-accent'
-                        : 'bg-surface-elevated border-border text-text-muted'
-                    )}
-                  >
-                    {notifications[item.key] && <Check className="h-3 w-3" />}
-                    {notifications[item.key] ? 'Enabled' : 'Off'}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Security — honest about the token model */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Shield className="h-4 w-4 text-secondary" /> Security
-            </h3>
-            <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
-              <div className="flex items-center gap-3">
-                <Lock className="h-4 w-4 text-text-muted" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Secure Access Link</p>
-                  <p className="text-xs text-text-muted">
-                    You're signed in via your reservation verification — no password needed. Your
-                    session ends when you close this browser tab.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <h3 className="text-sm font-semibold text-text-primary">Language / Ulimi / Taal</h3>
+        <div className="flex gap-2">
+          {[
+            { code: 'en', label: 'English' },
+            { code: 'zu', label: 'isiZulu' },
+            { code: 'af', label: 'Afrikaans' },
+          ].map((l) => (
+            <button
+              key={l.code}
+              onClick={() => setGuestLocale(l.code)}
+              className={cn(
+                'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                getGuestLocale() === l.code
+                  ? 'border-secondary bg-secondary/10 text-secondary'
+                  : 'border-border text-text-secondary hover:bg-surface-elevated'
+              )}
+            >
+              {l.label}
+            </button>
+          ))}
         </div>
       </div>
+
+      <button
+        onClick={() => navigate('/guest-portal/profile/documents')}
+        className="w-full rounded-xl border border-border bg-surface p-4 flex items-center justify-between hover:bg-surface-elevated transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <FileText className="h-5 w-5 text-secondary" />
+          <div className="text-left">
+            <p className="text-sm font-medium text-text-primary">Travel documents</p>
+            <p className="text-xs text-text-muted">Passport, ID, driver's licence</p>
+          </div>
+        </div>
+        <ArrowLeft className="h-4 w-4 text-text-muted rotate-180" />
+      </button>
     </div>
   );
 }

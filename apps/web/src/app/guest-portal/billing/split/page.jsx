@@ -5,49 +5,119 @@ import {
   ArrowLeft,
   Users,
   Plus,
-  Minus,
   CheckCircle2,
   Receipt,
-  Trash2,
   Mail,
-  Copy,
-  Check,
+  Loader2,
+  AlertTriangle,
+  Phone,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { guestStay, splitParticipants, formatCurrency, folioCategoryMeta } from '../../data';
+import { useGuestFolio, useStayDetails, getGuestToken } from '../../../../hooks/useGuestPortalData';
+import { useGuestSplits, useSplitCreate, newIdempotencyKey } from '../../../../hooks/useGuestPay';
+import { formatCurrency, formatDate, folioCategoryMeta } from '../../../../lib/guest-utils';
+
+const splitStatusMeta = {
+  pending: { label: 'Sent to front desk', chip: 'bg-warning/10 text-warning border-warning/20' },
+  accepted: { label: 'Accepted — being set up', chip: 'bg-accent/10 text-accent border-accent/20' },
+  declined: { label: 'Declined', chip: 'bg-danger/10 text-danger border-danger/20' },
+  applied: { label: 'Applied', chip: 'bg-accent/10 text-accent border-accent/20' },
+  cancelled: { label: 'Cancelled', chip: 'bg-danger/10 text-danger border-danger/20' },
+};
+
+function categoryForType(type) {
+  const map = { lodging: 'room', room: 'room', dining: 'dining', restaurant: 'dining', spa: 'spa' };
+  return map[type] ?? 'services';
+}
 
 export default function SplitBillPage() {
   const navigate = useNavigate();
-  const { folio } = guestStay;
-  const [participants, setParticipants] = useState(splitParticipants);
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay } = useStayDetails();
+  const { data: folioData, isLoading, isError, refetch } = useGuestFolio();
+  const { data: splitsData } = useGuestSplits();
+  const splitCreate = useSplitCreate();
+
+  const [participants, setParticipants] = useState([]);
   const [assignments, setAssignments] = useState({});
-  const [showAddGuest, setShowAddGuest] = useState(false);
   const [newGuestName, setNewGuestName] = useState('');
   const [newGuestEmail, setNewGuestEmail] = useState('');
-  const [sentTo, setSentTo] = useState([]);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [newGuestPhone, setNewGuestPhone] = useState('');
+  const [showAddGuest, setShowAddGuest] = useState(false);
+  const [feedback, setFeedback] = useState(null); // { ok, text }
 
-  // Calculate totals per participant
+  const items = folioData?.items ?? [];
+  const splits = splitsData?.splits ?? [];
+
   const participantTotals = useMemo(() => {
     const totals = {};
     participants.forEach((p) => {
       totals[p.id] = 0;
     });
-
     Object.entries(assignments).forEach(([chargeId, participantId]) => {
-      const charge = folio.charges.find((c) => c.id === chargeId);
+      const charge = items.find((c) => c.id === chargeId);
       if (charge && totals[participantId] !== undefined) {
-        totals[participantId] += charge.amount;
+        totals[participantId] += charge.amount * charge.quantity;
       }
     });
     return totals;
-  }, [assignments, participants, folio.charges]);
+  }, [assignments, participants, items]);
 
-  // Unassigned charges
   const unassignedTotal = useMemo(() => {
-    return folio.charges.filter((c) => !assignments[c.id]).reduce((s, c) => s + c.amount, 0);
-  }, [assignments, folio.charges]);
+    return items.filter((c) => !assignments[c.id]).reduce((s, c) => s + c.amount * c.quantity, 0);
+  }, [assignments, items]);
+
+  if (!hasToken) {
+    navigate('/guest-portal/auth/login', { replace: true });
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your folio…</p>
+      </div>
+    );
+  }
+
+  if (isError || !folioData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">We couldn't load your folio.</p>
+        <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  const handleAddGuest = () => {
+    if (!newGuestName.trim()) return;
+    if (!newGuestEmail.trim() && !newGuestPhone.trim()) return;
+    const newId = `P-${Date.now()}`;
+    setParticipants((prev) => [
+      ...prev,
+      {
+        id: newId,
+        name: newGuestName.trim(),
+        email: newGuestEmail.trim() || null,
+        phone: newGuestPhone.trim() || null,
+        avatar: newGuestName
+          .trim()
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase(),
+      },
+    ]);
+    setNewGuestName('');
+    setNewGuestEmail('');
+    setNewGuestPhone('');
+    setShowAddGuest(false);
+  };
 
   const handleAssign = (chargeId, participantId) => {
     setAssignments((prev) => ({ ...prev, [chargeId]: participantId }));
@@ -61,372 +131,295 @@ export default function SplitBillPage() {
     });
   };
 
-  const handleAddGuest = () => {
-    if (!newGuestName.trim() || !newGuestEmail.trim()) return;
-    const newId = `P-${Date.now()}`;
-    setParticipants((prev) => [
-      ...prev,
-      {
-        id: newId,
-        name: newGuestName.trim(),
-        email: newGuestEmail.trim(),
-        avatar: newGuestName
-          .trim()
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase(),
-        isPrimary: false,
-        share: 0,
-      },
-    ]);
-    setNewGuestName('');
-    setNewGuestEmail('');
-    setShowAddGuest(false);
-  };
-
-  const handleRemoveGuest = (id) => {
-    setParticipants((prev) => prev.filter((p) => p.id !== id));
-    setAssignments((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => {
-        if (next[k] === id) delete next[k];
+  const handleSendRequests = async () => {
+    setFeedback(null);
+    const targets = participants.filter((p) => participantTotals[p.id] > 0);
+    try {
+      await Promise.all(
+        targets.map((p) =>
+          splitCreate.mutateAsync({
+            toName: p.name,
+            toEmail: p.email ?? undefined,
+            toPhone: p.phone ?? undefined,
+            amount: Math.round(participantTotals[p.id] * 100) / 100,
+            note: `Split for reservation ${folioData.confirmationNumber}`,
+          })
+        )
+      );
+      setFeedback({
+        ok: true,
+        text: `Split request${targets.length > 1 ? 's' : ''} sent — the front desk will send ${
+          targets.length > 1 ? 'pay links to your guests' : 'a pay link to your guest'
+        }.`,
       });
-      return next;
-    });
+    } catch (err) {
+      setFeedback({
+        ok: false,
+        text: err?.message ?? 'Could not send the split request. Please try again.',
+      });
+    }
   };
 
-  const handleSendRequest = (participantId) => {
-    setSentTo((prev) => [...prev, participantId]);
-    setTimeout(() => {
-      setSentTo((prev) => prev.filter((id) => id !== participantId));
-    }, 3000);
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://vimad.io/split/${guestStay.confirmationNumber}`);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
-  };
-
-  const splitLink = `https://vimad.io/split/${guestStay.confirmationNumber}`;
+  const assignedCount = Object.keys(assignments).length;
+  const pendingSplits = splits.filter((s) => s.status === 'pending' || s.status === 'accepted');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/guest-portal/billing')}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-surface text-text-muted hover:text-text-primary hover:bg-surface-elevated"
+          className="rounded-lg border border-border bg-surface p-2 hover:bg-surface-elevated transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-5 w-5 text-text-primary" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Split Bill</h1>
-          <p className="text-sm text-text-secondary">Assign charges to guests and share the bill</p>
-        </div>
-      </div>
-
-      {/* Share Link */}
-      <div className="rounded-xl border border-border bg-surface p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
-              <LinkIcon className="h-5 w-5 text-secondary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-text-primary">Share Split Link</p>
-              <p className="text-xs text-text-muted">Guests can view their assigned charges</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <code className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-mono text-text-muted truncate max-w-50">
-              {splitLink}
-            </code>
-            <button
-              onClick={handleCopyLink}
-              className={cn(
-                'inline-flex h-8 items-center gap-1 rounded-md border px-3 text-xs font-medium transition-colors',
-                copiedLink
-                  ? 'border-accent bg-accent/10 text-accent'
-                  : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-              )}
-            >
-              {copiedLink ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-              {copiedLink ? 'Copied' : 'Copy'}
-            </button>
-          </div>
+          <h1 className="text-xl font-bold text-text-primary">Split Bill</h1>
+          <p className="text-xs text-text-muted">
+            Assign charges — the front desk sends each guest a secure pay link
+          </p>
         </div>
       </div>
 
       {/* Participants */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary">
-            Guests ({participants.length})
-          </h3>
-          <Button variant="outline" size="sm" onClick={() => setShowAddGuest(true)}>
-            <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Guest
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <h3 className="text-sm font-semibold text-text-primary">Guests</h3>
+        {participants.length === 0 && (
+          <p className="text-xs text-text-muted">
+            Add the guests you'd like to split charges with (email or phone required).
+          </p>
+        )}
+        <div className="space-y-2">
           {participants.map((p) => (
             <div
               key={p.id}
-              className={cn(
-                'rounded-xl border bg-surface p-4 transition-all',
-                p.isPrimary ? 'border-secondary/30 ring-1 ring-secondary/10' : 'border-border'
-              )}
+              className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold',
-                      p.isPrimary ? 'bg-secondary text-white' : 'bg-border text-text-muted'
-                    )}
-                  >
-                    {p.avatar}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{p.name}</p>
-                    <p className="text-xs text-text-muted">{p.email}</p>
-                    {p.isPrimary && (
-                      <span className="rounded-full bg-secondary/10 px-1.5 py-0.5 text-[9px] font-medium text-secondary mt-0.5 inline-block">
-                        Primary Guest
-                      </span>
-                    )}
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
+                  {p.avatar}
                 </div>
-                {!p.isPrimary && (
-                  <button
-                    onClick={() => handleRemoveGuest(p.id)}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-danger/10 hover:text-danger"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Their Charges */}
-              <div className="mt-3 space-y-1">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                  Assigned Charges
-                </p>
-                {folio.charges
-                  .filter((c) => assignments[c.id] === p.id)
-                  .map((c) => (
-                    <div key={c.id} className="flex items-center justify-between py-1">
-                      <span className="text-xs text-text-secondary truncate">{c.description}</span>
-                      <span className="text-xs font-mono text-text-primary">
-                        {formatCurrency(c.amount)}
-                      </span>
-                    </div>
-                  ))}
-                {folio.charges.filter((c) => assignments[c.id] === p.id).length === 0 && (
-                  <p className="text-xs text-text-muted italic">No charges assigned</p>
-                )}
-              </div>
-
-              {/* Total & Actions */}
-              <div className="mt-3 pt-3 border-t border-border">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-text-muted">Total</span>
-                  <span className="text-sm font-bold font-mono text-text-primary">
-                    {formatCurrency(participantTotals[p.id])}
-                  </span>
+                <div>
+                  <p className="text-sm font-medium text-text-primary">{p.name}</p>
+                  <p className="text-xs text-text-muted">
+                    {participantTotals[p.id] > 0
+                      ? `Assigned ${formatCurrency(Math.round(participantTotals[p.id] * 100) / 100)}`
+                      : 'No charges assigned'}
+                  </p>
                 </div>
-                {participantTotals[p.id] > 0 && !p.isPrimary && (
-                  <button
-                    onClick={() => handleSendRequest(p.id)}
-                    disabled={sentTo.includes(p.id)}
-                    className={cn(
-                      'mt-2 w-full inline-flex h-8 items-center justify-center gap-1 rounded-md border text-xs font-medium transition-colors',
-                      sentTo.includes(p.id)
-                        ? 'border-accent bg-accent/10 text-accent'
-                        : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
-                    )}
-                  >
-                    {sentTo.includes(p.id) ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" /> Request Sent
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="h-3.5 w-3.5" /> Send Summary
-                      </>
-                    )}
-                  </button>
-                )}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add Guest Form */}
-        {showAddGuest && (
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <h4 className="text-sm font-medium text-text-primary mb-3">Add Guest</h4>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {showAddGuest ? (
+          <div className="space-y-2">
+            <input
+              value={newGuestName}
+              onChange={(e) => setNewGuestName(e.target.value)}
+              placeholder="Guest name"
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <input
+              value={newGuestEmail}
+              onChange={(e) => setNewGuestEmail(e.target.value)}
+              placeholder="Email (or phone below)"
+              type="email"
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <div className="flex items-center gap-2">
               <input
-                type="text"
-                placeholder="Full name"
-                value={newGuestName}
-                onChange={(e) => setNewGuestName(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={newGuestPhone}
+                onChange={(e) => setNewGuestPhone(e.target.value)}
+                placeholder="Phone (if no email)"
+                className="h-10 flex-1 rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
-              <input
-                type="email"
-                placeholder="Email address"
-                value={newGuestEmail}
-                onChange={(e) => setNewGuestEmail(e.target.value)}
-                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-            <div className="mt-3 flex items-center gap-2">
               <Button
                 size="sm"
                 onClick={handleAddGuest}
-                disabled={!newGuestName.trim() || !newGuestEmail.trim()}
+                disabled={!newGuestName.trim() || (!newGuestEmail.trim() && !newGuestPhone.trim())}
               >
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Add
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowAddGuest(false)}>
-                Cancel
+                <Plus className="mr-1 h-4 w-4" /> Add
               </Button>
             </div>
           </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={() => setShowAddGuest(true)}>
+            <Plus className="mr-1 h-4 w-4" /> Add Guest
+          </Button>
         )}
       </div>
 
-      {/* Charges to Assign */}
+      {/* Folio Charges */}
       <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="border-b border-border bg-background px-6 py-4 flex items-center justify-between">
+        <div className="border-b border-border bg-background px-4 py-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-secondary" /> Assign Charges
+            <Receipt className="h-4 w-4 text-secondary" /> Folio Charges
           </h3>
           <span className="text-xs text-text-muted">
-            {Object.keys(assignments).length} of {folio.charges.length} assigned
+            {assignedCount} of {items.length} assigned
           </span>
         </div>
         <div className="divide-y divide-border">
-          {folio.charges.map((charge) => {
-            const assignedTo = assignments[charge.id];
-            const assignee = participants.find((p) => p.id === assignedTo);
-            const meta = folioCategoryMeta[charge.category] || folioCategoryMeta.services;
+          {items.map((charge) => {
+            const cat = categoryForType(charge.type);
+            const meta = folioCategoryMeta[cat] || folioCategoryMeta.services;
+            const assignedTo = assignments[charge.id]
+              ? participants.find((p) => p.id === assignments[charge.id])
+              : null;
             return (
-              <div
-                key={charge.id}
-                className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between hover:bg-background/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">{meta.icon}</span>
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{charge.description}</p>
-                    <p className="text-xs text-text-muted">
-                      {meta.label} · {charge.date}
+              <div key={charge.id} className="px-4 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {charge.description}
+                    </p>
+                    <p className="text-[10px] text-text-muted">
+                      {meta.label} · {formatDate(charge.postedAt)}
                     </p>
                   </div>
+                  <p className="text-sm font-mono font-medium text-text-primary">
+                    {formatCurrency(charge.amount * charge.quantity)}
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-mono font-medium text-text-primary">
-                    {formatCurrency(charge.amount)}
-                  </span>
-                  {assignee ? (
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-                        <CheckCircle2 className="h-3 w-3" /> {assignee.name}
-                      </span>
-                      <button
-                        onClick={() => handleUnassign(charge.id)}
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:bg-danger/10 hover:text-danger"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                    </div>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {assignedTo ? (
+                    <button
+                      onClick={() => handleUnassign(charge.id)}
+                      className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2.5 py-1 text-[10px] font-medium text-secondary hover:bg-secondary/20"
+                    >
+                      {assignedTo.name} ×
+                    </button>
                   ) : (
-                    <div className="flex items-center gap-1">
+                    <>
+                      <span className="text-[10px] text-text-muted mr-1">Assign:</span>
                       {participants.map((p) => (
                         <button
                           key={p.id}
                           onClick={() => handleAssign(charge.id, p.id)}
-                          className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-background px-2 text-[10px] font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
-                          title={`Assign to ${p.name}`}
+                          className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-medium text-text-secondary hover:border-secondary/40 hover:text-secondary"
                         >
-                          {p.avatar}
+                          {p.name}
                         </button>
                       ))}
-                    </div>
+                    </>
                   )}
                 </div>
               </div>
             );
           })}
         </div>
-        {unassignedTotal > 0 && (
-          <div className="border-t border-border bg-background px-6 py-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-muted">Unassigned charges</span>
-              <span className="text-sm font-bold font-mono text-warning">
-                {formatCurrency(unassignedTotal)}
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Summary */}
-      <div className="rounded-xl border border-border bg-surface p-5">
-        <h3 className="text-sm font-semibold text-text-primary mb-3">Split Summary</h3>
-        <div className="space-y-2">
-          {participants.map((p) => (
-            <div key={p.id} className="flex items-center justify-between py-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-text-secondary">{p.name}</span>
-                {p.isPrimary && <span className="text-[10px] text-secondary">(You)</span>}
-              </div>
-              <span className="text-sm font-mono font-medium text-text-primary">
-                {formatCurrency(participantTotals[p.id])}
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+        <h3 className="text-sm font-semibold text-text-primary">Summary</h3>
+        {participants
+          .filter((p) => participantTotals[p.id] > 0)
+          .map((p) => (
+            <div key={p.id} className="flex items-center justify-between text-sm">
+              <span className="text-text-secondary">{p.name}</span>
+              <span className="font-mono font-medium text-text-primary">
+                {formatCurrency(Math.round(participantTotals[p.id] * 100) / 100)}
               </span>
             </div>
           ))}
-          {unassignedTotal > 0 && (
-            <div className="flex items-center justify-between py-1">
-              <span className="text-xs text-warning">Unassigned</span>
-              <span className="text-sm font-mono font-medium text-warning">
-                {formatCurrency(unassignedTotal)}
-              </span>
-            </div>
-          )}
-          <div className="pt-2 border-t border-border flex items-center justify-between">
-            <span className="text-sm font-bold text-text-primary">Total</span>
-            <span className="text-lg font-bold font-mono text-text-primary">
-              {formatCurrency(folio.total)}
-            </span>
-          </div>
+        <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
+          <span className="text-text-secondary">{stay?.guestName ?? 'My folio'} (remaining)</span>
+          <span className="font-mono font-medium text-text-primary">
+            {formatCurrency(Math.round(unassignedTotal * 100) / 100)}
+          </span>
         </div>
       </div>
-    </div>
-  );
-}
 
-function LinkIcon({ className }) {
-  return (
-    <svg
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
+      {feedback && (
+        <div
+          className={cn(
+            'rounded-xl border p-4 flex items-center gap-3',
+            feedback.ok ? 'border-accent/20 bg-accent/5' : 'border-danger/20 bg-danger/5'
+          )}
+        >
+          {feedback.ok ? (
+            <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
+          ) : (
+            <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          )}
+          <p className="text-sm text-text-primary">{feedback.text}</p>
+        </div>
+      )}
+
+      {/* Send */}
+      <Button
+        className="w-full"
+        disabled={participants.length === 0 || assignedCount === 0 || splitCreate.isPending}
+        onClick={handleSendRequests}
+      >
+        {splitCreate.isPending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
+          </>
+        ) : (
+          <>
+            <Mail className="mr-2 h-4 w-4" /> Send Split Requests to Front Desk
+          </>
+        )}
+      </Button>
+
+      {/* Existing split requests */}
+      {splits.length > 0 && (
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="border-b border-border bg-background px-4 py-3">
+            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <Users className="h-4 w-4 text-secondary" /> Your split requests
+            </h3>
+          </div>
+          <div className="divide-y divide-border">
+            {splits.map((s) => {
+              const meta = splitStatusMeta[s.status] ?? splitStatusMeta.pending;
+              return (
+                <div key={s.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {s.toName}
+                      {s.toEmail && (
+                        <span className="ml-2 inline-flex items-center gap-1 text-[10px] text-text-muted">
+                          <Mail className="h-3 w-3" /> {s.toEmail}
+                        </span>
+                      )}
+                      {s.toPhone && !s.toEmail && (
+                        <span className="ml-2 inline-flex items-center gap-1 text-[10px] text-text-muted">
+                          <Phone className="h-3 w-3" /> {s.toPhone}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[10px] text-text-muted">{formatDate(s.createdAt)}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm font-mono font-medium text-text-primary">
+                      {formatCurrency(s.amount)}
+                    </span>
+                    <span
+                      className={cn(
+                        'rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                        meta.chip
+                      )}
+                    >
+                      {meta.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <p className="text-center text-[11px] text-text-muted flex items-center justify-center gap-1">
+        <Users className="h-3 w-3" />
+        {pendingSplits.length > 0
+          ? 'The front desk is setting up your pending splits.'
+          : 'Guests pay via a secure Paystack link sent by the hotel.'}
+      </p>
+    </div>
   );
 }

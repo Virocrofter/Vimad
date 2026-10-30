@@ -70,6 +70,12 @@ export async function getGuest360(prisma: PrismaClient, tenantId: string, guestI
     }),
   ]);
 
+  const reviews = await prisma.review.findMany({
+    where: { tenantId, guestId },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  });
+
   return {
     id: guest.id,
     firstName: guest.firstName,
@@ -87,6 +93,7 @@ export async function getGuest360(prisma: PrismaClient, tenantId: string, guestI
     segments: memberships.map((m) => m.segment),
     openFollowUps,
     recentNotes,
+    reviews,
   };
 }
 

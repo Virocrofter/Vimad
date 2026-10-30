@@ -223,10 +223,59 @@ export function tenantScope(req: Request, _res: Response, next: NextFunction) {
   next();
 }
 
+// Property scope (P1-D2/D4)
+// Resolves the property set a user may access from their role assignments.
+// An assignment with propertyId NULL grants global (all-properties) access --
+// the semantics that column always had. Returns null for global.
+export async function resolveAllowedPropertyIds(userId: string): Promise<string[] | null> {
+  const assignments = await prisma.roleAssignment.findMany({
+    where: { userId },
+    select: { propertyId: true },
+  });
+  if (assignments.length === 0 || assignments.some((a) => !a.propertyId)) return null;
+  return [...new Set(assignments.map((a) => a.propertyId!))];
+}
+
+// Attach after authMiddleware + tenantScope: sets req.allowedPropertyIds
+// (null = global). Resolved per request; assignments are a tiny row set.
+export async function attachPropertyScope(req: Request, _res: Response, next: NextFunction) {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    req.allowedPropertyIds = await resolveAllowedPropertyIds(authReq.auth.user.id);
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Entity-level guard for reservation /:id routes (GET/PATCH/DELETE and all
+// sub-resource actions). Scoped users receive a 404 indistinguishable from
+// "does not exist" -- never leak cross-property IDs or their existence.
+export function requirePropertyScope() {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const allowed = req.allowedPropertyIds;
+      if (!allowed) return next(); // global access -- unchanged behavior
+      const row = await prisma.reservation.findFirst({
+        where: { id: req.params.id, tenantId: req.tenantId },
+        select: { propertyId: true },
+      });
+      if (!row || !allowed.includes(row.propertyId)) {
+        next(new AppError(404, 'Reservation not found', 'NOT_FOUND'));
+        return;
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
 declare global {
   namespace Express {
     interface Request {
       tenantId: string;
+      allowedPropertyIds?: string[] | null;
     }
   }
 }

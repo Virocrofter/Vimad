@@ -6,6 +6,8 @@ declare global {
       auth: {
         userId: string;
         tenantId: string;
+        allowedPropertyIds?: string[] | null;
+        allowedPropertyIds?: string[] | null;
         email: string;
         role: string;
         user: {

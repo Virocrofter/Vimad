@@ -3,70 +3,114 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  Wrench,
-  Sparkles,
   Wifi,
   Volume2,
-  Shield,
-  HelpCircle,
-  CheckCircle2,
+  Droplets,
+  Snowflake,
+  Zap,
   AlertTriangle,
-  X,
-  Send,
+  CheckCircle2,
   Loader2,
-  Camera,
-  Upload,
-  ChevronRight,
   Clock,
-  MessageSquare,
-  FileText,
-  Image,
-  Plus,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { issueCategories } from '../../data';
+import { Button } from '../../../../components/ui/button';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { guestSupportApi } from '../../../../hooks/guestSupportApi';
+import { getGuestToken } from '../../../../hooks/guestPortalApi';
+import { timeAgo } from '../../../../lib/guest-utils';
+
+const categories = [
+  {
+    type: 'maintenance',
+    label: 'Plumbing',
+    description: 'Leaks, toilet, shower issues',
+    icon: Droplets,
+  },
+  {
+    type: 'maintenance',
+    label: 'Climate',
+    description: 'AC or heating not working',
+    icon: Snowflake,
+  },
+  {
+    type: 'maintenance',
+    label: 'Electrical',
+    description: 'Lights, outlets, TV, safe',
+    icon: Zap,
+  },
+  {
+    type: 'maintenance',
+    label: 'Noise',
+    description: 'Excessive noise disturbance',
+    icon: Volume2,
+  },
+  {
+    type: 'maintenance',
+    label: 'WiFi',
+    description: 'Internet connection problems',
+    icon: Wifi,
+  },
+  {
+    type: 'general',
+    label: 'Other',
+    description: 'Anything else in your room',
+    icon: AlertTriangle,
+  },
+];
+
+const urgencyMap = {
+  low: 'low',
+  normal: 'medium',
+  high: 'high',
+  urgent: 'urgent',
+};
+
+const statusMeta = {
+  open: { label: 'Open', cls: 'bg-warning/10 text-warning' },
+  in_progress: { label: 'In Progress', cls: 'bg-info/10 text-info' },
+  waiting_guest: { label: 'Waiting on You', cls: 'bg-secondary/10 text-secondary' },
+  resolved: { label: 'Resolved', cls: 'bg-accent/10 text-accent' },
+  closed: { label: 'Closed', cls: 'bg-neutral/10 text-text-muted' },
+};
 
 export default function IssuesPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const hasToken = Boolean(getGuestToken());
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [description, setDescription] = useState('');
   const [urgency, setUrgency] = useState('normal');
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [tickets, setTickets] = useState([
-    {
-      id: 'TIX-001',
-      category: 'tech',
-      description: 'WiFi keeps disconnecting in room 204',
-      urgency: 'normal',
-      status: 'resolved',
-      createdAt: '2026-08-13T10:00:00Z',
-      updatedAt: '2026-08-13T14:30:00Z',
-      response: 'We have reset the access point for your floor. Please try reconnecting.',
-    },
-  ]);
 
-  const handleSubmit = () => {
-    if (!selectedCategory || !description.trim()) return;
-    setLoading(true);
-    setTimeout(() => {
-      const newTicket = {
-        id: `TIX-${Date.now().toString(36).toUpperCase()}`,
-        category: selectedCategory.type,
-        description: description.trim(),
-        urgency,
-        status: 'open',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setTickets((prev) => [newTicket, ...prev]);
-      setLoading(false);
+  const { data: tickets = [], isLoading } = useQuery({
+    queryKey: ['guest-tickets'],
+    queryFn: () => guestSupportApi.list(),
+    enabled: hasToken,
+    refetchInterval: 30_000,
+  });
+
+  const createTicket = useMutation({
+    mutationFn: (input) => guestSupportApi.create(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['guest-tickets'] });
       setSubmitted(true);
       setSelectedCategory(null);
       setDescription('');
       setUrgency('normal');
       setTimeout(() => setSubmitted(false), 4000);
-    }, 1000);
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!selectedCategory || !description.trim()) return;
+    createTicket.mutate({
+      subject: `${selectedCategory.label}: ${description.trim().slice(0, 80)}`,
+      message: `Room issue (${selectedCategory.label}): ${description.trim()}`,
+      category: selectedCategory.type,
+      priority: urgencyMap[urgency] ?? 'medium',
+    });
   };
 
   const urgencyOptions = [
@@ -81,12 +125,10 @@ export default function IssuesPage() {
     },
   ];
 
-  const statusColors = {
-    open: 'bg-warning/10 text-warning',
-    in_progress: 'bg-info/10 text-info',
-    resolved: 'bg-accent/10 text-accent',
-    closed: 'bg-text-muted/10 text-text-muted',
-  };
+  if (!hasToken) {
+    navigate('/guest-portal/auth/login', { replace: true });
+    return null;
+  }
 
   return (
     <div className="space-y-6 pb-20">
@@ -98,15 +140,17 @@ export default function IssuesPage() {
         >
           <ArrowLeft className="h-5 w-5 text-text-primary" />
         </button>
-        <div className="flex-1">
+        <div>
           <h1 className="text-xl font-bold text-text-primary">Report an Issue</h1>
-          <p className="text-xs text-text-muted">Room 204 · We\'re here to help</p>
+          <p className="text-xs text-text-muted">
+            Maintenance and in-room problems go straight to our engineering team
+          </p>
         </div>
       </div>
 
       {/* Success Toast */}
       {submitted && (
-        <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+        <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 flex items-center gap-3">
           <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
           <div>
             <p className="text-sm font-medium text-text-primary">Issue Reported!</p>
@@ -116,191 +160,146 @@ export default function IssuesPage() {
           </div>
         </div>
       )}
+      {createTicket.isError && (
+        <div className="rounded-xl border border-danger/20 bg-danger/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          <p className="text-sm text-danger">
+            {createTicket.error?.message ?? 'Could not submit. Please try again.'}
+          </p>
+        </div>
+      )}
 
-      {/* New Ticket Form */}
-      <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-        <h2 className="text-sm font-semibold text-text-primary">New Report</h2>
+      {/* Category Grid */}
+      <div>
+        <h2 className="text-sm font-semibold text-text-primary mb-3">What’s the issue?</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {categories.map((cat) => (
+            <button
+              key={cat.label}
+              onClick={() => setSelectedCategory(cat)}
+              className={cn(
+                'rounded-xl border p-4 text-left transition-all',
+                selectedCategory?.label === cat.label
+                  ? 'border-secondary bg-secondary/5'
+                  : 'border-border bg-surface hover:shadow-md'
+              )}
+            >
+              <cat.icon
+                className={cn(
+                  'h-5 w-5 mb-2',
+                  selectedCategory?.label === cat.label ? 'text-secondary' : 'text-text-muted'
+                )}
+              />
+              <p
+                className={cn(
+                  'text-sm font-medium',
+                  selectedCategory?.label === cat.label ? 'text-secondary' : 'text-text-primary'
+                )}
+              >
+                {cat.label}
+              </p>
+              <p className="text-[11px] text-text-muted mt-0.5">{cat.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* Category Selection */}
-        <div>
-          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">
-            Category
-          </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {issueCategories.map((category) => {
-              const icons = {
-                Wrench: Wrench,
-                Sparkles: Sparkles,
-                Wifi: Wifi,
-                Volume2: Volume2,
-                Shield: Shield,
-                HelpCircle: HelpCircle,
-              };
-              const Icon = icons[category.icon] || HelpCircle;
-              const isSelected = selectedCategory?.id === category.id;
+      {/* Details Form */}
+      {selectedCategory && (
+        <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
+          <h3 className="text-sm font-semibold text-text-primary">
+            Tell us more about the {selectedCategory.label.toLowerCase()} issue
+          </h3>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe the problem — e.g. the bathroom sink is leaking"
+            rows={3}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
 
-              return (
+          <div>
+            <p className="text-xs font-medium text-text-secondary mb-2">Urgency</p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {urgencyOptions.map((opt) => (
                 <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category)}
+                  key={opt.id}
+                  onClick={() => setUrgency(opt.id)}
                   className={cn(
-                    'flex flex-col items-center gap-2 rounded-xl border p-3 transition-all',
-                    isSelected
+                    'rounded-lg border px-3 py-2 text-left transition-colors',
+                    urgency === opt.id
                       ? 'border-secondary bg-secondary/5'
                       : 'border-border bg-background hover:bg-surface-elevated'
                   )}
                 >
-                  <div
-                    className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-full',
-                      isSelected ? 'bg-secondary/10' : 'bg-border'
-                    )}
-                  >
-                    <Icon
-                      className={cn('h-5 w-5', isSelected ? 'text-secondary' : 'text-text-muted')}
-                    />
+                  <p className={cn('text-xs font-medium', opt.color)}>{opt.label}</p>
+                  <p className="text-[10px] text-text-muted">{opt.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            className="w-full"
+            disabled={!description.trim() || createTicket.isPending}
+            onClick={handleSubmit}
+          >
+            {createTicket.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…
+              </>
+            ) : (
+              'Submit Issue'
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* Previous Reports */}
+      <div>
+        <h2 className="text-sm font-semibold text-text-primary mb-3">Your Reports</h2>
+        {isLoading ? (
+          <div className="text-center py-8 rounded-xl border border-border bg-surface">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-text-muted mb-2" />
+            <p className="text-sm text-text-muted">Loading…</p>
+          </div>
+        ) : tickets.length === 0 ? (
+          <div className="text-center py-8 rounded-xl border border-border bg-surface">
+            <CheckCircle2 className="mx-auto h-10 w-10 text-text-muted mb-3" />
+            <p className="text-sm text-text-muted">No issues reported</p>
+            <p className="text-xs text-text-secondary mt-1">
+              Anything you report will show up here with live status
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {tickets.map((t) => {
+              const meta = statusMeta[t.status] ?? statusMeta.open;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => navigate('/guest-portal/support/tickets')}
+                  className="w-full flex items-center justify-between rounded-xl border border-border bg-surface p-4 text-left hover:bg-surface-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-warning/10">
+                      <Clock className="h-4 w-4 text-warning" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">{t.subject}</p>
+                      <p className="text-xs text-text-muted">
+                        {t.number} · Reported {timeAgo(t.createdAt)}
+                      </p>
+                    </div>
                   </div>
                   <span
-                    className={cn(
-                      'text-xs font-medium',
-                      isSelected ? 'text-secondary' : 'text-text-primary'
-                    )}
+                    className={cn('rounded-full px-2.5 py-0.5 text-[10px] font-medium', meta.cls)}
                   >
-                    {category.label}
+                    {meta.label}
                   </span>
                 </button>
               );
             })}
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">
-            Description
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-            placeholder="Describe the issue in detail..."
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
-          />
-        </div>
-
-        {/* Urgency */}
-        <div>
-          <label className="text-xs font-medium text-text-secondary uppercase mb-2 block">
-            Urgency
-          </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {urgencyOptions.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setUrgency(opt.id)}
-                className={cn(
-                  'rounded-lg border p-2.5 text-left transition-all',
-                  urgency === opt.id
-                    ? 'border-secondary bg-secondary/5'
-                    : 'border-border bg-background hover:bg-surface-elevated'
-                )}
-              >
-                <p
-                  className={cn(
-                    'text-sm font-medium',
-                    urgency === opt.id ? 'text-secondary' : opt.color
-                  )}
-                >
-                  {opt.label}
-                </p>
-                <p className="text-[10px] text-text-muted mt-0.5">{opt.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Submit */}
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedCategory || !description.trim() || loading}
-          className="w-full rounded-lg bg-secondary py-2.5 text-sm font-medium text-white hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4" />
-              Submit Report
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* Ticket History */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-text-primary">Your Reports</h2>
-        {tickets.length === 0 ? (
-          <div className="text-center py-8 rounded-xl border border-border bg-surface">
-            <HelpCircle className="mx-auto h-10 w-10 text-text-muted mb-3" />
-            <p className="text-sm text-text-muted">No issues reported yet</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="rounded-xl border border-border bg-surface p-4 space-y-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        'rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize',
-                        statusColors[ticket.status]
-                      )}
-                    >
-                      {ticket.status.replace('_', ' ')}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[10px] font-medium',
-                        ticket.urgency === 'urgent'
-                          ? 'text-danger'
-                          : ticket.urgency === 'high'
-                            ? 'text-warning'
-                            : ticket.urgency === 'normal'
-                              ? 'text-info'
-                              : 'text-accent'
-                      )}
-                    >
-                      {ticket.urgency}
-                    </span>
-                  </div>
-                  <span className="text-xs text-text-muted font-mono">{ticket.id}</span>
-                </div>
-                <p className="text-sm text-text-primary">{ticket.description}</p>
-                {ticket.response && (
-                  <div className="rounded-lg bg-accent/5 border border-accent/10 p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <MessageSquare className="h-3.5 w-3.5 text-accent" />
-                      <span className="text-xs font-medium text-accent">Staff Response</span>
-                    </div>
-                    <p className="text-xs text-text-secondary">{ticket.response}</p>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <Clock className="h-3 w-3" />
-                  {new Date(ticket.createdAt).toLocaleDateString()} at{' '}
-                  {new Date(ticket.createdAt).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </div>

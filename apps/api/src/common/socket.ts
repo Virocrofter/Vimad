@@ -66,6 +66,12 @@ export function createSocketServer(server: HttpServer): SocketIOServer {
     authSocket.join(`tenant:${tenantId}`);
     authSocket.join(`user:${userId}`);
 
+    const guestReservationId = (authSocket.user as { guestReservationId?: string })
+      .guestReservationId;
+    if (guestReservationId) {
+      authSocket.join(`reservation:${guestReservationId}`);
+    }
+
     if (role === 'owner' || role === 'admin') {
       authSocket.join('admin');
     }
@@ -94,6 +100,17 @@ export function emitToAdmin<T = unknown>(event: string, payload: T): void {
  */
 export function emitToTenant<T = unknown>(tenantId: string, event: string, payload: T): void {
   io?.to(`tenant:${tenantId}`).emit(event, payload);
+}
+
+/**
+ * Emit an event to the guest socket(s) of one reservation (portal chat).
+ */
+export function emitToReservation<T = unknown>(
+  reservationId: string,
+  event: string,
+  payload: T
+): void {
+  io?.to(`reservation:${reservationId}`).emit(event, payload);
 }
 
 /**

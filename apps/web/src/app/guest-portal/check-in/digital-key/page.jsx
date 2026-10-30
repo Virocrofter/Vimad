@@ -1,331 +1,246 @@
-/* src/app/guest-portal/check-in/digital-key/page.jsx */
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  KeyRound,
-  Smartphone,
-  CheckCircle2,
-  AlertTriangle,
-  Loader2,
-  QrCode,
-  Wifi,
-  Bluetooth,
-  Battery,
-  ShieldCheck,
-  Info,
-  ChevronRight,
-  RotateCcw,
-  Lock,
-  Unlock,
-  DoorOpen,
-  MapPin,
-  Clock,
-  Calendar,
-  Bell,
-  BellOff,
-  Settings,
-  HelpCircle,
-} from 'lucide-react';
+/* src/app/guest-portal/check-in/digital-key/page.jsx — G4: the key card */
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Loader2, AlertTriangle, Fingerprint, RefreshCw, Wifi } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { guestStays, formatDate } from '../../data';
-import { DigitalKeyWidget } from '../../components';
+import { guestPortalApi, getGuestToken } from '../../../../hooks/guestPortalApi';
+import { useStayDetails } from '../../../../hooks/useGuestPortalData';
 
-export default function GuestDigitalKeySetupPage() {
+function formatWindow(from, to) {
+  const f = new Date(from);
+  const t = new Date(to);
+  const sameDay = f.toDateString() === t.toDateString();
+  const opts = { day: 'numeric', month: 'short' };
+  return sameDay
+    ? `${f.toLocaleDateString('en-GB', opts)} · ${f.getHours()}:00–${t.getHours()}:00`
+    : `${f.toLocaleDateString('en-GB', opts)} → ${t.toLocaleDateString('en-GB', opts)}`;
+}
+
+export default function DigitalKeyPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const stayId = searchParams.get('stay');
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay } = useStayDetails();
 
-  const stay = guestStays.find((s) => s.id === stayId);
+  const [key, setKey] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [revealed, setRevealed] = useState(false);
 
-  const [step, setStep] = useState(1); // 1: setup, 2: activating, 3: active, 4: error
-  const [progress, setProgress] = useState(0);
-  const [notifications, setNotifications] = useState(true);
-  const [biometric, setBiometric] = useState(false);
-  const [deviceBound, setDeviceBound] = useState(false);
+  const load = () => {
+    const token = getGuestToken();
+    if (!token) return;
+    setLoading(true);
+    setError(null);
+    guestPortalApi
+      .digitalKey(token)
+      .then(setKey)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    if (step === 2) {
-      const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setStep(3);
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 300);
-      return () => clearInterval(interval);
+    if (!hasToken) {
+      navigate('/guest-portal/auth/login', { replace: true });
+      return;
     }
-  }, [step]);
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasToken]);
 
-  if (!stay) {
+  if (!hasToken) return null;
+
+  if (loading && !key) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Preparing your key…</p>
+      </div>
+    );
+  }
+
+  if (error || !key) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center px-6">
         <AlertTriangle className="h-10 w-10 text-warning mb-3" />
-        <p className="text-sm text-text-muted">Reservation not found</p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => navigate('/guest-portal/booking')}
-        >
-          Back to Reservations
+        <p className="text-sm text-text-muted">
+          {error ??
+            'Your key is not ready yet — check in first at the front desk or complete online check-in.'}
+        </p>
+        <Button variant="outline" className="mt-4" onClick={load}>
+          Retry
         </Button>
       </div>
     );
   }
 
-  const handleActivate = () => {
-    setStep(2);
-    setProgress(0);
-  };
-
-  const handleRetry = () => {
-    setStep(1);
-    setProgress(0);
-  };
-
-  const keyData = {
-    id: 'DK-2026-001',
-    status: step === 3 ? 'active' : 'pending',
-    type: 'mobile',
-    roomNumber: stay.room.number || '204',
-    issuedAt: new Date().toISOString(),
-    expiresAt: stay.dates.departure + 'T' + stay.dates.departureTime + ':00Z',
-    accessLog: stay.digitalKey?.accessLog || [],
-  };
+  const active = new Date() >= new Date(key.activeFrom) && new Date() <= new Date(key.activeUntil);
+  const codeGroups = key.keyCode.match(/.{1,4}/g) ?? [key.keyCode];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
+    <div className="min-h-full pb-20">
+      {/* ambient background */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(1200px 600px at 50% -10%, rgba(79,70,229,0.35), transparent 60%), radial-gradient(900px 500px at 90% 110%, rgba(67,56,202,0.28), transparent 60%)',
+        }}
+      />
+
+      <div className="flex items-center justify-between px-4 pt-4">
         <button
-          onClick={() => navigate('/guest-portal/check-in')}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface hover:bg-surface-elevated transition-colors"
+          onClick={() => navigate('/guest-portal')}
+          className="rounded-full border border-white/10 bg-white/5 p-2 backdrop-blur hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4 text-text-secondary" />
+          <ArrowLeft className="h-5 w-5 text-text-primary" />
         </button>
-        <div>
-          <h1 className="text-lg font-semibold text-text-primary">Digital Key Setup</h1>
-          <p className="text-xs text-text-muted">
-            {stay.property.name} · Room {stay.room.number || 'TBD'}
-          </p>
+        <button
+          onClick={load}
+          className="rounded-full border border-white/10 bg-white/5 p-2 backdrop-blur hover:bg-white/10 transition-colors"
+        >
+          <RefreshCw className="h-4 w-4 text-text-primary" />
+        </button>
+      </div>
+
+      <div className="px-6 pt-10 flex flex-col items-center">
+        <p className="text-[11px] uppercase tracking-[0.3em] text-text-muted mb-1">Digital Key</p>
+        <h1 className="text-lg font-semibold text-text-primary">
+          {stay?.propertyName ?? 'Your hotel'}
+        </h1>
+      </div>
+
+      {/* ── the card ── */}
+      <div className="px-6 mt-8" style={{ perspective: '1200px' }}>
+        <div
+          className="relative mx-auto max-w-sm rounded-3xl p-[1.5px] transition-transform duration-500 hover:[transform:rotateX(4deg)_rotateY(-4deg)]"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.06) 30%, rgba(139,92,246,0.55) 70%, rgba(255,255,255,0.35))',
+            boxShadow: '0 30px 60px -20px rgba(79,70,229,0.55), 0 10px 30px -10px rgba(0,0,0,0.6)',
+          }}
+        >
+          <div
+            className="relative overflow-hidden rounded-3xl px-6 py-8"
+            style={{
+              background:
+                'linear-gradient(150deg, #312e81 0%, #4f46e5 45%, #4338ca 70%, #1e1b4b 100%)',
+            }}
+          >
+            {/* shimmer sweep */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-40"
+              style={{
+                background:
+                  'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.25) 45%, transparent 60%)',
+                backgroundSize: '250% 100%',
+                animation: 'keyShimmer 4.5s ease-in-out infinite',
+              }}
+            />
+            {/* grid texture */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.12]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)',
+                backgroundSize: '28px 28px',
+              }}
+            />
+
+            <div className="relative">
+              {/* top row: chip + NFC */}
+              <div className="flex items-start justify-between">
+                <div
+                  className="rounded-md px-2 py-1.5"
+                  style={{ background: 'linear-gradient(135deg,#fbbf24,#d97706)' }}
+                >
+                  <div className="h-3 w-5 rounded-[2px] border border-amber-950/40 bg-amber-300/70" />
+                </div>
+
+                {/* NFC radiating arcs */}
+                <div className="relative flex h-12 w-12 items-center justify-center">
+                  <span
+                    className="absolute h-12 w-12 rounded-full border border-white/25"
+                    style={{ animation: 'nfcPulse 2.4s ease-out infinite' }}
+                  />
+                  <span
+                    className="absolute h-12 w-12 rounded-full border border-white/25"
+                    style={{ animation: 'nfcPulse 2.4s ease-out infinite 0.8s' }}
+                  />
+                  <span
+                    className="absolute h-12 w-12 rounded-full border border-white/25"
+                    style={{ animation: 'nfcPulse 2.4s ease-out infinite 1.6s' }}
+                  />
+                  <Wifi className="h-5 w-5 text-white/90" style={{ transform: 'rotate(90deg)' }} />
+                </div>
+              </div>
+
+              {/* room */}
+              <div className="mt-8">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-indigo-200/80">Room</p>
+                <p className="text-5xl font-bold text-white tracking-wide drop-shadow">
+                  {stay?.roomNumber ?? '—'}
+                </p>
+              </div>
+
+              {/* key code */}
+              <button
+                onClick={() => setRevealed((r) => !r)}
+                className="mt-6 w-full text-left group"
+                title={revealed ? 'Hide code' : 'Tap to reveal'}
+              >
+                <p className="text-[10px] uppercase tracking-[0.25em] text-indigo-200/80 mb-1 flex items-center gap-1">
+                  <Fingerprint className="h-3 w-3" /> {revealed ? 'Tap to hide' : 'Tap to reveal'}
+                </p>
+                <p
+                  className={cn(
+                    'font-mono text-2xl tracking-[0.35em] text-white transition-all duration-300 select-none',
+                    !revealed && 'blur-md group-active:blur-sm'
+                  )}
+                >
+                  {codeGroups.join(' ')}
+                </p>
+              </button>
+
+              {/* validity */}
+              <div className="mt-7 flex items-center justify-between border-t border-white/15 pt-4">
+                <div>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-indigo-200/70">Valid</p>
+                  <p className="text-xs text-white/90 font-mono">
+                    {formatWindow(key.activeFrom, key.activeUntil)}
+                  </p>
+                </div>
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold',
+                    active
+                      ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-300/30'
+                      : 'bg-amber-400/20 text-amber-200 border border-amber-300/30'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      active ? 'bg-emerald-300' : 'bg-amber-300',
+                      active && 'animate-pulse'
+                    )}
+                  />
+                  {active ? 'ACTIVE' : 'SCHEDULED'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {step === 1 && (
-        <div className="space-y-6">
-          {/* Key Preview Card */}
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="bg-gradient-to-br from-secondary/20 to-secondary/5 p-6 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 mb-4">
-                <KeyRound className="h-10 w-10 text-secondary" />
-              </div>
-              <h2 className="text-lg font-semibold text-text-primary">Mobile Key</h2>
-              <p className="text-xs text-text-muted mt-1">
-                Room {stay.room.number || '204'} · {stay.property.name}
-              </p>
-              <p className="text-xs text-text-muted mt-0.5">
-                Valid {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)}
-              </p>
-            </div>
-            <div className="p-4 space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-secondary flex items-center gap-2">
-                  <Smartphone className="h-4 w-4 text-text-muted" />
-                  Device
-                </span>
-                <span className="text-text-primary font-medium">This device</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-secondary flex items-center gap-2">
-                  <Wifi className="h-4 w-4 text-text-muted" />
-                  Bluetooth Required
-                </span>
-                <span className="text-accent flex items-center gap-1 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Enabled
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-secondary flex items-center gap-2">
-                  <Battery className="h-4 w-4 text-text-muted" />
-                  Battery Level
-                </span>
-                <span className="text-text-primary font-medium">85%</span>
-              </div>
-            </div>
-          </div>
+      <p className="mt-6 text-center text-[11px] text-text-muted px-10">
+        Hold your phone near the door reader. This key works offline within the valid window.
+      </p>
 
-          {/* Settings */}
-          <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-text-primary">Key Settings</h3>
-
-            <label className="flex items-center justify-between cursor-pointer">
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-text-muted" />
-                <span className="text-sm text-text-secondary">Unlock Notifications</span>
-              </div>
-              <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-border transition-colors">
-                <input
-                  type="checkbox"
-                  checked={notifications}
-                  onChange={(e) => setNotifications(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <span
-                  className={cn(
-                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                    notifications ? 'translate-x-6' : 'translate-x-1'
-                  )}
-                />
-                <div
-                  className={cn(
-                    'absolute inset-0 rounded-full transition-colors',
-                    notifications ? 'bg-secondary' : 'bg-border'
-                  )}
-                />
-              </div>
-            </label>
-
-            <label className="flex items-center justify-between cursor-pointer">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-text-muted" />
-                <span className="text-sm text-text-secondary">Biometric Unlock</span>
-              </div>
-              <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-border transition-colors">
-                <input
-                  type="checkbox"
-                  checked={biometric}
-                  onChange={(e) => setBiometric(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <span
-                  className={cn(
-                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                    biometric ? 'translate-x-6' : 'translate-x-1'
-                  )}
-                />
-                <div
-                  className={cn(
-                    'absolute inset-0 rounded-full transition-colors',
-                    biometric ? 'bg-secondary' : 'bg-border'
-                  )}
-                />
-              </div>
-            </label>
-
-            <label className="flex items-center justify-between cursor-pointer">
-              <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-text-muted" />
-                <span className="text-sm text-text-secondary">Device Binding</span>
-              </div>
-              <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-border transition-colors">
-                <input
-                  type="checkbox"
-                  checked={deviceBound}
-                  onChange={(e) => setDeviceBound(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <span
-                  className={cn(
-                    'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
-                    deviceBound ? 'translate-x-6' : 'translate-x-1'
-                  )}
-                />
-                <div
-                  className={cn(
-                    'absolute inset-0 rounded-full transition-colors',
-                    deviceBound ? 'bg-secondary' : 'bg-border'
-                  )}
-                />
-              </div>
-            </label>
-          </div>
-
-          {/* Info */}
-          <div className="rounded-lg border border-info/20 bg-info/5 p-3 flex items-start gap-2">
-            <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
-            <div className="text-xs text-text-secondary space-y-1">
-              <p>
-                Your digital key is encrypted and tied to this device. Keep Bluetooth and location
-                services enabled for the best experience.
-              </p>
-              <p>If you lose your device, contact the front desk immediately to revoke the key.</p>
-            </div>
-          </div>
-
-          <Button size="lg" className="w-full" onClick={handleActivate}>
-            <KeyRound className="mr-2 h-4 w-4" />
-            Activate Digital Key
-          </Button>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="text-center py-12 space-y-6">
-          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-secondary/10">
-            <Loader2 className="h-12 w-12 text-secondary animate-spin" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-text-primary">Activating Your Key...</h3>
-            <p className="text-sm text-text-muted mt-1">Please keep your device nearby</p>
-          </div>
-
-          <div className="max-w-xs mx-auto">
-            <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-              <div
-                className="h-full rounded-full bg-secondary transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-text-muted mt-2">{progress}%</p>
-          </div>
-
-          <div className="space-y-2 text-xs text-text-muted">
-            <p className={progress > 20 ? 'text-accent' : ''}>✓ Connecting to hotel system</p>
-            <p className={progress > 40 ? 'text-accent' : ''}>✓ Generating secure key</p>
-            <p className={progress > 60 ? 'text-accent' : ''}>✓ Binding to device</p>
-            <p className={progress > 80 ? 'text-accent' : ''}>✓ Configuring access permissions</p>
-            <p className={progress > 95 ? 'text-accent' : ''}>✓ Finalizing setup</p>
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="space-y-6">
-          <div className="text-center py-6">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 mb-4">
-              <CheckCircle2 className="h-10 w-10 text-accent" />
-            </div>
-            <h3 className="text-lg font-semibold text-text-primary">Digital Key Active!</h3>
-            <p className="text-sm text-text-muted mt-1">
-              Your key is ready to use. Tap the button below to unlock your door.
-            </p>
-          </div>
-
-          <DigitalKeyWidget
-            keyData={keyData}
-            onUnlock={() => {
-              // Simulate unlock
-              alert('Door unlocked!');
-            }}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" onClick={() => navigate('/guest-portal/keys')}>
-              <KeyRound className="mr-2 h-4 w-4" />
-              Key Details
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/guest-portal')}>
-              <ChevronRight className="mr-2 h-4 w-4" />
-              Dashboard
-            </Button>
-          </div>
-        </div>
-      )}
+      <style>{`
+        @keyframes keyShimmer { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+        @keyframes nfcPulse { 0% { transform: scale(0.55); opacity: 0.9; } 100% { transform: scale(1.5); opacity: 0; } }
+      `}</style>
     </div>
   );
 }

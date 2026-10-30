@@ -63,8 +63,9 @@ import {
   getPhaseBadge,
   formatDate,
   timeAgo,
-} from './data';
-import { tierBenefits, serviceStatusMeta } from './data';
+  tierBenefits,
+  serviceStatusMeta,
+} from '../../lib/guest-utils';
 
 // ─── Guest Booking Card ───
 export function GuestBookingCard({ stay, onAction }) {

@@ -6,6 +6,7 @@ import { paginate, paginationSchema, skipTake } from '../../common/pagination.js
 import { broadcastAuditEvent } from '../audit/audit.events.js';
 import { sendReservationConfirmation } from '../notifications/transactional.service.js';
 import { assertSellable } from '../inventory/inventory.service.js';
+import { refreshInventoryCache } from '../inventory/inventory.cache.js';
 import {
   broadcastReservationCreated,
   broadcastReservationUpdated,
@@ -94,6 +95,7 @@ export interface ReservationListQuery {
   page: number;
   pageSize: number;
   propertyId?: string;
+  propertyIds?: string[];
   guestId?: string;
   status?: string;
   source?: string;
@@ -178,6 +180,16 @@ export async function listReservations(tenantId: string, query: ReservationListQ
 
   const where: Record<string, unknown> = { tenantId };
   if (query.propertyId) where.propertyId = query.propertyId;
+  // P1-D2/D4: property-scope enforcement for scoped roles (null = global,
+  // handled by routes). A scoped user naming a property outside their set
+  // gets an empty result instead of a 403 -- existence stays hidden.
+  if (query.propertyIds) {
+    if (query.propertyId && !query.propertyIds.includes(query.propertyId)) {
+      where.propertyId = '__outside_scope__';
+    } else {
+      where.propertyId = { in: query.propertyIds };
+    }
+  }
   if (query.guestId) where.guestId = query.guestId;
   if (query.status) where.status = query.status;
   if (query.source) where.source = query.source;
@@ -283,7 +295,7 @@ export async function getReservation(
   return reservation;
 }
 
-function audit(
+async function audit(
   id: string,
   type: string,
   label: string,
@@ -295,6 +307,22 @@ function audit(
   metadata?: unknown,
   actor: AuditActor = SYSTEM_ACTOR
 ) {
+  // Persist to the audit trail first — the DB row is the durable record;
+  // the broadcast below is only a live UI pulse. This helper previously
+  // only broadcast, so all twelve reservation lifecycle call sites left no
+  // audit trail (found by 0.3 live smoke: check-in 200, audit_logs empty).
+  await prisma.auditLog.create({
+    data: {
+      tenantId,
+      userId: actor?.id ?? null,
+      action: type,
+      entity: 'reservation',
+      entityId: targetId,
+      metadata: metadata ? (metadata as Prisma.InputJsonObject) : undefined,
+      ipAddress: '0.0.0.0',
+    },
+  });
+
   broadcastAuditEvent({
     id,
     timestamp: new Date().toISOString(),
@@ -355,9 +383,13 @@ async function rebuildStays(
 }
 
 /* Recalculate reservation total/balance from stay rows + folio payments,
- * then mirror the balance onto the folio. Single write path for both. */
-async function syncReservationTotals(reservationId: string) {
-  const reservation = await prisma.reservation.findUniqueOrThrow({
+ * then mirror the balance onto the folio. Single write path for both.
+ * Pass a transaction client to run inside an existing transaction. */
+async function syncReservationTotals(
+  reservationId: string,
+  client: Prisma.TransactionClient | PrismaClient = prisma
+) {
+  const reservation = await client.reservation.findUniqueOrThrow({
     where: { id: reservationId },
     include: { stays: true, folio: true },
   });
@@ -368,15 +400,25 @@ async function syncReservationTotals(reservationId: string) {
   const totalPayments = reservation.folio ? Number(reservation.folio.totalPayments) : 0;
   const balance = Math.round((totalAmount - totalPayments) * 100) / 100;
 
-  await prisma.$transaction([
-    prisma.reservation.update({
+  if (client === prisma) {
+    await prisma.$transaction([
+      prisma.reservation.update({
+        where: { id: reservationId },
+        data: { totalAmount, balance },
+      }),
+      ...(reservation.folio
+        ? [prisma.folio.update({ where: { reservationId }, data: { balance } })]
+        : []),
+    ]);
+  } else {
+    await client.reservation.update({
       where: { id: reservationId },
       data: { totalAmount, balance },
-    }),
-    ...(reservation.folio
-      ? [prisma.folio.update({ where: { reservationId }, data: { balance } })]
-      : []),
-  ]);
+    });
+    if (reservation.folio) {
+      await client.folio.update({ where: { reservationId }, data: { balance } });
+    }
+  }
   return { totalAmount, balance };
 }
 
@@ -411,7 +453,57 @@ async function enforceTypeInventory(
   }
 }
 
+// Advisory-lock key shared by EVERY reservation-create path (web booking
+// engine, front-desk API, internal callers). Locking per property+roomType
+// makes the last-room check-and-insert atomic across all of them — the web
+// engine and the front desk can no longer oversell each other.
+export function inventoryLockKey(propertyId: string, roomTypeId: string | null): string {
+  return `public-booking:${propertyId}:${roomTypeId ?? 'none'}`;
+}
+
+/* The cache is a derived artifact: a failed rebuild must never fail the
+ * booking — the scheduler will converge it. Awaited (not voided) so that
+ * post-commit readers (tests, webhooks, availability grids) observe
+ * converged rows immediately. */
+async function refreshCacheAfterMutation(propertyId: string): Promise<void> {
+  try {
+    await refreshInventoryCache(propertyId);
+  } catch (err) {
+    logger.warn({ err, propertyId }, 'inventory cache refresh failed; scheduler will converge');
+  }
+}
+
 export async function createReservation(
+  tenantId: string,
+  input: ReservationCreateInput,
+  actor: AuditActor = SYSTEM_ACTOR,
+  client: Prisma.TransactionClient | PrismaClient = prisma
+) {
+  if (client !== prisma) {
+    // Caller already holds the inventory lock on this transaction (the public
+    // booking engine) — create directly so the lock is taken exactly once.
+    return createReservationInner(tenantId, input, actor, client);
+  }
+  const created = await prisma.$transaction(
+    async (tx) => {
+      let roomTypeId = input.roomTypeId ?? null;
+      if (!roomTypeId && input.roomId) {
+        const room = await tx.room.findFirst({
+          where: { id: input.roomId },
+          select: { roomTypeId: true },
+        });
+        roomTypeId = room?.roomTypeId ?? null;
+      }
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${inventoryLockKey(input.propertyId, roomTypeId)}))`;
+      return createReservationInner(tenantId, input, actor, tx);
+    },
+    { maxWait: 15000, timeout: 15000 }
+  );
+  await refreshCacheAfterMutation(input.propertyId);
+  return created;
+}
+
+async function createReservationInner(
   tenantId: string,
   input: ReservationCreateInput,
   actor: AuditActor = SYSTEM_ACTOR,
@@ -445,6 +537,10 @@ export async function createReservation(
   }
 
   let rate = input.rate ?? 0;
+  // Denormalised onto the reservation for reporting joins: room-level bookings
+  // would otherwise leave roomTypeId NULL (the null that made a DB-truth query
+  // silently return zero rows during race verification).
+  let resolvedRoomTypeId: string | null = input.roomTypeId ?? null;
   if (input.roomId) {
     const room = await client.room.findFirst({
       where: { id: input.roomId, propertyId: property.id, status: { not: 'inactive' } },
@@ -456,6 +552,7 @@ export async function createReservation(
     if (input.rate === undefined) {
       rate = Number(room.roomType.ratePlans[0]?.baseRate ?? 0);
     }
+    resolvedRoomTypeId = room.roomType.id;
     await assertRoomFree(tenantId, input.roomId, input.arrivalDate, input.nights, null, client);
     await enforceTypeInventory(
       tenantId,
@@ -473,6 +570,7 @@ export async function createReservation(
     if (!requestedType) {
       throw new AppError(404, 'Room type not found in this property', 'NOT_FOUND');
     }
+    resolvedRoomTypeId = requestedType.id;
     await enforceTypeInventory(
       tenantId,
       property.id,
@@ -499,6 +597,7 @@ export async function createReservation(
       adults: input.adults,
       children: input.children,
       notes: input.notes,
+      roomTypeId: resolvedRoomTypeId,
       ratePlanId: input.ratePlanId ?? null,
       eta: input.eta ?? null,
       specialRequests: input.specialRequests ?? null,
@@ -527,7 +626,7 @@ export async function createReservation(
 
   const full = await getReservation(tenantId, reservation.id, client);
 
-  audit(
+  await audit(
     `audit-res-create-${reservation.id}`,
     'create',
     'Reservation Created',
@@ -572,7 +671,6 @@ export async function assignRoom(
     throw new AppError(404, 'Room not found in this property', 'NOT_FOUND');
   }
 
-  await assertRoomFree(tenantId, input.roomId, reservation.arrivalDate, reservation.nights, id);
   await enforceTypeInventory(
     tenantId,
     reservation.propertyId,
@@ -586,12 +684,29 @@ export async function assignRoom(
     input.rate ??
     (reservation.nights > 0 ? Number(reservation.totalAmount) / reservation.nights : 0);
 
-  await rebuildStays(id, input.roomId, reservation.arrivalDate, reservation.nights, rate);
-  const { totalAmount, balance } = await syncReservationTotals(id);
+  // Serialize with create/update on the same property+roomType: the lock makes
+  // assert-then-rebuild atomic, so a booking racing this assignment cannot
+  // slip between the check and the stay writes.
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${inventoryLockKey(reservation.propertyId, room.roomTypeId)}))`;
+      await assertRoomFree(
+        tenantId,
+        input.roomId,
+        reservation.arrivalDate,
+        reservation.nights,
+        id,
+        tx
+      );
+      await rebuildStays(id, input.roomId, reservation.arrivalDate, reservation.nights, rate, tx);
+      await syncReservationTotals(id, tx);
+    },
+    { maxWait: 15000, timeout: 15000 }
+  );
 
   const updated = await getReservation(tenantId, id);
 
-  audit(
+  await audit(
     `audit-res-assign-${id}`,
     'update',
     'Room Assigned',
@@ -600,11 +715,12 @@ export async function assignRoom(
     updated.confirmationNumber,
     tenantId,
     'low',
-    { roomId: room.id, totalAmount, balance },
+    { roomId: room.id },
     actor
   );
 
   broadcastReservationUpdated(toEventPayload(updated));
+  await refreshCacheAfterMutation(reservation.propertyId);
 
   return updated;
 }
@@ -634,8 +750,6 @@ export async function updateReservation(
   const roomChanged = targetRoomId !== currentRoomId;
   const rateProvided = input.rate !== undefined;
 
-  const holdsInventory = ACTIVE_STATUSES.includes(existing.status);
-
   let rate =
     input.rate ??
     (existing.stays.length > 0
@@ -645,49 +759,72 @@ export async function updateReservation(
         : 0);
   rate = Math.round(rate * 100) / 100;
 
-  if (targetRoomId && (datesChanged || roomChanged || rateProvided) && holdsInventory) {
+  const reservationData = {
+    ...(input.arrivalDate ? { arrivalDate: newArrival } : {}),
+    ...(input.departureDate ? { departureDate: newDeparture } : {}),
+    nights: newNights,
+    ...(input.adults !== undefined ? { adults: input.adults } : {}),
+    ...(input.children !== undefined ? { children: input.children } : {}),
+    ...(input.notes !== undefined ? { notes: input.notes } : {}),
+    ...(input.source !== undefined ? { source: input.source } : {}),
+    ...(input.ratePlanId !== undefined ? { ratePlanId: input.ratePlanId } : {}),
+    ...(input.eta !== undefined ? { eta: input.eta } : {}),
+    ...(input.specialRequests !== undefined ? { specialRequests: input.specialRequests } : {}),
+    ...(input.marketSegment !== undefined ? { marketSegment: input.marketSegment } : {}),
+    ...(input.guaranteed !== undefined ? { guaranteed: input.guaranteed } : {}),
+    ...(input.houseUse !== undefined ? { houseUse: input.houseUse } : {}),
+    ...(input.doNotMove !== undefined ? { doNotMove: input.doNotMove } : {}),
+    ...(input.fixedRoom !== undefined ? { fixedRoom: input.fixedRoom } : {}),
+  };
+
+  const needsStayRebuild = Boolean(targetRoomId && (datesChanged || roomChanged || rateProvided));
+  let inventoryChanged = false;
+
+  if (needsStayRebuild) {
     const room = await prisma.room.findFirst({
-      where: { id: targetRoomId, propertyId: existing.propertyId },
+      where: { id: targetRoomId!, propertyId: existing.propertyId },
     });
     if (!room) {
       throw new AppError(404, 'Room not found in this property', 'NOT_FOUND');
     }
-    await assertRoomFree(tenantId, targetRoomId, newArrival, newNights, id);
-    await rebuildStays(id, targetRoomId, newArrival, newNights, rate);
-  } else if (targetRoomId && (datesChanged || roomChanged) && !holdsInventory) {
-    await rebuildStays(id, targetRoomId, newArrival, newNights, rate);
+
+    // Serialize with create/assign-room: lock → fresh status check →
+    // availability assert → rebuild stays → row update → totals, all in one
+    // transaction. Without this, two concurrent date edits on the same
+    // reservation interleaved deleteMany/insert and either 500'd with P2002
+    // or lost nights (P1 hardening; regression: P1-A4b).
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${inventoryLockKey(existing.propertyId, room.roomTypeId)}))`;
+
+        const fresh = await tx.reservation.findFirst({
+          where: { id, tenantId },
+          select: { status: true },
+        });
+        const holdsInventory = !!fresh && ACTIVE_STATUSES.includes(fresh.status);
+
+        if (holdsInventory) {
+          await assertRoomFree(tenantId, targetRoomId!, newArrival, newNights, id, tx);
+        }
+        await rebuildStays(id, targetRoomId!, newArrival, newNights, rate, tx);
+        await tx.reservation.update({ where: { id }, data: reservationData });
+        await syncReservationTotals(id, tx);
+      },
+      { maxWait: 15000, timeout: 15000 }
+    );
+    inventoryChanged = true;
+  } else {
+    await prisma.reservation.update({ where: { id }, data: reservationData });
+    await syncReservationTotals(id);
   }
 
-  const reservation = await prisma.reservation.update({
-    where: { id },
-    data: {
-      ...(input.arrivalDate ? { arrivalDate: newArrival } : {}),
-      ...(input.departureDate ? { departureDate: newDeparture } : {}),
-      nights: newNights,
-      ...(input.adults !== undefined ? { adults: input.adults } : {}),
-      ...(input.children !== undefined ? { children: input.children } : {}),
-      ...(input.notes !== undefined ? { notes: input.notes } : {}),
-      ...(input.source !== undefined ? { source: input.source } : {}),
-      ...(input.ratePlanId !== undefined ? { ratePlanId: input.ratePlanId } : {}),
-      ...(input.eta !== undefined ? { eta: input.eta } : {}),
-      ...(input.specialRequests !== undefined ? { specialRequests: input.specialRequests } : {}),
-      ...(input.marketSegment !== undefined ? { marketSegment: input.marketSegment } : {}),
-      ...(input.guaranteed !== undefined ? { guaranteed: input.guaranteed } : {}),
-      ...(input.houseUse !== undefined ? { houseUse: input.houseUse } : {}),
-      ...(input.doNotMove !== undefined ? { doNotMove: input.doNotMove } : {}),
-      ...(input.fixedRoom !== undefined ? { fixedRoom: input.fixedRoom } : {}),
-    },
-  });
-
-  await syncReservationTotals(id);
-
-  audit(
+  await audit(
     `audit-res-update-${id}`,
     'update',
     'Reservation Updated',
-    `Reservation ${reservation.confirmationNumber} updated`,
+    `Reservation ${existing.confirmationNumber} updated`,
     id,
-    reservation.confirmationNumber,
+    existing.confirmationNumber,
     tenantId,
     'low',
     { changedFields: Object.keys(input) },
@@ -696,6 +833,7 @@ export async function updateReservation(
 
   const full = await getReservation(tenantId, id);
   broadcastReservationUpdated(toEventPayload(full));
+  if (inventoryChanged) await refreshCacheAfterMutation(existing.propertyId);
 
   return full;
 }
@@ -719,13 +857,20 @@ export async function checkInReservation(
     throw new AppError(409, 'Assign a room before check-in', 'NO_ROOM_ASSIGNED');
   }
 
-  const updated = await prisma.reservation.update({
+  // P1-C1: atomic transition guard. The status predicate lives INSIDE the
+  // UPDATE, so a concurrent double-submit can flip at most one row — a
+  // read-then-update here let both requests through (two transitions, two
+  // audit rows). count === 0 means another request won the race.
+  const guard = await prisma.reservation.updateMany({
+    where: { id, tenantId, status: 'confirmed' },
+    data: { status: 'checked_in', checkedInAt: new Date(), checkedInBy: actor.id },
+  });
+  if (guard.count === 0) {
+    throw new AppError(409, 'Reservation was already checked in by another request', 'CONFLICT');
+  }
+
+  const updated = await prisma.reservation.findUniqueOrThrow({
     where: { id },
-    data: {
-      status: 'checked_in',
-      checkedInAt: new Date(),
-      checkedInBy: actor.id,
-    },
     include: {
       guest: { select: { id: true, firstName: true, lastName: true } },
       property: { select: { id: true, name: true } },
@@ -733,7 +878,7 @@ export async function checkInReservation(
     },
   });
 
-  audit(
+  await audit(
     `audit-res-checkin-${id}`,
     'checkin',
     'Guest Checked In',
@@ -766,21 +911,18 @@ export async function checkOutReservation(
     );
   }
 
+  // P1-C1: atomic transition guard — same pattern as check-in.
+  const guard = await prisma.reservation.updateMany({
+    where: { id, tenantId, status: 'checked_in' },
+    data: { status: 'checked_out', checkedOutAt: new Date(), checkedOutBy: actor.id },
+  });
+  if (guard.count === 0) {
+    throw new AppError(409, 'Reservation was already checked out by another request', 'CONFLICT');
+  }
+
   const today = day(new Date());
 
-  const [updated] = await prisma.$transaction([
-    prisma.reservation.update({
-      where: { id },
-      data: {
-        status: 'checked_out',
-        checkedOutAt: new Date(),
-        checkedOutBy: actor.id,
-      },
-      include: {
-        guest: { select: { id: true, firstName: true, lastName: true } },
-        property: { select: { id: true, name: true } },
-      },
-    }),
+  await prisma.$transaction([
     prisma.folio.updateMany({
       where: { reservationId: id, status: 'open' },
       data: { status: 'closed' },
@@ -795,7 +937,15 @@ export async function checkOutReservation(
     }),
   ]);
 
-  audit(
+  const updated = await prisma.reservation.findUniqueOrThrow({
+    where: { id },
+    include: {
+      guest: { select: { id: true, firstName: true, lastName: true } },
+      property: { select: { id: true, name: true } },
+    },
+  });
+
+  await audit(
     `audit-res-checkout-${id}`,
     'checkout',
     'Guest Checked Out',
@@ -829,23 +979,27 @@ export async function cancelReservation(
     );
   }
 
-  const updated = await prisma.reservation.update({
-    where: { id },
-    data: {
-      status: 'cancelled',
-      cancelledAt: new Date(),
-      cancelledBy: actor.id,
-      cancelReason: reason ?? null,
-    },
-    include: {
-      guest: { select: { id: true, firstName: true, lastName: true } },
-      property: { select: { id: true, name: true } },
-    },
-  });
+  // Atomic: the status flip and the stay release commit together. A crash
+  // between two separate statements used to leave a cancelled reservation
+  // still blocking its room-nights (P1-A5 hardening).
+  const [updated] = await prisma.$transaction([
+    prisma.reservation.update({
+      where: { id },
+      data: {
+        status: 'cancelled',
+        cancelledAt: new Date(),
+        cancelledBy: actor.id,
+        cancelReason: reason ?? null,
+      },
+      include: {
+        guest: { select: { id: true, firstName: true, lastName: true } },
+        property: { select: { id: true, name: true } },
+      },
+    }),
+    prisma.reservationStay.deleteMany({ where: { reservationId: id } }),
+  ]);
 
-  await prisma.reservationStay.deleteMany({ where: { reservationId: id } });
-
-  audit(
+  await audit(
     `audit-res-cancel-${id}`,
     'cancel',
     'Reservation Cancelled',
@@ -859,6 +1013,7 @@ export async function cancelReservation(
   );
 
   broadcastReservationCancelled(toEventPayload(updated));
+  await refreshCacheAfterMutation(reservation.propertyId);
 
   return updated;
 }
@@ -874,22 +1029,23 @@ export async function markNoShow(tenantId: string, id: string, actor: AuditActor
     );
   }
 
-  const updated = await prisma.reservation.update({
-    where: { id },
-    data: {
-      status: 'no_show',
-      noShowAt: new Date(),
-    },
-    include: {
-      guest: { select: { id: true, firstName: true, lastName: true } },
-      property: { select: { id: true, name: true } },
-    },
-  });
+  // Atomic: status flip + room-night release commit together (see cancelReservation).
+  const [updated] = await prisma.$transaction([
+    prisma.reservation.update({
+      where: { id },
+      data: {
+        status: 'no_show',
+        noShowAt: new Date(),
+      },
+      include: {
+        guest: { select: { id: true, firstName: true, lastName: true } },
+        property: { select: { id: true, name: true } },
+      },
+    }),
+    prisma.reservationStay.deleteMany({ where: { reservationId: id } }),
+  ]);
 
-  // Free the room — the guest never arrived
-  await prisma.reservationStay.deleteMany({ where: { reservationId: id } });
-
-  audit(
+  await audit(
     `audit-res-noshow-${id}`,
     'no_show',
     'No-Show Recorded',
@@ -903,6 +1059,7 @@ export async function markNoShow(tenantId: string, id: string, actor: AuditActor
   );
 
   broadcastReservationCancelled(toEventPayload(updated));
+  await refreshCacheAfterMutation(reservation.propertyId);
 
   return updated;
 }
@@ -924,7 +1081,7 @@ export async function resendConfirmation(
     data: { confirmationSentAt: new Date() },
   });
 
-  audit(
+  await audit(
     `audit-res-resend-${id}`,
     'update',
     'Confirmation Resent',
@@ -965,7 +1122,7 @@ export async function updateStayRate(
 
   const { totalAmount, balance } = await syncReservationTotals(stay.reservationId);
 
-  audit(
+  await audit(
     `audit-res-stayrate-${stayId}`,
     'update',
     'Night Rate Updated',
@@ -1009,7 +1166,7 @@ export async function createTrace(
     },
   });
 
-  audit(
+  await audit(
     `audit-res-trace-${trace.id}`,
     'update',
     'Trace Added',
@@ -1081,7 +1238,7 @@ export async function addCompanion(
     },
   });
 
-  audit(
+  await audit(
     `audit-res-companion-${companion.id}`,
     'update',
     'Companion Added',
@@ -1135,7 +1292,7 @@ export async function deleteReservation(
     prisma.reservation.deleteMany({ where: { id, tenantId } }),
   ]);
 
-  audit(
+  await audit(
     `audit-res-delete-${id}`,
     'delete',
     'Reservation Deleted',

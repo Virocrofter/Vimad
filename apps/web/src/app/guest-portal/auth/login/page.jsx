@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { KeyRound, ArrowRight, HelpCircle } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { useGuestStore } from '../../store';
-import { guestProfile, guestStays } from '../../data';
 import { setGuestToken } from '../../../../hooks/guestPortalApi';
 
 const API_BASE = (
@@ -16,8 +14,6 @@ const API_BASE = (
 
 export default function GuestLoginPage() {
   const navigate = useNavigate();
-  const login = useGuestStore((s) => s.login);
-  const setCurrentStay = useGuestStore((s) => s.setCurrentStay);
 
   const [bookingRef, setBookingRef] = useState('');
   const [lastName, setLastName] = useState('');
@@ -71,8 +67,6 @@ export default function GuestLoginPage() {
       //    truth for the storage key (guestPortalApi.TOKEN_KEY). The guard
       //    (GuestAuthGuard) and every portal page read the same key.
       setGuestToken(verifyBody.data.token);
-      login(guestProfile);
-      setCurrentStay(guestStays[0]);
       navigate('/guest-portal');
     } catch {
       setError('Could not reach the server — try again in a moment.');

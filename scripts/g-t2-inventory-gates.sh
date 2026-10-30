@@ -4,6 +4,7 @@ ok(){ PASS=$((PASS+1)); echo "PASS: $1"; }
 bad(){ FAIL=$((FAIL+1)); echo "FAIL: $1"; }
 API="http://localhost:3001"
 cd ~/Desktop/Vimad || exit 1
+(cd apps/api && npx tsx ../../scripts/room-block.ts cleanup > /dev/null 2>&1)
 TOKEN=$(curl -s -X POST "$API/auth/login" -H 'Content-Type: application/json' -d '{"tenantSlug":"demo-hotel","email":"admin@demo.com","password":"admin123"}' | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d.get("token") or d.get("accessToken") or (d.get("data") or {}).get("token") or "")')
 [ -n "$TOKEN" ] && ok "login" || { bad "login"; exit 1; }
 PROPS=$(curl -s "$API/v1/properties" -H "Authorization: Bearer $TOKEN")

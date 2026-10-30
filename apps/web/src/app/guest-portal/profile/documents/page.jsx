@@ -1,353 +1,307 @@
-/* src/app/guest-portal/profile/documents/page.jsx */
-import { useState } from 'react';
+/* src/app/guest-portal/profile/documents/page.jsx — G3: documents vault */
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   FileText,
-  Shield,
   Upload,
-  Camera,
-  Check,
-  X,
   Loader2,
-  Eye,
-  Trash2,
-  Download,
-  Lock,
   AlertTriangle,
-  Info,
-  BookOpen,
-  Car,
-  IdCard,
-  Plane,
-  FileCheck,
   CheckCircle2,
+  BadgeCheck,
+  XCircle,
   Clock,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { guestProfile, documentTypes, formatDate } from '../../data';
-import { SectionHeader, FileUploadZone, DocumentCard, EmptyState } from '../../components';
+import { getGuestToken } from '../../../../hooks/guestPortalApi';
+import {
+  useGuestDocuments,
+  useAddGuestDocument,
+  useUploadGuestDocument,
+} from '../../../../hooks/useGuestProfile';
+import { formatDate } from '../../../../lib/guest-utils';
+
+const verifyMeta = {
+  pending: {
+    label: 'Pending verification',
+    chip: 'bg-warning/10 text-warning border-warning/20',
+    icon: Clock,
+  },
+  verified: {
+    label: 'Verified',
+    chip: 'bg-accent/10 text-accent border-accent/20',
+    icon: BadgeCheck,
+  },
+  rejected: {
+    label: 'Rejected — see front desk',
+    chip: 'bg-danger/10 text-danger border-danger/20',
+    icon: XCircle,
+  },
+};
+
+const typeLabels = {
+  passport: 'Passport',
+  national_id: 'National ID',
+  driver_license: "Driver's Licence",
+  other: 'Other',
+};
 
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState(guestProfile.documents);
-  const [uploading, setUploading] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [uploadType, setUploadType] = useState('passport');
-  const [uploadCountry, setUploadCountry] = useState('');
-  const [uploadExpiry, setUploadExpiry] = useState('');
-  const [previewDoc, setPreviewDoc] = useState(null);
+  const navigate = useNavigate();
+  const hasToken = Boolean(getGuestToken());
+  const { data, isLoading, isError, refetch } = useGuestDocuments();
+  const addDoc = useAddGuestDocument();
+  const upload = useUploadGuestDocument();
 
-  const handleUpload = async (files) => {
-    if (!files || files.length === 0) return;
-    setUploading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    const newDoc = {
-      id: `DOC-${Date.now().toString(36).toUpperCase()}`,
-      type: uploadType,
-      country: uploadCountry || 'US',
-      numberHash: `sha256:${Math.random().toString(36).substring(7)}`,
-      expiryDate: uploadExpiry || '2030-01-01',
-      verified: false,
-      fileName: files[0].name,
-      uploadedAt: new Date().toISOString(),
-    };
-    setDocuments((prev) => [...prev, newDoc]);
-    setUploading(false);
-    setShowUploadModal(false);
-    setUploadCountry('');
-    setUploadExpiry('');
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ type: 'passport', number: '', issuedBy: '', expiryDate: '' });
+  const [feedback, setFeedback] = useState(null);
+  const fileInputRef = useRef(null);
+  const pendingUploadIdRef = useRef(null);
+
+  useEffect(() => {
+    if (!hasToken) navigate('/guest-portal/auth/login', { replace: true });
+  }, [hasToken, navigate]);
+
+  if (!hasToken) return null;
+
+  const handleAdd = () => {
+    setFeedback(null);
+    addDoc.mutate(
+      {
+        type: form.type,
+        number: form.number.trim() || undefined,
+        issuedBy: form.issuedBy.trim() || undefined,
+        expiryDate: form.expiryDate || undefined,
+      },
+      {
+        onSuccess: (d) => {
+          setFeedback({
+            ok: true,
+            text: 'Document added — now attach a scan or photo to speed up verification.',
+          });
+          setShowForm(false);
+          setForm({ type: 'passport', number: '', issuedBy: '', expiryDate: '' });
+          pendingUploadIdRef.current = d.document.id;
+          setTimeout(() => fileInputRef.current?.click(), 250);
+        },
+        onError: (e) => setFeedback({ ok: false, text: e.message }),
+      }
+    );
   };
 
-  const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this document?')) {
-      setDocuments((prev) => prev.filter((d) => d.id !== id));
+  const handleFile = (e, docId) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setFeedback(null);
+    if (file.size > 5 * 1024 * 1024) {
+      setFeedback({ ok: false, text: 'File exceeds the 5MB limit.' });
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result ?? '');
+      const base64 = dataUrl.split(',')[1] ?? '';
+      upload.mutate(
+        {
+          docId,
+          fileName: file.name,
+          contentBase64: base64,
+          contentType: file.type || 'application/octet-stream',
+        },
+        {
+          onSuccess: () =>
+            setFeedback({
+              ok: true,
+              text: 'File uploaded — the front desk will verify it shortly.',
+            }),
+          onError: (err) => setFeedback({ ok: false, text: err.message }),
+        }
+      );
+    };
+    reader.readAsDataURL(file);
   };
 
-  const typeIcons = {
-    passport: BookOpen,
-    drivers_license: Car,
-    national_id: IdCard,
-    visa: Plane,
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <a
-          href="/guest-portal/profile"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-text-muted hover:text-text-primary hover:bg-surface-elevated transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </a>
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Documents & IDs</h1>
-          <p className="text-sm text-text-secondary">Securely store your travel documents</p>
-        </div>
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your documents…</p>
       </div>
+    );
+  }
 
-      {/* Security Notice */}
-      <div className="rounded-lg border border-accent/20 bg-accent/5 p-4 flex items-start gap-3">
-        <Shield className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-text-primary">Bank-Level Encryption</p>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Your documents are encrypted with AES-256 both at rest and in transit. Only you and
-            authorized hotel staff can access them. Documents are automatically deleted 30 days
-            after checkout.
-          </p>
-        </div>
-      </div>
-
-      {/* Document Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-border bg-surface p-4 text-center">
-          <p className="text-2xl font-bold font-mono text-text-primary">{documents.length}</p>
-          <p className="text-xs text-text-muted">Documents</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-4 text-center">
-          <p className="text-2xl font-bold font-mono text-accent">
-            {documents.filter((d) => d.verified).length}
-          </p>
-          <p className="text-xs text-text-muted">Verified</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-4 text-center">
-          <p className="text-2xl font-bold font-mono text-warning">
-            {documents.filter((d) => !d.verified).length}
-          </p>
-          <p className="text-xs text-text-muted">Pending</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-4 text-center">
-          <p className="text-2xl font-bold font-mono text-info">
-            {documents.filter((d) => new Date(d.expiryDate) < new Date('2027-01-01')).length}
-          </p>
-          <p className="text-xs text-text-muted">Expiring Soon</p>
-        </div>
-      </div>
-
-      {/* Upload Button */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-text-primary">Your Documents</h2>
-        <Button size="sm" onClick={() => setShowUploadModal(true)}>
-          <Upload className="mr-1.5 h-4 w-4" /> Upload Document
+  if (isError || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">We couldn't load your documents.</p>
+        <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+          Retry
         </Button>
       </div>
+    );
+  }
 
-      {/* Documents Grid */}
-      {documents.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {documents.map((doc) => (
-            <DocumentCard
-              key={doc.id}
-              document={doc}
-              onDelete={() => handleDelete(doc.id)}
-              onView={() => setPreviewDoc(doc)}
-            />
-          ))}
+  const documents = data.documents ?? [];
+
+  return (
+    <div className="space-y-6 pb-20">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate('/guest-portal/profile')}
+          className="rounded-lg border border-border bg-surface p-2 hover:bg-surface-elevated transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-text-primary" />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-text-primary">Travel Documents</h1>
+          <p className="text-xs text-text-muted">Upload once — pre-check-in is faster next time</p>
+        </div>
+      </div>
+
+      {feedback && (
+        <div
+          className={cn(
+            'rounded-xl border p-4 flex items-center gap-3',
+            feedback.ok ? 'border-accent/20 bg-accent/5' : 'border-danger/20 bg-danger/5'
+          )}
+        >
+          {feedback.ok ? (
+            <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
+          ) : (
+            <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          )}
+          <p className="text-sm text-text-primary">{feedback.text}</p>
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        className="hidden"
+        onChange={(e) => pendingUploadIdRef.current && handleFile(e, pendingUploadIdRef.current)}
+      />
+
+      {documents.length === 0 ? (
+        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+          <FileText className="h-8 w-8 text-text-muted mx-auto mb-2" />
+          <p className="text-sm text-text-muted">No documents on file yet.</p>
         </div>
       ) : (
-        <EmptyState
-          icon={FileText}
-          title="No documents uploaded"
-          description="Upload your passport, ID, or visa for faster check-in."
-          action={
-            <Button size="sm" onClick={() => setShowUploadModal(true)}>
-              <Upload className="mr-1.5 h-4 w-4" /> Upload First Document
-            </Button>
-          }
-        />
-      )}
-
-      {/* Upload Modal */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowUploadModal(false)}
-          />
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-auto rounded-xl border border-border bg-background shadow-2xl">
-            <div className="sticky top-0 z-10 border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/10">
-                  <Upload className="h-5 w-5 text-secondary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-text-primary">Upload Document</h3>
-                  <p className="text-xs text-text-muted">Securely upload your travel document</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-5">
-              {/* Document Type */}
-              <div>
-                <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
-                  Document Type
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {documentTypes.map((type) => {
-                    const Icon = typeIcons[type.id] || FileText;
-                    const active = uploadType === type.id;
-                    return (
-                      <button
-                        key={type.id}
-                        onClick={() => setUploadType(type.id)}
-                        className={cn(
-                          'flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
-                          active
-                            ? 'border-secondary bg-secondary/5 text-secondary'
-                            : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {type.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Country & Expiry */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1">
-                    Issuing Country
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadCountry}
-                    onChange={(e) => setUploadCountry(e.target.value)}
-                    placeholder="e.g. US"
-                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-1">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="date"
-                    value={uploadExpiry}
-                    onChange={(e) => setUploadExpiry(e.target.value)}
-                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  />
-                </div>
-              </div>
-
-              {/* Upload Zone */}
-              <FileUploadZone onUpload={handleUpload} accept="image/*,.pdf" maxSize={10} />
-
-              {/* Privacy Note */}
-              <div className="rounded-lg border border-border bg-surface p-3 flex items-start gap-2">
-                <Lock className="h-4 w-4 text-text-muted shrink-0 mt-0.5" />
-                <p className="text-xs text-text-muted">
-                  Your document will be encrypted and stored securely. Only you and authorized hotel
-                  staff can access it. We never share your documents with third parties.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Preview Modal */}
-      {previewDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setPreviewDoc(null)}
-          />
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-background shadow-2xl">
-            <div className="border-b border-border bg-surface px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/10">
-                  <Eye className="h-5 w-5 text-secondary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-text-primary capitalize">
-                    {previewDoc.type.replace('_', ' ')}
-                  </h3>
-                  <p className="text-xs text-text-muted">
-                    {previewDoc.country} · Expires {formatDate(previewDoc.expiryDate)}
+        <div className="space-y-3">
+          {documents.map((d) => {
+            const meta = verifyMeta[d.verificationStatus] ?? verifyMeta.pending;
+            const Icon = meta.icon;
+            return (
+              <div key={d.id} className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-text-primary">
+                    {typeLabels[d.type] ?? d.type}
                   </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setPreviewDoc(null)}
-                className="rounded-md p-1.5 hover:bg-surface-elevated text-text-muted"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="rounded-lg border border-border bg-surface p-8 text-center">
-                <Lock className="h-12 w-12 text-text-muted mx-auto mb-3" />
-                <p className="text-sm font-medium text-text-primary">Document Preview</p>
-                <p className="text-xs text-text-muted mt-1">
-                  For security, document images are not displayed in the preview.
-                </p>
-                <p className="text-xs text-text-muted mt-0.5">
-                  ID: {previewDoc.id} · Hash: {previewDoc.numberHash.slice(0, 20)}...
-                </p>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Type</span>
-                  <span className="font-medium text-text-primary capitalize">
-                    {previewDoc.type.replace('_', ' ')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Country</span>
-                  <span className="font-medium text-text-primary">{previewDoc.country}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Uploaded</span>
-                  <span className="font-medium text-text-primary">
-                    {formatDate(previewDoc.uploadedAt)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Status</span>
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
-                      previewDoc.verified
-                        ? 'bg-accent/10 text-accent'
-                        : 'bg-warning/10 text-warning'
+                      'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                      meta.chip
                     )}
                   >
-                    {previewDoc.verified ? (
-                      <CheckCircle2 className="h-3 w-3" />
-                    ) : (
-                      <Clock className="h-3 w-3" />
-                    )}
-                    {previewDoc.verified ? 'Verified' : 'Pending Verification'}
+                    <Icon className="h-3 w-3" /> {meta.label}
                   </span>
                 </div>
+                <div className="text-xs text-text-muted space-y-0.5">
+                  {d.number && <p>No. {d.number}</p>}
+                  {d.issuedBy && <p>Issued by {d.issuedBy}</p>}
+                  {d.expiryDate && <p>Expires {formatDate(d.expiryDate)}</p>}
+                  <p>Added {formatDate(d.createdAt)}</p>
+                </div>
+                <div className="pt-1">
+                  {d.fileUrl ? (
+                    <p className="text-[11px] text-accent flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> File attached
+                    </p>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={upload.isPending}
+                      onClick={() => {
+                        pendingUploadIdRef.current = d.id;
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      {upload.isPending ? (
+                        <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Upload className="mr-1 h-3.5 w-3.5" />
+                      )}
+                      Attach file
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setPreviewDoc(null)}>
-                  Close
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => handleDelete(previewDoc.id)}
-                >
-                  <Trash2 className="mr-1.5 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </div>
+            );
+          })}
+        </div>
+      )}
+
+      {showForm ? (
+        <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+          <h3 className="text-sm font-semibold text-text-primary">Add a document</h3>
+          <div>
+            <label className="text-xs text-text-muted block mb-1">Document type</label>
+            <select
+              value={form.type}
+              onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="passport">Passport</option>
+              <option value="national_id">National ID</option>
+              <option value="driver_license">Driver's Licence</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-text-muted block mb-1">Document number</label>
+            <input
+              value={form.number}
+              onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-text-muted block mb-1">Issued by</label>
+            <input
+              value={form.issuedBy}
+              onChange={(e) => setForm((f) => ({ ...f, issuedBy: e.target.value }))}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-text-muted block mb-1">Expiry date</label>
+            <input
+              type="date"
+              value={form.expiryDate}
+              onChange={(e) => setForm((f) => ({ ...f, expiryDate: e.target.value }))}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" disabled={addDoc.isPending} onClick={handleAdd}>
+              {addDoc.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+              Add document
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
           </div>
         </div>
+      ) : (
+        <Button className="w-full" variant="outline" onClick={() => setShowForm(true)}>
+          <FileText className="mr-2 h-4 w-4" /> Add a document
+        </Button>
       )}
     </div>
   );

@@ -1,77 +1,129 @@
 /* src/app/guest-portal/profile/preferences/page.jsx */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  Save,
   CheckCircle2,
-  Globe,
-  Bell,
-  Moon,
-  Sun,
-  Monitor,
-  Smartphone,
-  Mail,
-  MessageSquare,
-  Shield,
-  KeyRound,
-  Bed,
-  UtensilsCrossed,
-  Accessibility,
-  Volume2,
-  VolumeX,
-  Wifi,
-  Plane,
-  Hotel,
-  CreditCard,
-  User,
   Loader2,
   AlertTriangle,
-  Check,
   BedDouble,
-  Thermometer,
-  Languages,
+  UtensilsCrossed,
+  Globe,
+  Bell,
+  Save,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 import {
-  guestProfile,
-  roomTypeOptions,
-  bedTypeOptions,
-  pillowTypeOptions,
-  dietaryOptions,
-  accessibilityOptions,
-  communicationOptions,
-  languageOptions,
-} from '../../data';
-import {
-  SectionHeader,
-  FormSelect,
-  ToggleSwitch,
-  CheckboxGroup,
-  RadioGroup,
-} from '../../components';
+  useGuestPreferences,
+  useUpdatePreferences,
+  getGuestToken,
+} from '../../../../hooks/useGuestPortalData';
+
+const roomTypeOptions = [
+  { value: 'no_preference', label: 'No preference' },
+  { value: 'high_floor', label: 'High floor' },
+  { value: 'low_floor', label: 'Low floor' },
+  { value: 'quiet_area', label: 'Quiet area' },
+  { value: 'near_elevator', label: 'Near elevator' },
+];
+
+const bedTypeOptions = [
+  { value: 'no_preference', label: 'No preference' },
+  { value: 'king', label: 'King' },
+  { value: 'twin', label: 'Twin' },
+  { value: 'queen', label: 'Queen' },
+];
+
+const pillowOptions = [
+  { value: 'no_preference', label: 'No preference' },
+  { value: 'firm', label: 'Firm' },
+  { value: 'soft', label: 'Soft' },
+  { value: 'hypoallergenic', label: 'Hypoallergenic' },
+];
+
+const dietaryOptions = [
+  { value: 'vegetarian', label: 'Vegetarian' },
+  { value: 'vegan', label: 'Vegan' },
+  { value: 'gluten_free', label: 'Gluten-free' },
+  { value: 'halal', label: 'Halal' },
+  { value: 'kosher', label: 'Kosher' },
+  { value: 'nut_allergy', label: 'Nut allergy' },
+];
+
+const languageOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'zu', label: 'isiZulu' },
+  { value: 'af', label: 'Afrikaans' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'pt', label: 'Português' },
+];
+
+function SelectPref({ label, prefKey, value, onChange, options, icon: Icon }) {
+  return (
+    <div className="rounded-lg border border-border bg-background p-3">
+      <div className="flex items-center gap-2 mb-1.5">
+        {Icon && <Icon className="h-3.5 w-3.5 text-text-muted" />}
+        <p className="text-xs font-medium text-text-secondary">{label}</p>
+      </div>
+      <select
+        value={value}
+        onChange={(e) => onChange(prefKey, e.target.value)}
+        className="h-9 w-full rounded-md border border-border bg-surface px-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 export default function PreferencesPage() {
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
+  const hasToken = Boolean(getGuestToken());
+  const { data: prefsData, isLoading } = useGuestPreferences();
+  const updatePreferences = useUpdatePreferences();
 
   const [prefs, setPrefs] = useState({
-    roomType: guestProfile.preferences.roomType,
-    bedType: guestProfile.preferences.bedType,
-    smoking: guestProfile.preferences.smoking,
-    pillowType: guestProfile.preferences.pillowType,
-    temperature: guestProfile.preferences.temperature,
-    dietary: [...guestProfile.preferences.dietary],
-    accessibility: [...guestProfile.preferences.accessibility],
-    communication: [...guestProfile.preferences.communication],
-    language: guestProfile.language,
-    darkMode: false,
-    autoCheckIn: true,
-    marketingEmails: true,
-    stayReminders: true,
+    roomType: 'no_preference',
+    bedType: 'no_preference',
+    pillowType: 'no_preference',
+    language: 'en',
+    dietary: [],
+    marketingEmails: 'true',
+    stayReminders: 'true',
   });
+  const [initialized, setInitialized] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const updatePref = (key, value) => {
+  useEffect(() => {
+    if (prefsData?.preferences && !initialized) {
+      const p = prefsData.preferences;
+      setPrefs((prev) => ({
+        ...prev,
+        roomType: p.roomType ?? prev.roomType,
+        bedType: p.bedType ?? prev.bedType,
+        pillowType: p.pillowType ?? prev.pillowType,
+        language: p.language ?? prev.language,
+        dietary: p.dietary ? p.dietary.split(',').filter(Boolean) : [],
+        marketingEmails: p.marketingEmails ?? prev.marketingEmails,
+        stayReminders: p.stayReminders ?? prev.stayReminders,
+      }));
+      setInitialized(true);
+    }
+  }, [prefsData, initialized]);
+
+  if (!hasToken) {
+    navigate('/guest-portal/auth/login', { replace: true });
+    return null;
+  }
+
+  const setPref = (key, value) => {
     setPrefs((p) => ({ ...p, [key]: value }));
     setSaved(false);
   };
@@ -86,243 +138,181 @@ export default function PreferencesPage() {
     setSaved(false);
   };
 
-  const toggleAccessibility = (value) => {
-    setPrefs((p) => ({
-      ...p,
-      accessibility: p.accessibility.includes(value)
-        ? p.accessibility.filter((v) => v !== value)
-        : [...p.accessibility, value],
-    }));
-    setSaved(false);
-  };
-
-  const toggleCommunication = (value) => {
-    setPrefs((p) => ({
-      ...p,
-      communication: p.communication.includes(value)
-        ? p.communication.filter((v) => v !== value)
-        : [...p.communication, value],
-    }));
-    setSaved(false);
-  };
-
   const handleSave = async () => {
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await updatePreferences.mutateAsync({
+        roomType: prefs.roomType,
+        bedType: prefs.bedType,
+        pillowType: prefs.pillowType,
+        language: prefs.language,
+        dietary: prefs.dietary.join(','),
+        marketingEmails: String(prefs.marketingEmails),
+        stayReminders: String(prefs.stayReminders),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } catch {
+      /* error surfaces via updatePreferences.isError */
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <a
-          href="/guest-portal/profile"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-text-muted hover:text-text-primary hover:bg-surface-elevated transition-colors"
+        <button
+          onClick={() => navigate('/guest-portal/profile')}
+          className="rounded-lg border border-border bg-surface p-2 hover:bg-surface-elevated transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
-        </a>
+          <ArrowLeft className="h-5 w-5 text-text-primary" />
+        </button>
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Preferences</h1>
-          <p className="text-sm text-text-secondary">Customize your stay experience</p>
+          <h1 className="text-xl font-bold text-text-primary">Preferences</h1>
+          <p className="text-xs text-text-muted">
+            Saved to your guest profile and applied to this stay
+          </p>
         </div>
       </div>
 
-      {/* Save Banner */}
-      {saved && (
-        <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 flex items-center gap-2 text-accent">
-          <Check className="h-4 w-4" />
-          <span className="text-sm font-medium">Preferences saved successfully</span>
+      {isLoading && !initialized ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+          <p className="text-sm text-text-muted">Loading your preferences…</p>
         </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Room Preferences */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <BedDouble className="h-4 w-4 text-secondary" /> Room Preferences
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
-                Room Location
-              </label>
-              <RadioGroup
-                options={roomTypeOptions}
+      ) : (
+        <>
+          {/* Room Preferences */}
+          <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <BedDouble className="h-4 w-4 text-secondary" /> Room Preferences
+            </h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <SelectPref
+                label="Room location"
+                prefKey="roomType"
                 value={prefs.roomType}
-                onChange={(v) => updatePref('roomType', v)}
-                columns={2}
+                onChange={setPref}
+                options={roomTypeOptions}
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
-                Bed Type
-              </label>
-              <RadioGroup
-                options={bedTypeOptions}
+              <SelectPref
+                label="Bed type"
+                prefKey="bedType"
                 value={prefs.bedType}
-                onChange={(v) => updatePref('bedType', v)}
-                columns={2}
+                onChange={setPref}
+                options={bedTypeOptions}
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
-                Pillow Preference
-              </label>
-              <RadioGroup
-                options={pillowTypeOptions}
+              <SelectPref
+                label="Pillows"
+                prefKey="pillowType"
                 value={prefs.pillowType}
-                onChange={(v) => updatePref('pillowType', v)}
-                columns={2}
+                onChange={setPref}
+                options={pillowOptions}
               />
             </div>
+          </div>
 
-            <ToggleSwitch
-              checked={!prefs.smoking}
-              onChange={(v) => updatePref('smoking', !v)}
-              label="Non-Smoking Room"
-              description="Prefer a smoke-free environment"
-            />
-
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
-                Preferred Temperature
-              </label>
-              <div className="flex items-center gap-4">
-                <Thermometer className="h-5 w-5 text-text-muted" />
-                <input
-                  type="range"
-                  min="60"
-                  max="80"
-                  value={prefs.temperature}
-                  onChange={(e) => updatePref('temperature', parseInt(e.target.value))}
-                  className="flex-1 h-2 rounded-full bg-border accent-secondary"
-                />
-                <span className="text-sm font-mono font-bold text-text-primary w-12 text-right">
-                  {prefs.temperature}°F
-                </span>
-              </div>
+          {/* Dietary */}
+          <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <UtensilsCrossed className="h-4 w-4 text-secondary" /> Dietary Requirements
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {dietaryOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => toggleDietary(opt.value)}
+                  className={cn(
+                    'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                    prefs.dietary.includes(opt.value)
+                      ? 'border-secondary bg-secondary/10 text-secondary'
+                      : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Dietary Preferences */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <UtensilsCrossed className="h-4 w-4 text-secondary" /> Dietary Preferences
-          </h3>
-          <p className="text-xs text-text-muted mb-3">
-            Select any dietary requirements. Our kitchen will be notified before your arrival.
-          </p>
-          <CheckboxGroup
-            options={dietaryOptions.map((d) => ({
-              value: d,
-              label: d.charAt(0).toUpperCase() + d.slice(1).replace('-', ' '),
-            }))}
-            selected={prefs.dietary}
-            onToggle={toggleDietary}
-            columns={2}
-          />
-        </div>
-
-        {/* Accessibility */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <Accessibility className="h-4 w-4 text-secondary" /> Accessibility Needs
-          </h3>
-          <p className="text-xs text-text-muted mb-3">
-            Let us know if you require any accessibility accommodations.
-          </p>
-          <CheckboxGroup
-            options={accessibilityOptions}
-            selected={prefs.accessibility}
-            onToggle={toggleAccessibility}
-            columns={1}
-          />
-        </div>
-
-        {/* Communication */}
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <Languages className="h-4 w-4 text-secondary" /> Communication & Language
-          </h3>
-          <div className="space-y-4">
-            <FormSelect
-              label="Preferred Language"
+          {/* Language */}
+          <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <Globe className="h-4 w-4 text-secondary" /> Language
+            </h3>
+            <select
               value={prefs.language}
-              onChange={(e) => updatePref('language', e.target.value)}
-              options={languageOptions}
-            />
+              onChange={(e) => setPref('language', e.target.value)}
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {languageOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
-                Communication Channels
-              </label>
-              <CheckboxGroup
-                options={communicationOptions}
-                selected={prefs.communication}
-                onToggle={toggleCommunication}
-                columns={2}
-              />
+          {/* Communications */}
+          <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <Bell className="h-4 w-4 text-secondary" /> Communications
+            </h3>
+            {[
+              { key: 'marketingEmails', label: 'Offers & promotions', desc: 'Deals and news' },
+              {
+                key: 'stayReminders',
+                label: 'Stay reminders',
+                desc: 'Check-in and check-out alerts',
+              },
+            ].map((item) => (
+              <div key={item.key} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-text-primary">{item.label}</p>
+                  <p className="text-xs text-text-muted">{item.desc}</p>
+                </div>
+                <button
+                  onClick={() => setPref(item.key, prefs[item.key] === 'true' ? 'false' : 'true')}
+                  className={cn(
+                    'relative inline-flex h-7 w-12 items-center rounded-full transition-colors',
+                    prefs[item.key] === 'true' ? 'bg-secondary' : 'bg-border'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm',
+                      prefs[item.key] === 'true' ? 'translate-x-6' : 'translate-x-1'
+                    )}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {updatePreferences.isError && (
+            <div className="rounded-lg border border-danger/20 bg-danger/5 px-4 py-2 text-sm text-danger flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              {updatePreferences.error?.message ?? 'Could not save. Please try again.'}
             </div>
-          </div>
-        </div>
-
-        {/* App Settings */}
-        <div className="rounded-xl border border-border bg-surface p-5 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <Monitor className="h-4 w-4 text-secondary" /> App Settings
-          </h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <ToggleSwitch
-              checked={prefs.darkMode}
-              onChange={(v) => updatePref('darkMode', v)}
-              label="Dark Mode"
-              description="Use dark theme throughout the app"
-            />
-            <ToggleSwitch
-              checked={prefs.autoCheckIn}
-              onChange={(v) => updatePref('autoCheckIn', v)}
-              label="Auto Check-In"
-              description="Automatically check in when available"
-            />
-            <ToggleSwitch
-              checked={prefs.marketingEmails}
-              onChange={(v) => updatePref('marketingEmails', v)}
-              label="Marketing Emails"
-              description="Receive offers and promotions"
-            />
-            <ToggleSwitch
-              checked={prefs.stayReminders}
-              onChange={(v) => updatePref('stayReminders', v)}
-              label="Stay Reminders"
-              description="Get reminders about upcoming stays"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
-        <a
-          href="/guest-portal/profile"
-          className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-surface px-4 text-sm font-medium text-text-secondary hover:bg-surface-elevated transition-colors"
-        >
-          Cancel
-        </a>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-1.5 h-4 w-4" />
           )}
-          Save Preferences
-        </Button>
-      </div>
+          {saved && (
+            <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-2 text-sm text-accent flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" /> Preferences saved.
+            </div>
+          )}
+
+          <Button className="w-full" onClick={handleSave} disabled={updatePreferences.isPending}>
+            {updatePreferences.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> Save Preferences
+              </>
+            )}
+          </Button>
+        </>
+      )}
     </div>
   );
 }

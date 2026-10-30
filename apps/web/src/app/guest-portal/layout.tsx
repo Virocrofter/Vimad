@@ -19,7 +19,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useGuestStore } from './store';
+import { useStayDetails, useGuestSignOut } from '../../hooks/useGuestPortalData';
+import { t } from '../../i18n/guestI18n';
+import { useNavigate } from 'react-router-dom';
 
 interface NavItem {
   id: string;
@@ -35,27 +37,41 @@ interface BottomNavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/guest-portal' },
+  { id: 'dashboard', label: t('nav.dashboard'), icon: Home, href: '/guest-portal' },
   { id: 'booking', label: 'My Bookings', icon: Calendar, href: '/guest-portal/booking' },
   { id: 'keys', label: 'Digital Key', icon: KeyRound, href: '/guest-portal/keys' },
   { id: 'stay', label: 'In-Stay', icon: UtensilsCrossed, href: '/guest-portal/stay' },
-  { id: 'billing', label: 'Billing', icon: CreditCard, href: '/guest-portal/billing' },
+  { id: 'billing', label: t('nav.billing'), icon: CreditCard, href: '/guest-portal/billing' },
   { id: 'loyalty', label: 'Loyalty', icon: Crown, href: '/guest-portal/loyalty' },
   { id: 'messages', label: 'Messages', icon: MessageSquare, href: '/guest-portal/messages' },
-  { id: 'profile', label: 'Profile', icon: User, href: '/guest-portal/profile' },
+  { id: 'profile', label: t('nav.profile'), icon: User, href: '/guest-portal/profile' },
 ];
 
 const bottomNavItems: BottomNavItem[] = [
-  { label: 'Help', icon: HelpCircle, href: '/guest-portal/support' },
+  { label: t('nav.help'), icon: HelpCircle, href: '/guest-portal/support' },
   { label: 'Settings', icon: Settings, href: '/guest-portal/profile/preferences' },
 ];
 
 export default function GuestPortalLayout() {
   const location = useLocation();
-  const { guest, logout, notifications, sidebarOpen, toggleSidebar } = useGuestStore();
+  const navigate = useNavigate();
+  const signOut = useGuestSignOut();
+  const { data: stay } = useStayDetails();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const toggleSidebar = () => setSidebarOpen((open) => !open);
+  const logout = () => {
+    signOut();
+    navigate('/guest-portal/auth/login');
+  };
+
+  // "Last, First" → first / last
+  const nameParts = stay?.guestName?.includes(',')
+    ? stay.guestName.split(',').map((s: string) => s.trim())
+    : ['', stay?.guestName ?? ''];
+  const firstName = nameParts[1] ?? '';
+  const lastName = nameParts[0] ?? '';
 
   const isItemActive = (href: string) =>
     location.pathname === href || location.pathname.startsWith(`${href}/`);
@@ -244,11 +260,6 @@ export default function GuestPortalLayout() {
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-text-muted hover:text-text-primary"
               >
                 <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[9px] font-bold text-white">
-                    {unreadCount}
-                  </span>
-                )}
               </a>
 
               {/* User */}
@@ -257,11 +268,11 @@ export default function GuestPortalLayout() {
                 className="flex items-center gap-2 rounded-lg border border-border bg-surface px-2 py-1.5 transition-colors hover:bg-surface-elevated"
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-xs font-bold text-secondary">
-                  {guest?.firstName?.[0]}
-                  {guest?.lastName?.[0]}
+                  {firstName?.[0]}
+                  {lastName?.[0]}
                 </div>
                 <span className="hidden text-sm font-medium text-text-primary sm:block">
-                  {guest?.firstName}
+                  {firstName}
                 </span>
               </a>
             </div>

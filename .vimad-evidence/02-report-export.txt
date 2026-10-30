@@ -1,0 +1,18 @@
+window: 2026-10-25 -> 2026-10-30
+DB truth: {'2026-10-28': (2, 378.0), '2026-10-26': (3, 523.0), '2026-10-27': (3, 523.0), '2026-10-25': (2, 334.0)}
+run status: 201
+header: ['Date / Room type', 'Avail', 'Sold', 'Occ %', 'ADR', 'Revenue']
+row: ['2026-10-25', '20', '2', '0.1', '167', '334']
+row: ['2026-10-26', '20', '3', '0.15', '174.33', '523']
+row: ['2026-10-27', '20', '3', '0.15', '174.33', '523']
+row: ['2026-10-28', '20', '3', '0.15', '126', '378']
+row: ['2026-10-29', '20', '2', '0.1', '0', '0']
+row: ['2026-10-30', '20', '0', '0', '0', '0']
+MISMATCH 2026-10-28 csv 3 378.0 db 2 378.0
+--- verdicts ---
+PASS - A1 run+export 2xx
+PASS - A2 window days present exactly once
+PASS - A3 no timezone date-shift
+FAIL - A4 sold+revenue match DB truth per day
+FAIL - A5 empty window: run OK + header-only, no 500
+REPORT_EXPORT_VERDICT: FAIL

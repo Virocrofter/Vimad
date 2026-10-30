@@ -1,0 +1,4 @@
+Error: P1003
+
+Database `vimad_shadow` does not exist on the database server at `localhost:5432`.
+

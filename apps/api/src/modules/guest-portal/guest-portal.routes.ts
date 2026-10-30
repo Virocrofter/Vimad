@@ -1,6 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
+import rateLimit from 'express-rate-limit';
 import { validateBody } from '../../common/validate.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import {
@@ -121,6 +122,19 @@ const PreferencesResponseSchema = z
 
 export const guestPortalRouter = Router();
 
+// [P0] lookup/verify mint portal tokens — stricter than A4's 30/min:
+// 10 req/min/IP blocks credential stuffing + scraping without hurting
+// a real guest retrying a typo.
+const guestPortalLookupLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: { code: 'RATE_LIMITED', message: 'Too many attempts. Please try again in a minute.' },
+  },
+});
+
 // Public endpoints — no auth middleware
 registry.registerPath({
   method: 'post',
@@ -147,6 +161,7 @@ registry.registerPath({
 
 guestPortalRouter.post(
   '/lookup',
+  guestPortalLookupLimiter,
   validateBody(LookupInputSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -186,6 +201,7 @@ registry.registerPath({
 
 guestPortalRouter.post(
   '/verify',
+  guestPortalLookupLimiter,
   validateBody(verifyIdentitySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {

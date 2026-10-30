@@ -1,0 +1,33 @@
+=== 0.3 v3: audit smokes + A6 offline gate ===
+token acquired
+pre-cleanup done
+R1=23fd250b-5343-407e-9b2e-0738473f64ba
+R2=9f763736-bbf5-4422-8794-3cdcbb5b2144
+== audit smoke: check-in R1 ==
+check-in R1 HTTP 200
+{"data":{"id":"23fd250b-5343-407e-9b2e-0738473f64ba","tenantId":"cmvpvm9cr0000afx46emxw02w","propertyId":"cmvpvm9hw0006afx4p3w74xr9","guestId":"demo-guest-011","confirmationNumber":"TEST-A6-AUDIT","groupId":null,"roomTypeId":null,"ratePlanId":null,"status":"checked_in","source":"direct","arrivalDate
+ action | entity | entityId | userId | createdAt 
+--------+--------+----------+--------+-----------
+(0 rows)
+
+== A6: kill API mid-check-in of R2 ==
+request in flight (paused) — killing API
+curl saw HTTP 000
+{"status":"alive"}
+== sweep ==
+  status   | checkedInAt | checkedInBy 
+-----------+-------------+-------------
+ confirmed |             | 
+(1 row)
+
+folio count (expect <=1): 0
+checkin audit rows (expect <=1): 0
+== recovery: retry same check-in ==
+retry HTTP 200 (409 = guard worked; 200 = clean recovery)
+{"data":{"id":"9f763736-bbf5-4422-8794-3cdcbb5b2144","tenantId":"cmvpvm9cr0000afx46emxw02w","propertyId":"cmvpvm9hw0006afx4p3w74xr9","guestId":"demo-guest-011","confirmationNumber":"TEST-A6-OFFLINE","groupId":null,"roomTypeId":null,"ratePlanId":null,"status":"checked_in","source":"direct","arrivalDa
+   status   |       checkedInAt       
+------------+-------------------------
+ checked_in | 2026-10-29 22:13:11.326
+(1 row)
+
+cleanup done

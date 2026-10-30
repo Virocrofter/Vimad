@@ -206,3 +206,69 @@ export function getPhaseBadge(phase: string) {
       };
   }
 }
+
+export const tierBenefits: Record<
+  string,
+  {
+    label: string;
+    color: string;
+    bg: string;
+    border: string;
+    dot: string;
+    benefits: string[];
+    pointsMultiplier: number;
+    pointsRequired: number;
+  }
+> = {
+  bronze: {
+    label: 'Bronze',
+    color: 'text-amber-700',
+    bg: 'bg-amber-700/10',
+    border: 'border-amber-700/20',
+    dot: 'bg-amber-700',
+    benefits: ['Free Wi-Fi', 'Late checkout (12pm)', 'Member rates'],
+    pointsMultiplier: 1.0,
+    pointsRequired: 0,
+  },
+  silver: {
+    label: 'Silver',
+    color: 'text-slate-400',
+    bg: 'bg-slate-400/10',
+    border: 'border-slate-400/20',
+    dot: 'bg-slate-400',
+    benefits: ['All Bronze benefits', 'Room upgrade (subject to availability)', 'Welcome drink'],
+    pointsMultiplier: 1.25,
+    pointsRequired: 5000,
+  },
+  gold: {
+    label: 'Gold',
+    color: 'text-yellow-500',
+    bg: 'bg-yellow-500/10',
+    border: 'border-yellow-500/20',
+    dot: 'bg-yellow-500',
+    benefits: [
+      'All Silver benefits',
+      'Guaranteed room upgrade',
+      'Free breakfast',
+      'Early check-in',
+    ],
+    pointsMultiplier: 1.5,
+    pointsRequired: 10000,
+  },
+  platinum: {
+    label: 'Platinum',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+    dot: 'bg-purple-500',
+    benefits: [
+      'All Gold benefits',
+      'Suite upgrade',
+      'Executive lounge access',
+      'Free parking',
+      'Spa credit',
+    ],
+    pointsMultiplier: 2.0,
+    pointsRequired: 25000,
+  },
+};

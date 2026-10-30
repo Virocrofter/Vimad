@@ -243,6 +243,8 @@ function renderTemplate(
           </tr>
         </tfoot>
       </table>
+    <p style="margin:18px 0 0;"><a href="${env.WEB_URL}/guest-portal/reviews?cn=${encodeURIComponent((p as { confirmationNumber?: string }).confirmationNumber ?? '')}&ln=${encodeURIComponent((p as { guestLastName?: string }).guestLastName ?? '')}" style="display:inline-block;background:#4F46E5;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Rate your stay</a></p>
+    <p style="font-size:12px;color:#888;margin-top:8px;">One tap, less than a minute — it means a lot.</p>
     `
       ),
     'booking-cancelled': (p) =>

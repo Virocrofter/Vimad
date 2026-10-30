@@ -87,6 +87,7 @@ export async function sendReservationConfirmation(
     template: 'reservation-confirmation',
     payload: {
       guestName: reservation.guest.firstName,
+      guestLastName: reservation.guest.lastName,
       propertyName: reservation.property.name,
       confirmationNumber: reservation.confirmationNumber,
       arrivalDate: day(reservation.arrivalDate),

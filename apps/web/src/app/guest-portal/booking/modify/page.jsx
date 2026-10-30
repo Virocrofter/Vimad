@@ -1,61 +1,94 @@
 /* src/app/guest-portal/booking/modify/page.jsx */
 import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Calendar,
-  Clock,
   Bed,
-  ChevronRight,
   CheckCircle2,
   AlertTriangle,
   Info,
   Save,
-  XCircle,
   Minus,
   Plus,
   Loader2,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
-import { guestStays, formatCurrency, formatDate, getCancellationPolicy } from '../../data';
+import {
+  useStayDetails,
+  useModifyBooking,
+  getGuestToken,
+} from '../../../../hooks/useGuestPortalData';
+import { formatCurrency, formatDate, formatDateRange } from '../../../../lib/guest-utils';
 
 export default function GuestBookingModifyPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const stayId = searchParams.get('stay');
-
-  const stay = guestStays.find((s) => s.id === stayId);
+  const hasToken = Boolean(getGuestToken());
+  const { data: stay, isLoading, isError, refetch } = useStayDetails();
+  const modifyBooking = useModifyBooking();
 
   const [arrival, setArrival] = useState('');
   const [departure, setDeparture] = useState('');
   const [guests, setGuests] = useState(2);
-  const [roomType, setRoomType] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [priceDiff, setPriceDiff] = useState(0);
 
-  const [prevStay, setPrevStay] = useState(null);
-  if (stay !== prevStay) {
-    setPrevStay(stay);
-    if (stay) {
-      setArrival(stay.dates.arrival);
-      setDeparture(stay.dates.departure);
-      setRoomType(stay.room.type);
-    }
+  if (stay && !initialized) {
+    setArrival(stay.arrivalDate);
+    setDeparture(stay.departureDate);
+    setGuests(stay.adults + stay.children);
+    setInitialized(true);
   }
 
-  if (!stay) {
+  if (!hasToken) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <AlertTriangle className="h-10 w-10 text-warning mb-3" />
-        <p className="text-sm text-text-muted">Reservation not found</p>
+        <p className="text-sm text-text-muted">Please verify your reservation first</p>
+        <Button className="mt-4" onClick={() => navigate('/guest-portal/auth/login')}>
+          Verify Reservation
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-secondary mb-3" />
+        <p className="text-sm text-text-muted">Loading your reservation…</p>
+      </div>
+    );
+  }
+
+  if (isError || !stay) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">We couldn’t load your reservation.</p>
+        <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (stay.status !== 'confirmed') {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="h-10 w-10 text-warning mb-3" />
+        <p className="text-sm text-text-muted">
+          {stay.checkedIn
+            ? 'This stay is already checked in — modifications are handled by the front desk.'
+            : 'This reservation can no longer be modified online — contact the front desk.'}
+        </p>
         <Button
           variant="outline"
           className="mt-4"
           onClick={() => navigate('/guest-portal/booking')}
         >
-          Back to Reservations
+          Back to Reservation
         </Button>
       </div>
     );
@@ -63,28 +96,27 @@ export default function GuestBookingModifyPage() {
 
   const nights = Math.max(
     1,
-    Math.ceil((new Date(departure) - new Date(arrival)) / (1000 * 60 * 60 * 24))
+    Math.round((new Date(departure) - new Date(arrival)) / (1000 * 60 * 60 * 24))
   );
-  const newTotal = nights * stay.rate.nightly;
-  const diff = newTotal - stay.rate.total;
+  const nightlyRate = stay.nights > 0 ? stay.totalAmount / stay.nights : stay.totalAmount;
+  const estimatedTotal = Math.round(nightlyRate * nights * 100) / 100;
+  const estimatedDiff = Math.round((estimatedTotal - stay.totalAmount) * 100) / 100;
+  const datesChanged = arrival !== stay.arrivalDate || departure !== stay.departureDate;
+  const guestsChanged = guests !== stay.adults + stay.children;
 
   const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsSaving(false);
-    setShowConfirm(true);
+    try {
+      await modifyBooking.mutateAsync({
+        arrivalDate: arrival,
+        departureDate: departure,
+        adults: guests,
+        children: 0,
+      });
+      setShowConfirm(true);
+    } catch {
+      /* error surfaces via modifyBooking.isError */
+    }
   };
-
-  const roomTypes = [
-    { id: 'Deluxe King', name: 'Deluxe King', price: 189, sqft: 420 },
-    { id: 'Ocean View Suite', name: 'Ocean View Suite', price: 289, sqft: 650 },
-    { id: 'Executive Suite', name: 'Executive Suite', price: 359, sqft: 850 },
-    { id: 'Penthouse', name: 'Penthouse', price: 599, sqft: 1200 },
-  ];
-
-  const selectedRoom = roomTypes.find((r) => r.id === roomType) || roomTypes[0];
-  const estimatedTotal = nights * selectedRoom.price;
-  const estimatedDiff = estimatedTotal - stay.rate.total;
 
   return (
     <div className="space-y-6">
@@ -111,22 +143,20 @@ export default function GuestBookingModifyPage() {
           <div>
             <p className="text-text-muted text-xs">Dates</p>
             <p className="text-text-primary font-medium">
-              {formatDate(stay.dates.arrival)} – {formatDate(stay.dates.departure)}
+              {formatDate(stay.arrivalDate)} – {formatDate(stay.departureDate)}
             </p>
           </div>
           <div>
             <p className="text-text-muted text-xs">Room</p>
-            <p className="text-text-primary font-medium">{stay.room.type}</p>
+            <p className="text-text-primary font-medium">{stay.roomTypeName ?? 'Standard'}</p>
           </div>
           <div>
             <p className="text-text-muted text-xs">Nights</p>
-            <p className="text-text-primary font-medium">{stay.dates.nights}</p>
+            <p className="text-text-primary font-medium">{stay.nights}</p>
           </div>
           <div>
             <p className="text-text-muted text-xs">Total</p>
-            <p className="text-text-primary font-medium">
-              {formatCurrency(stay.rate.total + stay.rate.taxes + stay.rate.fees)}
-            </p>
+            <p className="text-text-primary font-medium">{formatCurrency(stay.totalAmount)}</p>
           </div>
         </div>
       </div>
@@ -164,49 +194,12 @@ export default function GuestBookingModifyPage() {
         </div>
       </div>
 
-      {/* Modify Room */}
-      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-text-primary">Change Room Type</h3>
-        <div className="space-y-2">
-          {roomTypes.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => setRoomType(room.id)}
-              className={cn(
-                'w-full flex items-center justify-between rounded-lg border p-3 text-left transition-all',
-                roomType === room.id
-                  ? 'border-secondary bg-secondary/5'
-                  : 'border-border bg-background hover:bg-surface-elevated'
-              )}
-            >
-              <div>
-                <p
-                  className={cn(
-                    'text-sm font-medium',
-                    roomType === room.id ? 'text-secondary' : 'text-text-primary'
-                  )}
-                >
-                  {room.name}
-                </p>
-                <p className="text-xs text-text-muted">{room.sqft} sq ft</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-text-primary">
-                  {formatCurrency(room.price)}
-                  <span className="text-xs text-text-muted">/night</span>
-                </p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Guests */}
       <div className="rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-text-primary">Guests</h3>
-            <p className="text-xs text-text-muted">Number of guests</p>
+            <p className="text-xs text-text-muted">Total number of guests</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -217,7 +210,7 @@ export default function GuestBookingModifyPage() {
             </button>
             <span className="text-sm font-medium text-text-primary w-6 text-center">{guests}</span>
             <button
-              onClick={() => setGuests(Math.min(4, guests + 1))}
+              onClick={() => setGuests(Math.min(8, guests + 1))}
               className="h-8 w-8 rounded-lg border border-border bg-background flex items-center justify-center hover:bg-surface-elevated transition-colors"
             >
               <Plus className="h-4 w-4 text-text-secondary" />
@@ -227,65 +220,77 @@ export default function GuestBookingModifyPage() {
       </div>
 
       {/* Price Summary */}
-      <div
-        className={cn(
-          'rounded-xl border p-4',
-          estimatedDiff > 0
-            ? 'border-warning/30 bg-warning/5'
-            : estimatedDiff < 0
-              ? 'border-accent/30 bg-accent/5'
-              : 'border-border bg-surface'
-        )}
-      >
-        <h3 className="text-sm font-semibold text-text-primary mb-3">Price Summary</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-text-secondary">Original total</span>
-            <span className="text-text-primary">{formatCurrency(stay.rate.total)}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-text-secondary">New total</span>
-            <span className="text-text-primary">{formatCurrency(estimatedTotal)}</span>
-          </div>
-          <div className="border-t border-border pt-2 flex items-center justify-between font-medium">
-            <span
-              className={cn(
-                estimatedDiff > 0
-                  ? 'text-warning'
+      {(datesChanged || guestsChanged) && (
+        <div
+          className={cn(
+            'rounded-xl border p-4',
+            estimatedDiff > 0
+              ? 'border-warning/30 bg-warning/5'
+              : estimatedDiff < 0
+                ? 'border-accent/30 bg-accent/5'
+                : 'border-border bg-surface'
+          )}
+        >
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Price Summary</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-text-secondary">Original total</span>
+              <span className="text-text-primary">{formatCurrency(stay.totalAmount)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-text-secondary">New total ({nights} nights)</span>
+              <span className="text-text-primary">{formatCurrency(estimatedTotal)}</span>
+            </div>
+            <div className="border-t border-border pt-2 flex items-center justify-between font-medium">
+              <span
+                className={cn(
+                  estimatedDiff > 0
+                    ? 'text-warning'
+                    : estimatedDiff < 0
+                      ? 'text-accent'
+                      : 'text-text-primary'
+                )}
+              >
+                {estimatedDiff > 0
+                  ? 'Additional charge'
                   : estimatedDiff < 0
-                    ? 'text-accent'
-                    : 'text-text-primary'
-              )}
-            >
-              {estimatedDiff > 0
-                ? 'Additional charge'
-                : estimatedDiff < 0
-                  ? 'Refund due'
-                  : 'No change'}
-            </span>
-            <span
-              className={cn(
-                estimatedDiff > 0
-                  ? 'text-warning'
-                  : estimatedDiff < 0
-                    ? 'text-accent'
-                    : 'text-text-primary'
-              )}
-            >
-              {estimatedDiff !== 0 && formatCurrency(Math.abs(estimatedDiff))}
-            </span>
+                    ? 'Refund due'
+                    : 'No change'}
+              </span>
+              <span
+                className={cn(
+                  estimatedDiff > 0
+                    ? 'text-warning'
+                    : estimatedDiff < 0
+                      ? 'text-accent'
+                      : 'text-text-primary'
+                )}
+              >
+                {estimatedDiff !== 0 && formatCurrency(Math.abs(estimatedDiff))}
+              </span>
+            </div>
+            <p className="text-[11px] text-text-muted">
+              Estimated at your current nightly rate — the final amount is confirmed by the front
+              desk.
+            </p>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Policy Note */}
       <div className="rounded-lg border border-info/20 bg-info/5 p-3 flex items-start gap-2">
         <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
         <p className="text-xs text-text-secondary">
           Modifications are subject to availability. Rate changes may apply. You'll receive a
-          confirmation email once the modification is processed.
+          confirmation once the modification is processed.
         </p>
       </div>
+
+      {modifyBooking.isError && (
+        <div className="rounded-lg border border-danger/20 bg-danger/5 px-4 py-2 text-sm text-danger">
+          {modifyBooking.error?.message ?? 'Could not save changes. Please try again.'}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2">
@@ -299,14 +304,9 @@ export default function GuestBookingModifyPage() {
         <Button
           className="flex-1"
           onClick={handleSave}
-          disabled={
-            isSaving ||
-            (arrival === stay.dates.arrival &&
-              departure === stay.dates.departure &&
-              roomType === stay.room.type)
-          }
+          disabled={modifyBooking.isPending || (!datesChanged && !guestsChanged)}
         >
-          {isSaving ? (
+          {modifyBooking.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Saving...
@@ -333,16 +333,24 @@ export default function GuestBookingModifyPage() {
             </div>
             <h3 className="text-lg font-semibold text-text-primary mb-2">Modification Saved</h3>
             <p className="text-sm text-text-secondary mb-4">
-              Your reservation has been updated. A confirmation email has been sent to your inbox.
+              Your reservation has been updated
+              {modifyBooking.data?.delta
+                ? ` — your new total is ${formatCurrency(modifyBooking.data.totalAmount)}.`
+                : '.'}
             </p>
             <div className="rounded-lg border border-border bg-surface p-3 text-left mb-4">
-              <p className="text-xs text-text-muted">New total</p>
-              <p className="text-lg font-bold text-text-primary">
-                {formatCurrency(estimatedTotal + stay.rate.taxes + stay.rate.fees)}
+              <p className="text-xs text-text-muted">New dates</p>
+              <p className="text-sm font-bold text-text-primary">
+                {modifyBooking.data
+                  ? formatDateRange(
+                      modifyBooking.data.arrivalDate,
+                      modifyBooking.data.departureDate
+                    )
+                  : ''}
               </p>
             </div>
             <Button className="w-full" onClick={() => navigate('/guest-portal/booking')}>
-              Back to Reservations
+              Back to Reservation
             </Button>
           </div>
         </div>

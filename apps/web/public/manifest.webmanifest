@@ -1,12 +1,14 @@
 {
-  "name": "Vimad PMS",
+  "name": "Vimad Hotel Portal",
   "short_name": "Vimad",
-  "description": "Offline-tolerant hotel property management",
-  "start_url": "/app/front-desk",
+  "description": "Guest portal and hotel operations — offline-tolerant PWA",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f0f1a",
-  "theme_color": "#863bff",
+  "theme_color": "#4f46e5",
   "icons": [
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }

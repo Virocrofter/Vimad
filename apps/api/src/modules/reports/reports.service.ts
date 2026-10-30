@@ -32,7 +32,15 @@ const endOfDay = (d: Date) => {
   return x;
 };
 const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000);
-const dayStr = (d: Date) => startOfDay(d).toISOString().slice(0, 10);
+const dayStr = (d: Date) => {
+  // Render in server-local time — toISOString() is UTC, which shifted every
+  // day label back one date for non-UTC properties (found on 0.2: a
+  // 10-25→10-30 window exported rows labeled 10-24→10-29).
+  const s = startOfDay(d);
+  const m = String(s.getMonth() + 1).padStart(2, '0');
+  const day = String(s.getDate()).padStart(2, '0');
+  return `${s.getFullYear()}-${m}-${day}`;
+};
 const num = (v: any) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -120,22 +128,40 @@ async function occupancy(ctx: Ctx, p: Record<string, string>): Promise<RunOutput
       },
     })
   ).filter((r) => isActiveStatus(r.status));
+  // Daily room-night revenue from reservation_stays. Summing reservation
+  // totalAmount for every overlapping day double-counted multi-night stays
+  // on each day of their stay (1903 vs true 523 observed on 0.2).
+  const stayRows = await ctx.prisma.reservationStay.findMany({
+    where: { date: { gte: from, lte: to }, room: roomWhere },
+    select: { date: true, rate: true, room: { select: { roomTypeId: true } } },
+  });
+  const revByDay = new Map<string, number>();
+  const revByDayType = new Map<string, number>();
+  for (const st of stayRows) {
+    const k = dayStr(st.date);
+    revByDay.set(k, (revByDay.get(k) ?? 0) + num(st.rate));
+    const kt = `${k} · ${st.room.roomTypeId ?? 'none'}`;
+    revByDayType.set(kt, (revByDayType.get(kt) ?? 0) + num(st.rate));
+  }
+
   const groupByType = p.groupBy === 'ROOM_TYPE';
   const rows: Record<string, unknown>[] = [];
 
   for (const d of eachDay(from, to)) {
-    const sod = startOfDay(d).getTime();
-    const eod = endOfDay(d).getTime();
-    const todays = list.filter(
-      (r) => new Date(r.arrivalDate).getTime() <= eod && new Date(r.departureDate).getTime() > sod
-    );
+    const lbl = dayStr(d);
+    const todays = list.filter((r) => {
+      // Date-granularity comparison: timestamp comparison counted a stay on
+      // its DEPARTURE date (departure is UTC-midnight, after local
+      // start-of-day), inflating every departure day's occupancy.
+      return dayStr(new Date(r.arrivalDate)) <= lbl && dayStr(new Date(r.departureDate)) > lbl;
+    });
     if (groupByType) {
       const agg = new Map<string, { sold: number; revenue: number }>();
       for (const r of todays) {
         const k = r.roomTypeId ?? 'none';
         const a = agg.get(k) ?? { sold: 0, revenue: 0 };
         a.sold += 1;
-        a.revenue += num(r.totalAmount);
+        a.revenue = revByDayType.get(`${dayStr(d)} · ${k}`) ?? 0;
         agg.set(k, a);
       }
       for (const [k, a] of agg) {
@@ -150,7 +176,7 @@ async function occupancy(ctx: Ctx, p: Record<string, string>): Promise<RunOutput
         });
       }
     } else {
-      const revenue = todays.reduce((s, r) => s + num(r.totalAmount), 0);
+      const revenue = revByDay.get(dayStr(d)) ?? 0;
       const avail = rooms.length;
       const sold = todays.length;
       rows.push({
@@ -233,11 +259,13 @@ async function adrRevpar(ctx: Ctx, p: Record<string, string>): Promise<RunOutput
     })
   ).filter((r) => isActiveStatus(r.status));
   const rows = eachDay(from, to).map((d) => {
-    const sod = startOfDay(d).getTime();
-    const eod = endOfDay(d).getTime();
-    const todays = list.filter(
-      (r) => new Date(r.arrivalDate).getTime() <= eod && new Date(r.departureDate).getTime() > sod
-    );
+    const lbl = dayStr(d);
+    const todays = list.filter((r) => {
+      // Date-granularity comparison: timestamp comparison counted a stay on
+      // its DEPARTURE date (departure is UTC-midnight, after local
+      // start-of-day), inflating every departure day's occupancy.
+      return dayStr(new Date(r.arrivalDate)) <= lbl && dayStr(new Date(r.departureDate)) > lbl;
+    });
     const rev = todays.reduce((s, r) => s + num(r.totalAmount), 0);
     return {
       label: dayStr(d),
@@ -597,6 +625,414 @@ async function guestDemographics(ctx: Ctx, p: Record<string, string>): Promise<R
   };
 }
 
+// ─── C2' Mews reporting depth computers ───
+
+async function pacePickup(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('pace')!;
+  const from = startOfDay(new Date(p.dateFrom));
+  const to = endOfDay(new Date(p.dateTo));
+  const days = eachDay(from, to);
+  const span = Math.max(days.length - 1, 1);
+  const compFrom = addDays(from, -span);
+  const compTo = endOfDay(addDays(startOfDay(to), -span));
+  const list = (
+    await ctx.prisma.reservation.findMany({
+      where: { ...resWhereBase(ctx, p), arrivalDate: { lte: to }, departureDate: { gt: from } },
+      select: {
+        totalAmount: true,
+        arrivalDate: true,
+        departureDate: true,
+        status: true,
+        createdAt: true,
+      },
+    })
+  ).filter((r) => isActiveStatus(r.status));
+  const sevenAgo = Date.now() - 7 * 86400000;
+  // Comparison window: same overlap method as the occupancy report, shifted
+  // back by the range span — so pace comp columns are directly comparable.
+  const compList = (
+    await ctx.prisma.reservation.findMany({
+      where: {
+        ...resWhereBase(ctx, p),
+        arrivalDate: { lte: compTo },
+        departureDate: { gt: compFrom },
+      },
+      select: { totalAmount: true, arrivalDate: true, departureDate: true, status: true },
+    })
+  ).filter((r) => isActiveStatus(r.status));
+  const compByDay = new Map<string, { sold: number; revenue: number }>();
+  for (const d of eachDay(compFrom, compTo)) {
+    const sod = startOfDay(d).getTime();
+    const eod = endOfDay(d).getTime();
+    const todays = compList.filter(
+      (r) => new Date(r.arrivalDate).getTime() <= eod && new Date(r.departureDate).getTime() > sod
+    );
+    compByDay.set(dayStr(d), {
+      sold: todays.length,
+      revenue: r2(todays.reduce((sum, r) => sum + num(r.totalAmount), 0)),
+    });
+  }
+  const rows = days.map((d) => {
+    const lbl = dayStr(d);
+    const todays = list.filter((r) => {
+      // Date-granularity comparison: timestamp comparison counted a stay on
+      // its DEPARTURE date (departure is UTC-midnight, after local
+      // start-of-day), inflating every departure day's occupancy.
+      return dayStr(new Date(r.arrivalDate)) <= lbl && dayStr(new Date(r.departureDate)) > lbl;
+    });
+    const revenue = todays.reduce((sum, r) => sum + num(r.totalAmount), 0);
+    const pickup = todays.filter((r) => new Date(r.createdAt).getTime() >= sevenAgo).length;
+    const comp = compByDay.get(dayStr(addDays(d, -span))) ?? { sold: 0, revenue: 0 };
+    return {
+      label: dayStr(d),
+      onBooks: todays.length,
+      revenue: r2(revenue),
+      pickup7d: pickup,
+      compSold: comp.sold,
+      compRevenue: r2(comp.revenue),
+    };
+  });
+  const totRev = rows.reduce((sum, r) => sum + num(r.revenue), 0);
+  const totPickup = rows.reduce((sum, r) => sum + num(r.pickup7d), 0);
+  return {
+    columns: def.columns,
+    rows,
+    truncated: false,
+    summary: [
+      { label: 'OTB revenue', value: r2(totRev), format: 'currency' },
+      { label: 'Pick-up (7d rooms)', value: totPickup, format: 'number' },
+      {
+        label: 'Avg OTB / day',
+        value: rows.length ? r2(totRev / rows.length) : 0,
+        format: 'currency',
+      },
+    ],
+  };
+}
+
+async function forecast(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('forecast')!;
+  const from = startOfDay(new Date(p.dateFrom));
+  const to = endOfDay(new Date(p.dateTo));
+  const roomWhere: any = { tenantId: ctx.tenantId };
+  if (p.propertyId) roomWhere.propertyId = p.propertyId;
+  const rooms = await ctx.prisma.room.findMany({
+    where: roomWhere,
+    select: { status: true, serviceStatus: true },
+  });
+  const isOoo = (r: { status: string; serviceStatus: string }) =>
+    /ooo|out_?of_?order/i.test(String(r.status ?? '')) || String(r.serviceStatus) === 'ooo';
+  const sellable = rooms.filter((r) => !isOoo(r)).length;
+  const list = (
+    await ctx.prisma.reservation.findMany({
+      where: { ...resWhereBase(ctx, p), arrivalDate: { lte: to }, departureDate: { gt: from } },
+      select: { totalAmount: true, arrivalDate: true, departureDate: true, status: true },
+    })
+  ).filter((r) => isActiveStatus(r.status));
+  const rows = eachDay(from, to).map((d) => {
+    const lbl = dayStr(d);
+    const todays = list.filter((r) => {
+      // Date-granularity comparison: timestamp comparison counted a stay on
+      // its DEPARTURE date (departure is UTC-midnight, after local
+      // start-of-day), inflating every departure day's occupancy.
+      return dayStr(new Date(r.arrivalDate)) <= lbl && dayStr(new Date(r.departureDate)) > lbl;
+    });
+    const revenue = todays.reduce((sum, r) => sum + num(r.totalAmount), 0);
+    const sold = todays.length;
+    return {
+      label: dayStr(d),
+      available: sellable,
+      onBooks: sold,
+      remaining: Math.max(sellable - sold, 0),
+      occupancyPct: sellable ? sold / sellable : 0,
+      adr: sold ? r2(revenue / sold) : 0,
+      revpar: sellable ? r2(revenue / sellable) : 0,
+    };
+  });
+  const totSold = rows.reduce((sum, r) => sum + num(r.onBooks), 0);
+  const totAvail = rows.reduce((sum, r) => sum + num(r.available), 0);
+  return {
+    columns: def.columns,
+    rows,
+    truncated: false,
+    summary: [
+      { label: 'Avg OTB occupancy', value: totAvail ? totSold / totAvail : 0, format: 'percent' },
+      {
+        label: 'Rooms remaining (avg/day)',
+        value: rows.length
+          ? r2(rows.reduce((sum, r) => sum + num(r.remaining), 0) / rows.length)
+          : 0,
+        format: 'number',
+      },
+    ],
+  };
+}
+
+async function revenueBreakdown(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('revenue_breakdown')!;
+  const from = startOfDay(new Date(p.dateFrom));
+  const to = endOfDay(new Date(p.dateTo));
+  const folioWhere: any = { tenantId: ctx.tenantId };
+  if (p.propertyId) folioWhere.reservation = { propertyId: p.propertyId };
+  const items = await ctx.prisma.folioItem.findMany({
+    where: { postedAt: { gte: from, lte: to }, folio: folioWhere },
+    select: { amount: true, quantity: true, type: true },
+    take: 20000,
+  });
+  const agg = new Map<string, { charges: number; revenue: number }>();
+  for (const it of items) {
+    if (/transfer/i.test(it.type)) continue;
+    const a = agg.get(it.type) ?? { charges: 0, revenue: 0 };
+    a.charges += 1;
+    a.revenue += num(it.amount) * (num(it.quantity) || 1);
+    agg.set(it.type, a);
+  }
+  const totalRev = [...agg.values()].reduce((sum, a) => sum + a.revenue, 0);
+  const rows = [...agg.entries()]
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .map(([t, a]) => ({
+      label: t,
+      charges: a.charges,
+      revenue: r2(a.revenue),
+      sharePct: totalRev ? a.revenue / totalRev : 0,
+    }));
+  return {
+    columns: def.columns,
+    rows: rows.slice(0, MAX_ROWS),
+    truncated: agg.size > MAX_ROWS,
+    summary: [
+      { label: 'Total revenue', value: r2(totalRev), format: 'currency' },
+      { label: 'Charge types', value: rows.length, format: 'number' },
+    ],
+  };
+}
+
+async function marketSegments(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('market_segments')!;
+  const list = (
+    await ctx.prisma.reservation.findMany({
+      where: {
+        ...resWhereBase(ctx, p),
+        arrivalDate: { gte: startOfDay(new Date(p.dateFrom)), lte: endOfDay(new Date(p.dateTo)) },
+      },
+      select: {
+        marketSegment: true,
+        arrivalDate: true,
+        departureDate: true,
+        totalAmount: true,
+        status: true,
+      },
+    })
+  ).filter((r) => isActiveStatus(r.status));
+  const agg = new Map<string, { reservations: number; roomNights: number; revenue: number }>();
+  for (const r of list) {
+    const seg = (r.marketSegment ?? '').trim() || 'Unspecified';
+    const a = agg.get(seg) ?? { reservations: 0, roomNights: 0, revenue: 0 };
+    a.reservations += 1;
+    a.roomNights += Math.max(
+      0,
+      Math.round(
+        (new Date(r.departureDate).getTime() - new Date(r.arrivalDate).getTime()) / 86400000
+      )
+    );
+    a.revenue += num(r.totalAmount);
+    agg.set(seg, a);
+  }
+  const totalRev = [...agg.values()].reduce((sum, a) => sum + a.revenue, 0);
+  const rows = [...agg.entries()]
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .map(([seg, a]) => ({
+      label: seg,
+      reservations: a.reservations,
+      roomNights: a.roomNights,
+      revenue: r2(a.revenue),
+      sharePct: totalRev ? a.revenue / totalRev : 0,
+    }));
+  return {
+    columns: def.columns,
+    rows,
+    truncated: false,
+    summary: [
+      { label: 'Reservations', value: list.length, format: 'number' },
+      { label: 'Revenue', value: r2(totalRev), format: 'currency' },
+    ],
+  };
+}
+
+async function spaceStatus(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('space_status')!;
+  const w: any = { tenantId: ctx.tenantId };
+  if (p.propertyId) w.propertyId = p.propertyId;
+  const rooms = await ctx.prisma.room.findMany({
+    where: w,
+    select: {
+      number: true,
+      roomTypeId: true,
+      status: true,
+      housekeepingStatus: true,
+      serviceStatus: true,
+      serviceReason: true,
+      propertyId: true,
+    },
+    orderBy: [{ propertyId: 'asc' }, { number: 'asc' }],
+  });
+  const typeIds = [...new Set(rooms.map((r) => r.roomTypeId).filter(Boolean))] as string[];
+  const types = await ctx.prisma.roomType.findMany({
+    where: { id: { in: typeIds } },
+    select: { id: true, name: true },
+  });
+  const propIds = [...new Set(rooms.map((r) => r.propertyId).filter(Boolean))] as string[];
+  const props = await ctx.prisma.property.findMany({
+    where: { id: { in: propIds } },
+    select: { id: true, name: true },
+  });
+  const tName = new Map(types.map((t) => [t.id, t.name]));
+  const pName = new Map(props.map((x) => [x.id, x.name]));
+  const rows = rooms.map((r) => ({
+    property: pName.get(r.propertyId) ?? '-',
+    room: r.number,
+    roomType: tName.get(r.roomTypeId) ?? '-',
+    hkStatus: r.housekeepingStatus ?? 'UNKNOWN',
+    serviceStatus: r.serviceStatus ?? 'active',
+    reason: r.serviceReason ?? '',
+  }));
+  const ooo = rows.filter((r) => String(r.serviceStatus) === 'ooo').length;
+  const oos = rows.filter((r) => String(r.serviceStatus) === 'oos').length;
+  return {
+    columns: def.columns,
+    rows: rows.slice(0, MAX_ROWS),
+    truncated: rows.length > MAX_ROWS,
+    summary: [
+      { label: 'Rooms', value: rows.length, format: 'number' },
+      { label: 'OOO', value: ooo, format: 'number' },
+      { label: 'OOS', value: oos, format: 'number' },
+    ],
+  };
+}
+
+async function cancellationLead(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('cancellation_lead')!;
+  const from = startOfDay(new Date(p.dateFrom));
+  const to = endOfDay(new Date(p.dateTo));
+  const list = await ctx.prisma.reservation.findMany({
+    where: {
+      ...resWhereBase(ctx, p),
+      cancelledAt: { gte: from, lte: to },
+      status: { contains: 'cancel', mode: 'insensitive' },
+    },
+    select: { arrivalDate: true, totalAmount: true, cancelledAt: true },
+    take: 10000,
+  });
+  const bucketOf = (lead: number) =>
+    lead < 0
+      ? 'After arrival'
+      : lead === 0
+        ? 'Same day'
+        : lead <= 7
+          ? '1-7 days'
+          : lead <= 30
+            ? '8-30 days'
+            : lead <= 90
+              ? '31-90 days'
+              : '90+ days';
+  const agg = new Map<string, { cancellations: number; lostRevenue: number; leadSum: number }>();
+  for (const r of list) {
+    const lead = Math.floor(
+      (new Date(r.arrivalDate).getTime() - new Date(r.cancelledAt!).getTime()) / 86400000
+    );
+    const b = bucketOf(lead);
+    const a = agg.get(b) ?? { cancellations: 0, lostRevenue: 0, leadSum: 0 };
+    a.cancellations += 1;
+    a.lostRevenue += num(r.totalAmount);
+    a.leadSum += lead;
+    agg.set(b, a);
+  }
+  const order = ['After arrival', 'Same day', '1-7 days', '8-30 days', '31-90 days', '90+ days'];
+  const totalLost = [...agg.values()].reduce((sum, a) => sum + a.lostRevenue, 0);
+  const rows = order
+    .filter((b) => agg.has(b))
+    .map((b) => {
+      const a = agg.get(b)!;
+      return {
+        label: b,
+        cancellations: a.cancellations,
+        lostRevenue: r2(a.lostRevenue),
+        sharePct: totalLost ? a.lostRevenue / totalLost : 0,
+        avgLeadDays: a.cancellations ? Math.round(a.leadSum / a.cancellations) : 0,
+      };
+    });
+  return {
+    columns: def.columns,
+    rows,
+    truncated: false,
+    summary: [
+      { label: 'Cancellations', value: list.length, format: 'number' },
+      { label: 'Lost revenue', value: r2(totalLost), format: 'currency' },
+    ],
+  };
+}
+
+// ─── SA-3 net pricing & commission (Mews net-price reporting) ───
+
+async function netPricing(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const def = getDefinition('net_pricing')!;
+  const from = startOfDay(new Date(p.dateFrom));
+  const to = endOfDay(new Date(p.dateTo));
+  const list = (
+    await ctx.prisma.reservation.findMany({
+      where: {
+        ...resWhereBase(ctx, p),
+        arrivalDate: { gte: from, lte: to },
+      },
+      select: { totalAmount: true, ratePlanId: true, status: true },
+    })
+  ).filter((r) => isActiveStatus(r.status));
+  const planIds = [...new Set(list.map((r) => r.ratePlanId).filter(Boolean))] as string[];
+  const plans = await ctx.prisma.ratePlan.findMany({
+    where: { id: { in: planIds } },
+    select: { id: true, code: true, commissionPct: true },
+  });
+  const pmap = new Map(plans.map((x) => [x.id, x]));
+  const agg = new Map<
+    string,
+    { reservations: number; gross: number; commission: number; pct: number }
+  >();
+  for (const r of list) {
+    const plan = r.ratePlanId ? pmap.get(r.ratePlanId) : undefined;
+    const pct = plan?.commissionPct != null ? Number(plan.commissionPct) : 0;
+    const gross = num(r.totalAmount);
+    const key = plan ? plan.code : 'No rate plan';
+    const a = agg.get(key) ?? { reservations: 0, gross: 0, commission: 0, pct };
+    a.reservations += 1;
+    a.gross += gross;
+    // Net pricing: commission is INCLUDED in the gross → net = gross / (1 + pct)
+    a.commission += gross - gross / (1 + pct / 100);
+    agg.set(key, a);
+  }
+  const rows = [...agg.entries()]
+    .sort((a, b) => b[1].gross - a[1].gross)
+    .map(([label, a]) => ({
+      label,
+      reservations: a.reservations,
+      commissionPct: a.pct / 100,
+      grossRevenue: r2(a.gross),
+      commission: r2(a.commission),
+      netRevenue: r2(a.gross - a.commission),
+    }));
+  const totGross = rows.reduce((sum, r) => sum + num(r.grossRevenue), 0);
+  const totComm = rows.reduce((sum, r) => sum + num(r.commission), 0);
+  return {
+    columns: def.columns,
+    rows,
+    truncated: false,
+    summary: [
+      { label: 'Gross revenue', value: r2(totGross), format: 'currency' },
+      { label: 'Commission cost', value: r2(totComm), format: 'currency' },
+      { label: 'Net revenue', value: r2(totGross - totComm), format: 'currency' },
+    ],
+  };
+}
+
 const COMPUTERS: Record<string, (ctx: Ctx, p: Record<string, string>) => Promise<RunOutput>> = {
   occupancy,
   revenue,
@@ -607,6 +1043,13 @@ const COMPUTERS: Record<string, (ctx: Ctx, p: Record<string, string>) => Promise
   arrivals_departures: arrivalsDepartures,
   no_show_cancellation: noShowCancellation,
   guest_demographics: guestDemographics,
+  pace: pacePickup,
+  forecast,
+  revenue_breakdown: revenueBreakdown,
+  market_segments: marketSegments,
+  space_status: spaceStatus,
+  cancellation_lead: cancellationLead,
+  net_pricing: netPricing,
 };
 
 export async function runReport(

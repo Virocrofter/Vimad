@@ -1,0 +1,7 @@
+Error: P3006
+
+Migration `20261026155710_tenant_reports_reconcile` failed to apply cleanly to the shadow database. 
+Error code: P1014
+Error:
+The underlying table for model `TenantReportRun` does not exist.
+

@@ -54,7 +54,7 @@ import {
   stayStatusMeta,
   getStayPhase,
   getCancellationPolicy,
-} from '../data';
+} from '../../../lib/guest-utils';
 
 /* ─── Booking List Item ─── */
 export function BookingListItem({ stay, onClick, onAction }) {

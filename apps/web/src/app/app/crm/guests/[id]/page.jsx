@@ -342,6 +342,46 @@ export default function CrmGuest360Page() {
             )}
           </SectionCard>
 
+          {/* Reviews */}
+          <SectionCard title="Reviews">
+            {g.reviews?.length ? (
+              <div className="space-y-2">
+                {g.reviews.map((r) => (
+                  <div key={r.id} className="rounded-md border p-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/40'}`}
+                          />
+                        ))}
+                      </div>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[11px] ${
+                          r.status === 'approved'
+                            ? 'border-emerald-300 text-emerald-700 dark:text-emerald-400'
+                            : r.status === 'rejected'
+                              ? 'border-red-300 text-red-600'
+                              : 'border-amber-300 text-amber-700'
+                        }`}
+                      >
+                        {r.status}
+                      </span>
+                    </div>
+                    {r.title && <p className="mt-1 text-sm font-medium">{r.title}</p>}
+                    <p className="mt-1 whitespace-pre-wrap text-sm">{r.body}</p>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {fmtDate(r.createdAt)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground">No reviews yet.</span>
+            )}
+          </SectionCard>
+
           {/* Notes */}
           <SectionCard title="Notes">
             <div className="space-y-2">

@@ -1,7 +1,13 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import {
+  authMiddleware,
+  tenantScope,
+  requirePermission,
+  attachPropertyScope,
+  requirePropertyScope,
+} from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { paginationSchema } from '../../common/pagination.js';
 import {
@@ -175,16 +181,18 @@ registry.registerPath({
   },
 });
 
+reservationsRouter.use(attachPropertyScope);
+
 reservationsRouter.get(
   '/',
   requirePermission('reservation', 'read'),
   validateQuery(reservationQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await listReservations(
-        req.tenantId,
-        req.validatedQuery as ReservationListQuery
-      );
+      const result = await listReservations(req.tenantId, {
+        ...(req.validatedQuery as ReservationListQuery),
+        ...(req.allowedPropertyIds ? { propertyIds: req.allowedPropertyIds } : {}),
+      } as ReservationListQuery);
       res.json(result);
     } catch (err) {
       next(err);
@@ -213,6 +221,7 @@ registry.registerPath({
 reservationsRouter.get(
   '/:id',
   requirePermission('reservation', 'read'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await getReservation(req.tenantId, req.params.id);
@@ -295,6 +304,7 @@ registry.registerPath({
 reservationsRouter.patch(
   '/:id',
   requirePermission('reservation', 'update'),
+  requirePropertyScope(),
   validateBody(reservationUpdateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -310,6 +320,7 @@ reservationsRouter.patch(
 reservationsRouter.delete(
   '/:id',
   requirePermission('reservation', 'delete'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await deleteReservation(req.tenantId, req.params.id, actorOf(req));
@@ -324,6 +335,7 @@ reservationsRouter.delete(
 reservationsRouter.post(
   '/:id/assign-room',
   requirePermission('reservation', 'update'),
+  requirePropertyScope(),
   validateBody(assignRoomSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -339,6 +351,7 @@ reservationsRouter.post(
 reservationsRouter.post(
   '/:id/check-in',
   requirePermission('reservation', 'checkin'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await checkInReservation(req.tenantId, req.params.id, actorOf(req));
@@ -353,6 +366,7 @@ reservationsRouter.post(
 reservationsRouter.post(
   '/:id/check-out',
   requirePermission('reservation', 'checkout'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await checkOutReservation(req.tenantId, req.params.id, actorOf(req));
@@ -395,6 +409,7 @@ registry.registerPath({
 reservationsRouter.post(
   '/:id/cancel',
   requirePermission('reservation', 'cancel'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await cancelReservation(
@@ -432,6 +447,7 @@ registry.registerPath({
 reservationsRouter.post(
   '/:id/no-show',
   requirePermission('reservation', 'no_show'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await markNoShow(req.tenantId, req.params.id, actorOf(req));
@@ -461,6 +477,7 @@ registry.registerPath({
 reservationsRouter.post(
   '/:id/resend-confirmation',
   requirePermission('reservation', 'update'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await resendConfirmation(req.tenantId, req.params.id, actorOf(req));
@@ -495,6 +512,7 @@ reservationsRouter.patch(
 reservationsRouter.get(
   '/:id/traces',
   requirePermission('reservation', 'read'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await listTraces(req.tenantId, req.params.id);
@@ -509,6 +527,7 @@ reservationsRouter.get(
 reservationsRouter.post(
   '/:id/traces',
   requirePermission('reservation', 'trace'),
+  requirePropertyScope(),
   validateBody(createTraceSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -538,6 +557,7 @@ reservationsRouter.post(
 reservationsRouter.get(
   '/:id/companions',
   requirePermission('reservation', 'read'),
+  requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await listCompanions(req.tenantId, req.params.id);
@@ -552,6 +572,7 @@ reservationsRouter.get(
 reservationsRouter.post(
   '/:id/companions',
   requirePermission('reservation', 'update'),
+  requirePropertyScope(),
   validateBody(addCompanionSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {

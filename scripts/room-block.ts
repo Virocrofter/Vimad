@@ -10,6 +10,9 @@ async function main() {
       SELECT ${id}, t.id, ${propertyId}, ${roomTypeId}, 'ooo', 'active', 'inventory gate', ${start}::date, ${end}::date, now(), now()
       FROM tenants t WHERE t.slug = 'demo-hotel'`;
     console.log(id);
+  } else if (mode === 'cleanup') {
+    const r = await prisma.$executeRaw`DELETE FROM room_blocks WHERE reason = 'inventory gate'`;
+    console.log('cleaned ' + r + ' gate blocks');
   } else if (mode === 'delete') {
     await prisma.$executeRaw`DELETE FROM room_blocks WHERE id = ${process.argv[2]}`;
     console.log('deleted');

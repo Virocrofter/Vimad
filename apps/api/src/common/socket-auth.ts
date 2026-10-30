@@ -17,6 +17,30 @@ export interface SocketTokenPayload {
   role: string;
 }
 
-export function verifySocketToken(token: string): SocketTokenPayload {
-  return jwt.verify(token, env.JWT_SECRET) as SocketTokenPayload;
+export interface SocketGuestPayload extends SocketTokenPayload {
+  scope: 'guest-portal';
+  guestReservationId: string;
+}
+
+export type SocketIdentity = SocketTokenPayload | SocketGuestPayload;
+
+export function verifySocketToken(token: string): SocketIdentity {
+  const payload = jwt.verify(token, env.JWT_SECRET) as SocketTokenPayload & {
+    scope?: string;
+    reservationId?: string;
+  };
+
+  // Guest-portal sockets: same JWT, guest scope. Kept prisma-free (see header).
+  if (payload.scope === 'guest-portal' && payload.reservationId) {
+    return {
+      userId: payload.reservationId,
+      tenantId: payload.tenantId,
+      email: 'guest@portal',
+      role: 'guest',
+      scope: 'guest-portal',
+      guestReservationId: payload.reservationId,
+    } as SocketGuestPayload;
+  }
+
+  return payload;
 }

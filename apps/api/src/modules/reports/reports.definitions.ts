@@ -206,6 +206,127 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
       { key: 'sharePct', label: 'Share %', format: 'percent' },
     ],
   },
+
+  {
+    key: 'pace',
+    name: 'Pace & Pick-up',
+    category: 'Revenue',
+    description:
+      'On-the-books rooms and revenue per day vs the same days in the previous period (realized stays), plus 7-day pick-up.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'label', label: 'Date' },
+      { key: 'onBooks', label: 'On books', format: 'number' },
+      { key: 'revenue', label: 'OTB revenue', format: 'currency' },
+      { key: 'pickup7d', label: 'Pick-up 7d', format: 'number' },
+      { key: 'compSold', label: 'Comp sold', format: 'number' },
+      { key: 'compRevenue', label: 'Comp revenue', format: 'currency' },
+    ],
+  },
+  {
+    key: 'forecast',
+    name: 'Forecast (On the Books)',
+    category: 'Revenue',
+    description:
+      'Sellable rooms (excluding OOO/OOS), on-the-books occupancy, ADR and RevPAR per future day with rooms remaining.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'label', label: 'Date' },
+      { key: 'available', label: 'Sellable', format: 'number' },
+      { key: 'onBooks', label: 'On books', format: 'number' },
+      { key: 'remaining', label: 'Remaining', format: 'number' },
+      { key: 'occupancyPct', label: 'Occ %', format: 'percent' },
+      { key: 'adr', label: 'ADR', format: 'currency' },
+      { key: 'revpar', label: 'RevPAR', format: 'currency' },
+    ],
+  },
+  {
+    key: 'revenue_breakdown',
+    name: 'Revenue by Charge Type',
+    category: 'Revenue',
+    description: 'Posted folio revenue grouped by charge type with share of total.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'label', label: 'Charge type' },
+      { key: 'charges', label: 'Charges', format: 'number' },
+      { key: 'revenue', label: 'Revenue', format: 'currency' },
+      { key: 'sharePct', label: 'Share %', format: 'percent' },
+    ],
+  },
+  {
+    key: 'market_segments',
+    name: 'Market Segments',
+    category: 'Revenue',
+    description: 'Reservations, room nights and revenue by market segment.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'label', label: 'Segment' },
+      { key: 'reservations', label: 'Reservations', format: 'number' },
+      { key: 'roomNights', label: 'Room nights', format: 'number' },
+      { key: 'revenue', label: 'Revenue', format: 'currency' },
+      { key: 'sharePct', label: 'Share %', format: 'percent' },
+    ],
+  },
+  {
+    key: 'space_status',
+    name: 'Space Status (OOO/OOS)',
+    category: 'Operations',
+    description: 'Every room with housekeeping and service status (OOO/OOS) plus the reason.',
+    params: [
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ],
+    columns: [
+      { key: 'property', label: 'Property' },
+      { key: 'room', label: 'Room' },
+      { key: 'roomType', label: 'Type' },
+      { key: 'hkStatus', label: 'HK status' },
+      { key: 'serviceStatus', label: 'Service' },
+      { key: 'reason', label: 'Reason' },
+    ],
+  },
+  {
+    key: 'cancellation_lead',
+    name: 'Cancellation Lead Time',
+    category: 'Guests',
+    description: 'Cancellations bucketed by how far before arrival they were cancelled.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'label', label: 'Lead time' },
+      { key: 'cancellations', label: 'Cancellations', format: 'number' },
+      { key: 'lostRevenue', label: 'Lost revenue', format: 'currency' },
+      { key: 'sharePct', label: 'Share %', format: 'percent' },
+      { key: 'avgLeadDays', label: 'Avg lead (days)', format: 'number' },
+    ],
+  },
+
+  {
+    key: 'net_pricing',
+    name: 'Net Pricing & Commission',
+    category: 'Finance',
+    description:
+      'Gross booking revenue by rate plan with OTA commission (commission-inclusive net pricing) and net revenue.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'label', label: 'Rate plan' },
+      { key: 'reservations', label: 'Reservations', format: 'number' },
+      { key: 'commissionPct', label: 'Comm %', format: 'percent' },
+      { key: 'grossRevenue', label: 'Gross', format: 'currency' },
+      { key: 'commission', label: 'Commission', format: 'currency' },
+      { key: 'netRevenue', label: 'Net', format: 'currency' },
+    ],
+  },
 ];
 
 export const getDefinition = (key: string): ReportDefinition | undefined =>

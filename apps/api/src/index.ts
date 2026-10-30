@@ -1,3 +1,10 @@
+// BigInt values (payments.paystackId is a BIGINT column) are not JSON-
+// serializable by default; res.json throws 'Do not know how to serialize a
+// BigInt'. Serialize as string globally.
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 import 'dotenv/config';
 import './common/zod.js';
 import { createServer } from 'http';
@@ -79,6 +86,15 @@ import { nightAuditRouter } from './modules/night-audit/night-audit.routes.js';
 import { smsRouter } from './modules/sms/sms.routes.js';
 import { guestPortalRouter } from './modules/guest-portal/guest-portal.routes.js';
 import { guestPortalMyStaysRouter } from './modules/guest-portal/my-stays.routes.js';
+import { guestBookingRouter } from './modules/guest-portal/guest-booking.routes.js';
+import { guestBillingRouter } from './modules/guest-portal/guest-billing.routes.js';
+import { guestPayRouter } from './modules/guest-portal/guest-pay.routes.js';
+import { guestLoyaltyRouter } from './modules/guest-portal/guest-loyalty.routes.js';
+import { guestProfileRouter } from './modules/guest-portal/guest-profile.routes.js';
+import { guestCommerceRouter } from './modules/guest-portal/guest-commerce.routes.js';
+import { guestCommsRouter } from './modules/guest-portal/guest-comms.routes.js';
+import { guestPortalRefreshRouter } from './modules/guest-portal/refresh.routes.js';
+import { commsRouter } from './modules/guest-portal/comms.routes.js';
 import { notificationRouter } from './modules/notifications/notification.routes.js';
 // [A3] transactional email center (email logs + manual triggers)
 import { transactionalEmailRouter } from './modules/notifications/transactional.routes.js';
@@ -380,6 +396,24 @@ async function bootstrap() {
   // MUST mount BEFORE /v1/guest-portal — the main portal router would intercept.
   app.use('/v1/guest-portal/support', ticketsGuestRouter);
   app.use('/v1/guest-portal', guestPortalMyStaysRouter);
+  // [G1] Guest booking management (modify/cancel) + guest billing (folio,
+  // invoices, preferences, documents). MUST mount BEFORE the main portal
+  // router so their paths win over the generic /:token handlers.
+  app.use('/v1/guest-portal', guestBookingRouter);
+  app.use('/v1/guest-portal', guestBillingRouter);
+  // [G2] Guest checkout + split billing (portal-token auth; strictLimiter — these mint payment sessions).
+  // MUST mount BEFORE the main portal router.
+  app.use('/v1/guest-portal/pay', strictLimiter, guestPayRouter);
+  // [G3] Loyalty + guest profile/documents (portal-token auth).
+  app.use('/v1/guest-portal/loyalty', strictLimiter, guestLoyaltyRouter);
+  app.use('/v1/guest-portal/profile', strictLimiter, guestProfileRouter);
+  // [G4] In-stay commerce: menu, room-service orders, upsells, timeline.
+  app.use('/v1/guest-portal/commerce', strictLimiter, guestCommerceRouter);
+  // [G5] Guest chat + reviews + announcements (portal-token auth).
+  app.use('/v1/guest-portal/comms', strictLimiter, guestCommsRouter);
+  app.use('/v1/guest-portal', strictLimiter, guestPortalRefreshRouter);
+  // [G5] Staff comms desk (staff auth): chat inbox, review moderation, announcements.
+  app.use('/v1/comms', commsRouter);
   app.use('/v1/guest-portal', guestPortalRouter);
   // [T5] Public one-tap task links (tokenized capability URL, per-IP limited).
   // MUST mount BEFORE /v1/tasks — the staff routers' auth would 401 it.
