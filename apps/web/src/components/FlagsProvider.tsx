@@ -21,8 +21,8 @@ export function FlagsProvider({ children }: { children: React.ReactNode }) {
   const load = async () => {
     try {
       const r = await evaluateMyFlags();
-      const values = r?.values ?? r?.data?.values ?? {};
-      const meta = r?.meta ?? r?.data?.meta ?? {};
+      const values = r?.values ?? {};
+      const meta = r?.meta ?? {};
       setState({ values, meta, ready: true, loadedAt: Date.now() });
     } catch {
       setState((prev) => ({ ...prev, ready: true }));
