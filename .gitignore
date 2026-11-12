@@ -58,3 +58,7 @@ Thumbs.db
 .cache/
 tmp/
 temp/repomix-output.xml
+.s0_backups/
+apps/api/.backups/
+*.bak
+bulk3-recon.txt
