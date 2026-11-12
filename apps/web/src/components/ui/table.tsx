@@ -65,7 +65,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLT
       <th
         ref={ref}
         className={cn(
-          'h-12 px-4 text-left align-middle text-xs font-medium uppercase tracking-wider text-text-secondary',
+          'sticky top-0 z-[var(--hq-z-sticky)] h-12 bg-surface px-4 text-left align-middle text-xs font-medium uppercase tracking-wider text-text-secondary',
           className
         )}
         {...props}
@@ -74,13 +74,26 @@ export const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLT
   }
 );
 
-export const TableCell = forwardRef<HTMLTableCellElement, TdHTMLAttributes<HTMLTableCellElement>>(
-  function TableCell({ className, ...props }, ref) {
-    return (
-      <td ref={ref} className={cn('p-4 align-middle text-text-primary', className)} {...props} />
-    );
-  }
-);
+interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
+  numeric?: boolean;
+}
+
+export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell(
+  { className, numeric, ...props },
+  ref
+) {
+  return (
+    <td
+      ref={ref}
+      className={cn(
+        'p-4 align-middle text-text-primary',
+        numeric && 'text-right hq-tnum',
+        className
+      )}
+      {...props}
+    />
+  );
+});
 
 export const TableCaption = forwardRef<
   HTMLTableCaptionElement,

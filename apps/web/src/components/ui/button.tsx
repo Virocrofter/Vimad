@@ -13,8 +13,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-secondary text-white hover:bg-secondary/90 border-transparent',
-  secondary: 'bg-surface text-text-primary border-border hover:bg-surface-elevated',
+  primary: 'bg-primary text-white hover:bg-primary/90 border-transparent',
+  secondary: 'bg-secondary text-white hover:bg-secondary/90 border-transparent',
   outline: 'bg-transparent text-text-primary border-border hover:bg-surface',
   ghost:
     'bg-transparent text-text-secondary hover:bg-surface-elevated hover:text-text-primary border-transparent',
@@ -23,8 +23,8 @@ const variants: Record<ButtonVariant, string> = {
 
 const sizes: Record<ButtonSize, string> = {
   sm: 'h-8 px-3 text-xs',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-11 px-6 text-sm',
+  md: 'h-9 px-4 text-sm',
+  lg: 'h-10 px-6 text-sm',
   icon: 'h-9 w-9 p-0 justify-center',
 };
 
@@ -42,9 +42,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         className
       )}
       disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
       {...props}
     >
-      {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+      {isLoading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
       {children}
     </button>
   );

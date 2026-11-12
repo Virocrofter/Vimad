@@ -8,7 +8,12 @@ interface CardProps {
 
 export function Card({ children, className }: CardProps) {
   return (
-    <div className={cn('rounded-xl border border-border bg-surface p-4 shadow-sm', className)}>
+    <div
+      className={cn(
+        'rounded-[var(--hq-radius-md)] border border-border bg-surface p-4 shadow-none',
+        className
+      )}
+    >
       {children}
     </div>
   );
@@ -48,4 +53,15 @@ interface CardContentProps {
 
 export function CardContent({ children, className }: CardContentProps) {
   return <div className={className}>{children}</div>;
+}
+
+interface CardFooterProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function CardFooter({ children, className }: CardFooterProps) {
+  return (
+    <div className={cn('mt-3 flex items-center justify-end gap-2', className)}>{children}</div>
+  );
 }
