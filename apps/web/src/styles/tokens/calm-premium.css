@@ -86,3 +86,152 @@
   background: var(--accent);
   color: var(--accent-foreground);
 }
+
+/* ─── HQ-0 (Stage 2, 2026-11-13) — additive design-system layer ───
+ * Everything here is NEW (--hq-*, .hq-*) — no existing variable or
+ * class is redefined. Plan §6.2 contract; legacy --space-* scale is
+ * 8px-based and stays untouched (--hq-space-* is the 4px-base layer).
+ * Rollback: delete this section and the @import stays valid.
+ */
+
+:root:not(.dark) {
+  /* Typography (Display 28/34, Title 20/26, Section 14/18@600, Body 13/18, Caption 11/15) */
+  --hq-text-display-size: 28px;
+  --hq-text-display-line: 34px;
+  --hq-text-title-size: 20px;
+  --hq-text-title-line: 26px;
+  --hq-text-section-size: 14px;
+  --hq-text-section-line: 18px;
+  --hq-text-body-size: 13px;
+  --hq-text-body-line: 18px;
+  --hq-text-caption-size: 11px;
+  --hq-text-caption-line: 15px;
+
+  /* Rhythm — 4px base (new names; legacy --space-* untouched) */
+  --hq-space-1: 4px;
+  --hq-space-2: 8px;
+  --hq-space-3: 12px;
+  --hq-space-4: 16px;
+  --hq-space-6: 24px;
+  --hq-space-8: 32px;
+
+  /* Radius 8/10/14 */
+  --hq-radius-sm: 8px;
+  --hq-radius-md: 10px;
+  --hq-radius-lg: 14px;
+
+  /* Elevation: resting = hairline only; ONE raised shadow; overlay only for dialogs */
+  --hq-raise: 0 8px 24px -8px rgb(19 43 58 / 0.18);
+  --hq-overlay: 0 24px 48px -12px rgb(19 43 58 / 0.28);
+
+  /* Z-index contract */
+  --hq-z-content: 0;
+  --hq-z-sticky: 10;
+  --hq-z-drawer: 40;
+  --hq-z-dialog: 50;
+  --hq-z-toast: 60;
+  --hq-z-cmdk: 70;
+
+  /* Motion tokens (transform/opacity only; library decision pending measurement) */
+  --hq-duration-fast: 150ms;
+  --hq-duration-base: 250ms;
+  --hq-duration-slow: 400ms;
+  --hq-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --hq-ease-emphatic: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Two-layer focus: canvas halo under teal ring */
+  --hq-focus-halo: #f4f7f8;
+  --hq-focus-ring: #1f7a78;
+
+  /* Control heights (comfortable default; compact via data-density) */
+  --hq-control-sm: 32px;
+  --hq-control-md: 36px;
+  --hq-control-lg: 40px;
+  --hq-density-pad-x: 12px;
+}
+
+[data-density='compact'] {
+  --hq-control-sm: 28px;
+  --hq-control-md: 32px;
+  --hq-control-lg: 36px;
+  --hq-density-pad-x: 8px;
+}
+
+/* Tabular numerals — money, counts, room numbers, deltas (P1) */
+.hq-tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Type utilities */
+.hq-text-display {
+  font-size: var(--hq-text-display-size);
+  line-height: var(--hq-text-display-line);
+}
+.hq-text-title {
+  font-size: var(--hq-text-title-size);
+  line-height: var(--hq-text-title-line);
+}
+.hq-text-section {
+  font-size: var(--hq-text-section-size);
+  line-height: var(--hq-text-section-line);
+  font-weight: 600;
+}
+.hq-text-body {
+  font-size: var(--hq-text-body-size);
+  line-height: var(--hq-text-body-line);
+}
+.hq-text-caption {
+  font-size: var(--hq-text-caption-size);
+  line-height: var(--hq-text-caption-line);
+}
+
+/* Resting card — hairline border, no shadow (P10) */
+.hq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--hq-radius-md);
+  box-shadow: none;
+}
+
+/* Two-layer focus ring */
+.hq-focus:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--hq-focus-halo),
+    0 0 0 4px var(--hq-focus-ring);
+}
+
+/* Status color map (P11: one accent; text always accompanies color) */
+.hq-status-ready,
+.hq-status-inspected {
+  color: var(--primary);
+}
+.hq-status-dirty,
+.hq-status-in-progress {
+  color: var(--warning);
+}
+.hq-status-ooo,
+.hq-status-oos,
+.hq-status-clean {
+  color: var(--text-secondary);
+}
+.hq-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  margin-right: 6px;
+}
+.hq-status-dot.ready,
+.hq-status-dot.inspected {
+  background: var(--primary);
+}
+.hq-status-dot.dirty,
+.hq-status-dot.in-progress {
+  background: var(--warning);
+}
+.hq-status-dot.ooo,
+.hq-status-dot.oos,
+.hq-status-dot.clean {
+  background: var(--text-muted);
+}
