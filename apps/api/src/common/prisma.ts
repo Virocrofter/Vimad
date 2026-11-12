@@ -31,6 +31,14 @@ if (env.NODE_ENV === 'development') {
 }
 
 prisma.$on('error' as never, (e: { message: string; code?: string }) => {
+  // P2002 = unique-constraint races the app layer handles by design (task dedupe, upserts).
+  if (e.code === 'P2002') {
+    logger.debug(
+      { prismaError: { message: e.message, code: e.code } },
+      'Prisma error (handled race)'
+    );
+    return;
+  }
   logger.error({ prismaError: { message: e.message, code: e.code } }, 'Prisma error');
 });
 
