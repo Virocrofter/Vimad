@@ -53,7 +53,7 @@ import { ErrorState } from '../../../components/ui/ErrorState';
 import { FlagGate } from '../../../components/FlagGate';
 import { flags } from '../../../lib/flags';
 
-export default function AppDashboard() {
+function AppDashboardV1() {
   // D1.3 — respect the chain-admin sticky property (C1 property switcher)
   const { currentPropertyId, clear: clearStickyProperty } = usePropertyStore();
   const propertyId = currentPropertyId ?? undefined;
@@ -472,4 +472,16 @@ export default function AppDashboard() {
       <QuickActionsFab />
     </div>
   );
+}
+
+// Stage 3 dash.v2 gate (plan section 11.1): live-flag only. ready+on -> v2;
+// anything else -> v1. Legacy build-time flags.todayV2 stays untouched.
+import { useFlags, useLiveFlag } from '../../../components/FlagsProvider';
+import TodayV2Screen from './page.v2';
+
+export default function AppDashboard() {
+  const { ready } = useFlags();
+  const dashV2 = useLiveFlag('dash.v2', false);
+  if (ready && dashV2 === true) return <TodayV2Screen />;
+  return <AppDashboardV1 />;
 }
