@@ -92,7 +92,7 @@ if ! curl -sf "$BASE/v1/public/status" >/dev/null 2>&1; then
   gate R1-stack SKIP "API not reachable at $BASE - start it, then re-run"
 else
   gate R1-stack PASS "API at $BASE"
-  LOGIN=$(curl -sf -X POST "$BASE/v1/auth/login" -H 'Content-Type: application/json' -d "${LOGIN_BODY:-}" 2>/dev/null || true)
+  LOGIN=$(curl -sf -X POST "$BASE/auth/login" -H 'Content-Type: application/json' -d "${LOGIN_BODY:-}" 2>/dev/null || true)
   TOKEN=$(printf '%s' "$LOGIN" | python3 -c 'import sys,json
 d=json.load(sys.stdin); t=d.get("data") or d
 print(t.get("token") or t.get("accessToken") or "")' 2>/dev/null || true)
