@@ -5,6 +5,7 @@ import {
   useState,
   forwardRef,
   type ButtonHTMLAttributes,
+  type KeyboardEvent,
   type ReactNode,
 } from 'react';
 import { cn } from '../../lib/utils';
@@ -44,6 +45,26 @@ function useTabsContext() {
   return ctx;
 }
 
+/* Arrow-key navigation over [role=tab] triggers (P8) */
+function handleTabKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
+    return;
+  }
+  const triggers = Array.from(
+    e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]:not([disabled])')
+  );
+  if (!triggers.length) return;
+  e.preventDefault();
+  const current = triggers.indexOf(document.activeElement as HTMLButtonElement);
+  let next = current < 0 ? 0 : current;
+  if (e.key === 'ArrowRight') next = (current + 1) % triggers.length;
+  if (e.key === 'ArrowLeft') next = (current - 1 + triggers.length) % triggers.length;
+  if (e.key === 'Home') next = 0;
+  if (e.key === 'End') next = triggers.length - 1;
+  triggers[next].focus();
+  triggers[next].click();
+}
+
 function CompoundTabs({
   value,
   defaultValue,
@@ -72,7 +93,11 @@ function CompoundTabs({
 
 export function TabsList({ className, children }: { className?: string; children?: ReactNode }) {
   return (
-    <div className={cn('flex w-full items-center border-b border-border', className)}>
+    <div
+      role="tablist"
+      onKeyDown={handleTabKeyDown}
+      className={cn('flex w-full items-center border-b border-border', className)}
+    >
       {children}
     </div>
   );
@@ -88,6 +113,9 @@ export const TabsTrigger = forwardRef<
     <button
       ref={ref}
       type="button"
+      role="tab"
+      aria-selected={isActive}
+      tabIndex={isActive ? 0 : -1}
       onClick={(e) => {
         onClick?.(e);
         setValue(value);
@@ -95,7 +123,7 @@ export const TabsTrigger = forwardRef<
       className={cn(
         'relative flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
         isActive
-          ? 'border-secondary text-secondary'
+          ? 'border-primary text-primary'
           : 'border-transparent text-text-secondary hover:text-text-primary',
         className
       )}
@@ -117,7 +145,11 @@ export function TabsContent({
 }) {
   const { value: active } = useTabsContext();
   if (active !== value) return null;
-  return <div className={className}>{children}</div>;
+  return (
+    <div role="tabpanel" className={className}>
+      {children}
+    </div>
+  );
 }
 
 /* ─── Root: branches between the legacy tabs-array API and the compound API ─── */
@@ -148,17 +180,24 @@ function LegacyTabs({
 
   return (
     <div className={cn('space-y-4', className)}>
-      <div className="flex w-full items-center border-b border-border">
+      <div
+        role="tablist"
+        onKeyDown={handleTabKeyDown}
+        className="flex w-full items-center border-b border-border"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            aria-selected={active === tab.id}
+            tabIndex={active === tab.id ? 0 : -1}
             disabled={tab.disabled}
             onClick={() => handleChange(tab.id)}
             className={cn(
               'relative flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
               active === tab.id
-                ? 'border-secondary text-secondary'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-text-secondary hover:text-text-primary',
               tab.disabled && 'cursor-not-allowed opacity-50'
             )}
@@ -167,7 +206,7 @@ function LegacyTabs({
           </button>
         ))}
       </div>
-      <div>{activeTab?.content}</div>
+      <div role="tabpanel">{activeTab?.content}</div>
     </div>
   );
 }

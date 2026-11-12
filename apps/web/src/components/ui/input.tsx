@@ -1,22 +1,27 @@
-import { type InputHTMLAttributes, forwardRef, type ElementType } from 'react';
+import { type InputHTMLAttributes, forwardRef, type ElementType, useId } from 'react';
 import { cn } from '../../lib/utils';
 import type { LucideProps } from 'lucide-react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  hint?: string;
   error?: string;
   icon?: ElementType<LucideProps>;
   containerClassName?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, icon: Icon, className, containerClassName, ...props },
+  { label, hint, error, icon: Icon, className, containerClassName, id: idProp, ...props },
   ref
 ) {
+  const autoId = useId();
+  const id = idProp ?? autoId;
+  const messageId = `${id}-message`;
+  const describedBy = error || hint ? messageId : undefined;
   return (
     <div className={cn('space-y-1.5', containerClassName)}>
       {label && (
-        <label className="text-sm font-medium text-text-primary">
+        <label htmlFor={id} className="text-sm font-medium text-text-primary">
           {label}
           {props.required && <span className="text-danger ml-0.5">*</span>}
         </label>
@@ -29,6 +34,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         )}
         <input
           ref={ref}
+          id={id}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
           className={cn(
             'flex h-10 w-full rounded-md border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
             Icon && 'pl-10',
@@ -38,7 +46,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {...props}
         />
       </div>
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && (
+        <p id={messageId} className="text-xs text-danger">
+          {error}
+        </p>
+      )}
+      {!error && hint && (
+        <p id={messageId} className="text-xs text-text-muted">
+          {hint}
+        </p>
+      )}
     </div>
   );
 });
