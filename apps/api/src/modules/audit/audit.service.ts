@@ -20,6 +20,7 @@ export async function logAuditEvent(params: {
   description: string;
   entityType: string;
   entityId: string;
+  propertyId?: string;
   severity?: 'critical' | 'high' | 'medium' | 'low' | 'info';
   metadata?: Record<string, unknown>;
 }) {
@@ -32,6 +33,7 @@ export async function logAuditEvent(params: {
     description,
     entityType,
     entityId,
+    propertyId,
     severity = 'info',
     metadata,
   } = params;
@@ -58,6 +60,7 @@ export async function logAuditEvent(params: {
         action,
         entity: entityType,
         entityId,
+        propertyId: propertyId ?? (metadata?.propertyId as string) ?? null,
         metadata: {
           ...metadata,
           actor: actor ?? null,

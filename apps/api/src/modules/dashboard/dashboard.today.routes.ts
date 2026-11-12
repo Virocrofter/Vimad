@@ -14,6 +14,7 @@
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import { resolveAllowedPropertyIds } from '../auth/auth.middleware.js';
 import { nextStates } from '../../common/lifecycle.js';
 
 export const todayDashboardRouter = Router();
@@ -236,8 +237,15 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
   const revpar = roomsTotal > 0 ? roomRevenueToday / roomsTotal : 0;
 
   // ── Activity timeline (tenant-scoped audit trail) ──
+  const allowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  const activityWhere: any = { tenantId };
+  if (allowedProps) {
+    activityWhere.propertyId = { in: allowedProps.includes(propertyId) ? [propertyId] : [] };
+  } else {
+    activityWhere.OR = [{ propertyId: propertyId }, { propertyId: null }];
+  }
   const activity = await prisma.auditLog.findMany({
-    where: { tenantId },
+    where: activityWhere,
     orderBy: { createdAt: 'desc' },
     take: 20,
   });

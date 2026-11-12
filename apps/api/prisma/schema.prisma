@@ -11,118 +11,118 @@ datasource db {
 // ─── Tenant & Identity ───
 
 model Tenant {
-  id                  String               @id @default(cuid())
-  name                String
-  slug                String               @unique
-  plan                String               @default("trial")
-  isDemo              Boolean              @default(false)
-  status              String               @default("active")
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("trial")
+  isDemo    Boolean  @default(false)
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  properties          Property[]
-  users               User[]
-  guests              Guest[]
-  reservations        Reservation[]
-  roomTypes           RoomType[]
-  rooms               Room[]
-  ratePlans           RatePlan[]
-  auditLogs           AuditLog[]
-  notifications       Notification[]
-  invoices            Invoice[]
-  taxInvoices         TaxInvoice[]
-  invoiceCounters     InvoiceCounter[]
-  contracts           Contract[]
-  pushSubscriptions   PushSubscription[]
-  channelConnections  ChannelConnection[]
-  housekeepingTasks   HousekeepingTask[]
-  nightAudits         NightAudit[]
-  nightAuditSchedules NightAuditSchedule[]
-  payments              Payment[]
-  guestPaymentMethods   GuestPaymentMethod[]
-  paymentRequests       PaymentRequest[]
-  emailLogs             EmailLog[]
-  tasks     Task[]
-  taskRules TaskRule[]
-  conciergeItems      ConciergeItem[]
-  parkingBays         ParkingBay[]
-  guestVehicles       GuestVehicle[]
-  parkingAssignments  ParkingAssignment[]
-  chains              Chain[]
-  groups              Group[]
-  inventoryRestrictions InventoryRestriction[]
-  inventoryAllocations  InventoryAllocation[]
-  corporateAccounts      CorporateAccount[]
-  guestFollowUps         GuestFollowUp[]
-  guestSegments          GuestSegment[]
-  guestSegmentMemberships GuestSegmentMembership[]
-  restaurants         Restaurant[]
-  mealPlans           MealPlan[]
-  mealPlanAssignments MealPlanAssignment[]
-  mealPlanPostings    MealPlanPosting[]
-  tickets             Ticket[]
-  arInvoices         ArInvoice[]
-  arPayments         ArPayment[]
-  arInvoiceCounters  ArInvoiceCounter[]
-  reservationTraces      ReservationTrace[]
-  reservationCompanions  ReservationCompanion[]
-  scClients           ScClient[]
-  scEvents            ScEvent[]
-  beos                Beo[]
-  venues              Venue[]
-  menuPackages        MenuPackage[]
-  avPackages          AvPackage[]
-  setupStyles         SetupStyle[]
-  decorOptions        DecorOption[]
-  scActivities        ScActivity[]
-  cannedResponses    CannedResponse[]
-  guestIdentityGroups GuestIdentityGroup[]
-  supportCases       SupportCase[]
-  onboardingImports OnboardingImport[]
-  propertyTemplates PropertyTemplate[]
-  loyaltyConfig      LoyaltyConfig?
-  folioSplitRequests FolioSplitRequest[]
-  loyaltyRewards     LoyaltyReward[]
-  loyaltyRedemptions LoyaltyRedemption[]
+  properties                      Property[]
+  users                           User[]
+  guests                          Guest[]
+  reservations                    Reservation[]
+  roomTypes                       RoomType[]
+  rooms                           Room[]
+  ratePlans                       RatePlan[]
+  auditLogs                       AuditLog[]
+  notifications                   Notification[]
+  invoices                        Invoice[]
+  taxInvoices                     TaxInvoice[]
+  invoiceCounters                 InvoiceCounter[]
+  contracts                       Contract[]
+  pushSubscriptions               PushSubscription[]
+  channelConnections              ChannelConnection[]
+  housekeepingTasks               HousekeepingTask[]
+  nightAudits                     NightAudit[]
+  nightAuditSchedules             NightAuditSchedule[]
+  payments                        Payment[]
+  guestPaymentMethods             GuestPaymentMethod[]
+  paymentRequests                 PaymentRequest[]
+  emailLogs                       EmailLog[]
+  tasks                           Task[]
+  taskRules                       TaskRule[]
+  conciergeItems                  ConciergeItem[]
+  parkingBays                     ParkingBay[]
+  guestVehicles                   GuestVehicle[]
+  parkingAssignments              ParkingAssignment[]
+  chains                          Chain[]
+  groups                          Group[]
+  inventoryRestrictions           InventoryRestriction[]
+  inventoryAllocations            InventoryAllocation[]
+  corporateAccounts               CorporateAccount[]
+  guestFollowUps                  GuestFollowUp[]
+  guestSegments                   GuestSegment[]
+  guestSegmentMemberships         GuestSegmentMembership[]
+  restaurants                     Restaurant[]
+  mealPlans                       MealPlan[]
+  mealPlanAssignments             MealPlanAssignment[]
+  mealPlanPostings                MealPlanPosting[]
+  tickets                         Ticket[]
+  arInvoices                      ArInvoice[]
+  arPayments                      ArPayment[]
+  arInvoiceCounters               ArInvoiceCounter[]
+  reservationTraces               ReservationTrace[]
+  reservationCompanions           ReservationCompanion[]
+  scClients                       ScClient[]
+  scEvents                        ScEvent[]
+  beos                            Beo[]
+  venues                          Venue[]
+  menuPackages                    MenuPackage[]
+  avPackages                      AvPackage[]
+  setupStyles                     SetupStyle[]
+  decorOptions                    DecorOption[]
+  scActivities                    ScActivity[]
+  cannedResponses                 CannedResponse[]
+  guestIdentityGroups             GuestIdentityGroup[]
+  supportCases                    SupportCase[]
+  onboardingImports               OnboardingImport[]
+  propertyTemplates               PropertyTemplate[]
+  loyaltyConfig                   LoyaltyConfig?
+  folioSplitRequests              FolioSplitRequest[]
+  loyaltyRewards                  LoyaltyReward[]
+  loyaltyRedemptions              LoyaltyRedemption[]
   reservationModificationRequests ReservationModificationRequest[]
-  exceptions          Exception[]
+  exceptions                      Exception[]
+
   @@map("tenants")
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String
-  passwordHash String?
-  firstName    String?
-  lastName     String?
-  phone        String?   // T5: WhatsApp/SMS task push destination (E.164)
-  role         String   @default("staff")
-  status       String   @default("active")
-  tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  email          String
+  passwordHash   String?
+  firstName      String?
+  lastName       String?
+  phone          String? // T5: WhatsApp/SMS task push destination (E.164)
+  role           String   @default("staff")
+  status         String   @default("active")
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   lastPropertyId String? // C1: sticky property-switcher choice (validated in service layer)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  notifications     Notification[]
-  pushSubscriptions PushSubscription[]
-  roleAssignments   RoleAssignment[]
-  housekeepingTasks HousekeepingTask[] @relation("AssignedTasks")
-  inspectedTasks    HousekeepingTask[] @relation("InspectedTasks")
-  refreshTokens     RefreshToken[]
-  passwordResets    PasswordReset[]
-  guestNotes        GuestNote[]
-  minibarChecks MinibarCheck[]
-  assignedTasks     Task[] @relation("TaskAssignees")
-  conciergeItems    ConciergeItem[]
-  scManagedClients  ScClient[] @relation("SC_AccountManager")
-  scOwnedEvents     ScEvent[]  @relation("SC_EventOwner")
-  assignedTickets     Ticket[] @relation("TicketAssignee")
-  createdTickets      Ticket[] @relation("TicketCreator")
+  notifications        Notification[]
+  pushSubscriptions    PushSubscription[]
+  roleAssignments      RoleAssignment[]
+  housekeepingTasks    HousekeepingTask[] @relation("AssignedTasks")
+  inspectedTasks       HousekeepingTask[] @relation("InspectedTasks")
+  refreshTokens        RefreshToken[]
+  passwordResets       PasswordReset[]
+  guestNotes           GuestNote[]
+  minibarChecks        MinibarCheck[]
+  assignedTasks        Task[]             @relation("TaskAssignees")
+  conciergeItems       ConciergeItem[]
+  scManagedClients     ScClient[]         @relation("SC_AccountManager")
+  scOwnedEvents        ScEvent[]          @relation("SC_EventOwner")
+  assignedTickets      Ticket[]           @relation("TicketAssignee")
+  createdTickets       Ticket[]           @relation("TicketCreator")
   cannedResponses      CannedResponse[]
-  supportCasesAssigned SupportCase[] @relation("SupportCaseAssignee")
-  supportCasesCreated  SupportCase[] @relation("SupportCaseCreator")
-
+  supportCasesAssigned SupportCase[]      @relation("SupportCaseAssignee")
+  supportCasesCreated  SupportCase[]      @relation("SupportCaseCreator")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -185,52 +185,52 @@ model PasswordReset {
 // ─── Property & Inventory ───
 
 model Property {
-  id                  String   @id @default(cuid())
-  tenantId            String
-  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  name                String
-  code                String
-  address             String?
-  city                String?
-  country             String?
-  vatNumber          String?
-  chainId            String?
-  chain              Chain?   @relation(fields: [chainId], references: [id], onDelete: SetNull)
-  timezone            String   @default("UTC")
-  currency            String   @default("ZAR")
-  status              String   @default("active")
-  billClosingRule     String   @default("always")
-  billClosingWindowHours Int   @default(12)
-  tomsaLevyEnabled    Boolean  @default(false)
-  tomsaLevyPct        Decimal  @default(1) @db.Decimal(5, 2)
-  currentBusinessDate DateTime @default(now()) @db.Date
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  tenantId               String
+  tenant                 Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name                   String
+  code                   String
+  address                String?
+  city                   String?
+  country                String?
+  vatNumber              String?
+  chainId                String?
+  chain                  Chain?   @relation(fields: [chainId], references: [id], onDelete: SetNull)
+  timezone               String   @default("UTC")
+  currency               String   @default("ZAR")
+  status                 String   @default("active")
+  billClosingRule        String   @default("always")
+  billClosingWindowHours Int      @default(12)
+  tomsaLevyEnabled       Boolean  @default(false)
+  tomsaLevyPct           Decimal  @default(1) @db.Decimal(5, 2)
+  currentBusinessDate    DateTime @default(now()) @db.Date
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
-  roomTypes           RoomType[]
-  rooms               Room[]
-  ratePlans           RatePlan[]
-  reservations        Reservation[]
-  channelConnections  ChannelConnection[]
-  housekeepingTasks   HousekeepingTask[]
-  nightAudits         NightAudit[]
-  nightAuditSchedules NightAuditSchedule[]
-  taxInvoices         TaxInvoice[]
-  tasks     Task[]
-  taskRules TaskRule[]
-  conciergeItems      ConciergeItem[]
-  parkingBays         ParkingBay[]
-  parkingAssignments  ParkingAssignment[]
-  groups              Group[]
+  roomTypes             RoomType[]
+  rooms                 Room[]
+  ratePlans             RatePlan[]
+  reservations          Reservation[]
+  channelConnections    ChannelConnection[]
+  housekeepingTasks     HousekeepingTask[]
+  nightAudits           NightAudit[]
+  nightAuditSchedules   NightAuditSchedule[]
+  taxInvoices           TaxInvoice[]
+  tasks                 Task[]
+  taskRules             TaskRule[]
+  conciergeItems        ConciergeItem[]
+  parkingBays           ParkingBay[]
+  parkingAssignments    ParkingAssignment[]
+  groups                Group[]
   inventoryRestrictions InventoryRestriction[]
   inventoryAllocations  InventoryAllocation[]
-  restaurants         Restaurant[]
-  mealPlans           MealPlan[]
-  tickets             Ticket[]
-  venues              Venue[]
-  scEvents            ScEvent[]
-  arInvoices          ArInvoice[]
-  loyaltyTransactions LoyaltyTransaction[]
+  restaurants           Restaurant[]
+  mealPlans             MealPlan[]
+  tickets               Ticket[]
+  venues                Venue[]
+  scEvents              ScEvent[]
+  arInvoices            ArInvoice[]
+  loyaltyTransactions   LoyaltyTransaction[]
   accountingConfig      AccountingConfig?
 
   @@unique([tenantId, code])
@@ -253,10 +253,10 @@ model RoomType {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  rooms     Room[]
-  ratePlans RatePlan[]
-  groupBlocks GroupRoomBlock[]
-  reservations Reservation[]
+  rooms                 Room[]
+  ratePlans             RatePlan[]
+  groupBlocks           GroupRoomBlock[]
+  reservations          Reservation[]
   inventoryRestrictions InventoryRestriction[]
   inventoryAllocations  InventoryAllocation[]
   inventoryOverbooking  InventoryOverbooking?
@@ -269,33 +269,33 @@ model RoomType {
 }
 
 model Room {
-  id                 String   @id @default(cuid())
+  id                 String            @id @default(cuid())
   tenantId           String
-  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId         String
-  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property           Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   roomTypeId         String
-  roomType           RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  roomType           RoomType          @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
   number             String
   floor              String?
-  status             String   @default("clean")
-  housekeepingStatus String   @default("ready")
-  serviceStatus      String   @default("active")
+  status             String            @default("clean")
+  housekeepingStatus String            @default("ready")
+  serviceStatus      String            @default("active")
   serviceReason      String?
   parentRoomId       String?
   statusChangedAt    DateTime?
   statusChangedBy    String?
-  parentRoom         Room?    @relation("RoomCascade", fields: [parentRoomId], references: [id], onDelete: SetNull)
-  childRooms         Room[]   @relation("RoomCascade")
+  parentRoom         Room?             @relation("RoomCascade", fields: [parentRoomId], references: [id], onDelete: SetNull)
+  childRooms         Room[]            @relation("RoomCascade")
   statusEvents       RoomStatusEvent[]
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   reservationStays  ReservationStay[]
   housekeepingTasks HousekeepingTask[]
-  tasks Task[]
-  minibarChecks MinibarCheck[]
-  conciergeItems      ConciergeItem[]
+  tasks             Task[]
+  minibarChecks     MinibarCheck[]
+  conciergeItems    ConciergeItem[]
 
   @@unique([propertyId, number])
   @@index([tenantId])
@@ -304,6 +304,7 @@ model Room {
   @@index([propertyId, serviceStatus])
   @@map("rooms")
 }
+
 model RoomStatusEvent {
   id         String   @id @default(cuid())
   tenantId   String
@@ -323,7 +324,6 @@ model RoomStatusEvent {
   @@map("room_status_events")
 }
 
-
 model RatePlan {
   id                String    @id @default(cuid())
   tenantId          String
@@ -339,7 +339,7 @@ model RatePlan {
   currency          String    @default("ZAR")
   calculationMethod String    @default("fixed") // fixed | percent | amount
   parentRatePlanId  String?
-  commissionPct     Decimal? @db.Decimal(5, 2)
+  commissionPct     Decimal?  @db.Decimal(5, 2)
   calculationValue  Decimal?  @db.Decimal(10, 2)
   advanceDays       Int?
   startDate         DateTime?
@@ -386,27 +386,27 @@ model Guest {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  reservations        Reservation[]
-  preferences         GuestPreference[]
-  documents           GuestDocument[]
-  guestNotes          GuestNote[]
-  loyaltyTransactions LoyaltyTransaction[]
-  payments            Payment[]
-  paymentMethods      GuestPaymentMethod[]
-  taxInvoices         TaxInvoice[]
-  tasks Task[]
-  conciergeItems      ConciergeItem[]
-  vehicles            GuestVehicle[]
-  tags                String[]             @default([])
-  corporateAccountId  String?
-  corporateAccount    CorporateAccount?    @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
-  crmFollowUps        GuestFollowUp[]
-  segmentMemberships  GuestSegmentMembership[]
-  tickets             Ticket[]
+  reservations          Reservation[]
+  preferences           GuestPreference[]
+  documents             GuestDocument[]
+  guestNotes            GuestNote[]
+  loyaltyTransactions   LoyaltyTransaction[]
+  payments              Payment[]
+  paymentMethods        GuestPaymentMethod[]
+  taxInvoices           TaxInvoice[]
+  tasks                 Task[]
+  conciergeItems        ConciergeItem[]
+  vehicles              GuestVehicle[]
+  tags                  String[]                 @default([])
+  corporateAccountId    String?
+  corporateAccount      CorporateAccount?        @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
+  crmFollowUps          GuestFollowUp[]
+  segmentMemberships    GuestSegmentMembership[]
+  tickets               Ticket[]
   reservationCompanions ReservationCompanion[]
-  identityMemberships GuestIdentityMember[]
-  loyaltyRedemptions  LoyaltyRedemption[]
-  consents            GuestConsent[]
+  identityMemberships   GuestIdentityMember[]
+  loyaltyRedemptions    LoyaltyRedemption[]
+  consents              GuestConsent[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -428,19 +428,19 @@ model GuestPreference {
 }
 
 model GuestDocument {
-  id         String    @id @default(cuid())
-  guestId    String
-  guest      Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  type       String
-  number     String?
-  issuedBy   String?
-  issueDate  DateTime?
-  expiryDate DateTime?
-  fileUrl    String?
-  verificationStatus String   @default("pending") // pending | verified | rejected
+  id                 String    @id @default(cuid())
+  guestId            String
+  guest              Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  type               String
+  number             String?
+  issuedBy           String?
+  issueDate          DateTime?
+  expiryDate         DateTime?
+  fileUrl            String?
+  verificationStatus String    @default("pending") // pending | verified | rejected
   verifiedAt         DateTime?
   verifiedById       String?
-  createdAt  DateTime  @default(now())
+  createdAt          DateTime  @default(now())
 
   @@index([guestId])
   @@map("guest_documents")
@@ -465,37 +465,37 @@ model GuestNote {
 // ─── Reservations ───
 
 model Reservation {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   tenantId           String
-  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId         String
-  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property           Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   guestId            String
-  guest              Guest    @relation(fields: [guestId], references: [id], onDelete: Restrict)
-  confirmationNumber String   @unique
+  guest              Guest     @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  confirmationNumber String    @unique
   groupId            String?
   group              Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
   roomTypeId         String?
   roomType           RoomType? @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
   ratePlanId         String?
   ratePlan           RatePlan? @relation(fields: [ratePlanId], references: [id], onDelete: SetNull)
-  status             String   @default("confirmed")
-  source             String   @default("direct")
-  arrivalDate        DateTime @db.Date
-  departureDate      DateTime @db.Date
+  status             String    @default("confirmed")
+  source             String    @default("direct")
+  arrivalDate        DateTime  @db.Date
+  departureDate      DateTime  @db.Date
   nights             Int
-  adults             Int      @default(1)
-  children           Int      @default(0)
+  adults             Int       @default(1)
+  children           Int       @default(0)
   notes              String?
   eta                String?
   specialRequests    String?
   marketSegment      String?
-  houseUse           Boolean  @default(false)
-  guaranteed         Boolean  @default(false)
-  doNotMove          Boolean  @default(false)
-  fixedRoom          Boolean  @default(false)
-  depositDue         Decimal  @default(0) @db.Decimal(10, 2)
-  depositPaid        Decimal  @default(0) @db.Decimal(10, 2)
+  houseUse           Boolean   @default(false)
+  guaranteed         Boolean   @default(false)
+  doNotMove          Boolean   @default(false)
+  fixedRoom          Boolean   @default(false)
+  depositDue         Decimal   @default(0) @db.Decimal(10, 2)
+  depositPaid        Decimal   @default(0) @db.Decimal(10, 2)
   preArrivalSentAt   DateTime?
   confirmationSentAt DateTime?
   checkedInAt        DateTime?
@@ -506,29 +506,29 @@ model Reservation {
   cancelledBy        String?
   cancelReason       String?
   noShowAt           DateTime?
-  totalAmount        Decimal  @db.Decimal(10, 2)
-  balance            Decimal  @db.Decimal(10, 2)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  totalAmount        Decimal   @db.Decimal(10, 2)
+  balance            Decimal   @db.Decimal(10, 2)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  stays ReservationStay[]
-  folio Folio?
-  payments              Payment[]
-  paymentRequests       PaymentRequest[]
-  taxInvoices         TaxInvoice[]
-  tasks Task[]
-  minibarChecks MinibarCheck[]
-  conciergeItems      ConciergeItem[]
-  mealPlanAssignments MealPlanAssignment[]
-  tickets             Ticket[]
-  traces              ReservationTrace[]
-  companions          ReservationCompanion[]
+  stays                ReservationStay[]
+  folio                Folio?
+  payments             Payment[]
+  paymentRequests      PaymentRequest[]
+  taxInvoices          TaxInvoice[]
+  tasks                Task[]
+  minibarChecks        MinibarCheck[]
+  conciergeItems       ConciergeItem[]
+  mealPlanAssignments  MealPlanAssignment[]
+  tickets              Ticket[]
+  traces               ReservationTrace[]
+  companions           ReservationCompanion[]
   modificationRequests ReservationModificationRequest[]
-  splitRequests      FolioSplitRequest[]
-  redemptions        LoyaltyRedemption[]
-  guestOrders        GuestOrder[]
-  chatThreads        ChatThread[]
-  reviews            Review[]
+  splitRequests        FolioSplitRequest[]
+  redemptions          LoyaltyRedemption[]
+  guestOrders          GuestOrder[]
+  chatThreads          ChatThread[]
+  reviews              Review[]
 
   @@index([tenantId])
   @@index([propertyId])
@@ -562,24 +562,24 @@ model ReservationStay {
 // ─── Billing ───
 
 model Folio {
-  id            String      @id @default(cuid())
-  reservationId String?     @unique
+  id            String       @id @default(cuid())
+  reservationId String?      @unique
   reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   tenantId      String
-  status        String      @default("open")
+  status        String       @default("open")
   closedAt      DateTime?
   closedBy      String?
   groupId       String?
-  isMaster      Boolean     @default(false)
-  totalCharges  Decimal     @default(0) @db.Decimal(10, 2)
-  totalPayments Decimal     @default(0) @db.Decimal(10, 2)
-  balance       Decimal     @default(0) @db.Decimal(10, 2)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  isMaster      Boolean      @default(false)
+  totalCharges  Decimal      @default(0) @db.Decimal(10, 2)
+  totalPayments Decimal      @default(0) @db.Decimal(10, 2)
+  balance       Decimal      @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-  items    FolioItem[]
-  payments Payment[]
-  taxInvoices         TaxInvoice[]
+  items       FolioItem[]
+  payments    Payment[]
+  taxInvoices TaxInvoice[]
 
   @@index([status])
   @@index([tenantId, status, createdAt])
@@ -588,18 +588,18 @@ model Folio {
 }
 
 model FolioItem {
-  id          String   @id @default(cuid())
-  folioId     String
-  folio       Folio    @relation(fields: [folioId], references: [id], onDelete: Cascade)
-  type        String
-  description String
-  amount      Decimal  @db.Decimal(10, 2)
-  quantity    Int      @default(1)
-  postedAt    DateTime @default(now())
-  createdAt   DateTime @default(now())
+  id               String    @id @default(cuid())
+  folioId          String
+  folio            Folio     @relation(fields: [folioId], references: [id], onDelete: Cascade)
+  type             String
+  description      String
+  amount           Decimal   @db.Decimal(10, 2)
+  quantity         Int       @default(1)
+  postedAt         DateTime  @default(now())
+  createdAt        DateTime  @default(now())
   movedFromFolioId String?
-  movedAt   DateTime?
-  movedBy   String?
+  movedAt          DateTime?
+  movedBy          String?
 
   @@index([folioId])
   @@map("folio_items")
@@ -768,19 +768,21 @@ model NightAuditSchedule {
 // ─── Audit & Ops ───
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  userId    String?
-  action    String
-  entity    String
-  entityId  String?
-  metadata  Json?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId     String?
+  action     String
+  entity     String
+  entityId   String?
+  propertyId String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
 
   @@index([tenantId, createdAt])
+  @@index([tenantId, propertyId, createdAt])
   @@map("audit_logs")
 }
 
@@ -1056,19 +1058,19 @@ model UsageRecord {
 }
 
 model LoyaltyTransaction {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   tenantId    String
   guestId     String
-  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guest       Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
   type        String
   amount      Int
   balance     Int
   description String
-  source      String   @default("Manual")
+  source      String    @default("Manual")
   createdById String?
   propertyId  String?
   property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([tenantId])
   @@index([guestId])
@@ -1104,17 +1106,17 @@ model Payment {
   refundedMinor Int    @default(0)
 
   type           String
-  status         String    @default("pending")
-  idempotencyKey String?   @unique
+  status         String          @default("pending")
+  idempotencyKey String?         @unique
   failureReason  String?
   metadata       Json?
-  postedToFolio     Boolean  @default(false)
-  postedAt          DateTime?
-  createdById       String?
-  paymentRequest    PaymentRequest?
+  postedToFolio  Boolean         @default(false)
+  postedAt       DateTime?
+  createdById    String?
+  paymentRequest PaymentRequest?
 
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId, createdAt])
   @@index([tenantId, status, type])
@@ -1220,47 +1222,47 @@ model EmailLog {
 
 // [A5] SARS-compliant tax invoices & receipts
 model TaxInvoice {
-  id            String   @id @default(cuid())
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id])
-  propertyId    String
-  property      Property @relation(fields: [propertyId], references: [id])
-  folioId       String?
-  folio         Folio?   @relation(fields: [folioId], references: [id])
-  reservationId String?
-  reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  guestId       String?
-  guest         Guest?   @relation(fields: [guestId], references: [id])
-  paymentId     String?  @unique
-  originalId    String?
-  original      TaxInvoice?  @relation("CreditNotes", fields: [originalId], references: [id])
-  creditNotes   TaxInvoice[] @relation("CreditNotes")
+  id             String       @id @default(cuid())
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  folioId        String?
+  folio          Folio?       @relation(fields: [folioId], references: [id])
+  reservationId  String?
+  reservation    Reservation? @relation(fields: [reservationId], references: [id])
+  guestId        String?
+  guest          Guest?       @relation(fields: [guestId], references: [id])
+  paymentId      String?      @unique
+  originalId     String?
+  original       TaxInvoice?  @relation("CreditNotes", fields: [originalId], references: [id])
+  creditNotes    TaxInvoice[] @relation("CreditNotes")
   originalNumber String?
-  reason        String?
+  reason         String?
 
-  number        String
-  type          String
-  status        String   @default("open")
-  currency      String   @default("ZAR")
+  number   String
+  type     String
+  status   String @default("open")
+  currency String @default("ZAR")
 
-  subtotalExVat Decimal  @db.Decimal(12, 2)
-  vatRate       Decimal  @default(15.00) @db.Decimal(5, 2)
-  vatAmount     Decimal  @db.Decimal(12, 2)
-  totalInclVat  Decimal  @db.Decimal(12, 2)
-  amountPaid    Decimal  @default(0) @db.Decimal(12, 2)
+  subtotalExVat Decimal @db.Decimal(12, 2)
+  vatRate       Decimal @default(15.00) @db.Decimal(5, 2)
+  vatAmount     Decimal @db.Decimal(12, 2)
+  totalInclVat  Decimal @db.Decimal(12, 2)
+  amountPaid    Decimal @default(0) @db.Decimal(12, 2)
 
   propertyName  String
   propertyVatNo String?
   guestName     String
   guestEmail    String?
 
-  issueDate     DateTime @default(now())
-  pdfPath       String?
-  sentAt        DateTime?
+  issueDate DateTime  @default(now())
+  pdfPath   String?
+  sentAt    DateTime?
 
-  items         TaxInvoiceItem[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  items     TaxInvoiceItem[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
   @@unique([tenantId, number])
   @@index([folioId])
@@ -1315,7 +1317,7 @@ model Task {
 
   dueAt       DateTime?
   slaMinutes  Int?
-  slaBreached Boolean  @default(false)
+  slaBreached Boolean   @default(false)
 
   ruleId    String?
   rule      TaskRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
@@ -1328,14 +1330,14 @@ model Task {
   dedupeKey String?
   source    String  @default("manual")
 
-  metadata    Json?
+  metadata Json?
 
   pushToken          String?   @unique
   pushTokenExpiresAt DateTime?
   pushChannel        String?
   pushSentAt         DateTime?
   pushAttempts       Int       @default(0)
-  completedAt DateTime?
+  completedAt        DateTime?
 
   completedBy String?
   createdAt   DateTime @default(now())
@@ -1353,24 +1355,24 @@ model Task {
 }
 
 model TaskRule {
-  id          String    @id @default(cuid())
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId  String?
-  property    Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  key         String
-  name        String
-  department  String
-  description String?
-  trigger     Json     @default("{}")
-  conditions  Json     @default("{}")
-  action      Json     @default("{}")
-  config      Json     @default("{}")
-  isActive    Boolean  @default(true)
-  lastRunAt   DateTime?
-  lastRunCount Int     @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String    @id @default(cuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId   String?
+  property     Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  key          String
+  name         String
+  department   String
+  description  String?
+  trigger      Json      @default("{}")
+  conditions   Json      @default("{}")
+  action       Json      @default("{}")
+  config       Json      @default("{}")
+  isActive     Boolean   @default(true)
+  lastRunAt    DateTime?
+  lastRunCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   tasks Task[]
 
@@ -1410,23 +1412,23 @@ model MinibarCheck {
 // ─── T3: Concierge board ───
 
 model ConciergeItem {
-  id            String   @id @default(cuid())
+  id            String       @id @default(cuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId    String
-  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property      Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   type          String
-  status        String   @default("open")
+  status        String       @default("open")
   title         String
   description   String?
   guestId       String?
-  guest         Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guest         Guest?       @relation(fields: [guestId], references: [id], onDelete: SetNull)
   reservationId String?
   reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
   roomId        String?
-  room          Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  room          Room?        @relation(fields: [roomId], references: [id], onDelete: SetNull)
   assigneeId    String?
-  assignee      User?    @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  assignee      User?        @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
 
   scheduledAt DateTime?
   completedAt DateTime?
@@ -1508,25 +1510,25 @@ model GuestVehicle {
 }
 
 model ParkingAssignment {
-  id            String      @id @default(cuid())
+  id            String       @id @default(cuid())
   tenantId      String
-  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId    String
-  property      Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property      Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   bayId         String
-  bay           ParkingBay  @relation(fields: [bayId], references: [id], onDelete: Cascade)
+  bay           ParkingBay   @relation(fields: [bayId], references: [id], onDelete: Cascade)
   vehicleId     String
   vehicle       GuestVehicle @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
   reservationId String?
 
-  status      String    @default("scheduled")
-  valet       Boolean   @default(false)
+  status            String  @default("scheduled")
+  valet             Boolean @default(false)
   valetInstructions String?
   valetKeyLocation  String?
   plateAtCheckin    String?
 
   assignedBy   String?
-  scheduledFor DateTime @db.Date
+  scheduledFor DateTime  @db.Date
   checkedInAt  DateTime?
   checkedOutAt DateTime?
 
@@ -1546,28 +1548,28 @@ model ParkingAssignment {
 // ─── G1: Groups & room blocks ───
 
 model Group {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId    String
-  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property      Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   code          String
   name          String
   company       String?
   contactName   String?
   contactEmail  String?
   contactPhone  String?
-  blockType     String   @default("courtesy")
-  status        String   @default("prospect")
-  arrivalDate   DateTime @db.Date
-  departureDate DateTime @db.Date
+  blockType     String    @default("courtesy")
+  status        String    @default("prospect")
+  arrivalDate   DateTime  @db.Date
+  departureDate DateTime  @db.Date
   cutOffDate    DateTime? @db.Date
-  rate          Decimal? @db.Decimal(10, 2)
+  rate          Decimal?  @db.Decimal(10, 2)
   eventSpace    String?
   notes         String?
   createdById   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   roomBlocks   GroupRoomBlock[]
   reservations Reservation[]
@@ -1649,25 +1651,25 @@ model GroupEvent {
 // ─── S&C: Sales & Catering ───
 
 model ScClient {
-  id               String    @id @default(cuid())
+  id               String   @id @default(cuid())
   tenantId         String
-  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name             String
-  type             String    @default("corporate")
+  type             String   @default("corporate")
   primaryContact   String?
   email            String?
   phone            String?
   address          String?
-  clientSince      DateTime  @default(now())
+  clientSince      DateTime @default(now())
   accountManagerId String?
-  accountManager   User?     @relation("SC_AccountManager", fields: [accountManagerId], references: [id], onDelete: SetNull)
-  tags             String[]  @default([])
+  accountManager   User?    @relation("SC_AccountManager", fields: [accountManagerId], references: [id], onDelete: SetNull)
+  tags             String[] @default([])
   notes            String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  events     ScEvent[]
-  activities ScActivity[]
+  events            ScEvent[]
+  activities        ScActivity[]
   corporateAccounts CorporateAccount[]
 
   @@index([tenantId])
@@ -1675,29 +1677,29 @@ model ScClient {
 }
 
 model ScEvent {
-  id           String    @id @default(cuid())
-  tenantId     String
-  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId   String?
-  property     Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  clientId     String?
-  client       ScClient? @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  name         String
-  type         String    @default("corporate")
-  status       String    @default("lead")
-  eventDate    DateTime  @db.Date
-  startTime    String?
-  endTime      String?
-  guestCount   Int       @default(0)
-  budget       Decimal?  @db.Decimal(12, 2)
-  source       String    @default("direct")
-  probability  Int       @default(20)
-  ownerId      String?
-  owner        User?     @relation("SC_EventOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  notes        String?
-  lostReason   String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  clientId    String?
+  client      ScClient? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name        String
+  type        String    @default("corporate")
+  status      String    @default("lead")
+  eventDate   DateTime  @db.Date
+  startTime   String?
+  endTime     String?
+  guestCount  Int       @default(0)
+  budget      Decimal?  @db.Decimal(12, 2)
+  source      String    @default("direct")
+  probability Int       @default(20)
+  ownerId     String?
+  owner       User?     @relation("SC_EventOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  notes       String?
+  lostReason  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   beos       Beo[]
   activities ScActivity[]
@@ -1709,38 +1711,38 @@ model ScEvent {
 }
 
 model Beo {
-  id                 String    @id @default(cuid())
-  tenantId           String
-  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  eventId            String
-  event              ScEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  version            Int       @default(1)
-  status             String    @default("draft")
-  title              String
-  eventDate          DateTime  @db.Date
-  startTime          String?
-  endTime            String?
-  guestCount         Int       @default(0)
-  venueId            String?
-  venue              Venue?    @relation(fields: [venueId], references: [id], onDelete: SetNull)
-  setupId            String?
-  setup              SetupStyle? @relation(fields: [setupId], references: [id], onDelete: SetNull)
-  menuId             String?
-  menu               MenuPackage? @relation(fields: [menuId], references: [id], onDelete: SetNull)
-  avId               String?
-  av                 AvPackage? @relation(fields: [avId], references: [id], onDelete: SetNull)
-  priceOverrides     Json      @default("{}")
-  additionalServices Json      @default("[]")
-  decor              Json      @default("[]")
+  id                  String       @id @default(cuid())
+  tenantId            String
+  tenant              Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eventId             String
+  event               ScEvent      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  version             Int          @default(1)
+  status              String       @default("draft")
+  title               String
+  eventDate           DateTime     @db.Date
+  startTime           String?
+  endTime             String?
+  guestCount          Int          @default(0)
+  venueId             String?
+  venue               Venue?       @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  setupId             String?
+  setup               SetupStyle?  @relation(fields: [setupId], references: [id], onDelete: SetNull)
+  menuId              String?
+  menu                MenuPackage? @relation(fields: [menuId], references: [id], onDelete: SetNull)
+  avId                String?
+  av                  AvPackage?   @relation(fields: [avId], references: [id], onDelete: SetNull)
+  priceOverrides      Json         @default("{}")
+  additionalServices  Json         @default("[]")
+  decor               Json         @default("[]")
   specialInstructions String?
-  logistics          Json      @default("{}")
-  snapshots          Json      @default("{}")
-  signatures         Json      @default("[]")
-  createdById        String?
-  approvedById       String?
-  approvedAt         DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  logistics           Json         @default("{}")
+  snapshots           Json         @default("{}")
+  signatures          Json         @default("[]")
+  createdById         String?
+  approvedById        String?
+  approvedAt          DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([tenantId])
   @@index([eventId])
@@ -1748,20 +1750,20 @@ model Beo {
 }
 
 model Venue {
-  id         String   @id @default(cuid())
-  tenantId   String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId String?
-  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  name       String
-  code       String
-  capacity   Int      @default(0)
-  areaSqm    Int?
-  rentalPrice Decimal @default(0) @db.Decimal(10, 2)
-  features   String[] @default([])
-  status     String   @default("active")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String    @id @default(cuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  name        String
+  code        String
+  capacity    Int       @default(0)
+  areaSqm     Int?
+  rentalPrice Decimal   @default(0) @db.Decimal(10, 2)
+  features    String[]  @default([])
+  status      String    @default("active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   beos Beo[]
 
@@ -1841,17 +1843,17 @@ model DecorOption {
 }
 
 model ScActivity {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  clientId  String?
-  client    ScClient? @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  eventId   String?
-  event     ScEvent?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  type      String
-  body      String
+  id          String    @id @default(cuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      ScClient? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  eventId     String?
+  event       ScEvent?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type        String
+  body        String
   createdById String?
-  createdAt DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([tenantId, createdAt])
   @@index([clientId])
@@ -1916,19 +1918,19 @@ model InventoryAllocation {
 }
 
 model InventoryDailyCache {
-  propertyId      String
-  roomTypeId      String
-  roomType        RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
-  date            DateTime @db.Date
-  total           Int
-  ooo             Int
-  occupied        Int
-  held            Int
-  adjustment      Int
-  sellable        Int
+  propertyId       String
+  roomTypeId       String
+  roomType         RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  date             DateTime @db.Date
+  total            Int
+  ooo              Int
+  occupied         Int
+  held             Int
+  adjustment       Int
+  sellable         Int
   overbookingLimit Int
-  remaining       Int
-  computedAt      DateTime @default(now())
+  remaining        Int
+  computedAt       DateTime @default(now())
 
   @@id([propertyId, roomTypeId, date])
   @@index([roomTypeId, date])
@@ -1946,19 +1948,19 @@ model InventoryOverbooking {
 }
 
 model CorporateAccount {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   tenantId       String
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name           String
   contactName    String?
   email          String?
   phone          String?
-  negotiatedRate Decimal? @db.Decimal(10, 2)
+  negotiatedRate Decimal?  @db.Decimal(10, 2)
   notes          String?
-  isActive       Boolean  @default(true)
+  isActive       Boolean   @default(true)
   guests         Guest[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   scClientId     String?
   scClient       ScClient? @relation(fields: [scClientId], references: [id], onDelete: SetNull)
 
@@ -1969,8 +1971,8 @@ model CorporateAccount {
   billingEmail     String?
   billingAddress   String?
 
-  arInvoices       ArInvoice[]
-  arPayments       ArPayment[]
+  arInvoices ArInvoice[]
+  arPayments ArPayment[]
 
   @@index([tenantId, scClientId])
   @@index([tenantId, name])
@@ -2030,20 +2032,20 @@ model GuestSegmentMembership {
 // ─── T7: Meal plans ───
 
 model Restaurant {
-  id             String     @id @default(cuid())
+  id             String   @id @default(cuid())
   tenantId       String
-  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId     String
-  property       Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   name           String
-  type           String     @default("main")
+  type           String   @default("main")
   cuisine        String?
-  capacity       Int        @default(50)
+  capacity       Int      @default(50)
   operatingHours String?
   location       String?
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   mealPlans MealPlan[]
 
@@ -2088,22 +2090,22 @@ model MealPlan {
 }
 
 model MealPlanAssignment {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservationId String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   mealPlanId    String
-  mealPlan      MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Restrict)
-  startDate     DateTime @db.Date
-  endDate       DateTime @db.Date
-  adults        Int      @default(2)
-  children      Int      @default(0)
-  dailyRate     Decimal  @db.Decimal(10, 2)
-  status        String   @default("active")
+  mealPlan      MealPlan    @relation(fields: [mealPlanId], references: [id], onDelete: Restrict)
+  startDate     DateTime    @db.Date
+  endDate       DateTime    @db.Date
+  adults        Int         @default(2)
+  children      Int         @default(0)
+  dailyRate     Decimal     @db.Decimal(10, 2)
+  status        String      @default("active")
   cancelledAt   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   postings MealPlanPosting[]
 
@@ -2114,20 +2116,20 @@ model MealPlanAssignment {
 }
 
 model MealPlanPosting {
-  id           String   @id @default(cuid())
+  id           String             @id @default(cuid())
   tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   assignmentId String
   assignment   MealPlanAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  date         DateTime @db.Date
-  amount       Decimal  @db.Decimal(10, 2)
-  status       String   @default("pending")
+  date         DateTime           @db.Date
+  amount       Decimal            @db.Decimal(10, 2)
+  status       String             @default("pending")
   folioItemId  String?
   error        String?
-  retryCount   Int      @default(0)
+  retryCount   Int                @default(0)
   postedAt     DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 
   @@unique([assignmentId, date])
   @@index([tenantId, status])
@@ -2146,19 +2148,19 @@ model GuestIdentityGroup {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members     GuestIdentityMember[]
+  members GuestIdentityMember[]
 
   @@index([tenantId])
   @@map("guest_identity_groups")
 }
 
 model GuestIdentityMember {
-  id        String             @id @default(cuid())
-  groupId   String
-  group     GuestIdentityGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  guestId   String
-  guest     Guest              @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  addedAt   DateTime           @default(now())
+  id      String             @id @default(cuid())
+  groupId String
+  group   GuestIdentityGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  guestId String
+  guest   Guest              @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  addedAt DateTime           @default(now())
 
   @@unique([groupId, guestId])
   @@index([guestId])
@@ -2169,13 +2171,13 @@ model GuestIdentityMember {
 // ─── SUPPORT: ticketing ───
 
 model Ticket {
-  id            String   @id @default(cuid())
+  id            String       @id @default(cuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId    String?
-  property      Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  property      Property?    @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   guestId       String?
-  guest         Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guest         Guest?       @relation(fields: [guestId], references: [id], onDelete: SetNull)
   reservationId String?
   reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
 
@@ -2187,26 +2189,26 @@ model Ticket {
   status      String @default("open")
   priority    String @default("medium")
 
-  assigneeId String?
-  assignee   User?  @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  assigneeId  String?
+  assignee    User?   @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   createdById String?
-  createdBy  User?  @relation("TicketCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?   @relation("TicketCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   slaResponseDueAt DateTime?
   slaResolveDueAt  DateTime?
   firstResponseAt  DateTime?
   resolvedAt       DateTime?
   closedAt         DateTime?
-  slaBreached      Boolean  @default(false)
-  escalationLevel  Int      @default(0)
+  slaBreached      Boolean   @default(false)
+  escalationLevel  Int       @default(0)
 
   satisfactionRating  Int?
   satisfactionComment String?
 
-  lastMessageAt DateTime @default(now())
+  lastMessageAt DateTime        @default(now())
   messages      TicketMessage[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@unique([tenantId, number])
   @@index([tenantId, status])
@@ -2244,38 +2246,38 @@ model TicketCounter {
 // ─── AR: Accounts Receivable ───
 
 model ArInvoice {
-  id                 String   @id @default(cuid())
+  id                 String           @id @default(cuid())
   tenantId           String
-  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   corporateAccountId String
   corporateAccount   CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Restrict)
   propertyId         String?
-  property           Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  property           Property?        @relation(fields: [propertyId], references: [id], onDelete: SetNull)
 
-  number             String
-  status             String @default("draft")
-  currency           String @default("ZAR")
-  subtotal           Decimal @db.Decimal(12, 2)
-  vatRate            Decimal @default(15.00) @db.Decimal(5, 2)
-  vatAmount          Decimal @db.Decimal(12, 2)
-  total              Decimal @db.Decimal(12, 2)
-  amountPaid         Decimal @default(0) @db.Decimal(12, 2)
+  number     String
+  status     String  @default("draft")
+  currency   String  @default("ZAR")
+  subtotal   Decimal @db.Decimal(12, 2)
+  vatRate    Decimal @default(15.00) @db.Decimal(5, 2)
+  vatAmount  Decimal @db.Decimal(12, 2)
+  total      Decimal @db.Decimal(12, 2)
+  amountPaid Decimal @default(0) @db.Decimal(12, 2)
 
-  issueDate          DateTime @default(now())
-  dueDate            DateTime @db.Date
-  sentAt             DateTime?
-  lastReminderAt     DateTime?
-  paidAt             DateTime?
-  cancelledAt        DateTime?
-  cancelReason       String?
-  notes              String?
-  metadata           Json?
-  createdById        String?
+  issueDate      DateTime  @default(now())
+  dueDate        DateTime  @db.Date
+  sentAt         DateTime?
+  lastReminderAt DateTime?
+  paidAt         DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  notes          String?
+  metadata       Json?
+  createdById    String?
 
-  items              ArInvoiceItem[]
-  payments           ArPayment[]
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  items     ArInvoiceItem[]
+  payments  ArPayment[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@unique([tenantId, number])
   @@index([tenantId, status])
@@ -2301,24 +2303,24 @@ model ArInvoiceItem {
 }
 
 model ArPayment {
-  id                 String   @id @default(cuid())
+  id                 String           @id @default(cuid())
   tenantId           String
-  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   corporateAccountId String
   corporateAccount   CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Restrict)
   invoiceId          String?
-  invoice            ArInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  invoice            ArInvoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
 
-  amount             Decimal @db.Decimal(12, 2)
-  currency           String @default("ZAR")
-  method             String @default("bank_transfer")
-  reference          String?
-  note               String?
-  status             String @default("applied")
-  receivedAt         DateTime @default(now())
-  receivedById       String?
-  reversedAt         DateTime?
-  reversalReason     String?
+  amount         Decimal   @db.Decimal(12, 2)
+  currency       String    @default("ZAR")
+  method         String    @default("bank_transfer")
+  reference      String?
+  note           String?
+  status         String    @default("applied")
+  receivedAt     DateTime  @default(now())
+  receivedById   String?
+  reversedAt     DateTime?
+  reversalReason String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2379,10 +2381,10 @@ model SupportCase {
   closedAt         DateTime?
 
   satisfactionRating Int?
-  lastMessageAt      DateTime @default(now())
+  lastMessageAt      DateTime             @default(now())
   messages           SupportCaseMessage[]
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   @@unique([number])
   @@index([tenantId, status])
@@ -2392,15 +2394,15 @@ model SupportCase {
 }
 
 model SupportCaseMessage {
-  id         String   @id @default(cuid())
+  id         String      @id @default(cuid())
   caseId     String
   case       SupportCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
   authorType String
   authorId   String?
   authorName String
   body       String
-  isInternal Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  isInternal Boolean     @default(false)
+  createdAt  DateTime    @default(now())
 
   @@index([caseId, createdAt])
   @@map("support_case_messages")
@@ -2417,20 +2419,21 @@ model SupportCaseCounter {
 // ─── Marketing module ───
 
 model MarketingCampaign {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   tenantId  String
   name      String
   channel   String
-  status    String   @default("draft")
+  status    String           @default("draft")
   segmentId String?
-  budget    Float    @default(0)
-  spend     Float    @default(0)
-  revenue   Float    @default(0)
+  budget    Float            @default(0)
+  spend     Float            @default(0)
+  revenue   Float            @default(0)
   startDate DateTime?
   endDate   DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
   events    MarketingEvent[]
+
   @@index([tenantId, status])
   @@index([tenantId, channel])
 }
@@ -2444,6 +2447,7 @@ model MarketingEvent {
   device     String
   segmentId  String?
   createdAt  DateTime          @default(now())
+
   @@index([tenantId, campaignId])
   @@index([tenantId, device])
   @@index([tenantId, createdAt])
@@ -2462,6 +2466,7 @@ model MarketingWorkflow {
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
   runs        MarketingWorkflowRun[]
+
   @@index([tenantId, active])
 }
 
@@ -2473,6 +2478,7 @@ model MarketingWorkflowRun {
   status     String            @default("success")
   detail     String?
   createdAt  DateTime          @default(now())
+
   @@index([tenantId, workflowId])
 }
 
@@ -2487,6 +2493,7 @@ model MarketingTemplate {
   usageCount Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
   @@index([tenantId, category])
 }
 
@@ -2498,6 +2505,7 @@ model MarketingSegment {
   guestCount Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
   @@index([tenantId])
 }
 
@@ -2506,7 +2514,7 @@ model TenantReportRun {
   tenantId      String
   definitionKey String
   name          String
-  params        Json            @default("{}")
+  params        Json     @default("{}")
   result        Json?
   rowCount      Int      @default(0)
   status        String   @default("COMPLETED")
@@ -2523,7 +2531,7 @@ model TenantScheduledReport {
   tenantId      String
   definitionKey String
   name          String
-  params        Json            @default("{}")
+  params        Json      @default("{}")
   frequency     String
   dayOfWeek     Int?
   dayOfMonth    Int?
@@ -2539,14 +2547,13 @@ model TenantScheduledReport {
   @@index([tenantId, isActive, nextRunAt])
 }
 
-
 model ReservationModificationRequest {
   id            String      @id @default(cuid())
   tenantId      String
   tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservationId String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  type          String      // modify | cancel
+  type          String // modify | cancel
   payload       Json        @default("{}")
   status        String      @default("pending") // pending | approved | rejected | applied
   note          String?
@@ -2557,22 +2564,23 @@ model ReservationModificationRequest {
   @@index([reservationId])
   @@map("reservation_modification_requests")
 }
+
 // ─── R1: Reservation completeness ───
 
 model ReservationTrace {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   tenantId      String
-  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservationId String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   body          String
-  department    String    @default("front_desk")
+  department    String      @default("front_desk")
   dueAt         DateTime?
   resolvedAt    DateTime?
   resolvedBy    String?
   createdById   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@index([tenantId, reservationId])
   @@index([tenantId, dueAt])
@@ -2580,18 +2588,18 @@ model ReservationTrace {
 }
 
 model ReservationCompanion {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reservationId String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   guestId       String?
-  guest         Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guest         Guest?      @relation(fields: [guestId], references: [id], onDelete: SetNull)
   firstName     String
   lastName      String
   relationship  String?
-  sharesFolio   Boolean  @default(true)
-  createdAt     DateTime @default(now())
+  sharesFolio   Boolean     @default(true)
+  createdAt     DateTime    @default(now())
 
   @@index([tenantId, reservationId])
   @@map("reservation_companions")
@@ -2664,18 +2672,18 @@ model LoyaltyConfig {
 }
 
 model PricingRule {
-  id          String   @id @default(cuid())
-  tenantId    String
-  propertyId  String
-  name        String
-  type        String
-  conditions  Json     @default("{}")
-  adjustment  Json     @default("{}")
-  priority    Int      @default(50)
-  isActive    Boolean  @default(true)
-  createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  tenantId   String
+  propertyId String
+  name       String
+  type       String
+  conditions Json     @default("{}")
+  adjustment Json     @default("{}")
+  priority   Int      @default(50)
+  isActive   Boolean  @default(true)
+  createdBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([propertyId])
   @@map("pricing_rules")
@@ -2730,16 +2738,16 @@ model RateRestrictionSuggestion {
 }
 
 model UpsellProduct {
-  id           String         @id @default(cuid())
+  id           String       @id @default(cuid())
   tenantId     String
   propertyId   String
   name         String
-  category     String         @default("extra")
-  price        Decimal        @db.Decimal(10, 2)
-  taxInclusive Boolean        @default(true)
-  status       String         @default("active")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  category     String       @default("extra")
+  price        Decimal      @db.Decimal(10, 2)
+  taxInclusive Boolean      @default(true)
+  status       String       @default("active")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   sales        UpsellSale[]
 
   @@index([propertyId])
@@ -2822,18 +2830,18 @@ model ChannelPushLog {
 }
 
 model PricingSuggestion {
-  id           String   @id @default(cuid())
-  tenantId     String
-  propertyId   String
-  roomTypeId   String
-  date         DateTime @db.Date
-  currentRate  Decimal  @db.Decimal(10, 2)
-  suggestedRate Decimal @db.Decimal(10, 2)
-  occupancyPct Decimal  @db.Decimal(5, 2)
-  rationale    String
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  tenantId      String
+  propertyId    String
+  roomTypeId    String
+  date          DateTime @db.Date
+  currentRate   Decimal  @db.Decimal(10, 2)
+  suggestedRate Decimal  @db.Decimal(10, 2)
+  occupancyPct  Decimal  @db.Decimal(5, 2)
+  rationale     String
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@unique([roomTypeId, date])
   @@index([tenantId, status])
@@ -2887,23 +2895,23 @@ model LoyaltyReward {
 }
 
 model LoyaltyRedemption {
-  id              String        @id @default(cuid())
+  id              String         @id @default(cuid())
   tenantId        String
-  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   guestId         String
-  guest           Guest         @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guest           Guest          @relation(fields: [guestId], references: [id], onDelete: Cascade)
   reservationId   String?
-  reservation     Reservation?  @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  reservation     Reservation?   @relation(fields: [reservationId], references: [id], onDelete: SetNull)
   rewardId        String
-  reward          LoyaltyReward @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  reward          LoyaltyReward  @relation(fields: [rewardId], references: [id], onDelete: Restrict)
   rewardName      String
   pointsCost      Int
-  status          String        @default("pending") // pending | fulfilled | cancelled
-  idempotencyKey  String?       @unique
+  status          String         @default("pending") // pending | fulfilled | cancelled
+  idempotencyKey  String?        @unique
   conciergeItemId String?
   conciergeItem   ConciergeItem? @relation(fields: [conciergeItemId], references: [id], onDelete: SetNull)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([tenantId, guestId])
   @@map("loyalty_redemptions")
@@ -2922,26 +2930,28 @@ model MenuItem {
   status        String   @default("active")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
   @@index([tenantId, propertyId, status])
   @@map("menu_items")
 }
 
 model GuestOrder {
-  id            String          @id @default(cuid())
-  tenantId      String
-  propertyId    String
-  reservationId String
-  reservation   Reservation     @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  guestId       String
-  folioId       String?
-  folioItemId   String?         @unique
-  status        String          @default("received") // received | preparing | ready | delivered | cancelled
-  total         Decimal         @db.Decimal(10, 2)
-  note          String?
-  idempotencyKey String?        @unique
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  items         GuestOrderItem[]
+  id             String           @id @default(cuid())
+  tenantId       String
+  propertyId     String
+  reservationId  String
+  reservation    Reservation      @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guestId        String
+  folioId        String?
+  folioItemId    String?          @unique
+  status         String           @default("received") // received | preparing | ready | delivered | cancelled
+  total          Decimal          @db.Decimal(10, 2)
+  note           String?
+  idempotencyKey String?          @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  items          GuestOrderItem[]
+
   @@index([tenantId, reservationId])
   @@map("guest_orders")
 }
@@ -2954,11 +2964,12 @@ model GuestOrderItem {
   name       String
   unitPrice  Decimal    @db.Decimal(10, 2)
   quantity   Int        @default(1)
+
   @@index([orderId])
   @@map("guest_order_items")
 }
-// ─── G4: Guest in-stay commerce ───
 
+// ─── G4: Guest in-stay commerce ───
 
 // ─── G5: Guest communication ───
 
@@ -2994,8 +3005,8 @@ model ChatMessage {
   readAt     DateTime?
   createdAt  DateTime   @default(now())
 
-  @@index([threadId, createdAt])
   @@unique([threadId, clientId])
+  @@index([threadId, createdAt])
   @@map("chat_messages")
 }
 
@@ -3017,22 +3028,22 @@ model Announcement {
 }
 
 model Review {
-  id             String   @id @default(cuid())
+  id             String      @id @default(cuid())
   tenantId       String
   propertyId     String
-  reservationId  String   @unique
+  reservationId  String      @unique
   reservation    Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   guestId        String
   guestName      String
   rating         Int
   title          String?
   body           String
-  status         String   @default("pending") // pending | approved | rejected
+  status         String      @default("pending") // pending | approved | rejected
   moderationNote String?
   moderatedById  String?
   moderatedAt    DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@index([tenantId, status])
   @@map("reviews")
@@ -3065,9 +3076,9 @@ model GuestConsent {
   tenantId   String
   guestId    String
   purpose    String   @default("marketing") // marketing | newsletter | offers | events
-  channel    String   @default("email")     // email | sms | whatsapp
-  status     String                        // granted | revoked
-  source     String   @default("manual")    // booking | front_desk | guest_portal | import | unsubscribe
+  channel    String   @default("email") // email | sms | whatsapp
+  status     String // granted | revoked
+  source     String   @default("manual") // booking | front_desk | guest_portal | import | unsubscribe
   capturedAt DateTime @default(now())
   guest      Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
 
@@ -3081,35 +3092,35 @@ model GuestConsent {
 // (tenantId + dedupeKey); human decisions (resolved/dismissed) are never
 // re-opened by detectors. Table created via raw SQL (see migration note).
 model Exception {
-  id               String    @id @default(cuid())
-  tenantId         String
-  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId       String?
-  type             String
-  severity         String    @default("medium")
-  title            String
-  detail           String?
+  id                String    @id @default(cuid())
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId        String?
+  type              String
+  severity          String    @default("medium")
+  title             String
+  detail            String?
   recommendedAction String?
-  actionUrl        String?
-  reservationId    String?
-  guestId          String?
-  roomId           String?
-  paymentId        String?
-  taskId           String?
-  connectionId     String?
-  dedupeKey        String
-  status           String    @default("open")
-  ownerId          String?
-  assigneeId       String?
-  acknowledgedAt   DateTime?
-  resolvedAt       DateTime?
-  resolutionNote   String?
-  dismissedAt      DateTime?
-  dismissedBy      String?
-  dismissReason    String?
-  slaDueAt         DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  actionUrl         String?
+  reservationId     String?
+  guestId           String?
+  roomId            String?
+  paymentId         String?
+  taskId            String?
+  connectionId      String?
+  dedupeKey         String
+  status            String    @default("open")
+  ownerId           String?
+  assigneeId        String?
+  acknowledgedAt    DateTime?
+  resolvedAt        DateTime?
+  resolutionNote    String?
+  dismissedAt       DateTime?
+  dismissedBy       String?
+  dismissReason     String?
+  slaDueAt          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@unique([tenantId, dedupeKey])
   @@index([tenantId, status])
@@ -3206,24 +3217,24 @@ model PlatformAuditEvent {
 }
 
 model FeatureFlag {
-  id               String   @id
-  key              String
-  description      String
-  owner            String
-  defaultValue     Boolean  @default(false)
-  environment      String   @default("production")
-  rolloutStrategy  Json     @default("{}")
-  status           String   @default("active")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  overrides        FeatureFlagOverride[]
+  id              String                @id
+  key             String
+  description     String
+  owner           String
+  defaultValue    Boolean               @default(false)
+  environment     String                @default("production")
+  rolloutStrategy Json                  @default("{}")
+  status          String                @default("active")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  overrides       FeatureFlagOverride[]
 
   @@unique([key, environment])
   @@map("feature_flags")
 }
 
 model FeatureFlagOverride {
-  id        String   @id
+  id        String      @id
   flagId    String
   flag      FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade)
   tenantId  String?
@@ -3231,37 +3242,37 @@ model FeatureFlagOverride {
   cohort    String?
   createdBy String
   reason    String?
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
 
   @@unique([flagId, tenantId])
   @@map("feature_flag_overrides")
 }
 
 model Contract {
-  id                 String   @id
+  id                 String          @id
   tenantId           String
-  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+  tenant             Tenant          @relation(fields: [tenantId], references: [id])
   legalEntity        String
-  status             String   @default("draft")
-  modules            Json     @default("[]")
+  status             String          @default("draft")
+  modules            Json            @default("[]")
   roomBand           String?
-  currency           String   @default("ZAR")
-  listFee            Decimal  @db.Decimal(12, 2)
-  netFee             Decimal  @db.Decimal(12, 2)
-  renewalFee         Decimal? @db.Decimal(12, 2)
-  discountPct        Decimal  @default(0) @db.Decimal(5, 2)
+  currency           String          @default("ZAR")
+  listFee            Decimal         @db.Decimal(12, 2)
+  netFee             Decimal         @db.Decimal(12, 2)
+  renewalFee         Decimal?        @db.Decimal(12, 2)
+  discountPct        Decimal         @default(0) @db.Decimal(5, 2)
   discountApprovedBy String?
-  startDate          DateTime @db.Date
-  endDate            DateTime @db.Date
-  renewalNoticeDays  Int      @default(30)
-  autoRenew          Boolean  @default(false)
-  paymentMethod      String   @default("invoice")
-  signatories        Json     @default("[]")
+  startDate          DateTime        @db.Date
+  endDate            DateTime        @db.Date
+  renewalNoticeDays  Int             @default(30)
+  autoRenew          Boolean         @default(false)
+  paymentMethod      String          @default("invoice")
+  signatories        Json            @default("[]")
   documentUrl        String?
-  version            Int      @default(1)
+  version            Int             @default(1)
   createdBy          String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
   events             ContractEvent[]
 
   @@index([tenantId])
@@ -3328,20 +3339,22 @@ model DataRequest {
   completedAt DateTime?
   createdBy   String
   createdAt   DateTime  @default(now())
+
   @@index([tenantId, status])
   @@map("data_requests")
 }
 
 model RetentionPolicy {
-  id        String   @id
-  dataClass String
-  tenantId  String?
-  schedule  Json
-  legalHold Boolean  @default(false)
+  id         String   @id
+  dataClass  String
+  tenantId   String?
+  schedule   Json
+  legalHold  Boolean  @default(false)
   holdReason String?
-  updatedBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@unique([dataClass, tenantId])
   @@map("retention_policies")
 }
@@ -3359,6 +3372,7 @@ model BackupRun {
   restoreTestedAt   DateTime?
   restoreTestStatus String?
   restoreTestLog    String?
+
   @@map("backup_runs")
 }
 
@@ -3385,8 +3399,8 @@ model DemoSession {
   extendedCount  Int       @default(0)
   createdAt      DateTime  @default(now())
 
-  invites        DemoInvite[]
-  activity       DemoActivity[]
+  invites  DemoInvite[]
+  activity DemoActivity[]
 
   @@map("demo_sessions")
 }
@@ -3408,23 +3422,19 @@ model DemoInvite {
 }
 
 model DemoActivity {
-  id         String      @id @default(cuid())
-  sessionId  String
-  session    DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  tenantId   String?
-  actor      String?
-  action     String
-  detail     String?
-  meta       Json?
-  createdAt  DateTime    @default(now())
+  id        String      @id @default(cuid())
+  sessionId String
+  session   DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tenantId  String?
+  actor     String?
+  action    String
+  detail    String?
+  meta      Json?
+  createdAt DateTime    @default(now())
 
   @@index([sessionId, createdAt])
   @@map("demo_activity")
 }
-
-
-
-
 
 model FeedbackEntry {
   id        String   @id
@@ -3436,6 +3446,7 @@ model FeedbackEntry {
   status    String   @default("new")
   assignee  String?
   createdAt DateTime @default(now())
+
   @@map("feedback_entries")
 }
 
@@ -3451,6 +3462,7 @@ model Incident {
   createdBy         String
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+
   @@map("incidents")
 }
 
@@ -3464,6 +3476,7 @@ model WebhookDelivery {
   lastError    String?
   deliveredAt  DateTime?
   createdAt    DateTime  @default(now())
+
   @@index([status, createdAt])
   @@map("webhook_deliveries")
 }
@@ -3478,16 +3491,18 @@ model PlatformAnnouncement {
   createdBy String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("platform_announcements")
 }
 
 model ApiClient {
-  id          String   @id
-  name        String
+  id           String   @id
+  name         String
   contactEmail String?
-  status      String   @default("active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
   @@map("api_clients")
 }
 
@@ -3498,6 +3513,7 @@ model IntegrationCatalogEntry {
   availability String   @default("planned")
   notes        String?
   updatedAt    DateTime @updatedAt
+
   @@map("integration_catalog")
 }
 
@@ -3509,19 +3525,21 @@ model AccessReview {
   outcome    String
   notes      String?
   createdAt  DateTime @default(now())
+
   @@unique([period, operatorId])
   @@map("access_reviews")
 }
 
 model MetricDefinition {
-  key        String   @id
-  title      String
-  definition String
-  numerator  String
+  key         String   @id
+  title       String
+  definition  String
+  numerator   String
   denominator String
-  source     String
-  owner      String
-  caveats    String?
-  updatedAt  DateTime @updatedAt
+  source      String
+  owner       String
+  caveats     String?
+  updatedAt   DateTime @updatedAt
+
   @@map("metric_definitions")
 }
