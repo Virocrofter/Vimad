@@ -10,10 +10,11 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
-import { authMiddleware, tenantScope } from '../auth/auth.middleware.js';
+import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 
 export const exceptionsRouter = Router();
 exceptionsRouter.use(authMiddleware, tenantScope);
+exceptionsRouter.use(requirePermission('exception', 'read'));
 
 const STALE_MS = 2 * 3600 * 1000;
 const SYNC_STALE_MS = 24 * 3600 * 1000;
@@ -21,9 +22,11 @@ const ACTIVE = ['open', 'acknowledged', 'in_progress'];
 const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 
 const tenantOf = (req: Request): string =>
-  ((req as any).user?.tenantId ?? (req as any).tenantId) as string;
+  ((req as any).auth?.user?.tenantId ??
+    (req as any).auth?.tenantId ??
+    (req as any).tenantId) as string;
 const actorOf = (req: Request): string | null => {
-  const u: any = (req as any).user ?? {};
+  const u: any = (req as any).auth ?? {};
   return (u.userId ?? u.id ?? u.sub ?? null) as string | null;
 };
 
@@ -256,87 +259,97 @@ async function audit(
 }
 
 // POST /v1/exceptions/:id/ack
-exceptionsRouter.post('/:id/ack', async (req: Request, res: Response) => {
-  const ex = await loadActive(req, res);
-  if (!ex) return;
-  if (ex.status !== 'open') {
-    return res
-      .status(409)
-      .json({
+exceptionsRouter.post(
+  '/:id/ack',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    if (ex.status !== 'open') {
+      return res.status(409).json({
         error: { code: 'INVALID_STATE', message: `cannot acknowledge from '${ex.status}'` },
       });
+    }
+    const actor = actorOf(req);
+    const bodyOwner = (req.body as any)?.ownerId ? String((req.body as any).ownerId) : undefined;
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: {
+        status: 'acknowledged',
+        ownerId: actor ?? bodyOwner ?? undefined,
+        acknowledgedAt: new Date(),
+      },
+    });
+    await audit(ex.tenantId, actor, 'exception.acknowledge', ex, {});
+    return res.json({ data: updated });
   }
-  const actor = actorOf(req);
-  const bodyOwner = (req.body as any)?.ownerId ? String((req.body as any).ownerId) : undefined;
-  const updated = await prisma.exception.update({
-    where: { id: ex.id },
-    data: {
-      status: 'acknowledged',
-      ownerId: actor ?? bodyOwner ?? undefined,
-      acknowledgedAt: new Date(),
-    },
-  });
-  await audit(ex.tenantId, actor, 'exception.acknowledge', ex, {});
-  return res.json({ data: updated });
-});
+);
 
 // POST /v1/exceptions/:id/assign  (assignee = the caller; body optional)
-exceptionsRouter.post('/:id/assign', async (req: Request, res: Response) => {
-  const ex = await loadActive(req, res);
-  if (!ex) return;
-  const actor = actorOf(req);
-  const assigneeId = String((req.body as any)?.assigneeId ?? actor ?? '');
-  if (!assigneeId) {
-    return res
-      .status(400)
-      .json({
+exceptionsRouter.post(
+  '/:id/assign',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    const actor = actorOf(req);
+    const assigneeId = String((req.body as any)?.assigneeId ?? actor ?? '');
+    if (!assigneeId) {
+      return res.status(400).json({
         error: { code: 'ASSIGNEE_REQUIRED', message: 'assigneeId required when actor is unknown' },
       });
+    }
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: { assigneeId, status: ex.status === 'open' ? 'in_progress' : ex.status },
+    });
+    await audit(ex.tenantId, actor, 'exception.assign', ex, { assigneeId });
+    return res.json({ data: updated });
   }
-  const updated = await prisma.exception.update({
-    where: { id: ex.id },
-    data: { assigneeId, status: ex.status === 'open' ? 'in_progress' : ex.status },
-  });
-  await audit(ex.tenantId, actor, 'exception.assign', ex, { assigneeId });
-  return res.json({ data: updated });
-});
+);
 
 // POST /v1/exceptions/:id/resolve { note? }
-exceptionsRouter.post('/:id/resolve', async (req: Request, res: Response) => {
-  const ex = await loadActive(req, res);
-  if (!ex) return;
-  const actor = actorOf(req);
-  const note = (req.body as any)?.note ? String((req.body as any).note).trim() : null;
-  const updated = await prisma.exception.update({
-    where: { id: ex.id },
-    data: { status: 'resolved', resolvedAt: new Date(), resolutionNote: note },
-  });
-  await audit(ex.tenantId, actor, 'exception.resolve', ex, { note });
-  return res.json({ data: updated });
-});
+exceptionsRouter.post(
+  '/:id/resolve',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    const actor = actorOf(req);
+    const note = (req.body as any)?.note ? String((req.body as any).note).trim() : null;
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: { status: 'resolved', resolvedAt: new Date(), resolutionNote: note },
+    });
+    await audit(ex.tenantId, actor, 'exception.resolve', ex, { note });
+    return res.json({ data: updated });
+  }
+);
 
 // POST /v1/exceptions/:id/dismiss { reason } — reason REQUIRED, audited
-exceptionsRouter.post('/:id/dismiss', async (req: Request, res: Response) => {
-  const ex = await loadActive(req, res);
-  if (!ex) return;
-  const reason = (req.body as any)?.reason ? String((req.body as any).reason).trim() : '';
-  if (!reason) {
-    return res
-      .status(400)
-      .json({
+exceptionsRouter.post(
+  '/:id/dismiss',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    const reason = (req.body as any)?.reason ? String((req.body as any).reason).trim() : '';
+    if (!reason) {
+      return res.status(400).json({
         error: { code: 'REASON_REQUIRED', message: 'a dismissal reason is required (audited)' },
       });
+    }
+    const actor = actorOf(req);
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: {
+        status: 'dismissed',
+        dismissedAt: new Date(),
+        dismissedBy: actor,
+        dismissReason: reason,
+      },
+    });
+    await audit(ex.tenantId, actor, 'exception.dismiss', ex, { reason });
+    return res.json({ data: updated });
   }
-  const actor = actorOf(req);
-  const updated = await prisma.exception.update({
-    where: { id: ex.id },
-    data: {
-      status: 'dismissed',
-      dismissedAt: new Date(),
-      dismissedBy: actor,
-      dismissReason: reason,
-    },
-  });
-  await audit(ex.tenantId, actor, 'exception.dismiss', ex, { reason });
-  return res.json({ data: updated });
-});
+);

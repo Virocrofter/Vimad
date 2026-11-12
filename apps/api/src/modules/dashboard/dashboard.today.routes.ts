@@ -13,11 +13,12 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
-import { authMiddleware, tenantScope } from '../auth/auth.middleware.js';
+import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 import { nextStates } from '../../common/lifecycle.js';
 
 export const todayDashboardRouter = Router();
 todayDashboardRouter.use(authMiddleware, tenantScope);
+todayDashboardRouter.use(requirePermission('dashboard', 'read'));
 
 const RESERVATION_ACTION_LABELS: Record<string, string> = {
   checked_in: 'check-in',
@@ -43,7 +44,9 @@ function validActionsFor(status: string): string[] {
 
 // GET /v1/dashboard/today?propertyId=...
 todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
-  const tenantId = ((req as any).user?.tenantId ?? (req as any).tenantId) as string | undefined;
+  const tenantId = ((req as any).auth?.user?.tenantId ??
+    (req as any).auth?.tenantId ??
+    (req as any).tenantId) as string | undefined;
   const propertyId = String((req.query as any).propertyId ?? '');
   if (!tenantId || !propertyId) {
     return res
@@ -96,7 +99,7 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
     eta: r.eta,
     status: r.status,
     validActions: validActionsFor(r.status),
-    link: '/reservations/' + r.id,
+    link: '/app/reservations/' + r.id,
   }));
   const dueOutItems = dueOutStays.map((r: any) => ({
     id: r.id,
@@ -174,7 +177,7 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
       items: errorChannels.map((c: any) => ({
         id: c.id,
         label: c.provider + ' / ' + c.hotelId + ' (' + (c.lastSyncStatus ?? c.status) + ')',
-        link: '/channel-manager',
+        link: '/app/channel-manager',
       })),
       recommendedAction: 'Open sync-error dashboard, inspect push log, replay safely',
     },
@@ -185,7 +188,7 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
       items: failedPayments.map((p: any) => ({
         id: p.id,
         label: p.reference + (p.failureReason ? ' — ' + p.failureReason : ''),
-        link: '/billing/payments',
+        link: '/app/billing/payments',
       })),
       recommendedAction: 'Retry, send payment link, or change method',
     },

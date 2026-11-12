@@ -388,7 +388,7 @@ async function bootstrap() {
   // the auth'd payments router, otherwise it would 401.
   app.use('/v1/rates', rateGridsRouter);
   app.use('/v1/channel', channelObservabilityRouter);
-  app.use('/v1', dashboardRouter);
+
   app.use('/v1/dashboard', todayDashboardRouter);
   app.use('/v1/reservation-workspace', reservationWorkspaceRouter);
   app.use('/v1/room-board', roomBoardRouter);

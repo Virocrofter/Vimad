@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
 import { REPORT_DEFINITIONS, getDefinition } from './reports.definitions.js';
 import { computeNextRun, runReport } from './reports.service.js';
-import { authMiddleware, tenantScope } from '../auth/auth.middleware.js';
+import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 
 const MAX_AGE_DAYS = 180;
 
@@ -75,6 +75,7 @@ export const reportsRouter = (() => {
   const router = Router();
 
   router.use(authMiddleware, tenantScope);
+  router.use(requirePermission('report', 'read'));
 
   router.get('/definitions', async (req, res) => {
     const custom = await prisma.reportTemplate.findMany({

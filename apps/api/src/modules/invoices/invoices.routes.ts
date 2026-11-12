@@ -12,7 +12,7 @@ import {
   getInvoicePdfPath,
 } from './invoices.service.js';
 import { validateBody } from '../../common/validate.js';
-import { authMiddleware } from '../auth/auth.middleware.js';
+import { authMiddleware, requirePermission } from '../auth/auth.middleware.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 
 extendZodWithOpenApi(z);
@@ -30,13 +30,17 @@ registry.registerPath({
   tags: ['Invoices'],
   responses: { 200: { description: 'Tax invoice / receipt list' } },
 });
-invoicesRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    res.json({ data: await listInvoices((req as any).auth.tenantId, req.query as any) });
-  } catch (err) {
-    next(err);
+invoicesRouter.get(
+  '/',
+  requirePermission('invoice', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await listInvoices((req as any).auth.tenantId, req.query as any) });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 registry.registerPath({
   method: 'post',
@@ -76,13 +80,17 @@ registry.registerPath({
     },
   },
 });
-invoicesRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    res.json({ data: await getInvoice((req as any).auth.tenantId, req.params.id) });
-  } catch (err) {
-    next(err);
+invoicesRouter.get(
+  '/:id',
+  requirePermission('invoice', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await getInvoice((req as any).auth.tenantId, req.params.id) });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 registry.registerPath({
   method: 'post',
@@ -91,14 +99,18 @@ registry.registerPath({
   request: { params: IdParamSchema },
   responses: { 200: { description: 'Invoice emailed to the guest' } },
 });
-invoicesRouter.post('/:id/send', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await sendInvoiceEmail(req.params.id);
-    res.json({ data: { sent: true } });
-  } catch (err) {
-    next(err);
+invoicesRouter.post(
+  '/:id/send',
+  requirePermission('invoice', 'issue'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await sendInvoiceEmail(req.params.id);
+      res.json({ data: { sent: true } });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 registry.registerPath({
   method: 'get',
@@ -113,16 +125,20 @@ registry.registerPath({
     },
   },
 });
-invoicesRouter.get('/:id/pdf', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { path, number, type } = await getInvoicePdfPath(
-      (req as any).auth.tenantId,
-      req.params.id
-    );
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${type}-${number}.pdf"`);
-    fs.createReadStream(path).pipe(res);
-  } catch (err) {
-    next(err);
+invoicesRouter.get(
+  '/:id/pdf',
+  requirePermission('invoice', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { path, number, type } = await getInvoicePdfPath(
+        (req as any).auth.tenantId,
+        req.params.id
+      );
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}-${number}.pdf"`);
+      fs.createReadStream(path).pipe(res);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);

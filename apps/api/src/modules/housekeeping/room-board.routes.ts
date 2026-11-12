@@ -23,10 +23,11 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
-import { authMiddleware, tenantScope } from '../auth/auth.middleware.js';
+import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 
 export const roomBoardRouter = Router();
 roomBoardRouter.use(authMiddleware, tenantScope);
+roomBoardRouter.use(requirePermission('housekeeping', 'read'));
 
 /* ─── P5 room matrix ─── */
 const HK_TRANSITIONS: Record<string, { to: string; label: string }[]> = {
@@ -63,7 +64,9 @@ const SERVICE_TRANSITIONS: Record<
 const ASSIGNABLE_HK = new Set(['ready']);
 
 function tenantOf(req: Request): string | undefined {
-  return ((req as any).user?.tenantId ?? (req as any).tenantId) as string | undefined;
+  return ((req as any).auth?.user?.tenantId ??
+    (req as any).auth?.tenantId ??
+    (req as any).tenantId) as string | undefined;
 }
 const addDays = (d: Date, n: number) => {
   const x = new Date(d);

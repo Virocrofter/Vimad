@@ -165,7 +165,10 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
 
   const open = taskRows.filter((t) => t.status === 'open');
   const inProgress = taskRows.filter((t) => t.status === 'in_progress');
-  const slaBreached = taskRows.filter((t) => t.slaBreached);
+  const nowMs = Date.now();
+  const slaBreached = taskRows.filter(
+    (t) => t.slaBreached || (t.dueAt && t.dueAt.getTime() < nowMs)
+  );
   const byDepartmentMap = new Map<
     string,
     { department: string; count: number; slaBreached: number }

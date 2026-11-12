@@ -1,7 +1,11 @@
 /* apps/api/src/modules/minibar/minibar.routes.ts — T2 */
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import { authMiddleware, type AuthenticatedRequest } from '../auth/auth.middleware.js';
+import {
+  authMiddleware,
+  type AuthenticatedRequest,
+  requirePermission,
+} from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { paginationSchema } from '../../common/pagination.js';
 import { logMinibarConsumption, listMinibarChecks, settleMinibarCheck } from './minibar.service.js';
@@ -9,6 +13,7 @@ import { logMinibarConsumption, listMinibarChecks, settleMinibarCheck } from './
 export const minibarRouter = Router();
 
 minibarRouter.use(authMiddleware);
+minibarRouter.use(requirePermission('minibar', 'log'));
 
 const itemSchema = z.object({
   name: z.string().min(1).max(80),

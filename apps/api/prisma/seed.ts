@@ -396,6 +396,38 @@ const PERMISSIONS = [
     category: 'billing',
     description: 'Create/edit AR invoices, record payments',
   },
+  // Dashboard program permissions (Stage 1 RBAC)
+  {
+    resource: 'dashboard',
+    action: 'read',
+    category: 'dashboard',
+    description: 'View the Today dashboard',
+  },
+  {
+    resource: 'exception',
+    action: 'read',
+    category: 'dashboard',
+    description: 'View the Needs Attention queue',
+  },
+  {
+    resource: 'exception',
+    action: 'manage',
+    category: 'dashboard',
+    description: 'Acknowledge, assign, resolve and dismiss exceptions',
+  },
+  {
+    resource: 'minibar',
+    action: 'log',
+    category: 'operations',
+    description: 'Log minibar consumption',
+  },
+  { resource: 'invoice', action: 'read', category: 'billing', description: 'View tax invoices' },
+  {
+    resource: 'invoice',
+    action: 'issue',
+    category: 'billing',
+    description: 'Issue and send tax invoices',
+  },
 ];
 
 // ─── Role Definitions with Permission Sets ───
@@ -489,6 +521,12 @@ const ROLES = [
       'ticket:manage',
       'ar:read',
       'ar:manage',
+      'dashboard:read',
+      'exception:read',
+      'exception:manage',
+      'minibar:log',
+      'invoice:read',
+      'invoice:issue',
     ],
   },
   {
@@ -542,6 +580,11 @@ const ROLES = [
       'ticket:manage',
       'ar:read',
       'ar:manage',
+      'dashboard:read',
+      'exception:read',
+      'exception:manage',
+      'minibar:log',
+      'invoice:read',
     ],
   },
   {
@@ -579,6 +622,10 @@ const ROLES = [
       'ticket:read',
       'ticket:update',
       'ar:read',
+      'dashboard:read',
+      'exception:read',
+      'exception:manage',
+      'minibar:log',
     ],
   },
   {
@@ -594,6 +641,8 @@ const ROLES = [
       'inventory:view',
       'ticket:read',
       'ticket:update',
+      'dashboard:read',
+      'exception:read',
     ],
   },
 ];
@@ -2068,6 +2117,8 @@ async function main() {
     'loyalty:read',
     'channel:read',
     'sms:read',
+    'dashboard:read',
+    'exception:read',
   ];
 
   let chainAdminRole = await prisma.role.findFirst({
