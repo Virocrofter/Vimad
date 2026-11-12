@@ -108,6 +108,7 @@ import { paymentsRouter } from './modules/payments/payments.routes.js';
 import { rateGridsRouter } from './modules/rates/rate-grids.routes.js';
 import { channelObservabilityRouter } from './modules/channel/channel.observability.routes.js';
 import { todayDashboardRouter } from './modules/dashboard/dashboard.today.routes.js';
+import { todayV2Router } from './modules/dashboard/today-v2.routes.js';
 import { marketingConsentRouter } from './modules/marketing/marketing.consent.routes.js';
 import { winbackRouter } from './modules/marketing/winback.routes.js';
 import { reservationWorkspaceRouter } from './modules/reservations/reservations.workspace.routes.js';
@@ -390,6 +391,7 @@ async function bootstrap() {
   app.use('/v1/channel', channelObservabilityRouter);
 
   app.use('/v1/dashboard', todayDashboardRouter);
+  app.use('/v1/dashboard', todayV2Router);
   app.use('/v1/reservation-workspace', reservationWorkspaceRouter);
   app.use('/v1/room-board', roomBoardRouter);
   app.use('/v1/payment-exceptions', paymentExceptionsRouter);
