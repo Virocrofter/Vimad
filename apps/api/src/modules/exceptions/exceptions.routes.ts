@@ -10,7 +10,12 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
-import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import {
+  authMiddleware,
+  tenantScope,
+  requirePermission,
+  resolveAllowedPropertyIds,
+} from '../auth/auth.middleware.js';
 
 export const exceptionsRouter = Router();
 exceptionsRouter.use(authMiddleware, tenantScope);
@@ -199,6 +204,11 @@ async function detect(tenantId: string): Promise<void> {
 exceptionsRouter.get('/', async (req: Request, res: Response) => {
   const tenantId = tenantOf(req);
   await detect(tenantId);
+  const spoofPropId = String(req.query.propertyId ?? '');
+  const spoofAllowed = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (spoofPropId && Array.isArray(spoofAllowed) && !spoofAllowed.includes(spoofPropId)) {
+    return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
+  }
   const status = String(req.query.status ?? 'active');
   const where = {
     tenantId,

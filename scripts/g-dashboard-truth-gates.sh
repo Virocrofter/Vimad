@@ -113,7 +113,18 @@ print(a.get("id","") or "")' 2>/dev/null || true)
       [ "$CODE" = "200" ] && gate R4-exceptions PASS 'exceptions 200' || gate R4-exceptions FAIL "exceptions HTTP $CODE"
       CODE=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/v1/dashboard/today?propertyId=$PROP")
       if [ "$CODE" = "401" ] || [ "$CODE" = "403" ]; then gate R5-noauth PASS "unauth=$CODE"; else gate R5-noauth FAIL "unauth=$CODE"; fi
-      gate R6-spoof SKIP 'property-spoof negative needs a restricted-role login (add later)'
+      RLOGIN=$(curl -sf -X POST "$BASE/auth/login" -H 'Content-Type: application/json' -d '{"tenantSlug":"demo-hotel","email":"restricted-r6@test.com","password":"Vimad-r6test!"}' 2>/dev/null || true)
+      RTOK=$(printf '%s' "$RLOGIN" | python3 -c 'import sys,json
+d=json.load(sys.stdin); t=d.get("data") or d
+print(t.get("token") or "")' 2>/dev/null || true)
+      if [ -z "$RTOK" ]; then
+        gate R6-spoof SKIP 'restricted fixture login failed'
+      else
+        CA=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/v1/dashboard/today?propertyId=cmvpvm9hw0006afx4p3w74xr9" -H "Authorization: Bearer $RTOK")
+        CB=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/v1/dashboard/today?propertyId=cmvpvsti200ouma8elowk1k0v" -H "Authorization: Bearer $RTOK")
+        CE=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/v1/exceptions?propertyId=cmvpvsti200ouma8elowk1k0v" -H "Authorization: Bearer $RTOK")
+        if [ "$CA" = "200" ] && [ "$CB" = "403" ] && [ "$CE" = "403" ]; then gate R6-spoof PASS "restricted: A=200 B=403 E=403"; else gate R6-spoof FAIL "A=$CA B=$CB E=$CE"; fi
+      fi
     fi
   fi
 fi

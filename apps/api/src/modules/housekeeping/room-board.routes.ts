@@ -23,7 +23,12 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
-import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import {
+  authMiddleware,
+  tenantScope,
+  requirePermission,
+  resolveAllowedPropertyIds,
+} from '../auth/auth.middleware.js';
 
 export const roomBoardRouter = Router();
 roomBoardRouter.use(authMiddleware, tenantScope);
@@ -195,6 +200,10 @@ async function loadCtx(
 roomBoardRouter.get('/', async (req: Request, res: Response) => {
   const tenantId = tenantOf(req)!;
   const propertyId = String(req.query.propertyId ?? '');
+  const allowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (Array.isArray(allowedProps) && !allowedProps.includes(propertyId)) {
+    return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
+  }
   const prop = await prisma.property.findFirst({ where: { id: propertyId, tenantId } });
   if (!prop) {
     return res

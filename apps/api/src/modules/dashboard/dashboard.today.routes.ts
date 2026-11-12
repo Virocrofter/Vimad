@@ -49,6 +49,10 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
     (req as any).auth?.tenantId ??
     (req as any).tenantId) as string | undefined;
   const propertyId = String((req.query as any).propertyId ?? '');
+  const routeAllowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (Array.isArray(routeAllowedProps) && !routeAllowedProps.includes(propertyId)) {
+    return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
+  }
   if (!tenantId || !propertyId) {
     return res
       .status(400)
