@@ -194,6 +194,85 @@ export async function getStaff(): Promise<{ data: HousekeepingStaff[] }> {
   return response.data;
 }
 
+// ─── Room board (addendum 5.3, slice #3) ───
+export interface RoomBoardTransition {
+  field: 'housekeepingStatus' | 'serviceStatus';
+  to: string;
+  label: string;
+  reasonRequired: boolean;
+}
+export interface RoomBoardRoom {
+  id: string;
+  number: string;
+  floor?: string | null;
+  roomType: { id: string; name: string; code: string };
+  housekeepingStatus: string;
+  serviceStatus: string;
+  serviceReason?: string | null;
+  parentRoomId?: string | null;
+  childCount: number;
+  statusChangedAt?: string | null;
+  assignable: boolean;
+  blocked: boolean;
+  occupant: {
+    reservationId: string;
+    confirmationNumber: string;
+    guestName: string;
+    status: string;
+    date: string;
+  } | null;
+  nextStay: RoomBoardRoom['occupant'];
+  openTasks: { id: string; title: string; department: string; status: string; priority: string }[];
+  validTransitions: RoomBoardTransition[];
+}
+export interface RoomBoardData {
+  property: { id: string; name: string; code: string };
+  date: string;
+  stats: {
+    total: number;
+    assignable: number;
+    dirty: number;
+    inProgress: number;
+    inspected: number;
+    blocked: number;
+  };
+  cards: { arrivals: number; departures: number; stayovers: number };
+  rooms: RoomBoardRoom[];
+}
+export interface RoomBoardDetail extends RoomBoardRoom {
+  history: {
+    at: string;
+    field: string;
+    from: string | null;
+    to: string;
+    reason: string | null;
+    note: string | null;
+    actorId: string | null;
+  }[];
+  recentStays: {
+    date: string;
+    rate: number;
+    confirmationNumber: string;
+    guestName: string;
+    status: string;
+  }[];
+}
+
+export async function getRoomBoard(
+  propertyId: string,
+  date?: string
+): Promise<{ data: RoomBoardData }> {
+  const response = await apiClient.get<{ data: RoomBoardData }>('/room-board', {
+    params: { propertyId, ...(date ? { date } : {}) },
+  });
+  return response.data;
+}
+
+export async function getRoomBoardRoom(roomId: string): Promise<{ data: RoomBoardDetail }> {
+  const response = await apiClient.get<{ data: RoomBoardDetail }>(`/room-board/${roomId}`);
+  return response.data;
+}
+
 // ─── T2+ Space Status ───
 export interface SpaceStatusRoom {
   id: string;

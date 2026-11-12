@@ -10,6 +10,7 @@ import {
   PaginatedResponseSchema,
 } from '../../common/openapi-schemas.js';
 import {
+  getAvailability,
   createRatePlan,
   deleteRatePlan,
   getRatePlan,
@@ -20,6 +21,7 @@ import {
   type RatePlanCreateInput,
   type RatePlanUpdateInput,
 } from './rates.service.js';
+import { attachPropertyScope } from '../auth/auth.middleware.js';
 
 extendZodWithOpenApi(z);
 
@@ -65,6 +67,7 @@ const RatePlanListResponseSchema =
 export const ratesRouter = Router();
 
 ratesRouter.use(authMiddleware, tenantScope);
+ratesRouter.use(attachPropertyScope);
 
 registry.registerPath({
   method: 'get',
@@ -92,7 +95,7 @@ registry.registerPath({
 
 ratesRouter.get(
   '/',
-  requirePermission('rate', 'read'),
+  requirePermission('rate_plan', 'read'),
   validateQuery(rateQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -104,7 +107,8 @@ ratesRouter.get(
           propertyId?: string;
           roomTypeId?: string;
           status?: string;
-        }
+        },
+        req.effectivePropertyIds ?? undefined
       );
       res.json(result);
     } catch (err) {
@@ -141,9 +145,36 @@ registry.registerPath({
   },
 });
 
+// [Rates] Per-room-type availability for a date range. The service capability
+// pre-existed (rates.service.getAvailability) but was never mounted; the Rates
+// page's AvailabilityGrid calls this path. Simple physical-minus-stays view —
+// the sellable-inventory engine (OOO/holds/stop-sell aware) lives at
+// GET /v1/inventory/grid.
+ratesRouter.get(
+  '/availability',
+  requirePermission('rate_plan', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const q = req.query as Record<string, string | undefined>;
+      if (!q.from || !q.to) {
+        return res
+          .status(400)
+          .json({
+            error: { code: 'VALIDATION_ERROR', message: 'from and to query params are required' },
+          });
+      }
+      return res.json(
+        await getAvailability(req.tenantId, { from: q.from, to: q.to, propertyId: q.propertyId })
+      );
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 ratesRouter.get(
   '/:id',
-  requirePermission('rate', 'read'),
+  requirePermission('rate_plan', 'read'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await getRatePlan(req.tenantId, req.params.id);
@@ -191,7 +222,7 @@ registry.registerPath({
 
 ratesRouter.post(
   '/',
-  requirePermission('rate', 'create'),
+  requirePermission('rate_plan', 'create'),
   validateBody(ratePlanCreateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -241,7 +272,7 @@ registry.registerPath({
 
 ratesRouter.patch(
   '/:id',
-  requirePermission('rate', 'update'),
+  requirePermission('rate_plan', 'update'),
   validateBody(ratePlanUpdateSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -286,7 +317,7 @@ registry.registerPath({
 
 ratesRouter.delete(
   '/:id',
-  requirePermission('rate', 'delete'),
+  requirePermission('rate_plan', 'delete'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await deleteRatePlan(req.tenantId, req.params.id);

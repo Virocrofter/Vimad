@@ -110,10 +110,13 @@ export function useApiFetch(endpoint, options = {}) {
       setError(null);
 
       try {
-        const result = await apiFetch(endpoint, {
-          ...options,
-          signal,
-        });
+        const result =
+          typeof endpoint === 'function'
+            ? await endpoint() // admin pages: fetcher fn (returns a promise)
+            : await apiFetch(endpoint, {
+                ...options,
+                signal,
+              });
         setData(result);
       } catch (err) {
         if (err.name === 'AbortError') {
@@ -137,7 +140,15 @@ export function useApiFetch(endpoint, options = {}) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [endpoint, refetchIndex, isAuthenticated, authLoading]);
+  }, [
+    refetchIndex,
+    isAuthenticated,
+    authLoading,
+    // Two dialects: string callers track the endpoint; function callers track
+    // the caller-provided deps array (their inline fetcher identity changes
+    // every render and must NOT refire the effect).
+    ...(typeof endpoint === 'function' ? (Array.isArray(options) ? options : []) : [endpoint]),
+  ]);
 
   // FIX: Remove ref access during render - track aborted state in a ref that's safe to read
   const isAbortedRef = useRef(false);

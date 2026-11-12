@@ -13,6 +13,8 @@ import {
   listGuestPaymentMethods,
 } from '../../../../api/payments';
 import { usePaystack } from '../../../../hooks/usePaystack';
+import { Banknote, Send } from 'lucide-react';
+import PaymentRequestsPage from '../payment-requests/page';
 
 const TYPES = {
   deposit: 'Deposit',
@@ -32,7 +34,7 @@ const fmt = (minor, currency = 'ZAR') =>
   `${(minor / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })} ${currency}`;
 const newKey = () => `web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-export default function PaymentsPage() {
+function PaymentsInner() {
   const [config, setConfig] = useState(null);
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
@@ -564,6 +566,40 @@ function ModalActions({ onClose, onSubmit, submitLabel, disabled }) {
       >
         {submitLabel}
       </button>
+    </div>
+  );
+}
+
+/* --- Workspace shell (Bulk 0.5 slice 4) ------------------------------- */
+const PAY_TABS = [
+  { key: 'payments', label: 'Payments', icon: Banknote },
+  { key: 'requests', label: 'Payment Requests', icon: Send },
+];
+
+export default function PaymentsPage() {
+  const [tab, setTab] = useState('payments');
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center gap-1 border-b border-white/10 px-4">
+        {PAY_TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`flex items-center gap-2 px-3 py-2 text-sm border-b-2 -mb-px ${
+              tab === t.key
+                ? 'border-indigo-400 text-gray-100'
+                : 'border-transparent text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            <t.icon className="h-4 w-4" />
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {tab === 'payments' && <PaymentsInner />}
+        {tab === 'requests' && <PaymentRequestsPage />}
+      </div>
     </div>
   );
 }

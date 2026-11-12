@@ -13,8 +13,35 @@ import {
   getAdminTenantActivity,
   getAdminPlanDistribution,
   getAdminQuickActions,
+  getAdminAuditLogs,
+  getAdminAuditStats,
+  getAdminSystemMetrics,
+  getAdminTicketQueue,
+  getAdminTenants,
+  getAdminBillingDashboard,
+  getAdminRevenueAnalytics,
+  getAdminRevenueByPlan,
+  getAdminMrrHistory,
+  listAdminSubscriptions,
+  getAdminSubscriptionById,
+  updateAdminSubscription,
+  cancelAdminSubscription,
+  listAdminInvoices,
+  getAdminInvoiceById,
+  createAdminInvoice,
+  updateAdminInvoice,
+  deleteAdminInvoice,
+  generateAdminInvoice,
+  markAdminInvoicePaid,
+  getAdminCreditNotes,
+  createAdminCreditNote,
+  applyAdminCreditNote,
+  getAdminDunning,
+  triggerAdminDunning,
 } from './admin.service.js';
 import { adminReportsRouter } from './admin.reports.routes.js';
+import { contractsRouter } from './contracts.routes.js';
+import { billingAdapterRouter } from './billing-adapter.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -121,6 +148,8 @@ export const adminRouter = Router();
 
 // All admin routes require authentication + admin role
 adminRouter.use(authMiddleware, requireAdminRole);
+adminRouter.use('/billing/contracts', contractsRouter);
+adminRouter.use('/billing', billingAdapterRouter);
 
 /* ─── GET /admin/kpis ─── */
 registry.registerPath({
@@ -310,3 +339,283 @@ adminRouter.get('/quick-actions', async (_req: Request, res: Response, next: Nex
     next(err);
   }
 });
+// A1: platform audit-log explorer. Contract note: the audit client expects
+// the body to BE {data, meta} (it unwraps one level) — no extra envelope.
+adminRouter.get('/audit-logs', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const q = req.query as Record<string, string | undefined>;
+    const result = await getAdminAuditLogs({
+      page: q.page ? Number(q.page) : undefined,
+      pageSize: q.pageSize ? Number(q.pageSize) : undefined,
+      severity: q.severity,
+      category: q.category,
+      userId: q.userId,
+    });
+    return res.json(result);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.get('/audit-logs/stats', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.json(await getAdminAuditStats());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// A4: prometheus scrape for the health page.
+adminRouter.get('/health/metrics', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.json({ data: await getAdminSystemMetrics() });
+  } catch (err) {
+    return next(err);
+  }
+});
+// A2: platform support-ticket queue (page currently mock-fed; endpoint is the
+// contract for its future wiring).
+adminRouter.get('/ticket', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const q = req.query as Record<string, string | undefined>;
+    const result = await getAdminTicketQueue({
+      status: q.status,
+      priority: q.priority,
+      page: q.page ? Number(q.page) : undefined,
+      pageSize: q.pageSize ? Number(q.pageSize) : undefined,
+    });
+    return res.json(result);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// A3: platform tenant list — consumed by regions (migration selector) and
+// billing/credit-notes (both unwrap {data} tolerantly).
+adminRouter.get('/tenants', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.json({ data: await getAdminTenants() });
+  } catch (err) {
+    return next(err);
+  }
+});
+// ─── B1/B3: platform billing routes (contract-consumed response shapes) ───
+// Dashboard/revenue return their shape DIRECTLY (client consumes body as-is);
+// subscriptions list returns {data, meta} per PaginatedResponse.
+adminRouter.get('/billing/dashboard', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.json(await getAdminBillingDashboard());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.get('/billing/revenue', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const period = String(req.query.period ?? 'monthly');
+    return res.json(await getAdminRevenueAnalytics(period));
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.get(
+  '/billing/revenue-by-plan',
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json({ data: await getAdminRevenueByPlan() });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.get('/billing/mrr-history', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const months = req.query.months ? Number(req.query.months) : 12;
+    return res.json({ data: await getAdminMrrHistory(months) });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.get(
+  '/billing/subscriptions',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const q = req.query as Record<string, string | undefined>;
+      return res.json(
+        await listAdminSubscriptions({
+          page: q.page ? Number(q.page) : undefined,
+          pageSize: q.pageSize ? Number(q.pageSize) : undefined,
+          status: q.status,
+          tenantId: q.tenantId,
+        })
+      );
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.get(
+  '/billing/subscriptions/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await getAdminSubscriptionById(req.params.id));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.patch(
+  '/billing/subscriptions/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await updateAdminSubscription(req.params.id, req.body ?? {}));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.post(
+  '/billing/subscriptions/:id/cancel',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await cancelAdminSubscription(req.params.id, req.body ?? {}));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+// ─── B2/B4 routes (response shapes per billing.ts client consumption) ───
+adminRouter.get('/billing/invoices', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const q = req.query as Record<string, string | undefined>;
+    return res.json(
+      await listAdminInvoices({
+        page: q.page ? Number(q.page) : undefined,
+        pageSize: q.pageSize ? Number(q.pageSize) : undefined,
+        status: q.status,
+        tenantId: q.tenantId,
+      })
+    );
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.post('/billing/invoices', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.status(201).json(await createAdminInvoice(req.body ?? {}));
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.post('/billing/generate', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.status(201).json(await generateAdminInvoice(req.body ?? {}));
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.get(
+  '/billing/invoices/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await getAdminInvoiceById(req.params.id));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.patch(
+  '/billing/invoices/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await updateAdminInvoice(req.params.id, req.body ?? {}));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.delete(
+  '/billing/invoices/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await deleteAdminInvoice(req.params.id);
+      return res.status(204).end();
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.post(
+  '/billing/invoices/:id/pay',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await markAdminInvoicePaid(req.params.id, req.body ?? {}));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.get(
+  '/billing/credit-notes',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await getAdminCreditNotes(req.query.invoiceId as string | undefined));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.post(
+  '/billing/credit-notes',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.status(201).json(await createAdminCreditNote(req.body ?? {}));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.post(
+  '/billing/credit-notes/:id/apply',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json(await applyAdminCreditNote(req.params.id));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.get('/billing/dunning', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.json(await getAdminDunning(req.query.invoiceId as string | undefined));
+  } catch (err) {
+    return next(err);
+  }
+});
+
+adminRouter.post(
+  '/billing/invoices/:id/dunning',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.status(201).json(await triggerAdminDunning(req.params.id));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);

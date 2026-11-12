@@ -1,3 +1,4 @@
+import { isDemoTenantId, demoPaystackStub } from './demo-guard.js';
 /* apps/api/src/common/paystack.ts
  * Thin Paystack REST client. Card numbers never touch this server —
  * tokenization happens on Paystack's hosted checkout / inline popup.
@@ -60,6 +61,9 @@ export interface PaystackPaymentRequest {
 }
 
 async function paystackFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (await isDemoTenantId(process.env.VIMAD_DEMO_TENANT ?? null)) {
+    return demoPaystackStub(path, init) as never;
+  }
   if (!env.PAYSTACK_SECRET_KEY) {
     throw new AppError(503, 'Paystack is not configured', 'PAYMENTS_NOT_CONFIGURED');
   }

@@ -1,258 +1,458 @@
-// apps/web/src/app/admin/backups/components.jsx
-import { useState } from 'react';
-import { Badge } from '../../../components/ui/badge';
-import { Card } from '../../../components/ui/card';
-import { Skeleton } from '../../../components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+/* apps/web/src/app/admin/backups/components.jsx */
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../../components/ui/table';
-import { Progress } from '../../../components/ui/progress';
-import {
-  Clock,
   Database,
   HardDrive,
-  CheckCircle,
+  Activity,
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
   XCircle,
-  Loader2,
   Play,
-  TestTube,
   Trash2,
-  Calendar,
+  FlaskConical,
+  Download,
+  RefreshCw,
+  CalendarClock,
+  Zap,
+  Building2,
+  Users,
+  FileText,
+  CreditCard,
+  AlertTriangle,
 } from 'lucide-react';
 
-const statusConfig = {
-  pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  running: { color: 'bg-blue-100 text-blue-800', icon: Loader2 },
-  completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  failed: { color: 'bg-red-100 text-red-800', icon: XCircle },
-  cancelled: { color: 'bg-gray-100 text-gray-800', icon: XCircle },
-};
-
-const typeConfig = {
-  full: { label: 'Full', color: 'bg-purple-100 text-purple-800' },
-  incremental: { label: 'Incremental', color: 'bg-blue-100 text-blue-800' },
-  differential: { label: 'Differential', color: 'bg-cyan-100 text-cyan-800' },
-};
-
-export function BackupStatsCards({ stats, loading }) {
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="p-4">
-            <Skeleton className="h-4 w-24 mb-2" />
-            <Skeleton className="h-8 w-16" />
-          </Card>
-        ))}
-      </div>
-    );
+export const fmtBytes = (n) => {
+  if (n == null) return '—';
+  const u = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let i = 0;
+  let v = Number(n);
+  while (v >= 1024 && i < u.length - 1) {
+    v /= 1024;
+    i++;
   }
+  return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${u[i]}`;
+};
+export const fmtDate = (d) =>
+  d
+    ? new Intl.DateTimeFormat('en-ZA', { dateStyle: 'medium', timeStyle: 'short' }).format(
+        new Date(d)
+      )
+    : '—';
+export const fmtDur = (ms) => {
+  if (ms == null) return '—';
+  const s = Math.round(ms / 1000);
+  return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
+};
+export const fmtAgo = (d) => {
+  if (!d) return 'never';
+  const m = Math.round((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 48) return `${h} hr ago`;
+  return `${Math.round(h / 24)} d ago`;
+};
 
-  if (!stats) return null;
-
-  const cards = [
-    {
-      label: 'Total Backups',
-      value: stats.totalBackups?.toLocaleString() || '0',
-      sub: stats.lastBackupAt
-        ? `Last: ${new Date(stats.lastBackupAt).toLocaleDateString()}`
-        : 'No backups yet',
-    },
-    {
-      label: 'Storage Used',
-      value: stats.storageUsed || '0 GB',
-      sub: `${stats.storageAvailable || '∞'} available`,
-    },
-    { label: 'Total Size', value: stats.totalSize || '0 GB', sub: 'Compressed' },
-    { label: 'Success Rate', value: `${stats.successRate || 100}%`, sub: 'Last 30 days' },
-  ];
-
+const GRADS = ['bk-g-indigo', 'bk-g-emerald', 'bk-g-amber', 'bk-g-sky', 'bk-g-rose', 'bk-g-slate'];
+export function KpiCard({ label, value, sub, icon, grad }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {cards.map((card) => (
-        <Card key={card.label} className="p-4">
-          <p className="text-sm text-muted-foreground">{card.label}</p>
-          <p className="text-2xl font-bold mt-1">{card.value}</p>
-          <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
-        </Card>
-      ))}
+    <div className={`bk-kpi ${grad || GRADS[0]}`}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div className="k-label">{label}</div>
+          <div className="k-value">{value}</div>
+          {sub && <div className="k-sub">{sub}</div>}
+        </div>
+        <div style={{ opacity: 0.9 }}>{icon}</div>
+      </div>
     </div>
   );
 }
 
-export function BackupTable({ backups, loading, onDelete, onRestore, onTestRestore }) {
-  if (loading) {
-    return (
-      <Card className="p-4">
-        <Skeleton className="h-8 w-full mb-4" />
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full mb-2" />
-        ))}
-      </Card>
-    );
-  }
-
+export function StatusChip({ status }) {
+  const map = {
+    completed: ['ok', CheckCircle2],
+    passed: ['ok', CheckCircle2],
+    active: ['ok', CheckCircle2],
+    running: ['info', RefreshCw],
+    pending: ['warn', Clock],
+    open: ['warn', Clock],
+    failed: ['bad', XCircle],
+    cancelled: ['neutral', XCircle],
+    archived: ['neutral', XCircle],
+  };
+  const [tone, Icon] = map[status] || ['neutral', Activity];
   return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Backup</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Size</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {backups.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                No backups found. Create your first backup to get started.
-              </TableCell>
-            </TableRow>
-          ) : (
-            backups.map((backup) => {
-              const status = statusConfig[backup.status] || statusConfig.pending;
-              const StatusIcon = status.icon;
-              const type = typeConfig[backup.type] || typeConfig.full;
-
-              return (
-                <TableRow key={backup.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Database className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium text-sm">{backup.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {backup.tables?.length || 0} tables
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={type.color}>
-                      {type.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={status.color}>
-                      <StatusIcon
-                        className={`h-3 w-3 mr-1 ${backup.status === 'running' ? 'animate-spin' : ''}`}
-                      />
-                      {backup.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {backup.sizeFormatted || backup.sizeBytes?.toLocaleString() + ' bytes'}
-                  </TableCell>
-                  <TableCell>{backup.durationFormatted || '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      {new Date(backup.startedAt).toLocaleString()}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {backup.status === 'completed' && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onTestRestore(backup)}
-                            title="Test Restore"
-                          >
-                            <TestTube className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onRestore(backup)}
-                            title="Restore"
-                          >
-                            <Play className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(backup.id)}
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
-    </Card>
+    <span className={`bk-chip ${tone}`}>
+      <Icon size={11} />
+      {status}
+    </span>
   );
 }
 
-export function ScheduleList({ schedules, loading, onUpdate }) {
-  if (loading) {
+export function RunsTable({ runs, onTest, onRestore, onDelete, onDownload, busy }) {
+  if (!runs?.length)
     return (
-      <div className="space-y-2">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
+      <div className="bk-empty">No backups yet — run your first backup from the hero bar.</div>
     );
-  }
-
-  if (schedules.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-        <p className="text-sm">No scheduled backups</p>
-        <p className="text-xs">Create a schedule to automate backups</p>
-      </div>
-    );
-  }
-
-  const frequencyLabels = {
-    hourly: 'Every hour',
-    daily: 'Daily',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-  };
-
   return (
-    <div className="space-y-3">
-      {schedules.map((schedule) => (
-        <div key={schedule.id} className="p-3 border rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-sm">{schedule.name}</span>
-            </div>
-            <Badge variant={schedule.enabled ? 'default' : 'secondary'}>
-              {schedule.enabled ? 'Active' : 'Paused'}
-            </Badge>
+    <table className="bk-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Size</th>
+          <th>Duration</th>
+          <th>Verified</th>
+          <th>Started</th>
+          <th style={{ textAlign: 'right' }}>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {runs.map((r) => {
+          const dur =
+            r.startedAt && r.finishedAt ? new Date(r.finishedAt) - new Date(r.startedAt) : null;
+          return (
+            <tr key={r.id}>
+              <td>
+                <div style={{ fontWeight: 600 }}>{r.name || r.kind}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted-foreground,#a1a1aa)' }}>
+                  {r.actor}
+                </div>
+              </td>
+              <td>
+                <span className="bk-chip neutral">{r.type || r.kind}</span>
+              </td>
+              <td>
+                <StatusChip status={r.status} />
+                {r.status === 'running' && (
+                  <div className="bk-progress" style={{ marginTop: 6, width: 90 }}>
+                    <div style={{ width: '70%' }} />
+                  </div>
+                )}
+                {r.error && (
+                  <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4, maxWidth: 180 }}>
+                    {r.error}
+                  </div>
+                )}
+              </td>
+              <td>{fmtBytes(r.sizeBytes)}</td>
+              <td>{fmtDur(dur)}</td>
+              <td>
+                {r.restoreTestedStatus ? (
+                  <span className={`bk-chip ${r.restoreTestedStatus === 'passed' ? 'ok' : 'bad'}`}>
+                    {r.restoreTestedStatus === 'passed' ? (
+                      <ShieldCheck size={11} />
+                    ) : (
+                      <AlertTriangle size={11} />
+                    )}
+                    {r.restoreTestedStatus === 'passed' ? 'verified' : 'failed'}
+                  </span>
+                ) : (
+                  <span className="bk-chip neutral">never</span>
+                )}
+              </td>
+              <td>{fmtAgo(r.startedAt)}</td>
+              <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                <button
+                  className="bk-icon-btn"
+                  title="Download (audit-trailed)"
+                  disabled={busy || r.status !== 'completed'}
+                  onClick={() => onDownload(r)}
+                >
+                  <Download size={15} />
+                </button>
+                <button
+                  className="bk-icon-btn"
+                  title="Test restore (scratch)"
+                  disabled={busy || r.status !== 'completed'}
+                  onClick={() => onTest(r)}
+                >
+                  <FlaskConical size={15} />
+                </button>
+                <button
+                  className="bk-icon-btn"
+                  title="Restore to scratch"
+                  disabled={busy || r.status !== 'completed'}
+                  onClick={() => onRestore(r)}
+                >
+                  <Play size={15} />
+                </button>
+                <button
+                  className="bk-icon-btn danger"
+                  title="Delete"
+                  disabled={busy}
+                  onClick={() => onDelete(r)}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+const FREQS = [
+  { label: 'Hourly', cron: '0 * * * *' },
+  { label: 'Daily 02:00', cron: '0 2 * * *' },
+  { label: 'Weekly (Sun 02:00)', cron: '0 2 * * 0' },
+  { label: 'Monthly (1st 02:00)', cron: '0 2 1 * *' },
+];
+export { FREQS };
+
+export function ScheduleList({ schedules, onRun, onDelete, onEdit }) {
+  if (!schedules?.length)
+    return <div className="bk-empty">No schedules — automate your backups.</div>;
+  return (
+    <table className="bk-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Frequency</th>
+          <th>Type</th>
+          <th>Retention</th>
+          <th>Last run</th>
+          <th>Next run</th>
+          <th>Status</th>
+          <th style={{ textAlign: 'right' }}>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {schedules.map((s) => (
+          <tr key={s.id}>
+            <td style={{ fontWeight: 600 }}>{s.name}</td>
+            <td>
+              <code
+                style={{
+                  fontSize: 12,
+                  background: 'var(--muted,#27272a)',
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                }}
+              >
+                {s.cron}
+              </code>
+            </td>
+            <td>
+              <span className="bk-chip neutral">{s.type}</span>
+            </td>
+            <td>{s.retentionDays}d</td>
+            <td>{fmtAgo(s.lastRunAt)}</td>
+            <td>{fmtDate(s.nextRunAt)}</td>
+            <td>
+              <StatusChip status={s.isActive ? 'active' : 'cancelled'} />
+            </td>
+            <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+              <button className="bk-icon-btn" title="Run now" onClick={() => onRun(s)}>
+                <Zap size={15} />
+              </button>
+              <button className="bk-icon-btn" title="Edit" onClick={() => onEdit(s)}>
+                <CalendarClock size={15} />
+              </button>
+              <button className="bk-icon-btn danger" title="Delete" onClick={() => onDelete(s)}>
+                <Trash2 size={15} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export function RestoreJobsTable({ jobs }) {
+  if (!jobs?.length) return <div className="bk-empty">No restore jobs yet.</div>;
+  return (
+    <table className="bk-table">
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Target</th>
+          <th>Status</th>
+          <th>Duration</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {jobs.map((j) => (
+          <tr key={j.id}>
+            <td>{fmtDate(j.startedAt)}</td>
+            <td>
+              <span className="bk-chip info">{j.target}</span>
+            </td>
+            <td>
+              <StatusChip status={j.status} />
+            </td>
+            <td>{fmtDur(j.durationMs)}</td>
+            <td style={{ fontSize: 12, color: 'var(--muted-foreground,#a1a1aa)' }}>
+              {j.checks
+                ? `${j.checks.filter((c) => c.passed).length}/${j.checks.length} checks passed`
+                : j.error || '—'}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export function DrillsTable({ drills, targetHours }) {
+  if (!drills?.length)
+    return <div className="bk-empty">No drills yet — run one to measure your real RTO.</div>;
+  return (
+    <table className="bk-table">
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Status</th>
+          <th>RTO (actual)</th>
+          <th>Target</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {drills.map((d) => {
+          const rto =
+            d.rtoSeconds != null ? `${Math.floor(d.rtoSeconds / 60)}m ${d.rtoSeconds % 60}s` : '—';
+          const breach =
+            d.rtoSeconds != null && targetHours != null && d.rtoSeconds > targetHours * 3600;
+          return (
+            <tr key={d.id}>
+              <td>{fmtDate(d.startedAt)}</td>
+              <td>
+                <StatusChip status={d.status} />
+              </td>
+              <td style={{ fontWeight: 700, color: breach ? '#fca5a5' : '#6ee7b7' }}>{rto}</td>
+              <td>{targetHours ?? '—'}h</td>
+              <td style={{ fontSize: 12, color: 'var(--muted-foreground,#a1a1aa)' }}>
+                {d.checks
+                  ? `${d.checks.filter((c) => c.passed).length}/${d.checks.length} checks passed`
+                  : d.notes || '—'}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+export function CoveragePanel({ coverage: cov }) {
+  if (!cov) return null;
+  const rows = [
+    ['Tenants (hotels)', cov.tenants, Building2],
+    ['Properties', cov.properties, Building2],
+    ['Guests', cov.guests, Users],
+    ['Reservations', cov.reservations, CalendarClock],
+    ['Folios', cov.folios, FileText],
+    ['Payments', cov.payments, CreditCard],
+    ['Staff users', cov.users, Users],
+  ];
+  const max = Math.max(...rows.map(([, n]) => n), 1);
+  return (
+    <div className="bk-panel">
+      <h3>
+        <Database size={16} /> What your backups protect
+      </h3>
+      {rows.map(([lbl, n, Icon]) => (
+        <div className="bk-coverage-bar" key={lbl}>
+          <span className="lbl">
+            <Icon size={13} style={{ verticalAlign: -2, marginRight: 6 }} />
+            {lbl}
+          </span>
+          <div className="bk-progress" style={{ flex: 1 }}>
+            <div style={{ width: `${Math.max(4, (n / max) * 100)}%` }} />
           </div>
-          <div className="mt-2 text-xs text-muted-foreground space-y-1">
-            <p>
-              {frequencyLabels[schedule.frequency] || schedule.frequency} · {schedule.type} backup
-            </p>
-            <p>Retention: {schedule.retentionDays} days</p>
-            {schedule.nextRunAt && <p>Next run: {new Date(schedule.nextRunAt).toLocaleString()}</p>}
-          </div>
+          <span className="num">{n.toLocaleString()}</span>
         </div>
       ))}
+      <div style={{ fontSize: 12, color: 'var(--muted-foreground,#a1a1aa)', marginTop: 8 }}>
+        Full backups cover all {cov.coreTables}+ core tables plus every migration added after
+        onboarding — nothing is excluded unless you pick specific tables.
+      </div>
     </div>
+  );
+}
+
+export function RetentionMatrix({ rows }) {
+  if (!rows) return null;
+  return (
+    <div className="bk-panel">
+      <h3>
+        <Clock size={16} /> Retention policy
+      </h3>
+      <table className="bk-table">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Cadence</th>
+            <th>Keep for</th>
+            <th>Enforcement</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.tier}>
+              <td style={{ fontWeight: 600 }}>{r.tier}</td>
+              <td>{r.cadence}</td>
+              <td>{r.keepFor}</td>
+              <td style={{ color: 'var(--muted-foreground,#a1a1aa)' }}>{r.enforcement}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export function TenantsTable({ tenants, onExport, busyId }) {
+  if (!tenants?.length) return null;
+  return (
+    <table className="bk-table">
+      <thead>
+        <tr>
+          <th>Hotel / Tenant</th>
+          <th>Plan</th>
+          <th>Properties</th>
+          <th>Guests</th>
+          <th>Reservations</th>
+          <th>Status</th>
+          <th style={{ textAlign: 'right' }}>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tenants.map((t) => (
+          <tr key={t.id}>
+            <td>
+              <div style={{ fontWeight: 600 }}>{t.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--muted-foreground,#a1a1aa)' }}>{t.slug}</div>
+            </td>
+            <td>
+              <span className="bk-chip info">{t.plan}</span>
+            </td>
+            <td>{t.properties}</td>
+            <td>{t.guests.toLocaleString()}</td>
+            <td>{t.reservations.toLocaleString()}</td>
+            <td>
+              <StatusChip status={t.status === 'active' ? 'active' : t.status} />
+            </td>
+            <td style={{ textAlign: 'right' }}>
+              <button
+                className="bk-btn bk-btn-soft"
+                style={{ padding: '7px 12px' }}
+                disabled={busyId === t.id}
+                onClick={() => onExport(t)}
+              >
+                {busyId === t.id ? <RefreshCw size={13} /> : <Download size={13} />} Export
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

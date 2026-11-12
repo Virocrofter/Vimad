@@ -39,7 +39,7 @@ export class GuestPortalError extends Error {
 }
 
 async function raw(path: string, init?: RequestInit): Promise<Response> {
-  return fetch(`${API_BASE}/guest-portal${path}`, {
+  return fetch(`${API_BASE}/v1/guest-portal${path}`, {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   });

@@ -29,10 +29,13 @@ export type FolioCreateInput = z.infer<typeof folioCreateSchema>;
 
 export async function listFolios(
   tenantId: string,
-  query: { page: number; pageSize: number; reservationId?: string; status?: string }
+  query: { page: number; pageSize: number; reservationId?: string; status?: string },
+  propertyIds?: string[]
 ) {
   const pagination = paginationSchema.parse(query);
   const where: Record<string, unknown> = { tenantId };
+
+  if (propertyIds?.length) where.reservation = { is: { propertyId: { in: propertyIds } } };
 
   if (query.reservationId) where.reservationId = query.reservationId;
   if (query.status) where.status = query.status;

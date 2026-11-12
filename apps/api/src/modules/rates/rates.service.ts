@@ -40,10 +40,13 @@ export async function listRatePlans(
     status?: string;
     dateFrom?: string;
     dateTo?: string;
-  }
+  },
+  propertyIds?: string[]
 ) {
   const pagination = paginationSchema.parse(query);
   const where: Record<string, unknown> = { tenantId };
+
+  if (propertyIds?.length) where.propertyId = { in: propertyIds };
 
   if (query.propertyId) where.propertyId = query.propertyId;
   if (query.roomTypeId) where.roomTypeId = query.roomTypeId;

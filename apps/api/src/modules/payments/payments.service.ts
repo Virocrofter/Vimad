@@ -1,3 +1,4 @@
+import { isDemoTenantId } from '../../common/demo-guard.js';
 /* apps/api/src/modules/payments/payments.service.ts */
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
@@ -87,6 +88,16 @@ export async function postPaymentToFolio(paymentId: string): Promise<void> {
   const amountMajor = new Prisma.Decimal(minorToMajor(payment.amountMinor));
 
   await prisma.$transaction(async (tx) => {
+    // Atomic idempotency claim: a duplicate/late webhook processed by a
+    // concurrent worker can only lose this flip — the loser returns without
+    // touching the folio. Same-transaction, so a later failure rolls the
+    // claim back and the next attempt can retry.
+    const claim = await tx.payment.updateMany({
+      where: { id: payment.id, postedToFolio: false },
+      data: { postedToFolio: true, postedAt: new Date() },
+    });
+    if (claim.count === 0) return;
+
     await tx.folioItem.create({
       data: {
         folioId: folio.id,
@@ -112,7 +123,7 @@ export async function postPaymentToFolio(paymentId: string): Promise<void> {
 
     await tx.payment.update({
       where: { id: payment.id },
-      data: { folioId: folio.id, postedToFolio: true, postedAt: new Date() },
+      data: { folioId: folio.id },
     });
 
     // depositPaid was a dead column — nothing wrote it, the room plan read it.
@@ -261,6 +272,8 @@ export async function initializePayment(
   userId: string,
   input: z.infer<typeof initializePaymentSchema>
 ) {
+  if (await isDemoTenantId(tenantId))
+    throw new AppError(403, 'Payments are disabled in demo mode', 'PAYMENTS_DEMO_BLOCKED');
   if (input.reservationId) {
     const res = await prisma.reservation.findFirst({
       where: { id: input.reservationId, tenantId },

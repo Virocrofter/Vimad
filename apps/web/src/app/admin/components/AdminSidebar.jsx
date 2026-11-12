@@ -55,12 +55,12 @@ const navGroups = [
   {
     label: 'Platform',
     items: [
-      { to: '/admin/announcements', label: 'Announcements', icon: Megaphone },
-      { to: '/admin/audit', label: 'Audit Log', icon: Activity },
-      { to: '/admin/backups', label: 'Backups & DR', icon: Database },
-      { to: '/admin/health', label: 'System Health', icon: HeartPulse },
-      { to: '/admin/profiler', label: 'Profiler', icon: Gauge },
-      { to: '/admin/shadow', label: 'Shadow Mode', icon: Eye },
+      { to: '/admin/platform/announcements', label: 'Announcements', icon: Megaphone },
+      { to: '/admin/platform/audit', label: 'Audit Log', icon: Activity },
+      { to: '/admin/platform/backups', label: 'Backups & DR', icon: Database },
+      { to: '/admin/platform/health', label: 'System Health', icon: HeartPulse },
+      { to: '/admin/platform/profiler', label: 'Profiler', icon: Gauge },
+      { to: '/admin/platform/shadow', label: 'Shadow Mode', icon: Eye },
     ],
   },
   {
@@ -69,10 +69,10 @@ const navGroups = [
       { to: '/admin/billing', label: 'Billing Dashboard', icon: CreditCard },
       { to: '/admin/billing/invoices', label: 'Invoices', icon: FileText },
       { to: '/admin/billing/credit-notes', label: 'Credit Notes', icon: DollarSign },
-      { to: '/admin/billing/subscriptions', label: 'Subscriptions', icon: RefreshCw },
+      { to: '/admin/billing/contracts', label: 'Contracts', icon: RefreshCw },
       { to: '/admin/billing/dunning', label: 'Dunning', icon: AlertTriangle },
       { to: '/admin/billing/revenue', label: 'Revenue', icon: Landmark },
-      { to: '/admin/finances', label: 'Finances', icon: CircleDollarSign },
+      { to: '/admin/billing/finances', label: 'Finances', icon: CircleDollarSign },
     ],
   },
   {

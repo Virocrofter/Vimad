@@ -38,6 +38,7 @@ import {
   type GuestPreferenceInput,
   type GuestUpdateInput,
 } from './guests.service.js';
+import { attachPropertyScope } from '../auth/auth.middleware.js';
 
 extendZodWithOpenApi(z);
 
@@ -156,6 +157,7 @@ const GuestMergeResponseSchema = z
 export const guestsRouter = Router();
 
 guestsRouter.use(authMiddleware, tenantScope);
+guestsRouter.use(attachPropertyScope);
 
 /** req.user is typed as {} in the global augmentation — read id through a cast */
 function currentUserId(req: Request): string | undefined {
@@ -218,7 +220,11 @@ guestsRouter.get(
   validateQuery(guestQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await listGuests(req.tenantId, req.validatedQuery as GuestListQuery);
+      const result = await listGuests(
+        req.tenantId,
+        req.validatedQuery as GuestListQuery,
+        req.effectivePropertyIds ?? undefined
+      );
       res.json(result);
     } catch (err) {
       next(err);

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   listReservations,
   getReservation,
+  getReservationWorkspace,
   createReservation,
   updateReservation,
   deleteReservation,
@@ -47,6 +48,21 @@ export function useReservations(params?: UseReservationsParams) {
 }
 
 export const useReservationsList = useReservations;
+
+export function useReservationWorkspace(id?: string) {
+  const query = useQuery({
+    queryKey: ['reservations', 'workspace', id],
+    queryFn: () => getReservationWorkspace(id as string),
+    enabled: !!id,
+  });
+  return {
+    data: query.data?.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
 
 export function useReservation(id: string) {
   const query = useQuery({

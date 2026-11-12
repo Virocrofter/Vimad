@@ -1,330 +1,259 @@
-// apps/web/src/app/admin/billing/page.jsx — wired to api/billing.ts (Phase 3E)
-import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  DollarSign,
-  TrendingUp,
-  Users,
-  AlertTriangle,
-  RefreshCw,
-  FileText,
-  CreditCard,
-  ArrowRight,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useApiFetch } from '@/hooks/useApiFetch';
-import { useApiError } from '../../../hooks/useApiError';
-import {
-  getBillingDashboard,
-  getInvoices,
-  getSubscriptions,
-  getCreditNotes,
-  getDunningEvents,
-  getRevenueAnalytics,
-} from '@/api/billing';
-import { api } from '@/api/client';
-// Static metadata + formatters only — entity data comes from the API.
-import { formatCurrency } from '../../../lib/utils';
-import {
-  BillingStatCard,
-  MrrMovementBar,
-  PlanDistributionChart,
-  InvoiceMiniCard,
-  SubscriptionMiniCard,
-  DunningTimeline,
-} from './components';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getSummary } from './api';
 
-/* ─── Normalizers: API shapes → component shapes ─── */
-const invoiceStatusMap = { sent: 'pending', cancelled: 'void' };
-const normalizeInvoice = (inv) => ({
-  ...inv,
-  tenantName: inv.tenantName ?? inv.tenantId,
-  amount: inv.totalAmount ?? inv.amount ?? 0,
-  status: invoiceStatusMap[inv.status] ?? inv.status,
-});
+const fmtZAR = (n) =>
+  n == null || Number.isNaN(Number(n))
+    ? '\u2014'
+    : `R ${Number(n).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const subStatusMap = { trialing: 'trial' };
-const normalizeSubscription = (s) => ({
-  ...s,
-  tenantName: s.tenantName ?? s.tenantId,
-  status: subStatusMap[s.status] ?? s.status,
-  billingCycle: s.billingCycle ?? 'monthly',
-  seats: s.usage?.users ?? s.seats ?? 0,
-  amount: s.amount ?? 0,
-});
+const ICONS = {
+  invoices: (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M16 13H8" />
+      <path d="M16 17H8" />
+    </svg>
+  ),
+  'credit-notes': (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+    </svg>
+  ),
+  dunning: (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </svg>
+  ),
+  revenue: (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 3v18h18" />
+      <path d="m19 9-5 5-4-4-3 3" />
+    </svg>
+  ),
+  subscriptions: (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17 2v6h-6" />
+      <path d="M3 12a9 9 0 0 1 15.5-6.2L17 8" />
+      <path d="M21 12a9 9 0 0 1-15.5 6.2L7 16" />
+      <path d="M7 22v-6h6" />
+    </svg>
+  ),
+  finances: (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M6 12h.01M18 12h.01" />
+    </svg>
+  ),
+  contracts: (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="m9 15 2 2 4-4" />
+    </svg>
+  ),
+};
 
-const normalizeCreditNote = (cn) => ({
-  ...cn,
-  tenantName: cn.tenantName ?? cn.invoiceId,
-});
+const SECTIONS = [
+  {
+    key: 'invoices',
+    title: 'Invoices',
+    desc: 'Create, send and reconcile platform invoices. Track payments, overdue balances and credit application.',
+  },
+  {
+    key: 'contracts',
+    title: 'Contracts',
+    desc: 'Tenant contracts \u2014 terms, discounts with approval, renewal alerts and full amendment audit trail.',
+  },
+  {
+    key: 'dunning',
+    title: 'Dunning',
+    desc: 'Automated reminder schedules for overdue invoices, escalation levels and payment recovery tracking.',
+  },
+  {
+    key: 'revenue',
+    title: 'Revenue',
+    desc: 'MRR, ARR, expansion, contraction and churn \u2014 revenue movement with period-over-period deltas.',
+  },
+  {
+    key: 'finances',
+    title: 'Finances',
+    desc: 'Payouts, processing fees, cost to serve per tenant and gross margin view.',
+  },
+  {
+    key: 'credit-notes',
+    title: 'Credit Notes',
+    desc: 'Issue credit notes against paid or open invoices with full audit trail and VAT handling.',
+  },
+];
 
-const dunningEventToAction = (e) => ({
-  date: e.sentAt,
-  action: `Payment attempt #${e.attempt}`,
-  status: e.status === 'resolved' ? 'success' : e.status, // sent | failed | success
-  reason: e.failureReason,
-});
+export default function BillingHome() {
+  const navigate = useNavigate();
+  const [summary, setSummary] = useState(null);
 
-export default function BillingPage() {
-  /* ─── Data fetching (real API) ─── */
-  const dashboardQuery = useApiFetch(() => getBillingDashboard(), []);
-  const invoicesQuery = useApiFetch(async () => {
-    const res = await getInvoices({ page: 1, pageSize: 5 });
-    return (res?.data ?? res ?? []).map(normalizeInvoice);
+  useEffect(() => {
+    const ac = new AbortController();
+    getSummary()
+      .then((j) => {
+        if (j) setSummary(j);
+      })
+      .catch(() => {});
+    return () => ac.abort();
   }, []);
-  const subscriptionsQuery = useApiFetch(async () => {
-    const res = await getSubscriptions({ page: 1, pageSize: 5 });
-    return (res?.data ?? res ?? []).map(normalizeSubscription);
-  }, []);
-  const creditNotesQuery = useApiFetch(async () => {
-    const res = await getCreditNotes();
-    return (Array.isArray(res) ? res : (res?.data ?? [])).map(normalizeCreditNote);
-  }, []);
-  const dunningQuery = useApiFetch(async () => {
-    const res = await getDunningEvents();
-    return Array.isArray(res) ? res : (res?.data ?? []);
-  }, []);
 
-  // MRR movement history — endpoint: GET /admin/billing/mrr-history
-  const mrrHistoryQuery = useApiFetch(
-    async () => {
-      const res = await api.get('/admin/billing/mrr-history');
-      return res?.data ?? res ?? [];
+  const kpis = [
+    { label: 'MRR', value: fmtZAR(summary?.mrr), delta: summary?.mrrDeltaPct },
+    { label: 'ARR', value: fmtZAR(summary?.arr) },
+    { label: 'Active tenants', value: summary?.activeTenants ?? '\u2014' },
+    {
+      label: 'Overdue',
+      value: fmtZAR(summary?.overdueAmount),
+      delta: summary?.overdueDeltaPct,
+      invert: true,
     },
-    [],
-    { initialData: [] }
-  );
-
-  // Revenue by plan — endpoint: GET /admin/billing/revenue-by-plan
-  const planRevenueQuery = useApiFetch(
-    async () => {
-      const res = await api.get('/admin/billing/revenue-by-plan');
-      return res?.data ?? res ?? [];
+    {
+      label: 'Collection rate',
+      value:
+        summary?.collectionRatePct != null
+          ? `${Number(summary.collectionRatePct).toFixed(1)}%`
+          : '\u2014',
     },
-    [],
-    { initialData: [] }
-  );
-
-  useApiError(dashboardQuery.error);
-  useApiError(invoicesQuery.error);
-
-  const dashboard = dashboardQuery.data;
-  const invoices = invoicesQuery.data ?? [];
-  const subscriptions = subscriptionsQuery.data ?? [];
-  const creditNotes = creditNotesQuery.data ?? [];
-  const mrrHistory = mrrHistoryQuery.data ?? [];
-  const planRevenue = planRevenueQuery.data ?? [];
-
-  const loading = dashboardQuery.loading || invoicesQuery.loading || subscriptionsQuery.loading;
-
-  // Group dunning events by invoice → timeline of the most recent case
-  const latestDunningActions = useMemo(() => {
-    const dunningEvents = dunningQuery.data ?? [];
-    if (!dunningEvents.length) return [];
-    const byInvoice = new Map();
-    dunningEvents.forEach((e) => {
-      if (!byInvoice.has(e.invoiceId)) byInvoice.set(e.invoiceId, []);
-      byInvoice.get(e.invoiceId).push(dunningEventToAction(e));
-    });
-    const first = byInvoice.values().next().value;
-    return first.sort((a, b) => new Date(a.date) - new Date(b.date));
-  }, [dunningQuery.data]);
-
-  const refetchAll = () => {
-    dashboardQuery.refetch();
-    invoicesQuery.refetch();
-    subscriptionsQuery.refetch();
-    creditNotesQuery.refetch();
-    dunningQuery.refetch();
-    mrrHistoryQuery.refetch();
-    planRevenueQuery.refetch();
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 p-12 text-sm text-text-muted">
-        <RefreshCw className="h-4 w-4 animate-spin" /> Loading billing data…
-      </div>
-    );
-  }
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="vb-home">
+      <div className="vb-home-head">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Billing Management</h1>
-          <p className="text-sm text-text-secondary">
-            Revenue, subscriptions, invoices, credit notes, and dunning
-          </p>
+          <div className="vb-home-title">Billing</div>
+          <div className="vb-home-sub">
+            Platform revenue, invoices, subscriptions and collections — one workspace.
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={refetchAll}>
-          <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
-        </Button>
-      </div>
-
-      {/* KPI Stats */}
-      {dashboard && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <BillingStatCard
-            label="MRR"
-            value={formatCurrency(dashboard.mrr ?? 0)}
-            icon={DollarSign}
-            color="text-accent"
-            subtext="Monthly recurring revenue"
-          />
-          <BillingStatCard
-            label="Total Revenue"
-            value={formatCurrency(dashboard.totalRevenue ?? 0)}
-            icon={TrendingUp}
-            color="text-secondary"
-            subtext="All time"
-          />
-          <BillingStatCard
-            label="Active Subscriptions"
-            value={dashboard.activeSubscriptions ?? 0}
-            icon={Users}
-            color="text-info"
-            subtext={`${dashboard.trialConversions ?? 0} trial conversions`}
-          />
-          <BillingStatCard
-            label="Overdue"
-            value={formatCurrency(dashboard.overdueAmount ?? 0)}
-            icon={AlertTriangle}
-            color="text-danger"
-            subtext={`${dashboard.outstandingInvoices ?? 0} outstanding invoices`}
-          />
-        </div>
-      )}
-
-      {/* Charts row */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-secondary" /> MRR Movement
-          </h3>
-          {mrrHistory.length > 0 ? (
-            <MrrMovementBar data={mrrHistory} />
-          ) : (
-            <p className="py-8 text-center text-sm text-text-muted">No MRR history available.</p>
-          )}
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-secondary" /> Revenue by Plan
-          </h3>
-          {planRevenue.length > 0 ? (
-            <PlanDistributionChart data={planRevenue} />
-          ) : (
-            <p className="py-8 text-center text-sm text-text-muted">
-              No plan revenue data available.
-            </p>
-          )}
+        <div className="vb-quick-row">
+          <button type="button" className="vb-quick-btn" onClick={() => navigate('invoices')}>
+            Create invoice
+          </button>
+          <button
+            type="button"
+            className="vb-quick-btn primary"
+            onClick={() => navigate('contracts')}
+          >
+            Manage contracts
+          </button>
         </div>
       </div>
 
-      {/* Lists row */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Recent invoices */}
-        <div className="rounded-xl border border-border bg-surface overflow-hidden">
-          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <FileText className="h-4 w-4 text-secondary" /> Recent Invoices
-            </h3>
-            <Link
-              to="/admin/billing/invoices"
-              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
-            >
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="p-3 space-y-2">
-            {invoices.map((inv) => (
-              <InvoiceMiniCard key={inv.id} invoice={inv} />
-            ))}
-            {invoices.length === 0 && (
-              <p className="py-6 text-center text-sm text-text-muted">No invoices yet.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Recent subscriptions */}
-        <div className="rounded-xl border border-border bg-surface overflow-hidden">
-          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <Users className="h-4 w-4 text-secondary" /> Recent Subscriptions
-            </h3>
-            <Link
-              to="/admin/billing/subscriptions"
-              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
-            >
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="p-3 space-y-2">
-            {subscriptions.map((sub) => (
-              <SubscriptionMiniCard key={sub.id} subscription={sub} />
-            ))}
-            {subscriptions.length === 0 && (
-              <p className="py-6 text-center text-sm text-text-muted">No subscriptions yet.</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Credit notes + dunning row */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-surface overflow-hidden">
-          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-text-primary">Recent Credit Notes</h3>
-            <Link
-              to="/admin/billing/credit-notes"
-              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
-            >
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="p-3 space-y-2">
-            {creditNotes.slice(0, 5).map((cn) => (
-              <div
-                key={cn.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+      <div className="vb-kpi-row">
+        {kpis.map((k) => (
+          <div className="vb-kpi" key={k.label}>
+            <span className="vb-kpi-label">{k.label}</span>
+            <span className="vb-kpi-value">{k.value}</span>
+            {k.delta != null && (
+              <span
+                className={`vb-kpi-delta ${k.invert ? (k.delta > 0 ? 'down' : 'up') : k.delta >= 0 ? 'up' : 'down'}`}
               >
-                <div>
-                  <p className="text-sm font-medium text-text-primary">{cn.tenantName}</p>
-                  <p className="text-[10px] text-text-muted">
-                    {cn.id} · {cn.reason}
-                  </p>
-                </div>
-                <p className="text-sm font-mono font-medium text-accent">
-                  -{formatCurrency(cn.amount ?? 0)}
-                </p>
-              </div>
-            ))}
-            {creditNotes.length === 0 && (
-              <p className="py-6 text-center text-sm text-text-muted">No credit notes.</p>
+                {k.delta >= 0 ? '\u25B2' : '\u25BC'} {Math.abs(Number(k.delta)).toFixed(1)}%
+              </span>
             )}
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="rounded-xl border border-border bg-surface overflow-hidden">
-          <div className="border-b border-border bg-background px-5 py-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-text-primary">Latest Dunning Activity</h3>
-            <Link
-              to="/admin/billing/dunning"
-              className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
-            >
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="p-4">
-            {latestDunningActions.length > 0 ? (
-              <DunningTimeline actions={latestDunningActions} />
-            ) : (
-              <p className="py-6 text-center text-sm text-text-muted">No dunning activity.</p>
-            )}
-          </div>
-        </div>
+      <span className="vb-section-title">Modules</span>
+
+      <div className="vb-card-grid">
+        {SECTIONS.map((s) => (
+          <button type="button" key={s.key} className="vb-nav-card" onClick={() => navigate(s.key)}>
+            <span className="vb-nav-icon">{ICONS[s.key]}</span>
+            <span className="vb-nav-text">
+              <span className="vb-nav-title">
+                {s.title}
+                <svg
+                  className="vb-nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </span>
+              <span className="vb-nav-desc">{s.desc}</span>
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   );

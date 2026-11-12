@@ -115,3 +115,29 @@ export async function getChannelStatus(): Promise<{ active: number }> {
   const response = await apiGet<{ data: { active: number } }>('/v1/channel/status');
   return response.data;
 }
+
+export interface CreateDayOfWeekGridInput {
+  name: string;
+  roomTypeId: string;
+  ratePlanId: string;
+  daysOfWeek: number[];
+  adjustmentPercent: number;
+}
+export interface CreateSeasonalGridInput {
+  name: string;
+  roomTypeId: string;
+  ratePlanId: string;
+  startDate: string;
+  endDate: string;
+  rate: number;
+}
+export async function createDayOfWeekGrid(
+  input: CreateDayOfWeekGridInput
+): Promise<{ id: string }> {
+  const response = await apiPost<{ data: { id: string } }>('/v1/rates/day-of-week', input);
+  return response.data;
+}
+export async function createSeasonalGrid(input: CreateSeasonalGridInput): Promise<{ id: string }> {
+  const response = await apiPost<{ data: { id: string } }>('/v1/rates/seasonal', input);
+  return response.data;
+}

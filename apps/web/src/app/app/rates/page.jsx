@@ -4,11 +4,14 @@ import { Calendar, Plus, Tag, LayoutGrid } from 'lucide-react';
 import RateCalendar from './RateCalendar';
 import RateCodes from './RateCodes';
 import AvailabilityGrid from './AvailabilityGrid';
+import RateGridManager from './RateGridManager';
 
 const tabs = [
   { key: 'calendar', label: 'Rate Calendar', icon: Calendar },
   { key: 'codes', label: 'Rate Codes', icon: Tag },
   { key: 'availability', label: 'Availability', icon: LayoutGrid },
+
+  { key: 'grids', label: 'Grid Pricing', icon: LayoutGrid },
 ];
 
 export default function RatesPage() {
@@ -51,6 +54,7 @@ export default function RatesPage() {
       {tab === 'calendar' && <RateCalendar />}
       {tab === 'codes' && <RateCodes />}
       {tab === 'availability' && <AvailabilityGrid />}
+      {tab === 'grids' && <RateGridManager />}
     </div>
   );
 }

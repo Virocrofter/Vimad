@@ -23,6 +23,7 @@ import {
   paymentSchema,
   type FolioCreateInput,
 } from './folios.service.js';
+import { attachPropertyScope } from '../auth/auth.middleware.js';
 
 extendZodWithOpenApi(z);
 
@@ -95,6 +96,7 @@ const FolioIdChargeIdParamSchema = z
 export const foliosRouter = Router();
 
 foliosRouter.use(authMiddleware, tenantScope);
+foliosRouter.use(attachPropertyScope);
 
 registry.registerPath({
   method: 'get',
@@ -133,7 +135,8 @@ foliosRouter.get(
           pageSize: number;
           reservationId?: string;
           status?: string;
-        }
+        },
+        req.effectivePropertyIds ?? undefined
       );
       res.json(result);
     } catch (err) {

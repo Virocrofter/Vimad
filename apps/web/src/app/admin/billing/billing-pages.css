@@ -1,0 +1,514 @@
+/* Vimad Billing drawer pages - vb2-* */
+.vb2-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.vb2-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.vb2-tabs {
+  display: inline-flex;
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.vb2-tab {
+  border: 0;
+  background: transparent;
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--muted-foreground, #6b7280);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.vb2-tab:hover {
+  color: var(--foreground, #111827);
+}
+.vb2-tab.active {
+  background: var(--primary, #2563eb);
+  color: var(--primary-foreground, #ffffff);
+}
+.vb2-tab .vb2-count {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.vb2-tab.active .vb2-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+.vb2-search {
+  height: 36px;
+  padding: 0 12px 0 34px;
+  border-radius: 9px;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--card, #ffffff);
+  color: var(--foreground, #111827);
+  font-size: 13px;
+  min-width: 230px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 11px center;
+}
+.vb2-search:focus {
+  outline: 2px solid var(--ring, #93c5fd);
+  outline-offset: -1px;
+}
+.vb2-btn {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--card, #ffffff);
+  color: var(--foreground, #111827);
+}
+.vb2-btn:hover {
+  background: var(--accent, #f3f4f6);
+}
+.vb2-btn.primary {
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
+  color: var(--primary-foreground, #ffffff);
+}
+.vb2-btn.primary:hover {
+  filter: brightness(1.08);
+  background: var(--primary, #2563eb);
+}
+.vb2-btn.danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.vb2-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.vb2-btn.small {
+  height: 30px;
+  padding: 0 11px;
+  font-size: 12.5px;
+}
+.vb2-table-card {
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.vb2-table-scroll {
+  overflow-x: auto;
+}
+table.vb2-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.vb2-table th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground, #6b7280);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  background: color-mix(in srgb, var(--muted, #f3f4f6) 40%, transparent);
+  white-space: nowrap;
+}
+.vb2-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  vertical-align: middle;
+}
+.vb2-table tbody tr {
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+.vb2-table tbody tr:hover {
+  background: color-mix(in srgb, var(--muted, #f3f4f6) 45%, transparent);
+}
+.vb2-table tbody tr.selected {
+  background: color-mix(in srgb, var(--primary, #2563eb) 8%, transparent);
+}
+.vb2-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.vb2-num {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.vb2-muted {
+  color: var(--muted-foreground, #6b7280);
+  font-size: 12.5px;
+}
+.vb2-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.vb2-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 23px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+  text-transform: capitalize;
+}
+.vb2-badge.ok {
+  background: #dcfce7;
+  color: #15803d;
+}
+.vb2-badge.info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.vb2-badge.warn {
+  background: #fef9c3;
+  color: #a16207;
+}
+.vb2-badge.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.vb2-badge.muted {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.vb2-empty {
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--muted-foreground, #6b7280);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.vb2-empty-title {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--foreground, #111827);
+}
+.vb2-skel {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+.vb2-skel-bar {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--muted, #eceff3) 25%,
+    var(--border, #e2e5ea) 50%,
+    var(--muted, #eceff3) 75%
+  );
+  background-size: 200% 100%;
+  animation: vb2-shimmer 1.3s infinite;
+}
+@keyframes vb2-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.vb2-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 25, 0.35);
+  z-index: 70;
+  animation: vb2-fade 160ms ease;
+}
+@keyframes vb2-fade {
+  from {
+    opacity: 0;
+  }
+}
+.vb2-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(520px, 94vw);
+  background: var(--background, #f7f8fa);
+  border-left: 1px solid var(--border, #e5e7eb);
+  z-index: 71;
+  display: flex;
+  flex-direction: column;
+  animation: vb2-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.14);
+}
+@keyframes vb2-panel-in {
+  from {
+    transform: translateX(60px);
+    opacity: 0;
+  }
+}
+.vb2-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  background: var(--card, #ffffff);
+}
+.vb2-panel-title {
+  font-size: 15.5px;
+  font-weight: 700;
+}
+.vb2-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.vb2-close {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted-foreground, #6b7280);
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+}
+.vb2-close:hover {
+  background: var(--accent, #f3f4f6);
+  color: var(--foreground, #111827);
+}
+.vb2-kv {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 7px 14px;
+  font-size: 13.5px;
+}
+.vb2-kv dt {
+  color: var(--muted-foreground, #6b7280);
+  margin: 0;
+}
+.vb2-kv dd {
+  margin: 0;
+  font-weight: 550;
+}
+.vb2-section {
+  font-size: 11.5px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted-foreground, #6b7280);
+}
+.vb2-items {
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.vb2-item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  font-size: 13.5px;
+}
+.vb2-item-row:last-child {
+  border-bottom: 0;
+}
+.vb2-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  background: color-mix(in srgb, var(--muted, #f3f4f6) 45%, transparent);
+}
+.vb2-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.vb2-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 25, 0.45);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: vb2-fade 160ms ease;
+}
+.vb2-modal {
+  width: min(560px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: vb2-modal-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes vb2-modal-in {
+  from {
+    transform: translateY(14px) scale(0.985);
+    opacity: 0;
+  }
+}
+.vb2-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+.vb2-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vb2-field label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted-foreground, #6b7280);
+}
+.vb2-input,
+.vb2-select,
+.vb2-textarea {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--background, #ffffff);
+  color: var(--foreground, #111827);
+  font-size: 13.5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.vb2-textarea {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+}
+.vb2-input:focus,
+.vb2-select:focus,
+.vb2-textarea:focus {
+  outline: 2px solid var(--ring, #93c5fd);
+  outline-offset: -1px;
+}
+.vb2-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.vb2-item-edit {
+  display: grid;
+  grid-template-columns: 1fr 130px 36px;
+  gap: 8px;
+  align-items: center;
+}
+.vb2-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.vb2-toast {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #15803d;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: vb2-modal-in 180ms ease;
+}
+.vb2-toast.err {
+  background: #b91c1c;
+}
+.vb2-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.vb2-kpi-mini {
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 13px 16px;
+}
+.vb2-kpi-mini .l {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground, #6b7280);
+}
+.vb2-kpi-mini .v {
+  font-size: 19px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 3px;
+}
+
+/* KPI v2 - icon tiles */
+.vb2-kpi2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.vb2-kpi2-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.vb2-kpi2-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.vb2-kpi2-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground, #6b7280);
+}
+.vb2-kpi2-value {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}

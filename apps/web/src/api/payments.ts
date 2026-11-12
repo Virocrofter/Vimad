@@ -64,3 +64,33 @@ export const listGuestPaymentMethods = (guestId: string) =>
 
 export const removePaymentMethod = (id: string) =>
   apiDelete(`/v1/payments/methods/${encodeURIComponent(id)}`);
+
+// ─── Payment exceptions (addendum 5.3, slice #4) ───
+export interface PaymentExceptionItem {
+  id: string;
+  type: 'failed' | 'stale_pending';
+  severity: 'critical' | 'high';
+  reference: string;
+  status: string;
+  amountMinor: number;
+  currency: string;
+  channel: string;
+  failureReason: string | null;
+  createdAt: string;
+  ageMinutes: number;
+  guestName: string | null;
+  reservationId: string | null;
+  confirmationNumber: string | null;
+  folioId: string | null;
+  folioBalance: number | null;
+  validActions: string[];
+}
+export const listPaymentExceptions = () =>
+  apiGet<{ data: { generatedAt: string; items: PaymentExceptionItem[] } }>(
+    '/v1/payment-exceptions'
+  );
+export const dismissPaymentException = (paymentId: string, reason: string) =>
+  apiPost<{ data: { dismissed: boolean } }>('/v1/payment-exceptions/dismiss', {
+    paymentId,
+    reason,
+  });

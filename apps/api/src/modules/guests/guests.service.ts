@@ -67,9 +67,11 @@ export interface GuestListQuery {
   sortDir?: 'asc' | 'desc';
 }
 
-export async function listGuests(tenantId: string, query: GuestListQuery) {
+export async function listGuests(tenantId: string, query: GuestListQuery, propertyIds?: string[]) {
   const pagination = paginationSchema.parse(query);
   const where: Record<string, unknown> = { tenantId };
+
+  if (propertyIds?.length) where.reservations = { some: { propertyId: { in: propertyIds } } };
 
   if (query.search) {
     where.OR = [

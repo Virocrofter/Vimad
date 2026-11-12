@@ -115,6 +115,12 @@ export const router = createBrowserRouter([
     errorElement: <RouterError />,
   },
 
+  {
+    path: '/demo-access/enter',
+    lazy: async () => ({ Component: (await import('./app/demo-access/enter/page')).default }),
+    errorElement: <RouterError />,
+  },
+
   /* ─── Auth ─── */
   {
     path: '/auth',
@@ -128,6 +134,56 @@ export const router = createBrowserRouter([
   },
 
   /* ─── Main PMS App ─── */
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    errorElement: <RouterError />,
+    children: [
+      { index: true, ...page(() => import('./app/admin/page')) },
+      { path: 'analytics', ...page(() => import('./app/admin/analytics/page')) },
+      { path: 'dashboard', ...page(() => import('./app/admin/dashboard/page')) },
+      { path: 'data-export', ...page(() => import('./app/admin/data-export/page')) },
+      { path: 'demo-access', ...page(() => import('./app/admin/demo-access/page')) },
+      { path: 'feature-flags', ...page(() => import('./app/admin/feature-flags/page')) },
+      { path: 'feedback', ...page(() => import('./app/admin/feedback/page')) },
+      { path: 'finances', ...page(() => import('./app/admin/finances/page')) },
+      { path: 'integrations', ...page(() => import('./app/admin/integrations/page')) },
+      { path: 'onboarding', ...page(() => import('./app/admin/onboarding/page')) },
+      { path: 'quotas', ...page(() => import('./app/admin/quotas/page')) },
+      { path: 'rbac', ...page(() => import('./app/admin/rbac/page')) },
+      { path: 'regions', ...page(() => import('./app/admin/regions/page')) },
+      { path: 'reports', ...page(() => import('./app/admin/reports/page')) },
+      { path: 'security', ...page(() => import('./app/admin/security/page')) },
+      { path: 'settings', ...page(() => import('./app/admin/settings/page')) },
+      { path: 'ticket', ...page(() => import('./app/admin/ticket/page')) },
+      {
+        path: 'platform',
+        ...page(() => import('./app/admin/platform/layout')),
+        children: [
+          { index: true, ...page(() => import('./app/admin/platform/page')) },
+          { path: 'announcements', ...page(() => import('./app/admin/announcements/page')) },
+          { path: 'audit', ...page(() => import('./app/admin/audit/page')) },
+          { path: 'backups', ...page(() => import('./app/admin/backups/page')) },
+          { path: 'health', ...page(() => import('./app/admin/health/page')) },
+          { path: 'profiler', ...page(() => import('./app/admin/profiler/page')) },
+          { path: 'shadow', ...page(() => import('./app/admin/shadow/page')) },
+        ],
+      },
+      {
+        path: 'billing',
+        ...page(() => import('./app/admin/billing/layout')),
+        children: [
+          { index: true, ...page(() => import('./app/admin/billing/page')) },
+          { path: 'credit-notes', ...page(() => import('./app/admin/billing/credit-notes/page')) },
+          { path: 'dunning', ...page(() => import('./app/admin/billing/dunning/page')) },
+          { path: 'invoices', ...page(() => import('./app/admin/billing/invoices/page')) },
+          { path: 'revenue', ...page(() => import('./app/admin/billing/revenue/page')) },
+          { path: 'finances', ...page(() => import('./app/admin/billing/finances/page')) },
+          { path: 'contracts', ...page(() => import('./app/admin/billing/contracts/page')) },
+        ],
+      },
+    ],
+  },
   {
     path: '/app',
     element: <AppLayout />,
@@ -146,6 +202,8 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'room-plan', ...page(() => import('./app/app/room-plan/page')) },
+      { path: 'rooms', ...page(() => import('./app/app/rooms/page')) },
+      { path: 'exceptions', ...page(() => import('./app/app/exceptions/page')) },
       { path: 'chain-dashboard', ...page(() => import('./app/app/chain-dashboard/page')) },
       { path: 'guest-identity', ...page(() => import('./app/app/guest-identity/page')) },
       {
@@ -204,6 +262,7 @@ export const router = createBrowserRouter([
       { path: 'settings', ...page(() => import('./app/app/settings/page')) },
       { path: 'settings/email', ...page(() => import('./app/app/settings/email/page')) },
       { path: 'support', ...page(() => import('./app/app/support/page')) },
+      { path: 'support/status', ...page(() => import('./app/app/support/status/page')) },
       { path: 'comms', ...page(() => import('./app/app/comms/page')) },
       {
         path: 'sales-catering',
@@ -433,58 +492,6 @@ export const router = createBrowserRouter([
   },
 
   /* ─── Super Admin ─── */
-  {
-    path: '/admin',
-    element: <AdminLayout />,
-    errorElement: <RouterError />,
-    children: [
-      { index: true, ...page(() => import('./app/admin/page')) },
-      { path: 'dashboard', ...page(() => import('./app/admin/dashboard/page')) },
-      { path: 'analytics', ...page(() => import('./app/admin/analytics/page')) },
-      { path: 'announcements', ...page(() => import('./app/admin/announcements/page')) },
-      { path: 'audit', ...page(() => import('./app/admin/audit/page')) },
-      { path: 'backups', ...page(() => import('./app/admin/backups/page')) },
-      {
-        path: 'billing',
-        children: [
-          { index: true, ...page(() => import('./app/admin/billing/page')) },
-          { path: 'credit-notes', ...page(() => import('./app/admin/billing/credit-notes/page')) },
-          { path: 'dunning', ...page(() => import('./app/admin/billing/dunning/page')) },
-          { path: 'invoices', ...page(() => import('./app/admin/billing/invoices/page')) },
-          { path: 'revenue', ...page(() => import('./app/admin/billing/revenue/page')) },
-          {
-            path: 'subscriptions',
-            ...page(() => import('./app/admin/billing/subscriptions/page')),
-          },
-          { path: 'payments', ...page(() => import('./app/app/billing/payments/page')) },
-          {
-            path: 'payment-requests',
-            ...page(() => import('./app/app/billing/payment-requests/page')),
-          },
-        ],
-      },
-      { path: 'data-export', ...page(() => import('./app/admin/data-export/page')) },
-      { path: 'demo-access', ...page(() => import('./app/admin/demo-access/page')) },
-      {
-        path: 'feature-flags',
-        ...page(() => import('./app/admin/feature-flags/FeatureFlagModal')),
-      },
-      { path: 'feedback', ...page(() => import('./app/admin/feedback/page')) },
-      { path: 'finances', ...page(() => import('./app/admin/finances/page')) },
-      { path: 'health', ...page(() => import('./app/admin/health/page')) },
-      { path: 'integrations', ...page(() => import('./app/admin/integrations/page')) },
-      { path: 'onboarding', ...page(() => import('./app/admin/onboarding/page')) },
-      { path: 'profiler', ...page(() => import('./app/admin/profiler/page')) },
-      { path: 'quotas', ...page(() => import('./app/admin/quotas/page')) },
-      { path: 'rbac', ...page(() => import('./app/admin/rbac/page')) },
-      { path: 'regions', ...page(() => import('./app/admin/regions/page')) },
-      { path: 'reports', ...page(() => import('./app/admin/reports/page')) },
-      { path: 'security', ...page(() => import('./app/admin/security/page')) },
-      { path: 'settings', ...page(() => import('./app/admin/settings/page')) },
-      { path: 'shadow', ...page(() => import('./app/admin/shadow/page')) },
-      { path: 'ticket', ...page(() => import('./app/admin/ticket/page')) },
-    ],
-  },
 
   /* ─── 404 Catch-all (DEBUG — revert to <Navigate to="/" replace /> after diagnosis) ─── */
   { path: '*', element: <NotFoundDebug /> },

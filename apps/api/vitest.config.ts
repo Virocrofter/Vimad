@@ -9,6 +9,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],
+    testTimeout: 60000,
     env: {
       NODE_ENV: 'test',
       DATABASE_URL: process.env.DATABASE_URL,

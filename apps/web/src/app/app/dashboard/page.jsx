@@ -45,10 +45,10 @@ import {
   VipArrivals,
   PriorityWorklist,
 } from './dashWidgets';
-import CommandPalette from './CommandPalette';
-import { dismissAlert, filterDismissed, LINKS } from './dashLinks';
+import { dismissAlert, filterDismissed, LINKS } from '../../../lib/dashLinks';
 import { cn } from '../../../lib/utils';
 import CrmPulse from './CrmPulse';
+import TodayCockpit from './TodayCockpit';
 import { ErrorState } from '../../../components/ui/ErrorState';
 import { FlagGate } from '../../../components/FlagGate';
 import { flags } from '../../../lib/flags';
@@ -71,9 +71,6 @@ export default function AppDashboard() {
   const alerts = useDashboardAlerts(propertyId);
   const ops = useOpsToday(propertyId);
   const deltas = useDashboardDeltas(propertyId);
-
-  // D3 — command palette
-  const [paletteOpen, setPaletteOpen] = useState(false);
 
   // D3 fix — the auth store's permissions array is never populated at login
   // (platform gap: no endpoint exposed them). Hydrate it once per session so
@@ -205,7 +202,7 @@ export default function AppDashboard() {
           </span>
           {data && <NightAuditChip nightAudit={data.nightAudit} businessDate={data.businessDate} />}
           <button
-            onClick={() => setPaletteOpen(true)}
+            onClick={() => window.dispatchEvent(new CustomEvent('vimad:open-palette'))}
             className="hidden items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text-primary md:inline-flex"
           >
             <Search className="h-3.5 w-3.5" />
@@ -246,6 +243,11 @@ export default function AppDashboard() {
           </button>
         </div>
       </div>
+
+      {/* Today cockpit v2 (UX addendum F) — behind the todayV2 flag. Renders
+          above the legacy board during validation; the legacy sections stay
+          for cross-checking until the flag graduates. */}
+      {flags.todayV2 && <TodayCockpit propertyId={propertyId} onMutated={() => ops.refetch()} />}
 
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
@@ -468,12 +470,6 @@ export default function AppDashboard() {
       <CrmPulse />
 
       <QuickActionsFab />
-
-      <CommandPalette
-        open={paletteOpen}
-        onOpen={() => setPaletteOpen(true)}
-        onClose={() => setPaletteOpen(false)}
-      />
     </div>
   );
 }

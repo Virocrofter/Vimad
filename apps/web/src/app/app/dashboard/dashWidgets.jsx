@@ -17,7 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn, formatCurrency } from '../../../lib/utils';
-import { LINKS, reservationUrl } from './dashLinks';
+import { LINKS, reservationUrl } from '../../../lib/dashLinks';
 import { VipBadge } from '../crm/components';
 
 // ─── Today strip ─────────────────────────────────────────────────────────────

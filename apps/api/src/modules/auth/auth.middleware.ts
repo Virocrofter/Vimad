@@ -242,6 +242,35 @@ export async function attachPropertyScope(req: Request, _res: Response, next: Ne
   try {
     const authReq = req as AuthenticatedRequest;
     req.allowedPropertyIds = await resolveAllowedPropertyIds(authReq.auth.user.id);
+
+    // C1 switcher: honor x-property-id (the web client sends it on every
+    // request). Validated against the tenant; stale/foreign ids are IGNORED
+    // (tenant-wide fallback) — the switcher is a view preference, never an
+    // authorization boundary. Effective filter = restrictions ∩ switcher:
+    // null = no filter; [] = restricted user picked a forbidden property
+    // (deny-by-default, consistent with requirePropertyScope's 404 rule).
+    const headerId = String(req.headers['x-property-id'] ?? '').trim();
+    const tenantId = ((req as any).tenantId ?? (req as any).auth?.user?.tenantId ?? null) as
+      string | null;
+    let switcher: string | null = null;
+    if (headerId) {
+      const prop = await prisma.property.findUnique({
+        where: { id: headerId },
+        select: { tenantId: true },
+      });
+      if (prop && prop.tenantId === tenantId) switcher = headerId;
+    }
+    req.switcherPropertyId = switcher;
+    const allowed = req.allowedPropertyIds;
+    req.effectivePropertyIds =
+      switcher && allowed
+        ? allowed.includes(switcher)
+          ? [switcher]
+          : []
+        : switcher
+          ? [switcher]
+          : allowed;
+
     next();
   } catch (err) {
     next(err);

@@ -21,11 +21,13 @@ import {
 } from './inventory.service.js';
 import { readInventoryCache, refreshInventoryCache } from './inventory.cache.js';
 import { pushInventoryToChannels } from './inventory.push.js';
+import { attachPropertyScope } from '../auth/auth.middleware.js';
 
 export const inventoryRouter = Router();
 export const registry = new OpenAPIRegistry();
 
 inventoryRouter.use(authMiddleware);
+inventoryRouter.use(attachPropertyScope);
 
 const tenantOf = (req: Request) => (req as AuthenticatedRequest).auth.tenantId;
 const userOf = (req: Request) => (req as AuthenticatedRequest).auth.user.id;

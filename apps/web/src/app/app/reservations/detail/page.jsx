@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { flags } from '../../../../lib/flags';
+import ReservationWorkspace from './ReservationWorkspace';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { cn, formatCurrency } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
@@ -152,6 +154,8 @@ export default function ReservationDetailPage() {
     noShow.isPending ||
     resend.isPending ||
     updateStayRate.isPending;
+
+  if (flags.reservationWorkspace) return <ReservationWorkspace reservationId={id} />;
 
   if (isLoading) {
     return (

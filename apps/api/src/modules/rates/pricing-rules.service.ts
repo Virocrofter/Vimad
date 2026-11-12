@@ -47,13 +47,27 @@ function matches(rule: Rule, date: Date, occupancyPct: number): boolean {
     if (c.dateTo && day > c.dateTo) return false;
     return true;
   }
+  // E1x grid dialect: day_of_week + seasonal (created directly via rate-grids
+  // routes, bypassing ruleSchema). Same ledger, one mechanism.
+  if (rule.type === 'day_of_week') {
+    const days = (c as any).daysOfWeek;
+    return Array.isArray(days) && days.includes(date.getUTCDay());
+  }
+  if (rule.type === 'seasonal') {
+    const day = dstr(date);
+    const from = (c as any).startDate as string | undefined;
+    const to = (c as any).endDate as string | undefined;
+    if (from && day < from) return false;
+    if (to && day > to) return false;
+    return Boolean(from || to);
+  }
   return false;
 }
 
 function apply(base: number, adj: Rule['adjustment']): number {
-  const method = adj.method ?? 'percent';
+  const method = adj.method ?? (adj as any).kind ?? 'percent';
   const value = adj.value ?? 0;
-  if (method === 'fixed') return round2(value);
+  if (method === 'fixed' || method === 'fixed_rate') return round2(value);
   if (method === 'amount') return round2(base + value);
   return round2(base * (1 + value / 100));
 }
@@ -229,7 +243,7 @@ export async function evaluate(tenantId: string, propertyId: string, from: strin
     }
 
     const winning = rules.find((r) => {
-      if (r.conditions.roomTypeIds?.length) {
+      if (r.conditions.roomTypeIds?.length || (r.conditions as any).roomTypeId) {
         // roomType-scoped rule only applies to matching plans
         return false; // per-plan check below
       }
@@ -241,6 +255,8 @@ export async function evaluate(tenantId: string, propertyId: string, from: strin
         (r) =>
           (!r.conditions.roomTypeIds?.length ||
             r.conditions.roomTypeIds.includes(plan.roomTypeId)) &&
+          (!(r.conditions as any).roomTypeId ||
+            (r.conditions as any).roomTypeId === plan.roomTypeId) &&
           matches(r, date, occupancyPct)
       );
       const rule = scoped ?? winning;

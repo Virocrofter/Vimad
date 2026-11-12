@@ -1,150 +1,97 @@
-// apps/web/src/api/feature-flags.ts
-import { getApiClient } from './client';
+// Feature flags v2 — full admin API client (/admin/feature-flags)
+import { api } from './client';
+
+export interface FlagVariant {
+  name: string;
+  value: unknown;
+}
+export interface SegmentRule {
+  name?: string;
+  all: Array<{ field: string; op: string; value: unknown }>;
+  value?: unknown;
+}
 
 export interface FeatureFlag {
   id: string;
   key: string;
-  name: string;
   description: string;
-  type: 'boolean' | 'string' | 'number' | 'json';
+  owner: string;
+  environment: string;
+  status: 'active' | 'killed';
+  valueType: 'boolean' | 'string' | 'number' | 'json';
   defaultValue: unknown;
-  rules: {
-    id: string;
-    name: string;
-    condition: Record<string, unknown>;
-    value: unknown;
-    percentage?: number;
-    startAt?: string;
-    endAt?: string;
-  }[];
-  environments: {
-    environment: string;
-    enabled: boolean;
-    value?: unknown;
-  }[];
-  tags: string[];
-  enabled?: boolean;
-  rolloutPercentage?: number;
-  targetAudience?: string;
-  createdAt: string;
-  updatedAt: string;
+  variants: FlagVariant[];
+  failMode: 'open' | 'closed';
+  protected: boolean;
+  rolloutPct: number;
+  segmentRules: SegmentRule[];
+  killReason?: string | null;
+  killedAt?: string | null;
+  createdBy?: string;
+  overridesCount: number;
+  lastChangeAt?: string | null;
+  lastChangeBy?: string | null;
 }
 
-export interface FeatureFlagEvaluation {
-  flagKey: string;
-  value: unknown;
-  ruleId?: string;
-  reason: 'default' | 'rule_match' | 'percentage' | 'disabled';
-}
-
-export interface FeatureFlagAudit {
+export interface FlagOverride {
   id: string;
   flagId: string;
-  action: 'created' | 'updated' | 'deleted' | 'toggled' | 'rule_changed';
-  actorId: string;
-  actorName: string;
-  previousValue?: unknown;
-  newValue?: unknown;
+  tenantId: string;
+  value: unknown;
+  cohort?: string | null;
+  createdBy?: string;
+  reason?: string;
   createdAt: string;
+  tenantSlug?: string;
+  tenantName?: string;
 }
 
-const client = getApiClient();
-
-export async function fetchFeatureFlags(params?: {
-  environment?: string;
-  tag?: string;
-}): Promise<FeatureFlag[]> {
-  return client.get('/admin/feature-flags', params);
+export interface EvaluationResult {
+  key: string;
+  flagId: string;
+  value: unknown;
+  source: 'kill' | 'override' | 'segment' | 'rollout' | 'default';
+  detail: string;
+  hashPct?: number;
+  valueType?: string;
 }
 
-export async function getFeatureFlags(params?: {
-  environment?: string;
-  tag?: string;
-}): Promise<FeatureFlag[]> {
-  return client.get('/admin/feature-flags', params);
-}
-
-export async function getFeatureFlag(id: string): Promise<FeatureFlag> {
-  return client.get(`/admin/feature-flags/${id}`);
-}
-
-export async function getFeatureFlagByKey(key: string): Promise<FeatureFlag> {
-  return client.get(`/admin/feature-flags/key/${key}`);
-}
-
-export async function createFeatureFlag(
-  data: Omit<FeatureFlag, 'id' | 'createdAt' | 'updatedAt'>
-): Promise<FeatureFlag> {
-  return client.post('/admin/feature-flags', data);
-}
-
-export async function updateFeatureFlag(
-  id: string,
-  data: Partial<FeatureFlag>
-): Promise<FeatureFlag> {
-  return client.patch(`/admin/feature-flags/${id}`, data);
-}
-
-export async function deleteFeatureFlag(id: string): Promise<void> {
-  return client.delete(`/admin/feature-flags/${id}`);
-}
-
-export async function toggleFeatureFlag(
-  id: string,
-  environment: string,
-  enabled: boolean
-): Promise<FeatureFlag> {
-  return client.post(`/admin/feature-flags/${id}/toggle`, { environment, enabled });
-}
-
-export async function evaluateFeatureFlag(
-  key: string,
-  context: Record<string, unknown>
-): Promise<FeatureFlagEvaluation> {
-  return client.post(`/admin/feature-flags/evaluate`, { key, context });
-}
-
-export async function evaluateFeatureFlags(
-  context: Record<string, unknown>
-): Promise<Record<string, FeatureFlagEvaluation>> {
-  return client.post('/admin/feature-flags/evaluate-all', context);
-}
-
-export async function getFeatureFlagHistory(id: string): Promise<FeatureFlagAudit[]> {
-  return client.get(`/admin/feature-flags/${id}/history`);
-}
-
-export async function addRule(
+export const listFlags = () => api.get('/admin/feature-flags');
+export const getFlag = (id: string) => api.get(`/admin/feature-flags/${id}`);
+export const createFlag = (payload: Record<string, unknown>) =>
+  api.post('/admin/feature-flags', payload);
+export const updateFlag = (id: string, payload: Record<string, unknown>) =>
+  api.patch(`/admin/feature-flags/${id}`, payload);
+export const setFlagDefault = (id: string, value: unknown, reason: string) =>
+  api.post(`/admin/feature-flags/${id}/default`, { value, reason });
+export const setRollout = (id: string, rolloutPct: number, reason: string) =>
+  api.post(`/admin/feature-flags/${id}/rollout`, { rolloutPct, reason });
+export const killFlag = (id: string, reason: string) =>
+  api.post(`/admin/feature-flags/${id}/kill`, { reason });
+export const restoreFlag = (id: string, reason: string) =>
+  api.post(`/admin/feature-flags/${id}/restore`, { reason });
+export const setOverride = (
   flagId: string,
-  rule: Omit<FeatureFlag['rules'][0], 'id'>
-): Promise<FeatureFlag> {
-  return client.post(`/admin/feature-flags/${flagId}/rules`, rule);
-}
-
-export async function updateRule(
-  flagId: string,
-  ruleId: string,
-  rule: Partial<FeatureFlag['rules'][0]>
-): Promise<FeatureFlag> {
-  return client.patch(`/admin/feature-flags/${flagId}/rules/${ruleId}`, rule);
-}
-
-export async function deleteRule(flagId: string, ruleId: string): Promise<FeatureFlag> {
-  return client.delete(`/admin/feature-flags/${flagId}/rules/${ruleId}`);
-}
-
-export async function getFeatureFlagTags(): Promise<string[]> {
-  return client.get('/admin/feature-flags/tags');
-}
-
-export async function bulkToggle(
-  flagIds: string[],
-  environment: string,
-  enabled: boolean
-): Promise<{ updated: number }> {
-  return client.post('/admin/feature-flags/bulk-toggle', { flagIds, environment, enabled });
-}
-
-export async function cloneFeatureFlag(id: string, newKey: string): Promise<FeatureFlag> {
-  return client.post(`/admin/feature-flags/${id}/clone`, { newKey });
-}
+  payload: { tenantId: string; value: unknown; reason: string }
+) => api.post(`/admin/feature-flags/${flagId}/overrides`, payload);
+export const deleteOverride = (overrideId: string, reason?: string) =>
+  api.delete(
+    `/admin/feature-flags/overrides/${overrideId}${reason ? `?reason=${encodeURIComponent(reason)}` : ''}`
+  );
+export const deleteFlag = (id: string) => api.delete(`/admin/feature-flags/${id}`);
+export const evaluateTenant = (tenantRef: string) =>
+  api.get(`/admin/feature-flags/evaluate/${encodeURIComponent(tenantRef)}`);
+export const bootstrapTenant = (tenantRef: string) =>
+  api.get(`/admin/feature-flags/bootstrap/${encodeURIComponent(tenantRef)}`);
+export const traceFlag = (flagId: string, tenantRef: string) =>
+  api.get(`/admin/feature-flags/${flagId}/trace/${encodeURIComponent(tenantRef)}`);
+export const listOverrides = () => api.get('/admin/feature-flags/overrides');
+export const pushImpressions = (
+  items: Array<{
+    flagKey: string;
+    tenantId: string;
+    flagId?: string;
+    on?: boolean;
+    error?: boolean;
+  }>
+) => api.post('/admin/feature-flags/impressions', { items });

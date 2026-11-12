@@ -15,6 +15,7 @@ model Tenant {
   name                String
   slug                String               @unique
   plan                String               @default("trial")
+  isDemo              Boolean              @default(false)
   status              String               @default("active")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
@@ -31,6 +32,7 @@ model Tenant {
   invoices            Invoice[]
   taxInvoices         TaxInvoice[]
   invoiceCounters     InvoiceCounter[]
+  contracts           Contract[]
   pushSubscriptions   PushSubscription[]
   channelConnections  ChannelConnection[]
   housekeepingTasks   HousekeepingTask[]
@@ -83,6 +85,7 @@ model Tenant {
   loyaltyRewards     LoyaltyReward[]
   loyaltyRedemptions LoyaltyRedemption[]
   reservationModificationRequests ReservationModificationRequest[]
+  exceptions          Exception[]
   @@map("tenants")
 }
 
@@ -228,6 +231,7 @@ model Property {
   scEvents            ScEvent[]
   arInvoices          ArInvoice[]
   loyaltyTransactions LoyaltyTransaction[]
+  accountingConfig      AccountingConfig?
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -404,6 +408,7 @@ model Guest {
   loyaltyRedemptions  LoyaltyRedemption[]
   consents            GuestConsent[]
 
+  @@unique([tenantId, email])
   @@index([tenantId])
   @@index([email])
   @@map("guests")
@@ -615,6 +620,7 @@ model Invoice {
   currency      String    @default("ZAR")
   status        String    @default("draft")
   paidAt        DateTime?
+  billingPeriod String?
   items         Json?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -3068,4 +3074,454 @@ model GuestConsent {
   @@index([tenantId])
   @@index([guestId, purpose, channel, capturedAt])
   @@map("guest_consents")
+}
+
+// ─── Phase 4: Operational exception queue (audit §6) ───
+// One queue for situations needing a human. Detected idempotently
+// (tenantId + dedupeKey); human decisions (resolved/dismissed) are never
+// re-opened by detectors. Table created via raw SQL (see migration note).
+model Exception {
+  id               String    @id @default(cuid())
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId       String?
+  type             String
+  severity         String    @default("medium")
+  title            String
+  detail           String?
+  recommendedAction String?
+  actionUrl        String?
+  reservationId    String?
+  guestId          String?
+  roomId           String?
+  paymentId        String?
+  taskId           String?
+  connectionId     String?
+  dedupeKey        String
+  status           String    @default("open")
+  ownerId          String?
+  assigneeId       String?
+  acknowledgedAt   DateTime?
+  resolvedAt       DateTime?
+  resolutionNote   String?
+  dismissedAt      DateTime?
+  dismissedBy      String?
+  dismissReason    String?
+  slaDueAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([tenantId, dedupeKey])
+  @@index([tenantId, status])
+  @@index([tenantId, slaDueAt])
+  @@map("exceptions")
+}
+
+// ─── PROFILER: production profiling (snapshots, slow queries, tenant cost) ───
+
+model ProfilerQuerySnapshot {
+  id          String   @id @default(cuid())
+  fingerprint String
+  query       String
+  calls       Int      @default(0)
+  totalTimeMs Float    @default(0)
+  meanTimeMs  Float    @default(0)
+  rows        Float    @default(0)
+  capturedAt  DateTime @default(now())
+
+  @@index([fingerprint, capturedAt])
+  @@map("profiler_query_snapshots")
+}
+
+model ProfilerSlowQuery {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  route      String?
+  query      String
+  durationMs Float
+  rows       Int?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([createdAt])
+  @@map("profiler_slow_queries")
+}
+
+model ProfilerTenantCost {
+  tenantId    String   @id
+  queries     Int      @default(0)
+  totalTimeMs Float    @default(0)
+  slowQueries Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@map("profiler_tenant_costs")
+}
+
+model AccountingConfig {
+  propertyId  String   @id
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  mappings    Json     @default("{}")
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("accounting_configs")
+}
+
+model PlatformOperator {
+  id           String    @id
+  email        String    @unique
+  role         String    @default("platform_super_admin")
+  status       String    @default("active")
+  grantedBy    String?
+  grantedAt    DateTime  @default(now())
+  revokedAt    DateTime?
+  revokeReason String?
+  mfaEnrolled  Boolean   @default(false)
+  lastActiveAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("platform_operators")
+}
+
+model PlatformAuditEvent {
+  id            String   @id
+  actorEmail    String
+  action        String
+  entity        String
+  entityId      String?
+  tenantId      String?
+  before        Json?
+  after         Json?
+  reason        String?
+  source        String   @default("console")
+  correlationId String?
+  ipAddress     String?
+  createdAt     DateTime @default(now())
+
+  @@index([actorEmail, createdAt])
+  @@index([entity, entityId])
+  @@index([tenantId, createdAt])
+  @@map("platform_audit_events")
+}
+
+model FeatureFlag {
+  id               String   @id
+  key              String
+  description      String
+  owner            String
+  defaultValue     Boolean  @default(false)
+  environment      String   @default("production")
+  rolloutStrategy  Json     @default("{}")
+  status           String   @default("active")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  overrides        FeatureFlagOverride[]
+
+  @@unique([key, environment])
+  @@map("feature_flags")
+}
+
+model FeatureFlagOverride {
+  id        String   @id
+  flagId    String
+  flag      FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  tenantId  String?
+  value     Boolean
+  cohort    String?
+  createdBy String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([flagId, tenantId])
+  @@map("feature_flag_overrides")
+}
+
+model Contract {
+  id                 String   @id
+  tenantId           String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+  legalEntity        String
+  status             String   @default("draft")
+  modules            Json     @default("[]")
+  roomBand           String?
+  currency           String   @default("ZAR")
+  listFee            Decimal  @db.Decimal(12, 2)
+  netFee             Decimal  @db.Decimal(12, 2)
+  renewalFee         Decimal? @db.Decimal(12, 2)
+  discountPct        Decimal  @default(0) @db.Decimal(5, 2)
+  discountApprovedBy String?
+  startDate          DateTime @db.Date
+  endDate            DateTime @db.Date
+  renewalNoticeDays  Int      @default(30)
+  autoRenew          Boolean  @default(false)
+  paymentMethod      String   @default("invoice")
+  signatories        Json     @default("[]")
+  documentUrl        String?
+  version            Int      @default(1)
+  createdBy          String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  events             ContractEvent[]
+
+  @@index([tenantId])
+  @@index([status, endDate])
+  @@map("contracts")
+}
+
+model ContractEvent {
+  id         String   @id
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  type       String
+  payload    Json?
+  actor      String
+  createdAt  DateTime @default(now())
+
+  @@index([contractId, createdAt])
+  @@map("contract_events")
+}
+
+model UsageLedger {
+  id             String   @id
+  tenantId       String
+  metric         String
+  quantity       Int
+  unit           String
+  period         String
+  unitCost       Decimal? @db.Decimal(12, 6)
+  ratedAmount    Decimal? @db.Decimal(12, 2)
+  status         String   @default("pending")
+  invoiceId      String?
+  idempotencyKey String?
+  metadata       Json?
+  recordedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@map("usage_ledger")
+}
+
+model SupportAccessRequest {
+  id          String    @id
+  caseId      String
+  tenantId    String
+  requestedBy String
+  scope       String    @default("read_only")
+  purpose     String
+  status      String    @default("pending")
+  expiresAt   DateTime?
+  approvedBy  String?
+  createdAt   DateTime  @default(now())
+
+  @@map("support_access_requests")
+}
+
+model DataRequest {
+  id          String    @id
+  tenantId    String
+  type        String
+  purpose     String
+  requestedBy String
+  status      String    @default("pending")
+  result      Json?
+  expiresAt   DateTime?
+  completedAt DateTime?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  @@index([tenantId, status])
+  @@map("data_requests")
+}
+
+model RetentionPolicy {
+  id        String   @id
+  dataClass String
+  tenantId  String?
+  schedule  Json
+  legalHold Boolean  @default(false)
+  holdReason String?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([dataClass, tenantId])
+  @@map("retention_policies")
+}
+
+model BackupRun {
+  id                String    @id
+  kind              String
+  status            String
+  destination       String
+  sizeBytes         BigInt?
+  checksum          String?
+  startedAt         DateTime  @default(now())
+  finishedAt        DateTime?
+  actor             String?
+  restoreTestedAt   DateTime?
+  restoreTestStatus String?
+  restoreTestLog    String?
+  @@map("backup_runs")
+}
+
+model DemoSession {
+  id             String    @id @default(cuid())
+  tenantId       String?
+  requesterEmail String
+  status         String    @default("pending")
+  grantedBy      String?
+  activatedAt    DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  revokeReason   String?
+  company        String?
+  hotelName      String?
+  roomCount      Int?
+  currentPms     String?
+  preferredSlot  String?
+  notes          String?
+  firstLoginAt   DateTime?
+  lastActivityAt DateTime?
+  activityCount  Int       @default(0)
+  convertedAt    DateTime?
+  extendedCount  Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  invites        DemoInvite[]
+  activity       DemoActivity[]
+
+  @@map("demo_sessions")
+}
+
+model DemoInvite {
+  id          String      @id @default(cuid())
+  sessionId   String
+  session     DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tokenHash   String
+  tokenPrefix String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdBy   String?
+  createdAt   DateTime    @default(now())
+
+  @@index([sessionId])
+  @@index([tokenHash])
+  @@map("demo_invites")
+}
+
+model DemoActivity {
+  id         String      @id @default(cuid())
+  sessionId  String
+  session    DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tenantId   String?
+  actor      String?
+  action     String
+  detail     String?
+  meta       Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([sessionId, createdAt])
+  @@map("demo_activity")
+}
+
+
+
+
+
+model FeedbackEntry {
+  id        String   @id
+  tenantId  String?
+  source    String   @default("admin")
+  npsScore  Int?
+  body      String?
+  category  String   @default("general")
+  status    String   @default("new")
+  assignee  String?
+  createdAt DateTime @default(now())
+  @@map("feedback_entries")
+}
+
+model Incident {
+  id                String    @id
+  severity          String
+  title             String
+  status            String    @default("investigating")
+  affectedTenantIds Json      @default("[]")
+  timeline          Json      @default("[]")
+  startedAt         DateTime  @default(now())
+  resolvedAt        DateTime?
+  createdBy         String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  @@map("incidents")
+}
+
+model WebhookDelivery {
+  id           String    @id
+  connectionId String
+  event        String
+  payloadHash  String
+  status       String    @default("queued")
+  attempts     Int       @default(0)
+  lastError    String?
+  deliveredAt  DateTime?
+  createdAt    DateTime  @default(now())
+  @@index([status, createdAt])
+  @@map("webhook_deliveries")
+}
+
+model PlatformAnnouncement {
+  id        String   @id
+  title     String
+  body      String
+  audience  String   @default("all_operators")
+  status    String   @default("draft")
+  publishAt DateTime @default(now())
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("platform_announcements")
+}
+
+model ApiClient {
+  id          String   @id
+  name        String
+  contactEmail String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@map("api_clients")
+}
+
+model IntegrationCatalogEntry {
+  key          String   @id
+  name         String
+  category     String
+  availability String   @default("planned")
+  notes        String?
+  updatedAt    DateTime @updatedAt
+  @@map("integration_catalog")
+}
+
+model AccessReview {
+  id         String   @id
+  period     String
+  operatorId String
+  reviewedBy String
+  outcome    String
+  notes      String?
+  createdAt  DateTime @default(now())
+  @@unique([period, operatorId])
+  @@map("access_reviews")
+}
+
+model MetricDefinition {
+  key        String   @id
+  title      String
+  definition String
+  numerator  String
+  denominator String
+  source     String
+  owner      String
+  caveats    String?
+  updatedAt  DateTime @updatedAt
+  @@map("metric_definitions")
 }

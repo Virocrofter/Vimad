@@ -34,6 +34,8 @@ import {
   deleteFolio,
 } from '../../../api/folio';
 import FolioOverview from './components/FolioOverview';
+import { flags } from '../../../lib/flags';
+import PaymentExceptions from './PaymentExceptions';
 
 /* ─── Transaction codes (kept — now mapped to backend charge/payment types) ─── */
 const transactionCodes = [
@@ -294,6 +296,8 @@ export default function BillingPage() {
   const guestName = folio?.reservation?.guest
     ? `${folio.reservation.guest.firstName} ${folio.reservation.guest.lastName}`
     : null;
+
+  if (flags.paymentExceptions) return <PaymentExceptions />;
 
   return (
     <div className="space-y-6">

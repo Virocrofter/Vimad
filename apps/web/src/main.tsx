@@ -3,6 +3,7 @@ import { initSentry } from './lib/sentry';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
+import { FlagsProvider } from './components/FlagsProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
 
@@ -47,7 +48,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <ToastProvider>
-          <RouterProvider router={router} />
+          <FlagsProvider>
+            <RouterProvider router={router} />
+          </FlagsProvider>
         </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>

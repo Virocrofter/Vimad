@@ -1,126 +1,176 @@
-// apps/web/src/api/backups.ts
-import { apiClient } from './client';
+/* apps/web/src/api/backups.ts — Backups & DR API.
+ * Wired through the SHARED axios client (api/client.ts) so tokens auto-refresh —
+ * raw fetch left sessions dying silently every 15 minutes. */
+import { apiGet, apiPost, apiPatch, apiPut, apiDelete, apiClient } from './client';
 
-export interface BackupJob {
-  id: string;
-  name: string;
-  type: 'full' | 'incremental' | 'differential';
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  startedAt: string;
-  completedAt?: string;
-  sizeBytes: number;
-  sizeFormatted: string;
-  durationMs?: number;
-  durationFormatted?: string;
-  tables: string[];
-  errorMessage?: string;
-  createdBy: string;
-  storageLocation: string;
-  retentionDays: number;
+const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:3001';
+
+async function get<T>(path: string): Promise<T> {
+  const body = await apiGet<{ data: T }>(path);
+  return body.data;
+}
+async function post<T>(path: string, data?: unknown): Promise<T> {
+  const body = await apiPost<{ data: T }>(path, data);
+  return body.data;
+}
+async function postLong<T>(path: string, data?: unknown, timeoutMs = 10 * 60_000): Promise<T> {
+  // restores/test-restores run a full scratch pg_restore — can exceed the 30s client timeout
+  const response = await apiClient.post(path, data, { timeout: timeoutMs });
+  return (response.data as { data: T }).data;
+}
+async function patch<T>(path: string, data?: unknown): Promise<T> {
+  const body = await apiPatch<{ data: T }>(path, data);
+  return body.data;
+}
+async function put<T>(path: string, data?: unknown): Promise<T> {
+  const body = await apiPut<{ data: T }>(path, data);
+  return body.data;
+}
+async function del<T>(path: string): Promise<T> {
+  const body = (await apiDelete<{ data: T }>(path)) as { data: T } | undefined;
+  return body?.data as T;
 }
 
+export interface BackupRun {
+  id: string;
+  name: string | null;
+  kind: string;
+  type: string;
+  status: string;
+  destination: string;
+  sizeBytes: number | null;
+  checksum: string | null;
+  actor: string | null;
+  restoreTestedAt: string | null;
+  restoreTestedStatus: string | null;
+  verified: boolean;
+  retentionDays: number;
+  storage: string;
+  error: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+  tables: string[];
+}
+export interface BackupStats {
+  totalBackups: number;
+  totalSize: number;
+  storageUsed: number;
+  lastBackupAt: string | null;
+  successRate: number | null;
+  lastVerified: { restoreTestedAt: string; restoreTestedStatus: string } | null;
+  rpoTargetMinutes: number;
+  rtoTargetHours: number;
+  rpoActualMinutes: number | null;
+  rtoActualSeconds: number | null;
+  running: number;
+}
 export interface BackupSchedule {
   id: string;
   name: string;
-  enabled: boolean;
-  type: 'full' | 'incremental' | 'differential';
-  frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
-  cronExpression: string;
-  timeZone: string;
-  retentionDays: number;
+  type: string;
+  cron: string;
+  timezone: string;
   tables: string[];
-  lastRunAt?: string;
-  nextRunAt?: string;
-  createdAt: string;
+  retentionDays: number;
+  storage: string;
+  isActive: boolean;
+  lastRunAt: string | null;
+  nextRunAt: string | null;
 }
-
 export interface RestoreJob {
   id: string;
   backupId: string;
-  backupName: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  target: string;
+  status: string;
+  checks: { check: string; passed: boolean; detail: string }[] | null;
+  error: string | null;
   startedAt: string;
-  completedAt?: string;
-  targetEnvironment: string;
-  tablesRestored: string[];
-  errorMessage?: string;
-  verified: boolean;
+  finishedAt: string | null;
+  durationMs: number | null;
+  createdBy: string | null;
 }
-
-const client = apiClient;
-
-export async function getBackups(params?: {
-  status?: string;
-  type?: string;
-}): Promise<BackupJob[]> {
-  return client.get('/admin/backups', { params });
+export interface DrDrill {
+  id: string;
+  status: string;
+  backupId: string | null;
+  rtoSeconds: number | null;
+  checks: { check: string; passed: boolean; detail: string }[] | null;
+  notes: string | null;
+  startedAt: string;
+  finishedAt: string | null;
 }
-
-export async function getBackupById(id: string): Promise<BackupJob> {
-  return client.get(`/admin/backups/${id}`);
-}
-
-export async function createBackup(data: {
+export interface TenantRow {
+  id: string;
   name: string;
-  type: 'full' | 'incremental' | 'differential';
+  slug: string;
+  plan: string;
+  status: string;
+  properties: number;
+  guests: number;
+  reservations: number;
+}
+export interface Coverage {
+  tenants: number;
+  properties: number;
+  guests: number;
+  reservations: number;
+  folios: number;
+  payments: number;
+  users: number;
+  coreTables: number;
+}
+
+export const getBackups = () => get<BackupRun[]>('/admin/backups');
+export const getBackupStats = () => get<BackupStats>('/admin/backups/stats');
+export const getBackupCoverage = () => get<Coverage>('/admin/backups/coverage');
+export const getBackupRetention = () =>
+  get<{ tier: string; cadence: string; keepFor: string; enforcement: string }[]>(
+    '/admin/backups/retention'
+  );
+export const createBackup = (payload: {
+  name?: string;
+  type?: string;
   tables?: string[];
   retentionDays?: number;
-}): Promise<BackupJob> {
-  return client.post('/admin/backups', data);
-}
+  storage?: string;
+}) => post<{ id: string }>('/admin/backups', payload);
+export const deleteBackup = (id: string) => del<void>(`/admin/backups/${id}`);
+export const getBackupSchedules = () => get<BackupSchedule[]>('/admin/backups/schedules');
+export const createBackupSchedule = (payload: Partial<BackupSchedule>) =>
+  post<{ id: string }>('/admin/backups/schedules', payload);
+export const updateBackupSchedule = (id: string, payload: Partial<BackupSchedule>) =>
+  patch<{ id: string }>(`/admin/backups/schedules/${id}`, payload);
+export const deleteBackupSchedule = (id: string) => del<void>(`/admin/backups/schedules/${id}`);
+export const runBackupSchedule = (id: string) =>
+  post<{ id: string }>(`/admin/backups/schedules/${id}/run`);
+export const getRestoreJobs = () => get<RestoreJob[]>('/admin/backups/restores');
+export const createRestore = (payload: { backupId: string; target: string; verify?: boolean }) =>
+  postLong<{
+    jobId: string;
+    checks: { check: string; passed: boolean; detail: string }[];
+    passed: boolean;
+  }>('/admin/backups/restores', payload);
+export const testRestoreBackup = (backupId: string) =>
+  postLong<{
+    jobId: string;
+    checks: { check: string; passed: boolean; detail: string }[];
+    passed: boolean;
+  }>('/admin/backups/test-restore', { backupId });
+export const getDrDrills = () => get<DrDrill[]>('/admin/backups/drills');
+export const runDrDrill = () => post<{ id: string }>('/admin/backups/drills/run');
+export const getBackupTenants = () => get<TenantRow[]>('/admin/backups/tenants');
+export const exportTenant = (tenantId: string) =>
+  post<{ file: string; path: string; tables: number }>(`/admin/backups/tenants/${tenantId}/export`);
+export const detectStaleBackups = () =>
+  post<{ stale: boolean; ageMin: number; targetMin: number }>('/admin/backups/detect-stale');
+export const getBackupSettings = () =>
+  get<{ rpoTargetMinutes: number; rtoTargetHours: number }>('/admin/backups/settings');
+export const updateBackupSettings = (payload: {
+  rpoTargetMinutes: number;
+  rtoTargetHours: number;
+}) => put('/admin/backups/settings', payload);
 
-export async function deleteBackup(id: string): Promise<void> {
-  return client.delete(`/admin/backups/${id}`);
-}
-
-export async function getBackupSchedules(): Promise<BackupSchedule[]> {
-  return client.get('/admin/backups/schedules');
-}
-
-export async function createBackupSchedule(
-  data: Omit<BackupSchedule, 'id' | 'lastRunAt' | 'nextRunAt' | 'createdAt'>
-): Promise<BackupSchedule> {
-  return client.post('/admin/backups/schedules', data);
-}
-
-export async function updateBackupSchedule(
-  id: string,
-  data: Partial<BackupSchedule>
-): Promise<BackupSchedule> {
-  return client.patch(`/admin/backups/schedules/${id}`, data);
-}
-
-export async function deleteBackupSchedule(id: string): Promise<void> {
-  return client.delete(`/admin/backups/schedules/${id}`);
-}
-
-export async function getRestores(): Promise<RestoreJob[]> {
-  return client.get('/admin/backups/restores');
-}
-
-export async function restoreBackup(data: {
-  backupId: string;
-  targetEnvironment: string;
-  tables?: string[];
-  verifyAfterRestore?: boolean;
-}): Promise<RestoreJob> {
-  return client.post('/admin/backups/restores', data);
-}
-
-export async function testRestoreBackup(data: {
-  backupId: string;
-  tables?: string[];
-}): Promise<{ success: boolean; validationResults: Record<string, boolean>; message: string }> {
-  return client.post('/admin/backups/test-restore', data);
-}
-
-export async function getBackupStats(): Promise<{
-  totalBackups: number;
-  totalSize: string;
-  lastBackupAt?: string;
-  successRate: number;
-  storageUsed: string;
-  storageAvailable: string;
-}> {
-  return client.get('/admin/backups/stats');
+/** Download URL only — the caller must send the Authorization header (page.jsx does). */
+export function backupDownloadUrl(id: string): string {
+  return `${BASE}/admin/backups/${id}/download`;
 }

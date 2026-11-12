@@ -25,6 +25,7 @@ export async function listRooms(
     propertyId?: string;
     roomTypeId?: string;
     status?: string;
+    search?: string;
   }
 ) {
   const pagination = paginationSchema.parse(query);
@@ -33,6 +34,7 @@ export async function listRooms(
   if (query.propertyId) where.propertyId = query.propertyId;
   if (query.roomTypeId) where.roomTypeId = query.roomTypeId;
   if (query.status) where.status = query.status;
+  if (query.search) where.number = { contains: query.search, mode: 'insensitive' };
 
   const [total, items] = await Promise.all([
     prisma.room.count({ where }),

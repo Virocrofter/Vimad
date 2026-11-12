@@ -191,7 +191,7 @@ reservationsRouter.get(
     try {
       const result = await listReservations(req.tenantId, {
         ...(req.validatedQuery as ReservationListQuery),
-        ...(req.allowedPropertyIds ? { propertyIds: req.allowedPropertyIds } : {}),
+        ...(req.effectivePropertyIds ? { propertyIds: req.effectivePropertyIds } : {}),
       } as ReservationListQuery);
       res.json(result);
     } catch (err) {

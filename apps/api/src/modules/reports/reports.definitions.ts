@@ -327,6 +327,41 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
       { key: 'netRevenue', label: 'Net', format: 'currency' },
     ],
   },
+  {
+    key: 'accounting_journal',
+    name: 'Accounting Journal',
+    category: 'Finance',
+    description:
+      'Postings journal for accounting export: folio charges, payments and refunds in the window, one line per posting with debit/credit columns and reconciliation totals. Export-grade, not a full GL.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'date', label: 'Date', format: 'date' },
+      { key: 'type', label: 'Type' },
+      { key: 'account', label: 'Account' },
+      { key: 'description', label: 'Description' },
+      { key: 'reference', label: 'Reference' },
+      { key: 'debit', label: 'Debit', format: 'currency' },
+      { key: 'credit', label: 'Credit', format: 'currency' },
+      { key: 'folioId', label: 'Folio' },
+    ],
+  },
+  {
+    key: 'vat201_prep',
+    name: 'VAT201 Preparation',
+    category: 'Finance',
+    description:
+      'VAT201 output-side boxes from issued tax invoices, grouped by VAT rate (credit notes negative). Input tax (box 14) comes from supplier records held outside the PMS. Practitioner review before filing.',
+    params: range([
+      { key: 'propertyId', label: 'Property', type: 'select', dynamicOptions: 'properties' },
+    ]),
+    columns: [
+      { key: 'box', label: 'Box' },
+      { key: 'description', label: 'Description' },
+      { key: 'amount', label: 'Amount', format: 'currency' },
+    ],
+  },
 ];
 
 export const getDefinition = (key: string): ReportDefinition | undefined =>

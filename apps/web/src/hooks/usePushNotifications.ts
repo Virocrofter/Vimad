@@ -1,6 +1,6 @@
 /* apps/web/src/hooks/usePushNotifications.ts */
 import { useState, useEffect, useCallback } from 'react';
-import { apiGet, apiPost } from '../api/client';
+import { apiClient, apiGet, apiPost } from '../api/client';
 
 interface PushNotificationState {
   isSupported: boolean;
@@ -79,7 +79,7 @@ export function usePushNotifications(): PushNotificationState {
       });
 
       // Send subscription to server
-      await apiPost('/v1/push/subscribe', {
+      await apiPost('/v1/push/subscriptions', {
         endpoint: subscription.endpoint,
         keys: {
           p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
@@ -105,8 +105,8 @@ export function usePushNotifications(): PushNotificationState {
 
       if (subscription) {
         await subscription.unsubscribe();
-        await apiPost('/v1/push/unsubscribe', {
-          endpoint: subscription.endpoint,
+        await apiClient.delete('/v1/push/subscriptions', {
+          data: { endpoint: subscription.endpoint },
         });
       }
 

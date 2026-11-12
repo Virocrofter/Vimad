@@ -89,6 +89,12 @@ export async function idempotencyMiddleware(
       // Fire-and-forget is the bug this fixes: the response is only sent
       // after the upsert settles, so a crash mid-request can't lose the
       // stored response and allow a duplicate execution on retry.
+      // Never store error responses: a stored 4xx/5xx would replay forever
+      // and poison every legitimate retry of the same key (P4b saga).
+      if (capturedStatus >= 400) {
+        return originalJson(body);
+      }
+
       prisma.idempotencyKey
         .update({
           where: { key },

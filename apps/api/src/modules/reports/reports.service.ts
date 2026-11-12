@@ -1199,3 +1199,159 @@ export async function executeDueSchedules(prisma: PrismaClient) {
   }
   return due.length;
 }
+// [C2'/C6'] Accounting journal: one line per posting (folio charge, payment,
+// refund part) in the window, debit/credit columns, reconciliation totals in
+// summary. Account codes are convention-based prefixes (REV:/RCV:) — the
+// property-level account mapping config and SARS formats are the C6'
+// remainder (practitioner-gated). Export via the standard report export path.
+async function accountingJournal(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const start = parseLocalDate(p.dateFrom);
+  const end = new Date(parseLocalDate(p.dateTo).getTime() + 86400000);
+  const propFilter = p.propertyId ? { reservation: { is: { propertyId: p.propertyId } } } : {};
+
+  const items = await ctx.prisma.folioItem.findMany({
+    where: { postedAt: { gte: start, lt: end }, folio: { tenantId: ctx.tenantId, ...propFilter } },
+    include: { folio: { select: { id: true, reservationId: true } } },
+    orderBy: { postedAt: 'asc' },
+    take: 5000,
+  });
+  const payments = await ctx.prisma.payment.findMany({
+    where: { tenantId: ctx.tenantId, createdAt: { gte: start, lt: end }, ...propFilter },
+    select: {
+      id: true,
+      reference: true,
+      type: true,
+      channel: true,
+      amountMinor: true,
+      refundedMinor: true,
+      status: true,
+      createdAt: true,
+      folioId: true,
+    },
+    orderBy: { createdAt: 'asc' },
+    take: 5000,
+  });
+
+  const rows: Record<string, unknown>[] = [];
+  for (const it of items) {
+    const amt = Number(it.amount);
+    const isRefund = String(it.type).toLowerCase().includes('refund') || amt < 0;
+    rows.push({
+      date: dayStr(new Date(it.postedAt)),
+      type: String(it.type),
+      account: (isRefund ? 'REV:refund:' : 'REV:') + String(it.type),
+      description: String(it.description).slice(0, 80),
+      reference: it.folio.reservationId ?? it.folio.id,
+      debit: isRefund ? 0 : amt,
+      credit: isRefund ? Math.abs(amt) : 0,
+      folioId: it.folioId,
+    });
+  }
+  for (const pay of payments) {
+    const amt = pay.amountMinor / 100;
+    const refunded = (pay.refundedMinor ?? 0) / 100;
+    const isRefund = String(pay.type).toLowerCase().includes('refund');
+    rows.push({
+      date: dayStr(pay.createdAt),
+      type: 'payment:' + String(pay.type),
+      account: 'RCV:' + String(pay.channel),
+      description: (String(pay.reference) + ' ' + String(pay.status)).slice(0, 80),
+      reference: pay.reference,
+      debit: isRefund ? amt : 0,
+      credit: isRefund ? 0 : amt,
+      folioId: pay.folioId ?? '',
+    });
+    if (!isRefund && refunded > 0) {
+      rows.push({
+        date: dayStr(pay.createdAt),
+        type: 'refund',
+        account: 'RCV:' + String(pay.channel),
+        description: ('refund of ' + String(pay.reference)).slice(0, 80),
+        reference: pay.reference,
+        debit: refunded,
+        credit: 0,
+        folioId: pay.folioId ?? '',
+      });
+    }
+  }
+
+  rows.sort(
+    (a: any, b: any) =>
+      String(a.date).localeCompare(String(b.date)) ||
+      String(a.reference).localeCompare(String(b.reference))
+  );
+
+  const totalDebit = rows.reduce((sum: number, r: any) => sum + Number(r.debit), 0);
+  const totalCredit = rows.reduce((sum: number, r: any) => sum + Number(r.credit), 0);
+  return {
+    rows,
+    columns: getDefinition('accounting_journal')!.columns,
+    summary: [
+      { label: 'Postings', value: rows.length, format: 'number' },
+      { label: 'Total debit', value: totalDebit, format: 'currency' },
+      { label: 'Total credit', value: totalCredit, format: 'currency' },
+    ],
+    truncated: items.length === 5000 || payments.length === 5000,
+  };
+}
+
+COMPUTERS['accounting_journal'] = accountingJournal;
+// [C6'] VAT201 preparation: output-side boxes from tax_invoices grouped by
+// VAT rate (credit notes via originalId count negative). Box 14 (input tax)
+// is honestly labeled: supplier/AP records live outside the PMS. Box layout
+// follows SARS VAT201 Blocks 1A/2/3/4/14. Practitioner review before filing.
+async function vat201Prep(ctx: Ctx, p: Record<string, string>): Promise<RunOutput> {
+  const start = parseLocalDate(p.dateFrom);
+  const end = new Date(parseLocalDate(p.dateTo).getTime() + 86400000);
+  const invoices = await ctx.prisma.taxInvoice.findMany({
+    where: {
+      tenantId: ctx.tenantId,
+      issueDate: { gte: start, lt: end },
+      status: { not: 'cancelled' },
+      ...(p.propertyId ? { propertyId: p.propertyId } : {}),
+    },
+    select: { vatRate: true, subtotalExVat: true, vatAmount: true, originalId: true },
+    take: 5000,
+  });
+  let stdEx = 0,
+    stdVat = 0,
+    zeroEx = 0,
+    exemptEx = 0;
+  for (const inv of invoices) {
+    const rate = Number(inv.vatRate);
+    const sign = inv.originalId ? -1 : 1;
+    const ex = sign * Number(inv.subtotalExVat);
+    const vat = sign * Number(inv.vatAmount);
+    if (rate === 15) {
+      stdEx += ex;
+      stdVat += vat;
+    } else if (rate === 0) {
+      zeroEx += ex;
+    } else {
+      exemptEx += ex;
+    }
+  }
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const rows = [
+    { box: '1A', description: 'Standard-rated supplies (excl. VAT)', amount: r2(stdEx) },
+    { box: '2', description: 'Zero-rated supplies', amount: r2(zeroEx) },
+    { box: '3', description: 'Exempt supplies', amount: r2(exemptEx) },
+    { box: '4', description: 'Output tax', amount: r2(stdVat) },
+    { box: '14', description: 'Input tax (from supplier records - not held in PMS)', amount: null },
+  ];
+  return {
+    rows,
+    columns: getDefinition('vat201_prep')!.columns,
+    summary: [
+      {
+        label: 'Output tax (net of input tax per accountant)',
+        value: r2(stdVat),
+        format: 'currency',
+      },
+      { label: 'Invoices in window', value: invoices.length, format: 'number' },
+    ],
+    truncated: invoices.length === 5000,
+  };
+}
+
+COMPUTERS['vat201_prep'] = vat201Prep;

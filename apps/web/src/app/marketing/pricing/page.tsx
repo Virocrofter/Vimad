@@ -15,7 +15,7 @@ import { cn } from '../../../lib/utils';
 
 const tiers = [
   {
-    name: 'Starter',
+    name: 'Compass',
     icon: Hotel,
     monthlyPrice: 199,
     annualPrice: 165,
@@ -39,14 +39,14 @@ const tiers = [
     ],
   },
   {
-    name: 'Professional',
+    name: 'Command',
     icon: Building2,
     monthlyPrice: 499,
     annualPrice: 414,
     roomLimit: 'Up to 200 rooms',
     description: 'Boutique hotels',
     features: [
-      'Everything in Starter',
+      'Everything in Compass',
       'Booking Engine',
       'Channel Manager',
       'CRM & Loyalty',
@@ -56,7 +56,7 @@ const tiers = [
     cta: 'Start Free Trial',
     popular: true,
     included: [
-      'Everything in Starter',
+      'Everything in Compass',
       'Priority email + chat support',
       'Dedicated onboarding specialist',
       'Full API access',
@@ -65,14 +65,14 @@ const tiers = [
     ],
   },
   {
-    name: 'Enterprise',
+    name: 'Constellation',
     icon: Crown,
     monthlyPrice: 999,
     annualPrice: 829,
     roomLimit: 'Unlimited rooms',
     description: 'Hotel chains & resorts',
     features: [
-      'Everything in Professional',
+      'Everything in Command',
       'Multi-Property Dashboard',
       'AI Revenue Manager',
       'Sales & Catering',
@@ -82,7 +82,7 @@ const tiers = [
     cta: 'Contact Sales',
     popular: false,
     included: [
-      'Everything in Professional',
+      'Everything in Command',
       '24/7 phone support',
       'Dedicated account manager',
       'Custom integrations',
@@ -99,7 +99,7 @@ const tiers = [
     roomLimit: '50+ properties',
     description: 'Branded guest experience',
     features: [
-      'Everything in Enterprise',
+      'Everything in Constellation',
       'Custom Branding',
       'Dedicated Infrastructure',
       'API Access',
@@ -110,7 +110,7 @@ const tiers = [
     popular: false,
     accentColor: 'border-accent',
     included: [
-      'Everything in Enterprise',
+      'Everything in Constellation',
       'White-glove setup',
       'Custom domain & SSL',
       'Dedicated success team',
@@ -127,7 +127,7 @@ const faqs = [
   },
   {
     q: 'What payment methods do you accept?',
-    a: 'All major credit cards, ACH bank transfer, and wire for annual Enterprise plans.',
+    a: 'All major credit cards, ACH bank transfer, and wire for annual Constellation plans.',
   },
   {
     q: 'Is there a discount for annual billing?',
@@ -313,7 +313,7 @@ export default function PricingPage() {
             ))}
           </div>
 
-          {/* Enterprise CTA Banner */}
+          {/* Constellation CTA Banner */}
           <div className="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
             <h3 className="text-lg font-semibold text-text-primary">
               Need a custom plan for 500+ rooms or multiple brands?

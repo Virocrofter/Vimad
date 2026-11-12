@@ -48,7 +48,7 @@ export const guestBillingApi = {
   get: async (): Promise<GuestFolioView> => {
     const token = getGuestToken();
     if (!token) throw new Error('No portal session');
-    const res = await fetch(API_BASE + '/v1/guest-portal/billing/' + encodeURIComponent(token));
+    const res = await fetch(API_BASE + '/v1/guest-portal/folio/' + encodeURIComponent(token));
     const body = await res.json().catch(() => null);
     if (!res.ok) throw new Error(body?.error?.message ?? 'Request failed');
     return body.data;
@@ -57,10 +57,11 @@ export const guestBillingApi = {
     const token = getGuestToken() ?? '';
     return (
       API_BASE +
-      '/v1/guest-portal/billing/invoice/' +
+      '/v1/guest-portal/invoice/' +
+      encodeURIComponent(token) +
+      '/' +
       encodeURIComponent(invoiceId) +
-      '/pdf?token=' +
-      encodeURIComponent(token)
+      '/pdf'
     );
   },
 };

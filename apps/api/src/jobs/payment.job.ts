@@ -11,6 +11,7 @@ import { fetchTransaction } from '../common/paystack.js';
 import { PAYMENTS_QUEUE } from '../modules/payments/payments.webhook.js';
 import { postPaymentToFolio, postRefundToFolio } from '../modules/payments/payments.service.js';
 import { settlePaymentRequestForPayment } from '../modules/payments/payment-requests.service.js';
+import cron from 'node-cron';
 
 type PaymentJobData =
   | { reference: string; transactionId?: number }
@@ -78,14 +79,74 @@ export const paymentWorker = createWorker<PaymentJobData>(PAYMENTS_QUEUE, async 
     const delta = totalRefunded - payment.refundedMinor;
 
     if (delta > 0) {
-      await prisma.payment.update({
-        where: { id: payment.id },
+      // Canonical lifecycle guard (roadmap #9): a refund event for a payment
+      // that is not in a refundable state fails here and retries; an
+      // out-of-order event self-heals once the charge.success job lands.
+      const p5nextStatus = totalRefunded >= payment.amountMinor ? 'refunded' : 'partially_refunded';
+      const { assertTransition } = await import('../common/lifecycle.js');
+      assertTransition('payment', payment.status, p5nextStatus, { reference: payment.reference });
+      // Atomic claim on the refund progression: a concurrent refund-processed
+      // job for the same payment can only advance refundedMinor from the
+      // snapshot we read; the loser skips, and the next event reconciles.
+      const claimed = await prisma.payment.updateMany({
+        where: { id: payment.id, refundedMinor: payment.refundedMinor },
         data: {
           refundedMinor: totalRefunded,
           status: totalRefunded >= payment.amountMinor ? 'refunded' : 'partially_refunded',
         },
       });
-      await postRefundToFolio(payment.id, delta);
+      if (claimed.count === 1) {
+        await postRefundToFolio(payment.id, delta);
+      }
     }
   }
 });
+
+// ─── [E2x] Abandoned-deposit sweep ───
+// Orphan release in createPublicBooking covers deposit-INIT failure. This
+// covers checkout abandonment after successful init: guest closes the tab,
+// confirmed reservation + pending deposit sit forever, I1 inventory held.
+// Hourly: pending web-deposit payments older than 24h -> failed
+// (abandoned_checkout), reservation cancelled (deposit_abandoned).
+export async function sweepAbandonedDeposits(now = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - 24 * 3600 * 1000);
+  const stale = await prisma.payment.findMany({
+    where: { status: 'pending', reference: { endsWith: '-deposit' }, createdAt: { lt: cutoff } },
+    include: { reservation: { select: { id: true, status: true } } },
+    take: 100,
+  });
+  for (const pay of stale) {
+    await prisma.$transaction([
+      prisma.payment.update({
+        where: { id: pay.id },
+        data: { status: 'failed', failureReason: 'abandoned_checkout' },
+      }),
+      ...(pay.reservation && pay.reservation.status === 'confirmed'
+        ? [
+            prisma.reservation.update({
+              where: { id: pay.reservation.id },
+              data: {
+                status: 'cancelled',
+                cancelledAt: now,
+                cancelledBy: 'system',
+                cancelReason: 'deposit_abandoned',
+              },
+            }),
+          ]
+        : []),
+    ]);
+  }
+  if (stale.length) logger.info({ count: stale.length }, 'abandoned deposits swept');
+  return stale.length;
+}
+
+export function startAbandonedDepositScheduler(): void {
+  cron.schedule('37 * * * *', async () => {
+    try {
+      await sweepAbandonedDeposits();
+    } catch (err) {
+      logger.error({ err }, 'abandoned deposit sweep failed');
+    }
+  });
+  logger.info('Abandoned-deposit scheduler started (hourly :37)');
+}

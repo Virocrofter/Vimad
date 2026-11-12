@@ -1,0 +1,1 @@
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "renewalFee" DECIMAL(12,2);

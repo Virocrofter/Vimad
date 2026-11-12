@@ -54,6 +54,7 @@
 @import './themes/light.css';
 @import './themes/dark.css';
 @import './components.css';
+@import './tokens/calm-premium.css';
 
 html {
   scroll-behavior: smooth;

@@ -336,17 +336,28 @@ export async function createPublicBooking(
 
   // Guest find-or-create by email (a returning web guest reuses their profile)
   const email = input.guest.email.toLowerCase().trim();
+  // Atomic guest resolution: the (tenantId, email) unique index turns a
+  // concurrent same-email booking into a conflict; the P2002 retry fetches
+  // the winner. Closes the duplicate-guest race found by P4-B4.
+  // Atomic guest resolution: the (tenantId, email) unique index turns a
+  // concurrent same-email booking into a conflict; the P2002 retry
+  // fetches the winner. Closes the duplicate-guest race (P4-B4).
   let guest = await prisma.guest.findFirst({ where: { tenantId, email } });
   if (!guest) {
-    guest = await prisma.guest.create({
-      data: {
-        tenantId,
-        firstName: input.guest.firstName.trim(),
-        lastName: input.guest.lastName.trim(),
-        email,
-        phone: input.guest.phone.trim(),
-      },
-    });
+    try {
+      guest = await prisma.guest.create({
+        data: {
+          tenantId,
+          firstName: input.guest.firstName.trim(),
+          lastName: input.guest.lastName.trim(),
+          email,
+          phone: input.guest.phone.trim(),
+        },
+      });
+    } catch (err: any) {
+      if (err?.code !== 'P2002') throw err;
+      guest = await prisma.guest.findFirstOrThrow({ where: { tenantId, email } });
+    }
   }
 
   // The SAME path the front desk uses: folio, stay rows, inventory assertion,

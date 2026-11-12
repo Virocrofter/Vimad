@@ -98,10 +98,13 @@ const PERMISSIONS = [
   { resource: 'folio', action: 'update', category: 'billing', description: 'Post adjustments' },
   { resource: 'folio', action: 'payment', category: 'billing', description: 'Process payments' },
   { resource: 'folio', action: 'refund', category: 'billing', description: 'Issue refunds' },
+  { resource: 'folio', action: 'delete', category: 'billing', description: 'Delete folios' },
 
   // Rate plan permissions
   { resource: 'rate_plan', action: 'read', category: 'rates', description: 'View rate plans' },
   { resource: 'rate_plan', action: 'update', category: 'rates', description: 'Modify rates' },
+  { resource: 'rate_plan', action: 'delete', category: 'rates', description: 'Delete rate plans' },
+  { resource: 'rate_plan', action: 'create', category: 'rates', description: 'Create rate plans' },
 
   // Channel permissions
   {

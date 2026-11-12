@@ -146,6 +146,11 @@ export async function assignRoom(
   return response.data;
 }
 
+export async function getReservationWorkspace(id: string): Promise<{ data: any }> {
+  const response = await apiClient.get<{ data: any }>(`/reservation-workspace/${id}`);
+  return response.data;
+}
+
 export async function checkInReservation(id: string): Promise<{ data: Reservation }> {
   const response = await apiClient.post<{ data: Reservation }>(`/reservations/${id}/check-in`);
   return response.data;

@@ -33,7 +33,7 @@ registry.registerPath({
   },
 });
 
-paymentsWebhookRouter.post('/webhook', (req: Request, res: Response) => {
+paymentsWebhookRouter.post('/', (req: Request, res: Response) => {
   const rawBody = (req as any).rawBody as Buffer | undefined;
   const signature = req.get('x-paystack-signature');
 

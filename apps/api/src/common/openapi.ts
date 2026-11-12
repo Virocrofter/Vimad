@@ -20,7 +20,6 @@ import * as apiKeyModule from '../modules/rbac/api-key.routes.js';
 import * as rbacModule from '../modules/rbac/rbac.routes.js';
 import * as pushModule from '../modules/push/push.routes.js';
 import * as filesModule from '../modules/files/files.routes.js';
-import * as adminModule from '../modules/admin/admin.routes.js';
 // [A1] Payments (Paystack) + public webhook
 import * as paymentsModule from '../modules/payments/payments.routes.js';
 import * as paymentsWebhookModule from '../modules/payments/payments.webhook.js';
@@ -45,6 +44,7 @@ import * as mealsModule from '../modules/meals/meals.routes.js';
 import * as ticketsModule from '../modules/tickets/tickets.routes.js';
 import * as onboardingModule from '../modules/onboarding/onboarding.routes.js';
 import * as chainLoyaltyModule from '../modules/chain-loyalty/chain-loyalty.routes.js';
+import * as adminModule from '../modules/admin/admin.routes.js';
 
 extendZodWithOpenApi(z);
 

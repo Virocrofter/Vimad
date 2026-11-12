@@ -18,6 +18,7 @@ import {
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { requestDemo } from '../../../api/demo-access';
 
 const timeSlots = [
   '9:00 AM',
@@ -108,9 +109,22 @@ export default function DemoRequestPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsSubmitting(false);
-    setStep('success');
+    try {
+      await requestDemo({
+        email: formData.email,
+        name: formData.name,
+        company: formData.hotelName,
+        phone: formData.phone,
+        roomCount: formData.roomCount ? Number(formData.roomCount) : null,
+        currentPms: formData.currentPMS,
+        preferredSlot: `${selectedDateStr} ${selectedTime}`,
+      });
+      setStep('success');
+    } catch (err) {
+      alert(err?.data?.error || err.message || 'Something went wrong — please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectedDateStr = selectedDate

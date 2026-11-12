@@ -1,447 +1,426 @@
-/* src/app/admin/health/components.jsx */
-import { useState } from 'react';
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Copy,
-  ExternalLink,
-  Server,
-  X,
-  XCircle,
-  Zap,
-  Shield,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Info,
-} from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import {
-  severityMeta,
-  serviceStatusMeta,
-  errorStatusMeta,
-  incidentSeverityMeta,
-  timeAgo,
-} from './data';
+import React from 'react';
+import './health.css';
 
-/* ─── Stat Card ─── */
-export function HealthStatCard({ label, value, subtext, icon: Icon, color, trend }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{label}</p>
-          <p className={cn('mt-1 text-2xl font-bold font-mono', color)}>{value}</p>
-          {subtext && <p className="mt-0.5 text-xs text-text-muted">{subtext}</p>}
-          {trend !== undefined && (
-            <p
-              className={cn('mt-1 text-xs font-medium', trend >= 0 ? 'text-accent' : 'text-danger')}
-            >
-              {trend >= 0 ? '+' : ''}
-              {trend}% vs last period
-            </p>
-          )}
-        </div>
-        <div
-          className={cn(
-            'rounded-lg p-2.5',
-            color
-              .replace('text-', 'bg-')
-              .replace('danger', 'danger/10')
-              .replace('accent', 'accent/10')
-              .replace('warning', 'warning/10')
-              .replace('info', 'info/10')
-              .replace('secondary', 'secondary/10')
-          )}
-        >
-          <Icon className={cn('h-5 w-5', color)} />
-        </div>
+export const Pill = ({ v }) => (
+  <span className={`hl-pill ${String(v).toLowerCase()}`}>{String(v).replace(/_/g, ' ')}</span>
+);
+
+export const Banner = ({ o }) => (
+  <div className={`hl-banner ${o.status}`}>
+    <div className="hl-dot" />
+    <div>
+      <div className="hl-title">
+        System{' '}
+        {o.status === 'healthy' ? 'Healthy' : o.status === 'degraded' ? 'Degraded' : 'Critical'}
+      </div>
+      <div className="hl-sub">
+        uptime {o.uptime} · {o.openIncidents} open incident{o.openIncidents === 1 ? '' : 's'} ·{' '}
+        {o.openExceptions} open exceptions · refreshed{' '}
+        {new Date(o.generatedAt).toLocaleTimeString()}
       </div>
     </div>
-  );
-}
+  </div>
+);
 
-/* ─── Service Status Badge ─── */
-export function ServiceStatusBadge({ status }) {
-  const meta = serviceStatusMeta[status] || serviceStatusMeta.operational;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        meta.class
-      )}
-    >
-      <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
-      {meta.label}
-    </span>
-  );
-}
-
-/* ─── Severity Badge ─── */
-export function SeverityBadge({ severity }) {
-  const meta = severityMeta[severity] || severityMeta.info;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-        meta.class
-      )}
-    >
-      <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
-      {meta.label}
-    </span>
-  );
-}
-
-/* ─── Error Status Badge ─── */
-export function ErrorStatusBadge({ status }) {
-  const meta = errorStatusMeta[status] || errorStatusMeta.open;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium',
-        meta.class
-      )}
-    >
-      {meta.label}
-    </span>
-  );
-}
-
-/* ─── Incident Severity Badge ─── */
-export function IncidentSeverityBadge({ severity }) {
-  const meta = incidentSeverityMeta[severity] || incidentSeverityMeta.info;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        meta.class
-      )}
-    >
-      <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
-      {meta.label}
-    </span>
-  );
-}
-
-/* ─── Mini Sparkline (SVG) ─── */
-export function MiniSparkline({ data, color = 'text-accent', width = 80, height = 24 }) {
-  if (!data || data.length < 2) return <div className="h-6 w-20 bg-border rounded" />;
-
-  const values = data.map((d) => (typeof d === 'number' ? d : d.value || 0));
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-
-  const points = values
-    .map((v, i) => {
-      const x = (i / (values.length - 1)) * width;
-      const y = height - ((v - min) / range) * height;
-      return `${x},${y}`;
-    })
-    .join(' ');
-
-  const colorClass = color.replace('text-', '');
-  const strokeColors = {
-    accent: '#22c55e',
-    danger: '#ef4444',
-    warning: '#f59e0b',
-    info: '#3b82f6',
-    secondary: '#863bff',
-  };
-
-  return (
-    <svg width={width} height={height} className="overflow-visible">
-      <polyline
-        fill="none"
-        stroke={strokeColors[colorClass] || strokeColors.accent}
-        strokeWidth="1.5"
-        points={points}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx={width}
-        cy={height - ((values[values.length - 1] - min) / range) * height}
-        r="2"
-        fill={strokeColors[colorClass] || strokeColors.accent}
-      />
-    </svg>
-  );
-}
-
-/* ─── Service Card ─── */
-export function ServiceCard({ service, onClick }) {
-  const meta = serviceStatusMeta[service.status] || serviceStatusMeta.operational;
-  const StatusIcon =
-    service.status === 'operational'
-      ? CheckCircle2
-      : service.status === 'degraded'
-        ? AlertTriangle
-        : XCircle;
-
-  return (
-    <div
-      onClick={onClick}
-      className={cn(
-        'group rounded-xl border bg-surface p-4 cursor-pointer transition-all hover:shadow-md',
-        service.status === 'critical'
-          ? 'border-danger/30 hover:border-danger/50'
-          : service.status === 'degraded'
-            ? 'border-warning/30 hover:border-warning/50'
-            : 'border-border hover:border-secondary/50'
-      )}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', meta.class)}>
-            <Server className={cn('h-4 w-4', meta.iconColor)} />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-text-primary">{service.name}</h3>
-            <p className="text-[10px] text-text-muted">
-              {service.version} · {service.region}
-            </p>
-          </div>
+export const ServiceGrid = ({ services }) => (
+  <div className="hl-grid">
+    {services.map((s) => (
+      <div className="hl-card" key={s.name}>
+        <h4>
+          {s.name}
+          <Pill v={s.status} />
+        </h4>
+        <div className="hl-metric">
+          {s.latencyMs ? `${s.latencyMs}ms` : s.status === 'operational' ? '✓' : '—'}
         </div>
-        <ServiceStatusBadge status={service.status} />
+        <div className="hl-detail">{s.detail}</div>
       </div>
+    ))}
+  </div>
+);
 
-      {/* Metrics */}
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div>
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">Latency (p95)</p>
-          <p className="text-sm font-mono font-medium text-text-primary">{service.latency.p95}ms</p>
+export const HeartbeatGrid = ({ tiles }) => (
+  <div className="hl-grid">
+    {tiles.map((t) => (
+      <div className="hl-card" key={t.name}>
+        <h4>
+          {t.name}
+          <Pill v={t.status} />
+        </h4>
+        <div className="hl-metric">
+          {t.ageMs === null
+            ? '—'
+            : t.ageMs < 60000
+              ? `${Math.round(t.ageMs / 1000)}s ago`
+              : `${Math.round(t.ageMs / 60000)}m ago`}
         </div>
-        <div>
-          <p className="text-[10px] text-text-muted uppercase tracking-wider">Uptime</p>
-          <p className="text-sm font-mono font-medium text-text-primary">{service.uptime}</p>
+        <div className="hl-detail">
+          {t.ranAt ? `last run ${new Date(t.ranAt).toLocaleTimeString()}` : 'never ran'} · expected
+          every {t.expectedMs ? `${Math.round(t.expectedMs / 60000)}m` : 'n/a'}
         </div>
+        {t.error && <div className="hl-tile-err">{t.error}</div>}
       </div>
+    ))}
+  </div>
+);
 
-      {service.alert && (
-        <div className="mt-3 rounded-lg border border-warning/20 bg-warning/5 p-2 flex gap-2">
-          <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
-          <p className="text-xs text-warning">{service.alert}</p>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[10px] text-text-muted">
-        <span>
-          {service.requestsPerMin
-            ? `${service.requestsPerMin.toLocaleString()} req/min`
-            : service.connections
-              ? `${service.connections.active} conns`
-              : service.queueDepth
-                ? `${service.queueDepth.toLocaleString()} queued`
-                : `${service.sentPerMin?.toLocaleString() || service.storageUsed?.used || service.memoryUsage?.used} ${service.storageUsed?.unit || service.memoryUsage?.unit || 'sent/min'}`}
-        </span>
-        <span>
-          {service.lastRestart ? `Restarted ${timeAgo(service.lastRestart)}` : 'Always on'}
-        </span>
-      </div>
+export const ProbeCards = ({ results, running, onRun }) => (
+  <div>
+    <div style={{ marginBottom: 14 }}>
+      <button className="hl-btn" onClick={onRun} disabled={running}>
+        {running ? 'Running…' : 'Run probes now'}
+      </button>
     </div>
-  );
-}
-
-/* ─── Error Log Row ─── */
-export function ErrorLogRow({ error, expanded, onToggle }) {
-  const sevMeta = severityMeta[error.severity] || severityMeta.info;
-
-  return (
-    <>
-      <tr className="hover:bg-background/50 transition-colors cursor-pointer" onClick={onToggle}>
-        <td className="px-4 py-3">
-          <div className="flex items-center gap-2">
-            <button className="text-text-muted hover:text-text-primary">
-              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-            <span className="font-mono text-xs text-text-muted">{error.id}</span>
+    <div className="hl-grid">
+      {results.map((r) => (
+        <div className="hl-card" key={r.probe}>
+          <h4>
+            {r.label}
+            <Pill v={r.status} />
+          </h4>
+          <div className="hl-metric">{r.latencyMs}ms</div>
+          <div className="hl-detail">{r.error ? `ERROR: ${r.error}` : r.detail || ''}</div>
+          <div className="hl-detail">
+            {r.ranAt ? `ran ${new Date(r.ranAt).toLocaleTimeString()}` : ''}
           </div>
-        </td>
-        <td className="px-4 py-3">
-          <SeverityBadge severity={error.severity} />
-        </td>
-        <td className="px-4 py-3 text-text-secondary text-xs">{error.service}</td>
-        <td className="px-4 py-3">
-          <p className="text-sm text-text-primary truncate max-w-[300px]">{error.message}</p>
-        </td>
-        <td className="px-4 py-3 text-text-secondary text-xs">{timeAgo(error.timestamp)}</td>
-        <td className="px-4 py-3">
-          <ErrorStatusBadge status={error.status} />
-        </td>
-        <td className="px-4 py-3 text-right">
-          <span className="text-xs font-mono text-text-muted">×{error.count}</span>
-        </td>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+export const TenantTable = ({ tenants, onPick }) => (
+  <table className="hl-table">
+    <thead>
+      <tr>
+        <th>Tenant</th>
+        <th>Plan</th>
+        <th>Score</th>
+        <th>Payments 30d</th>
+        <th>Emails sent</th>
+        <th>Exceptions</th>
+        <th>Night audit</th>
+        <th />
       </tr>
-      {expanded && (
-        <tr>
-          <td colSpan={7} className="px-4 py-4 bg-background/50">
-            <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-text-muted">First seen: {error.firstSeen}</span>
-                  {error.assignedTo && (
-                    <span className="text-xs text-text-secondary">
-                      Assigned: {error.assignedTo}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-text-secondary hover:bg-surface-elevated">
-                    <Copy className="h-3 w-3" /> Copy
-                  </button>
-                  <button className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-text-secondary hover:bg-surface-elevated">
-                    <ExternalLink className="h-3 w-3" /> Trace
-                  </button>
-                </div>
+    </thead>
+    <tbody>
+      {tenants.map((t) => (
+        <tr key={t.id} style={{ cursor: 'pointer' }} onClick={() => onPick(t)}>
+          <td>
+            <strong>{t.name}</strong>
+            <div className="hl-kv">{t.slug}</div>
+          </td>
+          <td>{t.plan}</td>
+          <td>
+            <span className={`hl-score ${t.band}`}>{t.score}</span>
+          </td>
+          <td>
+            {t.pay_ok} ok / {t.pay_bad} failed
+          </td>
+          <td>
+            {t.email_sent}/{t.email_total}
+          </td>
+          <td>{t.exceptions_open}</td>
+          <td>
+            {t.audits_completed}/{t.props}
+          </td>
+          <td>→</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+export const TenantDrilldown = ({ t, detail, onClose }) => (
+  <div className="hl-card" style={{ marginTop: 14 }}>
+    <h4>
+      {t.name} — signal provenance{' '}
+      <button className="hl-btn hl-ghost" onClick={onClose}>
+        close
+      </button>
+    </h4>
+    {!detail ? (
+      <div className="hl-empty">loading…</div>
+    ) : (
+      <div className="hl-grid" style={{ marginTop: 10 }}>
+        <div className="hl-card">
+          <h4>Payments (30d)</h4>
+          {detail.payments.map((p) => (
+            <div className="hl-row" key={p.status}>
+              <span>{p.status}</span>
+              <strong>{p.c}</strong>
+            </div>
+          ))}
+        </div>
+        <div className="hl-card">
+          <h4>Emails (30d)</h4>
+          {detail.emails.map((p) => (
+            <div className="hl-row" key={p.status}>
+              <span>{p.status}</span>
+              <strong>{p.c}</strong>
+            </div>
+          ))}
+        </div>
+        <div className="hl-card">
+          <h4>Open exceptions</h4>
+          {detail.exceptions.length === 0 ? (
+            <div className="hl-detail">none</div>
+          ) : (
+            detail.exceptions.map((e, i) => (
+              <div className="hl-row" key={i}>
+                <span>{e.title}</span>
+                <Pill v={e.severity} />
               </div>
-              {error.stack && (
-                <div className="rounded-md bg-background border border-border p-3">
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                    Stack Trace
-                  </p>
-                  <pre className="text-xs font-mono text-text-secondary whitespace-pre-wrap">
-                    {error.stack}
-                  </pre>
-                </div>
-              )}
-              <div className="flex items-center gap-2 pt-2">
-                <button className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-white hover:bg-secondary/90">
-                  Mark Resolved
-                </button>
-                <button className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-elevated">
-                  Assign
-                </button>
-                <button className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-elevated">
-                  Create Incident
-                </button>
+            ))
+          )}
+        </div>
+        <div className="hl-card">
+          <h4>Night audits</h4>
+          {detail.audits.length === 0 ? (
+            <div className="hl-detail">none yet</div>
+          ) : (
+            detail.audits.map((a, i) => (
+              <div className="hl-row" key={i}>
+                <span>
+                  {a.property} · {String(a.auditDate).slice(0, 10)}
+                </span>
+                <Pill v={a.status === 'completed' ? 'ok' : 'warn'} />
+              </div>
+            ))
+          )}
+        </div>
+        <div className="hl-card" style={{ gridColumn: '1 / -1' }}>
+          <h4>Failed jobs (24h)</h4>
+          {detail.failedJobs.length === 0 ? (
+            <div className="hl-detail">none</div>
+          ) : (
+            detail.failedJobs.map((f, i) => (
+              <div className="hl-row" key={i}>
+                <span>
+                  {f.queue} / {f.jobName}
+                </span>
+                <span className="hl-kv">{f.failReason}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+export const JourneyTable = ({ rows }) => (
+  <table className="hl-table">
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Check-in success</th>
+        <th>Payment-request conversion</th>
+        <th>Order fulfilment</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => {
+        const ci = r.checkins_started
+          ? Math.round((r.checkins_done / r.checkins_started) * 100)
+          : null;
+        const pr = r.payreq_total ? Math.round((r.payreq_paid / r.payreq_total) * 100) : null;
+        const od = r.orders_total ? Math.round((r.orders_delivered / r.orders_total) * 100) : null;
+        const bar = (v) =>
+          v === null ? (
+            <span className="hl-kv">no data</span>
+          ) : (
+            <div>
+              <strong className={`hl-score ${v >= 80 ? 'green' : v >= 50 ? 'amber' : 'red'}`}>
+                {v}%
+              </strong>
+              <div className="hl-bar">
+                <span style={{ width: `${v}%` }} />
               </div>
             </div>
-          </td>
-        </tr>
-      )}
-    </>
-  );
-}
+          );
+        return (
+          <tr key={r.propertyId}>
+            <td>
+              <strong>{r.name}</strong>
+            </td>
+            <td>{bar(ci)}</td>
+            <td>{bar(pr)}</td>
+            <td>{bar(od)}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+);
 
-/* ─── Incident Card ─── */
-export function IncidentCard({ incident }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <IncidentSeverityBadge severity={incident.severity} />
-          <span className="font-mono text-xs text-text-muted">{incident.id}</span>
-        </div>
-        <span className="text-xs text-text-muted">{incident.duration}</span>
-      </div>
-
-      <h4 className="mt-2 text-sm font-semibold text-text-primary">{incident.title}</h4>
-      <p className="mt-1 text-xs text-text-secondary">{incident.date}</p>
-
-      <div className="mt-3 space-y-1">
-        <p className="text-xs text-text-muted">
-          <span className="font-medium text-text-secondary">Root Cause:</span> {incident.rootCause}
-        </p>
-        <p className="text-xs text-text-muted">
-          <span className="font-medium text-text-secondary">Resolution:</span> {incident.resolution}
-        </p>
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-1">
-        {incident.affectedServices.map((svc) => (
-          <span
-            key={svc}
-            className="rounded-full bg-background border border-border px-2 py-0.5 text-[10px] font-medium text-text-secondary"
-          >
-            {svc}
-          </span>
-        ))}
+export const NightlyPanel = ({ n }) => (
+  <div className="hl-grid">
+    <div className="hl-card">
+      <h4>Inventory cache</h4>
+      <div className="hl-metric">{n.inventoryCache.rows}</div>
+      <div className="hl-detail">
+        <Pill v={n.inventoryCache.fresh ? 'ok' : 'warn'} />{' '}
+        {n.inventoryCache.freshest
+          ? `freshest ${new Date(n.inventoryCache.freshest).toLocaleString()}`
+          : 'never computed'}
       </div>
     </div>
+    <div className="hl-card">
+      <h4>Report failures (24h)</h4>
+      <div className={`hl-metric ${n.reportFailures24h > 0 ? 'hl-score red' : 'hl-score green'}`}>
+        {n.reportFailures24h}
+      </div>
+    </div>
+    <div className="hl-card">
+      <h4>Meal-posting failures (24h)</h4>
+      <div
+        className={`hl-metric ${n.mealPostingFailures24h > 0 ? 'hl-score red' : 'hl-score green'}`}
+      >
+        {n.mealPostingFailures24h}
+      </div>
+    </div>
+    {n.nightlyLoops.map((l) => (
+      <div className="hl-card" key={l.name}>
+        <h4>
+          {l.name}
+          <Pill v={l.error ? 'fail' : 'ok'} />
+        </h4>
+        <div className="hl-detail">last ran {new Date(l.ranAt).toLocaleString()}</div>
+      </div>
+    ))}
+  </div>
+);
+
+export const IncidentList = ({ incidents, onUpdate }) => (
+  <div>
+    <table className="hl-table">
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Severity</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th />
+        </tr>
+      </thead>
+      <tbody>
+        {incidents.map((i) => (
+          <tr key={i.id}>
+            <td className="hl-kv">{new Date(i.startedAt).toLocaleString()}</td>
+            <td>
+              <Pill v={i.severity} />
+            </td>
+            <td>{i.title}</td>
+            <td>
+              <Pill v={i.status} />
+            </td>
+            <td>
+              {!['resolved', 'closed'].includes(i.status) && (
+                <button
+                  className="hl-btn hl-ghost"
+                  onClick={() => onUpdate(i.id, 'resolved', 'resolved from health console')}
+                >
+                  resolve
+                </button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {incidents.length === 0 && <div className="hl-empty">No incidents on record</div>}
+  </div>
+);
+
+export const HealthBoard = ({ tenants, journeys, onPick }) => {
+  if (!tenants) return <div className="hl-empty">loading…</div>;
+  const sorted = [...tenants].sort((a, b) => a.score - b.score);
+  const byTenant = {};
+  (journeys || []).forEach((j) => {
+    (byTenant[j.tenantId] = byTenant[j.tenantId] || []).push(j);
+  });
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : null);
+  const mini = (label, v) => (
+    <span className="hl-mini">
+      {label}{' '}
+      <strong
+        className={`hl-score ${v === null ? '' : v >= 80 ? 'green' : v >= 50 ? 'amber' : 'red'}`}
+      >
+        {v === null ? '–' : `${v}%`}
+      </strong>
+    </span>
   );
-}
-
-/* ─── Simple Bar Chart (no recharts dependency for simple cases) ─── */
-export function SimpleBarChart({
-  data,
-  dataKey,
-  labelKey,
-  color = 'bg-secondary',
-  maxHeight = 120,
-}) {
-  const max = Math.max(...data.map((d) => d[dataKey]));
-
+  const worstGuest = (p) => {
+    const rates = [
+      pct(p.checkins_done, p.checkins_started),
+      pct(p.payreq_paid, p.payreq_total),
+      pct(p.orders_delivered, p.orders_total),
+    ].filter((x) => x !== null);
+    return rates.length ? Math.min(...rates) : 101;
+  };
   return (
-    <div className="flex items-end gap-1 h-32">
-      {data.map((d, i) => {
-        const height = max > 0 ? (d[dataKey] / max) * maxHeight : 0;
+    <div>
+      {sorted.map((t) => {
+        const props = byTenant[t.id] || [];
+        const worst = props.length ? Math.min(...props.map(worstGuest)) : 101;
+        const flag = t.score < 50 || worst < 50;
         return (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <div
-              className={cn('w-full rounded-t-sm transition-all hover:opacity-80', color)}
-              style={{ height: `${height}px` }}
-              title={`${d[labelKey]}: ${d[dataKey]}`}
-            />
-            <span className="text-[9px] text-text-muted rotate-0">{d[labelKey]}</span>
+          <div
+            key={t.id}
+            className={`hl-card hl-board-row ${flag ? 'hl-board-flag' : ''}`}
+            style={{ marginBottom: 12 }}
+            onClick={() => onPick && onPick(t)}
+          >
+            <div className="hl-board-head">
+              <span className={`hl-score ${t.band}`} style={{ fontSize: 22 }}>
+                {t.score}
+              </span>
+              <div>
+                <div style={{ fontWeight: 600 }}>{t.name}</div>
+                <div className="hl-kv">
+                  {t.slug} · {t.plan}
+                </div>
+              </div>
+              <div className="hl-board-stats">
+                {mini(
+                  'payments',
+                  t.pay_total ? Math.round(((t.pay_total - t.pay_bad) / t.pay_total) * 100) : null
+                )}
+                {mini(
+                  'emails',
+                  t.email_total ? Math.round((t.email_sent / t.email_total) * 100) : null
+                )}
+                {mini(
+                  'exceptions',
+                  t.exceptions_open === 0 ? 100 : Math.max(0, 100 - t.exceptions_open * 10)
+                )}
+                {mini(
+                  'night audit',
+                  t.props ? Math.round((t.audits_completed / t.props) * 100) : null
+                )}
+                {t.failed_jobs_24h > 0 && (
+                  <span className="hl-mini" style={{ color: 'var(--bad)' }}>
+                    {t.failed_jobs_24h} failed jobs
+                  </span>
+                )}
+              </div>
+            </div>
+            {props.length > 0 && (
+              <div className="hl-board-props">
+                {props.map((p) => (
+                  <div key={p.propertyId} className="hl-prop-chip">
+                    <span className="hl-prop-name">{p.name}</span>
+                    {mini('check-in', pct(p.checkins_done, p.checkins_started))}
+                    {mini('pay-req', pct(p.payreq_paid, p.payreq_total))}
+                    {mini('orders', pct(p.orders_delivered, p.orders_total))}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
     </div>
   );
-}
-
-/* ─── System Health Indicator ─── */
-export function SystemHealthIndicator({ status }) {
-  const configs = {
-    healthy: {
-      icon: CheckCircle2,
-      color: 'text-accent',
-      bg: 'bg-accent/10',
-      border: 'border-accent/20',
-      label: 'All Systems Operational',
-    },
-    degraded: {
-      icon: AlertTriangle,
-      color: 'text-warning',
-      bg: 'bg-warning/10',
-      border: 'border-warning/20',
-      label: 'Degraded Performance',
-    },
-    critical: {
-      icon: XCircle,
-      color: 'text-danger',
-      bg: 'bg-danger/10',
-      border: 'border-danger/20',
-      label: 'Critical Issues Detected',
-    },
-  };
-
-  const config = configs[status] || configs.healthy;
-  const Icon = config.icon;
-
-  return (
-    <div className={cn('rounded-xl border p-4 flex items-center gap-4', config.bg, config.border)}>
-      <div
-        className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-full bg-background',
-          config.color
-        )}
-      >
-        <Icon className="h-6 w-6" />
-      </div>
-      <div>
-        <p className={cn('text-lg font-bold', config.color)}>{config.label}</p>
-        <p className="text-xs text-text-secondary">
-          Last checked: {new Date().toLocaleTimeString()}
-        </p>
-      </div>
-    </div>
-  );
-}
+};

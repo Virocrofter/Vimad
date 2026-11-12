@@ -41,7 +41,7 @@ function newKey() {
   return `go-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
-export default function RoomServicePage() {
+function RoomServicePageInner() {
   const navigate = useNavigate();
   const hasToken = Boolean(getGuestToken());
 
@@ -370,3 +370,23 @@ export default function RoomServicePage() {
     </div>
   );
 }
+
+// ─── Phase B: live feature-flag gate (guest-portal-commerce) ───
+import { useLiveFlag } from '../../../../components/FlagsProvider';
+
+function RoomServicePage() {
+  const enabled = useLiveFlag('guest-portal-commerce', true);
+  if (!enabled) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
+        <UtensilsCrossed className="h-8 w-8 text-text-muted" />
+        <h2 className="text-base font-semibold">Room service is temporarily unavailable</h2>
+        <p className="max-w-sm text-sm text-text-muted">
+          We are tuning this feature right now. Please try again shortly or contact the front desk.
+        </p>
+      </div>
+    );
+  }
+  return <RoomServicePageInner />;
+}
+export default RoomServicePage;

@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { cn, formatCurrency } from '../../../lib/utils';
-import { activityTarget, LINKS, reservationUrl } from './dashLinks';
+import { activityTarget, LINKS, reservationUrl } from '../../../lib/dashLinks';
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 

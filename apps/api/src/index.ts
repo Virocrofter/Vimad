@@ -41,7 +41,7 @@ import { reportWorker } from './jobs/report.job.js';
 import { gdprWorker } from './jobs/gdpr.job.js';
 import { deadLetterWorker, attachDeadLetterHandler } from './jobs/dead-letter.handler.js';
 // [PAYMENTS] Paystack payment worker (webhook → folio side effects)
-import { paymentWorker } from './jobs/payment.job.js';
+import { startAbandonedDepositScheduler, paymentWorker } from './jobs/payment.job.js';
 // [DEPOSIT-AUTOMATION] payment request reminders + expiry/auto-cancel
 import { paymentRequestWorker, startPaymentRequestScheduler } from './jobs/payment-request.job.js';
 // [A3] transactional email — pre-arrival scanner
@@ -63,6 +63,7 @@ import { groupsWorker, startGroupsScheduler } from './jobs/groups.job.js';
 import { mealsWorker, startMealPostingScheduler } from './jobs/meals.job.js';
 // [AR] Accounts Receivable dunning — overdue reminders
 import { arWorker, startArScheduler } from './jobs/ar.job.js';
+import './jobs/contracts.renewal.job.js'; // [CONTRACTS] renewal/expiry scan (self-starts)
 // [REPORTS] tenant-scoped reports — due-schedule runner
 import { startReportsScheduler } from './jobs/reports.job.js';
 // [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
@@ -101,10 +102,18 @@ import { transactionalEmailRouter } from './modules/notifications/transactional.
 import { apiKeysRouter } from './modules/rbac/api-key.routes.js';
 import { rbacRouter } from './modules/rbac/rbac.routes.js';
 import { pushRouter } from './modules/push/push.routes.js';
-import { adminRouter } from './modules/admin/admin.routes.js';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes.js';
 // [PAYMENTS] Paystack payments router + public webhook router
 import { paymentsRouter } from './modules/payments/payments.routes.js';
+import { rateGridsRouter } from './modules/rates/rate-grids.routes.js';
+import { channelObservabilityRouter } from './modules/channel/channel.observability.routes.js';
+import { todayDashboardRouter } from './modules/dashboard/dashboard.today.routes.js';
+import { marketingConsentRouter } from './modules/marketing/marketing.consent.routes.js';
+import { winbackRouter } from './modules/marketing/winback.routes.js';
+import { reservationWorkspaceRouter } from './modules/reservations/reservations.workspace.routes.js';
+import { roomBoardRouter } from './modules/housekeeping/room-board.routes.js';
+import { paymentExceptionsRouter } from './modules/payments/payment-exceptions.routes.js';
+import { exceptionsRouter } from './modules/exceptions/exceptions.routes.js';
 import { paymentsWebhookRouter } from './modules/payments/payments.webhook.js';
 // [DEPOSIT-AUTOMATION] payment requests router
 import { paymentRequestsRouter } from './modules/payments/payment-requests.routes.js';
@@ -161,10 +170,33 @@ import { arRouter } from './modules/ar/ar.routes.js';
 import { marketingRouter } from './modules/marketing/marketing.routes.js';
 // [REPORTS] tenant-scoped reporting — library, builder, scheduler, history
 import { reportsRouter } from './modules/reports/reports.routes.js';
+import flagsEvalRouter from './modules/flags/flags.eval.routes.js';
 import roomPlanRoutes from './modules/room-plan/room-plan.routes.js';
+import { startDlqAlertScheduler } from './jobs/dlq-alert.job.js';
+import { accountingRouter } from './modules/accounting/accounting.routes.js';
+// [ADMIN] legacy platform admin — KPIs, health, alerts, reports, jobs, billing
+import { adminRouter } from './modules/admin/admin.routes.js';
+import featureFlagsRouter from './modules/admin/admin.feature-flags.routes.js';
+import { installHeartbeatPatch } from './common/heartbeat.js';
+import { adminHealthRouter } from './modules/admin/admin.health.routes.js';
+import { profilerMiddleware } from './common/profiler.js';
+import { adminProfilerRouter } from './modules/admin/admin.profiler.routes.js';
+import {
+  demoAccessAdminRouter,
+  demoAccessPublicRouter,
+} from './modules/admin/admin.demo-access.routes.js';
+import { publicStatusRouter } from './modules/health/public.status.routes.js';
+import { adminJobsRouter } from './modules/admin/admin.jobs.routes.js';
+import { adminReportsRouter } from './modules/admin/admin.reports.routes.js';
+import { backupsDrRouter, startBackupsDrSchedulers } from './modules/admin/backups.dr.routes.js';
 
 const app = express();
 const server = createServer(app);
+// Chrome/Node keep-alive race fix: Node's default 5s idle close kills sockets
+// Chrome reuses — GETs auto-retry so they survive, POSTs hang until client
+// abort. Standard remedy (AWS ALB / Node docs): keepAlive > any LB/client idle.
+server.keepAliveTimeout = 61_000;
+server.headersTimeout = 62_000;
 const PORT = env.PORT;
 
 // Workers start on import (module-level createWorker) — track them for shutdown
@@ -187,6 +219,7 @@ const activeWorkers = [
 ];
 
 async function bootstrap() {
+  installHeartbeatPatch();
   // Initialize Redis for rate limiting + job queues
   await initRateLimitRedis();
 
@@ -244,6 +277,7 @@ async function bootstrap() {
 
   // Prometheus metrics instrumentation
   app.use(metricsMiddleware);
+  app.use(profilerMiddleware);
 
   // Body parsing
   // [PAYMENTS] `verify` captures the raw body so the Paystack webhook can
@@ -346,10 +380,22 @@ async function bootstrap() {
   // Single mount point per router — the legacy non-versioned duplicates were
   // cut: they doubled rate-limit passes, doubled the API surface, and
   // /invoices was even mounted three times in total.
+  app.use('/v1/public/demo-access', demoAccessPublicRouter);
+  app.use('/v1/public/status', publicLimiter, publicStatusRouter);
   app.use('/v1', tieredLimiter);
 
   // [PAYMENTS] Webhook is PUBLIC (HMAC-signed, no JWT) — must mount BEFORE
   // the auth'd payments router, otherwise it would 401.
+  app.use('/v1/rates', rateGridsRouter);
+  app.use('/v1/channel', channelObservabilityRouter);
+  app.use('/v1', dashboardRouter);
+  app.use('/v1/dashboard', todayDashboardRouter);
+  app.use('/v1/reservation-workspace', reservationWorkspaceRouter);
+  app.use('/v1/room-board', roomBoardRouter);
+  app.use('/v1/payment-exceptions', paymentExceptionsRouter);
+  app.use('/v1/exceptions', exceptionsRouter);
+  app.use('/v1/marketing', marketingConsentRouter);
+  app.use('/v1/marketing', winbackRouter);
   app.use('/v1/payments/webhook', paymentsWebhookRouter);
   app.use('/v1/payments', paymentsRouter);
   // [DEPOSIT-AUTOMATION] Payment requests (auth'd)
@@ -357,6 +403,7 @@ async function bootstrap() {
   // [A3] Transactional email center (auth'd)
   app.use('/v1/communications', transactionalEmailRouter);
   // [A4] Public booking engine (unauthenticated, per-IP rate limited)
+
   app.use('/v1/public', publicLimiter, publicRouter);
   // [A5] Tax invoices & receipts (auth'd)
   app.use('/v1/invoices', invoicesRouter);
@@ -456,13 +503,24 @@ async function bootstrap() {
   // [MARKETING] marketing module (auth'd)
   app.use('/v1/marketing', marketingRouter);
   // [REPORTS] tenant-scoped reports — library, builder, scheduler, history
+  app.use('/v1/accounting', accountingRouter);
+  app.use('/v1/flags', flagsEvalRouter);
   app.use('/v1/reports', reportsRouter);
 
-  // ─── Admin (platform admin: KPIs, health, alerts, reports, jobs) ───
-  app.use('/admin', adminRouter);
+  // ─── Admin (legacy platform admin: KPIs, health, alerts, reports, jobs, billing) ───
 
   // ─── Phase 3: Queue Dashboard (protected) ───
   app.use('/admin/queues', ...queueDashboardMiddleware());
+  app.use('/admin/feature-flags', featureFlagsRouter);
+
+  app.use('/admin', adminJobsRouter);
+  app.use('/admin', adminReportsRouter);
+  app.use('/admin', adminRouter);
+  app.use('/admin', backupsDrRouter);
+  startBackupsDrSchedulers();
+  app.use('/admin', adminHealthRouter);
+  app.use('/admin', adminProfilerRouter);
+  app.use('/admin', demoAccessAdminRouter);
 
   // ─── Error Handling ───
   app.use(sentryErrorHandler);
@@ -516,6 +574,8 @@ async function bootstrap() {
   void startMealPostingScheduler(); // [T7] meal auto-post scan (every 15 min)
   void startTicketScheduler(); // [SUPPORT] SLA breach scan + escalation (every 5 min)
   void startArScheduler(); // [AR] overdue dunning scan (every 6h)
+  void startAbandonedDepositScheduler(); // [E2x] cancel web bookings whose deposit checkout was abandoned (hourly)
+  void startDlqAlertScheduler(); // [B3] notify tenants on unresolved dead-lettered jobs (hourly)
   void startReportsScheduler(); // [REPORTS] due scheduled reports (every min)
 
   // ─── Graceful Shutdown ───

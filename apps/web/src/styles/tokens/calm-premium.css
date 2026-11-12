@@ -1,0 +1,88 @@
+/* apps/web/src/styles/tokens/calm-premium.css
+ * Calm-premium hospitality theme (roadmap addendum E).
+ * Loaded AFTER themes/light|dark.css: equal-specificity :root rules, so these
+ * win. Dark theme is intentionally untouched in v1 (addendum direction is
+ * light-first; glass + mint surfaces are light-only until dark is designed).
+ *
+ * Palette contract:
+ *  - deep ink  #132B3A → hierarchy, nav, secondary actions
+ *  - teal      #1F7A78 → primary actions, selected nav, positive accents
+ *  - warm neutral #F4F7F8 → canvas; soft mint #E8F4F1 → selected/insight surfaces
+ *  - amber     #B7791F → attention/due-soon (always paired with a text label)
+ *  - red       #B42318 → genuine failures ONLY
+ * Rollback: remove the @import line in globals.css.
+ */
+:root:not(.dark) {
+  /* Canvas & surfaces */
+  --background: #f4f7f8;
+  --surface: #ffffff;
+  --surface-elevated: #ecf1f2;
+  --border: #dce5e8;
+  /* Ink hierarchy */
+  --foreground: #132b3a;
+  --text-primary: #132b3a;
+  --text-secondary: #40586a;
+  --text-muted: #7a8b96;
+  /* Actions */
+  --primary: #1f7a78;
+  --primary-foreground: #ffffff;
+  --secondary: #132b3a;
+  --secondary-foreground: #ffffff;
+  /* Selected / insight surfaces */
+  --accent: #e8f4f1;
+  --accent-foreground: #1f7a78;
+  /* Status — amber attention, red reserved for real failures */
+  --warning: #b7791f;
+  --warning-foreground: #ffffff;
+  --danger: #b42318;
+  --danger-foreground: #ffffff;
+  --info: #2f6f8f;
+  --info-foreground: #ffffff;
+  --neutral: #7a8b96;
+  --neutral-foreground: #ffffff;
+  --ring: #1f7a78;
+  --input: #c7d3d8;
+  --radius: 0.625rem;
+  /* shadcn aliases */
+  --card: #ffffff;
+  --card-foreground: #132b3a;
+  --popover: #ffffff;
+  --popover-foreground: #132b3a;
+  --muted: #ecf1f2;
+  --muted-foreground: #7a8b96;
+
+  /* 8-point rhythm reference (spacing utilities consume the same scale) */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+}
+
+/* ─── Glassmorphism — SPARINGLY, per addendum: 1–3 focal surfaces only ───
+ * Current assignments: critical attention strip + revenue insight card
+ * (TodayCockpit). Never behind dense tables or body text. Solid-surface
+ * fallback where backdrop-filter is unsupported (contrast guaranteed). */
+.glass {
+  background: color-mix(in srgb, var(--surface) 74%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  backdrop-filter: blur(14px) saturate(1.35);
+  border: 1px solid color-mix(in srgb, var(--surface) 65%, transparent);
+  box-shadow:
+    0 1px 2px rgb(19 43 58 / 0.04),
+    0 12px 32px -12px rgb(19 43 58 / 0.18);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgb(19 43 58 / 0.08);
+  }
+}
+
+/* Selected/insight surface (mint) — utility for chips, active rows */
+.surface-insight {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}

@@ -1,0 +1,13 @@
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const { execSync } = require('child_process');
+const env = fs.readFileSync('/Users/mosesokpeku/Desktop/Vimad/apps/api/.env', 'utf8');
+const g = (k) => { const m = env.match(new RegExp('^' + k + '=(.*)$', 'm')); return m ? m[1].trim().replace(/^"|"$/g, '') : ''; };
+const secret = g('JWT_SECRET');
+const email = ((g('PLATFORM_ADMIN_EMAILS') || '').split(',')[0].trim()) || 'devops@vimad.internal';
+const row = execSync(`docker exec $(docker ps -q --filter publish=5432 | head -1) psql -U vimad -d unified_pms -tAc "SELECT id, \\"tenantId\\" FROM users WHERE email='devops@vimad.internal' LIMIT 1"`).toString().trim().split('|');
+const uid = row[0], tid = row[1];
+console.log('email:', email, '| uid:', uid.slice(0, 10), '| tid:', (tid || '').slice(0, 10));
+const token = jwt.sign({ userId: uid, tenantId: tid, email, role: 'owner' }, secret, { expiresIn: '10m' });
+const out = execSync(`curl -s -m 25 -w '\nHTTP %{http_code} in %{time_total}s\n' -X POST http://localhost:3001/admin/backups -H 'Authorization: Bearer ${token}' -H 'Content-Type: application/json' -d '{"name":"minted-test","type":"full","retentionDays":30}'`).toString();
+console.log(out);

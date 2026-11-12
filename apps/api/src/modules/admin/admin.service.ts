@@ -1,4 +1,6 @@
 /* apps/api/src/modules/admin/admin.service.ts */
+import { planFee } from './plan-catalog.js';
+import { resolveMonthlyFee } from './contracts.service.js';
 import { prisma } from '../../common/prisma.js';
 import { logger } from '../../common/logger.js';
 import { getRedisClient } from '../../common/queue.js';
@@ -401,4 +403,694 @@ export function getAdminQuickActions(): QuickActionItem[] {
       color: 'secondary',
     },
   ];
+}
+
+// ─── A1: platform audit-log explorer (app/admin/audit) ───
+// Contract: apps/web/src/api/audit.ts — AuditEntry/AuditStats are presentation
+// shapes; raw audit_logs rows are mapped via metadata JSONB + user lookup.
+export type AdminAuditSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+
+export interface AdminAuditLogEntry {
+  id: string;
+  timestamp: string;
+  severity: AdminAuditSeverity;
+  user: { name: string; role: string; ip: string };
+  action: { type: string; category: string; label: string; description: string };
+  resource: { type: string; id: string; name: string };
+  category: string;
+  description: string;
+  changes: { field: string; old: string; new: string }[];
+  sessionId: string;
+}
+
+export interface AdminAuditLogsResult {
+  data: AdminAuditLogEntry[];
+  meta: { page: number; pageSize: number; total: number; totalPages: number };
+}
+
+const SEVERITIES: AdminAuditSeverity[] = ['critical', 'high', 'medium', 'low', 'info'];
+
+function mapAuditEntry(row: any, userMap: Map<string, any>): AdminAuditLogEntry {
+  const md = (row.metadata ?? {}) as Record<string, any>;
+  const user = row.userId ? userMap.get(row.userId) : undefined;
+  return {
+    id: row.id,
+    timestamp:
+      row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt ?? ''),
+    severity: SEVERITIES.includes(md.severity) ? md.severity : 'info',
+    user: {
+      name: user
+        ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.id
+        : (md.userName ?? 'System'),
+      role: user?.role ?? md.userRole ?? 'system',
+      ip: row.ipAddress ?? '',
+    },
+    action: {
+      type: row.action ?? '',
+      category: md.actionCategory ?? row.entity ?? '',
+      label: md.label ?? row.action ?? '',
+      description: md.description ?? '',
+    },
+    resource: {
+      type: row.entity ?? '',
+      id: row.entityId ?? '',
+      name: md.resourceName ?? row.entityId ?? '',
+    },
+    category: md.category ?? row.entity ?? '',
+    description: md.description ?? '',
+    changes: Array.isArray(md.changes) ? md.changes : [],
+    sessionId: md.sessionId ?? '',
+  };
+}
+
+export async function getAdminAuditLogs(params: {
+  page?: number;
+  pageSize?: number;
+  severity?: string;
+  category?: string;
+  userId?: string;
+}): Promise<AdminAuditLogsResult> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 25));
+  const where: any = {};
+  if (params.userId) where.userId = params.userId;
+  if (params.category) where.entity = params.category;
+  const withSeverity =
+    params.severity && params.severity !== 'all'
+      ? { AND: [where, { metadata: { path: ['severity'], equals: params.severity } }] }
+      : where;
+
+  const [rows, total] = await Promise.all([
+    prisma.auditLog.findMany({
+      where: withSeverity,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.auditLog.count({ where: withSeverity }),
+  ]);
+
+  const userIds = [...new Set(rows.map((r: any) => r.userId).filter(Boolean))] as string[];
+  const users = userIds.length
+    ? await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, firstName: true, lastName: true, role: true },
+      })
+    : [];
+  const userMap = new Map(users.map((u: any) => [u.id, u]));
+  const data = rows.map((r: any) => mapAuditEntry(r, userMap));
+
+  // Contract: body IS {data, meta} (audit client unwraps one level only).
+  return { data, meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) } };
+}
+
+export async function getAdminAuditStats(): Promise<{
+  totalEvents: number;
+  criticalEvents: number;
+  eventsLast24h: number;
+  uniqueUsers: number;
+}> {
+  const dayAgo = new Date(Date.now() - 24 * 3600_000);
+  const [totalEvents, criticalEvents, eventsLast24h, userGroups] = await Promise.all([
+    prisma.auditLog.count(),
+    prisma.auditLog.count({ where: { metadata: { path: ['severity'], equals: 'critical' } } }),
+    prisma.auditLog.count({ where: { createdAt: { gte: dayAgo } } }),
+    prisma.auditLog.groupBy({ by: ['userId'], where: { userId: { not: null } } }),
+  ]);
+  return { totalEvents, criticalEvents, eventsLast24h, uniqueUsers: userGroups.length };
+}
+
+// ─── A4: prometheus metrics scrape (app/admin/health) ───
+export async function getAdminSystemMetrics(): Promise<string> {
+  const { register } = await import('../../common/metrics.js');
+  return register.metrics();
+}
+
+// ─── A2: platform support-ticket queue (app/admin/ticket) ───
+// Page is currently mock-fed (data.js); this endpoint is shaped from the
+// mock's queue item so page-wiring is a mechanical follow-up. Page-wiring
+// itself is NOT part of this slice (no speculative client edits).
+export interface AdminTicketItem {
+  id: string;
+  number: string;
+  subject: string;
+  status: string;
+  priority: string;
+  category: string;
+  source: string;
+  tenantId: string | null;
+  tenantName: string | null;
+  assigneeName: string | null;
+  createdAt: string;
+  lastMessageAt: string;
+  slaBreached: boolean;
+  escalationLevel: number;
+  messageCount: number;
+}
+
+export async function getAdminTicketQueue(params: {
+  status?: string;
+  priority?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{
+  data: AdminTicketItem[];
+  meta: { page: number; pageSize: number; total: number; totalPages: number };
+}> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 25));
+  const where: any = {};
+  if (params.status) where.status = params.status;
+  if (params.priority) where.priority = params.priority;
+
+  const [rows, total] = await Promise.all([
+    prisma.supportCase.findMany({
+      where,
+      orderBy: [{ lastMessageAt: 'desc' }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        messages: { select: { id: true } },
+        tenant: { select: { id: true, name: true } },
+        assignee: { select: { firstName: true, lastName: true } },
+      },
+    }),
+    prisma.supportCase.count({ where }),
+  ]);
+
+  const iso = (d: any) => (d instanceof Date ? d.toISOString() : d ? String(d) : '');
+  const data = rows.map((r: any) => ({
+    id: r.id,
+    number: r.number,
+    subject: r.subject,
+    status: r.status,
+    priority: r.priority,
+    category: r.category,
+    source: r.source,
+    tenantId: r.tenant?.id ?? r.tenantId ?? null,
+    tenantName: r.tenant?.name ?? null,
+    assigneeName: r.assignee
+      ? `${r.assignee.firstName ?? ''} ${r.assignee.lastName ?? ''}`.trim()
+      : null,
+    createdAt: iso(r.createdAt),
+    lastMessageAt: iso(r.lastMessageAt),
+    // support_cases stores SLA due-dates, not breach/escalation — derive them
+    // (tickets-model semantics stay on tickets; this is the platform queue view).
+    slaBreached:
+      !['resolved', 'closed'].includes(r.status) &&
+      r.slaResolveDueAt instanceof Date &&
+      r.slaResolveDueAt.getTime() < Date.now(),
+    escalationLevel:
+      !['resolved', 'closed'].includes(r.status) &&
+      r.slaResolveDueAt instanceof Date &&
+      r.slaResolveDueAt.getTime() < Date.now()
+        ? 1
+        : 0,
+    messageCount: Array.isArray(r.messages) ? r.messages.length : 0,
+  }));
+
+  return { data, meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) } };
+}
+
+// ─── A3: platform tenant list (regions migration selector + credit-notes) ───
+// Proven consumers only; EditTenantModal PATCH and /admin/users are unwired/
+// unrouted — logged, not built (no speculative work).
+export interface AdminTenantItem {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  status: string;
+  userCount: number;
+  propertyCount: number;
+  createdAt: string;
+}
+
+export async function getAdminTenants(): Promise<AdminTenantItem[]> {
+  const rows = await prisma.tenant.findMany({
+    orderBy: { name: 'asc' },
+    include: { _count: { select: { users: true, properties: true } } },
+  });
+  return rows.map((t: any) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+    plan: t.plan,
+    status: t.status,
+    userCount: t._count?.users ?? 0,
+    propertyCount: t._count?.properties ?? 0,
+    createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : String(t.createdAt ?? ''),
+  }));
+}
+// ─── B1/B3: platform billing (Commercial Monetisation Plan, 2026-10-29) ───
+// Base fee via planFee() seam (contracts plug in later); usage itemised in
+// `items`; trials never invoice; churn/upgrade/downgrade stay 0 (§9 honesty —
+// no event sources yet). Subscriptions are DERIVED views over tenants + DB
+// counts — no Subscription table (contracts stay flexible per deal).
+const PAYING_TENANTS: any = { status: 'active', plan: { not: 'trial' } };
+const DAY_MS = 86400_000;
+const iso = (d: any) => (d instanceof Date ? d.toISOString() : d ? String(d) : '');
+
+async function resolveTenantMrr(tenants: any[]): Promise<number> {
+  let s = 0;
+  for (const t of tenants) s += await resolveMonthlyFee(t.id, planFee(t.plan));
+  return s;
+}
+
+export interface AdminBillingDashboard {
+  totalRevenue: number;
+  mrr: number;
+  outstandingInvoices: number;
+  overdueAmount: number;
+  activeSubscriptions: number;
+  trialConversions: number;
+}
+
+export async function getAdminBillingDashboard(): Promise<AdminBillingDashboard> {
+  const now = new Date();
+  const [paid, outstanding, overdue, paying, active, converted] = await Promise.all([
+    prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { status: 'paid' } }),
+    prisma.invoice.count({ where: { status: { in: ['draft', 'sent', 'overdue'] } } }),
+    prisma.invoice.aggregate({
+      _sum: { totalAmount: true },
+      where: { OR: [{ status: 'overdue' }, { status: 'sent', dueDate: { lt: now } }] },
+    }),
+    prisma.tenant.findMany({ where: PAYING_TENANTS, select: { id: true, plan: true } }),
+    prisma.tenant.count({ where: PAYING_TENANTS }),
+    prisma.tenant.count({ where: { plan: { not: 'trial' } } }),
+  ]);
+  return {
+    totalRevenue: Number(paid._sum.totalAmount ?? 0),
+    mrr: await resolveTenantMrr(paying),
+    outstandingInvoices: outstanding,
+    overdueAmount: Number(overdue._sum.totalAmount ?? 0),
+    activeSubscriptions: active,
+    // approximation: any non-trial tenant converted at some point; true
+    // conversion rate needs trial-event sourcing (doc §9).
+    trialConversions: converted,
+  };
+}
+
+// GET /admin/billing/revenue?period=daily|weekly|monthly
+export async function getAdminRevenueAnalytics(
+  period: string
+): Promise<
+  {
+    date: string;
+    revenue: number;
+    mrr: number;
+    arr: number;
+    newCustomers: number;
+    churnedCustomers: number;
+    upgrades: number;
+    downgrades: number;
+  }[]
+> {
+  const buckets = period === 'daily' ? 30 : 12;
+  const stepMs = period === 'daily' ? DAY_MS : period === 'weekly' ? 7 * DAY_MS : 30 * DAY_MS;
+  const end = new Date();
+  const start = new Date(end.getTime() - buckets * stepMs);
+
+  const [paidInvoices, tenants] = await Promise.all([
+    prisma.invoice.findMany({
+      where: { status: 'paid', paidAt: { gte: start } },
+      select: { paidAt: true, totalAmount: true },
+    }),
+    prisma.tenant.findMany({ select: { id: true, createdAt: true, plan: true, status: true } }),
+  ]);
+
+  const out: any[] = [];
+  for (let i = buckets - 1; i >= 0; i--) {
+    const bEnd = new Date(end.getTime() - i * stepMs);
+    const bStart = new Date(bEnd.getTime() - stepMs);
+    const revenue = paidInvoices
+      .filter((inv: any) => inv.paidAt >= bStart && inv.paidAt < bEnd)
+      .reduce((s: number, inv: any) => s + Number(inv.totalAmount), 0);
+    // mrr approximation: tenants created by bucket end, at CURRENT plan/status
+    // (no historical plan state exists until contracts/subscription events).
+    const mrr = await resolveTenantMrr(
+      tenants.filter((t: any) => t.createdAt <= bEnd && t.status === 'active' && t.plan !== 'trial')
+    );
+    out.push({
+      date: bStart.toISOString().slice(0, 10),
+      revenue,
+      mrr,
+      arr: mrr * 12,
+      newCustomers: tenants.filter((t: any) => t.createdAt >= bStart && t.createdAt < bEnd).length,
+      churnedCustomers: 0,
+      upgrades: 0,
+      downgrades: 0,
+    });
+  }
+  return out;
+}
+
+export async function getAdminRevenueByPlan(): Promise<
+  { plan: string; tenants: number; properties: number; mrr: number }[]
+> {
+  const rows = await prisma.tenant.findMany({
+    where: PAYING_TENANTS,
+    include: { _count: { select: { properties: true } } },
+    orderBy: { plan: 'asc' },
+  });
+  const byPlan = new Map<string, any>();
+  for (const t of rows as any[]) {
+    const cur = byPlan.get(t.plan) ?? { plan: t.plan, tenants: 0, properties: 0, mrr: 0 };
+    cur.tenants += 1;
+    cur.properties += t._count?.properties ?? 0;
+    cur.mrr += await resolveMonthlyFee(t.id, planFee(t.plan));
+    byPlan.set(t.plan, cur);
+  }
+  return [...byPlan.values()];
+}
+
+export async function getAdminMrrHistory(
+  months = 12
+): Promise<{ date: string; mrr: number; revenue: number }[]> {
+  const end = new Date();
+  const out: any[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const bEnd = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - i + 1, 1));
+    const bStart = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - i, 1));
+    const [paid, tenants] = await Promise.all([
+      prisma.invoice.aggregate({
+        _sum: { totalAmount: true },
+        where: { status: 'paid', paidAt: { gte: bStart, lt: bEnd } },
+      }),
+      prisma.tenant.findMany({ select: { id: true, createdAt: true, plan: true, status: true } }),
+    ]);
+    const mrr = await resolveTenantMrr(
+      tenants.filter((t: any) => t.createdAt < bEnd && t.status === 'active' && t.plan !== 'trial')
+    );
+    out.push({
+      date: bStart.toISOString().slice(0, 7),
+      mrr,
+      revenue: Number(paid._sum.totalAmount ?? 0),
+    });
+  }
+  return out;
+}
+
+// ─── B3: derived subscriptions (views over tenants — no table) ───
+async function deriveSubscription(t: any): Promise<any> {
+  const monthlyFee = await resolveMonthlyFee(t.id, planFee(t.plan));
+  const periodStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
+  const periodEnd = new Date(
+    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)
+  );
+  const [rooms, apiCalls] = await Promise.all([
+    prisma.room.count({ where: { tenantId: t.id } }),
+    prisma.usageRecord.aggregate({
+      _sum: { quantity: true },
+      where: { tenantId: t.id, recordedAt: { gte: periodStart } },
+    }),
+  ]);
+  return {
+    id: t.id,
+    tenantId: t.id,
+    plan: t.plan,
+    status: t.status === 'active' ? 'active' : 'past_due',
+    monthlyFee,
+    currentPeriodStart: iso(periodStart),
+    currentPeriodEnd: iso(periodEnd),
+    cancelAtPeriodEnd: false,
+    usage: {
+      properties: t._count?.properties ?? 0,
+      rooms,
+      users: t._count?.users ?? 0,
+      apiCalls: Number(apiCalls._sum.quantity ?? 0),
+    },
+    createdAt: iso(t.createdAt),
+  };
+}
+
+export async function listAdminSubscriptions(params: {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  tenantId?: string;
+}) {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 25));
+  const where: any = params.tenantId ? { id: params.tenantId } : { plan: { not: 'trial' } };
+  const [rows, total] = await Promise.all([
+    prisma.tenant.findMany({
+      where,
+      orderBy: { name: 'asc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { _count: { select: { properties: true, users: true } } },
+    }),
+    prisma.tenant.count({ where }),
+  ]);
+  const data = [];
+  for (const t of rows as any[]) data.push(await deriveSubscription(t));
+  const filtered = params.status ? data.filter((s: any) => s.status === params.status) : data;
+  return {
+    data: filtered,
+    meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+  };
+}
+
+export async function getAdminSubscriptionById(id: string) {
+  const t: any = await prisma.tenant.findUnique({
+    where: { id },
+    include: { _count: { select: { properties: true, users: true } } },
+  });
+  if (!t) throw new Error('subscription not found: ' + id);
+  return deriveSubscription(t);
+}
+
+export async function updateAdminSubscription(id: string, data: { plan?: string }) {
+  if (data.plan) {
+    const { PLAN_CATALOG } = await import('./plan-catalog.js');
+    if (!PLAN_CATALOG[data.plan.toLowerCase()]) throw new Error('unknown plan: ' + data.plan);
+    await prisma.tenant.update({ where: { id }, data: { plan: data.plan.toLowerCase() } });
+  }
+  return getAdminSubscriptionById(id);
+}
+
+export async function cancelAdminSubscription(id: string, opts: { immediately?: boolean }) {
+  if (opts.immediately) {
+    await prisma.tenant.update({ where: { id }, data: { status: 'suspended' } });
+    return getAdminSubscriptionById(id);
+  }
+  // Non-immediate cancel: no persistence layer for cancelAtPeriodEnd until
+  // contracts land — the derived view reports the intent, logged not hidden.
+  const sub = await getAdminSubscriptionById(id);
+  return { ...sub, cancelAtPeriodEnd: true };
+}
+// ─── B2/B4: invoices + generation + credit notes + dunning ───
+// Idempotency (doc §4 "prevent double-billing"): generate is return-existing
+// per (tenantId, period). Credit notes ARE negative invoices (totalAmount < 0,
+// items.creditOf) — no new table. Dunning is a DERIVED queue (overdue =
+// status overdue, or sent with past dueDate); event persistence lands with
+// migration batch C. Trials are never invoiced. Metered usage is itemised as
+// informational lines at amount 0 until the per-metric rate card ships with
+// contracts — disclosed on the invoice, not silently dropped.
+
+export async function listAdminInvoices(params: {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  tenantId?: string;
+}) {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 25));
+  const where: any = {};
+  if (params.status) where.status = params.status;
+  if (params.tenantId) where.tenantId = params.tenantId;
+  const [rows, total] = await Promise.all([
+    prisma.invoice.findMany({
+      where,
+      orderBy: { dueDate: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.invoice.count({ where }),
+  ]);
+  return { data: rows, meta: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) } };
+}
+
+export async function getAdminInvoiceById(id: string) {
+  const inv: any = await prisma.invoice.findUnique({ where: { id } });
+  if (!inv) throw new Error('invoice not found: ' + id);
+  return inv;
+}
+
+export async function createAdminInvoice(data: any) {
+  return prisma.invoice.create({ data: { ...data, status: data.status ?? 'draft' } });
+}
+
+export async function updateAdminInvoice(id: string, data: any) {
+  await getAdminInvoiceById(id);
+  return prisma.invoice.update({ where: { id }, data });
+}
+
+export async function deleteAdminInvoice(id: string) {
+  const inv: any = await getAdminInvoiceById(id);
+  if (!['draft', 'cancelled'].includes(inv.status)) {
+    throw new Error('only draft or cancelled invoices can be deleted: ' + id);
+  }
+  return prisma.invoice.delete({ where: { id } });
+}
+
+export async function generateAdminInvoice(input: {
+  tenantId: string;
+  periodStart: string;
+  periodEnd: string;
+}) {
+  const t: any = await prisma.tenant.findUnique({ where: { id: input.tenantId } });
+  if (!t) throw new Error('tenant not found: ' + input.tenantId);
+  if (t.plan === 'trial') throw new Error('trial tenants are not invoiced');
+  const pStart = new Date(input.periodStart);
+  const pEnd = new Date(input.periodEnd);
+  const existing = await prisma.invoice.findFirst({
+    where: { tenantId: t.id, periodStart: pStart, periodEnd: pEnd },
+  });
+  if (existing) return existing; // return-existing: never double-bill a period
+
+  const base = await resolveMonthlyFee(t.id, planFee(t.plan));
+  const usage = await prisma.usageRecord.groupBy({
+    by: ['metric'],
+    where: { tenantId: t.id, recordedAt: { gte: pStart, lt: pEnd } },
+    _sum: { quantity: true },
+  });
+  const lines = [
+    { type: 'base', description: t.plan + ' plan — monthly base fee', amount: base },
+    ...usage.map((u: any) => ({
+      type: 'usage',
+      description: 'usage: ' + u.metric + ' × ' + u._sum.quantity,
+      amount: 0,
+    })),
+  ];
+  return prisma.invoice.create({
+    data: {
+      tenantId: t.id,
+      periodStart: pStart,
+      periodEnd: pEnd,
+      dueDate: new Date(pEnd.getTime() + 14 * 86400_000),
+      plan: t.plan,
+      baseAmount: base,
+      overageAmount: 0,
+      totalAmount: base,
+      currency: 'ZAR',
+      status: 'sent',
+      items: { lines, vatIncluded: false, meteredRatesPending: true },
+    },
+  });
+}
+
+export async function markAdminInvoicePaid(
+  id: string,
+  details: { amount?: number; method?: string; reference?: string }
+) {
+  const inv: any = await getAdminInvoiceById(id);
+  const payments = Array.isArray(inv.items?.payments) ? inv.items.payments : [];
+  return prisma.invoice.update({
+    where: { id },
+    data: {
+      status: 'paid',
+      paidAt: new Date(),
+      items: {
+        ...(inv.items ?? {}),
+        payments: [...payments, { at: new Date().toISOString(), ...details }],
+      },
+    },
+  });
+}
+
+// Credit notes are negative invoices; this view filters totalAmount < 0.
+export async function getAdminCreditNotes(invoiceId?: string) {
+  const rows: any[] = await prisma.invoice.findMany({
+    where: { totalAmount: { lt: 0 }, ...(invoiceId ? { 'items.creditOf': undefined } : {}) },
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+  });
+  const notes = rows
+    .map((r) => ({ r, cn: (r.items as any)?.creditOf }))
+    .filter((x) => x.cn && (!invoiceId || x.cn === invoiceId))
+    .map(({ r }) => ({
+      id: r.id,
+      invoiceId: (r.items as any).creditOf,
+      amount: Math.abs(Number(r.totalAmount)),
+      currency: r.currency,
+      reason: (r.items as any).reason ?? '',
+      status: (r.items as any).status ?? 'pending',
+      createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+    }));
+  return notes;
+}
+
+export async function createAdminCreditNote(input: {
+  invoiceId: string;
+  amount: number;
+  reason: string;
+}) {
+  const parent: any = await prisma.invoice.findUnique({ where: { id: input.invoiceId } });
+  if (!parent) throw new Error('invoice not found: ' + input.invoiceId);
+  if (input.amount <= 0) throw new Error('credit note amount must be positive');
+  return prisma.invoice.create({
+    data: {
+      tenantId: parent.tenantId,
+      periodStart: parent.periodStart,
+      periodEnd: parent.periodEnd,
+      dueDate: parent.dueDate,
+      plan: parent.plan,
+      baseAmount: -input.amount,
+      overageAmount: 0,
+      totalAmount: -input.amount,
+      currency: parent.currency,
+      status: 'sent',
+      items: { creditOf: parent.id, reason: input.reason, status: 'pending' },
+    },
+  });
+}
+
+export async function applyAdminCreditNote(id: string) {
+  const note: any = await getAdminInvoiceById(id);
+  if (Number(note.totalAmount) >= 0) throw new Error('not a credit note: ' + id);
+  return prisma.invoice.update({
+    where: { id },
+    data: {
+      items: { ...(note.items ?? {}), status: 'applied', appliedAt: new Date().toISOString() },
+    },
+  });
+}
+
+// Derived dunning queue: no persistence yet (migration batch C).
+export async function getAdminDunning(invoiceId?: string) {
+  const now = new Date();
+  const overdue: any[] = await prisma.invoice.findMany({
+    where: {
+      status: { in: ['sent', 'overdue'] },
+      dueDate: { lt: now },
+      totalAmount: { gt: 0 },
+    },
+    orderBy: { dueDate: 'asc' },
+    take: 200,
+  });
+  return overdue
+    .filter((i) => !invoiceId || i.id === invoiceId)
+    .map((i) => ({
+      id: 'dun-' + i.id,
+      invoiceId: i.id,
+      attempt: 1,
+      status: 'sent',
+      sentAt: i.dueDate instanceof Date ? i.dueDate.toISOString() : String(i.dueDate),
+    }));
+}
+
+export async function triggerAdminDunning(invoiceId: string) {
+  const inv: any = await getAdminInvoiceById(invoiceId);
+  if (inv.status === 'paid') throw new Error('paid invoices are not dunned: ' + invoiceId);
+  // v1: the reminder is dispatched via the existing email queue; the visible
+  // event is derived (see getAdminDunning). Persistence lands with batch C.
+  return {
+    id: 'dun-' + inv.id,
+    invoiceId: inv.id,
+    attempt: 1,
+    status: 'sent',
+    sentAt: new Date().toISOString(),
+  };
 }
