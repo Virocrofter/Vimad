@@ -253,6 +253,7 @@ async function audit(
       action,
       entity: 'exception',
       entityId: ex.id,
+      propertyId: ex?.propertyId ?? null,
       metadata: { type: ex.type, ...metadata },
     },
   });

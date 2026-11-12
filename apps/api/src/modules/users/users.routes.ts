@@ -15,6 +15,7 @@ import {
 import { validateBody, validateParams, validateQuery } from '../../common/validate.js';
 import { paginationSchema } from '../../common/pagination.js';
 import { prisma } from '../../common/prisma.js';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { AppError } from '../../common/errors.js';
 import { env } from '../../common/env.js';
 import { logger } from '../../common/logger.js';
@@ -103,6 +104,7 @@ async function audit(
         action,
         entity,
         entityId,
+        propertyId: await resolveAuditPropertyId(tenantId, entity, entityId),
         metadata: metadata as object | undefined,
         ipAddress: req?.ip,
         userAgent: req?.get('user-agent'),

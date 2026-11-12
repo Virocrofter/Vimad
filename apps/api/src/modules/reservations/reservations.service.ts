@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
 import { paginate, paginationSchema, skipTake } from '../../common/pagination.js';
@@ -318,6 +319,7 @@ async function audit(
       action: type,
       entity: 'reservation',
       entityId: targetId,
+      propertyId: await resolveAuditPropertyId(tenantId, 'reservation', targetId),
       metadata: metadata ? (metadata as Prisma.InputJsonObject) : undefined,
       ipAddress: '0.0.0.0',
     },

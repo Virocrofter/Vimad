@@ -4,6 +4,7 @@
  * post is guarded by folioItemId + a status flip inside a transaction.
  */
 import { Prisma } from '@prisma/client';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
@@ -184,6 +185,7 @@ async function postChargeToFolio(
         action: 'minibar.charge_posted',
         entity: 'minibar_check',
         entityId: checkId,
+        propertyId: await resolveAuditPropertyId(tenantId, 'minibar_check', checkId),
         metadata: {
           folioId,
           folioItemId: item.id,
@@ -249,6 +251,7 @@ export async function settleMinibarCheck(
         action: `minibar.${action}`,
         entity: 'minibar_check',
         entityId: checkId,
+        propertyId: await resolveAuditPropertyId(tenantId, 'minibar_check', checkId),
         metadata: { reason, folioItemId: check.folioItemId } as unknown as Prisma.InputJsonValue,
       },
     });

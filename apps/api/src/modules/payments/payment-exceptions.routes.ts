@@ -15,6 +15,7 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { prisma } from '../../common/prisma.js';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { authMiddleware, tenantScope } from '../auth/auth.middleware.js';
 
 export const paymentExceptionsRouter = Router();
@@ -84,11 +85,9 @@ paymentExceptionsRouter.post('/dismiss', async (req: Request, res: Response) => 
     (req as any).user?.userId ?? (req as any).user?.id ?? (req as any).user?.sub ?? null;
   const { paymentId, reason } = (req.body ?? {}) as { paymentId?: string; reason?: string };
   if (!reason || !String(reason).trim()) {
-    return res
-      .status(400)
-      .json({
-        error: { code: 'REASON_REQUIRED', message: 'a dismissal reason is required (audited)' },
-      });
+    return res.status(400).json({
+      error: { code: 'REASON_REQUIRED', message: 'a dismissal reason is required (audited)' },
+    });
   }
   const payment = await prisma.payment.findFirst({
     where: { id: String(paymentId ?? ''), tenantId },
@@ -112,6 +111,7 @@ paymentExceptionsRouter.post('/dismiss', async (req: Request, res: Response) => 
       action: 'payment_exception.dismiss',
       entity: 'payment',
       entityId: payment.id,
+      propertyId: await resolveAuditPropertyId(tenantId, 'payment', payment.id),
       metadata: { reason: String(reason).trim(), reference: payment.reference },
     },
   });

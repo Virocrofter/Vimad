@@ -1,5 +1,6 @@
 /* apps/api/src/modules/tickets/tickets.service.ts */
 import { prisma } from '../../common/prisma.js';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { logger } from '../../common/logger.js';
 import { AppError } from '../../common/errors.js';
 import { sendEmail } from '../../jobs/email.queue.js';
@@ -55,6 +56,7 @@ async function audit(req: any, action: string, ticketId: string, metadata?: obje
         action,
         entity: 'ticket',
         entityId: ticketId,
+        propertyId: await resolveAuditPropertyId(req.auth?.tenantId, 'ticket', ticketId),
         metadata: metadata as object,
         ipAddress: req.ip,
         userAgent: req.get?.('user-agent'),

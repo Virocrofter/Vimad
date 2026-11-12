@@ -5,6 +5,7 @@
  */
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { Prisma } from '@prisma/client';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { z } from 'zod';
 import { authMiddleware, type AuthenticatedRequest } from '../auth/auth.middleware.js';
 import { requirePermission } from '../auth/auth.middleware.js';
@@ -33,6 +34,7 @@ export async function auditTask(
       action,
       entity: 'task',
       entityId: taskId,
+      propertyId: await resolveAuditPropertyId(tenantId, 'task', taskId),
       metadata: metadata as unknown as Prisma.InputJsonValue,
       ipAddress: ip,
     },

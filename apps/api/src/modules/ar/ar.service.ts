@@ -7,6 +7,7 @@
  *   • "overdue" is derived: status sent|partially_paid AND dueDate < today
  */
 import { Prisma } from '@prisma/client';
+import { resolveAuditPropertyId } from '../audit/audit-property.js';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { paginate, skipTake, type PaginationInput } from '../../common/pagination.js';
@@ -409,6 +410,7 @@ export const arService = {
           action: 'create',
           entity: 'ar_invoice',
           entityId: created.id,
+          propertyId: await resolveAuditPropertyId(tenantId, 'ar_invoice', created.id),
           metadata: { number: created.number, total, accountId: account.id },
         },
       });
@@ -475,6 +477,7 @@ export const arService = {
         action: 'send',
         entity: 'ar_invoice',
         entityId: id,
+        propertyId: await resolveAuditPropertyId(tenantId, 'ar_invoice', id),
         metadata: { number: inv.number },
       },
     });
@@ -506,6 +509,7 @@ export const arService = {
         action: 'cancel',
         entity: 'ar_invoice',
         entityId: id,
+        propertyId: await resolveAuditPropertyId(tenantId, 'ar_invoice', id),
         metadata: { number: inv.number, reason },
       },
     });
@@ -608,6 +612,7 @@ export const arService = {
           action: 'payment',
           entity: 'ar_payment',
           entityId: payment.id,
+          propertyId: await resolveAuditPropertyId(tenantId, 'ar_payment', payment.id),
           metadata: {
             amount,
             accountId: account.id,
@@ -669,6 +674,7 @@ export const arService = {
           action: 'reverse',
           entity: 'ar_payment',
           entityId: id,
+          propertyId: await resolveAuditPropertyId(tenantId, 'ar_payment', id),
           metadata: { amount: Number(payment.amount), reason },
         },
       });
