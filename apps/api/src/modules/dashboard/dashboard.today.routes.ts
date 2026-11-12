@@ -109,7 +109,7 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
     balance: r.folio ? Number(r.folio.balance) : Number(r.balance),
     flags: [r.folio && Number(r.folio.balance) > 0 ? 'unsettled_balance' : null].filter(Boolean),
     validActions: validActionsFor(r.status),
-    link: '/reservations/' + r.id,
+    link: '/app/reservations/' + r.id,
   }));
 
   // ── Today at a glance ──
