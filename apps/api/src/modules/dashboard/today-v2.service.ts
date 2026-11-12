@@ -83,7 +83,11 @@ export async function getTodayV2(
     select: { id: true, name: true, timezone: true, currency: true, currentBusinessDate: true },
   });
   if (!property) throw new Error('PROPERTY_NOT_FOUND');
-  const bd = String(property.currentBusinessDate ?? new Date().toISOString().slice(0, 10));
+  const bdRaw = property.currentBusinessDate as unknown;
+  const bd =
+    bdRaw instanceof Date
+      ? bdRaw.toISOString().slice(0, 10)
+      : String(bdRaw ?? new Date().toISOString().slice(0, 10)).slice(0, 10);
   const { start, end } = bdWindow(bd);
 
   const entitlements = {
