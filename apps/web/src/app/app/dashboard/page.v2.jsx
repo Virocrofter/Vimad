@@ -1,7 +1,7 @@
 /* Today v2 (plan v3.0 section 7) - first real consumer of the HQ-0 patterns.
  * Rendered only when the live flag dash.v2 is ready and on (page.jsx gate);
  * every other state falls back to v1. */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
@@ -17,6 +17,7 @@ import { Worklist } from '../../../components/patterns/Worklist';
 import { FilterBar } from '../../../components/patterns/FilterBar';
 import { useSocket } from '../../../hooks/useSocket';
 import { getAccessToken } from '../../../stores/authStores';
+import { api } from '../../../api/client';
 
 function Section({ id, title, count, children, action }) {
   return (
@@ -84,6 +85,23 @@ export default function TodayV2Screen() {
     on('ops:mutation', handler);
     return () => clearTimeout(t);
   }, [on, qc]);
+
+  // Per-record mutation state (plan 7.3): busy blocks double-submit;
+  // failure stays on the row; success invalidates today queries.
+  const [busy, setBusy] = useState({});
+  const runAction = async (id, fn) => {
+    if (busy[id]) return;
+    setBusy((prev) => ({ ...prev, [id]: true }));
+    try {
+      await fn();
+      qc.invalidateQueries({ predicate: (q) => q.queryKey.includes('today') });
+    } catch {
+      // server message surfaces on refetch; row remains interactive
+    } finally {
+      setBusy((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+  const act = (path, id) => () => api.post(path.replace(':id', id));
 
   const d = q.data;
   const ctx = d?.context;
@@ -304,6 +322,17 @@ export default function TodayV2Screen() {
                       </p>
                     </div>
                     <StatusChip status={readinessTone(r.readiness)} />
+                    {r.actions?.includes('check_in') && (
+                      <button
+                        disabled={!!busy[r.ref.id]}
+                        onClick={() =>
+                          runAction(r.ref.id, act('/v1/reservations/:id/check-in', r.ref.id))
+                        }
+                        className="shrink-0 rounded-md bg-primary px-2.5 py-1 hq-text-caption font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                      >
+                        {busy[r.ref.id] ? 'Checking in…' : 'Check in'}
+                      </button>
+                    )}
                   </div>
                 ))}
               </Worklist>
@@ -336,6 +365,27 @@ export default function TodayV2Screen() {
                       </p>
                       <p className="hq-text-caption text-text-muted">Due out</p>
                     </div>
+                    <span className="flex shrink-0 items-center gap-2">
+                      {r.actions?.includes('check_out') && (
+                        <button
+                          disabled={!!busy[r.ref.id]}
+                          onClick={() =>
+                            runAction(r.ref.id, act('/v1/reservations/:id/check-out', r.ref.id))
+                          }
+                          className="rounded-md bg-primary px-2.5 py-1 hq-text-caption font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                        >
+                          {busy[r.ref.id] ? 'Checking out…' : 'Check out'}
+                        </button>
+                      )}
+                      {r.actions?.includes('record_payment') && (
+                        <Link
+                          to={'/app/billing?reservation=' + r.ref.id}
+                          className="rounded-md border border-border px-2 py-1 hq-text-caption text-text-secondary hover:bg-surface-elevated"
+                        >
+                          Payment
+                        </Link>
+                      )}
+                    </span>
                     {r.balance != null && (
                       <span
                         className={

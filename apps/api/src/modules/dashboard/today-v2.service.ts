@@ -224,6 +224,7 @@ export async function getTodayV2(
           party: { adults: r.adults, children: r.children },
           specialRequests: r.specialRequests,
           links: { reservation: '/app/reservations/' + r.id },
+          actions: r.status === 'confirmed' && entitlements.actions.checkIn ? ['check_in'] : [],
         };
       }),
       nextCursor: page * pageSize < total ? String(page + 1) : null,
@@ -270,6 +271,12 @@ export async function getTodayV2(
         dueOut: r.departureDate,
         balance: canFolio ? Number(r.balance) : null,
         links: { reservation: '/app/reservations/' + r.id },
+        actions: [
+          ...(entitlements.actions.checkOut ? ['check_out'] : []),
+          ...(entitlements.actions.recordPayment && canFolio && Number(r.balance) > 0
+            ? ['record_payment']
+            : []),
+        ],
       })),
       nextCursor: page * pageSize < dueTotal ? String(page + 1) : null,
       computedAt: new Date().toISOString(),
