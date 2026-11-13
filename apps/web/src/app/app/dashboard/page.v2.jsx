@@ -1,6 +1,7 @@
 /* Today v2 (plan v3.0 section 7) - first real consumer of the HQ-0 patterns.
  * Rendered only when the live flag dash.v2 is ready and on (page.jsx gate);
  * every other state falls back to v1. */
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
@@ -67,7 +68,22 @@ export default function TodayV2Screen() {
   const propertyId = currentPropertyId ?? undefined;
   const qc = useQueryClient();
   const q = useDashboardTodayV2(propertyId);
-  const { isConnected } = useSocket(getAccessToken());
+  const { isConnected, on } = useSocket(getAccessToken());
+
+  // Socket invalidation (plan 7.3): ops:mutation events trigger debounced,
+  // targeted invalidation - never a blind page reload.
+  useEffect(() => {
+    let t = null;
+    const handler = () => {
+      clearTimeout(t);
+      t = setTimeout(
+        () => qc.invalidateQueries({ predicate: (q) => q.queryKey.includes('today') }),
+        400
+      );
+    };
+    on('ops:mutation', handler);
+    return () => clearTimeout(t);
+  }, [on, qc]);
 
   const d = q.data;
   const ctx = d?.context;
