@@ -24,13 +24,13 @@
   --text-secondary: #40586a;
   --text-muted: #7a8b96;
   /* Actions */
-  --primary: #1f7a78;
+  --primary: #6e56cf;
   --primary-foreground: #ffffff;
   --secondary: #132b3a;
   --secondary-foreground: #ffffff;
   /* Selected / insight surfaces */
-  --accent: #e8f4f1;
-  --accent-foreground: #1f7a78;
+  --accent: #f2eefc;
+  --accent-foreground: #5842c2;
   /* Status — amber attention, red reserved for real failures */
   --warning: #b7791f;
   --warning-foreground: #ffffff;
@@ -40,7 +40,7 @@
   --info-foreground: #ffffff;
   --neutral: #7a8b96;
   --neutral-foreground: #ffffff;
-  --ring: #1f7a78;
+  --ring: #6e56cf;
   --input: #c7d3d8;
   --radius: 0.625rem;
   /* shadcn aliases */
@@ -141,7 +141,7 @@
 
   /* Two-layer focus: canvas halo under teal ring */
   --hq-focus-halo: #f4f7f8;
-  --hq-focus-ring: #1f7a78;
+  --hq-focus-ring: #6e56cf;
 
   /* Control heights (comfortable default; compact via data-density) */
   --hq-control-sm: 32px;
@@ -255,13 +255,13 @@
   --text-secondary: #a7b6bf;
   --text-muted: #6e7f89;
   /* Actions */
-  --primary: #2fa8a3;
-  --primary-foreground: #0f1a22;
+  --primary: #8b74e8;
+  --primary-foreground: #14101f;
   --secondary: #e7edf0;
   --secondary-foreground: #0f1a22;
   /* Selected / insight surfaces (mint, dark) */
-  --accent: #142b28;
-  --accent-foreground: #2fa8a3;
+  --accent: #201a38;
+  --accent-foreground: #b7a6f7;
   /* Status */
   --warning: #d9a03f;
   --warning-foreground: #0f1a22;
@@ -271,7 +271,7 @@
   --info-foreground: #0f1a22;
   --neutral: #6e7f89;
   --neutral-foreground: #e7edf0;
-  --ring: #2fa8a3;
+  --ring: #8b74e8;
   --input: #3a4c59;
   --card: #16232c;
   --card-foreground: #e7edf0;
@@ -286,5 +286,5 @@
 
   /* Two-layer focus: dark canvas halo under bright teal ring */
   --hq-focus-halo: #0f1a22;
-  --hq-focus-ring: #2fa8a3;
+  --hq-focus-ring: #8b74e8;
 }
