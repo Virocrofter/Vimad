@@ -393,6 +393,22 @@ export async function getTodayV2(
       ]);
       const projectedRoomRevenue = Number(stayAgg._sum.rate ?? 0);
       const postedRevenue = Number(posted._sum.amount ?? 0);
+      const seriesStart = new Date(start.getTime() - 13 * 86400000);
+      const dailyAgg = await prisma.reservationStay.groupBy({
+        by: ['date'],
+        where: { reservation: { propertyId }, date: { gte: seriesStart, lt: end } },
+        _sum: { rate: true },
+      });
+      const byDay = new Map(
+        dailyAgg.map((d) => [
+          (d.date instanceof Date ? d.date.toISOString() : String(d.date)).slice(0, 10),
+          Number(d._sum.rate ?? 0),
+        ])
+      );
+      const series = Array.from({ length: 14 }, (_, i) => {
+        const day = new Date(start.getTime() - (13 - i) * 86400000).toISOString().slice(0, 10);
+        return { date: day, projectedRoomRevenue: byDay.get(day) ?? 0 };
+      });
       const available = Math.max(1, availableBasis);
       const occBase = occupied || 1;
       return {
@@ -406,6 +422,7 @@ export async function getTodayV2(
           adr: Math.round((projectedRoomRevenue / occBase) * 100) / 100,
           revpar: Math.round((projectedRoomRevenue / available) * 100) / 100,
         },
+        series,
         basis: {
           revenue:
             'projected stay rates (ReservationStay) for the business date; posted = folio charges created in the business-date window',
