@@ -260,7 +260,7 @@ export default function TodayV2Screen() {
             )}
             {shift && (
               <StatDial
-                label="My open tasks"
+                label="My Shift"
                 value={shift.status === 'ready' ? shift.summary.open : '—'}
                 href="/app/tasks?assignee=me"
               />
@@ -356,7 +356,9 @@ export default function TodayV2Screen() {
                       <p className="hq-text-caption text-text-muted">
                         {[
                           r.room ? 'Room ' + r.room : r.roomType,
-                          r.party.adults + (r.children ? '+' + r.children : '') + ' guests',
+                          r.party.adults +
+                            (r.children ? '+' + r.children : '') +
+                            (r.party.adults === 1 ? ' guest' : ' guests'),
                         ]
                           .filter(Boolean)
                           .join(' · ')}
