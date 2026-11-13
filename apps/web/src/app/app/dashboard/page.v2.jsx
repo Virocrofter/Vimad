@@ -489,65 +489,65 @@ export default function TodayV2Screen() {
               )}
             </Section>
           )}
-          {perf && (
-            <Section id="sec-performance" title="Performance">
-              {q.isLoading ? (
-                <Skeleton />
-              ) : perf.status === 'error' ? (
-                <SectionError message={perf.error} onRetry={() => q.refetch()} />
-              ) : (
-                <>
-                  <dl className="space-y-2 hq-text-body">
-                    <div className="flex justify-between">
-                      <dt className="text-text-secondary">Occupancy</dt>
-                      <dd className="hq-tnum font-medium">
-                        {perf.metrics.occupancyPct}% ({perf.metrics.occupiedTonight}/
-                        {perf.metrics.availableRooms})
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-text-secondary">ADR (projected)</dt>
-                      <dd className="hq-tnum font-medium">
-                        <Money
-                          amountMinor={Math.round(perf.metrics.adr * 100)}
-                          currency={ctx?.currency}
-                        />
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-text-secondary">RevPAR (projected)</dt>
-                      <dd className="hq-tnum font-medium">
-                        <Money
-                          amountMinor={Math.round(perf.metrics.revpar * 100)}
-                          currency={ctx?.currency}
-                        />
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-text-secondary">Projected room revenue</dt>
-                      <dd className="hq-tnum font-medium">
-                        <Money
-                          amountMinor={Math.round(perf.metrics.projectedRoomRevenue * 100)}
-                          currency={ctx?.currency}
-                        />
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-text-secondary">Posted today</dt>
-                      <dd className="hq-tnum font-medium">
-                        <Money
-                          amountMinor={Math.round(perf.metrics.postedRevenue * 100)}
-                          currency={ctx?.currency}
-                        />
-                      </dd>
-                    </div>
-                  </dl>
-                  <AreaChart series={perf.series} currency={ctx?.currency} />
-                </>
-              )}
-            </Section>
-          )}
         </div>
+        {perf && (
+          <Section id="sec-performance" title="Performance">
+            {q.isLoading ? (
+              <Skeleton />
+            ) : perf.status === 'error' ? (
+              <SectionError message={perf.error} onRetry={() => q.refetch()} />
+            ) : (
+              <>
+                <dl className="space-y-2 hq-text-body">
+                  <div className="flex justify-between">
+                    <dt className="text-text-secondary">Occupancy</dt>
+                    <dd className="hq-tnum font-medium">
+                      {perf.metrics.occupancyPct}% ({perf.metrics.occupiedTonight}/
+                      {perf.metrics.availableRooms})
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-text-secondary">ADR (projected)</dt>
+                    <dd className="hq-tnum font-medium">
+                      <Money
+                        amountMinor={Math.round(perf.metrics.adr * 100)}
+                        currency={ctx?.currency}
+                      />
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-text-secondary">RevPAR (projected)</dt>
+                    <dd className="hq-tnum font-medium">
+                      <Money
+                        amountMinor={Math.round(perf.metrics.revpar * 100)}
+                        currency={ctx?.currency}
+                      />
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-text-secondary">Projected room revenue</dt>
+                    <dd className="hq-tnum font-medium">
+                      <Money
+                        amountMinor={Math.round(perf.metrics.projectedRoomRevenue * 100)}
+                        currency={ctx?.currency}
+                      />
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-text-secondary">Posted today</dt>
+                    <dd className="hq-tnum font-medium">
+                      <Money
+                        amountMinor={Math.round(perf.metrics.postedRevenue * 100)}
+                        currency={ctx?.currency}
+                      />
+                    </dd>
+                  </div>
+                </dl>
+                <AreaChart series={perf.series} currency={ctx?.currency} height={200} />
+              </>
+            )}
+          </Section>
+        )}
 
         {/* 9. Activity rail */}
         {act && (
