@@ -235,3 +235,56 @@
 .hq-status-dot.clean {
   background: var(--text-muted);
 }
+
+/* ─── HQ-0 DARK (Stage 2 addendum #7, 2026-11-13) — designed calm-premium dark ───
+ * Same principles as light: warm-neutral ramp darkened from ink (canvas
+ * #0F1A22, never pure black), teal brightened to #2FA8A3 for dark-surface
+ * contrast, amber attention / red failure preserved, hairlines carry
+ * structure, shadows minimal. Equal specificity, later order — wins over
+ * themes/dark.css. Rollback: delete this section.
+ */
+:root.dark {
+  /* Canvas & surfaces */
+  --background: #0f1a22;
+  --surface: #16232c;
+  --surface-elevated: #1c2b35;
+  --border: #2a3a46;
+  /* Ink hierarchy */
+  --foreground: #e7edf0;
+  --text-primary: #e7edf0;
+  --text-secondary: #a7b6bf;
+  --text-muted: #6e7f89;
+  /* Actions */
+  --primary: #2fa8a3;
+  --primary-foreground: #0f1a22;
+  --secondary: #e7edf0;
+  --secondary-foreground: #0f1a22;
+  /* Selected / insight surfaces (mint, dark) */
+  --accent: #142b28;
+  --accent-foreground: #2fa8a3;
+  /* Status */
+  --warning: #d9a03f;
+  --warning-foreground: #0f1a22;
+  --danger: #e5483d;
+  --danger-foreground: #ffffff;
+  --info: #5a9bc0;
+  --info-foreground: #0f1a22;
+  --neutral: #6e7f89;
+  --neutral-foreground: #e7edf0;
+  --ring: #2fa8a3;
+  --input: #3a4c59;
+  --card: #16232c;
+  --card-foreground: #e7edf0;
+  --popover: #1c2b35;
+  --popover-foreground: #e7edf0;
+  --muted: #1c2b35;
+  --muted-foreground: #6e7f89;
+
+  /* HQ-0 dark elevations (shadows weaker on dark; hairlines carry borders) */
+  --hq-raise: 0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --hq-overlay: 0 24px 48px -12px rgb(0 0 0 / 0.65);
+
+  /* Two-layer focus: dark canvas halo under bright teal ring */
+  --hq-focus-halo: #0f1a22;
+  --hq-focus-ring: #2fa8a3;
+}
