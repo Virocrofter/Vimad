@@ -374,6 +374,9 @@ export default function TodayV2Screen() {
                         {busy[r.ref.id] ? 'Checking in…' : 'Check in'}
                       </button>
                     )}
+                    {r.status === 'checked_in' && (
+                      <span className="hq-text-caption text-[var(--text-muted)]">Checked in</span>
+                    )}
                     {rowError[r.ref.id] && (
                       <span className="hq-text-caption text-[var(--danger)]">
                         {rowError[r.ref.id]}
