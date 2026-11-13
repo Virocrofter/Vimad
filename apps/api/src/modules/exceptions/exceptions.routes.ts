@@ -292,6 +292,46 @@ async function audit(
   });
 }
 
+// GET /v1/exceptions/assignees?propertyId= - picker source for /assign.
+// Tenant-scoped active users only (no cross-tenant by construction); restricted
+// callers get 403 on foreign propertyId (plan 8.2 assignee picker contract).
+exceptionsRouter.get(
+  '/assignees',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const tenantId = tenantOf(req)!;
+    const requested = String(req.query.propertyId ?? '');
+    const allowed = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+    if (requested && Array.isArray(allowed) && !allowed.includes(requested)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
+    }
+    if (requested) {
+      const prop = await prisma.property.findFirst({ where: { id: requested, tenantId } });
+      if (!prop) {
+        return res.status(400).json({ error: { code: 'VALIDATION', message: 'unknown property' } });
+      }
+    }
+    const users = await prisma.user.findMany({
+      where: { tenantId, status: 'active' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        roleAssignments: { select: { propertyId: true, role: { select: { name: true } } } },
+      },
+      orderBy: { firstName: 'asc' },
+      take: 100,
+    });
+    const items = users.map((u) => ({
+      id: u.id,
+      name: (u.firstName + ' ' + (u.lastName ?? '')).trim(),
+      roles: [...new Set(u.roleAssignments.map((r) => r.role.name))],
+      propertyIds: [...new Set(u.roleAssignments.map((r) => r.propertyId).filter(Boolean))],
+    }));
+    return res.json({ data: { generatedAt: new Date().toISOString(), items } });
+  }
+);
+
 // POST /v1/exceptions/bulk { action: 'resolve'|'dismiss', ids, reason?, note? }
 // Per-item scope check, transition and audit; partial failures itemized,
 // never silent (plan 8.3). Registered before /:id/* routes by convention.
