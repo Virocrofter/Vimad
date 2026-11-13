@@ -419,7 +419,13 @@ export async function getTodayV2(
     return {
       items: rows.map((a) => ({
         id: a.id,
-        actor: (a.metadata as any)?.actor ?? (a.metadata as any)?.label ?? null,
+        actor: (() => {
+          const m: any = a.metadata ?? {};
+          const actor = m.actor;
+          if (typeof actor === 'string') return actor;
+          if (actor && typeof actor === 'object') return actor.name ?? null;
+          return typeof m.label === 'string' ? m.label : null;
+        })(),
         action: a.action,
         entity: a.entity,
         entityId: a.entityId,
