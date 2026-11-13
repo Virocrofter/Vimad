@@ -126,14 +126,18 @@ export default function TodayV2Screen() {
   // Per-record mutation state (plan 7.3): busy blocks double-submit;
   // failure stays on the row; success invalidates today queries.
   const [busy, setBusy] = useState({});
+  const [rowError, setRowError] = useState({});
   const runAction = async (id, fn) => {
     if (busy[id]) return;
     setBusy((prev) => ({ ...prev, [id]: true }));
     try {
       await fn();
       qc.invalidateQueries({ predicate: (q) => q.queryKey.includes('today') });
-    } catch {
-      // server message surfaces on refetch; row remains interactive
+    } catch (e) {
+      setRowError((prev) => ({
+        ...prev,
+        [id]: e?.response?.data?.message || e?.message || 'Action failed',
+      }));
     } finally {
       setBusy((prev) => ({ ...prev, [id]: false }));
     }
@@ -370,6 +374,11 @@ export default function TodayV2Screen() {
                         {busy[r.ref.id] ? 'Checking in…' : 'Check in'}
                       </button>
                     )}
+                    {rowError[r.ref.id] && (
+                      <span className="hq-text-caption text-[var(--danger)]">
+                        {rowError[r.ref.id]}
+                      </span>
+                    )}
                   </div>
                 ))}
               </Worklist>
@@ -413,6 +422,11 @@ export default function TodayV2Screen() {
                         >
                           {busy[r.ref.id] ? 'Checking out…' : 'Check out'}
                         </button>
+                      )}
+                      {rowError[r.ref.id] && (
+                        <span className="hq-text-caption text-[var(--danger)]">
+                          {rowError[r.ref.id]}
+                        </span>
                       )}
                       {r.actions?.includes('record_payment') && (
                         <Link
