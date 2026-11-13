@@ -66,9 +66,9 @@ export default function AreaChart({ series, currency, height = 150 }) {
         i % stepX === 0 || i === series.length - 1 ? (
           <text
             key={x.date}
-            x={px(i)}
+            x={i === series.length - 1 ? W - 2 : px(i)}
             y={H - 6}
-            textAnchor="middle"
+            textAnchor={i === series.length - 1 ? 'end' : 'middle'}
             fontSize="8.5"
             className="fill-[var(--text-muted)]"
           >

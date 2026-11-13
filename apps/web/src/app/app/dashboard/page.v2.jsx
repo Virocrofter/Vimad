@@ -19,6 +19,7 @@ import { useSocket } from '../../../hooks/useSocket';
 import { getAccessToken } from '../../../stores/authStores';
 import { api } from '../../../api/client';
 import AreaChart from '../../../components/charts/AreaChart';
+import Donut from '../../../components/charts/Donut';
 
 function Section({ id, title, count, children, action }) {
   return (
@@ -439,13 +440,28 @@ export default function TodayV2Screen() {
               ) : rd.status === 'error' ? (
                 <SectionError message={rd.error} onRetry={() => q.refetch()} />
               ) : (
-                <div className="flex flex-wrap gap-2">
-                  <StatusChip status="ready" label={rd.summary.ready + ' ready'} />
-                  <StatusChip status="dirty" label={rd.summary.dirty + ' dirty'} />
-                  <StatusChip status="in_progress" label={rd.summary.inProgress + ' in progress'} />
-                  <StatusChip status="ooo" label={rd.summary.ooo + ' OoO'} />
-                  <StatusChip status="oos" label={rd.summary.oos + ' OoS'} />
-                </div>
+                <>
+                  <Donut
+                    center="rooms"
+                    segments={[
+                      { label: 'Ready', value: rd.summary.ready, tone: 'ready' },
+                      { label: 'Dirty', value: rd.summary.dirty, tone: 'dirty' },
+                      { label: 'In progress', value: rd.summary.inProgress, tone: 'in_progress' },
+                      { label: 'OoO', value: rd.summary.ooo, tone: 'ooo' },
+                      { label: 'OoS', value: rd.summary.oos, tone: 'oos' },
+                    ]}
+                  />
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <StatusChip status="ready" label={rd.summary.ready + ' ready'} />
+                    <StatusChip status="dirty" label={rd.summary.dirty + ' dirty'} />
+                    <StatusChip
+                      status="in_progress"
+                      label={rd.summary.inProgress + ' in progress'}
+                    />
+                    <StatusChip status="ooo" label={rd.summary.ooo + ' OoO'} />
+                    <StatusChip status="oos" label={rd.summary.oos + ' OoS'} />
+                  </div>
+                </>
               )}
             </Section>
           )}
