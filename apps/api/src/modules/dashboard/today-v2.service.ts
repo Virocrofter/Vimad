@@ -196,8 +196,27 @@ export async function getTodayV2(
         })
       : [];
     const roomMap = new Map(rooms.map((r) => [r.id, r]));
+    const trendStart = new Date(start.getTime() - 6 * 86400000);
+    const arrAgg = await prisma.reservation.groupBy({
+      by: ['arrivalDate'],
+      where: { tenantId, propertyId, arrivalDate: { gte: trendStart, lt: end } },
+      _count: { _all: true },
+    });
+    const arrByDay = new Map(
+      arrAgg.map((g) => [
+        (g.arrivalDate instanceof Date ? g.arrivalDate.toISOString() : String(g.arrivalDate)).slice(
+          0,
+          10
+        ),
+        g._count._all,
+      ])
+    );
+    const trend = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(start.getTime() - (6 - i) * 86400000).toISOString().slice(0, 10);
+      return arrByDay.get(day) ?? 0;
+    });
     return {
-      summary: { total, remaining: total, done: 0 },
+      summary: { total, remaining: total, done: 0, trend },
       items: rows.map((r) => {
         const rid = stayRoom.get(r.id);
         const room = rid ? roomMap.get(rid) : undefined;
@@ -262,8 +281,32 @@ export async function getTodayV2(
         },
       }),
     ]);
+    const depTrendStart = new Date(start.getTime() - 6 * 86400000);
+    const depAgg = await prisma.reservation.groupBy({
+      by: ['departureDate'],
+      where: {
+        tenantId,
+        propertyId,
+        status: 'checked_in',
+        departureDate: { gte: depTrendStart, lt: end },
+      },
+      _count: { _all: true },
+    });
+    const depByDay = new Map(
+      depAgg.map((g) => [
+        (g.departureDate instanceof Date
+          ? g.departureDate.toISOString()
+          : String(g.departureDate)
+        ).slice(0, 10),
+        g._count._all,
+      ])
+    );
+    const depTrend = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(start.getTime() - (6 - i) * 86400000).toISOString().slice(0, 10);
+      return depByDay.get(day) ?? 0;
+    });
     return {
-      summary: { dueOut: dueTotal, checkedOutToday: doneTotal },
+      summary: { dueOut: dueTotal, checkedOutToday: doneTotal, trend: depTrend },
       items: dueRows.map((r) => ({
         ref: { type: 'reservation', id: r.id },
         guest: [r.guest?.firstName, r.guest?.lastName].filter(Boolean).join(' '),

@@ -179,6 +179,7 @@ export default function TodayV2Screen() {
               <StatDial
                 label="Arrivals"
                 value={arr.status === 'ready' ? arr.summary.total : '—'}
+                spark={arr.status === 'ready' ? arr.summary.trend : undefined}
                 href="/app/reservations/front-desk?view=arrivals"
               />
             )}
@@ -191,6 +192,7 @@ export default function TodayV2Screen() {
                     ? { label: dep.summary.checkedOutToday + ' done', direction: 'flat' }
                     : undefined
                 }
+                spark={dep.status === 'ready' ? dep.summary.trend : undefined}
                 href="/app/reservations/front-desk?view=departures"
               />
             )}
@@ -424,7 +426,7 @@ export default function TodayV2Screen() {
         </div>
 
         {/* 5-7. Readiness, My Shift, Performance, Activity */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {rd && (
             <Section
               id="sec-readiness"
