@@ -222,7 +222,7 @@ export default function TodayV2Screen() {
                       <p className="hq-text-caption text-text-muted">
                         {x.severity}
                         {x.overdue ? ' · overdue' : ''} ·{' '}
-                        <TimeAgo date={x.ageMinutes * 60000 + Date.now() - 0} />
+                        <TimeAgo date={new Date(Date.now() - x.ageMinutes * 60000)} />
                       </p>
                     </div>
                     <Link

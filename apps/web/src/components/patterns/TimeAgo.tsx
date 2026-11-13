@@ -20,7 +20,10 @@ function diffParts(from: Date, to: Date): [number, Intl.RelativeTimeFormatUnit] 
 }
 
 export function TimeAgo({ date, className }: TimeAgoProps) {
-  const d = useMemo(() => (typeof date === 'string' ? new Date(date) : date), [date]);
+  const d = useMemo(() => {
+    if (date instanceof Date) return date;
+    return new Date(date as string | number);
+  }, [date]);
   const now = new Date();
   const [value, unit] = diffParts(d, now);
   const relative = rtf ? rtf.format(value, unit) : d.toLocaleString();
