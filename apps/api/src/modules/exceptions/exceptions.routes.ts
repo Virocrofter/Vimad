@@ -204,19 +204,28 @@ async function detect(tenantId: string): Promise<void> {
 exceptionsRouter.get('/', async (req: Request, res: Response) => {
   const tenantId = tenantOf(req);
   await detect(tenantId);
-  const spoofPropId = String(req.query.propertyId ?? '');
-  const spoofAllowed = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
-  if (spoofPropId && Array.isArray(spoofAllowed) && !spoofAllowed.includes(spoofPropId)) {
+  const requestedPropId = String(req.query.propertyId ?? '');
+  const allowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (requestedPropId && Array.isArray(allowedProps) && !allowedProps.includes(requestedPropId)) {
     return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
   }
+  // Property scope (plan 8.2): explicit param wins; restricted users with no
+  // param default to their allowed properties; global users stay tenant-wide.
+  const propertyScope =
+    requestedPropId && (!allowedProps || allowedProps.includes(requestedPropId))
+      ? requestedPropId
+      : Array.isArray(allowedProps)
+        ? { in: allowedProps }
+        : undefined;
   const status = String(req.query.status ?? 'active');
   const where = {
     tenantId,
+    ...(propertyScope ? { propertyId: propertyScope } : {}),
     ...(status === 'all' ? {} : status === 'active' ? { status: { in: ACTIVE } } : { status }),
   };
   const [rows, counts] = await Promise.all([
     prisma.exception.findMany({ where, take: 300 }),
-    prisma.exception.groupBy({ by: ['status'], where: { tenantId }, _count: { _all: true } }),
+    prisma.exception.groupBy({ by: ['status'], where, _count: { _all: true } }),
   ]);
   rows.sort(
     (a, b) =>
@@ -237,6 +246,14 @@ async function loadActive(req: Request, res: Response) {
     where: { id: String(req.params.id), tenantId: tenantOf(req) },
   });
   if (!ex) {
+    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'exception not found' } });
+    return null;
+  }
+  const actorAllowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (
+    Array.isArray(actorAllowedProps) &&
+    (!ex.propertyId || !actorAllowedProps.includes(ex.propertyId))
+  ) {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'exception not found' } });
     return null;
   }
