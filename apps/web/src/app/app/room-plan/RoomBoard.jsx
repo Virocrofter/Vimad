@@ -107,7 +107,7 @@ function RoomCard({ room, selected, onSelect, onTransition, busy }) {
             type="checkbox"
             checked={selected}
             onChange={() => onSelect(room.id)}
-            className="h-3.5 w-3.5 accent-[#1f7a78]"
+            className="h-3.5 w-3.5 accent-[var(--primary)]"
             aria-label={'Select room ' + room.number}
           />
           <span className="text-base font-bold text-text-primary">{room.number}</span>

@@ -18,6 +18,7 @@ import { FilterBar } from '../../../components/patterns/FilterBar';
 import { useSocket } from '../../../hooks/useSocket';
 import { getAccessToken } from '../../../stores/authStores';
 import { api } from '../../../api/client';
+import AreaChart from '../../../components/charts/AreaChart';
 
 function Section({ id, title, count, children, action }) {
   return (
@@ -63,44 +64,6 @@ function readinessTone(r) {
   if (r === 'in_progress') return 'in_progress';
   return 'clean';
 }
-
-function TrendChart({ series, currency }) {
-  if (!series?.length) return null;
-  const vals = series.map((x) => x.projectedRoomRevenue ?? 0);
-  const max = Math.max(...vals, 1);
-  const W = 560;
-  const H = 96;
-  const bw = W / series.length;
-  return (
-    <svg
-      viewBox={'0 0 ' + W + ' ' + H}
-      className="mt-3 w-full"
-      role="img"
-      aria-label="14-day projected room revenue"
-    >
-      {series.map((x, i) => {
-        const h = Math.max(2, Math.round((vals[i] / max) * (H - 20)));
-        const isToday = i === series.length - 1;
-        return (
-          <rect
-            key={x.date}
-            x={i * bw + 2}
-            y={H - h}
-            width={Math.max(4, bw - 5)}
-            height={h}
-            rx={2}
-            className={isToday ? 'fill-[var(--primary)]' : 'fill-[var(--border)]'}
-          >
-            <title>
-              {x.date + ': ' + (x.projectedRoomRevenue ?? 0).toFixed(2) + ' ' + (currency ?? '')}
-            </title>
-          </rect>
-        );
-      })}
-    </svg>
-  );
-}
-
 export default function TodayV2Screen() {
   const currentPropertyId = usePropertyStore((s) => s.currentPropertyId);
   const propertyId = currentPropertyId ?? undefined;
@@ -579,7 +542,7 @@ export default function TodayV2Screen() {
                       </dd>
                     </div>
                   </dl>
-                  <TrendChart series={perf.series} currency={ctx?.currency} />
+                  <AreaChart series={perf.series} currency={ctx?.currency} />
                 </>
               )}
             </Section>
