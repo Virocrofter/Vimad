@@ -138,7 +138,7 @@ export default function TodayV2Screen() {
       setBusy((prev) => ({ ...prev, [id]: false }));
     }
   };
-  const act = (path, id) => () => api.post(path.replace(':id', id));
+  const actOn = (path, id) => () => api.post(path.replace(':id', id));
 
   const d = q.data;
   const ctx = d?.context;
@@ -363,7 +363,7 @@ export default function TodayV2Screen() {
                       <button
                         disabled={!!busy[r.ref.id]}
                         onClick={() =>
-                          runAction(r.ref.id, act('/v1/reservations/:id/check-in', r.ref.id))
+                          runAction(r.ref.id, actOn('/v1/reservations/:id/check-in', r.ref.id))
                         }
                         className="shrink-0 rounded-md bg-primary px-2.5 py-1 hq-text-caption font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
                       >
@@ -407,7 +407,7 @@ export default function TodayV2Screen() {
                         <button
                           disabled={!!busy[r.ref.id]}
                           onClick={() =>
-                            runAction(r.ref.id, act('/v1/reservations/:id/check-out', r.ref.id))
+                            runAction(r.ref.id, actOn('/v1/reservations/:id/check-out', r.ref.id))
                           }
                           className="rounded-md bg-primary px-2.5 py-1 hq-text-caption font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
                         >
