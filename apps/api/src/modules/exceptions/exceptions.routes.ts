@@ -292,6 +292,82 @@ async function audit(
   });
 }
 
+// POST /v1/exceptions/bulk { action: 'resolve'|'dismiss', ids, reason?, note? }
+// Per-item scope check, transition and audit; partial failures itemized,
+// never silent (plan 8.3). Registered before /:id/* routes by convention.
+exceptionsRouter.post(
+  '/bulk',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const tenantId = tenantOf(req);
+    const action = String((req.body as any)?.action ?? '');
+    const ids = Array.isArray((req.body as any)?.ids)
+      ? ((req.body as any).ids as unknown[]).map(String)
+      : [];
+    const reason = (req.body as any)?.reason ? String((req.body as any).reason).trim() : '';
+    const note = (req.body as any)?.note ? String((req.body as any).note).trim() : null;
+    if (action !== 'resolve' && action !== 'dismiss') {
+      return res.status(400).json({
+        error: { code: 'VALIDATION', message: "action must be 'resolve' or 'dismiss'" },
+      });
+    }
+    if (ids.length === 0 || ids.length > 200) {
+      return res.status(400).json({
+        error: { code: 'VALIDATION', message: 'ids must contain 1..200 entries' },
+      });
+    }
+    if (action === 'dismiss' && !reason) {
+      return res.status(400).json({
+        error: { code: 'REASON_REQUIRED', message: 'a dismissal reason is required (audited)' },
+      });
+    }
+    const actor = actorOf(req);
+    const allowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+    const results: Array<{ id: string; ok: boolean; error?: string }> = [];
+    for (const id of ids) {
+      try {
+        const ex = await prisma.exception.findFirst({ where: { id, tenantId } });
+        if (
+          !ex ||
+          (Array.isArray(allowedProps) && (!ex.propertyId || !allowedProps.includes(ex.propertyId)))
+        ) {
+          results.push({ id, ok: false, error: 'not_found' });
+          continue;
+        }
+        if (!ACTIVE.includes(ex.status)) {
+          results.push({ id, ok: false, error: 'invalid_state:' + ex.status });
+          continue;
+        }
+        if (action === 'resolve') {
+          await prisma.exception.update({
+            where: { id: ex.id },
+            data: { status: 'resolved', resolvedAt: new Date(), resolutionNote: note },
+          });
+          await audit(ex.tenantId, actor, 'exception.resolve', ex, { note, bulk: true });
+        } else {
+          await prisma.exception.update({
+            where: { id: ex.id },
+            data: {
+              status: 'dismissed',
+              dismissedAt: new Date(),
+              dismissedBy: actor,
+              dismissReason: reason,
+            },
+          });
+          await audit(ex.tenantId, actor, 'exception.dismiss', ex, { reason, bulk: true });
+        }
+        results.push({ id, ok: true });
+      } catch {
+        results.push({ id, ok: false, error: 'server_error' });
+      }
+    }
+    const succeeded = results.filter((r) => r.ok).length;
+    return res.json({
+      data: { succeeded, failed: results.length - succeeded, results },
+    });
+  }
+);
+
 // POST /v1/exceptions/:id/ack
 exceptionsRouter.post(
   '/:id/ack',
