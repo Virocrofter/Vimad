@@ -11,7 +11,7 @@ const rtf =
     : null;
 
 function diffParts(from: Date, to: Date): [number, Intl.RelativeTimeFormatUnit] {
-  const s = Math.round((to.getTime() - from.getTime()) / 1000);
+  const s = Math.round((from.getTime() - to.getTime()) / 1000);
   const abs = Math.abs(s);
   if (abs < 60) return [s, 'second'];
   if (abs < 3600) return [Math.round(s / 60), 'minute'];
