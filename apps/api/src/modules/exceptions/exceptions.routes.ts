@@ -100,7 +100,8 @@ async function detect(tenantId: string): Promise<void> {
     }),
     prisma.task.findMany({
       where: { tenantId, status: { in: ['open', 'in_progress'] }, dueAt: { lt: now } },
-      take: 100,
+      orderBy: { dueAt: 'asc' },
+      take: 500,
     }),
     prisma.channelConnection.findMany({ where: { tenantId }, take: 50 }),
   ]);
@@ -165,7 +166,7 @@ async function detect(tenantId: string): Promise<void> {
   for (const t of overdueTasks) {
     await upsert(tenantId, {
       type: 'overdue_request',
-      severity: t.slaBreached ? 'high' : 'medium',
+      severity: t.dueAt && t.dueAt.getTime() < now.getTime() ? 'high' : 'medium', // #42: live, not the stored boolean
       title: `Overdue task: ${t.title}`,
       detail: `${t.department} — due ${t.dueAt ? t.dueAt.toISOString().slice(11, 16) : '—'} (${Math.floor((now.getTime() - new Date(t.dueAt!).getTime()) / 60000)}m overdue)`,
       recommendedAction: 'Open tasks — reassign or complete',
@@ -232,10 +233,15 @@ exceptionsRouter.get('/', async (req: Request, res: Response) => {
       (SEVERITY_RANK[a.severity] ?? 9) - (SEVERITY_RANK[b.severity] ?? 9) ||
       (a.slaDueAt?.getTime() ?? 9e15) - (b.slaDueAt?.getTime() ?? 9e15)
   );
+  const nowMs = Date.now();
+  const items = rows.map((r) => ({
+    ...r,
+    overdue: r.slaDueAt ? r.slaDueAt.getTime() < nowMs : false,
+  }));
   return res.json({
     data: {
       generatedAt: new Date().toISOString(),
-      items: rows,
+      items,
       counts: Object.fromEntries(counts.map((c) => [c.status, c._count._all])),
     },
   });
