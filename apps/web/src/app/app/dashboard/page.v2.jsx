@@ -179,7 +179,6 @@ export default function TodayV2Screen() {
               <StatDial
                 label="Arrivals"
                 value={arr.status === 'ready' ? arr.summary.total : '—'}
-                spark={arr.status === 'ready' ? arr.summary.trend : undefined}
                 href="/app/reservations/front-desk?view=arrivals"
               />
             )}
@@ -192,7 +191,6 @@ export default function TodayV2Screen() {
                     ? { label: dep.summary.checkedOutToday + ' done', direction: 'flat' }
                     : undefined
                 }
-                spark={dep.status === 'ready' ? dep.summary.trend : undefined}
                 href="/app/reservations/front-desk?view=departures"
               />
             )}
